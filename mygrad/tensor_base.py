@@ -166,6 +166,19 @@ class Tensor(object):
     def __radd__(self, other):
         return self._op(Add, other, self)
 
+    def __sub__(self, other):
+        pass
+
+    def __rsub__(self, other):
+        pass
+
+    def __truediv__(self, other):
+        return self._op(Divide, self, other)
+
+    def __rtruediv__(self, other):
+        return self._op(Divide, other, self)
+
+
     def __mul__(self, other):
         return self._op(Multiply, self, other)
 
