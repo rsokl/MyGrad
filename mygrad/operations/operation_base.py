@@ -1,9 +1,10 @@
 import numpy as np
 
-__all__ = []
+__all__ = ["Operation",
+           "BroadcastableOp"]
 
 
-class Operation(object):
+class Operation:
     """ Base class for all tensor operations that support backprop.
 
         Functions accept `Tensor` objects and return Python numeric types """
@@ -23,7 +24,7 @@ class Operation(object):
         raise NotImplementedError
 
     def backward_a(self, grad):
-        """ Given grad = d(L)/d(f), computes d(L)/d(a), and passes this result to a._backward():
+        """ Given grad = d(L)/d(f), computes d(L)/d(a), and passes this result to a.backward():
                 a._backward( dL/da )
 
             Parameters
@@ -34,10 +35,10 @@ class Operation(object):
             Raises
             ------
             NotImplemented Error"""
-        raise NotImplementedError
+        raise
 
     def backward_b(self, grad):
-        """ Given grad = d(L)/d(f), computes d(L)/d(b), and passes this result to b._backward():
+        """ Given grad = d(L)/d(f), computes d(L)/d(b), and passes this result to b.backward():
                 b._backward( dL/da )
 
             Parameters
@@ -67,16 +68,6 @@ class Operation(object):
 
 
 class BroadcastableOp(Operation):
-    """ A subclass of Operation that allows for back-propagation through broadcasted operations.
-
-        If broadcasting occurs with a non-constant tensor, then MyGrad's back-propagation system
-        requires that the computational graph's terminal node, which triggers the back-propagation,
-        is a scalar.
-
-        Broadcastable operations must run `broadcast_check` during __call__.
-        (see `Add` for an example)"""
-
-
     def broadcast_check(self, a, b, out_shape):
         """ Given a, b, and the shape of op(a, b), detect if any non-constant Tensor undergoes
             broadcasting via f. If so, set op.scalar_only to True, and record the broadcasted
@@ -94,10 +85,10 @@ class BroadcastableOp(Operation):
         self.a = a
         self.b = b
 
-        self.new_axes_a = []  # stores which axes needed to be created for `a`, for broadcasting
+        self.new_axes_a = []
         self.new_axes_b = []
 
-        self.keepdims_a = []  # stores which axes existing axes in `a` are broadcasted over
+        self.keepdims_a = []
         self.keepdims_b = []
 
         # no broadcasting occurs for non-constants
@@ -111,17 +102,14 @@ class BroadcastableOp(Operation):
                 if i == 1:
                     # broadcasting occurs over existing dim: e.g. (2,1) w/ (2,3) -> (2,3)
                     self.keepdims_a.append(axis)
-                elif j == 1:
-                    self.keepdims_b.append(axis)
                 else:
-                    raise ValueError("operands could not be broadcast together with shapes {} {}".format(a.shape,
-                                                                                                         b.shape))
+                    self.keepdims_b.append(axis)
 
         self.keepdims_a = tuple(self.keepdims_a)
         self.keepdims_b = tuple(self.keepdims_b)
 
         if not self.a.constant:
-            # a new axis is created to allow brodcasting: e.g. (2,) w/ (2,3) -> (2,3)
+            # a new axis is created to allow broadcasting: e.g. (2,) w/ (2,3) -> (2,3)
             if self.a.ndim < len(out_shape):
                 self.new_axes_a = tuple(range(len(out_shape) - self.a.ndim))
 

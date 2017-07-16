@@ -1,6 +1,3 @@
-from .add import Add
-from .multiply import Multiply
-
-
-__all__ = ["Add",
-           "Multiply"]
+from .add import *
+from .multiply import *
+from .sum import *
