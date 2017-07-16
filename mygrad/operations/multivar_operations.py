@@ -3,8 +3,14 @@ from itertools import zip_longest
 __all__ = ["MultiVarOperation",
            "MultiVarBroadcastableOp"]
 
+
 class MultiVarOperation:
+    """ Experimental! Permits arbitrary number of tensor operands."""
     scalar_only = False
+
+    def __call__(self, *input_vars):
+        self.variables = input_vars
+        return NotImplementedError
 
     def backward_var(self, grad, index):
         raise NotImplementedError
@@ -25,7 +31,8 @@ class MultiVarOperation:
 
 
 class MultiVarBroadcastableOp(MultiVarOperation):
-    """ A subclass of Operation that allows for back-propagation through broadcasted operations.
+    """ Experimental! Permits arbitrary number of tensor operands.
+        A subclass of Operation that allows for back-propagation through broadcasted operations.
 
         If broadcasting occurs with a non-constant tensor, then MyGrad's back-propagation system
         requires that the computational graph's terminal node, which triggers the back-propagation,
@@ -35,17 +42,16 @@ class MultiVarBroadcastableOp(MultiVarOperation):
         (see `Add` for an example)"""
 
     def broadcast_check(self, *variables, out_shape):
-        """ Given a, b, and the shape of op(a, b), detect if any non-constant Tensor undergoes
+        """ Given {a, b, ...} and the shape of op(a, b, ...), detect if any non-constant Tensor undergoes
             broadcasting via f. If so, set op.scalar_only to True, and record the broadcasted
             axes for each such tensor.
 
             Broadcast-incompatible shapes need not be accounted for by this function, since
-            the shape of f(a, b) must already be known.
+            the shape of f(a, b, ...) must already be known.
 
             Parameters
             ----------
-            a : pygrad.Tensor
-            b : pygrad.Tensor
+            variables : Sequence[mygrad.Tensor
             out_shape : Sequence[int]
                 The shape of f(a, b)."""
         self.variables = variables
@@ -59,11 +65,11 @@ class MultiVarBroadcastableOp(MultiVarOperation):
         # check size of aligned dimensions
         for n, dims in enumerate(zip_longest(*(var.shape[::-1] for var in self.variables))):
             axis = len(out_shape) - 1 - n
-            if len(set(dims)) == 1:
+            if len(set(i for i in dims if (i is not None))) <= 1:
                 continue
 
             for var_index, i in enumerate(dims):
-                # broadcasting occurs over existing dim: e.g. (2,1) w/ (2,3) -> (2,3)
+                # broadcasting occurs over existing dim: e.g. (2,1,5) w/ (2,3,5) -> (2,3,5)
                 if i == 1:
                     self.keepdims[var_index].append(axis)
 
@@ -77,8 +83,6 @@ class MultiVarBroadcastableOp(MultiVarOperation):
 
                 if self.new_axes[var_index] or self.new_axes[var_index]:
                     self.scalar_only = True
-        print(self.keepdims)
-        print(self.new_axes)
 
     @staticmethod
     def broadcast_back(grad, new_axes, keepdim_axes):

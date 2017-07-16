@@ -7,6 +7,7 @@ __all__ = ["MultiplySequence"]
 class MultiplySequence(MultiVarBroadcastableOp):
     """ Performs f(a, b, ..., z) = a * b * ... * z"""
     def __call__(self, *input_vars):
+        assert len(input_vars) > 1, "`multiply_sequence` requires at least two operands"
         self.variables = input_vars
         out = reduce(lambda x, y: x*y, (var.data for var in input_vars))
         self.broadcast_check(*input_vars, out_shape=out.shape)

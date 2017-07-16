@@ -35,7 +35,7 @@ class Operation:
             Raises
             ------
             NotImplemented Error"""
-        raise
+        raise NotImplementedError
 
     def backward_b(self, grad):
         """ Given grad = d(L)/d(f), computes d(L)/d(b), and passes this result to b.backward():
