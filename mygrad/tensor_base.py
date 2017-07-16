@@ -167,17 +167,19 @@ class Tensor(object):
         return self._op(Add, other, self)
 
     def __sub__(self, other):
+        # STUDENT CODE HERE
         pass
+        return self._op(Subtract, self, other)
 
     def __rsub__(self, other):
-        pass
+        # STUDENT CODE HERE
+        return self._op(Subtract, other, self)
 
     def __truediv__(self, other):
         return self._op(Divide, self, other)
 
     def __rtruediv__(self, other):
         return self._op(Divide, other, self)
-
 
     def __mul__(self, other):
         return self._op(Multiply, self, other)

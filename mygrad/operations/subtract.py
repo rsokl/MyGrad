@@ -1,7 +1,8 @@
 from .operation_base import BroadcastableOp
 
+## STUDENT CODE HERE
 __all__ = ["Subtract"]
-
+## FILL IN  __all__
 
 class Subtract(BroadcastableOp):
     def __call__(self, a, b):
@@ -20,18 +21,23 @@ class Subtract(BroadcastableOp):
         # 2. Compute out = a - b, **using the underlying numpy-arrays stored by these tensors**
         # 3. Because this is a BroadcastableOP, call: self.broadcast_check(a, b, out.shape)
         # 4. return the result of the forward pass, which should **not** be a Tensor instance, but a numpy-array
-        pass
+        self.a = a
+        self.b = b
+        out = a.data - b.data
+
+        self.broadcast_check(a, b, out.shape)
+        return out
 
     def backward_a(self, grad):
         # STUDENT CODE HERE
         # 1. Given, dL/df (a.k.a `grad`), compute dL/da
         # 2. Because this is a broadcastable op, get the broadcasted gradient
-        # 3.
-        # 2. Compute out = a - b, **using the underlying numpy-arrays stored by these tensors**
-        # 3. Because this is a BroadcastableOP, call: self.broadcast_check(a, b, out.shape)
-        # 4. return the result of the forward pass, which should **not** be a Tensor instance, but a numpy-array
-        pass
+        #    by calling super(Subtract, self).backward_a( dL/da )
+        # 3. Pass the broadcasted gradient to self.a.backward
+        broadcasted_grad = super(Subtract, self).backward_a(grad)
+        self.a.backward(broadcasted_grad)
 
     def backward_b(self, grad):
+        # STUDENT CODE HERE
         broadcasted_grad = super(Subtract, self).backward_b(-1 * grad)
         self.b.backward(broadcasted_grad)
