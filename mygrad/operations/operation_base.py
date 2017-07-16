@@ -52,8 +52,7 @@ class Operation:
         raise NotImplementedError
 
     def backward(self, grad):
-        """ Back-propagates the gradient through all of the operation's inputs. This needs to be updated
-            by an operation if that operation takes more than 2 Tensor arguments."""
+        """ Back-propagates the gradient coming from the operation's output, back to its inputs."""
         if not self.a.constant:
             self.backward_a(grad)
         if hasattr(self, 'b') and not self.b.constant:

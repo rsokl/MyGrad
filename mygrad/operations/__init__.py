@@ -4,5 +4,4 @@ from .sum import *
 from .divide import *
 from .multiply_sequence import *
 from .add_sequence import *
-# STUDENT CODE HERE: import your subtract-op
-from .subtract import Subtract
+# STUDENT CODE HERE: import your Subtract-op

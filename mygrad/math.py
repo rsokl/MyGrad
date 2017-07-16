@@ -70,6 +70,5 @@ def multiply_sequence(*variables):
 
 
 def subtract(a, b):
-    #pass
-    # YOUR CODE HERE
-    return Tensor._op(Subtract, a, b)
+    pass
+    # STUDENT CODE HERE
