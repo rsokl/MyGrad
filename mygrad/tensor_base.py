@@ -193,12 +193,9 @@ class Tensor(object):
         return self._op(Add, other, self)
 
     def __sub__(self, other):
-        # STUDENT CODE HERE
-        pass
         return self._op(Subtract, self, other)
 
     def __rsub__(self, other):
-        # STUDENT CODE HERE
         return self._op(Subtract, other, self)
 
     def __truediv__(self, other):
