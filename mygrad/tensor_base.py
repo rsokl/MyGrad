@@ -220,6 +220,12 @@ class Tensor(object):
     def __rmul__(self, other):
         return self._op(Multiply, other, self)
 
+    def __pow__(self, other):
+        return self._op(Power, self, other)
+
+    def __rpow__(self, other):
+        return self._op(Power, other, self)
+
     def __neg__(self):
         return -1 * self
 
