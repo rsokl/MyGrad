@@ -8,3 +8,4 @@ from .add_sequence import *
 from .subtract import Subtract
 from .power import Power
 from .log import Log
+from .reshape import Reshape

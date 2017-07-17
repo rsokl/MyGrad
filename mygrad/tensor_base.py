@@ -160,6 +160,32 @@ class Tensor(object):
             """
         return self._creator
 
+    def reshape(self, *shape, **kwargs):
+        """ Returns a tensor with a new shape, without changing its data.
+
+            Parameters
+            ----------
+            newshape : Union[int, Tuple[int, ...]]
+                The new shape should be compatible with the original shape. If
+                an integer, then the result will be a 1-D array of that length.
+                One shape dimension can be -1. In this case, the value is
+                inferred from the length of the array and remaining dimensions.
+
+            Returns
+            -------
+            Tensor
+
+            Notes
+            -----
+            `reshape` utilizes C-ordering, meaning that it reads & writes elements using
+            C-like index ordering; the last axis index changing fastest, and, proceeding
+            in reverse order, the first axis index changing slowest. """
+        if hasattr(shape[0], "__iter__"):
+            if len(shape) > 1:
+                raise TypeError("an integer is required")
+            shape = shape[0]
+        return self._op(Reshape, self, op_args=(shape,), **kwargs)
+
     def __add__(self, other):
         return self._op(Add, self, other)
 
