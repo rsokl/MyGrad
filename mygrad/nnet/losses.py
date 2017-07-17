@@ -9,10 +9,15 @@ class MulticlassHinge(Operation):
     def __call__(self, a, y, hinge=1.):
         """ Parameters
             ----------
-            a : pygrad.Tensor, shape=(N, C)
-                The C class scores for each of the N pieces of data.
+            a : pygrad.Tensor, shape=(N, K)
+                The K class scores for each of the N pieces of data.
+
             y : numpy.ndarray, shape=(N,)
-                The correct class-index, in [0, C), for each datum.
+                The correct class-index, in [0, K), for each datum.
+
+            hinge : float, optional (default=1.0)
+                The hinge-margin for the loss.
+
             Returns
             -------
             The average multiclass hinge loss"""
@@ -43,11 +48,12 @@ class MulticlassHinge(Operation):
 def multiclass_hinge(x, y_true, hinge=1.):
     """ Parameters
         ----------
-        x : pygrad.Tensor, shape=(N, C)
-            The C class scores for each of the N pieces of data.
+        x : mygrad.Tensor, shape=(N, K)
+            The K class scores for each of the N pieces of data.
+
         y : Sequence[int]
-            The correct class-indices, in [0, C), for each datum.
+            The correct class-indices, in [0, K), for each datum.
         Returns
         -------
         The average multiclass hinge loss"""
-    return Tensor._op(MulticlassHinge, x, y_true, hinge)
+    return Tensor._op(MulticlassHinge, x, op_args=(y_true, hinge))

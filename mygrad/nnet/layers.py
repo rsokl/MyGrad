@@ -27,9 +27,9 @@ def dense(x, w):
 
         Parameters
         ----------
-        x : Union[Tensor, array_like], shape=(N, D)
+        x : Union[mygrad.Tensor, array_like], shape=(N, D)
 
-        w : Union[Tensor, array_like], shape=(D, M)
+        w : Union[mygrad.Tensor, array_like], shape=(D, M)
 
         Returns
         -------
