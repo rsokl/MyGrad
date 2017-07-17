@@ -106,5 +106,12 @@ def power(a, b):
 
 
 def subtract(a, b):
-    pass
-    # STUDENT CODE HERE
+    """ f(a, b) -> a - b
+        Parameters
+        ----------
+        a : Union[tensor-like, Number]
+        b : Union[tensor-like, Number]
+        Returns
+        -------
+        mygrad.Tensor"""
+    return Tensor._op(Subtract, a, b)

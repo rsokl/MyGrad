@@ -55,7 +55,7 @@ def test_add_broadcast():
     b = Tensor([1, 2, 3])
     c = Tensor(2)
     f = a + b + c
-    g = f.sum(keepdims=True)
+    g = f.sum(keepdims=False)
     g.backward(-1)
 
     assert np.allclose(f.data, a.data + b.data + c.data)
