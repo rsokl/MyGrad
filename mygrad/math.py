@@ -1,6 +1,7 @@
 from .tensor_base import Tensor
 from .operations import *
 
+
 def add(a, b):
     """ f(a, b) -> a + b
 
@@ -42,6 +43,19 @@ def divide(a, b):
     return Tensor._op(Divide, a, b)
 
 
+def log(a):
+    """ f(a)-> log(a)
+
+        Parameters
+        ----------
+        a : Union[tensor-like, Number]
+
+        Returns
+        -------
+        mygrad.Tensor"""
+    return Tensor._op(Log, a)
+
+
 def multiply(a, b):
     """ f(a, b) -> a * b
 
@@ -69,7 +83,31 @@ def multiply_sequence(*variables):
     return Tensor._op(MultiplySequence, *variables)
 
 
+def power(a, b):
+    """ f(a, b) -> a ** b
+
+        Parameters
+        ----------
+        a : Union[tensor-like, Number]
+        b : Union[tensor-like, Number]
+
+        Returns
+        -------
+        mygrad.Tensor"""
+    return Tensor._op(Power, a, b)
+
+
 def subtract(a, b):
-    #pass
-    # YOUR CODE HERE
+    """ f(a, b) -> a - b
+
+        Parameters
+        ----------
+        a : Union[tensor-like, Number]
+        b : Union[tensor-like, Number]
+
+        Returns
+        -------
+        mygrad.Tensor"""
     return Tensor._op(Subtract, a, b)
+
+
