@@ -1,6 +1,14 @@
 from .tensor_base import Tensor
 from .operations import *
 
+__all__ = ["add",
+           "add_sequence",
+           "divide",
+           "log",
+           "multiply",
+           "multiply_sequence",
+           "power",
+           "subtract"]
 
 def add(a, b):
     """ f(a, b) -> a + b
