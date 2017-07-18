@@ -4,7 +4,7 @@ import numpy as np
 __all__ = ['Tensor']
 
 
-class Tensor(object):
+class Tensor:
     """ A numpy.array-like object capable of serving as a node in a computational graph that
         supports back-propagation of derivatives via the chain rule."""
     __array_priority__ = 15.0
