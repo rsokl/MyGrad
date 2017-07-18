@@ -2,7 +2,7 @@ from .operation_base import Operation
 import numpy as np
 
 
-__all__ = ["Sum"]
+__all__ = ["Sum", "Mean"]
 
 
 class Sum(Operation):
@@ -32,3 +32,13 @@ class Sum(Operation):
         for i in self.axis:
             index[i] = np.newaxis
         self.a.backward(grad[index] * np.ones_like(self.a.data, dtype=float))
+
+
+class Mean(Sum):
+    def __call__(self, a, axis=None, keepdims=False):
+        out = super(Mean, self).__call__(a, axis, keepdims)
+        self.n = a.data.size if not self.axis else np.prod([a.shape[i] for i in self.axis])
+        return out / self.n
+
+    def backward_a(self, grad):
+        super(Mean, self).backward_a(grad / self.n)

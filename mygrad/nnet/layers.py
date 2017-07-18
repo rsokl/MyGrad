@@ -4,7 +4,6 @@ import numpy as np
 
 __all__ = ["dense"]
 
-
 class Dense(Operation):
     scalar_only = True
 

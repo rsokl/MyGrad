@@ -42,6 +42,9 @@ class Tensor(object):
         self.grad = None
         self._constant = constant
 
+        # used for setitem
+        self._ops = []  # Operation instances that utilized self an input tensor
+
     @staticmethod
     def _check_valid_dtype(dtype):
         if not np.issubdtype(dtype, np.number):
@@ -54,7 +57,7 @@ class Tensor(object):
             Parameters
             ----------
             Op : Operation
-                Operation to be performed using `input_cars`.
+                Operation-class, used to perform forward-pass on `input_vars`.
 
             input_vars : Sequence[Union[Number, numpy.ndarray]]
                 An arbitrary number of tensor-like objects, which are used as the input
@@ -85,6 +88,11 @@ class Tensor(object):
 
         f = Op()
         op_out = f(*tensor_vars, *op_args, **op_kwargs)
+
+        # record that a variable participated in that op
+        for var in tensor_vars:
+            if not var.constant:
+                var._ops.append(f)
 
         is_const = all(var.constant for var in tensor_vars)
 
@@ -218,6 +226,18 @@ class Tensor(object):
     def __rpow__(self, other):
         return self._op(Power, other, self)
 
+    def __iadd__(self, other):
+        return self + other
+
+    def __imul__(self, other):
+        return self * other
+
+    def __isub__(self, other):
+        return self - other
+
+    def __idiv__(self, other):
+        return self / other
+
     def __neg__(self):
         return -1 * self
 
@@ -275,6 +295,43 @@ class Tensor(object):
     def __contains__(self, item):
         return self.data.__contains__(item)
 
+    def __getitem__(self, item):
+        return self._op(GetItem, self, op_args=(item,))
+
+    def __setitem__(self, key, value):
+        if self.constant:
+            raise ValueError("Tensor constants do not support __setitem__")
+
+        # old_tensor is the tensor pre-setitem
+        old_tensor = self.__copy__()
+        old_tensor._creator = self.creator
+        old_tensor._ops = self._ops
+
+        # point all ops involving self to old_tensor instead
+        for op in old_tensor._ops:
+            if hasattr(op, "variables"):
+                for i in range(len(op.variables)):
+                    if op.variables[i] is self:
+                        op.variables[i] = old_tensor
+                        break
+            elif op.a is self:
+                op.a = old_tensor
+            else:
+                try:
+                    op.b = old_tensor
+                except AttributeError:
+                    msg = """"self._op contains an Operation which does not reference self.
+                              This is likely due to a bug in the Operation's implementation."""
+                    raise AttributeError(msg)
+
+        # self becomes the tensor post-setitem
+        out = self._op(SetItem, old_tensor, value, op_args=(key,))
+        self._creator = out.creator
+        self._scalar_only = out.scalar_only
+        self._ops = out._ops
+        self.data = out.data
+
+
     @property
     def size(self):
         return self.data.size
@@ -313,3 +370,68 @@ class Tensor(object):
                 axis/axes removed. If `self` is a 0-d tensor, or if `axis` is None,
                 a 0-dim Tensor is returned."""
         return self._op(Sum, self, op_args=(axis, keepdims))
+
+    def mean(self, axis=None, keepdims=False):
+        """ Mean of tensor elements over a given axis.
+
+            Parameters
+            ----------
+            axis : Optional[int, Tuple[ints, ...]
+                Axis or axes along which a mean is performed.  The default,
+                axis=None, will mean all of the elements of the input tensor.  If
+                axis is negative it counts from the last to the first axis.
+
+                If axis is a tuple of ints, a mean is performed on all of the axes
+                specified in the tuple instead of a single axis or all the axes as
+                before.
+
+            keepdims : bool, optional
+                If this is set to True, the axes which are reduced are left
+                in the result as dimensions with size one. With this option,
+                the result will broadcast correctly against the input tensor.
+
+            Returns
+            -------
+            mean_along_axis : Tensor
+                A Tensor with the same shape as `self`, with the specified
+                axis/axes removed. If `self` is a 0-d tensor, or if `axis` is None,
+                a 0-dim Tensor is returned."""
+        return self._op(Mean, self, op_args=(axis, keepdims))
+
+    def max(self, axis=None, keepdims=False):
+        """ Return the maximum of a tensor, or along its axes.
+
+            Parameters
+            ----------
+            axis : Optional[int, Tuple[int, ...]]
+                Axis or axes along which to operate. By default, flattened input is used.
+
+            keepdims : bool, optional
+                If this is set to True, the axes which are reduced are left
+                in the result as dimensions with size one. With this option,
+                the result will broadcast correctly against the original `arr`.
+
+            Returns
+            -------
+            max : Tensor
+                Maximum of `a`. If `axis` is None, the result is a 0-D tensor."""
+        return self._op(MaxMin, self, op_kwargs=dict(axis=axis, keepdims=keepdims, maxmin='max'))
+
+    def min(self, axis=None, keepdims=False):
+        """ Return the minimum of a tensor, or along its axes.
+
+            Parameters
+            ----------
+            axis : Optional[int, Tuple[int, ...]]
+                Axis or axes along which to operate. By default, flattened input is used.
+
+            keepdims : bool, optional
+                If this is set to True, the axes which are reduced are left
+                in the result as dimensions with size one. With this option,
+                the result will broadcast correctly against the original `arr`.
+
+            Returns
+            -------
+            min : Tensor
+                Minimum of `a`. If `axis` is None, the result is a 0-D tensor."""
+        return self._op(MaxMin, self, op_kwargs=dict(axis=axis, keepdims=keepdims, maxmin='min'))

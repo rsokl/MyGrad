@@ -9,24 +9,36 @@ class MulticlassHinge(Operation):
     def __call__(self, a, y, hinge=1.):
         """ Parameters
             ----------
-            a : pygrad.Tensor, shape=(N, K)
-                The K class scores for each of the N pieces of data.
+            a : mygrad.Tensor, shape=(N, C)
+                The C class scores for each of the N pieces of data.
 
             y : numpy.ndarray, shape=(N,)
-                The correct class-index, in [0, K), for each datum.
-
-            hinge : float, optional (default=1.0)
-                The hinge-margin for the loss.
+                The correct class-index, in [0, C), for each datum.
 
             Returns
             -------
             The average multiclass hinge loss"""
-        # STUDENT CODE HERE
-        pass
+        self.a = a
+        scores = a.data
+        correct_labels = (range(len(y)), y)
+        correct_class_scores = scores[correct_labels]  # Nx1
+
+        M = scores - correct_class_scores[:, np.newaxis] + hinge  # NxC margins
+        not_thresh = np.where(M <= 0)
+        Lij = M
+        Lij[not_thresh] = 0
+        Lij[correct_labels] = 0
+
+        TMP = np.ones(M.shape, dtype=float)
+        TMP[not_thresh] = 0
+        TMP[correct_labels] = 0  # NxC; 1 where margin > 0
+        TMP[correct_labels] = -1 * TMP.sum(axis=-1)
+        self.back = TMP
+        self.back /= scores.shape[0]
+        return np.sum(Lij) / scores.shape[0]
 
     def backward_a(self, grad):
-        # STUDENT CODE HERE
-        pass
+        self.a.backward(grad * self.back)
 
 
 def multiclass_hinge(x, y_true, hinge=1.):
@@ -37,6 +49,7 @@ def multiclass_hinge(x, y_true, hinge=1.):
 
         y : Sequence[int]
             The correct class-indices, in [0, K), for each datum.
+
         Returns
         -------
         The average multiclass hinge loss"""

@@ -8,3 +8,6 @@ from .subtract import *
 from .power import Power
 from .log import Log
 from .reshape import Reshape
+from .maxmin import *
+from .getitem import *
+from .setitem import *
