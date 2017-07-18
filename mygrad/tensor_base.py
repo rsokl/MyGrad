@@ -139,6 +139,7 @@ class Tensor:
 
     def null_gradients(self):
         self.grad = None
+        self._ops = []
         if self._creator is not None:
             self._creator.null_gradients()
 

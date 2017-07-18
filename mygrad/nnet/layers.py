@@ -9,16 +9,15 @@ class Dense(Operation):
 
     def __call__(self, a, b):
         assert a.ndim == 2 and b.ndim == 2
-        # STUDENT CODE HERE
-        pass
+        self.a = a
+        self.b = b
+        return np.dot(a.data, b.data)
 
     def backward_a(self, grad):
-        # STUDENT CODE HERE
-        pass
+        self.a.backward(np.dot(grad, self.b.data.T))
 
     def backward_b(self, grad):
-        # STUDENT CODE HERE
-        pass
+        self.b.backward(np.dot(self.a.data.T, grad))
 
 
 def dense(x, w):
