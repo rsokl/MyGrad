@@ -11,3 +11,4 @@ from .reshape import Reshape
 from .maxmin import *
 from .getitem import *
 from .setitem import *
+from .transpose import *

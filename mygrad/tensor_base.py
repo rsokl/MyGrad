@@ -436,3 +436,28 @@ class Tensor:
             min : Tensor
                 Minimum of `a`. If `axis` is None, the result is a 0-D tensor."""
         return self._op(MaxMin, self, op_kwargs=dict(axis=axis, keepdims=keepdims, maxmin='min'))
+
+    def transpose(self, axes=None):
+        """ Permute the dimensions of an array.
+
+            Parameters
+            ----------
+            axes : list of ints, optional
+                By default, reverse the dimensions, otherwise permute the axes
+                according to the values given.
+
+            Returns
+            -------
+            Tensor
+                `self` with its axes permuted.  A new tensor is returned. """
+        return self._op(Transpose, self, op_args=(axes,))
+
+    @property
+    def T(self):
+        """ Same as self.transpose(), except that self is returned if self.ndim < 2 and
+            a view of the underlying data is utilized whenever possible.
+
+            Returns
+            -------
+            Tensor"""
+        return self._op(Tensor_Transpose_Property, self)
