@@ -54,3 +54,51 @@ def multiclass_hinge(x, y_true, hinge=1.):
         -------
         The average multiclass hinge loss"""
     return Tensor._op(MulticlassHinge, x, op_args=(y_true, hinge))
+
+
+class SoftmaxCrossEntropy(Operation):
+    """ Given the classification scores of C classes for N pieces of data,
+        computes the NxC softmax classification probabilities. The
+        cross entropy is then computed by using the true classifications."""
+    def __call__(self, a, y):
+        """ Parameters
+            ----------
+            a : mygrad.Tensor, shape=(N, C)
+                The C class scores for each of the N pieces of data.
+
+            y : Sequence[int]
+                The correct class-indices, in [0, C), for each datum.
+            Returns
+            -------
+            The average softmax loss"""
+        self.a = a
+        scores = np.copy(a.data)
+        max_scores = np.max(scores, axis=1, keepdims=True)
+        np.exp(scores - max_scores, out=scores)
+        scores /= np.sum(scores, axis=1, keepdims=True)
+        label_locs = (range(len(scores)), y)
+
+        loss = -np.sum(np.log(scores[label_locs])) / scores.shape[0]
+
+        self.back = scores
+        self.back[label_locs] -= 1.
+        self.back /= scores.shape[0]
+        return loss
+
+    def backward_a(self, grad):
+        self.a.backward(grad * self.back)
+
+
+def softmax_crossentropy(x, y_true):
+    """ Parameters
+        ----------
+        x : pygrad.Tensor, shape=(N, C)
+            The C class scores for each of the N pieces of data.
+        y_true : Sequence[int]
+            The correct class-indices, in [0, C), for each datum.
+        Returns
+        -------
+        The average softmax loss"""
+    return Tensor._op(SoftmaxCrossEntropy, x, y_true)
+
+
