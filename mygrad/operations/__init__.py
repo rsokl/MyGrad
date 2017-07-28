@@ -2,6 +2,7 @@ from .add import *
 from .multiply import *
 from .sum import *
 from .divide import *
+from .dot import *
 from .multiply_sequence import *
 from .add_sequence import *
 from .subtract import *
