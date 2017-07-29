@@ -452,7 +452,6 @@ class Tensor:
                 `self` with its axes permuted.  A new tensor is returned. """
         return self._op(Transpose, self, op_args=(axes,))
 
-    @property
     def T(self):
         """ Same as self.transpose(), except that self is returned if self.ndim < 2 and
             a view of the underlying data is utilized whenever possible.
