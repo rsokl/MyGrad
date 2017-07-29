@@ -94,7 +94,7 @@ class Conv2D(Operation):
         self.stride = stride
         return out
 
-    def backward(self, grad):
+    def backward(self, grad, **kwargs):
         if self.a.constant and self.b.constant:
             return None
 

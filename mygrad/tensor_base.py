@@ -1,4 +1,5 @@
 from .operations import *
+from .operations.recurrent_units import RecurrentUnit
 import numpy as np
 
 __all__ = ['Tensor']
@@ -86,7 +87,7 @@ class Tensor:
                 var = cls(var, constant=True)
             tensor_vars.append(var)
 
-        f = Op()
+        f = Op() if not issubclass(Op, RecurrentUnit) else Op
         op_out = f(*tensor_vars, *op_args, **op_kwargs)
 
         # record that a variable participated in that op
@@ -100,7 +101,10 @@ class Tensor:
         for var in tensor_vars:
             scalar_only = scalar_only or (var.scalar_only and not var.constant)
 
-        return cls(op_out, constant=is_const, _creator=f, _scalar_only=scalar_only)
+        if isinstance(op_out, (tuple, list)):
+            return tuple(cls(dat, constant=is_const, _creator=f, _scalar_only=scalar_only) for dat in op_out)
+        else:
+            return cls(op_out, constant=is_const, _creator=f, _scalar_only=scalar_only)
 
     def backward(self, grad=None):
         """ Compute set or accumulate `self.grad` with `grad`, and pass `self.creator.backward(grad)`.
@@ -121,8 +125,10 @@ class Tensor:
                 (i.e. scalar) to invoke self.backprop(grad)."""
 
         if grad is not None:
+            terminal = False
             grad = np.asarray(grad.data if isinstance(grad, Tensor) else grad)
         else:
+            terminal = True
             if self.ndim > 0 and self.scalar_only:
                 raise Exception("Invalid Backprop: scalar-only violation")
 
@@ -134,7 +140,7 @@ class Tensor:
         self.grad = np.asarray(grad if self.grad is None else self.grad + grad)
 
         if self._creator is not None:
-            self._creator.backward(grad)
+            self._creator.backward(grad, terminal=terminal)
 
 
     def null_gradients(self):

@@ -15,7 +15,7 @@ class MultiplySequence(MultiVarBroadcastableOp):
         self._iszero = np.any(out == 0)
         return out
 
-    def backward(self, grad):
+    def backward(self, grad, **kwargs):
         """ Back-propagates the gradient through all of the operation's inputs. This needs to be updated
             by an operation if that operation takes more than 2 Tensor arguments."""
         if not self._iszero:
