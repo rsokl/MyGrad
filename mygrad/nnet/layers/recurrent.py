@@ -2,6 +2,14 @@ from ...operations.operation_base import Operation
 from ...tensor_base import Tensor
 import numpy as np
 
+from numba import njit
+
+
+@njit
+def _dot_accum(x, W):
+    for n in range(len(x) - 1):
+        x[n + 1] += np.dot(x[n], W)
+
 
 class RecurrentUnit(Operation):
     def __init__(self, U, W, V, bp_lim):
@@ -17,10 +25,7 @@ class RecurrentUnit(Operation):
 
     def __call__(self, seq, s0=None):
 
-        if self._input_seq is None:
-            self._input_seq = seq
-        else:
-            self._input_seq = np.vstack((self._input_seq, seq))
+        self._input_seq = seq if self._input_seq is None else np.vstack((self._input_seq, seq))
 
         out = np.zeros((seq.shape[0] + 1, seq.shape[1], self.U.shape[-1]))
 
@@ -30,8 +35,7 @@ class RecurrentUnit(Operation):
             out[0] = s0 if isinstance(s0, Tensor) else s0
 
         np.dot(seq, self.U.data, out=out[1:])
-        for n, s_prev in enumerate(out[:-1]):
-            out[n + 1] += s_prev.dot(self.W.data)
+        _dot_accum(out, self.W.data)
 
         np.tanh(out, out=out)
 
@@ -62,6 +66,14 @@ class RecurrentUnit(Operation):
         else:
             s_prev.grad = None
             s_prev.backward(np.dot(dLdo, self.W.data.T))
+
+    def backward(self, grad):
+        s = self._hidden_seq
+        dsdf = (1 - s.data ** 2)
+        for i in range(self.bp_cnt):
+            grad[1:len(grad)-(i + 1)] += np.dot(grad[2:len(grad) - i] * dsdf[2:len(grad) - i], self.W.data.T)
+        self.U.backward(np.einsum("ijk,ijl -> kl", self._input_seq, grad[1:]))
+        self.W.backward(np.einsum("ijk,ijl -> kl", s[:-1], grad[1:]))
 
 
 def recurrent(s, x):
