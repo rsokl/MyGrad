@@ -4,7 +4,7 @@ import numpy as np
 def test_transpose_property():
     dat = np.arange(6).reshape(2, 3)
     x = Tensor(dat)
-    f = x.T
+    f = x.T()
     f.backward(dat.T)
 
     assert np.allclose(f.data, dat.T)

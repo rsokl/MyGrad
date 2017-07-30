@@ -15,7 +15,7 @@ class MultiVarOperation:
     def backward_var(self, grad, index):
         raise NotImplementedError
 
-    def backward(self, grad):
+    def backward(self, grad, **kwargs):
         """ Back-propagates the gradient through all of the operation's inputs. This needs to be updated
             by an operation if that operation takes more than 2 Tensor arguments."""
         for index, var in enumerate(self.variables):
@@ -51,7 +51,7 @@ class MultiVarBroadcastableOp(MultiVarOperation):
 
             Parameters
             ----------
-            variables : Sequence[mygrad.Tensor
+            variables : Sequence[mygrad.Tensor]
             out_shape : Sequence[int]
                 The shape of f(a, b)."""
         self.variables = variables

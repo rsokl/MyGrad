@@ -9,7 +9,7 @@ class Tensor:
         supports back-propagation of derivatives via the chain rule."""
     __array_priority__ = 15.0
 
-    def __init__(self, x, *, constant=False, _scalar_only=False, _creator=None):
+    def __init__(self, x, *, constant=False, _scalar_only=False, _creator=None, _seq_index=None):
         """ Parameters
             ----------
             x : array_like
@@ -44,6 +44,9 @@ class Tensor:
 
         # used for setitem
         self._ops = []  # Operation instances that utilized self an input tensor
+
+        # used for RNNs
+        self._seq_index = _seq_index
 
     @staticmethod
     def _check_valid_dtype(dtype):
@@ -126,16 +129,12 @@ class Tensor:
             if self.ndim > 0 and self.scalar_only:
                 raise Exception("Invalid Backprop: scalar-only violation")
 
-            if self.ndim == 0:
-                grad = np.asarray(1)
-            else:
-                grad = np.ones(self.shape, dtype=float)
+            grad = np.ones(self.shape, dtype=float) if self.ndim > 0 else np.asarray(1)
 
         self.grad = np.asarray(grad if self.grad is None else self.grad + grad)
 
         if self._creator is not None:
-            self._creator.backward(grad)
-
+            self._creator.backward(grad, seq_index=self._seq_index)
 
     def null_gradients(self):
         self.grad = None
@@ -452,7 +451,6 @@ class Tensor:
                 `self` with its axes permuted.  A new tensor is returned. """
         return self._op(Transpose, self, op_args=(axes,))
 
-    @property
     def T(self):
         """ Same as self.transpose(), except that self is returned if self.ndim < 2 and
             a view of the underlying data is utilized whenever possible.

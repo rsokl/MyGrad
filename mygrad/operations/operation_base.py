@@ -51,7 +51,7 @@ class Operation:
             NotImplemented Error"""
         raise NotImplementedError
 
-    def backward(self, grad):
+    def backward(self, grad, **kwargs):
         """ Back-propagates the gradient coming from the operation's output, back to its inputs."""
         if not self.a.constant:
             self.backward_a(grad)

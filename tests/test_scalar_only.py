@@ -5,6 +5,8 @@ from pytest import raises
 from mygrad.tensor_base import Tensor
 from mygrad.operations import Operation
 
+import numpy as np
+
 
 class ScalarOnlyOp(Operation):
     def __init__(self):
@@ -14,7 +16,7 @@ class ScalarOnlyOp(Operation):
         self.a = a
         if b is not None:
             self.b = b
-        return [0]
+        return np.array([0])
 
 
 class NotScalarOnlyOp(Operation):
@@ -25,7 +27,7 @@ class NotScalarOnlyOp(Operation):
         self.a = a
         if b is not None:
             self.b = b
-        return [0]
+        return np.array([0])
 
 
 @given(a_const=st.booleans(), a_scalar_only=st.booleans(),
