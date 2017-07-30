@@ -51,7 +51,7 @@ class MultiVarBroadcastableOp(MultiVarOperation):
 
             Parameters
             ----------
-            variables : Sequence[mygrad.Tensor
+            variables : Sequence[mygrad.Tensor]
             out_shape : Sequence[int]
                 The shape of f(a, b)."""
         self.variables = variables

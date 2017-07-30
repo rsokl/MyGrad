@@ -10,11 +10,10 @@ __all__ = ['tanh', 'sigmoid', 'relu', 'softmax', 'logsoftmax']
 class Tanh(Operation):
     def __call__(self, a):
         self.a = a
-        self.tanh = np.tanh(a.data)
-        return self.tanh
+        return np.tanh(a.data)
 
     def backward_a(self, grad):
-        self.a.backward(grad * (1 - self.tanh ** 2))
+        self.a.backward(grad * (1 - np.tanh(self.a.data) ** 2))
 
 
 def tanh(x):

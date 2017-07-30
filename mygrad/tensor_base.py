@@ -1,5 +1,4 @@
 from .operations import *
-from .operations.recurrent_units import RecurrentUnit
 import numpy as np
 
 __all__ = ['Tensor']
@@ -46,6 +45,9 @@ class Tensor:
         # used for setitem
         self._ops = []  # Operation instances that utilized self an input tensor
 
+        # used for RNNs
+        self._seq_index = None
+
     @staticmethod
     def _check_valid_dtype(dtype):
         if not np.issubdtype(dtype, np.number):
@@ -87,7 +89,7 @@ class Tensor:
                 var = cls(var, constant=True)
             tensor_vars.append(var)
 
-        f = Op() if not issubclass(Op, RecurrentUnit) else Op
+        f = Op()
         op_out = f(*tensor_vars, *op_args, **op_kwargs)
 
         # record that a variable participated in that op
@@ -125,23 +127,17 @@ class Tensor:
                 (i.e. scalar) to invoke self.backprop(grad)."""
 
         if grad is not None:
-            terminal = False
             grad = np.asarray(grad.data if isinstance(grad, Tensor) else grad)
         else:
-            terminal = True
             if self.ndim > 0 and self.scalar_only:
                 raise Exception("Invalid Backprop: scalar-only violation")
 
-            if self.ndim == 0:
-                grad = np.asarray(1)
-            else:
-                grad = np.ones(self.shape, dtype=float)
+            grad = np.ones(self.shape, dtype=float) if self.ndim > 0 else np.asarray(1)
 
         self.grad = np.asarray(grad if self.grad is None else self.grad + grad)
 
         if self._creator is not None:
-            self._creator.backward(grad, terminal=terminal)
-
+            self._creator.backward(grad, seq_index=self._seq_index)
 
     def null_gradients(self):
         self.grad = None
