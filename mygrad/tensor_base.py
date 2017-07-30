@@ -9,7 +9,7 @@ class Tensor:
         supports back-propagation of derivatives via the chain rule."""
     __array_priority__ = 15.0
 
-    def __init__(self, x, *, constant=False, _scalar_only=False, _creator=None):
+    def __init__(self, x, *, constant=False, _scalar_only=False, _creator=None, _seq_index=None):
         """ Parameters
             ----------
             x : array_like
@@ -46,7 +46,7 @@ class Tensor:
         self._ops = []  # Operation instances that utilized self an input tensor
 
         # used for RNNs
-        self._seq_index = None
+        self._seq_index = _seq_index
 
     @staticmethod
     def _check_valid_dtype(dtype):
@@ -103,10 +103,7 @@ class Tensor:
         for var in tensor_vars:
             scalar_only = scalar_only or (var.scalar_only and not var.constant)
 
-        if isinstance(op_out, (tuple, list)):
-            return tuple(cls(dat, constant=is_const, _creator=f, _scalar_only=scalar_only) for dat in op_out)
-        else:
-            return cls(op_out, constant=is_const, _creator=f, _scalar_only=scalar_only)
+        return cls(op_out, constant=is_const, _creator=f, _scalar_only=scalar_only)
 
     def backward(self, grad=None):
         """ Compute set or accumulate `self.grad` with `grad`, and pass `self.creator.backward(grad)`.

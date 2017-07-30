@@ -10,46 +10,37 @@ class RecurrentUnit(Operation):
         self.V = V
         self.bp_lim = bp_lim
 
-        self._input_seq = []
+        self._input_seq = None
         self._hidden_seq = []
 
         self.bp_cnt = 0
 
-    def __call__(self, s_old, seq=None):
-        if not self._hidden_seq:
-            s_old._seq_index = len(self._hidden_seq)
-            self._hidden_seq.append(s_old)
+    def __call__(self, seq, s0=None):
 
-        assert s_old._seq_index == len(self._hidden_seq) - 1
-        self._input_seq.append(seq)
+        if self._input_seq is None:
+            self._input_seq = seq
+        else:
+            self._input_seq = np.vstack((self._input_seq, seq))
 
-        out = seq.dot(self.U.data)
+        out = np.zeros((seq.shape[0] + 1, seq.shape[1], self.U.shape[-1]))
+
+        if self._hidden_seq:
+            out[0] = self._hidden_seq[-1].data
+        elif s0 is not None:
+            out[0] = s0 if isinstance(s0, Tensor) else s0
+
+        np.dot(seq, self.U.data, out=out[1:])
         for n, s_prev in enumerate(out[:-1]):
-            out[n + 1] += s_old.data.dot(self.W.data)
+            out[n + 1] += s_prev.dot(self.W.data)
 
         np.tanh(out, out=out)
 
-        s = Tensor(out, _creator=self)
-        s._seq_index = len(self._hidden_seq)
-        self._hidden_seq.append(s)
-        return s
+        if not self._hidden_seq:
+            self._hidden_seq = [Tensor(out[0], _creator=self, _seq_index=0)]
 
-    # def __call__(self, s_old, seq=None):
-    #     if not self._hidden_seq:
-    #         s_old._seq_index = len(self._hidden_seq)
-    #         self._hidden_seq.append(s_old)
-    #
-    #     assert s_old._seq_index == len(self._hidden_seq) - 1
-    #     self._input_seq.append(seq)
-    #
-    #     out = seq.dot(self.U.data)
-    #     out += s_old.data.dot(self.W.data)
-    #     np.tanh(out, out=out)
-    #
-    #     s = Tensor(out, _creator=self)
-    #     s._seq_index = len(self._hidden_seq)
-    #     self._hidden_seq.append(s)
-    #     return s
+        self._hidden_seq += [Tensor(s, _creator=self, _seq_index=(n + len(self._hidden_seq)))
+                             for n, s in enumerate(out[1:])]
+        return self._hidden_seq
 
     def backward(self, grad, seq_index=None):
         """ o = UX_t + WS_{t-1}

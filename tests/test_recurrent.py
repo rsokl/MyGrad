@@ -1,6 +1,7 @@
 from mygrad.tensor_base import Tensor
 from mygrad.nnet.layers import RecurrentUnit, dense
 from mygrad.nnet.activations import tanh
+from mygrad.math import add_sequence
 
 import hypothesis.strategies as st
 from hypothesis import given
@@ -48,12 +49,10 @@ def test_recurrent(data, choice):
 
     rec = RecurrentUnit(U, W, V, T)
 
-    s = s0
-    ls = 0
-    for n, x in enumerate(X):
-        s = rec(s, x)
-        o = dense(s, V)
-        ls += o.sum()
+    if X.shape[0] > 1:
+        ls = add_sequence(*(dense(i, V).sum() for i in rec(X)[1:]))
+    else:
+        ls = dense(rec(X)[1], V).sum()
     ls.backward()
 
     s = s2
@@ -64,9 +63,9 @@ def test_recurrent(data, choice):
         ls2 += o.sum()
     ls2.backward()
 
-    assert np.allclose(W.data, W2.data)
-    assert np.allclose(W.grad, W2.grad)
-    assert np.allclose(U.data, U2.data)
-    assert np.allclose(U.grad, U2.grad)
-    assert np.allclose(V.data, V2.data)
-    assert np.allclose(V.grad, V2.grad)
+    assert np.allclose(W.data, W2.data, atol=1E-3)
+    assert np.allclose(W.grad, W2.grad, atol=1E-3)
+    assert np.allclose(U.data, U2.data, atol=1E-3)
+    assert np.allclose(U.grad, U2.grad, atol=1E-3)
+    assert np.allclose(V.data, V2.data, atol=1E-3)
+    assert np.allclose(V.grad, V2.grad, atol=1E-3)
