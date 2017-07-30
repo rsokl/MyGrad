@@ -1,5 +1,6 @@
 from mygrad.tensor_base import Tensor
 from mygrad.nnet.layers import RecurrentUnit, dense
+from mygrad.nnet.layers.recurrent import OldRecurrentUnit
 from mygrad.nnet.activations import tanh
 from mygrad.math import add_sequence
 
@@ -12,7 +13,7 @@ import numpy as np
 
 @given(st.data(), st.choices())
 def test_recurrent(data, choice):
-    X = data.draw(hnp.arrays(shape=hnp.array_shapes(max_side=3, min_dims=3, max_dims=3),
+    X = data.draw(hnp.arrays(shape=hnp.array_shapes(max_side=5, min_dims=3, max_dims=3),
                              dtype=float,
                              elements=st.floats(-10, 10)))
     T, N, C = X.shape
@@ -48,24 +49,39 @@ def test_recurrent(data, choice):
     s2 = s0.__copy__()
 
     rec = RecurrentUnit(U, W, V, T)
-
-    if X.shape[0] > 1:
-        ls = add_sequence(*(dense(i, V).sum() for i in rec(X)[1:]))
-    else:
-        ls = dense(rec(X)[1], V).sum()
+    s = rec(X)
+    o = dense(s[1:], V)
+    ls = o.sum()
     ls.backward()
 
-    s = s2
+    # rec = OldRecurrentUnit(U, W, V, T)
+    #
+    # if X.shape[0] > 1:
+    #     s = rec(X)
+    #     o = [dense(i, V).sum() for i in s]
+    #     ls = add_sequence(*o[1:])
+    # else:
+    #     s = rec(X)
+    #     ls = dense(s[1], V).sum()
+    # ls.backward()
+
+    stt = s2
+    all_s = [s0.data]
     ls2 = 0
     for n, x in enumerate(X):
-        s = tanh(dense(x, U2) + dense(s, W2))
-        o = dense(s, V2)
+        stt = tanh(dense(x, U2) + dense(stt, W2))
+        all_s.append(stt.data)
+        o = dense(stt, V2)
         ls2 += o.sum()
     ls2.backward()
 
-    assert np.allclose(W.data, W2.data, atol=1E-2)
-    assert np.allclose(W.grad, W2.grad, atol=1E-2)
-    assert np.allclose(U.data, U2.data, atol=1E-2)
-    assert np.allclose(U.grad, U2.grad, atol=1E-2)
-    assert np.allclose(V.data, V2.data, atol=1E-2)
-    assert np.allclose(V.grad, V2.grad, atol=1E-2)
+    all_s = np.stack(all_s)
+    s = np.stack([i.data for i in s])
+    assert np.allclose(all_s, s)
+    assert np.allclose(ls.data, ls2.data)
+    assert np.allclose(W.data, W2.data)
+    assert np.allclose(W.grad, W2.grad)
+    assert np.allclose(U.data, U2.data)
+    assert np.allclose(U.grad, U2.grad)
+    assert np.allclose(V.data, V2.data)
+    assert np.allclose(V.grad, V2.grad)
