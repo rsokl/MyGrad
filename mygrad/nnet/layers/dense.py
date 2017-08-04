@@ -7,16 +7,28 @@ class Dense(Operation):
     scalar_only = True
 
     def __call__(self, a, b):
-        assert a.ndim == 2 and b.ndim == 2
         self.a = a
         self.b = b
+        assert b.ndim == 2
+        assert 3 >= a.ndim >= 2
+
         return np.dot(a.data, b.data)
 
     def backward_a(self, grad):
-        self.a.backward(np.dot(grad, self.b.data.T))
+        if self.a.ndim == 2:
+            self.a.backward(np.dot(grad, self.b.data.T))
+        else:
+            # grad: (T, N, D)
+            # b: (C, D)
+            self.a.backward(np.einsum("ijk, nk", grad, self.b.data))
 
     def backward_b(self, grad):
-        self.b.backward(np.dot(self.a.data.T, grad))
+        if self.a.ndim == 2:
+            self.b.backward(np.dot(self.a.data.T, grad))
+        else:
+            # a: (T, N, C)
+            # grad: (T, N, D)
+            self.b.backward(np.einsum("ijk,ijl -> kl", self.a.data, grad))
 
 
 def dense(x, w):
