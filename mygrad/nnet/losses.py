@@ -99,6 +99,6 @@ def softmax_crossentropy(x, y_true):
         Returns
         -------
         The average softmax loss"""
-    return Tensor._op(SoftmaxCrossEntropy, x, y_true)
+    return Tensor._op(SoftmaxCrossEntropy, x, op_args=(y_true,))
 
 
