@@ -150,7 +150,14 @@ def simple_RNN(X, U, W, s0=None, bp_lim=None, backprop_s=False):
         Returns
         -------
         mygrad.Tensor
-            The sequence of 'hidden-descriptors' produced by the forward pass of the RNN."""
+            The sequence of 'hidden-descriptors' produced by the forward pass of the RNN.
+
+        Notes
+        -----
+        T : Sequence length
+        N : Batch size
+        C : Length of single datum
+        D : Length of 'hidden' descriptor"""
     s = Tensor._op(RecurrentUnit, X, U, W, op_kwargs=dict(s0=s0, bp_lim=bp_lim, backprop_s=backprop_s))
     s.creator._hidden_seq = s
     return s
