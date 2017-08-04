@@ -1,6 +1,5 @@
 from mygrad.tensor_base import Tensor
-from mygrad.nnet.layers import RecurrentUnit, dense
-from mygrad.nnet.layers.recurrent import OldRecurrentUnit
+from mygrad.nnet.layers import simple_RNN, dense
 from mygrad.nnet.activations import tanh
 from mygrad.math import add_sequence
 
@@ -50,22 +49,10 @@ def test_recurrent(data, choice):
     s0 = Tensor(s0)
     s2 = s0.__copy__()
 
-    rec = RecurrentUnit(U, W, T, constant=False)
-    s = rec(X)
+    s = simple_RNN(X, U, W, backprop_s=True)
     o = dense(s[1:], V)
     ls = o.sum()
     ls.backward()
-
-    # rec = OldRecurrentUnit(U, W, V, T)
-    #
-    # if X.shape[0] > 1:
-    #     s = rec(X)
-    #     o = [dense(i, V).sum() for i in s]
-    #     ls = add_sequence(*o[1:])
-    # else:
-    #     s = rec(X)
-    #     ls = dense(s[1], V).sum()
-    # ls.backward()
 
     stt = s2
     all_s = [s0.data]
@@ -88,6 +75,6 @@ def test_recurrent(data, choice):
     assert np.allclose(U.grad, U2.grad)
     assert np.allclose(V.data, V2.data)
     assert np.allclose(V.grad, V2.grad)
-    # assert np.allclose(X.data, X2.data)
-    # assert np.allclose(X.grad, X2.grad)
+    assert np.allclose(X.data, X2.data)
+    assert np.allclose(X.grad, X2.grad)
 
