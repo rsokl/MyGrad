@@ -116,6 +116,11 @@ class RecurrentUnit(Operation):
         if not self.X.constant:
             self.X.backward(np.dot(dLt_dft[1:], self.U.data.T))
 
+    def null_gradients(self):
+        """ Back-propagates `None` to the gradients of the operation's input Tensors."""
+        for x in [self.X, self.U, self.W]:
+            x.null_gradients()
+
 
 def simple_RNN(X, U, W, s0=None, bp_lim=None, backprop_s=False):
     """ Performs a forward pass of sequential data through a simple RNN layer, returning
