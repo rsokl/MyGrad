@@ -78,3 +78,7 @@ def test_recurrent(data, choice):
     assert np.allclose(X.data, X2.data)
     assert np.allclose(X.grad, X2.grad)
 
+    ls.null_gradients()
+    for x in [s, W, X, U, V]:
+        assert x.grad is None
+
