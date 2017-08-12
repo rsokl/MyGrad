@@ -81,6 +81,7 @@ class RecurrentUnit(Operation):
 
         return self._hidden_seq.data
 
+
     def backward(self, grad, seq_index=None):
         if self.U.constant and self.W.constant and self.X.constant and self.backprop_s:
             return None
@@ -166,3 +167,136 @@ def simple_RNN(X, U, W, s0=None, bp_lim=None, backprop_s=False):
     s = Tensor._op(RecurrentUnit, X, U, W, op_kwargs=dict(s0=s0, bp_lim=bp_lim, backprop_s=backprop_s))
     s.creator._hidden_seq = s
     return s
+
+
+
+
+
+@njit
+def _gru_layer(s, z, r, h, Wz, Wr, Wh):
+    for n in range(len(s) - 1):
+        z[n] += np.dot(s[n], Wz)
+        z[n] = 1 / (1 + np.exp(-z[n]))
+
+        r[n] += np.dot(s[n], Wr)
+        r[n] = 1 / (1 + np.exp(-r[n]))
+
+        h[n] += np.dot(r[n] * s[n], Wh)
+        h[n] = np.tanh(h[n])
+
+        s[n + 1] = (1 - z[n]) * h[n] + z[n] * s[n]
+
+
+def _gru_dsds(s, z, r, h, dLds, Wz, Wr, Wh):
+    return z * dLds + np.dot((dLds * (s - h)) * z * (1 - z), Wz.T) + r * np.dot((1 - h ** 2) * (1 - z) * dLds, Wh.T) + \
+           np.dot(s * np.dot((1 - h ** 2) * (1 - z) * dLds, Wh.T) * r * (1 - r), Wr.T)
+
+
+class GRUnit(Operation):
+    def __init__(self, Uz, Wz, Ur, Wr, Uh, Wh, V, bp_lim):
+        self.Uz = Uz
+        self.Wz = Wz
+
+        self.Ur = Ur
+        self.Wr = Wr
+
+        self.Uh = Uh
+        self.Wh = Wh
+
+        self.V = V
+
+        self.bp_lim = bp_lim
+
+        self._input_seq = None
+        self._hidden_seq = []
+
+        self._z = []
+        self._r = []
+        self._h = []
+
+        self.bp_cnt = 0
+
+
+    def __call__(self, seq, s0=None):
+        # fix W's and U's references
+        self._input_seq = seq if self._input_seq is None else np.vstack((self._input_seq, seq))
+
+        z = np.zeros((seq.shape[0], seq.shape[1], self.Uz.shape[-1]))
+        r = np.zeros((seq.shape[0], seq.shape[1], self.Ur.shape[-1]))
+        h = np.zeros((seq.shape[0], seq.shape[1], self.Uh.shape[-1]))
+        out = np.zeros((seq.shape[0] + 1, seq.shape[1], self.Uz.shape[-1]))
+
+        if self._hidden_seq:
+            out[0] = self._hidden_seq[-1].data
+        elif s0 is not None:
+            out[0] = s0.data if isinstance(s0, Tensor) else s0
+
+        np.dot(seq, self.Uz.data, out=z)
+        np.dot(seq, self.Ur.data, out=r)
+        np.dot(seq, self.Uh.data, out=h)
+
+        _gru_layer(out, z, r, h, self.Wz.data, self.Wr.data, self.Wh.data)
+
+
+        if not self._hidden_seq:
+            self._hidden_seq = Tensor(out, _creator=self)
+        else:
+            new_dat = np.vstack((self._hidden_seq.data, out[1:]))
+            self._hidden_seq = Tensor(new_dat, _creator=self)
+
+        if not self._z:
+            self._z = Tensor(z, _creator=self)
+        else:
+            new_dat = np.vstack((self._z.data, z[1:]))
+            self._z = Tensor(new_dat, _creator=self)
+
+        if not self._r:
+            self._r = Tensor(r, _creator=self)
+        else:
+            new_dat = np.vstack((self._r.data, r[1:]))
+            self._r = Tensor(new_dat, _creator=self)
+
+        if not self._h:
+            self._h = Tensor(h, _creator=self)
+        else:
+            new_dat = np.vstack((self._h.data, h[1:]))
+            self._h = Tensor(new_dat, _creator=self)
+
+        return self._hidden_seq
+
+
+    def backward(self, grad, seq_index=None):
+        s = self._hidden_seq.data[:-1]
+        z = self._z.data
+        r = self._r.data
+        h = self._h.data
+
+        dLds = grad[1:]
+        old_dLds = np.zeros_like(dLds)
+
+        for i in range(min(s.shape[0] - 1, self.bp_lim)):
+            dt = dLds[1:len(dLds) - i] - old_dLds[1:len(old_dLds) - i]
+            old_dLds = np.copy(dLds)
+            dLds[:len(dLds) - (i + 1)] += _gru_dsds(s[len(dLds) - (i + 1)], z[len(dLds) - (i + 1)], r[len(dLds) - (i + 1)], h[len(dLds) - (i + 1)], grad[len(dLds) - (i + 1)], self.Wz.data, self.Wr.data, self.Wh.data)
+
+
+        dsdz = -h + s
+        dsdh = 1 - z
+        dsdr = (1 - z) * np.dot(1 - h ** 2, self.Wh.data.T) * s
+        zgrad = dLds * dsdz
+        rgrad = dLds * dsdr
+        hgrad = dLds * dsdh
+
+        self._hidden_seq.grad = dLds
+        self._z.grad = zgrad
+        self._r.grad = rgrad
+        self._h.grad = hgrad
+
+        self.Uz.backward(np.einsum("ijk, ijl -> kl", self._input_seq, zgrad))
+        self.Wz.backward(np.einsum("ijk, ijl -> kl", s, zgrad))
+
+        self.Ur.backward(np.einsum("ijk, ijl -> kl", self._input_seq, rgrad))
+        self.Wr.backward(np.einsum("ijk, ijl -> kl", s, rgrad))
+
+        self.Uh.backward(np.einsum("ijk, ijl -> kl", self._input_seq, hgrad))
+        self.Wh.backward(np.einsum("ijk, ijl -> kl", (s * r), hgrad))

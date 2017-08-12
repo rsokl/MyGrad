@@ -115,3 +115,25 @@ def subtract(a, b):
         -------
         mygrad.Tensor"""
     return Tensor._op(Subtract, a, b)
+
+def dot(x, w):
+    """ Calculates dot product between two tensors of shape (N)
+
+        Parameters
+        ----------
+        x : Union[mygrad.Tensor, array_like], shape=(N)
+
+        w : Union[mygrad.Tensor, array_like], shape=(D)
+
+        Returns
+        -------
+        Tensor, shape=(1)
+            The result of the dot product `x` with `w`
+
+        Notes
+        -----
+        This is a "scalar-only" operation, meaning that back propagation through
+        this layer assumes that a scalar (i.e. a 0-dimensional tensor) will invoke
+        `tensor.backward()` for the computational graph. This is standard for a
+        neural network, which terminates in a scalar loss."""
+    return Tensor._op(Dot, x, w)
