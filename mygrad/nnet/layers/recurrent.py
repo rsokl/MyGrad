@@ -281,11 +281,11 @@ class GRUnit(Operation):
         self._r.grad = rgrad
         self._h.grad = hgrad
 
-        self.Uz.backward(np.einsum("ijk, ijl -> kl", self._input_seq, zgrad))
-        self.Wz.backward(np.einsum("ijk, ijl -> kl", s, zgrad))
+        self.Uz.backward(np.einsum("ijk, ijl -> kl", self._input_seq, zgrad * z * (1 - z)))
+        self.Wz.backward(np.einsum("ijk, ijl -> kl", s, zgrad * z * (1 - z)))
 
-        self.Ur.backward(np.einsum("ijk, ijl -> kl", self._input_seq, rgrad))
-        self.Wr.backward(np.einsum("ijk, ijl -> kl", s, rgrad))
+        self.Ur.backward(np.einsum("ijk, ijl -> kl", self._input_seq, rgrad * r * (1 - r)))
+        self.Wr.backward(np.einsum("ijk, ijl -> kl", s, rgrad * r * (1 - r)))
 
-        self.Uh.backward(np.einsum("ijk, ijl -> kl", self._input_seq, hgrad))
-        self.Wh.backward(np.einsum("ijk, ijl -> kl", (s * r), hgrad))
+        self.Uh.backward(np.einsum("ijk, ijl -> kl", self._input_seq, hgrad * (1 - h ** 2)))
+        self.Wh.backward(np.einsum("ijk, ijl -> kl", (s * r), hgrad * (1 - h ** 2)))
