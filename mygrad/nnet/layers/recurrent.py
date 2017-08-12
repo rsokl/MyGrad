@@ -267,17 +267,15 @@ class GRUnit(Operation):
         h = self._h.data
 
         dLds = grad[1:]
-        old_dLds = np.zeros_like(dLds)
 
         for i in range(min(s.shape[0] - 1, self.bp_lim)):
-            dt = dLds[1:len(dLds) - i] - old_dLds[1:len(old_dLds) - i]
-            old_dLds = np.copy(dLds)
-            dLds[:len(dLds) - (i + 1)] += _gru_dsds(s[len(dLds) - (i + 1)], z[len(dLds) - (i + 1)], r[len(dLds) - (i + 1)], h[len(dLds) - (i + 1)], grad[len(dLds) - (i + 1)], self.Wz.data, self.Wr.data, self.Wh.data)
+            dt = dLds[len(dLds) - (i + 1)]
+            dLds[len(dLds) - (i + 2)] += _gru_dsds(s[len(dLds) - (i + 1)], z[len(dLds) - (i + 1)], r[len(dLds) - (i + 1)], h[len(dLds) - (i + 1)], dt, self.Wz.data, self.Wr.data, self.Wh.data)
 
 
         dsdz = -h + s
         dsdh = 1 - z
-        dsdr = (1 - z) * np.dot(1 - h ** 2, self.Wh.data.T) * s
+        dsdr = np.dot((1 - h ** 2) * (1 - z), self.Wh.data.T) * s
         zgrad = dLds * dsdz
         rgrad = dLds * dsdr
         hgrad = dLds * dsdh
