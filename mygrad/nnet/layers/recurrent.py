@@ -182,23 +182,9 @@ def _gru_layer(s, z, r, h, Wz, Wr, Wh):
         s[n + 1] = (1 - z[n]) * h[n] + z[n] * s[n]
 
 
-def _gru_dsds(s, z, r, h, Wz, Wr, Wh):
-    """
-    All parameters are ndarrays, not Tensors
-    """
-    pdsds = z
-    dsdz = -h + s
-    dsdh = 1 - z
-    dz = z * (1 - z)
-    pdzds = np.dot(dz, Wz.T)
-    dh = (1 - h ** 2)
-    pdh = dh * (np.dot(s * r, Wh.T))
-    pdhds = pdh * r
-    pdhdr = pdh * s
-    dr = r * (1 - r)
-    pdrds = np.dot(dr, Wr.T)
-
-    return pdsds + dsdz * pdzds + dsdh * (pdhds + pdhdr * pdrds)
+def _gru_dsds(s, z, r, h, dLds, Wz, Wr, Wh):
+    return z * dLds + np.dot((dLds * (s - h)) * z * (1 - z), Wz.T) + r * np.dot((1 - h ** 2) * (1 - z) * dLds, Wh.T) + \
+           np.dot(s * np.dot((1 - h ** 2) * (1 - z) * dLds, Wh.T) * r * (1 - r), Wr.T)
 
 
 class GRUnit(Operation):
@@ -280,79 +266,32 @@ class GRUnit(Operation):
         r = self._r.data
         h = self._h.data
 
+        dLds = grad[1:]
+        old_dLds = np.zeros_like(dLds)
+
+        for i in range(min(s.shape[0] - 1, self.bp_lim)):
+            dt = dLds[1:len(dLds) - i] - old_dLds[1:len(old_dLds) - i]
+            old_dLds = np.copy(dLds)
+            dLds[:len(dLds) - (i + 1)] += _gru_dsds(s[len(dLds) - (i + 1)], z[len(dLds) - (i + 1)], r[len(dLds) - (i + 1)], h[len(dLds) - (i + 1)], grad[len(dLds) - (i + 1)], self.Wz.data, self.Wr.data, self.Wh.data)
+
+
         dsdz = -h + s
+        dsdh = 1 - z
+        dsdr = (1 - z) * np.dot(1 - h ** 2, self.Wh.data.T) * s
+        zgrad = dLds * dsdz
+        rgrad = dLds * dsdr
+        hgrad = dLds * dsdh
 
-        dsds = _gru_dsds(s, z, r, h, self.Wz.data, self.Wr.data, self.Wh.data)
-
-        #dsds = z + np.dot((s - h) * z * (1 - z), self.Wz.data.T) + (1 - z) * (r * (np.dot((1 - h ** 2), self.Wh.data.T)) + \
-        #       np.dot((np.dot((1 - h ** 2), self.Wh.data.T) * s * r * (1 - r)), self.Wr.data.T))
-
-        grad = grad[1:]
-        old_grad = np.zeros_like(grad)
-
-        for i in range(min(s.shape[0] - 1, self.bp_lim)):
-            dt = (grad[1:len(grad) - i] - old_grad[1:len(old_grad) - i]) * _gru_dsds(s[1:len(grad) - i], z[1:len(grad) - i], r[1:len(grad) - i], h[1:len(grad) - i], self.Wz.data, self.Wr.data, self.Wh.data)
-            old_grad = np.copy(grad)
-            grad[:len(grad) - (i + 1)] += dt
-
-            '''
-            dst = dst_dft[2:len(grad) - i] * (dLt_dst[2:len(grad) - i] - old_dst[2:len(grad) - i])  # ds_t+1 / df_t
-
-            old_dst = np.copy(dLt_dst)
-
-            dLt_dst[1:len(grad) - (i + 1)] += np.dot(dst, self.W.data.T)  # ds_t+1 / ds_t
-            '''
-
-        # dsdz is correct; can multiply at very end, so long as dsds/grad is correct
-        zgrad = grad * dsdz
-        #rgrad = grad * dsdr
-        #hgrad = grad * dsdh
-        old_zgrad = np.zeros_like(zgrad)
-        #old_rgrad = np.zeros_like(rgrad)
-        #old_hgrad = np.zeros_like(hgrad)
-
-
-        """
-        def backward(self, grad, seq_index=None):
-        if self.U.constant and self.W.constant and self._input_seq.constant:
-            return None
-
-        s = self._hidden_seq
-
-        dst_dft = (1 - s.data ** 2)
-        dLt_dst = grad * 1  # dLt / dst
-        dLt_dft = grad * dst_dft  # dLt / dst
-
-        old_dst = np.zeros_like(grad)
-        old_dft = np.zeros_like(grad)
-
-        for i in range(min(s.shape[0] - 1, self.bp_lim)):
-            dst = dst_dft[2:len(grad) - i] * (dLt_dst[2:len(grad) - i] - old_dst[2:len(grad) - i])  # ds_t+1 / df_t
-            dft = dLt_dft[2:len(grad) - i] - old_dft[2:len(grad) - i]
-
-            old_dst = np.copy(dLt_dst)
-            old_dft = np.copy(dLt_dft)
-
-            dLt_dst[1:len(grad) - (i + 1)] += np.dot(dst, self.W.data.T)  # ds_t+1 / ds_t
-            dLt_dft[1:len(grad) - (i + 1)] += dst_dft[1:len(grad) - (i + 1)] * np.dot(dft, self.W.data.T)
-
-
-        s.grad = dLt_dst
-        if not self.U.constant:
-            self.U.backward(np.einsum("ijk, ijl -> kl", self._input_seq.data, dLt_dft[1:]))
-        if not self.W.constant:
-            self.W.backward(np.einsum("ijk, ijl -> kl", s.data[:-1], dLt_dft[1:]))"""
-
-        self._hidden_seq.grad = grad
+        self._hidden_seq.grad = dLds
         self._z.grad = zgrad
-        #self._r.grad = rgrad
-        #self._h.grad = hgrad
+        self._r.grad = rgrad
+        self._h.grad = hgrad
 
         self.Uz.backward(np.einsum("ijk, ijl -> kl", self._input_seq, zgrad))
         self.Wz.backward(np.einsum("ijk, ijl -> kl", s, zgrad))
 
-        #self.Ur.backward(np.einsum("ijk, ijl -> kl", self._input_seq, rgrad))
-        #self.Wr.backward(np.einsum("ijk, ijl -> kl", s, rgrad))
+        self.Ur.backward(np.einsum("ijk, ijl -> kl", self._input_seq, rgrad))
+        self.Wr.backward(np.einsum("ijk, ijl -> kl", s, rgrad))
 
-        #self.Uh.backward(np.einsum("ijk, ijl -> kl", self._input_seq, hgrad))
-        #self.Wh.backward(np.einsum("ijk, ijl -> kl", (s * r), hgrad))
+        self.Uh.backward(np.einsum("ijk, ijl -> kl", self._input_seq, hgrad))
+        self.Wh.backward(np.einsum("ijk, ijl -> kl", (s * r), hgrad))
