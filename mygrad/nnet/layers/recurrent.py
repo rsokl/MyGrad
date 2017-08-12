@@ -272,13 +272,9 @@ class GRUnit(Operation):
             dt = dLds[len(dLds) - (i + 1)]
             dLds[len(dLds) - (i + 2)] += _gru_dsds(s[len(dLds) - (i + 1)], z[len(dLds) - (i + 1)], r[len(dLds) - (i + 1)], h[len(dLds) - (i + 1)], dt, self.Wz.data, self.Wr.data, self.Wh.data)
 
-
-        dsdz = -h + s
-        dsdh = 1 - z
-        dsdr = np.dot((1 - h ** 2) * (1 - z), self.Wh.data.T) * s
-        zgrad = dLds * dsdz
-        rgrad = dLds * dsdr
-        hgrad = dLds * dsdh
+        zgrad = dLds * (s - h)
+        hgrad = dLds * (1 - z)
+        rgrad = np.dot((1 - h ** 2) * hgrad, self.Wh.data.T) * s
 
         self._hidden_seq.grad = dLds
         self._z.grad = zgrad
