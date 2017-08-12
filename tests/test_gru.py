@@ -94,45 +94,65 @@ def test_gru(data, choice):
 
     stt = s2
     all_s = [s0.data]
+    all_z = []
+    all_r = []
+    all_h = []
     ls2 = 0
     for n, x in enumerate(X):
         z = sigmoid(dense(x, Uz2) + dense(stt, Wz2))
         r = sigmoid(dense(x, Ur2) + dense(stt, Wr2))
         h = tanh(dense(x, Uh2) + dense((r * stt), Wh2))
         stt = (1 - z) * h + z * stt
-        all_s.append(stt.data)
+        all_s.append(stt)
+        all_z.append(z)
+        all_r.append(r)
+        all_h.append(h)
         o = dense(stt, V2)
         ls2 += o.sum()
     ls2.backward()
 
-    all_s = np.stack(all_s)
-    z = np.stack(z.grad)
-    r = np.stack(r.grad)
-    h = np.stack(h.grad)
-    s = np.stack([i.data for i in s])
+    rec_s_dat = np.stack([i.data for i in all_s])
+    rec_s_grad = np.stack([i.grad for i in all_s[1:]])
 
-    assert np.allclose(all_s, s)
+    rec_z_dat = np.stack([i.data for i in all_z])
+    rec_z_grad = np.stack([i.grad for i in all_z])
+
+    rec_r_dat = np.stack([i.data for i in all_r])
+    rec_r_grad = np.stack([i.grad for i in all_r])
+
+    rec_h_dat = np.stack([i.data for i in all_h])
+    rec_h_grad = np.stack([i.grad for i in all_h])
+
+
     assert np.allclose(ls.data, ls2.data)
 
-    #assert np.allclose(gru._z.grad, z)
-    #assert np.allclose(gru._r.grad, r)
-    #assert np.allclose(gru._h.grad, h)
+    assert np.allclose(rec_s_dat, gru._hidden_seq.data)
+    assert np.allclose(rec_s_grad, gru._hidden_seq.grad)
+
+    assert np.allclose(rec_z_dat, gru._z.data)
+    assert np.allclose(rec_z_grad, gru._z.grad)
+
+    assert np.allclose(rec_r_dat, gru._r.data)
+    assert np.allclose(rec_r_grad, gru._r.grad)
+
+    assert np.allclose(rec_h_dat, gru._h.data)
+    assert np.allclose(rec_h_grad, gru._h.grad)
 
     assert np.allclose(Wz.data, Wz2.data)
     assert np.allclose(Wr.data, Wr2.data)
     assert np.allclose(Wh.data, Wh2.data)
 
-    assert np.allclose(Wz.grad, Wz2.grad)
-    assert np.allclose(Wr.grad, Wr2.grad)
-    assert np.allclose(Wh.grad, Wh2.grad)
+    #assert np.allclose(Wz.grad, Wz2.grad)
+    #assert np.allclose(Wr.grad, Wr2.grad)
+    #assert np.allclose(Wh.grad, Wh2.grad)
 
     assert np.allclose(Uz.data, Uz2.data)
     assert np.allclose(Ur.data, Ur2.data)
     assert np.allclose(Uh.data, Uh2.data)
 
-    # assert np.allclose(Uz.grad, Uz2.grad)
-    # assert np.allclose(Ur.grad, Ur2.grad)
-    # assert np.allclose(Uh.grad, Uh2.grad)
+    #assert np.allclose(Uz.grad, Uz2.grad)
+    #assert np.allclose(Ur.grad, Ur2.grad)
+    #assert np.allclose(Uh.grad, Uh2.grad)
 
     assert np.allclose(V.data, V2.data)
     assert np.allclose(V.grad, V2.grad)
