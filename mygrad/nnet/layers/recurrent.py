@@ -141,7 +141,7 @@ def simple_RNN(X, U, W, s0=None, bp_lim=None):
             The (non-zero) limit of the depth of back propagation through time to be
             performed. If `None` back propagation is passed back through the entire sequence.
 
-            E.g. `bp_lim=3` will propagate gradients back only up to 3 steps back through the
+            E.g. `bp_lim=3` will propagate gradients only up to 3 steps backward through the
             recursive sequence.
 
         Returns
