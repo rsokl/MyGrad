@@ -28,6 +28,10 @@ def test_gru(data, choice):
                              dtype=float,
                              elements=st.floats(-10.0, 10.0)))
 
+    bz = data.draw(hnp.arrays(shape=(D,),
+                             dtype=float,
+                             elements=st.floats(-10.0, 10.0)))
+
     Wr = data.draw(hnp.arrays(shape=(D, D),
                              dtype=float,
                              elements=st.floats(-10.0, 10.0)))
@@ -36,11 +40,19 @@ def test_gru(data, choice):
                              dtype=float,
                              elements=st.floats(-10.0, 10.0)))
 
+    br = data.draw(hnp.arrays(shape=(D,),
+                             dtype=float,
+                             elements=st.floats(-10.0, 10.0)))
+
     Wh = data.draw(hnp.arrays(shape=(D, D),
                              dtype=float,
                              elements=st.floats(-10.0, 10.0)))
 
     Uh = data.draw(hnp.arrays(shape=(C, D),
+                             dtype=float,
+                             elements=st.floats(-10.0, 10.0)))
+
+    bh = data.draw(hnp.arrays(shape=(D,),
                              dtype=float,
                              elements=st.floats(-10.0, 10.0)))
 
@@ -57,11 +69,17 @@ def test_gru(data, choice):
     Uz = Tensor(Uz)
     Uz2 = Uz.__copy__()
 
+    bz = Tensor(bz)
+    bz2 = bz.__copy__()
+
     Wr = Tensor(Wr)
     Wr2 = Wr.__copy__()
 
     Ur = Tensor(Ur)
     Ur2 = Ur.__copy__()
+
+    br = Tensor(br)
+    br2 = br.__copy__()
 
     Wh = Tensor(Wh)
     Wh2 = Wh.__copy__()
@@ -69,13 +87,16 @@ def test_gru(data, choice):
     Uh = Tensor(Uh)
     Uh2 = Uh.__copy__()
 
+    bh = Tensor(bh)
+    bh2 = bh.__copy__()
+
     V = Tensor(V)
     V2 = V.__copy__()
 
     s0 = Tensor(s0)
     s2 = s0.__copy__()
 
-    gru = GRUnit(Uz, Wz, Ur, Wr, Uh, Wh, V, T)
+    gru = GRUnit(Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, T)
     s = gru(X)
     o = dense(s[1:], V)
     ls = o.sum()
@@ -99,9 +120,9 @@ def test_gru(data, choice):
     all_h = []
     ls2 = 0
     for n, x in enumerate(X):
-        z = sigmoid(dense(x, Uz2) + dense(stt, Wz2))
-        r = sigmoid(dense(x, Ur2) + dense(stt, Wr2))
-        h = tanh(dense(x, Uh2) + dense((r * stt), Wh2))
+        z = sigmoid(dense(x, Uz2) + dense(stt, Wz2) + bz2)
+        r = sigmoid(dense(x, Ur2) + dense(stt, Wr2) + br2)
+        h = tanh(dense(x, Uh2) + dense((r * stt), Wh2) + bh2)
         stt = (1 - z) * h + z * stt
         all_s.append(stt)
         all_z.append(z)
@@ -142,17 +163,25 @@ def test_gru(data, choice):
     assert np.allclose(Wr.data, Wr2.data)
     assert np.allclose(Wh.data, Wh2.data)
 
-    #assert np.allclose(Wz.grad, Wz2.grad)
-    #assert np.allclose(Wr.grad, Wr2.grad)
-    #assert np.allclose(Wh.grad, Wh2.grad)
+    assert np.allclose(Wz.grad, Wz2.grad)
+    assert np.allclose(Wr.grad, Wr2.grad)
+    assert np.allclose(Wh.grad, Wh2.grad)
 
     assert np.allclose(Uz.data, Uz2.data)
     assert np.allclose(Ur.data, Ur2.data)
     assert np.allclose(Uh.data, Uh2.data)
 
-    #assert np.allclose(Uz.grad, Uz2.grad)
-    #assert np.allclose(Ur.grad, Ur2.grad)
-    #assert np.allclose(Uh.grad, Uh2.grad)
+    assert np.allclose(Uz.grad, Uz2.grad)
+    assert np.allclose(Ur.grad, Ur2.grad)
+    assert np.allclose(Uh.grad, Uh2.grad)
+
+    assert np.allclose(bz.data, bz2.data)
+    assert np.allclose(br.data, br2.data)
+    assert np.allclose(bh.data, bh2.data)
+
+    assert np.allclose(bz.grad, bz2.grad)
+    assert np.allclose(br.grad, br2.grad)
+    assert np.allclose(bh.grad, bh2.grad)
 
     assert np.allclose(V.data, V2.data)
     assert np.allclose(V.grad, V2.grad)

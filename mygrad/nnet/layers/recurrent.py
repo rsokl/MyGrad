@@ -173,15 +173,15 @@ def simple_RNN(X, U, W, s0=None, bp_lim=None, backprop_s=False):
 
 
 @njit
-def _gru_layer(s, z, r, h, Wz, Wr, Wh):
+def _gru_layer(s, z, r, h, Wz, Wr, Wh, bz, br, bh):
     for n in range(len(s) - 1):
-        z[n] += np.dot(s[n], Wz)
+        z[n] += np.dot(s[n], Wz) + bz
         z[n] = 1 / (1 + np.exp(-z[n]))
 
-        r[n] += np.dot(s[n], Wr)
+        r[n] += np.dot(s[n], Wr) + br
         r[n] = 1 / (1 + np.exp(-r[n]))
 
-        h[n] += np.dot(r[n] * s[n], Wh)
+        h[n] += np.dot(r[n] * s[n], Wh) + bh
         h[n] = np.tanh(h[n])
 
         s[n + 1] = (1 - z[n]) * h[n] + z[n] * s[n]
@@ -193,17 +193,18 @@ def _gru_dsds(s, z, r, h, dLds, Wz, Wr, Wh):
 
 
 class GRUnit(Operation):
-    def __init__(self, Uz, Wz, Ur, Wr, Uh, Wh, V, bp_lim):
+    def __init__(self, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, bp_lim):
         self.Uz = Uz
         self.Wz = Wz
+        self.bz = bz
 
         self.Ur = Ur
         self.Wr = Wr
+        self.br = br
 
         self.Uh = Uh
         self.Wh = Wh
-
-        self.V = V
+        self.bh = bh
 
         self.bp_lim = bp_lim
 
@@ -213,8 +214,6 @@ class GRUnit(Operation):
         self._z = []
         self._r = []
         self._h = []
-
-        self.bp_cnt = 0
 
 
     def __call__(self, seq, s0=None):
@@ -235,7 +234,7 @@ class GRUnit(Operation):
         np.dot(seq, self.Ur.data, out=r)
         np.dot(seq, self.Uh.data, out=h)
 
-        _gru_layer(out, z, r, h, self.Wz.data, self.Wr.data, self.Wh.data)
+        _gru_layer(out, z, r, h, self.Wz.data, self.Wr.data, self.Wh.data, self.bz.data, self.br.data, self.bh.data)
 
 
         if not self._hidden_seq:
@@ -286,11 +285,18 @@ class GRUnit(Operation):
         self._r.grad = rgrad
         self._h.grad = hgrad
 
-        self.Uz.backward(np.einsum("ijk, ijl -> kl", self._input_seq, zgrad * z * (1 - z)))
-        self.Wz.backward(np.einsum("ijk, ijl -> kl", s, zgrad * z * (1 - z)))
+        dz = zgrad * z * (1 - z)
+        dr = rgrad * r * (1 - r)
+        dh = hgrad * (1 - h ** 2)
 
-        self.Ur.backward(np.einsum("ijk, ijl -> kl", self._input_seq, rgrad * r * (1 - r)))
-        self.Wr.backward(np.einsum("ijk, ijl -> kl", s, rgrad * r * (1 - r)))
+        self.Uz.backward(np.einsum("ijk, ijl -> kl", self._input_seq, dz))
+        self.Wz.backward(np.einsum("ijk, ijl -> kl", s, dz))
+        self.bz.backward(np.sum(np.sum(dz, axis=0), axis=0))
 
-        self.Uh.backward(np.einsum("ijk, ijl -> kl", self._input_seq, hgrad * (1 - h ** 2)))
-        self.Wh.backward(np.einsum("ijk, ijl -> kl", (s * r), hgrad * (1 - h ** 2)))
+        self.Ur.backward(np.einsum("ijk, ijl -> kl", self._input_seq, dr))
+        self.Wr.backward(np.einsum("ijk, ijl -> kl", s, dr))
+        self.br.backward(np.sum(np.sum(dr, axis=0), axis=0))
+
+        self.Uh.backward(np.einsum("ijk, ijl -> kl", self._input_seq, dh))
+        self.Wh.backward(np.einsum("ijk, ijl -> kl", (s * r), dh))
+        self.bh.backward(np.sum(np.sum(dh, axis=0), axis=0))
