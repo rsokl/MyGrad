@@ -187,9 +187,23 @@ def _gru_layer(s, z, r, h, Wz, Wr, Wh, bz, br, bh):
         s[n + 1] = (1 - z[n]) * h[n] + z[n] * s[n]
 
 
-def _gru_dsds(s, z, r, h, dLds, Wz, Wr, Wh):
-    return z * dLds + np.dot((dLds * (s - h)) * z * (1 - z), Wz.T) + r * np.dot((1 - h ** 2) * (1 - z) * dLds, Wh.T) + \
-           np.dot(s * np.dot((1 - h ** 2) * (1 - z) * dLds, Wh.T) * r * (1 - r), Wr.T)
+def _gru_dLds(s, z, r, h, dLds, Wz, Wr, Wh):
+    """
+    Returns
+    --------
+        partial dL / ds(t+1) * ds(t+1) / ds(t) +
+        partial dL / ds(t+1) * ds(t+1) / dz(t) * dz(t) / ds(t) +
+        partial dL / ds(t+1) * ds(t+1) / dh(t) * dh(t) / ds(t) +
+        partial dL / ds(t+1) * ds(t+1) / dh(t) * dh(t) / dr(t) * dr(t) / ds(t)
+    """
+    dz = 1 - z # note: not actually ds(t+1) / dz(t)
+    dh = 1 - h ** 2
+    dLdh = np.dot(dLds * dh * dz, Wh.T)
+
+    return z * dLds + \
+           np.dot((dLds * (s - h)) * z * dz, Wz.T) + \
+           dLdh * r + \
+           np.dot(dLdh * s * r * (1 - r), Wr.T)
 
 
 class GRUnit(Operation):
@@ -217,7 +231,6 @@ class GRUnit(Operation):
 
 
     def __call__(self, seq, s0=None):
-        # fix W's and U's references
         self._input_seq = seq if self._input_seq is None else np.vstack((self._input_seq, seq))
 
         z = np.zeros((seq.shape[0], seq.shape[1], self.Uz.shape[-1]))
@@ -234,7 +247,9 @@ class GRUnit(Operation):
         np.dot(seq, self.Ur.data, out=r)
         np.dot(seq, self.Uh.data, out=h)
 
-        _gru_layer(out, z, r, h, self.Wz.data, self.Wr.data, self.Wh.data, self.bz.data, self.br.data, self.bh.data)
+        _gru_layer(out, z, r, h,
+                   self.Wz.data, self.Wr.data, self.Wh.data,
+                   self.bz.data, self.br.data, self.bh.data)
 
 
         if not self._hidden_seq:
@@ -273,12 +288,19 @@ class GRUnit(Operation):
         dLds = grad[1:]
 
         for i in range(min(s.shape[0] - 1, self.bp_lim)):
-            dt = dLds[len(dLds) - (i + 1)]
-            dLds[len(dLds) - (i + 2)] += _gru_dsds(s[len(dLds) - (i + 1)], z[len(dLds) - (i + 1)], r[len(dLds) - (i + 1)], h[len(dLds) - (i + 1)], dt, self.Wz.data, self.Wr.data, self.Wh.data)
+            #  dL(t) / ds(t) + dL(t+1) / ds(t)
+            dLds[len(dLds) - (i + 2)] += _gru_dLds(s[len(dLds) - (i + 1)],
+                                                   z[len(dLds) - (i + 1)],
+                                                   r[len(dLds) - (i + 1)],
+                                                   h[len(dLds) - (i + 1)],
+                                                   dLds[len(dLds) - (i + 1)],
+                                                   self.Wz.data,
+                                                   self.Wr.data,
+                                                   self.Wh.data)
 
-        zgrad = dLds * (s - h)
-        hgrad = dLds * (1 - z)
-        rgrad = np.dot((1 - h ** 2) * hgrad, self.Wh.data.T) * s
+        zgrad = dLds * (s - h) # dL / dz
+        hgrad = dLds * (1 - z) # dL / dh
+        rgrad = np.dot((1 - h ** 2) * hgrad, self.Wh.data.T) * s # dL / dr
 
         self._hidden_seq.grad = dLds
         self._z.grad = zgrad
