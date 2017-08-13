@@ -9,7 +9,7 @@ class Tensor:
         supports back-propagation of derivatives via the chain rule."""
     __array_priority__ = 15.0
 
-    def __init__(self, x, *, constant=False, _scalar_only=False, _creator=None, _seq_index=None):
+    def __init__(self, x, *, constant=False, _scalar_only=False, _creator=None):
         """ Parameters
             ----------
             x : array_like
@@ -44,9 +44,6 @@ class Tensor:
 
         # used for setitem
         self._ops = []  # Operation instances that utilized self an input tensor
-
-        # used for RNNs
-        self._seq_index = _seq_index
 
     @staticmethod
     def _check_valid_dtype(dtype):
@@ -134,7 +131,7 @@ class Tensor:
         self.grad = np.asarray(grad if self.grad is None else self.grad + grad)
 
         if self._creator is not None:
-            self._creator.backward(grad, seq_index=self._seq_index)
+            self._creator.backward(grad)
 
     def null_gradients(self):
         self.grad = None

@@ -1,7 +1,7 @@
 from mygrad.tensor_base import Tensor
 from mygrad.nnet.layers import simple_RNN, dense
 from mygrad.nnet.activations import tanh
-from mygrad.math import add_sequence
+
 
 import hypothesis.strategies as st
 from hypothesis import given
@@ -49,7 +49,7 @@ def test_recurrent(data, choice):
     s0 = Tensor(s0)
     s2 = s0.__copy__()
 
-    s = simple_RNN(X, U, W, backprop_s=True)
+    s = simple_RNN(X, U, W)
     o = dense(s[1:], V)
     ls = o.sum()
     ls.backward()
