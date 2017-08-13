@@ -138,13 +138,11 @@ def simple_RNN(X, U, W, s0=None, bp_lim=None):
             of zeros of shape (N, D) is created.
 
         bp_lim : Optional[int]
-            The (non-zero) limit of the number of back propagations through time are
-            performed
+            The (non-zero) limit of the depth of back propagation through time to be
+            performed. If `None` back propagation is passed back through the entire sequence.
 
-        backprop_s : bool, (default=False)
-            If False, backpropagation will not be carried through the hidden-descriptors of
-            this RNN. Backpropagation through X, U, and W will still occur, granted that
-            these are non-constant Tensors.
+            E.g. `bp_lim=3` will propagate gradients back only up to 3 steps back through the
+            recursive sequence.
 
         Returns
         -------
