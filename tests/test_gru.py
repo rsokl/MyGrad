@@ -1,7 +1,7 @@
 from mygrad.tensor_base import Tensor
-from mygrad.nnet.layers import dense, GRU
+from mygrad.nnet.layers import dense, gru
 from mygrad.nnet.activations import tanh, sigmoid
-from mygrad.math import add_sequence
+
 
 import hypothesis.strategies as st
 from hypothesis import given
@@ -98,21 +98,11 @@ def test_gru(data, choice):
     s0 = Tensor(s0)
     s2 = s0.__copy__()
 
-    s = GRU(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh)
+    s = gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh)
     o = dense(s[1:], V)
     ls = o.sum()
     ls.backward()
 
-    # rec = OldRecurrentUnit(U, W, V, T)
-    #
-    # if X.shape[0] > 1:
-    #     s = rec(X)
-    #     o = [dense(i, V).sum() for i in s]
-    #     ls = add_sequence(*o[1:])
-    # else:
-    #     s = rec(X)
-    #     ls = dense(s[1], V).sum()
-    # ls.backward()
 
     stt = s2
     all_s = [s0.data]
@@ -164,3 +154,7 @@ def test_gru(data, choice):
 
     assert np.allclose(X.data, X2.data)
     assert np.allclose(X.grad, X2.grad)
+
+    ls.null_gradients()
+    for x in [s, Wz, Wr, Wh, bz, br, bh, X, Uz, Ur, Uh, V]:
+        assert x.grad is None
