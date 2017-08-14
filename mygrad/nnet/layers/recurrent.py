@@ -197,9 +197,31 @@ def _gru_dLds(s, z, r, h, dLds, Wz, Wr, Wh):
            dLdh * r + \
            np.dot(dLdh * s * r * (1 - r), Wr.T)
 
+def _gru_dLdx(s, z, r, h, dLds, Uz, Ur, Uh):
+    """
+    Returns
+    --------
+        partial dL / ds(t+1) * ds(t+1) / dz(t) * dz(t) / ds(t) +
+        partial dL / ds(t+1) * ds(t+1) / dh(t) * dh(t) / ds(t) +
+        partial dL / ds(t+1) * ds(t+1) / dh(t) * dh(t) / dr(t) * dr(t) / ds(t)
+    """
+    dz = 1 - z # note: not actually derivative of sigmoid
+    dh = 1 - h ** 2
+    dLdh = np.dot(dLds * dh * dz, Uh.T)
+
+    return np.dot((dLds * (s - h)) * z * dz, Uz.T) + \
+           dLdh * r + \
+           np.dot(dLdh * s * r * (1 - r), Ur.T)
+
 
 class GRUnit(Operation):
-    def __init__(self, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, bp_lim):
+    def __call__(self, X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None):
+        if bp_lim is not None:
+            assert isinstance(bp_lim, Integral) and 0 < bp_lim <= len(X)
+        self.bp_lim = bp_lim if bp_lim is not None else len(X)
+
+        self.X = X
+
         self.Uz = Uz
         self.Wz = Wz
         self.bz = bz
@@ -212,27 +234,20 @@ class GRUnit(Operation):
         self.Wh = Wh
         self.bh = bh
 
-        self.bp_lim = bp_lim
-
-        self._input_seq = None
         self._hidden_seq = []
 
         self._z = []
         self._r = []
         self._h = []
 
-
-    def __call__(self, seq, s0=None):
-        self._input_seq = seq if self._input_seq is None else np.vstack((self._input_seq, seq))
+        seq = self.X.data
 
         z = np.zeros((seq.shape[0], seq.shape[1], self.Uz.shape[-1]))
         r = np.zeros((seq.shape[0], seq.shape[1], self.Ur.shape[-1]))
         h = np.zeros((seq.shape[0], seq.shape[1], self.Uh.shape[-1]))
         out = np.zeros((seq.shape[0] + 1, seq.shape[1], self.Uz.shape[-1]))
 
-        if self._hidden_seq:
-            out[0] = self._hidden_seq[-1].data
-        elif s0 is not None:
+        if s0 is not None:
             out[0] = s0.data if isinstance(s0, Tensor) else s0
 
         np.dot(seq, self.Uz.data, out=z)
@@ -244,34 +259,20 @@ class GRUnit(Operation):
                    self.bz.data, self.br.data, self.bh.data)
 
 
-        if not self._hidden_seq:
-            self._hidden_seq = Tensor(out, _creator=self)
-        else:
-            new_dat = np.vstack((self._hidden_seq.data, out[1:]))
-            self._hidden_seq = Tensor(new_dat, _creator=self)
-
-        if not self._z:
-            self._z = Tensor(z, _creator=self)
-        else:
-            new_dat = np.vstack((self._z.data, z[1:]))
-            self._z = Tensor(new_dat, _creator=self)
-
-        if not self._r:
-            self._r = Tensor(r, _creator=self)
-        else:
-            new_dat = np.vstack((self._r.data, r[1:]))
-            self._r = Tensor(new_dat, _creator=self)
-
-        if not self._h:
-            self._h = Tensor(h, _creator=self)
-        else:
-            new_dat = np.vstack((self._h.data, h[1:]))
-            self._h = Tensor(new_dat, _creator=self)
+        self._hidden_seq = Tensor(out, _creator=self)
+        self._z = Tensor(z, _creator=self)
+        self._r = Tensor(r, _creator=self)
+        self._h = Tensor(h, _creator=self)
 
         return self._hidden_seq
 
 
-    def backward(self, grad, seq_index=None):
+    def backward(self, grad):
+        if self.X.constant and self.Uz.constant and self.Wz.constant  and self.bz.constant \
+           and self.Ur.constant and self.Wr.constant and self.br.constant \
+           and self.Uh.constant and self.Wh.constant and self.bh.constant:
+            return None
+
         s = self._hidden_seq.data[:-1]
         z = self._z.data
         r = self._r.data
@@ -289,7 +290,7 @@ class GRUnit(Operation):
             dLt_dst[1:len(grad) - (i + 1)] += np.dot(dLn_ft1, self.W.data.T)  # dL_{t} / ds_{t} + ... + dL_{n} / ds_{t}
         """
 
-        for i in range(min(s.shape[0] - 1, self.bp_lim)):
+        for i in range(self.bp_lim):
             #  dL(t) / ds(t) + dL(t+1) / ds(t)
             dt = dLds[1:len(dLds) - i] - old_dLds[1:len(dLds) - i]
             old_dLds = np.copy(dLds)
@@ -315,14 +316,78 @@ class GRUnit(Operation):
         dr = rgrad * r * (1 - r)
         dh = hgrad * (1 - h ** 2)
 
-        self.Uz.backward(np.einsum("ijk, ijl -> kl", self._input_seq, dz))
+        self.Uz.backward(np.einsum("ijk, ijl -> kl", self.X.data, dz))
         self.Wz.backward(np.einsum("ijk, ijl -> kl", s, dz))
-        self.bz.backward(np.sum(np.sum(dz, axis=0), axis=0))
+        self.bz.backward(np.einsum("ijk -> k", dz))
 
-        self.Ur.backward(np.einsum("ijk, ijl -> kl", self._input_seq, dr))
+        self.Ur.backward(np.einsum("ijk, ijl -> kl", self.X.data, dr))
         self.Wr.backward(np.einsum("ijk, ijl -> kl", s, dr))
-        self.br.backward(np.sum(np.sum(dr, axis=0), axis=0))
+        self.br.backward(np.einsum("ijk -> k", dr))
 
-        self.Uh.backward(np.einsum("ijk, ijl -> kl", self._input_seq, dh))
+        self.Uh.backward(np.einsum("ijk, ijl -> kl", self.X.data, dh))
         self.Wh.backward(np.einsum("ijk, ijl -> kl", (s * r), dh))
-        self.bh.backward(np.sum(np.sum(dh, axis=0), axis=0))
+        self.bh.backward(np.einsum("ijk -> k", dh))
+
+        if not self.X.constant:
+            dz = 1 - z # note: not actually derivative of sigmoid
+            dh = 1 - h ** 2
+
+            self.X.backward(np.dot((dLds * (s - h)) * z * dz, self.Uz.data.T) + \
+                   np.dot(dLds * dh * dz, self.Uh.data.T) + \
+                   np.dot(np.dot(dLds * dh * dz, self.Wh.data.T) * s * r * (1 - r), self.Ur.data.T))
+
+
+        def null_gradients(self):
+            """ Back-propagates `None` to the gradients of the operation's input Tensors."""
+            for x in [self.X, self.Uz, self.Wz, self.Ur, self.Wr, self.Uh, self.Wh]:
+                x.null_gradients()
+
+
+def GRU(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None):
+    """ Performs a forward pass of sequential data through a Gated Recurrent Unit layer, returning
+        the 'hidden-descriptors' arrived at by utilizing the trainable parameters as follows:
+
+                            Z_{t} = sigmoid(Uz X_{t} + Wz S_{t-1} + bz)
+                            R_{t} = sigmoid(Ur X_{t} + Wr S_{t-1} + br)
+                            H_{t} = tanh(Uh X_{t} + Wh (R{t} * S_{t-1}) + bh)
+                            S_{t} = (1 - Z{t}) * H{t} + Z{t} * S_{t-1}
+
+        Parameters
+        ----------
+        X : mygrad.Tensor, shape=(T, N, C)
+           The sequential data to be passed forward.
+
+        Uz/Ur/Uh : mygrad.Tensor, shape=(D, C)
+           The weights used to map sequential data to its hidden-descriptor representation
+
+        Wz/Wr/Wh : mygrad.Tensor, shape=(D, D)
+            The weights used to map a hidden-descriptor to a hidden-descriptor.
+
+        bz/br/bh : mygrad.Tensor, shape=(D,)
+           The biases used to scale a hidden-descriptor.
+
+        s0 : Optional[mygrad.Tensor, numpy.ndarray], shape=(N, D)
+            The 'seed' hidden descriptors to feed into the RNN. If None, a Tensor
+            of zeros of shape (N, D) is created.
+
+        bp_lim : Optional[int]
+            The (non-zero) limit of the depth of back propagation through time to be
+            performed. If `None` back propagation is passed back through the entire sequence.
+
+            E.g. `bp_lim=3` will propagate gradients only up to 3 steps backward through the
+            recursive sequence.
+
+        Returns
+        -------
+        mygrad.Tensor
+            The sequence of 'hidden-descriptors' produced by the forward pass of the RNN.
+
+        Notes
+        -----
+        T : Sequence length
+        N : Batch size
+        C : Length of single datum
+        D : Length of 'hidden' descriptor"""
+    s = Tensor._op(GRUnit, X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, op_kwargs=dict(s0=s0, bp_lim=bp_lim))
+    s.creator._hidden_seq = s
+    return s

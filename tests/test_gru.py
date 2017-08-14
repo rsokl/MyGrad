@@ -1,6 +1,5 @@
 from mygrad.tensor_base import Tensor
-from mygrad.nnet.layers import dense
-from mygrad.nnet.layers.recurrent import GRUnit
+from mygrad.nnet.layers import dense, GRU
 from mygrad.nnet.activations import tanh, sigmoid
 from mygrad.math import add_sequence
 
@@ -63,6 +62,9 @@ def test_gru(data, choice):
 
     s0 = np.zeros((N, D), dtype=float)
 
+    X = Tensor(X)
+    X2 = X.__copy__()
+
     Wz = Tensor(Wz)
     Wz2 = Wz.__copy__()
 
@@ -96,8 +98,7 @@ def test_gru(data, choice):
     s0 = Tensor(s0)
     s2 = s0.__copy__()
 
-    gru = GRUnit(Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, T)
-    s = gru(X)
+    s = GRU(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh)
     o = dense(s[1:], V)
     ls = o.sum()
     ls.backward()
@@ -115,19 +116,13 @@ def test_gru(data, choice):
 
     stt = s2
     all_s = [s0.data]
-    all_z = []
-    all_r = []
-    all_h = []
     ls2 = 0
-    for n, x in enumerate(X):
+    for n, x in enumerate(X2):
         z = sigmoid(dense(x, Uz2) + dense(stt, Wz2) + bz2)
         r = sigmoid(dense(x, Ur2) + dense(stt, Wr2) + br2)
         h = tanh(dense(x, Uh2) + dense((r * stt), Wh2) + bh2)
         stt = (1 - z) * h + z * stt
         all_s.append(stt)
-        all_z.append(z)
-        all_r.append(r)
-        all_h.append(h)
         o = dense(stt, V2)
         ls2 += o.sum()
     ls2.backward()
@@ -135,29 +130,10 @@ def test_gru(data, choice):
     rec_s_dat = np.stack([i.data for i in all_s])
     rec_s_grad = np.stack([i.grad for i in all_s[1:]])
 
-    rec_z_dat = np.stack([i.data for i in all_z])
-    rec_z_grad = np.stack([i.grad for i in all_z])
-
-    rec_r_dat = np.stack([i.data for i in all_r])
-    rec_r_grad = np.stack([i.grad for i in all_r])
-
-    rec_h_dat = np.stack([i.data for i in all_h])
-    rec_h_grad = np.stack([i.grad for i in all_h])
-
-
     assert np.allclose(ls.data, ls2.data)
 
-    assert np.allclose(rec_s_dat, gru._hidden_seq.data)
-    assert np.allclose(rec_s_grad, gru._hidden_seq.grad)
-
-    assert np.allclose(rec_z_dat, gru._z.data)
-    assert np.allclose(rec_z_grad, gru._z.grad)
-
-    assert np.allclose(rec_r_dat, gru._r.data)
-    assert np.allclose(rec_r_grad, gru._r.grad)
-
-    assert np.allclose(rec_h_dat, gru._h.data)
-    assert np.allclose(rec_h_grad, gru._h.grad)
+    assert np.allclose(rec_s_dat, s.data)
+    assert np.allclose(rec_s_grad, s.grad)
 
     assert np.allclose(Wz.data, Wz2.data)
     assert np.allclose(Wr.data, Wr2.data)
@@ -185,3 +161,6 @@ def test_gru(data, choice):
 
     assert np.allclose(V.data, V2.data)
     assert np.allclose(V.grad, V2.grad)
+
+    assert np.allclose(X.data, X2.data)
+    assert np.allclose(X.grad, X2.grad)
