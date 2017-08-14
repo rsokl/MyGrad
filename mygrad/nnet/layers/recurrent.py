@@ -278,14 +278,26 @@ class GRUnit(Operation):
         h = self._h.data
 
         dLds = grad[1:]
+        old_dLds = np.zeros_like(dLds)
+
+        """
+        for i in range(self.bp_lim):
+            # dL_{n} / ds_{t+1} -> dL_{n} / df_{t+1}  | ( n > t )
+            index = slice(2, len(grad) - i)
+            dLn_ft1 = dst_dft[index] * (dLt_dst[index] - old_dst[index])
+            old_dst = np.copy(dLt_dst)
+            dLt_dst[1:len(grad) - (i + 1)] += np.dot(dLn_ft1, self.W.data.T)  # dL_{t} / ds_{t} + ... + dL_{n} / ds_{t}
+        """
 
         for i in range(min(s.shape[0] - 1, self.bp_lim)):
             #  dL(t) / ds(t) + dL(t+1) / ds(t)
-            dLds[len(dLds) - (i + 2)] += _gru_dLds(s[len(dLds) - (i + 1)],
-                                                   z[len(dLds) - (i + 1)],
-                                                   r[len(dLds) - (i + 1)],
-                                                   h[len(dLds) - (i + 1)],
-                                                   dLds[len(dLds) - (i + 1)],
+            dt = dLds[1:len(dLds) - i] - old_dLds[1:len(dLds) - i]
+            old_dLds = np.copy(dLds)
+            dLds[:len(dLds) - (i + 1)] += _gru_dLds(s[1:len(dLds) - i],
+                                                   z[1:len(dLds) - i],
+                                                   r[1:len(dLds) - i],
+                                                   h[1:len(dLds) - i],
+                                                   dt,
                                                    self.Wz.data,
                                                    self.Wr.data,
                                                    self.Wh.data)
