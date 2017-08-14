@@ -144,21 +144,35 @@ class GRUnit(Operation):
         self._r.grad = rgrad
         self._h.grad = hgrad
 
-        dz = zgrad * z * (1 - z)
-        dr = rgrad * r * (1 - r)
-        dh = hgrad * (1 - h ** 2)
+        if any(not const for const in (self.Uz.constant, self.Wz.constant, self.bz.constant)):
+            dz = zgrad * z * (1 - z)
 
-        self.Uz.backward(np.einsum("ijk, ijl -> kl", self.X.data, dz))
-        self.Wz.backward(np.einsum("ijk, ijl -> kl", s, dz))
-        self.bz.backward(dz.sum(axis=(0, 1)))
+        if not self.Uz.constant:
+            self.Uz.backward(np.einsum("ijk, ijl -> kl", self.X.data, dz))
+        if not self.Wz.constant:
+            self.Wz.backward(np.einsum("ijk, ijl -> kl", s, dz))
+        if not self.bz.constant:
+            self.bz.backward(dz.sum(axis=(0, 1)))
 
-        self.Ur.backward(np.einsum("ijk, ijl -> kl", self.X.data, dr))
-        self.Wr.backward(np.einsum("ijk, ijl -> kl", s, dr))
-        self.br.backward(dr.sum(axis=(0, 1)))
+        if any(not const for const in (self.Ur.constant, self.Wr.constant, self.br.constant)):
+            dr = rgrad * r * (1 - r)
 
-        self.Uh.backward(np.einsum("ijk, ijl -> kl", self.X.data, dh))
-        self.Wh.backward(np.einsum("ijk, ijl -> kl", (s * r), dh))
-        self.bh.backward(dh.sum(axis=(0, 1)))
+        if not self.Ur.constant:
+            self.Ur.backward(np.einsum("ijk, ijl -> kl", self.X.data, dr))
+        if not self.Wr.constant:
+            self.Wr.backward(np.einsum("ijk, ijl -> kl", s, dr))
+        if not self.br.constant:
+            self.br.backward(dr.sum(axis=(0, 1)))
+
+        if any(not const for const in (self.Uh.constant, self.Wh.constant, self.bh.constant)):
+            dh = hgrad * (1 - h ** 2)
+
+        if not self.Uh.constant:
+            self.Uh.backward(np.einsum("ijk, ijl -> kl", self.X.data, dh))
+        if not self.Wh.constant:
+            self.Wh.backward(np.einsum("ijk, ijl -> kl", (s * r), dh))
+        if not self.bh.constant:
+            self.bh.backward(dh.sum(axis=(0, 1)))
 
         if not self.X.constant:
             dz = 1 - z  # note: not actually derivative of sigmoid
