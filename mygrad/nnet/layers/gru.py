@@ -1,60 +1,107 @@
+#TODO: memory optimizations
+
 from ...operations.operation_base import Operation
 from ...tensor_base import Tensor
 from numbers import Integral
 import numpy as np
 
-from numba import njit
+from numba import jit, njit, vectorize, guvectorize
+
+
+@vectorize(['int32(int32)',
+            'int64(int64)',
+            'float32(float32)',
+            'float64(float64)'], nopython=True)
+def sig(f):
+    """
+    Calculates a sigmoid function
+    """
+    return 1 / (1 + np.exp(-f))
+
+
+@vectorize(['int32(int32)',
+            'int64(int64)',
+            'float32(float32)',
+            'float64(float64)'], nopython=True)
+def d_sig(f):
+    """
+    Calculates the derivative of a sigmoid function
+    """
+    return f * (1 - f)
+
+
+@vectorize(['int32(int32)',
+            'int64(int64)',
+            'float32(float32)',
+            'float64(float64)'], nopython=True)
+def d_tanh(f):
+    """
+    Calculates the derivative of a tanh function
+    """
+    return 1 - f ** 2
+
+#TODO: compare gufunc with njit when support for gufunc in njit is added (issue 2089)
+# (or if can figure out why numba throws error for custom gufunc in njit)
+'''@guvectorize(['(float32[:,:], float32[:,:], float32[:,:])',
+            '(float64[:,:], float64[:,:], float64[:,:])'],
+            '(n,d),(d,d)->(n,d)', nopython=True)'''
+@njit
+def dot(a, b):
+    """
+    Calculates the dot product between 2 arrays
+    of shapes (N,D) and (D,D), respectively
+    """
+    out = np.zeros_like(a)
+    for i in range(len(a)):
+        out[i] = np.dot(a[i], b)
+    return out
 
 
 @njit
 def _gru_layer(s, z, r, h, Wz, Wr, Wh, bz, br, bh):
     for n in range(len(s) - 1):
         z[n] += np.dot(s[n], Wz) + bz
-        z[n] = 1 / (1 + np.exp(-z[n]))
+        z[n] = sig(z[n])
 
         r[n] += np.dot(s[n], Wr) + br
-        r[n] = 1 / (1 + np.exp(-r[n]))
+        r[n] = sig(r[n])
 
         h[n] += np.dot(r[n] * s[n], Wh) + bh
         h[n] = np.tanh(h[n])
 
         s[n + 1] = (1 - z[n]) * h[n] + z[n] * s[n]
 
-
-def _gru_dLds(s, z, r, h, dLds, Wz, Wr, Wh):
+@njit
+def _gru_dLds(s, z, r, h, dLds, Wz, Wr, Wh, bp_lim):
+    #TODO: update doctring
     """
-    Returns
-    --------
+    Calculates
         partial dL / ds(t+1) * ds(t+1) / ds(t) +
         partial dL / ds(t+1) * ds(t+1) / dz(t) * dz(t) / ds(t) +
         partial dL / ds(t+1) * ds(t+1) / dh(t) * dh(t) / ds(t) +
         partial dL / ds(t+1) * ds(t+1) / dh(t) * dh(t) / dr(t) * dr(t) / ds(t)
+    for all t of dLds up to bp_lim
     """
-    dz = 1 - z  # note: not actually ds(t+1) / dz(t)
-    dh = 1 - h ** 2
-    dLdh = np.dot(dLds * dh * dz, Wh.T)
+    old_dLds = np.zeros_like(dLds)
 
-    return z * dLds + \
-           np.dot((dLds * (s - h)) * z * dz, Wz.T) + \
-           dLdh * r + \
-           np.dot(dLdh * s * r * (1 - r), Wr.T)
+    for i in range(bp_lim):
+        index = slice(1, len(dLds) - i)
+        dt = dLds[index] - old_dLds[index]
+        old_dLds = np.copy(dLds)
+        tmp_s = s[index]
+        tmp_z = z[index]
+        tmp_r = r[index]
+        tmp_h = h[index]
 
+        dh = d_tanh(tmp_h)
+        dLdh = dot(dt * dh * (1 - tmp_z), Wh.T)
 
-def _gru_dLdx(s, z, r, h, dLds, Uz, Ur, Uh):
-    """
-    Returns
-    --------
-        partial dL / ds(t+1) * ds(t+1) / dz(t) * dz(t) / ds(t) +
-        partial dL / ds(t+1) * ds(t+1) / dh(t) * dh(t) / ds(t) +
-        partial dL / ds(t+1) * ds(t+1) / dh(t) * dh(t) / dr(t) * dr(t) / ds(t)
-    """
-    dz = 1 - z  # note: not actually derivative of sigmoid
-    dh = 1 - h ** 2
-    dLdh = np.dot(dLds * dh * dz, Uh.T)
+        tmp = dt * tmp_z
+        tmp += dot(dt * (tmp_s - tmp_h) * d_sig(tmp_z), Wz.T)
+        tmp += dLdh * tmp_r
+        tmp += dot(dLdh * tmp_s * d_sig(tmp_r), Wr.T)
 
-    return np.dot((dLds * (s - h)) * z * dz, Uz.T) + \
-           dLdh * r + \
-           np.dot(dLdh * s * r * (1 - r), Ur.T)
+        dLds[:len(dLds) - (i + 1)] += tmp
 
 
 class GRUnit(Operation):
@@ -108,6 +155,7 @@ class GRUnit(Operation):
 
         return self._hidden_seq
 
+
     def backward(self, grad):
         if self.X.constant and self.Uz.constant and self.Wz.constant  and self.bz.constant \
            and self.Ur.constant and self.Wr.constant and self.br.constant \
@@ -120,24 +168,12 @@ class GRUnit(Operation):
         h = self._h.data
 
         dLds = grad[1:]
-        old_dLds = np.zeros_like(dLds)
 
-        for i in range(self.bp_lim):
-            #  dL(t) / ds(t) + dL(t+1) / ds(t)
-            dt = dLds[1:len(dLds) - i] - old_dLds[1:len(dLds) - i]
-            old_dLds = np.copy(dLds)
-            dLds[:len(dLds) - (i + 1)] += _gru_dLds(s[1:len(dLds) - i],
-                                                    z[1:len(dLds) - i],
-                                                    r[1:len(dLds) - i],
-                                                    h[1:len(dLds) - i],
-                                                    dt,
-                                                    self.Wz.data,
-                                                    self.Wr.data,
-                                                    self.Wh.data)
+        _gru_dLds(s, z, r, h, dLds, self.Wz.data, self.Wr.data, self.Wh.data, self.bp_lim)
 
         zgrad = dLds * (s - h)  # dL / dz
         hgrad = dLds * (1 - z)   # dL / dh
-        rgrad = np.dot((1 - h ** 2) * hgrad, self.Wh.data.T) * s  # dL / dr
+        rgrad = np.dot(hgrad * d_tanh(h), self.Wh.data.T) * s  # dL / dr
 
         self._hidden_seq.grad = dLds
         self._z.grad = zgrad
@@ -145,7 +181,7 @@ class GRUnit(Operation):
         self._h.grad = hgrad
 
         if any(not const for const in (self.Uz.constant, self.Wz.constant, self.bz.constant)):
-            dz = zgrad * z * (1 - z)
+            dz = zgrad * d_sig(z)
 
         if not self.Uz.constant:
             self.Uz.backward(np.einsum("ijk, ijl -> kl", self.X.data, dz))
@@ -155,7 +191,7 @@ class GRUnit(Operation):
             self.bz.backward(dz.sum(axis=(0, 1)))
 
         if any(not const for const in (self.Ur.constant, self.Wr.constant, self.br.constant)):
-            dr = rgrad * r * (1 - r)
+            dr = rgrad * d_sig(r)
 
         if not self.Ur.constant:
             self.Ur.backward(np.einsum("ijk, ijl -> kl", self.X.data, dr))
@@ -165,7 +201,7 @@ class GRUnit(Operation):
             self.br.backward(dr.sum(axis=(0, 1)))
 
         if any(not const for const in (self.Uh.constant, self.Wh.constant, self.bh.constant)):
-            dh = hgrad * (1 - h ** 2)
+            dh = hgrad * d_tanh(h)
 
         if not self.Uh.constant:
             self.Uh.backward(np.einsum("ijk, ijl -> kl", self.X.data, dh))
@@ -175,12 +211,11 @@ class GRUnit(Operation):
             self.bh.backward(dh.sum(axis=(0, 1)))
 
         if not self.X.constant:
-            dz = 1 - z  # note: not actually derivative of sigmoid
-            dh = 1 - h ** 2
-            tmp = dLds * dh * dz
-            dLdX = np.dot((dLds * (s - h)) * z * dz, self.Uz.data.T)
+            dh = d_tanh(h)
+            tmp = dLds * dh * (1 - z)
+            dLdX = np.dot((dLds * (s - h)) * d_sig(z), self.Uz.data.T)
             dLdX += np.dot(tmp, self.Uh.data.T)
-            dLdX += np.dot(np.dot(tmp, self.Wh.data.T) * s * r * (1 - r), self.Ur.data.T)
+            dLdX += np.dot(np.dot(tmp, self.Wh.data.T) * s * d_sig(r), self.Ur.data.T)
             self.X.backward(dLdX)
 
 
