@@ -7,10 +7,33 @@ from numba import njit
 
 
 @njit
+def dot(a, b):
+    """
+    Calculates the dot product between 2 arrays
+    of shapes (N,D) and (D,D), respectively
+    """
+    out = np.zeros_like(a)
+    for i in range(len(a)):
+        out[i] = np.dot(a[i], b)
+    return out
+
+
+@njit
 def _dot_tanh_accum(x, W):
     for n in range(len(x) - 1):
         x[n + 1] += np.dot(x[n], W)
         x[n + 1] = np.tanh(x[n + 1])
+
+
+@njit
+def _rnn_dLds(dst_dft, dLt_dst, W, bp_lim):
+    old_dst = np.zeros_like(dLt_dst)
+    for i in range(bp_lim):
+        # dL_{n} / ds_{t+1} -> dL_{n} / df_{t+1}  | ( n > t )
+        index = slice(2, len(dLt_dst) - i)
+        dLn_ft1 = dst_dft[index] * (dLt_dst[index] - old_dst[index])
+        old_dst = np.copy(dLt_dst)
+        dLt_dst[1:len(dLt_dst) - (i + 1)] += dot(dLn_ft1, W.T)  # dL_{t} / ds_{t} + ... + dL_{n} / ds_{t}
 
 
 class RecurrentUnit(Operation):
@@ -91,14 +114,8 @@ class RecurrentUnit(Operation):
 
         dst_dft = (1 - s.data ** 2)  # ds_{t} / d_f{t}
         dLt_dst = np.copy(grad)  # dL_{t} / ds_{t}
-        old_dst = np.zeros_like(grad)
 
-        for i in range(self.bp_lim):
-            # dL_{n} / ds_{t+1} -> dL_{n} / df_{t+1}  | ( n > t )
-            index = slice(2, len(grad) - i)
-            dLn_ft1 = dst_dft[index] * (dLt_dst[index] - old_dst[index])
-            old_dst = np.copy(dLt_dst)
-            dLt_dst[1:len(grad) - (i + 1)] += np.dot(dLn_ft1, self.W.data.T)  # dL_{t} / ds_{t} + ... + dL_{n} / ds_{t}
+        _rnn_dLds(dst_dft, dLt_dst, self.W.data, self.bp_lim)
 
         self._hidden_seq.grad = dLt_dst  # element t: dL_{t} / ds_{t} + ... + dL_{T_lim} / ds_{t}
 
@@ -159,4 +176,3 @@ def simple_RNN(X, U, W, s0=None, bp_lim=None):
     s = Tensor._op(RecurrentUnit, X, U, W, op_kwargs=dict(s0=s0, bp_lim=bp_lim))
     s.creator._hidden_seq = s
     return s
-

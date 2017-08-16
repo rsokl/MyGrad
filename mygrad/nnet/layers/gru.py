@@ -1,42 +1,60 @@
+#TODO: memory optimizations
+
 from ...operations.operation_base import Operation
 from ...tensor_base import Tensor
 from numbers import Integral
 import numpy as np
 
-from numba import jit, njit, vectorize, guvectorize, \
-                    float64, float32, int64, int32
+from numba import jit, njit, vectorize, guvectorize
 
 
-@vectorize([int32(int32),
-            int64(int64),
-            float32(float32),
-            float64(float64)], nopython=True)
-def sig(fun):
-    return 1 / (1 + np.exp(-fun))
+@vectorize(['int32(int32)',
+            'int64(int64)',
+            'float32(float32)',
+            'float64(float64)'], nopython=True)
+def sig(f):
+    """
+    Calculates a sigmoid function
+    """
+    return 1 / (1 + np.exp(-f))
 
 
-@vectorize([int32(int32),
-            int64(int64),
-            float32(float32),
-            float64(float64)], nopython=True)
-def d_sig(fun):
-    return fun * (1 - fun)
+@vectorize(['int32(int32)',
+            'int64(int64)',
+            'float32(float32)',
+            'float64(float64)'], nopython=True)
+def d_sig(f):
+    """
+    Calculates the derivative of a sigmoid function
+    """
+    return f * (1 - f)
 
 
-@vectorize([int32(int32),
-            int64(int64),
-            float32(float32),
-            float64(float64)], nopython=True)
-def d_tanh(fun):
-    return 1 - fun ** 2
+@vectorize(['int32(int32)',
+            'int64(int64)',
+            'float32(float32)',
+            'float64(float64)'], nopython=True)
+def d_tanh(f):
+    """
+    Calculates the derivative of a tanh function
+    """
+    return 1 - f ** 2
 
-
-@guvectorize([(float32[:,:,:], float32[:,:], float32[:,:,:]),
-            (float64[:,:,:], float64[:,:], float64[:,:,:])],
-            '(t,n,d),(d,d)->(t,n,d)', nopython=True)
-def dot_32(a, b, out):
+#TODO: compare gufunc with njit when support for gufunc in njit is added (issue 2089)
+# (or if can figure out why numba throws error for custom gufunc in njit)
+'''@guvectorize(['(float32[:,:], float32[:,:], float32[:,:])',
+            '(float64[:,:], float64[:,:], float64[:,:])'],
+            '(n,d),(d,d)->(n,d)', nopython=True)'''
+@njit
+def dot(a, b):
+    """
+    Calculates the dot product between 2 arrays
+    of shapes (N,D) and (D,D), respectively
+    """
+    out = np.zeros_like(a)
     for i in range(len(a)):
         out[i] = np.dot(a[i], b)
+    return out
 
 
 @njit
@@ -53,19 +71,20 @@ def _gru_layer(s, z, r, h, Wz, Wr, Wh, bz, br, bh):
 
         s[n + 1] = (1 - z[n]) * h[n] + z[n] * s[n]
 
-@jit
+@njit
 def _gru_dLds(s, z, r, h, dLds, Wz, Wr, Wh, bp_lim):
+    #TODO: update doctring
     """
-    Returns
-    --------
+    Calculates
         partial dL / ds(t+1) * ds(t+1) / ds(t) +
         partial dL / ds(t+1) * ds(t+1) / dz(t) * dz(t) / ds(t) +
         partial dL / ds(t+1) * ds(t+1) / dh(t) * dh(t) / ds(t) +
         partial dL / ds(t+1) * ds(t+1) / dh(t) * dh(t) / dr(t) * dr(t) / ds(t)
+    for all t of dLds up to bp_lim
     """
     old_dLds = np.zeros_like(dLds)
 
-    for i in range(bp_lim - 1):
+    for i in range(bp_lim):
         index = slice(1, len(dLds) - i)
         dt = dLds[index] - old_dLds[index]
         old_dLds = np.copy(dLds)
@@ -75,32 +94,14 @@ def _gru_dLds(s, z, r, h, dLds, Wz, Wr, Wh, bp_lim):
         tmp_h = h[index]
 
         dh = d_tanh(tmp_h)
-        dLdh = dot_32(dt * dh * (1 - tmp_z), Wh.T, np.zeros_like(dt))
+        dLdh = dot(dt * dh * (1 - tmp_z), Wh.T)
 
         tmp = dt * tmp_z
-        tmp += dot_32(dt * (tmp_s - tmp_h) * d_sig(tmp_z), Wz.T, np.zeros_like(dt))
+        tmp += dot(dt * (tmp_s - tmp_h) * d_sig(tmp_z), Wz.T)
         tmp += dLdh * tmp_r
-        tmp += dot_32(dLdh * tmp_s * d_sig(tmp_r), Wr.T, np.zeros_like(dt))
+        tmp += dot(dLdh * tmp_s * d_sig(tmp_r), Wr.T)
 
         dLds[:len(dLds) - (i + 1)] += tmp
-
-    index = slice(1, len(dLds) - (bp_lim - 1))
-    dt = dLds[index] - old_dLds[index]
-    old_dLds = np.copy(dLds)
-    tmp_s = s[index]
-    tmp_z = z[index]
-    tmp_r = r[index]
-    tmp_h = h[index]
-
-    dh = d_tanh(tmp_h)
-    dLdh = np.dot(dt * dh * (1 - tmp_z), Wh.T)
-
-    tmp = dt * tmp_z
-    tmp += np.dot(dt * (tmp_s - tmp_h) * d_sig(tmp_z), Wz.T)
-    tmp += dLdh * tmp_r
-    tmp += np.dot(dLdh * tmp_s * d_sig(tmp_r), Wr.T)
-
-    dLds[:len(dLds) - (bp_lim)] += tmp
 
 
 class GRUnit(Operation):
