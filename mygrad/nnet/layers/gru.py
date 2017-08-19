@@ -131,7 +131,7 @@ class GRUnit(Operation):
         h = self._h.data
 
         dLds = grad[1:]
-        if self.bp_lim < len(self.X):
+        if self.bp_lim < len(self.X) or True:
             old_dLds = np.zeros_like(dLds)
 
         const = {"1-z": 1 - z,
@@ -146,7 +146,7 @@ class GRUnit(Operation):
 
         for i in range(self.bp_lim):
             #  dL(t) / ds(t) + dL(t+1) / ds(t)
-            if self.bp_lim < len(self.X):
+            if self.bp_lim < len(self.X) or True:
                 source_index = slice(1, len(dLds) - i)
                 target_index = slice(None, len(dLds) - (i + 1))
                 dt = dLds[source_index] - old_dLds[source_index]
@@ -188,7 +188,7 @@ class GRUnit(Operation):
             self.bz.backward(dz.sum(axis=(0, 1)))
 
         if any(not const for const in (self.Ur.constant, self.Wr.constant, self.br.constant)):
-            dr = rgrad * r * const["r*(1 - r)"]
+            dr = rgrad * const["r*(1 - r)"]
 
         if not self.Ur.constant:
             self.Ur.backward(np.einsum("ijk, ijl -> kl", self.X.data, dr))
