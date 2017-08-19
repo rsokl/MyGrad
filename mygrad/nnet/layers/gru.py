@@ -40,23 +40,6 @@ def _gru_dLds(s, z, r, h, dLds, Wz, Wr, Wh):
            np.dot(dLdh * s * r * (1 - r), Wr.T)
 
 
-def _gru_dLdx(s, z, r, h, dLds, Uz, Ur, Uh):
-    """
-    Returns
-    --------
-        partial dL / ds(t+1) * ds(t+1) / dz(t) * dz(t) / ds(t) +
-        partial dL / ds(t+1) * ds(t+1) / dh(t) * dh(t) / ds(t) +
-        partial dL / ds(t+1) * ds(t+1) / dh(t) * dh(t) / dr(t) * dr(t) / ds(t)
-    """
-    dz = 1 - z  # note: not actually derivative of sigmoid
-    dh = 1 - h ** 2
-    dLdh = np.dot(dLds * dh * dz, Uh.T)
-
-    return np.dot((dLds * (s - h)) * z * dz, Uz.T) + \
-           dLdh * r + \
-           np.dot(dLdh * s * r * (1 - r), Ur.T)
-
-
 class GRUnit(Operation):
     def __call__(self, X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None):
         if bp_lim is not None:
