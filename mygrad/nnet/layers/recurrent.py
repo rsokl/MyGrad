@@ -56,8 +56,8 @@ class RecurrentUnit(Operation):
             mygrad.Tensor
                 The sequence of 'hidden-descriptors' produced by the forward pass of the RNN."""
         if bp_lim is not None:
-            assert isinstance(bp_lim, Integral) and 0 < bp_lim <= len(X)
-        self.bp_lim = bp_lim if bp_lim is not None else len(X)
+            assert isinstance(bp_lim, Integral) and 0 <= bp_lim < len(X)
+        self.bp_lim = bp_lim if bp_lim is not None else len(X) - 1
 
         self.X = X
         self.U = U
@@ -81,8 +81,9 @@ class RecurrentUnit(Operation):
     def backward(self, grad):
         """ Performs back propagation through time (with optional truncation), using the
             following notation:
-                s_t = tanh(f_t)
+
                 f_t = U x_{t-1} + W s_{t-1}
+                s_t = tanh(f_t)
         """
         if self.U.constant and self.W.constant and self.X.constant:
             return None
