@@ -42,10 +42,10 @@ class GRUnit(Operation):
 
     def __call__(self, X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None, dropout=0.):
         if bp_lim is not None:
-            assert isinstance(bp_lim, Integral) and 0 < bp_lim <= len(X)
+            assert isinstance(bp_lim, Integral) and 0 <= bp_lim < len(X)
         assert 0. <= dropout <= 1.
         self._dropout = dropout
-        self.bp_lim = bp_lim if bp_lim is not None else len(X)
+        self.bp_lim = bp_lim if bp_lim is not None else len(X) - 1
 
         self.X = X
 
@@ -83,9 +83,10 @@ class GRUnit(Operation):
                        self.Wz.data, self.Wr.data, self.Wh.data,
                        self.bz.data, self.br.data, self.bh.data)
         else:
-            self._dropz = np.random.binomial(1, dropout, size=z.shape) / dropout
-            self._dropr = np.random.binomial(1, dropout, size=r.shape) / dropout
-            self._droph = np.random.binomial(1, dropout, size=h.shape) / dropout
+            p = 1 - dropout
+            self._dropz = np.random.binomial(1, p, size=z.shape) / p
+            self._dropr = np.random.binomial(1, p, size=r.shape) / p
+            self._droph = np.random.binomial(1, p, size=h.shape) / p
 
             _gru_layer_dropout(out, z, r, h,
                                self.Wz.data, self.Wr.data, self.Wh.data,
@@ -131,7 +132,7 @@ class GRUnit(Operation):
         h = self._h.data
 
         dLds = grad[1:]
-        if self.bp_lim < len(self.X) or True:
+        if self.bp_lim < len(self.X) - 1:
             old_dLds = np.zeros_like(dLds)
 
         const = {"1-z": 1 - z,
@@ -146,7 +147,7 @@ class GRUnit(Operation):
 
         for i in range(self.bp_lim):
             #  dL(t) / ds(t) + dL(t+1) / ds(t)
-            if self.bp_lim < len(self.X) or True:
+            if self.bp_lim < len(self.X) - 1:
                 source_index = slice(1, len(dLds) - i)
                 target_index = slice(None, len(dLds) - (i + 1))
                 dt = dLds[source_index] - old_dLds[source_index]
@@ -222,7 +223,7 @@ class GRUnit(Operation):
             x.null_gradients()
 
 
-def gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None):
+def gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None, dropout=0.):
     """ Performs a forward pass of sequential data through a Gated Recurrent Unit layer, returning
         the 'hidden-descriptors' arrived at by utilizing the trainable parameters as follows:
 
@@ -256,6 +257,13 @@ def gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None):
             E.g. `bp_lim=3` will propagate gradients only up to 3 steps backward through the
             recursive sequence.
 
+        dropout : float (default=0.)
+            If non-zero, the expected proportion of layer outputs to be set to zero. Applied
+            to the layers Z, R, and H, - *not* S.
+
+            These layers are also scaled by 1 / dropout, such that the test-time forward pass
+            of the gru-layer can be executed without dropout, and with no additional scaling.
+
         Returns
         -------
         mygrad.Tensor
@@ -267,6 +275,6 @@ def gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None):
         N : Batch size
         C : Length of single datum
         D : Length of 'hidden' descriptor"""
-    s = Tensor._op(GRUnit, X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, op_kwargs=dict(s0=s0, bp_lim=bp_lim))
+    s = Tensor._op(GRUnit, X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, op_kwargs=dict(s0=s0, bp_lim=bp_lim, dropout=dropout))
     s.creator._hidden_seq = s
     return s

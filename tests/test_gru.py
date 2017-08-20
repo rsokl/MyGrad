@@ -16,6 +16,7 @@ def test_gru_fwd(data, choice):
                              elements=st.floats(-10, 10)))
     T, N, C = X.shape
     D = choice(list(range(1, 5)))
+    dropout = choice([0, .33])
 
 
     Wz = data.draw(hnp.arrays(shape=(D, D),
@@ -97,17 +98,27 @@ def test_gru_fwd(data, choice):
     s0 = Tensor(s0)
     s2 = s0.__copy__()
 
-    s = gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh)
+    s = gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, dropout=dropout)
     o = dense(s[1:], V)
     ls = o.sum()
+
+    if dropout:
+        for d in [s.creator._dropr, s.creator._dropz, s.creator._droph]:
+            assert np.all(np.logical_or(d == 1 / (1 - dropout), d == 0))
 
     stt = s2
     all_s = [s0.data]
     ls2 = 0
     for n, x in enumerate(X2):
         z = sigmoid(dense(x, Uz2) + dense(stt, Wz2) + bz2)
+        if dropout:
+            z *= s.creator._dropz[n]
         r = sigmoid(dense(x, Ur2) + dense(stt, Wr2) + br2)
+        if dropout:
+            r *= s.creator._dropr[n]
         h = tanh(dense(x, Uh2) + dense((r * stt), Wh2) + bh2)
+        if dropout:
+            h *= s.creator._droph[n]
         stt = (1 - z) * h + z * stt
         all_s.append(stt)
         o = dense(stt, V2)
@@ -147,7 +158,7 @@ def test_gru_backward(data, choice):
                              elements=st.floats(-10, 10)))
     T, N, C = X.shape
     D = choice(list(range(1, 5)))
-
+    dropout = 0#choice([0, .33])
 
     Wz = data.draw(hnp.arrays(shape=(D, D),
                              dtype=float,
@@ -228,7 +239,7 @@ def test_gru_backward(data, choice):
     s0 = Tensor(s0)
     s2 = s0.__copy__()
 
-    s = gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh)
+    s = gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, dropout=dropout)
     o = dense(s[1:], V)
     ls = o.sum()
     ls.backward()
@@ -239,8 +250,14 @@ def test_gru_backward(data, choice):
     ls2 = 0
     for n, x in enumerate(X2):
         z = sigmoid(dense(x, Uz2) + dense(stt, Wz2) + bz2)
+        if dropout:
+            z *= s.creator._dropz[n]
         r = sigmoid(dense(x, Ur2) + dense(stt, Wr2) + br2)
+        if dropout:
+            r *= s.creator._dropr[n]
         h = tanh(dense(x, Uh2) + dense((r * stt), Wh2) + bh2)
+        if dropout:
+            h *= s.creator._droph[n]
         stt = (1 - z) * h + z * stt
         all_s.append(stt)
         o = dense(stt, V2)
