@@ -92,14 +92,25 @@ class RecurrentUnit(Operation):
 
         dst_dft = (1 - s.data ** 2)  # ds_{t} / d_f{t}
         dLt_dst = np.copy(grad)  # dL_{t} / ds_{t}
-        old_dst = np.zeros_like(grad)
+
+        if self.bp_lim < len(self.X) - 1:
+            old_dst = np.zeros_like(grad)
 
         for i in range(self.bp_lim):
-            # dL_{n} / ds_{t+1} -> dL_{n} / df_{t+1}  | ( n > t )
-            index = slice(2, len(grad) - i)
-            dLn_ft1 = dst_dft[index] * (dLt_dst[index] - old_dst[index])
-            old_dst = np.copy(dLt_dst)
-            dLt_dst[1:len(grad) - (i + 1)] += np.dot(dLn_ft1, self.W.data.T)  # dL_{t} / ds_{t} + ... + dL_{n} / ds_{t}
+            if self.bp_lim < len(self.X) - 1:
+                source_index = slice(2, len(grad) - i)
+                target_index = slice(1, len(grad) - (i + 1))
+                
+                # dL_{n} / ds_{t+1} -> dL_{n} / df_{t+1}  | ( n > t )
+                dLn_ft1 = dst_dft[source_index] * (dLt_dst[source_index] - old_dst[source_index])
+                old_dst = np.copy(dLt_dst)
+
+            else:  # no backprop truncation
+                source_index = len(grad) - (i + 1)
+                target_index = len(grad) - (i + 2)
+                dLn_ft1 = dst_dft[source_index] * dLt_dst[source_index]
+
+            dLt_dst[target_index] += np.dot(dLn_ft1, self.W.data.T)  # dL_{t} / ds_{t} + ... + dL_{n} / ds_{t}
 
         self._hidden_seq.grad = dLt_dst  # element t: dL_{t} / ds_{t} + ... + dL_{T_lim} / ds_{t}
 
