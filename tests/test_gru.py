@@ -158,7 +158,7 @@ def test_gru_backward(data, choice):
                              elements=st.floats(-10, 10)))
     T, N, C = X.shape
     D = choice(list(range(1, 5)))
-    dropout = 0#choice([0, .33])
+    dropout = choice([0, .33])
 
     Wz = data.draw(hnp.arrays(shape=(D, D),
                              dtype=float,
@@ -285,5 +285,6 @@ def test_gru_backward(data, choice):
     assert np.allclose(X.grad, X2.grad)
 
     ls.null_gradients()
+    ls2.null_gradients()
     for x in [s, Wz, Wr, Wh, bz, br, bh, X, Uz, Ur, Uh, V]:
         assert x.grad is None

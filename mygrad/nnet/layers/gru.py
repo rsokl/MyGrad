@@ -25,17 +25,15 @@ def _gru_layer_dropout(s, z, r, h, Wz, Wr, Wh, bz, br, bh, dropz, dropr, droph):
     for n in range(len(s) - 1):
         z[n] += np.dot(s[n], Wz) + bz
         z[n] = (1 / (1 + np.exp(-z[n])))
-        z[n] *= dropz[n]
 
         r[n] += np.dot(s[n], Wr) + br
         r[n] = (1 / (1 + np.exp(-r[n])))
-        r[n] *= dropr[n]
 
-        h[n] += np.dot(r[n] * s[n], Wh) + bh
+        h[n] += np.dot(dropr[n] * r[n] * s[n], Wh) + bh
         h[n] = np.tanh(h[n])
-        h[n] *= droph[n]
 
-        s[n + 1] = (1 - z[n]) * h[n] + z[n] * s[n]
+        zd = dropz[n] * z[n]
+        s[n + 1] = (1 - zd) * droph[n] * h[n] + zd * s[n]
 
 
 class GRUnit(Operation):
@@ -43,7 +41,7 @@ class GRUnit(Operation):
     def __call__(self, X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None, dropout=0.):
         if bp_lim is not None:
             assert isinstance(bp_lim, Integral) and 0 <= bp_lim < len(X)
-        assert 0. <= dropout <= 1.
+        assert 0. <= dropout < 1.
         self._dropout = dropout
         self.bp_lim = bp_lim if bp_lim is not None else len(X) - 1
 
@@ -100,8 +98,13 @@ class GRUnit(Operation):
 
         return self._hidden_seq
 
-    def _gru_dLds(self, s, z, r, dLds, dz, dh, dr, s_h):
+    def _gru_dLds(self, s, z, r, dLds, dz, dh, dr, s_h, one_z):
         """
+                            Z_{t} = sigmoid(Uz X_{t} + Wz S_{t-1} + bz)
+                            R_{t} = sigmoid(Ur X_{t} + Wr S_{t-1} + br)
+                            H_{t} = tanh(Uh X_{t} + Wh (R{t} * S_{t-1}) + bh)
+                            S_{t} = (1 - Z{t}) * H{t} + Z{t} * S_{t-1}
+
         Returns
         --------
             partial dL / ds(t+1) * ds(t+1) / ds(t) +
@@ -110,10 +113,10 @@ class GRUnit(Operation):
             partial dL / ds(t+1) * ds(t+1) / dh(t) * dh(t) / dr(t) * dr(t) / ds(t)
         """
         Wz, Wr, Wh = self.Wz.data, self.Wr.data, self.Wh.data
+        dLdh = np.dot(dLds * one_z * dh, Wh.T)
 
-        dLdh = np.dot(dLds * dh * dz, Wh.T)
         out = z * dLds
-        out += np.dot(dLds * s_h * z * dz, Wz.T)
+        out += np.dot(dLds * s_h * dz, Wz.T)
         out += dLdh * r
         out += np.dot(dLdh * s * dr, Wr.T)
 
@@ -135,15 +138,20 @@ class GRUnit(Operation):
         if self.bp_lim < len(self.X) - 1:
             old_dLds = np.zeros_like(dLds)
 
-        const = {"1-z": 1 - z,
-                 "1-h**2": 1 - h**2,
-                 "s-h": s - h,
+        const = {"1 - h**2": 1 - h**2,
+                 "z*(1 - z)": z * (1 - z),
                  "r*(1 - r)": r * (1 - r)}
 
         if self._dropout:
-            const["1-h**2"] *= self._droph
+            const["1 - h**2"] *= self._droph
             const["r*(1 - r)"] *= self._dropr
-            const["s-h"] *= self._dropz
+            const["z*(1 - z)"] *= self._dropz
+            h *= self._droph
+            r *= self._dropr
+            z *= self._dropz
+
+        const["s - h"] = s - h
+        const["1 - z"] = 1 - z
 
         for i in range(self.bp_lim):
             #  dL(t) / ds(t) + dL(t+1) / ds(t)
@@ -161,14 +169,15 @@ class GRUnit(Operation):
                                                  z[source_index],
                                                  r[source_index],
                                                  dt,
-                                                 const["1-z"][source_index],
-                                                 const["1-h**2"][source_index],
+                                                 const["z*(1 - z)"][source_index],
+                                                 const["1 - h**2"][source_index],
                                                  const["r*(1 - r)"][source_index],
-                                                 const["s-h"][source_index])
+                                                 const["s - h"][source_index],
+                                                 const["1 - z"][source_index])
 
         zgrad = dLds * (s - h)   # dL / dz
-        hgrad = dLds * const["1-z"]   # dL / dh
-        rgrad = np.dot(const["1-h**2"] * hgrad, self.Wh.data.T) * s  # dL / dr
+        hgrad = dLds * const["1 - z"]   # dL / dh
+        rgrad = np.dot(const["1 - h**2"] * hgrad, self.Wh.data.T) * s  # dL / dr
 
         self._hidden_seq.grad = dLds
         self._z.grad = zgrad
@@ -176,10 +185,7 @@ class GRUnit(Operation):
         self._h.grad = hgrad
 
         if any(not const for const in (self.Uz.constant, self.Wz.constant, self.bz.constant)):
-            dz = zgrad * z * const["1-z"]
-
-            if self._dropout:
-                dz *= self._dropz
+            dz = zgrad * const["z*(1 - z)"]
 
         if not self.Uz.constant:
             self.Uz.backward(np.einsum("ijk, ijl -> kl", self.X.data, dz))
@@ -199,7 +205,7 @@ class GRUnit(Operation):
             self.br.backward(dr.sum(axis=(0, 1)))
 
         if any(not const for const in (self.Uh.constant, self.Wh.constant, self.bh.constant)):
-            dh = hgrad * const["1-h**2"]
+            dh = hgrad * const["1 - h**2"]
 
         if not self.Uh.constant:
             self.Uh.backward(np.einsum("ijk, ijl -> kl", self.X.data, dh))
@@ -209,9 +215,9 @@ class GRUnit(Operation):
             self.bh.backward(dh.sum(axis=(0, 1)))
 
         if not self.X.constant:
-            tmp = dLds * const["1-h**2"] * const["1-z"]
+            tmp = dLds * const["1 - z"] * const["1 - h**2"]
 
-            dLdX = np.dot((dLds * const["s-h"]) * z * const["1-z"], self.Uz.data.T)
+            dLdX = np.dot((dLds * const["s - h"]) * const["z*(1 - z)"], self.Uz.data.T)
             dLdX += np.dot(tmp, self.Uh.data.T)
             dLdX += np.dot(np.dot(tmp, self.Wh.data.T) * s * const["r*(1 - r)"], self.Ur.data.T)
 
@@ -227,10 +233,10 @@ def gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None, dropout=0.)
     """ Performs a forward pass of sequential data through a Gated Recurrent Unit layer, returning
         the 'hidden-descriptors' arrived at by utilizing the trainable parameters as follows:
 
-                            Z_{t} = sigmoid(Uz X_{t} + Wz S_{t-1} + bz)
-                            R_{t} = sigmoid(Ur X_{t} + Wr S_{t-1} + br)
-                            H_{t} = tanh(Uh X_{t} + Wh (R{t} * S_{t-1}) + bh)
-                            S_{t} = (1 - Z{t}) * H{t} + Z{t} * S_{t-1}
+                    Z_{t} = drop_z * sigmoid(Uz X_{t} + Wz S_{t-1} + bz)
+                    R_{t} = drop_r * sigmoid(Ur X_{t} + Wr S_{t-1} + br)
+                    H_{t} = drop_h * tanh(Uh X_{t} + Wh (R{t} * S_{t-1}) + bh)
+                    S_{t} = (1 - Z{t}) * H{t} + Z{t} * S_{t-1}
 
         Parameters
         ----------
@@ -257,12 +263,13 @@ def gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None, dropout=0.)
             E.g. `bp_lim=3` will propagate gradients only up to 3 steps backward through the
             recursive sequence.
 
-        dropout : float (default=0.)
-            If non-zero, the expected proportion of layer outputs to be set to zero. Applied
+        dropout : float (default=0.), 0 <= dropout < 1
+            If non-zero, the expected proportion of a layer's outputs to be set to zero. Applied
             to the layers Z, R, and H, - *not* S.
 
             These layers are also scaled by 1 / dropout, such that the test-time forward pass
             of the gru-layer can be executed without dropout, and with no additional scaling.
+            (only if `dropout` is non-zero)
 
         Returns
         -------
