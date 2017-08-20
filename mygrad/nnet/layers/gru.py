@@ -188,9 +188,9 @@ class GRUnit(Operation):
             dz = zgrad * const["z*(1 - z)"]
 
         if not self.Uz.constant:
-            self.Uz.backward(np.einsum("ijk, ijl -> kl", self.X.data, dz))
+            self.Uz.backward(np.tensordot(self.X.data, dz, ([0, 1], [0, 1])))
         if not self.Wz.constant:
-            self.Wz.backward(np.einsum("ijk, ijl -> kl", s, dz))
+            self.Wz.backward(np.tensordot(s, dz, ([0, 1], [0, 1])))
         if not self.bz.constant:
             self.bz.backward(dz.sum(axis=(0, 1)))
 
@@ -198,9 +198,9 @@ class GRUnit(Operation):
             dr = rgrad * const["r*(1 - r)"]
 
         if not self.Ur.constant:
-            self.Ur.backward(np.einsum("ijk, ijl -> kl", self.X.data, dr))
+            self.Ur.backward(np.tensordot(self.X.data, dr, ([0, 1], [0, 1])))
         if not self.Wr.constant:
-            self.Wr.backward(np.einsum("ijk, ijl -> kl", s, dr))
+            self.Wr.backward(np.tensordot(s, dr, ([0, 1], [0, 1])))
         if not self.br.constant:
             self.br.backward(dr.sum(axis=(0, 1)))
 
@@ -208,9 +208,9 @@ class GRUnit(Operation):
             dh = hgrad * const["1 - h**2"]
 
         if not self.Uh.constant:
-            self.Uh.backward(np.einsum("ijk, ijl -> kl", self.X.data, dh))
+            self.Uh.backward(np.tensordot(self.X.data, dh, ([0, 1], [0, 1])))
         if not self.Wh.constant:
-            self.Wh.backward(np.einsum("ijk, ijl -> kl", (s * r), dh))
+            self.Wh.backward(np.tensordot((s * r), dh, ([0, 1], [0, 1])))
         if not self.bh.constant:
             self.bh.backward(dh.sum(axis=(0, 1)))
 

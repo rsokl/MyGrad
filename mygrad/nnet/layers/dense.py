@@ -28,7 +28,7 @@ class Dense(Operation):
         else:
             # a: (T, N, C)
             # grad: (T, N, D)
-            self.b.backward(np.einsum("ijk,ijl -> kl", self.a.data, grad))
+            self.b.backward(np.tensordot(self.a.data, grad, ((0, 1), (0, 1))))
 
 
 def dense(x, w):
