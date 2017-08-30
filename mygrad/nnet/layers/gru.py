@@ -110,7 +110,7 @@ def _gru_dLds(s, z, r, dLds, Wz, Wh, Wr, dz, dh, dr, s_h, one_z):
 
 
 @njit
-def _gru_tbptt(X, dLds, s, z, r, Wz, Wh, Wr, dz, dh, dr, s_h, one_z, bp_lim, old_dLds=None):
+def _gru_bptt(X, dLds, s, z, r, Wz, Wh, Wr, dz, dh, dr, s_h, one_z, bp_lim, old_dLds=None):
     Wz, Wh, Wr = Wz.T, Wh.T, Wr.T
     bptt = bp_lim < len(X) - 1
     if bptt:
@@ -234,7 +234,7 @@ class GRUnit(Operation):
         s_h = s - h
         one_z = 1 - z
 
-        _gru_tbptt(self.X.data, dLds, s, z, r,
+        _gru_bptt(self.X.data, dLds, s, z, r,
                    self.Wz.data,
                    self.Wh.data,
                    self.Wr.data,
