@@ -5,7 +5,7 @@ from ...tensor_base import Tensor
 from numbers import Integral
 import numpy as np
 
-from numba import jit, njit, vectorize, guvectorize
+from numba import njit, vectorize
 
 
 @vectorize(['int32(int32)',
@@ -40,18 +40,14 @@ def d_tanh(f):
     """
     return 1 - f ** 2
 
-#TODO: compare gufunc with njit when support for gufunc in njit is added (issue 2089)
-# (or if can figure out why numba throws error for custom gufunc in njit)
-'''@guvectorize(['(float32[:,:], float32[:,:], float32[:,:])',
-            '(float64[:,:], float64[:,:], float64[:,:])'],
-            '(n,d),(d,d)->(n,d)', nopython=True)'''
+
 @njit
 def dot(a, b):
     """
     Calculates the dot product between 2 arrays
-    of shapes (N,D) and (D,D), respectively
+    of shapes (W,X,Y) and (Y,Z), respectively
     """
-    out = np.zeros_like(a)
+    out = np.zeros((a.shape[0], a.shape[1], b.shape[-1]))
     for i in range(len(a)):
         out[i] = np.dot(a[i], b)
     return out
@@ -71,44 +67,89 @@ def _gru_layer(s, z, r, h, Wz, Wr, Wh, bz, br, bh):
 
         s[n + 1] = (1 - z[n]) * h[n] + z[n] * s[n]
 
+
 @njit
-def _gru_dLds(s, z, r, h, dLds, Wz, Wr, Wh, bp_lim):
-    #TODO: update doctring
+def _gru_layer_dropout(s, z, r, h, Wz, Wr, Wh, bz, br, bh, dropz, dropr, droph):
+    for n in range(len(s) - 1):
+        z[n] += np.dot(s[n], Wz) + bz
+        z[n] = (1 / (1 + np.exp(-z[n])))
+
+        r[n] += np.dot(s[n], Wr) + br
+        r[n] = (1 / (1 + np.exp(-r[n])))
+
+        h[n] += np.dot(dropr[n] * r[n] * s[n], Wh) + bh
+        h[n] = np.tanh(h[n])
+
+        zd = dropz[n] * z[n]
+        s[n + 1] = (1 - zd) * droph[n] * h[n] + zd * s[n]
+
+
+@njit
+def _gru_dLds(s, z, r, dLds, Wz, Wh, Wr, dz, dh, dr, s_h, one_z):
     """
-    Calculates
+                        Z_{t} = sigmoid(Uz X_{t} + Wz S_{t-1} + bz)
+                        R_{t} = sigmoid(Ur X_{t} + Wr S_{t-1} + br)
+                        H_{t} = tanh(Uh X_{t} + Wh (R{t} * S_{t-1}) + bh)
+                        S_{t} = (1 - Z{t}) * H{t} + Z{t} * S_{t-1}
+
+    Returns
+    --------
         partial dL / ds(t+1) * ds(t+1) / ds(t) +
         partial dL / ds(t+1) * ds(t+1) / dz(t) * dz(t) / ds(t) +
         partial dL / ds(t+1) * ds(t+1) / dh(t) * dh(t) / ds(t) +
         partial dL / ds(t+1) * ds(t+1) / dh(t) * dh(t) / dr(t) * dr(t) / ds(t)
-    for all t of dLds up to bp_lim
     """
-    old_dLds = np.zeros_like(dLds)
+    dLdh = dot(dLds * one_z * dh, Wh)
+
+    out = z * dLds
+    out += dot(dLds * s_h * dz, Wz)
+    out += dLdh * r
+    out += dot(dLdh * s * dr, Wr)
+
+    return out
+
+
+@njit
+def _gru_tbptt(X, dLds, s, z, r, Wz, Wh, Wr, dz, dh, dr, s_h, one_z, bp_lim, old_dLds=None):
+    Wz, Wh, Wr = Wz.T, Wh.T, Wr.T
+    bptt = bp_lim < len(X) - 1
+    if bptt:
+        old_dLds = np.zeros_like(dLds)
 
     for i in range(bp_lim):
-        index = slice(1, len(dLds) - i)
-        dt = dLds[index] - old_dLds[index]
-        old_dLds = np.copy(dLds)
-        tmp_s = s[index]
-        tmp_z = z[index]
-        tmp_r = r[index]
-        tmp_h = h[index]
+        #  dL(t) / ds(t) + dL(t+1) / ds(t)
+        if bptt:
+            source_index = slice(1, len(dLds) - i)
+            target_index = slice(None, len(dLds) - (i + 1))
+            dt = dLds[source_index] - old_dLds[source_index]
+            old_dLds = np.copy(dLds)
+        else:  # no backprop truncation
+            source_index = slice(len(dLds) - (i + 1), len(dLds) - i)
+            target_index = slice(len(dLds) - (i + 2), len(dLds) - (i + 1))
+            dt = dLds[source_index]
 
-        dh = d_tanh(tmp_h)
-        dLdh = dot(dt * dh * (1 - tmp_z), Wh.T)
-
-        tmp = dt * tmp_z
-        tmp += dot(dt * (tmp_s - tmp_h) * d_sig(tmp_z), Wz.T)
-        tmp += dLdh * tmp_r
-        tmp += dot(dLdh * tmp_s * d_sig(tmp_r), Wr.T)
-
-        dLds[:len(dLds) - (i + 1)] += tmp
+        dLds[target_index] += _gru_dLds(s[source_index],
+                                        z[source_index],
+                                        r[source_index],
+                                        dt,
+                                        Wz,
+                                        Wh,
+                                        Wr,
+                                        dz[source_index],
+                                        dh[source_index],
+                                        dr[source_index],
+                                        s_h[source_index],
+                                        one_z[source_index])
 
 
 class GRUnit(Operation):
-    def __call__(self, X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None):
+
+    def __call__(self, X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None, dropout=0.):
         if bp_lim is not None:
-            assert isinstance(bp_lim, Integral) and 0 < bp_lim <= len(X)
-        self.bp_lim = bp_lim if bp_lim is not None else len(X)
+            assert isinstance(bp_lim, Integral) and 0 <= bp_lim < len(X)
+        assert 0. <= dropout < 1.
+        self._dropout = dropout
+        self.bp_lim = bp_lim if bp_lim is not None else len(X) - 1
 
         self.X = X
 
@@ -124,12 +165,6 @@ class GRUnit(Operation):
         self.Wh = Wh
         self.bh = bh
 
-        self._hidden_seq = []
-
-        self._z = []
-        self._r = []
-        self._h = []
-
         seq = self.X.data
 
         z = np.zeros((seq.shape[0], seq.shape[1], self.Uz.shape[-1]))
@@ -140,13 +175,27 @@ class GRUnit(Operation):
         if s0 is not None:
             out[0] = s0.data if isinstance(s0, Tensor) else s0
 
-        np.dot(seq, self.Uz.data, out=z)
-        np.dot(seq, self.Ur.data, out=r)
-        np.dot(seq, self.Uh.data, out=h)
+        z = dot(seq, self.Uz.data)
+        r = dot(seq, self.Ur.data)
+        h = dot(seq, self.Uh.data)
 
-        _gru_layer(out, z, r, h,
-                   self.Wz.data, self.Wr.data, self.Wh.data,
-                   self.bz.data, self.br.data, self.bh.data)
+        if not dropout:
+            self._dropz = None
+            self._dropr = None
+            self._droph = None
+            _gru_layer(out, z, r, h,
+                       self.Wz.data, self.Wr.data, self.Wh.data,
+                       self.bz.data, self.br.data, self.bh.data)
+        else:
+            p = 1 - dropout
+            self._dropz = np.random.binomial(1, p, size=z.shape) / p
+            self._dropr = np.random.binomial(1, p, size=r.shape) / p
+            self._droph = np.random.binomial(1, p, size=h.shape) / p
+
+            _gru_layer_dropout(out, z, r, h,
+                               self.Wz.data, self.Wr.data, self.Wh.data,
+                               self.bz.data, self.br.data, self.bh.data,
+                               self._dropz, self._dropr, self._droph)
 
         self._hidden_seq = Tensor(out, _creator=self)
         self._z = Tensor(z, _creator=self)
@@ -157,9 +206,10 @@ class GRUnit(Operation):
 
 
     def backward(self, grad):
-        if self.X.constant and self.Uz.constant and self.Wz.constant  and self.bz.constant \
-           and self.Ur.constant and self.Wr.constant and self.br.constant \
-           and self.Uh.constant and self.Wh.constant and self.bh.constant:
+        if all(i.constant for i in [self.X,
+                                    self.Uz, self.Wz, self.bz,
+                                    self.Ur, self.Wr, self.br,
+                                    self.Uh, self.Wh, self.bh]):
             return None
 
         s = self._hidden_seq.data[:-1]
@@ -169,11 +219,35 @@ class GRUnit(Operation):
 
         dLds = grad[1:]
 
-        _gru_dLds(s, z, r, h, dLds, self.Wz.data, self.Wr.data, self.Wh.data, self.bp_lim)
+        pdh = d_tanh(h)
+        pdz = d_sig(z)
+        pdr = d_sig(r)
 
-        zgrad = dLds * (s - h)  # dL / dz
-        hgrad = dLds * (1 - z)   # dL / dh
-        rgrad = np.dot(hgrad * d_tanh(h), self.Wh.data.T) * s  # dL / dr
+        if self._dropout:
+            pdh *= self._droph
+            pdr *= self._dropr
+            pdz *= self._dropz
+            h *= self._droph
+            r *= self._dropr
+            z *= self._dropz
+
+        s_h = s - h
+        one_z = 1 - z
+
+        _gru_tbptt(self.X.data, dLds, s, z, r,
+                   self.Wz.data,
+                   self.Wh.data,
+                   self.Wr.data,
+                   pdz,
+                   pdh,
+                   pdr,
+                   s_h,
+                   one_z,
+                   self.bp_lim)
+
+        zgrad = dLds * s_h   # dL / dz
+        hgrad = dLds * one_z   # dL / dh
+        rgrad = dot(pdh * hgrad, self.Wh.data.T) * s  # dL / dr
 
         self._hidden_seq.grad = dLds
         self._z.grad = zgrad
@@ -181,43 +255,52 @@ class GRUnit(Operation):
         self._h.grad = hgrad
 
         if any(not const for const in (self.Uz.constant, self.Wz.constant, self.bz.constant)):
-            dz = zgrad * d_sig(z)
+            dz = zgrad * pdz
 
         if not self.Uz.constant:
-            self.Uz.backward(np.einsum("ijk, ijl -> kl", self.X.data, dz))
+            self.Uz.backward(np.tensordot(self.X.data, dz, ([0, 1], [0, 1])))
         if not self.Wz.constant:
-            self.Wz.backward(np.einsum("ijk, ijl -> kl", s, dz))
+            self.Wz.backward(np.tensordot(s, dz, ([0, 1], [0, 1])))
         if not self.bz.constant:
             self.bz.backward(dz.sum(axis=(0, 1)))
+        del dz
 
         if any(not const for const in (self.Ur.constant, self.Wr.constant, self.br.constant)):
-            dr = rgrad * d_sig(r)
+            dr = rgrad * pdr
 
         if not self.Ur.constant:
-            self.Ur.backward(np.einsum("ijk, ijl -> kl", self.X.data, dr))
+            self.Ur.backward(np.tensordot(self.X.data, dr, ([0, 1], [0, 1])))
         if not self.Wr.constant:
-            self.Wr.backward(np.einsum("ijk, ijl -> kl", s, dr))
+            self.Wr.backward(np.tensordot(s, dr, ([0, 1], [0, 1])))
         if not self.br.constant:
             self.br.backward(dr.sum(axis=(0, 1)))
+        del dr
 
         if any(not const for const in (self.Uh.constant, self.Wh.constant, self.bh.constant)):
-            dh = hgrad * d_tanh(h)
+            dh = hgrad * pdh
 
         if not self.Uh.constant:
-            self.Uh.backward(np.einsum("ijk, ijl -> kl", self.X.data, dh))
+            self.Uh.backward(np.tensordot(self.X.data, dh, ([0, 1], [0, 1])))
         if not self.Wh.constant:
-            self.Wh.backward(np.einsum("ijk, ijl -> kl", (s * r), dh))
+            self.Wh.backward(np.tensordot((s * r), dh, ([0, 1], [0, 1])))
         if not self.bh.constant:
             self.bh.backward(dh.sum(axis=(0, 1)))
+        del dh
 
         if not self.X.constant:
-            dh = d_tanh(h)
-            tmp = dLds * dh * (1 - z)
-            dLdX = np.dot((dLds * (s - h)) * d_sig(z), self.Uz.data.T)
-            dLdX += np.dot(tmp, self.Uh.data.T)
-            dLdX += np.dot(np.dot(tmp, self.Wh.data.T) * s * d_sig(r), self.Ur.data.T)
-            self.X.backward(dLdX)
+            tmp = dLds * one_z * pdh
 
+            dLdX = dot((dLds * s_h) * pdz, self.Uz.data.T)
+            dLdX += dot(tmp, self.Uh.data.T)
+            dLdX += dot(dot(tmp, self.Wh.data.T) * s * pdr, self.Ur.data.T)
+            del tmp
+            del pdz
+            del pdr
+            del pdh
+            del s_h
+            del one_z
+
+            self.X.backward(dLdX)
 
     def null_gradients(self):
         """ Back-propagates `None` to the gradients of the operation's input Tensors."""
@@ -225,14 +308,14 @@ class GRUnit(Operation):
             x.null_gradients()
 
 
-def gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None):
+def gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None, dropout=0.):
     """ Performs a forward pass of sequential data through a Gated Recurrent Unit layer, returning
         the 'hidden-descriptors' arrived at by utilizing the trainable parameters as follows:
 
-                            Z_{t} = sigmoid(Uz X_{t} + Wz S_{t-1} + bz)
-                            R_{t} = sigmoid(Ur X_{t} + Wr S_{t-1} + br)
-                            H_{t} = tanh(Uh X_{t} + Wh (R{t} * S_{t-1}) + bh)
-                            S_{t} = (1 - Z{t}) * H{t} + Z{t} * S_{t-1}
+                    Z_{t} = drop_z * sigmoid(Uz X_{t} + Wz S_{t-1} + bz)
+                    R_{t} = drop_r * sigmoid(Ur X_{t} + Wr S_{t-1} + br)
+                    H_{t} = drop_h * tanh(Uh X_{t} + Wh (R{t} * S_{t-1}) + bh)
+                    S_{t} = (1 - Z{t}) * H{t} + Z{t} * S_{t-1}
 
         Parameters
         ----------
@@ -259,6 +342,14 @@ def gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None):
             E.g. `bp_lim=3` will propagate gradients only up to 3 steps backward through the
             recursive sequence.
 
+        dropout : float (default=0.), 0 <= dropout < 1
+            If non-zero, the expected proportion of a layer's outputs to be set to zero. Applied
+            to the layers Z, R, and H, - *not* S.
+
+            These layers are also scaled by 1 / dropout, such that the test-time forward pass
+            of the gru-layer can be executed without dropout, and with no additional scaling.
+            (only if `dropout` is non-zero)
+
         Returns
         -------
         mygrad.Tensor
@@ -270,6 +361,6 @@ def gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None):
         N : Batch size
         C : Length of single datum
         D : Length of 'hidden' descriptor"""
-    s = Tensor._op(GRUnit, X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, op_kwargs=dict(s0=s0, bp_lim=bp_lim))
+    s = Tensor._op(GRUnit, X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, op_kwargs=dict(s0=s0, bp_lim=bp_lim, dropout=dropout))
     s.creator._hidden_seq = s
     return s
