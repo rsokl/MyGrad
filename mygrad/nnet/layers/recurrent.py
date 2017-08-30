@@ -79,8 +79,8 @@ class RecurrentUnit(Operation):
             mygrad.Tensor
                 The sequence of 'hidden-descriptors' produced by the forward pass of the RNN."""
         if bp_lim is not None:
-            assert isinstance(bp_lim, Integral) and 0 < bp_lim <= len(X)
-        self.bp_lim = bp_lim if bp_lim is not None else len(X)
+            assert isinstance(bp_lim, Integral) and 0 <= bp_lim < len(X)
+        self.bp_lim = bp_lim if bp_lim is not None else len(X) - 1
 
         self.X = X
         self.U = U
@@ -104,8 +104,9 @@ class RecurrentUnit(Operation):
     def backward(self, grad):
         """ Performs back propagation through time (with optional truncation), using the
             following notation:
-                s_t = tanh(f_t)
+
                 f_t = U x_{t-1} + W s_{t-1}
+                s_t = tanh(f_t)
         """
         if self.U.constant and self.W.constant and self.X.constant:
             return None
@@ -115,7 +116,24 @@ class RecurrentUnit(Operation):
         dst_dft = (1 - s.data ** 2)  # ds_{t} / d_f{t}
         dLt_dst = np.copy(grad)  # dL_{t} / ds_{t}
 
-        _rnn_dLds(dst_dft, dLt_dst, self.W.data, self.bp_lim)
+        if self.bp_lim < len(self.X) - 1:
+            old_dst = np.zeros_like(grad)
+
+        for i in range(self.bp_lim):
+            if self.bp_lim < len(self.X) - 1:
+                source_index = slice(2, len(grad) - i)
+                target_index = slice(1, len(grad) - (i + 1))
+
+                # dL_{n} / ds_{t+1} -> dL_{n} / df_{t+1}  | ( n > t )
+                dLn_ft1 = dst_dft[source_index] * (dLt_dst[source_index] - old_dst[source_index])
+                old_dst = np.copy(dLt_dst)
+
+            else:  # no backprop truncation
+                source_index = len(grad) - (i + 1)
+                target_index = len(grad) - (i + 2)
+                dLn_ft1 = dst_dft[source_index] * dLt_dst[source_index]
+
+            dLt_dst[target_index] += np.dot(dLn_ft1, self.W.data.T)  # dL_{t} / ds_{t} + ... + dL_{n} / ds_{t}
 
         self._hidden_seq.grad = dLt_dst  # element t: dL_{t} / ds_{t} + ... + dL_{T_lim} / ds_{t}
 
