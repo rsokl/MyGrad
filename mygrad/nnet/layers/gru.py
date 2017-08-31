@@ -143,7 +143,6 @@ def _gru_bptt(X, dLds, s, z, r, Wz, Wh, Wr, dz, dh, dr, s_h, one_z, bp_lim, old_
 
 
 class GRUnit(Operation):
-
     def __call__(self, X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None, dropout=0.):
         if bp_lim is not None:
             assert isinstance(bp_lim, Integral) and 0 <= bp_lim < len(X)
@@ -219,35 +218,35 @@ class GRUnit(Operation):
 
         dLds = grad[1:]
 
-        pdh = d_tanh(h)
-        pdz = d_sig(z)
-        pdr = d_sig(r)
+        const = {"1 - h**2": d_tanh(h),
+                 "z*(1 - z)": d_sig(z),
+                 "r*(1 - r)": d_sig(r)}
 
         if self._dropout:
-            pdh *= self._droph
-            pdr *= self._dropr
-            pdz *= self._dropz
+            const["1 - h**2"] *= self._droph
+            const["r*(1 - r)"] *= self._dropr
+            const["z*(1 - z)"] *= self._dropz
             h *= self._droph
             r *= self._dropr
             z *= self._dropz
 
-        s_h = s - h
-        one_z = 1 - z
+        const["s - h"] = s - h
+        const["1 - z"] = 1 - z
 
         _gru_bptt(self.X.data, dLds, s, z, r,
                    self.Wz.data,
                    self.Wh.data,
                    self.Wr.data,
-                   pdz,
-                   pdh,
-                   pdr,
-                   s_h,
-                   one_z,
+                   const["z*(1 - z)"],
+                   const["1 - h**2"],
+                   const["r*(1 - r)"],
+                   const["s - h"],
+                   const["1 - z"],
                    self.bp_lim)
 
-        zgrad = dLds * s_h   # dL / dz
-        hgrad = dLds * one_z   # dL / dh
-        rgrad = dot(pdh * hgrad, self.Wh.data.T) * s  # dL / dr
+        zgrad = dLds * const["s - h"]   # dL / dz
+        hgrad = dLds * const["1 - z"]   # dL / dh
+        rgrad = dot(const["1 - h**2"] * hgrad, self.Wh.data.T) * s  # dL / dr
 
         self._hidden_seq.grad = dLds
         self._z.grad = zgrad
@@ -255,7 +254,7 @@ class GRUnit(Operation):
         self._h.grad = hgrad
 
         if any(not const for const in (self.Uz.constant, self.Wz.constant, self.bz.constant)):
-            dz = zgrad * pdz
+            dz = zgrad * const["z*(1 - z)"]
 
         if not self.Uz.constant:
             self.Uz.backward(np.tensordot(self.X.data, dz, ([0, 1], [0, 1])))
@@ -263,10 +262,9 @@ class GRUnit(Operation):
             self.Wz.backward(np.tensordot(s, dz, ([0, 1], [0, 1])))
         if not self.bz.constant:
             self.bz.backward(dz.sum(axis=(0, 1)))
-        del dz
 
         if any(not const for const in (self.Ur.constant, self.Wr.constant, self.br.constant)):
-            dr = rgrad * pdr
+            dr = rgrad * const["r*(1 - r)"]
 
         if not self.Ur.constant:
             self.Ur.backward(np.tensordot(self.X.data, dr, ([0, 1], [0, 1])))
@@ -274,10 +272,9 @@ class GRUnit(Operation):
             self.Wr.backward(np.tensordot(s, dr, ([0, 1], [0, 1])))
         if not self.br.constant:
             self.br.backward(dr.sum(axis=(0, 1)))
-        del dr
 
         if any(not const for const in (self.Uh.constant, self.Wh.constant, self.bh.constant)):
-            dh = hgrad * pdh
+            dh = hgrad * const["1 - h**2"]
 
         if not self.Uh.constant:
             self.Uh.backward(np.tensordot(self.X.data, dh, ([0, 1], [0, 1])))
@@ -285,20 +282,13 @@ class GRUnit(Operation):
             self.Wh.backward(np.tensordot((s * r), dh, ([0, 1], [0, 1])))
         if not self.bh.constant:
             self.bh.backward(dh.sum(axis=(0, 1)))
-        del dh
 
         if not self.X.constant:
-            tmp = dLds * one_z * pdh
+            tmp = dLds * const["1 - z"] * const["1 - h**2"]
 
-            dLdX = dot((dLds * s_h) * pdz, self.Uz.data.T)
+            dLdX = dot((dLds * const["s - h"]) * const["z*(1 - z)"], self.Uz.data.T)
             dLdX += dot(tmp, self.Uh.data.T)
-            dLdX += dot(dot(tmp, self.Wh.data.T) * s * pdr, self.Ur.data.T)
-            del tmp
-            del pdz
-            del pdr
-            del pdh
-            del s_h
-            del one_z
+            dLdX += dot(dot(tmp, self.Wh.data.T) * s * const["r*(1 - r)"], self.Ur.data.T)
 
             self.X.backward(dLdX)
 
