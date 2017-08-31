@@ -1,5 +1,3 @@
-#TODO: memory optimizations
-
 from ...operations.operation_base import Operation
 from ...tensor_base import Tensor
 from numbers import Integral
@@ -66,6 +64,18 @@ def _gru_layer(s, z, r, h, Wz, Wr, Wh, bz, br, bh):
         h[n] = np.tanh(h[n])
 
         s[n + 1] = (1 - z[n]) * h[n] + z[n] * s[n]
+
+@njit
+def _gru_layer_dropout(s, z, r, h, Wz, Wr, Wh, bz, br, bh, dropz, dropr, droph):
+    for n in range(len(s) - 1):
+        z[n] += np.dot(s[n], Wz) + bz
+        z[n] = (1 / (1 + np.exp(-z[n])))
+
+        r[n] += np.dot(s[n], Wr) + br
+        r[n] = (1 / (1 + np.exp(-r[n])))
+
+        h[n] += np.dot(dropr[n] * r[n] * s[n], Wh) + bh
+        h[n] = np.tanh(h[n])
 
 
 @njit
@@ -140,6 +150,7 @@ def _gru_bptt(X, dLds, s, z, r, Wz, Wh, Wr, dz, dh, dr, s_h, one_z, bp_lim, old_
                                         dr[source_index],
                                         s_h[source_index],
                                         one_z[source_index])
+
 
 
 class GRUnit(Operation):
@@ -218,9 +229,16 @@ class GRUnit(Operation):
 
         dLds = grad[1:]
 
+<<<<<<< HEAD
         const = {"1 - h**2": d_tanh(h),
                  "z*(1 - z)": d_sig(z),
                  "r*(1 - r)": d_sig(r)}
+=======
+
+        pdh = d_tanh(h)
+        pdz = d_sig(z)
+        pdr = d_sig(r)
+>>>>>>> 588a7e58c8b8be77e751e958ec5bb1f60d53cdfd
 
         if self._dropout:
             const["1 - h**2"] *= self._droph
@@ -254,8 +272,12 @@ class GRUnit(Operation):
         self._h.grad = hgrad
 
         if any(not const for const in (self.Uz.constant, self.Wz.constant, self.bz.constant)):
+<<<<<<< HEAD
             dz = zgrad * const["z*(1 - z)"]
 
+=======
+            dz = zgrad * pdz
+>>>>>>> 588a7e58c8b8be77e751e958ec5bb1f60d53cdfd
         if not self.Uz.constant:
             self.Uz.backward(np.tensordot(self.X.data, dz, ([0, 1], [0, 1])))
         if not self.Wz.constant:
@@ -264,8 +286,12 @@ class GRUnit(Operation):
             self.bz.backward(dz.sum(axis=(0, 1)))
 
         if any(not const for const in (self.Ur.constant, self.Wr.constant, self.br.constant)):
+<<<<<<< HEAD
             dr = rgrad * const["r*(1 - r)"]
 
+=======
+            dr = rgrad * pdr
+>>>>>>> 588a7e58c8b8be77e751e958ec5bb1f60d53cdfd
         if not self.Ur.constant:
             self.Ur.backward(np.tensordot(self.X.data, dr, ([0, 1], [0, 1])))
         if not self.Wr.constant:
@@ -274,8 +300,12 @@ class GRUnit(Operation):
             self.br.backward(dr.sum(axis=(0, 1)))
 
         if any(not const for const in (self.Uh.constant, self.Wh.constant, self.bh.constant)):
+<<<<<<< HEAD
             dh = hgrad * const["1 - h**2"]
 
+=======
+            dh = hgrad * pdh
+>>>>>>> 588a7e58c8b8be77e751e958ec5bb1f60d53cdfd
         if not self.Uh.constant:
             self.Uh.backward(np.tensordot(self.X.data, dh, ([0, 1], [0, 1])))
         if not self.Wh.constant:
@@ -284,14 +314,24 @@ class GRUnit(Operation):
             self.bh.backward(dh.sum(axis=(0, 1)))
 
         if not self.X.constant:
+<<<<<<< HEAD
             tmp = dLds * const["1 - z"] * const["1 - h**2"]
 
             dLdX = dot((dLds * const["s - h"]) * const["z*(1 - z)"], self.Uz.data.T)
             dLdX += dot(tmp, self.Uh.data.T)
             dLdX += dot(dot(tmp, self.Wh.data.T) * s * const["r*(1 - r)"], self.Ur.data.T)
 
+=======
+            tmp = dLds * one_z * pdh
+            
+            dLdX = dot((dLds * s_h) * pdz, self.Uz.data.T)
+            dLdX += dot(tmp, self.Uh.data.T)
+            dLdX += dot(dot(tmp, self.Wh.data.T) * s * pdr, self.Ur.data.T)
+            
+>>>>>>> 588a7e58c8b8be77e751e958ec5bb1f60d53cdfd
             self.X.backward(dLdX)
 
+            
     def null_gradients(self):
         """ Back-propagates `None` to the gradients of the operation's input Tensors."""
         for x in [self.X, self.Uz, self.Wz, self.bz, self.Ur, self.Wr, self.br, self.Uh, self.Wh, self.bh]:
