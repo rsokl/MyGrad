@@ -229,16 +229,9 @@ class GRUnit(Operation):
 
         dLds = grad[1:]
 
-<<<<<<< HEAD
         const = {"1 - h**2": d_tanh(h),
                  "z*(1 - z)": d_sig(z),
                  "r*(1 - r)": d_sig(r)}
-=======
-
-        pdh = d_tanh(h)
-        pdz = d_sig(z)
-        pdr = d_sig(r)
->>>>>>> 588a7e58c8b8be77e751e958ec5bb1f60d53cdfd
 
         if self._dropout:
             const["1 - h**2"] *= self._droph
@@ -272,12 +265,8 @@ class GRUnit(Operation):
         self._h.grad = hgrad
 
         if any(not const for const in (self.Uz.constant, self.Wz.constant, self.bz.constant)):
-<<<<<<< HEAD
             dz = zgrad * const["z*(1 - z)"]
 
-=======
-            dz = zgrad * pdz
->>>>>>> 588a7e58c8b8be77e751e958ec5bb1f60d53cdfd
         if not self.Uz.constant:
             self.Uz.backward(np.tensordot(self.X.data, dz, ([0, 1], [0, 1])))
         if not self.Wz.constant:
@@ -286,12 +275,8 @@ class GRUnit(Operation):
             self.bz.backward(dz.sum(axis=(0, 1)))
 
         if any(not const for const in (self.Ur.constant, self.Wr.constant, self.br.constant)):
-<<<<<<< HEAD
             dr = rgrad * const["r*(1 - r)"]
 
-=======
-            dr = rgrad * pdr
->>>>>>> 588a7e58c8b8be77e751e958ec5bb1f60d53cdfd
         if not self.Ur.constant:
             self.Ur.backward(np.tensordot(self.X.data, dr, ([0, 1], [0, 1])))
         if not self.Wr.constant:
@@ -300,12 +285,8 @@ class GRUnit(Operation):
             self.br.backward(dr.sum(axis=(0, 1)))
 
         if any(not const for const in (self.Uh.constant, self.Wh.constant, self.bh.constant)):
-<<<<<<< HEAD
             dh = hgrad * const["1 - h**2"]
 
-=======
-            dh = hgrad * pdh
->>>>>>> 588a7e58c8b8be77e751e958ec5bb1f60d53cdfd
         if not self.Uh.constant:
             self.Uh.backward(np.tensordot(self.X.data, dh, ([0, 1], [0, 1])))
         if not self.Wh.constant:
@@ -314,24 +295,15 @@ class GRUnit(Operation):
             self.bh.backward(dh.sum(axis=(0, 1)))
 
         if not self.X.constant:
-<<<<<<< HEAD
             tmp = dLds * const["1 - z"] * const["1 - h**2"]
 
             dLdX = dot((dLds * const["s - h"]) * const["z*(1 - z)"], self.Uz.data.T)
             dLdX += dot(tmp, self.Uh.data.T)
             dLdX += dot(dot(tmp, self.Wh.data.T) * s * const["r*(1 - r)"], self.Ur.data.T)
 
-=======
-            tmp = dLds * one_z * pdh
-            
-            dLdX = dot((dLds * s_h) * pdz, self.Uz.data.T)
-            dLdX += dot(tmp, self.Uh.data.T)
-            dLdX += dot(dot(tmp, self.Wh.data.T) * s * pdr, self.Ur.data.T)
-            
->>>>>>> 588a7e58c8b8be77e751e958ec5bb1f60d53cdfd
             self.X.backward(dLdX)
 
-            
+
     def null_gradients(self):
         """ Back-propagates `None` to the gradients of the operation's input Tensors."""
         for x in [self.X, self.Uz, self.Wz, self.bz, self.Ur, self.Wr, self.br, self.Uh, self.Wh, self.bh]:
