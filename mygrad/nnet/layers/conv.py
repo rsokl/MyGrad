@@ -77,14 +77,18 @@ class Conv2D(Operation):
 
 
 def conv2d(x, filter_bank, stride, padding, memory_constrained=False):
-    """ Use `filter_bank` to perform strided 2D convolutions (see Notes) over `x`.
+    """ Use `filter_bank` to perform strided 2D convolutions
+       (see Notes) over `x`.
 
-        `x` represents a batch of data over which the filters are convolved. Specifically,
-        it must be a tensor of shape (N, C, H, W), where N is the number of samples in the batch,
-        C is the channel-depth of each datum, and H & W are the dimensions over which the filters
-        are convolved. Accordingly, each filter must have a channel depth of C.
+        `x` represents a batch of data over which the filters
+        are convolved. Specifically, it must be a tensor of shape
+        (N, C, H, W), where N is the number of samples in the batch,
+        C is the channel-depth of each datum, and H & W are the
+        dimensions over which the filters are convolved. Accordingly,
+        each filter must have a channel depth of C.
 
-        Thus convolving F filters over the data batch will produce a tensor of shape (N, F, H', W').
+        Thus convolving F filters over the data batch will produce a
+        tensor of shape (N, F, H', W').
 
         Parameters
         ----------
@@ -95,39 +99,44 @@ def conv2d(x, filter_bank, stride, padding, memory_constrained=False):
             The filters used to perform the convolutions.
 
         stride : Union[int, Tuple[int, int]]
-            The step-size with which each filter is placed along the H and W axes
-            during the convolution. The tuple indicates (stride-H, stride-W). If a
-            single integer is provided, this stride is used for both axes.
+            The step-size with which each filter is placed along the
+            H and W axes during the convolution. The tuple indicates
+            (stride-H, stride-W). If a single integer is provided, this
+            stride is used for both axes.
 
         padding : Tuple[int, int]
-            The number of zeros to be padded to either end of the H-dimension
-            and the W-dimension, respectively, for each datum in the batch. If
-            a single integer is provided, this padding is used for both axes
+            The number of zeros to be padded to either end of
+            the H-dimension and the W-dimension, respectively,
+            for each datum in the batch. If a single integer is
+            provided, this padding is used for both axes
 
         memory_constrained : Bool, optional (default=False)
-            By default, a 'stretched' version of the data batch (see Notes) is cached
-            after the convolution is performed, for use when performing `backward`.
+            By default, a 'stretched' version of the data batch
+            (see Notes) is cached after the convolution is performed,
+            for use when performing `backward`.
 
-            Setting this to False will forego caching, at the expense of some computation
-            time during `backward`.
+            Setting this to False will forego caching, at the expense
+            of some computation time during `backward`.
 
         Returns
         -------
         Tensor, shape=(N, F, H', W')
-            The result of each filter being convolved over each datum in the batch.
+            The result of each filter being convolved over each datum in
+            the batch.
 
         Notes
         -----
-         - The filters are *not* flipped by this operation, meaning that an auto-correlation
-           is being performed rather than a true convolution.
+         - The filters are *not* flipped by this operation, meaning that
+           an auto-correlation is being performed rather than a true convolution.
 
-         - The present implementation of `conv2d` relies on performing a matrix multiplication
-           in lieu of a true auto-correlation. This comes at the cost of a significant memory
-           footprint, especially if a computational graph contains multiple convolutions. Consider
+         - The present implementation of `conv2d` relies on performing a
+           matrix multiplication in lieu of a true auto-correlation. This
+           comes at the cost of a significant memory footprint, especially
+           if a computational graph contains multiple convolutions. Consider
            setting `memory_constrained` to True in these circumstances.
 
-         - Only 'valid' filter placements are permitted - where the filters overlap completely
-           with the (padded) data.
+         - Only 'valid' filter placements are permitted - where the filters overlap
+           completely with the (padded) data.
 
          - This is a "scalar-only" operation, meaning that back propagation through
            this layer assumes that a scalar (i.e. a 0-dimensional tensor) will invoke
