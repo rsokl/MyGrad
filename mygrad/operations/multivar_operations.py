@@ -77,11 +77,11 @@ class MultiVarBroadcastableOp(MultiVarOperation):
             self.keepdims[var_index] = tuple(self.keepdims[var_index])
 
             if not var.constant:
-                # a new axis is created to allow broadcasting: e.g. (2,) w/ (2,3) -> (2,3)
+                # a new axis is created to allow broadcasting: e.g. (3,) w/ (2,3) -> (2,3)
                 if var.ndim < len(out_shape):
                     self.new_axes[var_index] = tuple(range(len(out_shape) - var.ndim))
 
-                if self.new_axes[var_index] or self.new_axes[var_index]:
+                if self.keepdims[var_index] or self.new_axes[var_index]:
                     self.scalar_only = True
 
     @staticmethod
