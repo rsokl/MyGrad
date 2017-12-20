@@ -7,10 +7,45 @@ from numba import njit
 
 
 @njit
+def dot(a, b):
+    """
+    Calculates the dot product between 2 arrays
+    of shapes (W,X,Y) and (Y,Z), respectively
+    """
+    out = np.zeros((a.shape[0], a.shape[1], b.shape[-1]))
+    for i in range(len(a)):
+        out[i] = np.dot(a[i], b)
+    return out
+
+
+@njit
 def _dot_tanh_accum(x, W):
     for n in range(len(x) - 1):
         x[n + 1] += np.dot(x[n], W)
         x[n + 1] = np.tanh(x[n + 1])
+
+
+@njit
+def _rnn_bptt(X, dLt_dst, dst_dft, W, bp_lim, old_dst=None):
+    W = W.T
+    if bp_lim < len(X) - 1:
+        old_dst = np.zeros_like(dLt_dst)
+
+    for i in range(bp_lim):
+        if bp_lim < len(X) - 1:
+            source_index = slice(2, len(dLt_dst) - i)
+            target_index = slice(1, len(dLt_dst) - (i + 1))
+
+            # dL_{n} / ds_{t+1} -> dL_{n} / df_{t+1}  | ( n > t )
+            dLn_ft1 = dst_dft[source_index] * (dLt_dst[source_index] - old_dst[source_index])
+            old_dst = np.copy(dLt_dst)
+
+        else:  # no backprop truncation
+            source_index = slice(len(dLt_dst) - (i + 1), len(dLt_dst) - i)
+            target_index = slice(len(dLt_dst) - (i + 2), len(dLt_dst) - (i + 1))
+            dLn_ft1 = dst_dft[source_index] * dLt_dst[source_index]
+
+        dLt_dst[target_index] += dot(dLn_ft1, W)
 
 
 class RecurrentUnit(Operation):
@@ -70,7 +105,7 @@ class RecurrentUnit(Operation):
         if s0 is not None:
             out[0] = s0.data if isinstance(s0, Tensor) else s0
 
-        np.dot(seq, self.U.data, out=out[1:])
+        out[1:] = dot(seq, self.U.data)
         _dot_tanh_accum(out, self.W.data)
 
         self._hidden_seq = Tensor(out, _creator=self)
@@ -93,24 +128,7 @@ class RecurrentUnit(Operation):
         dst_dft = (1 - s.data ** 2)  # ds_{t} / d_f{t}
         dLt_dst = np.copy(grad)  # dL_{t} / ds_{t}
 
-        if self.bp_lim < len(self.X) - 1:
-            old_dst = np.zeros_like(grad)
-
-        for i in range(self.bp_lim):
-            if self.bp_lim < len(self.X) - 1:
-                source_index = slice(2, len(grad) - i)
-                target_index = slice(1, len(grad) - (i + 1))
-                
-                # dL_{n} / ds_{t+1} -> dL_{n} / df_{t+1}  | ( n > t )
-                dLn_ft1 = dst_dft[source_index] * (dLt_dst[source_index] - old_dst[source_index])
-                old_dst = np.copy(dLt_dst)
-
-            else:  # no backprop truncation
-                source_index = len(grad) - (i + 1)
-                target_index = len(grad) - (i + 2)
-                dLn_ft1 = dst_dft[source_index] * dLt_dst[source_index]
-
-            dLt_dst[target_index] += np.dot(dLn_ft1, self.W.data.T)  # dL_{t} / ds_{t} + ... + dL_{n} / ds_{t}
+        _rnn_bptt(self.X.data, dLt_dst, dst_dft, self.W.data, self.bp_lim)
 
         self._hidden_seq.grad = dLt_dst  # element t: dL_{t} / ds_{t} + ... + dL_{T_lim} / ds_{t}
 
@@ -121,7 +139,8 @@ class RecurrentUnit(Operation):
         if not self.W.constant:
             self.W.backward(np.einsum("ijk, ijl -> kl", s.data[:-1], dLt_dft))  # dL_{1} / dW + ... + dL_{T} / dW
         if not self.X.constant:
-            self.X.backward(np.dot(dLt_dft, self.U.data.T))  # dL_{1} / dX + ... + dL_{T} / dX
+            self.X.backward(dot(dLt_dft, self.U.data.T))  # dL_{1} / dX + ... + dL_{T} / dX
+
 
     def null_gradients(self):
         """ Back-propagates `None` to the gradients of the operation's input Tensors."""
@@ -171,4 +190,3 @@ def simple_RNN(X, U, W, s0=None, bp_lim=None):
     s = Tensor._op(RecurrentUnit, X, U, W, op_kwargs=dict(s0=s0, bp_lim=bp_lim))
     s.creator._hidden_seq = s
     return s
-
