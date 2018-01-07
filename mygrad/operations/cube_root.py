@@ -8,4 +8,4 @@ class Cbrt(Operation):
         return np.cbrt(a.data)
 
     def backward_a(self, grad):
-        return self.a.backward(grad / (3 * np.cbrt(a.data ** 2)))
+        return self.a.backward(grad / (3 * np.cbrt(self.a.data ** 2)))

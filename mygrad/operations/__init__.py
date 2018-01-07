@@ -6,7 +6,7 @@ from .multiply_sequence import *
 from .add_sequence import *
 from .subtract import *
 from .power import Power
-from .log import Log
+from .log import *
 from .reshape import Reshape
 from .maxmin import *
 from .getitem import *

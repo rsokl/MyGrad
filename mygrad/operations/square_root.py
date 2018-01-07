@@ -8,4 +8,4 @@ class Sqrt(Operation):
         return np.sqrt(a.data)
 
     def backward_a(self, grad):
-        return self.a.backward(grad / (2 * np.sqrt(a.data)))
+        return self.a.backward(grad / (2 * np.sqrt(self.a.data)))

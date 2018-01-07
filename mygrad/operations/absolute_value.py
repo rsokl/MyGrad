@@ -8,4 +8,4 @@ class Abs(Operation):
         return np.abs(a.data)
 
     def backward_a(self, grad):
-        return self.a.backward(grad * np.piecewise(a.data, [a.data < 0, a.data >= 0], [lambda data: -a.data, lambda data: a.data]))
+        return self.a.backward(grad * np.piecewise(self.a.data, [self.a.data < 0, self.a.data == 0, self.a.data > 0], [-1, 0, 1]))
