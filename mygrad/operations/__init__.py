@@ -12,3 +12,11 @@ from .maxmin import *
 from .getitem import *
 from .setitem import *
 from .transpose import *
+from .absolute_value import *
+from .cube_root import *
+from .hyperbolic_trig import *
+from .inverse_hyperbolic_trig import *
+from .inverse_trig import *
+from .logaddexp import *
+from .square_root import *
+from .trigonometric import *

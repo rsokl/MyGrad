@@ -1,14 +1,57 @@
 from .tensor_base import Tensor
 from .operations import *
 
-__all__ = ["add",
+__all__ = ["abs",
+           "add",
            "add_sequence",
+           "arccos",
+           "arccosh",
+           "arccot",
+           "arccoth",
+           "arccsc",
+           "arccsch",
+           "arcsec",
+           "arcsech",
+           "arcsin",
+           "arcsinh",
+           "arctan",
+           "arctanh",
+           "cbrt",
+           "cos",
+           "cosh",
+           "cot",
+           "coth",
+           "csc",
+           "csch",
            "divide",
            "log",
+           "log2",
+           "log10",
+           "logaddexp",
            "multiply",
            "multiply_sequence",
            "power",
-           "subtract"]
+           "sec",
+           "sech",
+           "sin",
+           "sinh",
+           "sqrt",
+           "subtract",
+           "tan",
+           "tanh"]
+
+def abs(a):
+    """ f(a)-> |a|
+
+        Parameters
+        ----------
+        a : Union[tensor-like, Number]
+
+        Returns
+        -------
+        mygrad.Tensor"""
+    return Tensor._op(Abs, a)
+
 
 def add(a, b):
     """ f(a, b) -> a + b
@@ -192,6 +235,19 @@ def arctanh(a):
     return Tensor._op(Arctanh, a)
 
 
+def cbrt(a):
+    """ f(a)-> cbrt(a)
+
+        Parameters
+        ----------
+        a : Union[tensor-like, Number]
+
+        Returns
+        -------
+        mygrad.Tensor"""
+    return Tensor._op(Cbrt, a)
+
+
 def cos(a):
     """ f(a)-> cos(a)
 
@@ -323,6 +379,20 @@ def log10(a):
     return Tensor._op(Log10, a)
 
 
+def logaddexp(a, b):
+    """ f(a, b)-> log(exp(a) + exp(b))
+
+        Parameters
+        ----------
+        a : Union[tensor-like, Number]
+        b : Union[tensor-like, Number]
+
+        Returns
+        -------
+        mygrad.Tensor"""
+    return Tensor._op(Logaddexp, a, b)
+
+
 def multiply(a, b):
     """ f(a, b) -> a * b
 
@@ -414,6 +484,19 @@ def sinh(a):
         -------
         mygrad.Tensor"""
     return Tensor._op(Sinh, a)
+
+
+def sqrt(a):
+    """ f(a)-> sqrt(a)
+
+        Parameters
+        ----------
+        a : Union[tensor-like, Number]
+
+        Returns
+        -------
+        mygrad.Tensor"""
+    return Tensor._op(Sqrt, a)
 
 
 def subtract(a, b):
