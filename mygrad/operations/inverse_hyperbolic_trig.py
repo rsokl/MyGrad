@@ -32,7 +32,7 @@ class Arccosh(Operation):
 class Arctanh(Operation):
     def __call__(self, a):
         self.a = a
-        if np.any(1 <= a or a <= -1):
+        if np.any(1 <= a) or np.any(a <= -1):
             raise ValueError("Invalid arctanh-domain value")
         return np.arctanh(a.data)
 
@@ -54,7 +54,7 @@ class Arccsch(Operation):
 class Arcsech(Operation):
     def __call__(self, a):
         self.a = a
-        if np.any(1 < a or a <= 0):
+        if np.any(1 < a) or np.any(a <= 0):
             raise ValueError("Invalid arcsech-domain value")
         return np.arccosh(1 / a.data)
 
@@ -65,7 +65,7 @@ class Arcsech(Operation):
 class Arccoth(Operation):
     def __call__(self, a):
         self.a = a
-        if np.any(-1 <= a or a <= 1):
+        if np.any(-1 <= a) and np.any(a <= 1):
             raise ValueError("Invalid arccoth-domain value")
         return np.arctanh(1 / a.data)
 

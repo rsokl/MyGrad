@@ -34,14 +34,18 @@ class Dense(Operation):
 def dense(x, w):
     """ Perform a dense-layer pass (i.e. matrix multiplication) of a (N, D)-shape
         tensor with a (D, M)-shape tensor.
+
         Parameters
         ----------
         x : Union[mygrad.Tensor, array_like], shape=(N, D) or (T, N, D)
+
         w : Union[mygrad.Tensor, array_like], shape=(D, M)
+
         Returns
         -------
         Tensor, shape=(N, M)
             The result of the matrix multiplication of `x` with `w`
+
         Notes
         -----
         This is a "scalar-only" operation, meaning that back propagation through
