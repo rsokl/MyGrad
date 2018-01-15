@@ -12,3 +12,7 @@ from .maxmin import *
 from .getitem import *
 from .setitem import *
 from .transpose import *
+from .hstack import *
+from .stack import *
+from .vstack import *
+from .dstack import *
