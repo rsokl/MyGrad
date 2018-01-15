@@ -28,5 +28,5 @@ class Concatenate(MultiVarOperation):
 
     def backward_var(self, grad, index):
         var = self.variables[index]
-        grad_slice = [slice(None, None, None) if dim is not self.axis else slice(self.indices[index], self.indices[index+1]) for dim in range(len(var.data.shape))]
+        grad_slice = [slice(None, None, None) if dim is not self.axis else slice(self.indices[index], self.indices[index+1]) for dim in range(var.data.ndim)]
         var.backward(grad[grad_slice])

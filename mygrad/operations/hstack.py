@@ -8,13 +8,13 @@ class Hstack(MultiVarOperation):
         for i, dim in enumerate(list(zip_longest(*[var.data.shape for var in input_vars]))):
             assert dim.count(None) == 0, "all input Tensors must have the same number of dimensions"
 
-            if (i == 0 and len(input_vars[0].data.shape) == 1) or (i == 1):
+            if (i == 0 and input_vars[0].data.ndim == 1) or (i == 1):
                 pass
             else:
                 assert dim.count(dim[0]) == len(dim), "all input Tensor dimensions except for the concatenation axis must match exactly"
 
         self.variables = input_vars
-        self.axis = 0 if len(input_vars[0].data.shape) is 1 else 1
+        self.axis = 0 if input_vars[0].data.ndim is 1 else 1
         self.indices = list(accumulate([var.data.shape[0] if self.axis is 0 else var.data.shape[1] for var in input_vars]))
         self.indices.insert(0,0)
         out = np.hstack([var.data for var in input_vars])
