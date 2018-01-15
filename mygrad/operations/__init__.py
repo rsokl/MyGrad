@@ -16,3 +16,4 @@ from .hstack import *
 from .stack import *
 from .vstack import *
 from .dstack import *
+from .concatenate import *
