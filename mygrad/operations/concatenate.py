@@ -5,13 +5,16 @@ from itertools import accumulate, zip_longest
 
 class Concatenate(MultiVarOperation):
     def __call__(self, *input_vars, axis=0):
-        for i, dim in enumerate(list(zip_longest(*[var.data.shape for var in input_vars]))):
+        for i, dim in enumerate(list(zip_longest(*[(0,) if not var.data.ndim else var.data.shape for var in input_vars]))):
+            if i == 0 and dim.count(0) != 0:
+                assert False, "zero-dimensional Tensors cannot be concatenated"
             assert dim.count(None) == 0, "all input Tensors must have the same number of dimensions"
 
             if i == axis:
                 pass
             else:
                 assert dim.count(dim[0]) == len(dim), "all input Tensor dimensions except for the concatenation axis must match exactly"
+        assert axis < input_vars[0].ndim, "axis {} is out of bounds for Tensor of dimension {}".format(axis, input_vars[0].ndim)
 
         self.variables = input_vars
         self.axis = axis

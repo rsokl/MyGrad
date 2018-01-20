@@ -6,6 +6,7 @@ from itertools import accumulate, zip_longest
 class Stack(MultiVarOperation):
     def __call__(self, *input_vars, axis=0):
         assert len({var.data.shape for var in input_vars}) == 1, "all input Tensors must have the same shape"
+        assert axis < input_vars[0].ndim+1, "axis {} is out of bounds for Tensor of dimension {}".format(axis, input_vars[0].ndim+1)
 
         self.variables = input_vars
         self.axis = axis

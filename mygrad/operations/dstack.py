@@ -5,7 +5,7 @@ from itertools import accumulate, zip_longest
 
 class Dstack(MultiVarOperation):
     def __call__(self, *input_vars):
-        for i, dim in enumerate(list(zip_longest(*[var.data[np.newaxis,:,np.newaxis].shape if var.data.ndim is 1 else var.data[...,np.newaxis].shape if var.data.ndim is 2 else var.data.shape for var in input_vars]))):
+        for i, dim in enumerate(list(zip_longest(*[var.data[np.newaxis,np.newaxis,np.newaxis].shape if not var.data.ndim else var.data[np.newaxis,:,np.newaxis].shape if var.data.ndim is 1 else var.data[...,np.newaxis].shape if var.data.ndim is 2 else var.data.shape for var in input_vars]))):
             assert dim.count(None) == 0, "all input Tensors must have the same number of dimensions"
 
             if i == 2:
@@ -14,7 +14,7 @@ class Dstack(MultiVarOperation):
                 assert dim.count(dim[0]) == len(dim), "all input Tensor dimensions except for the concatenation axis must match exactly"
 
         self.variables = input_vars
-        self.indices = list(accumulate([1 if var.data.ndim is 1 else 1 if var.data.ndim is 2 else var.data.shape[2] for var in input_vars]))
+        self.indices = list(accumulate([1 if (0,1,2).__contains__(var.data.ndim) else var.data.shape[2] for var in input_vars]))
         self.indices.insert(0,0)
         out = np.dstack([var.data for var in input_vars])
 
@@ -27,8 +27,10 @@ class Dstack(MultiVarOperation):
 
     def backward_var(self, grad, index):
         var = self.variables[index]
-        if var.data.ndim == 1:
-            var.backward(np.squeeze(grad[:,:,self.indices[index]:self.indices[index+1]]))
+        if not var.data.ndim:
+            var.backward(np.asscalar(grad[:,:,self.indices[index]:self.indices[index+1]]))
+        elif var.data.ndim == 1:
+            var.backward(np.squeeze(grad[:,:,self.indices[index]:self.indices[index+1]], axis=(0,2)))
         elif var.data.ndim == 2:
             var.backward(np.squeeze(grad[:,:,self.indices[index]:self.indices[index+1]], axis=2))
         else:

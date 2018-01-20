@@ -1,7 +1,7 @@
 from .tensor_base import Tensor
 from .operations import Concatenate, Dstack, Hstack, Stack, Vstack
 
-__all__ = ["concatenate"
+__all__ = ["concatenate",
            "dstack",
            "hstack",
            "stack",
@@ -49,7 +49,8 @@ def concatenate(*variables, axis=0):
 
 def dstack(*variables):
     """ Stacks multiple Tensors depth-wise, along the 3rd axis.
-        1-D and 2-D Tensors are first reshaped to (1,N,1) and (N,M,1), respectively.
+        0-D, 1-D, and 2-D Tensors are first reshaped to (1,1,1), (1,N,1),
+        and (N,M,1) Tensors, respectively.
 
         a -> [[1 2]
               [3 4]]
@@ -77,7 +78,8 @@ def dstack(*variables):
 
 def hstack(*variables):
     """ Stacks multiple Tensors horizontally, along the 2nd (column) axis.
-        1-D arrays are joined along the 1st axis.
+        1-D Tensors are joined along the 1st axis. 0-D Tensors are first
+        reshaped to (1,) Tensors.
 
         a -> [[1]
               [2]
@@ -137,7 +139,8 @@ def stack(*variables, axis=0):
 
 def vstack(*variables):
     """ Stacks multiple Tensors vertically, along the 1st (row) axis.
-        1-D Tensors are first reshaped into (1,N) Tensors.
+        0-D and 1-D Tensors are first reshaped into (1,1) and (1,N)
+        Tensors, respectively.
 
         a -> [1 2 3]
         b -> [4 5 6]
