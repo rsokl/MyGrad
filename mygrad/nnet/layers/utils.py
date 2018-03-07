@@ -2,95 +2,166 @@
 import numpy as np
 
 
-def sliding_window_view(arr, window_shape, steps):
-    """ Produce a view from a sliding, striding window over `arr`.
-        The window is only placed in 'valid' positions - no overlapping
-        over the boundary.
+def sliding_window_view(arr, window_shape, step, dilation=None):
+    """ Create a sliding window view over the trailing dimesnions of an array.
+        No copy is made.
+
+        The window is applied only to valid regions of `arr`, but is applied geedily.
+
+        See Notes section for details.
 
         Parameters
         ----------
-        arr : numpy.ndarray, shape=(...,[x, (...), z])
-            The array to slide the window over.
+        arr : numpy.ndarray, shape=(..., [x, (...), z])
+            C-ordered array over which sliding view-window is applied along the trailing
+            dimensions [x, ..., z], as determined by the length of `window_shape`.
 
         window_shape : Sequence[int]
-            The shape of the window to raster: [Wx, (...), Wz],
-            determines the shape of [x, (...), z]
+            Specifies the shape of the view-window: [Wx, (...), Wz].
+            The length of `window_shape` determines the length of [x, (...) , z]
 
-        steps : Sequence[int]
-            The step size used when applying the window
-            along the [x, (...), z] directions: [Sx, (...), Sz]
+        step : Union[int, Sequence[int]]
+            The step sized used along the [x, (...), z] dimensions: [Sx, (...), Sz].
+            If a single integer is specified, a uniform step size is used.
+
+        dilation : Optional[Sequence[int]]
+            The dilation factor used along the [x, (...), z] directions: [Dx, (...), Dz].
+            If no value is specified, a dilation factor of 1 is used along each direction.
+            Dilation specifies the step size used when filling the window's elements
 
         Returns
         -------
-        view of `arr`, shape=([X, (...), Z], ..., [Sx, (...), Sz])
-            Where X = (x - Wx) // Sx + 1
+        A contiguous view of `arr`, of shape ([X, (...), Z], ..., [Wx, (...), Wz]), where
+        [X, ..., Z] is the shape of the grid on which the window was applied. See Notes
+        sections for more details.
 
         Notes
         -----
-        In general, given
-          `out` = sliding_window_view(arr,
-                                      window_shape=[Wx, (...), Wz],
-                                      steps=[Sx, (...), Sz])
+        Window placement:
+            Given a dimension of size x, with a window of size W along this dimension, applied
+            with stride S and dilation D, the window will be applied
+                                      X = (x - (W - 1) * D + 1) // S + 1
+            number of times along that dimension.
 
-           out[ix, (...), iz] = arr[..., ix*Sx:ix*Sx+Wx,  (...), iz*Sz:iz*Sz+Wz]
+        Interpreting output:
+            In general, given an array `arr` of shape (..., x, (...), z), and
+                `out = sliding_window_view(arr, window_shape=[Wx, (...), Wz], step=[Sx, (...), Sz])`
+            the indexing `out` with [ix, (...), iz] produces the following view of x:
 
-         Examples
-         --------
-         >>> import numpy as np
-         >>> x = np.arange(9).reshape(3,3)
-         >>> x
-         array([[0, 1, 2],
-                [3, 4, 5],
-                [6, 7, 8]])
+                `out[ix, (...), iz] ==
+                    x[..., ix*Sx:(ix*Sx + Wx*Dx):Dx, (...), iz*Sz:(iz*Sz + Wz*Dz):Dz]`
 
-         >>> y = sliding_window_view(x, window_shape=(2, 2), steps=(1, 1))
-         >>> y
-         array([[[[0, 1],
-                  [3, 4]],
+            For example, suppose `arr` is an array of shape (10, 12, 6). Specifying sliding
+            window of shape (3, 3) with step size (2, 2), dilation (2, 1) will create the view:
 
-                 [[1, 2],
-                  [4, 5]]],
+                            [[arr[:,  0:6:2, 0:3], arr[:,   0:6:3, 3:6]]
+                             [arr[:, 6:12:2, 0:3], arr[:, 6:12:12, 3:6]]]
 
+            producing a view of shape (2, 2, 10, 3, 3) in total.
 
-                [[[3, 4],
-                  [6, 7]],
+        Examples
+        --------
+        >>> import numpy as np
+        >>> x = np.arange(36).reshape(6, 6)
+        >>> x
+        array([[ 0,  1,  2,  3,  4,  5],
+               [ 6,  7,  8,  9, 10, 11],
+               [12, 13, 14, 15, 16, 17],
+               [18, 19, 20, 21, 22, 23],
+               [24, 25, 26, 27, 28, 29],
+               [30, 31, 32, 33, 34, 35]])
 
-                 [[4, 5],
-                  [7, 8]]]])
+        Apply an 3x2 window with step-sizes of (2, 2). This results in
+        the window being placed twice along axis-0 and three times along axis-1.
+        >>> y = sliding_window_view(x, step=(2, 2), window_shape=(3, 2))
+        >>> y.shape
+        (2, 3, 3, 2)
 
-        # Performing a neural net style 2D conv (correlation)
-        # placing a 4x4 filter with stride-1
-        >>> data = np.random.rand(10, 3, 16, 16)  # (N, C, H, W)
-        >>> filters = np.random.rand(5, 3, 4, 4)  # (F, C, Hf, Wf)
-        >>> windowed_data = sliding_window_view(data,
-        ...                                     window_shape=(4, 4),
-        ...                                     steps=(1, 1))
+        # window applied at (0, 0)
+        >>> y[0, 0]
+        array([[ 0,  1],
+               [ 6,  7],
+               [12, 13]])
 
-        >>> conv_out = np.tensordot(filters,
-        ...                         windowed_data,
-        ...                         axes=[[1,2,3], [3,4,5]])
+        # window applied at (2, 0)
+        >>> y[1, 0]
+        array([[12, 13],
+               [18, 19],
+               [24, 25]])
 
-        # (F, H', W', N) -> (N, F, H', W')
-        >>> conv_out = conv_out.transpose([3,0,1,2])
-         """
-    import numpy as np
+        # window applied at (0, 2)
+        >>> y[0, 1]
+        array([[ 2,  3],
+               [ 8,  9],
+               [14, 15]])
+
+        >>> i, j = np.random.randint(0, 2, size=2)
+        >>> wx, wy = (2, 2)
+        >>> sx, sy = (2, 2)
+        >>> np.all(y[i, j] == x[..., i*sx:(i*sx + wx), j*sy:(j*sy + wy)])
+        True
+        """
+
+    from numbers import Integral
     from numpy.lib.stride_tricks import as_strided
-    in_shape = np.array(arr.shape[-len(steps):])  # [x, (...), z]
-    window_shape = np.array(window_shape)  # [Wx, (...), Wz]
-    steps = np.array(steps)  # [Sx, (...), Sz]
-    nbytes = arr.strides[-1]  # size (bytes) of an element in `arr`
+    import numpy as np
 
-    # number of per-byte steps to take to fill window
-    window_strides = tuple(np.cumprod(arr.shape[:0:-1])[::-1]) + (1,)
-    # number of per-byte steps to take to place window
-    step_strides = tuple(window_strides[-len(steps):] * steps)
-    # number of bytes to step to populate sliding window view
-    strides = tuple(int(i) * nbytes for i in step_strides + window_strides)
+    step = tuple(int(step) for i in range(len(window_shape))) if isinstance(step, Integral) else tuple(step)
+    assert all(isinstance(i, Integral) and i > 0 for i in step), "`step` be a sequence of positive integers"
 
-    outshape = tuple((in_shape - window_shape) // steps + 1)
-    # outshape: ([X, (...), Z], ..., [Sx, (...), Sz])
-    outshape = outshape + arr.shape[:-len(steps)] + tuple(window_shape)
-    return as_strided(arr, shape=outshape, strides=strides, writeable=False)
+    window_shape = tuple(window_shape)
+    if not all(isinstance(i, Integral) and i > 0 for i in window_shape):
+        msg = "`window_shape` be a sequence of positive integers"
+        raise AssertionError(msg)
+
+    if len(window_shape) > arr.ndim:
+        msg = """ `window_shape` cannot specify more values than `arr.ndim`."""
+        raise AssertionError(msg)
+
+    if any(i > j for i, j in zip(window_shape[::-1], arr.shape[::-1])):
+        msg = """ The window must fit within the trailing dimensions of `arr`."""
+        raise AssertionError(msg)
+
+    if dilation is None:
+        dilation = np.ones((len(window_shape),), dtype=int)
+    else:
+        if isinstance(dilation, Integral):
+            dilation = tuple(int(dilation) for i in range(len(window_shape)))
+        else:
+            np.asarray(dilation)
+            assert all(isinstance(i, Integral) for i in dilation)
+            if any(w * d > s for w, d, s in zip(window_shape[::-1], dilation[::-1], arr.shape[::-1])):
+                msg = """ The dilated window must fit within the trailing dimensions of `arr`."""
+                raise AssertionError(msg)
+
+    step = np.array(step)  # (Sx, ..., Sz)
+    window_shape = np.array(window_shape)  # (Wx, ..., Wz)
+    in_shape = np.array(arr.shape[-len(step):])  # (x, ... , z)
+    nbyte = arr.strides[-1]  # size, in bytes, of element in `arr`
+
+    # per-byte strides required to fill a window
+    win_stride = tuple(np.cumprod(arr.shape[:0:-1])[::-1]) + (1,)
+
+    # per-byte strides required to advance the window
+    step_stride = tuple(win_stride[-len(step):] * step)
+
+    # update win_stride to accommodate dilation
+    win_stride = np.array(win_stride)
+    win_stride[-len(step):] *= dilation
+    win_stride = tuple(win_stride)
+
+    # tuple of bytes to step to traverse corresponding dimensions of view
+    # see: 'internal memory layout of an ndarray'
+    stride = tuple(int(nbyte * i) for i in step_stride + win_stride)
+
+    # number of window placements along x-dim: X = (x - (Wx - 1)*Dx + 1) // Sx + 1
+    out_shape = tuple((in_shape - ((window_shape - 1) * dilation + 1)) // step + 1)
+
+    # ([X, (...), Z], ..., [Wx, (...), Wz])
+    out_shape = out_shape + arr.shape[:-len(step)] + tuple(window_shape)
+    out_shape = tuple(int(i) for i in out_shape)
+
+    return as_strided(arr, shape=out_shape, strides=stride, writeable=False)
 
 
 
