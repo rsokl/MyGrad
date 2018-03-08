@@ -35,11 +35,11 @@ class MaxPoolND(Operation):
             window cannot extend passed the "boundaries" of the data in the H and W
             dimensions.
             """
-        self.a = x  # data: ((N0, ...), C0, ...) # TODO: copy data!!
-        x = x.data
+        self.a = x  # data: ((N0, ...), C0, ...)
+        x = np.copy(x.data)  # prevent window-view weirdness with views
 
         pool = np.asarray(pool, dtype=int)
-        assert all(i > -1 for i in pool)  # TODO: Check if 0-pool dim is valid..
+        assert all(i > 0 for i in pool)
         assert x.ndim >= len(pool), "The number of pooled dimensions cannot exceed the dimensionality of the data."
         
         stride = np.array([stride]*len(pool)) if isinstance(stride, Integral) else np.asarray(stride, dtype=int)
