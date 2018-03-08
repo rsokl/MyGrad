@@ -169,16 +169,15 @@ def test_conv2d_fwd():
         x = np.arange(1, 13).reshape(1, 1, 3, 4)
         k = -1 * np.arange(1, 5).reshape(1, 1, 2, 2)
 
-        o = conv2d(Tensor(x), k, [1, 2], 0, memory_constrained=mem_constr)
+        o = conv2d(Tensor(x), k, [1, 2], 0)
 
         out = np.array([[[[-44.,  -64.],
                           [-84., -104.]]]])
         assert isinstance(o, Tensor) and not o.constant and not o.scalar_only and np.all(o.data == out)
 
 
-
-@given(st.data(), st.booleans(), st.choices(), st.choices(), st.choices())
-def test_conv2d(data, mem,  choice_1,  choice_2, choice_3):
+@given(st.data(), st.choices(), st.choices(), st.choices())
+def test_conv2d(data,  choice_1,  choice_2, choice_3):
 
     f = choice_1([1, 2, 3])
     c = choice_2([1, 2])
@@ -196,7 +195,7 @@ def test_conv2d(data, mem,  choice_1,  choice_2, choice_3):
 
     x = Tensor(dat)
     w = Tensor(w_dat)
-    f = conv2d(x, w, stride, pad, memory_constrained=mem)
+    f = conv2d(x, w, stride, pad)
 
     b = np.zeros((w.shape[0],))
     out, _ = conv_forward_naive(dat, w_dat, b, {'stride': stride, 'pad': pad})
