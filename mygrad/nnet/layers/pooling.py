@@ -9,18 +9,25 @@ class MaxPoolND(Operation):
     def __call__(self, x, pool, stride):
         """ Perform max-pooling over the last N dimensions of a data batch.
 
+            Extended Summary
+            ----------------
+            The data consists of N trailing axes to be pooled over, denoted by `C0, ...`. These
+            can be preceded, optionally, by un-pooled axes, denoted by `(N0, ...)`. The dimensions
+            of the window over which pooling is performed is denoted by `P0, ...`. The window
+            is placed with stride values `S0, ...`.
+
+            Ultimately the pooled channels have a shape `C0', ...`.
+
             Parameters
             ----------
             x : mygrad.Tensor, shape=([(N0, ...), C0, ...])
                 The data batch; to be pooled along the H and W axes
 
-            pool : Tuple[Integral, ...]
-                (P0, ...)
-
+            pool : Tuple[Integral, ...], (P0, ...)
                 The extent of the pooling window along the (C0, ...) axes, respectively. The
                 length of `pool` determines N - the number of trailing dimensions to pool over.
 
-            stride : Union[Integral, Tuple[Integral, ...]]
+            stride : Union[Integral, Tuple[Integral, ...]], (S0, ...)
                 The spacing used to place the pooling window, along (P0, ...) axes, respectively.
                 If a single value is provided, it is used for all N pooling axes.
 
@@ -28,6 +35,17 @@ class MaxPoolND(Operation):
             -------
             numpy.ndarray, shape=((N0, ...), C0', ...)
                 The pooled data batch.
+
+            Examples
+            --------
+            >>> import numpy as np
+            >>> from mygrad.nnet.layers import max_pool
+            >>> x = np.random.rand(10, 3, 12, 12)
+            >>> pool = (2, 2)   # 2x2 pooling over the last axes
+            >>> stride = (2, 1) # Apply 2x1 stride
+            >>> out = max_pool(x, pool, stride)
+            >>> out.shape
+            (10, 3, 6, 11)
 
             Notes
             -----
@@ -45,8 +63,8 @@ class MaxPoolND(Operation):
         stride = np.array([stride]*len(pool)) if isinstance(stride, Integral) else np.asarray(stride, dtype=int)
         assert len(stride) == len(pool) and all(s >= 1 and isinstance(s, Integral) for s in stride)
 
-        self.pool = pool
-        self.stride = stride
+        self.pool = pool      # (P0, ...)
+        self.stride = stride  # (S0, ...)
 
         num_pool = len(pool)
         num_no_pool = x.ndim - num_pool
