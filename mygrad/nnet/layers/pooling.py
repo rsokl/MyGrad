@@ -1,5 +1,5 @@
-from ...operations.operation_base import Operation
-from ...tensor_base import Tensor
+from mygrad.operations.operation_base import Operation
+from mygrad.tensor_base import Tensor
 import numpy as np
 from numbers import Integral
 from mygrad.nnet.layers.utils import im2col, col2im, sliding_window_view
@@ -43,7 +43,7 @@ class MaxPoolND(Operation):
         assert x.ndim >= len(pool), "The number of pooled dimensions cannot exceed the dimensionality of the data."
         
         stride = np.array([stride]*len(pool)) if isinstance(stride, Integral) else np.asarray(stride, dtype=int)
-        assert len(stride) == len(pool) and np.all(stride >= 1) #and np.issubdtype(stride.dtype, int)
+        assert len(stride) == len(pool) and all(s >= 1 and isinstance(s, Integral) for s in stride)
 
         self.pool = pool
         self.stride = stride

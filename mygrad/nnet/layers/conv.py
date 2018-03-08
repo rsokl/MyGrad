@@ -1,5 +1,5 @@
-from ...operations.operation_base import Operation
-from ...tensor_base import Tensor
+from mygrad.operations.operation_base import Operation
+from mygrad.tensor_base import Tensor
 import numpy as np
 from numbers import Integral
 from mygrad.nnet.layers.utils import sliding_window_view
@@ -21,10 +21,10 @@ class Conv2D(Operation):
         w_shape = np.array(w.shape[2:])
 
         padding = np.array((padding, padding)) if isinstance(padding, Integral) else np.array(padding, dtype=int)
-        assert len(padding) == 2 and np.all(padding >= 0) and np.issubdtype(padding.dtype, np.int)
+        assert len(padding) == 2 and all(p >= 0 and isinstance(p, Integral) for p in padding)
 
         stride = np.array((stride, stride)) if isinstance(stride, Integral) else np.asarray(stride, dtype=int)
-        assert len(stride) == 2 and np.all(stride >= 1) and np.issubdtype(stride.dtype, np.int)
+        assert len(stride) == 2 and all(s >= 1 and isinstance(s, Integral) for s in stride)
 
         out_shape = (x_shape + 2 * padding - w_shape) / stride + 1
 
