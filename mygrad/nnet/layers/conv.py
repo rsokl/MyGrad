@@ -100,7 +100,7 @@ class Conv2D(Operation):
         self.b.backward(df)
 
 
-def conv2d(x, filter_bank, stride, padding=(0, 0), memory_constrained=False):
+def conv2d(x, filter_bank, stride, padding=(0, 0)):
     """ Use `filter_bank` to perform strided 2D convolutions
        (see Notes) over `x`.
 
@@ -133,14 +133,6 @@ def conv2d(x, filter_bank, stride, padding=(0, 0), memory_constrained=False):
             the H-dimension and the W-dimension, respectively,
             for each datum in the batch. If a single integer is
             provided, this padding is used for both axes
-
-        memory_constrained : Bool, optional (default=False)
-            By default, a 'stretched' version of the data batch
-            (see Notes) is cached after the convolution is performed,
-            for use when performing `backward`.
-
-            Setting this to False will forego caching, at the expense
-            of some computation time during `backward`.
 
         Returns
         -------
