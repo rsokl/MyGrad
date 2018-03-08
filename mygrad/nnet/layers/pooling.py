@@ -2,7 +2,7 @@ from mygrad.operations.operation_base import Operation
 from mygrad.tensor_base import Tensor
 import numpy as np
 from numbers import Integral
-from mygrad.nnet.layers.utils import im2col, col2im, sliding_window_view
+from mygrad.nnet.layers.utils import sliding_window_view
 
 
 class MaxPoolND(Operation):
