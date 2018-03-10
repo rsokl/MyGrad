@@ -20,3 +20,4 @@ from .inverse_trig import *
 from .logaddexp import *
 from .square_root import *
 from .trigonometric import *
+from .exp import *
