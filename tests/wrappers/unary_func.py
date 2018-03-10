@@ -8,7 +8,7 @@ import numpy as np
 from functools import wraps
 
 
-class fwdprop_test():
+class fwdprop_test_factory():
     def __init__(self, *, mygrad_op, true_func, xbnds=(-100, 100), no_go=()):
 
         self.op = mygrad_op
@@ -27,13 +27,16 @@ class fwdprop_test():
                 assume(np.all(x != value))
 
             o = self.op(x)
+            tensor_out = o.data
+            true_out = self.true_func(x)
             assert isinstance(o, Tensor)
-            assert np.allclose(o.data, self.true_func(x))
+            assert np.allclose(tensor_out, true_out)
         return wrapper
 
 
-class backprop_test():
-    def __init__(self, *, mygrad_op, true_func=None, xbnds=(-100, 100), no_go=(), h=1e-8, rtol=1e-05, atol=1e-08):
+class backprop_test_factory():
+    def __init__(self, *, mygrad_op, true_func=None, xbnds=(-100, 100), no_go=(),
+                 h=1e-8, rtol=1e-05, atol=1e-08):
 
         self.op = mygrad_op
         self.func = true_func if true_func is not None else lambda x: mygrad_op(float(x)).data.item()
@@ -46,19 +49,18 @@ class backprop_test():
         @given(st.data())
         @wraps(f)
         def wrapper(data):
-            from hypothesis import note
-            # sampled x coord, and df/fx evaluated at x (numerically)
-            # both are of type Decimal
-            x, dx = data.draw(numerical_derivative(self.func, xbnds=[0, 100], no_go=(0,)))
-
             # gradient to be backpropped through this operation
             grad = data.draw(st.decimals(min_value=-100, max_value=100))
 
-            # compute df/dx via mygrad (`var.grad`)
+            # sampled x coord, and df/fx evaluated at x (numerically)
+            # both are of type Decimal
+            x, dx = data.draw(numerical_derivative(self.func, xbnds=[0, 100], no_go=(0,)))
+            numerical_grad = float(dx * grad)
+
+            # compute df/dx via mygrad
             var = Tensor(float(x))
             self.op(var).backward(float(grad))
-            var_grad = var.grad.item()
-            note(f"dx * grad: {float(dx * grad)}")
-            note(f"grad: {var_grad}")
-            assert np.isclose(float(dx * grad), var_grad, **self.tolerances)
+            tensor_grad = var.grad.item()
+
+            assert np.isclose(numerical_grad, tensor_grad, **self.tolerances)
         return wrapper
