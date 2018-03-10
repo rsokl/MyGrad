@@ -20,7 +20,9 @@ def test_cos_fwd(): pass
 def test_cos_backward(): pass
 
 
-@fwdprop_test(mygrad_op=tan, true_func=np.tan, xbnds=(-np.pi/2, np.pi/2), no_go=(-np.pi/2, np.pi/2))
+@fwdprop_test(mygrad_op=tan, true_func=np.tan,
+              xbnds=(-np.pi/2, np.pi/2),
+              no_go=(-np.pi/2, np.pi/2))
 def test_tan_fwd(): pass
 
 
