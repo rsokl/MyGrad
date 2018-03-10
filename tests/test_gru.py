@@ -9,14 +9,14 @@ import hypothesis.extra.numpy as hnp
 
 import numpy as np
 
-@given(st.data(), st.choices())
-def test_gru_fwd(data, choice):
+@given(st.data())
+def test_gru_fwd(data):
     X = data.draw(hnp.arrays(shape=hnp.array_shapes(max_side=5, min_dims=3, max_dims=3),
                              dtype=float,
                              elements=st.floats(-10, 10)))
     T, N, C = X.shape
-    D = choice(list(range(1, 5)))
-    dropout = choice([0, .33])
+    D = data.draw(st.sampled_from(list(range(1, 5))))
+    dropout = data.draw(st.sampled_from([0, .33]))
 
 
     Wz = data.draw(hnp.arrays(shape=(D, D),
@@ -151,55 +151,55 @@ def test_gru_fwd(data, choice):
         assert x.grad is None
 
 
-@given(st.data(), st.choices())
-def test_gru_backward(data, choice):
+@given(st.data())
+def test_gru_backward(data):
     X = data.draw(hnp.arrays(shape=hnp.array_shapes(max_side=5, min_dims=3, max_dims=3),
                              dtype=float,
                              elements=st.floats(-10, 10)))
     T, N, C = X.shape
-    D = choice(list(range(1, 5)))
-    dropout = choice([0, .33])
+    D = data.draw(st.sampled_from(list(range(1, 5))))
+    dropout = data.draw(st.sampled_from([0, .33]))
+
 
     Wz = data.draw(hnp.arrays(shape=(D, D),
-                             dtype=float,
-                             elements=st.floats(-10.0, 10.0)))
+                              dtype=float,
+                              elements=st.floats(-10.0, 10.0)))
 
     Uz = data.draw(hnp.arrays(shape=(C, D),
-                             dtype=float,
-                             elements=st.floats(-10.0, 10.0)))
+                              dtype=float,
+                              elements=st.floats(-10.0, 10.0)))
 
     bz = data.draw(hnp.arrays(shape=(D,),
-                             dtype=float,
-                             elements=st.floats(-10.0, 10.0)))
+                              dtype=float,
+                              elements=st.floats(-10.0, 10.0)))
 
     Wr = data.draw(hnp.arrays(shape=(D, D),
-                             dtype=float,
-                             elements=st.floats(-10.0, 10.0)))
+                              dtype=float,
+                              elements=st.floats(-10.0, 10.0)))
 
     Ur = data.draw(hnp.arrays(shape=(C, D),
-                             dtype=float,
-                             elements=st.floats(-10.0, 10.0)))
+                              dtype=float,
+                              elements=st.floats(-10.0, 10.0)))
 
     br = data.draw(hnp.arrays(shape=(D,),
-                             dtype=float,
-                             elements=st.floats(-10.0, 10.0)))
+                              dtype=float,
+                              elements=st.floats(-10.0, 10.0)))
 
     Wh = data.draw(hnp.arrays(shape=(D, D),
-                             dtype=float,
-                             elements=st.floats(-10.0, 10.0)))
+                              dtype=float,
+                              elements=st.floats(-10.0, 10.0)))
 
     Uh = data.draw(hnp.arrays(shape=(C, D),
-                             dtype=float,
-                             elements=st.floats(-10.0, 10.0)))
+                              dtype=float,
+                              elements=st.floats(-10.0, 10.0)))
 
     bh = data.draw(hnp.arrays(shape=(D,),
-                             dtype=float,
-                             elements=st.floats(-10.0, 10.0)))
+                              dtype=float,
+                              elements=st.floats(-10.0, 10.0)))
 
     V = data.draw(hnp.arrays(shape=(D, C),
                              dtype=float,
                              elements=st.floats(-10.0, 10.0)))
-
 
     s0 = np.zeros((N, D), dtype=float)
 
@@ -243,7 +243,6 @@ def test_gru_backward(data, choice):
     o = dense(s[1:], V)
     ls = o.sum()
     ls.backward()
-
 
     stt = s2
     all_s = [s0.data]

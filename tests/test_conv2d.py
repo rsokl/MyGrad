@@ -176,14 +176,14 @@ def test_conv2d_fwd():
         assert isinstance(o, Tensor) and not o.constant and not o.scalar_only and np.all(o.data == out)
 
 
-@given(st.data(), st.choices(), st.choices(), st.choices())
-def test_conv2d(data,  choice_1,  choice_2, choice_3):
+@given(st.data())
+def test_conv2d(data):
 
-    f = choice_1([1, 2, 3])
-    c = choice_2([1, 2])
+    f = data.draw(st.sampled_from([1, 2, 3]))
+    c = data.draw(st.sampled_from([1, 2]))
 
-    #w, pad, stride
-    ws, pad, stride = choice_3([(1, 0, 4), (1, 0, 1), (3, 1, 2), (5, 0, 1)])
+    # w, pad, stride
+    ws, pad, stride = data.draw(st.sampled_from([(1, 0, 4), (1, 0, 1), (3, 1, 2), (5, 0, 1)]))
 
     dat = data.draw(hnp.arrays(shape=(2, c, 5, 5),
                                dtype=float,
