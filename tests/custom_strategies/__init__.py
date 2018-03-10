@@ -6,6 +6,7 @@ from decimal import Decimal, getcontext
 
 getcontext().prec = 14
 
+
 @st.composite
 def numerical_derivative(draw, f, xbnds=(-100, 100), no_go=(), h=1e-8):
     """ Hypothesis search strategy: Sample x from specified bounds,
@@ -16,6 +17,9 @@ def numerical_derivative(draw, f, xbnds=(-100, 100), no_go=(), h=1e-8):
         Returning a search-strategy for: (x, dfdx)
 
         Makes use of `decimal.Decimal` for high-precision arithmetic.
+
+        Note: The parameter `draw` is reserved for use by `hypothesis` - thus it
+              it excluded from the function signature.
 
         Parameters
         ----------
