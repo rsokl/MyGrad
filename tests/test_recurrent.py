@@ -21,7 +21,7 @@ def test_recurrent(data, choice):
     s0 = data.draw(hnp.arrays(shape=(N, D),
                               dtype=float,
                               elements=st.floats(0.0, 0.0)))
-    
+
     W = data.draw(hnp.arrays(shape=(D, D),
                              dtype=float,
                              elements=st.floats(-10.0, 10.0)))
@@ -81,4 +81,3 @@ def test_recurrent(data, choice):
     ls.null_gradients()
     for x in [s, W, X, U, V]:
         assert x.grad is None
-

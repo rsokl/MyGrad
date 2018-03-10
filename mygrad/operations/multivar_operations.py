@@ -33,11 +33,9 @@ class MultiVarOperation:
 class MultiVarBroadcastableOp(MultiVarOperation):
     """ Experimental! Permits arbitrary number of tensor operands.
         A subclass of Operation that allows for back-propagation through broadcasted operations.
-
         If broadcasting occurs with a non-constant tensor, then MyGrad's back-propagation system
         requires that the computational graph's terminal node, which triggers the back-propagation,
         is a scalar.
-
         Broadcastable operations must run `broadcast_check` during __call__.
         (see `Add` for an example)"""
 
@@ -45,10 +43,8 @@ class MultiVarBroadcastableOp(MultiVarOperation):
         """ Given {a, b, ...} and the shape of op(a, b, ...), detect if any non-constant Tensor undergoes
             broadcasting via f. If so, set op.scalar_only to True, and record the broadcasted
             axes for each such tensor.
-
             Broadcast-incompatible shapes need not be accounted for by this function, since
             the shape of f(a, b, ...) must already be known.
-
             Parameters
             ----------
             variables : Sequence[mygrad.Tensor]
