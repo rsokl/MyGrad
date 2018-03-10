@@ -24,14 +24,13 @@ class Sum(Operation):
             self.a.backward(np.full(self.a.shape, grad, dtype=float))
             return None
 
-        if self.keepdims:
-            self.a.backward(grad * np.ones_like(self.a.data, dtype=float))
-            return None
+        if not self.keepdims:
+            index = [slice(None) for i in range(self.a.ndim)]
+            for i in self.axis:
+                index[i] = np.newaxis
+            grad = grad[index]
 
-        index = [slice(None) for i in range(self.a.ndim)]
-        for i in self.axis:
-            index[i] = np.newaxis
-        self.a.backward(grad[index] * np.ones_like(self.a.data, dtype=float))
+        self.a.backward(np.broadcast_to(grad, self.a.data.shape).astype(float))
 
 
 class Mean(Sum):
