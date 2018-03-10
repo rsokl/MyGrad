@@ -17,11 +17,11 @@ def test_min_fwd(keepdims, d):
     a = Tensor(a)
 
     np_out = a.data.min(axis=axes, keepdims=keepdims)
-    pygrad_out = a.min(axis=axes, keepdims=keepdims).data
-    if pygrad_out.ndim == 0:
-        pygrad_out = np.asscalar(pygrad_out)
+    mygrad_out = a.min(axis=axes, keepdims=keepdims).data
+    if mygrad_out.ndim == 0:
+        mygrad_out = np.asscalar(mygrad_out)
 
-    assert np.allclose(np_out, pygrad_out)
+    assert np.allclose(np_out, mygrad_out)
 
 
 @given(fill_val=st.floats(min_value=-100, max_value=100),

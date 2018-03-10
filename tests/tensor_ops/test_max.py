@@ -17,11 +17,11 @@ def test_max_fwd(keepdims, d):
     a = Tensor(a)
 
     np_out = a.data.max(axis=axes, keepdims=keepdims)
-    pygrad_out = a.max(axis=axes, keepdims=keepdims).data
-    if pygrad_out.ndim == 0:
-        pygrad_out = np.asscalar(pygrad_out)
+    mygrad_out = a.max(axis=axes, keepdims=keepdims).data
+    if mygrad_out.ndim == 0:
+        mygrad_out = np.asscalar(mygrad_out)
 
-    assert np.allclose(np_out, pygrad_out)
+    assert np.allclose(np_out, mygrad_out)
 
 
 @given(fill_val=st.floats(min_value=-100, max_value=100),
@@ -59,8 +59,6 @@ def test_degenerate_max_back(fill_val, shape, keepdims, d):
         shape = a.data.max(axis=axes).shape
         grad[index] = np.arange(1, 1 + out.data.size).reshape(shape)
         assert np.allclose(grad, a.grad)
-
-
 
 
 @given(keepdims=st.booleans(),

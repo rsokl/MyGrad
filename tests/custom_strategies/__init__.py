@@ -5,7 +5,9 @@ import hypothesis.strategies as st
 def choices(seq, size, replace=True):
     """Randomly choose elements from `seq`, producing a tuple of length `size`."""
     if size > len(seq) and not replace:
-        raise ValueError("`size` must not exceed the length of `seq`")
+        raise ValueError("`size` must not exceed the length of `seq` when `replace` is `False`")
+    if size > len(seq) and not seq:
+        raise ValueError("`size` must be 0, given an empty `seq`")
     inds = range(len(seq))
     strat = st.tuples(*[st.sampled_from(inds)]*size)
     if not replace:
