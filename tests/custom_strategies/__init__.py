@@ -47,5 +47,5 @@ def valid_axes(draw, ndim, pos_only=False):
     num_axes = draw(st.integers(min_value=0, max_value=ndim))
     axes = draw(choices(range(ndim), num_axes, replace=False))
     if not pos_only:
-        return draw(rand_neg_axis(axes, ndim))
+        axes = draw(rand_neg_axis(axes, ndim))
     return draw(st.none()) if not axes else axes
