@@ -1,23 +1,20 @@
 from mygrad.tensor_base import Tensor
-
+from ..custom_strategies import valid_axes
 import numpy as np
 import hypothesis.strategies as st
 from hypothesis import given
 import hypothesis.extra.numpy as hnp
 
 
-@given(a=hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=5),
-                    dtype=float,
-                    elements=st.floats(-100, 100)),
-       num_axes=st.integers(min_value=0, max_value=5),
-       keepdims=st.booleans()
+@given(keepdims=st.booleans(),
+       d=st.data()
        )
-def test_max_fwd(a, num_axes, keepdims):
+def test_max_fwd(keepdims, d):
+    a = d.draw(hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=5),
+                          dtype=float,
+                          elements=st.floats(-100, 100)))
+    axes = d.draw(valid_axes(a.ndim))
     a = Tensor(a)
-    if num_axes == 0:
-        axes = None
-    else:
-        axes = tuple(np.random.choice(range(0, a.ndim), size=min(num_axes, a.ndim), replace=False))
 
     np_out = a.data.max(axis=axes, keepdims=keepdims)
     pygrad_out = a.max(axis=axes, keepdims=keepdims).data
@@ -26,30 +23,16 @@ def test_max_fwd(a, num_axes, keepdims):
 
     assert np.allclose(np_out, pygrad_out)
 
-    if num_axes:
-        neg_axes = tuple(np.random.choice(range(-a.ndim, 0), size=min(num_axes, a.ndim), replace=False))
-        np_out = a.data.max(axis=neg_axes, keepdims=keepdims)
-        pygrad_out = a.max(axis=neg_axes, keepdims=keepdims).data
-
-        if pygrad_out.ndim == 0:
-            pygrad_out = np.asscalar(pygrad_out)
-
-        assert np.allclose(np_out, pygrad_out)
-
 
 @given(fill_val=st.floats(min_value=-100, max_value=100),
        shape=hnp.array_shapes(max_side=3, max_dims=5),
-       num_axes=st.integers(min_value=0, max_value=5),
-       keepdims=st.booleans()
+       keepdims=st.booleans(),
+       d=st.data()
        )
-def test_degenerate_max_back(fill_val, shape, num_axes, keepdims):
+def test_degenerate_max_back(fill_val, shape, keepdims, d):
     """ test max backprop for degenerate-valued tensors"""
     a = Tensor(np.full(shape=shape, fill_value=fill_val, dtype=float))
-
-    if num_axes == 0:
-        axes = None
-    else:
-        axes = tuple(np.random.choice(range(0, a.ndim), size=min(num_axes, a.ndim), replace=False))
+    axes = d.draw(valid_axes(a.ndim))
 
     out = a.max(axis=axes, keepdims=keepdims)
     out2 = out * np.arange(1, 1 + out.data.size).reshape(out.shape)
@@ -78,26 +61,24 @@ def test_degenerate_max_back(fill_val, shape, num_axes, keepdims):
         assert np.allclose(grad, a.grad)
 
 
-@given(a=hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=5),
-                    dtype=float,
-                    elements=st.floats(-100, -100)),
-       num_axes=st.integers(min_value=0, max_value=5),
-       keepdims=st.booleans()
+
+
+@given(keepdims=st.booleans(),
+       d=st.data()
        )
-def test_max_back(a, num_axes, keepdims):
-    """ Test Tensor.max for arbitrary data, axis, and keepdim"""
-    if num_axes == 0:
-        axes = None
-    else:
-        axes = np.random.choice(range(0, a.ndim), size=min(num_axes, a.ndim), replace=False)
-        axes = tuple(sorted(axes))
+def test_max_back(keepdims, d):
+    a = d.draw(hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=5),
+                          dtype=float,
+                          elements=st.floats(-100, 100)))
+    axes = d.draw(valid_axes(a.ndim, pos_only=True))
+    a = Tensor(a)
 
     # single global maximum
-    if axes is None or axes == tuple(range(a.ndim)):
+    if axes is None or tuple(sorted(axes)) == tuple(range(a.ndim)):
         index = tuple(np.random.choice(i.flat) for i in np.indices(a.shape))
         a[index] = a.max() + 1
 
-        grad = np.zeros_like(a)
+        grad = np.zeros_like(a.data)
         grad[index] = 1
 
         a = Tensor(a)

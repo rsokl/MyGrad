@@ -2,6 +2,7 @@ from mygrad.tensor_base import Tensor
 from mygrad.math import multiply_sequence, add_sequence
 import numpy as np
 
+
 def test_seq_add():
     a = Tensor(3)
     b = Tensor([1, 2, 3])
