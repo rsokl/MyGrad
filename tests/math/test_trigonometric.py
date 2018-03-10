@@ -1,182 +1,57 @@
-from mygrad.tensor_base import Tensor
+from ..wrappers.unary_func import fwdprop_test, backprop_test
 from mygrad.math import sin, cos, tan, csc, sec, cot
-
-import hypothesis.strategies as st
-from hypothesis import given
-import hypothesis.extra.numpy as hnp
 
 import numpy as np
 
 
-@given(st.data())
-def test_sin_fwd(data):
-    a = data.draw(hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=3),
-                             dtype=float,
-                             elements=st.floats(0.1, 10)))
-
-    result = np.sin(a)
-
-    o = sin(a)
-    assert isinstance(o, Tensor)
-    assert np.allclose(o.data, result)
+@fwdprop_test(mygrad_op=sin, true_func=np.sin)
+def test_sin_fwd(): pass
 
 
-@given(st.data())
-def test_sin_backward(data):
-    x = data.draw(hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=3),
-                             dtype=float,
-                             elements=st.floats(0.1, 100)))
-
-    grad = data.draw(hnp.arrays(shape=x.shape,
-                                dtype=float,
-                                elements=st.floats(-10, 10)))
-
-    a = Tensor(x)
-    c = sin(a)
-    c.backward(grad)
-    assert np.allclose(a.grad, grad * np.cos(x))
+@backprop_test(mygrad_op=sin)
+def test_sin_backward(): pass
 
 
-@given(st.data())
-def test_cos_fwd(data):
-    a = data.draw(hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=3),
-                             dtype=float,
-                             elements=st.floats(0.1, 10)))
-
-    result = np.cos(a)
-
-    o = cos(a)
-    assert isinstance(o, Tensor)
-    assert np.allclose(o.data, result)
+@fwdprop_test(mygrad_op=cos, true_func=np.cos)
+def test_cos_fwd(): pass
 
 
-@given(st.data())
-def test_cos_backward(data):
-    x = data.draw(hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=3),
-                             dtype=float,
-                             elements=st.floats(0.1, 100)))
-
-    grad = data.draw(hnp.arrays(shape=x.shape,
-                                dtype=float,
-                                elements=st.floats(-10, 10)))
-
-    a = Tensor(x)
-    c = cos(a)
-    c.backward(grad)
-    assert np.allclose(a.grad, grad * -np.sin(x))
+@backprop_test(mygrad_op=cos)
+def test_cos_backward(): pass
 
 
-@given(st.data())
-def test_tan_fwd(data):
-    a = data.draw(hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=3),
-                             dtype=float,
-                             elements=st.floats(0.1, 10)))
-
-    result = np.tan(a)
-
-    o = tan(a)
-    assert isinstance(o, Tensor)
-    assert np.allclose(o.data, result)
+@fwdprop_test(mygrad_op=tan, true_func=np.tan, xbnds=(-np.pi/2, np.pi/2), no_go=(-np.pi/2, np.pi/2))
+def test_tan_fwd(): pass
 
 
-@given(st.data())
-def test_tan_backward(data):
-    x = data.draw(hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=3),
-                             dtype=float,
-                             elements=st.floats(0.1, 100)))
-
-    grad = data.draw(hnp.arrays(shape=x.shape,
-                                dtype=float,
-                                elements=st.floats(-10, 10)))
-
-    a = Tensor(x)
-    c = tan(a)
-    c.backward(grad)
-    assert np.allclose(a.grad, grad / np.cos(x) ** 2)
+@backprop_test(mygrad_op=tan, xbnds=(-np.pi/1.5, np.pi/1.5))
+def test_tan_backward(): pass
 
 
-@given(st.data())
-def test_csc_fwd(data):
-    a = data.draw(hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=3),
-                             dtype=float,
-                             elements=st.floats(0.1, 10)))
-
-    result = 1 / np.sin(a)
-
-    o = csc(a)
-    assert isinstance(o, Tensor)
-    assert np.allclose(o.data, result)
+@fwdprop_test(mygrad_op=csc, true_func=lambda x: 1 / np.sin(x), 
+              xbnds=(0, np.pi), no_go=(0, np.pi))
+def test_csc_fwd(): pass
 
 
-@given(st.data())
-def test_csc_backward(data):
-    x = data.draw(hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=3),
-                             dtype=float,
-                             elements=st.floats(0.1, 100)))
-
-    grad = data.draw(hnp.arrays(shape=x.shape,
-                                dtype=float,
-                                elements=st.floats(-10, 10)))
-
-    a = Tensor(x)
-    c = csc(a)
-    c.backward(grad)
-    assert np.allclose(a.grad, grad * -np.cos(x) / np.sin(x) ** 2)
+@backprop_test(mygrad_op=csc, xbnds=(0, np.pi), no_go=(0, np.pi))
+def test_csc_backward(): pass
 
 
-@given(st.data())
-def test_sec_fwd(data):
-    a = data.draw(hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=3),
-                             dtype=float,
-                             elements=st.floats(0.1, 10)))
-
-    result = 1 / np.cos(a)
-
-    o = sec(a)
-    assert isinstance(o, Tensor)
-    assert np.allclose(o.data, result)
+@fwdprop_test(mygrad_op=sec, true_func=lambda x: 1 / np.cos(x),
+              xbnds=(-np.pi/2, np.pi/2),
+              no_go=(-np.pi/2, np.pi/2))
+def test_sec_fwd(): pass
 
 
-@given(st.data())
-def test_sec_backward(data):
-    x = data.draw(hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=3),
-                             dtype=float,
-                             elements=st.floats(0.1, 100)))
-
-    grad = data.draw(hnp.arrays(shape=x.shape,
-                                dtype=float,
-                                elements=st.floats(-10, 10)))
-
-    a = Tensor(x)
-    c = sec(a)
-    c.backward(grad)
-    assert np.allclose(a.grad, grad * np.sin(x) / np.cos(x) ** 2)
+@backprop_test(mygrad_op=sec, xbnds=(-np.pi/2, np.pi/2), no_go=(-np.pi/2, np.pi/2))
+def test_sec_backward(): pass
 
 
-@given(st.data())
-def test_cot_fwd(data):
-    a = data.draw(hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=3),
-                             dtype=float,
-                             elements=st.floats(0.1, 10)))
-
-    result = 1 / np.tan(a)
-
-    o = cot(a)
-    assert isinstance(o, Tensor)
-    assert np.allclose(o.data, result)
+@fwdprop_test(mygrad_op=cot, true_func=lambda x: 1 / np.tan(x),
+              xbnds=(0, np.pi),
+              no_go=(0, np.pi))
+def test_cot_fwd(): pass
 
 
-@given(st.data())
-def test_cot_backward(data):
-    x = data.draw(hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=3),
-                             dtype=float,
-                             elements=st.floats(0.1, 100)))
-
-    grad = data.draw(hnp.arrays(shape=x.shape,
-                                dtype=float,
-                                elements=st.floats(-10, 10)))
-
-    a = Tensor(x)
-    c = cot(a)
-    c.backward(grad)
-    assert np.allclose(a.grad, grad / -np.sin(x) ** 2)
+@backprop_test(mygrad_op=cot, xbnds=(0, np.pi), no_go=(0, np.pi))
+def test_cot_backward(): pass
