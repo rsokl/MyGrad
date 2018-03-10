@@ -1,5 +1,5 @@
 from mygrad.tensor_base import Tensor
-from mygrad.math import logaddexp
+from mygrad.math import logaddexp, log, exp
 
 import hypothesis.strategies as st
 from hypothesis import given
@@ -36,38 +36,49 @@ def test_logaddexp_backward(data):
                                 elements=st.floats(-100, 100)))
 
     a = Tensor(x)
-    c = logaddexp(a, b)
-    c.backward(grad)
-    assert np.allclose(a.grad, grad * x / (np.exp(x) + np.exp(b)))
+    b = Tensor(b)
+    logaddexp(a, b).backward(grad)
 
-    a = Tensor(x)
-    c = logaddexp(b, a)
-    c.backward(grad)
-    assert np.allclose(a.grad, grad * x / (np.exp(x) + np.exp(b)))
+    a1 = Tensor(a)
+    b1 = Tensor(b)
+    log(exp(a1) + exp(b1)).backward(grad)
+
+    assert np.allclose(a.grad, a1.grad)
+    assert np.allclose(b.grad, b1.grad)
 
 
 def test_logaddexp_broadcast():
     a = Tensor([3])
     b = Tensor([1, 2, 3])
-    f = logaddexp(a, b)
-    g = f.sum(keepdims=False)
-    g.backward(-1)
+    out = logaddexp(a, b)
+    out.sum(keepdims=False).backward(-1)
 
-    assert np.allclose(f.data, np.logaddexp(a.data, b.data))
+    a1 = Tensor(a)
+    b1 = Tensor(b)
+    long_form = log(exp(a1) + exp(b1))
+    long_form.sum(keepdims=False).backward(-1)
+
+    assert np.allclose(out.data, np.logaddexp(a.data, b.data))
     assert a.grad.shape == (1,)
-    assert np.allclose(a.grad, -1 * np.array([sum(map(lambda x: 3 / (np.exp(3) + np.exp(x)), b.data))]))
+    assert np.allclose(a.grad, a1.grad)
     assert b.grad.shape == (3,)
-    assert np.allclose(b.grad, -1 * np.array(list(map(lambda x: x / (np.exp(3) + np.exp(x)), b.data))))
+    assert np.allclose(b.grad, b1.grad)
+
+    a = Tensor([1, 2, 3])
+    b = Tensor(2)
+
+    out = logaddexp(a, b)
+    out.sum(keepdims=False).backward(-1)
+
+    a1 = Tensor(a)
+    b1 = Tensor(b)
+    long_form = log(exp(a1) + exp(b1))
+    long_form.sum(keepdims=False).backward(-1)
+
+    assert np.allclose(out.data, np.logaddexp(a.data, b.data))
+    assert a.grad.shape == (3,)
+    assert np.allclose(a.grad, a1.grad)
+    assert b.grad.ndim == 0
+    assert np.allclose(b.grad, b1.grad)
 
 
-    b = Tensor([1, 2, 3])
-    c = Tensor(2)
-    f = logaddexp(b, c)
-    g = f.sum(keepdims=False)
-    g.backward(-1)
-
-    assert np.allclose(f.data, np.logaddexp(b.data, c.data))
-    assert b.grad.shape == (3,)
-    assert np.allclose(b.grad, -1 * np.array(list(map(lambda x: x / (np.exp(2) + np.exp(x)), b.data))))
-    assert c.grad.ndim == 0
-    assert np.allclose(c.grad, -1 * np.array(sum(map(lambda x: 2 / (np.exp(2) + np.exp(x)), b.data))))

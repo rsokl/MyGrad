@@ -24,6 +24,7 @@ __all__ = ["abs",
            "csc",
            "csch",
            "divide",
+           "exp",
            "log",
            "log2",
            "log10",
@@ -338,6 +339,19 @@ def divide(a, b):
         -------
         mygrad.Tensor"""
     return Tensor._op(Divide, a, b)
+
+
+def exp(a):
+    """ f(a)-> exp(a)
+
+        Parameters
+        ----------
+        a : Union[tensor-like, Number]
+
+        Returns
+        -------
+        mygrad.Tensor"""
+    return Tensor._op(Exp, a)
 
 
 def log(a):
