@@ -10,13 +10,13 @@ import hypothesis.extra.numpy as hnp
 import numpy as np
 
 
-@given(st.data(), st.choices())
-def test_recurrent(data, choice):
+@given(st.data())
+def test_recurrent(data):
     X = data.draw(hnp.arrays(shape=hnp.array_shapes(max_side=5, min_dims=3, max_dims=3),
                              dtype=float,
                              elements=st.floats(-10, 10)))
     T, N, C = X.shape
-    D = choice(list(range(1, 5)))
+    D = data.draw(st.sampled_from(list(range(1, 5))))
 
     s0 = data.draw(hnp.arrays(shape=(N, D),
                               dtype=float,
