@@ -46,7 +46,7 @@ class backprop_test():
         @given(st.data())
         @wraps(f)
         def wrapper(data):
-
+            from hypothesis import note
             # sampled x coord, and df/fx evaluated at x (numerically)
             # both are of type Decimal
             x, dx = data.draw(numerical_derivative(self.func, xbnds=[0, 100], no_go=(0,)))
@@ -58,5 +58,7 @@ class backprop_test():
             var = Tensor(float(x))
             self.op(var).backward(float(grad))
             var_grad = var.grad.item()
+            note(f"dx * grad: {float(dx * grad)}")
+            note(f"grad: {var_grad}")
             assert np.isclose(float(dx * grad), var_grad, **self.tolerances)
         return wrapper
