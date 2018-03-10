@@ -23,19 +23,19 @@ def test_arccosh_backward(): pass
 def test_arctanh_fwd(): pass
 
 
-@backprop_test_factory(mygrad_func=arctanh,  xbnds=(-0.5, 0,5), no_go=(1,))
+@backprop_test_factory(mygrad_func=arctanh,  xbnds=(-0.5, 0.5), no_go=(1,))
 def test_arctanh_backward(): pass
 
 
-@fwdprop_test_factory(mygrad_func=arccsch, true_func=lambda x: 1 / np.arcsinh(x), xbnds=(0.1, 10))
+@fwdprop_test_factory(mygrad_func=arccsch, true_func=lambda x: np.arcsinh(1 / x), xbnds=(1, 10))
 def test_arccsch_fwd(): pass
 
 
-@backprop_test_factory(mygrad_func=arccsch, xbnds=(0.1, 10))
+@backprop_test_factory(mygrad_func=arccsch, xbnds=(1, 10))
 def test_arccsch_backward(): pass
 
 
-@fwdprop_test_factory(mygrad_func=arcsech, true_func=lambda x: 1 / np.arccosh(x), xbnds=(1.5, 10))
+@fwdprop_test_factory(mygrad_func=arcsech, true_func=lambda x: np.arccosh(1 / x), xbnds=(1.5, 10))
 def test_arcsech_fwd(): pass
 
 

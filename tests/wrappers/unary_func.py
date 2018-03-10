@@ -54,7 +54,7 @@ class backprop_test_factory():
 
             # sampled x coord, and df/fx evaluated at x (numerically)
             # both are of type Decimal
-            x, dx = data.draw(numerical_derivative(self.func, xbnds=self.xbnds, no_go=(0,)))
+            x, dx = data.draw(numerical_derivative(self.func, xbnds=self.xbnds, no_go=self.no_go))
             numerical_grad = float(dx * grad)
 
             # compute df/dx via mygrad
