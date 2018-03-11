@@ -1,5 +1,5 @@
 from ..wrappers.unary_func import fwdprop_test_factory, backprop_test_factory
-from mygrad.math import arcsinh, arccosh, arctanh, arccsch, arcsech, arccoth
+from mygrad.math import arcsinh, arccosh, arctanh, arccsch, arccoth
 import numpy as np
 
 
@@ -35,17 +35,9 @@ def test_arccsch_fwd(): pass
 def test_arccsch_backward(): pass
 
 
-@fwdprop_test_factory(mygrad_func=arcsech, true_func=lambda x: np.arccosh(1 / x), xbnds=(1.5, 10))
-def test_arcsech_fwd(): pass
-
-
-@backprop_test_factory(mygrad_func=arcsech,  xbnds=(1.5, 10))
-def test_arcsech_backward(): pass
-
-
-@fwdprop_test_factory(mygrad_func=arccoth, true_func=lambda x: 1 / np.arctanh(x), xbnds=(1.5, 10))
+@fwdprop_test_factory(mygrad_func=arccoth, true_func=lambda x: np.arctanh(1 / x), xbnds=(5, 10))
 def test_arccoth_fwd(): pass
 
 
-@backprop_test_factory(mygrad_func=arccoth,  xbnds=(1.5, 10))
+@backprop_test_factory(mygrad_func=arccoth, xbnds=(5, 10))
 def test_arccoth_backward(): pass

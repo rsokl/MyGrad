@@ -5,7 +5,6 @@ __all__ = ["Arcsinh",
            "Arccosh",
            "Arctanh",
            "Arccsch",
-           "Arcsech",
            "Arccoth"]
 
 
@@ -43,15 +42,6 @@ class Arccsch(Operation):
 
     def backward_a(self, grad):
         return self.a.backward(-grad / (np.abs(self.a.data) * np.sqrt(1 + self.a.data ** 2)))
-
-
-class Arcsech(Operation):
-    def __call__(self, a):
-        self.a = a
-        return np.arccosh(1 / a.data)
-
-    def backward_a(self, grad):
-        return self.a.backward(-grad / (self.a.data * np.sqrt(1 - self.a.data ** 2)))
 
 
 class Arccoth(Operation):

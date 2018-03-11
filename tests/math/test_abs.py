@@ -9,11 +9,3 @@ def test_abs_fwd(): pass
 
 @backprop_test_factory(mygrad_func=abs, xbnds=(-100, 100), no_go=(0,))
 def test_abs_backward(): pass
-
-
-@given(st.data())
-def test_abs_fwd(data):
-    test_fwd(abs, np.abs, data)
-
-@backprop_test_factory(mygrad_func=abs, xbnds=(-100, 100), no_go=(0,))
-def test_abs_backward(): pass
