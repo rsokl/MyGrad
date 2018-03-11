@@ -11,7 +11,6 @@ __all__ = ["abs",
            "arccsc",
            "arccsch",
            "arcsec",
-           "arcsech",
            "arcsin",
            "arcsinh",
            "arctan",
@@ -170,20 +169,6 @@ def arcsec(a):
         -------
         mygrad.Tensor"""
     return Tensor._op(Arcsec, a)
-
-
-def arcsech(a):
-    """ f(a)-> arcsech(a)
-
-        Parameters
-        ----------
-        a : Union[tensor-like, Number]
-
-        Returns
-        -------
-        mygrad.Tensor"""
-    return Tensor._op(Arcsech, a)
-
 
 def arcsin(a):
     """ f(a)-> arcsin(a)

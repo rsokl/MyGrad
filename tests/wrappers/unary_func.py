@@ -29,10 +29,9 @@ class fwdprop_test_factory():
             o = self.op(x)
             tensor_out = o.data
             true_out = self.true_func(x)
-            assert isinstance(o, Tensor)
-            assert np.allclose(tensor_out, true_out)
+            assert isinstance(o, Tensor), "`mygrad_func` returned type {}, should return `mygrad.Tensor`".format(type(o))
+            assert np.allclose(tensor_out, true_out), "`mygrad_func(x)` and `true_func(x)` produce different results"
         return wrapper
-
 
 class backprop_test_factory():
     def __init__(self, *, mygrad_func, true_func=None, xbnds=(-100, 100), no_go=(),
@@ -62,5 +61,6 @@ class backprop_test_factory():
             self.op(var).backward(float(grad))
             tensor_grad = var.grad.item()
 
-            assert np.isclose(numerical_grad, tensor_grad, **self.tolerances)
+            assert np.isclose(numerical_grad, tensor_grad, **self.tolerances), \
+                "numerical derivative and mygrad derivative do not match"
         return wrapper
