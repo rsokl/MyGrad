@@ -45,7 +45,7 @@ def test_csc_backward(): pass
 def test_sec_fwd(): pass
 
 
-@backprop_test_factory(mygrad_func=sec, xbnds=(-np.pi / 2, np.pi / 2), no_go=(-np.pi / 2, np.pi / 2))
+@backprop_test_factory(mygrad_func=sec, xbnds=(-np.pi / 2.5, np.pi / 2.5), atol=1e-4)
 def test_sec_backward(): pass
 
 
