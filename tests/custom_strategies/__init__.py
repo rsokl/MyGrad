@@ -1,52 +1,5 @@
 """ Custom hypothesis search strategies """
 import hypothesis.strategies as st
-from hypothesis import assume
-
-from decimal import Decimal, getcontext
-
-getcontext().prec = 14
-
-
-@st.composite
-def numerical_derivative(draw, f, xbnds=(-100, 100), no_go=(), h=1e-8):
-    """ Hypothesis search strategy: Sample x from specified bounds,
-        and compute::
-
-                  dfdx = (f(x + h) - f(x - h)) / (2h)
-
-        Returning a search-strategy for: (x, dfdx)
-
-        Makes use of `decimal.Decimal` for high-precision arithmetic.
-
-        Note: The parameter `draw` is reserved for use by `hypothesis` - thus it
-              it excluded from the function signature.
-
-        Parameters
-        ----------
-        f : Callable[[Real], Real]
-            A differentiable unary function: f(x)
-
-        xbnds : Tuple[Real, Real], optional (default=(-100, 100))
-            Defines the domain bounds (inclusive) from which `x` is drawn.
-
-        no_go : Iterable[Real, ...], optional (default=())
-            An iterable of values from which `x` will not be drawn.
-
-        h : Real, optional (default=1e-8)
-            Approximating infinitesimal.
-
-        Returns
-        -------
-        hypothesis.searchstrategy.SearchStrategy
-            -> Tuple[decimals.Decimal, decimals.Decimal]
-            (x, df/dx) """
-    h = Decimal(h)
-    x = draw(st.decimals(min_value=xbnds[0], max_value=xbnds[1]))
-    for x_val in no_go:
-        assume(x != x_val)
-
-    dx = (Decimal(f(x + h)) - Decimal(f(x - h))) / (Decimal(2) * h)
-    return x, dx
 
 
 def choices(seq, size, replace=True):
