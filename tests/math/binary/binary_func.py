@@ -4,13 +4,24 @@ from itertools import zip_longest
 
 
 def to_decimal_array(arr):
-   return np.array(tuple(Decimal(float(i)) for i in arr.flat), dtype=Decimal).reshape(arr.shape)
+    """ Convert numpy ND-array to Decimal-type object array of the same shape.
+        Used for facilitating high-precision arithmetic.
+
+        Parameters
+        ----------
+        arr : numpy.ndarray
+
+        Returns
+        -------
+        numpy.ndarray - Decimal-type object array"""
+    return np.array(tuple(Decimal(float(i)) for i in arr.flat), dtype=Decimal).reshape(arr.shape)
 
 
 def broadcast_check(*variables, out_shape):
     """ Given {a, b, ...} and the shape of op(a, b, ...), detect if any non-constant Tensor undergoes
         broadcasting via f. If so, set op.scalar_only to True, and record the broadcasted
         axes for each such tensor.
+
         Broadcast-incompatible shapes need not be accounted for by this function, since
         the shape of f(a, b, ...) must already be known.
 
