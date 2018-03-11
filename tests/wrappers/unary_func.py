@@ -8,29 +8,21 @@ from decimal import Decimal, getcontext
 
 getcontext().prec = 14
 
+
 def numerical_derivative(f, x, h=1e-8):
-    """ Hypothesis search strategy: Sample x from specified bounds,
-        and compute::
+    """ Computes the numerical derivate of f(x) at `x`::
 
                   dfdx = (f(x + h) - f(x - h)) / (2h)
 
-        Returning a search-strategy for: (x, dfdx)
-
         Makes use of `decimal.Decimal` for high-precision arithmetic.
-
-        Note: The parameter `draw` is reserved for use by `hypothesis` - thus it
-              it excluded from the function signature.
 
         Parameters
         ----------
         f : Callable[[Real], Real]
-            A differentiable unary function: f(x)
+            A unary function: f(x)
 
-        xbnds : Tuple[Real, Real], optional (default=(-100, 100))
-            Defines the domain bounds (inclusive) from which `x` is drawn.
-
-        no_go : Iterable[Real, ...], optional (default=())
-            An iterable of values from which `x` will not be drawn.
+        x : Decimal
+            The value at at which the derivative is computed
 
         h : Real, optional (default=1e-8)
             Approximating infinitesimal.
@@ -38,11 +30,12 @@ def numerical_derivative(f, x, h=1e-8):
         Returns
         -------
         Decimal
-            -> Tuple[decimals.Decimal, decimals.Decimal]
-            (x, df/dx) """
+            df/dx @ `x` """
+
     h = Decimal(h)
     dx = (Decimal(f(x + h)) - Decimal(f(x - h))) / (Decimal(2) * h)
     return dx
+
 
 class fwdprop_test_factory():
     def __init__(self, *, mygrad_func, true_func, xbnds=(-100, 100), no_go=()):
@@ -68,6 +61,7 @@ class fwdprop_test_factory():
             assert np.allclose(tensor_out, true_out), "`mygrad_func(x)` and `true_func(x)` produce different results"
         return wrapper
 
+
 class backprop_test_factory():
     def __init__(self, *, mygrad_func, true_func=None, xbnds=(-100, 100), no_go=(),
                  h=1e-8, rtol=1e-05, atol=1e-08):
@@ -84,6 +78,19 @@ class backprop_test_factory():
                x=st.decimals(min_value=self.xbnds[0], max_value=self.xbnds[1]))
         @wraps(f)
         def wrapper(grad, x):
+            """ Performs hypothesis unit test for checking back-propagation
+                through a `mygrad` op.
+
+                Parameters
+                ----------
+                grad : Decimal
+                    Gradient-value to be backpropped through this operation
+                x : Decimal
+                    The value at which df/dx is evaluated
+
+                Raises
+                ------
+                AssertionError"""
             for x_val in self.no_go:
                 assume(x != x_val)
             # gradient to be backpropped through this operation
