@@ -1,5 +1,5 @@
 from mygrad.math import log, log2, log10
-from ..wrappers.unary_func import backprop_test_factory, fwdprop_test_factory
+from tests.wrappers.unary_func import backprop_test_factory, fwdprop_test_factory
 
 import numpy as np
 
