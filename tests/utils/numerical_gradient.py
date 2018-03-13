@@ -1,4 +1,5 @@
 from decimal import Decimal
+
 import numpy as np
 from itertools import zip_longest
 
@@ -9,15 +10,16 @@ def to_decimal_array(arr):
 
         Parameters
         ----------
-        arr : numpy.ndarray
+        arr : Union[float, numpy.ndarray]
 
         Returns
         -------
-        numpy.ndarray - Decimal-type object array"""
+        numpy.ndarray
+        Decimal-type object array"""
     return np.array(tuple(Decimal(float(i)) for i in arr.flat), dtype=Decimal).reshape(arr.shape)
 
 
-def broadcast_check(*variables, out_shape):
+def broadcast_check(*variables):
     """ Given {a, b, ...} and the shape of op(a, b, ...), detect if any non-constant Tensor undergoes
         broadcasting via f. If so, set op.scalar_only to True, and record the broadcasted
         axes for each such tensor.
@@ -27,10 +29,16 @@ def broadcast_check(*variables, out_shape):
 
         Parameters
         ----------
-        variables : Sequence[mygrad.Tensor]
-        out_shape : Sequence[int]
-            The shape of f(a, b)."""
+        variables : Sequence[ArrayLike]
+
+        Returns
+        -------
+        Tuple[Dict[str, Tuple[int, ...]]
+            ({'new_axes': (...), 'keepdim_axes: (...)}, ...)
+            For each variable, indicates which, if any, axes need be summed over
+            to reduce the broadcasted gradient for back-prop through that variable."""
     variables = variables
+    out_shape = np.broadcast(*variables).shape
     new_axes = [[] for i in range(len(variables))]
     keepdims = [[] for i in range(len(variables))]
 
@@ -74,7 +82,8 @@ def broadcast_back(grad, new_axes, keepdim_axes):
 
 
 def numerical_gradient(f, *args, back_grad, vary_ind=None, h=1e-8):
-    """ Computes numerical partial derivatives of f(x, y)
+    """ Computes numerical partial derivatives of f(x0, x1, ...) in each
+        of its variables, using the central difference method.
 
         Parameters
         ----------
@@ -98,30 +107,33 @@ def numerical_gradient(f, *args, back_grad, vary_ind=None, h=1e-8):
 
         Returns
         -------
-        Tuple[Union[NoneType, numpy.ndarray], Union[NoneType, numpy.ndarray]]
-            dfdx, dfdy - both evaluated at `x` and `y`.
+        Tuple[Union[NoneType, numpy.ndarray], ...]
+            df/dx0, df/dx1, ... - evaluated at (`x0`, `x1`, ... ).
         """
-    if vary_ind not in {None, 0, 1}:
-        raise ValueError("`vary_ind` must be `None`, `0`, or `1`. Passed {}".format(vary_ind))
 
-    outshape = np.broadcast(*args).shape
+    if not args:
+        raise ValueError("At least one value must be passed to `args`")
 
     h = Decimal(h)
     args = tuple(to_decimal_array(arr) for arr in args)
 
-    all_broad_args = broadcast_check(*args, out_shape=outshape)
+    # get axis & keepdims args for collapsing a broadcasted gradient
+    all_broad_args = broadcast_check(*args)
 
     grads = [None]*len(args)
 
     def gen_fwd_diff(i):
+        # x1, ..., x_i + h, ..., xn
         return ((var if j != i else var + h) for j, var in enumerate(args))
 
     def gen_bkwd_diff(i):
+        # x1, ..., x_i - h, ..., xn
         return ((var if j != i else var - h) for j, var in enumerate(args))
 
     for n, broad_args in enumerate(all_broad_args):
         if vary_ind is not None and n not in vary_ind:
             continue
+        # central difference in variable n
         dvar = (f(*gen_fwd_diff(n)) - f(*gen_bkwd_diff(n))) / (Decimal(2) * h)
         grads[n] = broadcast_back(back_grad * dvar.astype(float), **broad_args)
 

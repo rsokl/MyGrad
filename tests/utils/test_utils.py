@@ -1,16 +1,51 @@
-""" Test `numerical_gradient`"""
-from .binary_func import numerical_gradient
+""" Test `numerical_gradient` and `broadcast_check`"""
 
-from hypothesis import given
-import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
-
+import hypothesis.strategies as st
 import numpy as np
+from hypothesis import given
+
+from tests.utils.numerical_gradient import numerical_gradient, broadcast_check
+
+
+def unary_func(x): return x ** 2
+
+
+def binary_func(x, y): return x * y ** 2
+
+
+def ternary_func(x, y, z): return z * x * y ** 2
+
+
+def test_broadcast_check1():
+    x = np.empty((3, 1, 4))
+    y = np.empty((4,))
+    z = np.empty((3, 2, 4))
+    x_args, y_args, z_args = broadcast_check(x, y, z)
+    assert x_args == dict(new_axes=tuple(), keepdim_axes=(1,))
+    assert y_args == dict(new_axes=(0, 1), keepdim_axes=tuple())
+    assert z_args == dict(new_axes=tuple(), keepdim_axes=tuple())
+
+
+def test_broadcast_check2():
+    # no broadcasting
+    x = np.empty((3,))
+    y = np.empty((3,))
+    x_args, y_args = broadcast_check(x, y)
+    assert x_args == dict(new_axes=tuple(), keepdim_axes=tuple())
+    assert y_args == dict(new_axes=tuple(), keepdim_axes=tuple())
+
+
+def test_broadcast_check3():
+    x = np.empty((3, 1, 4))
+    y = np.empty((5, 3, 2, 4))
+    x_args, y_args = broadcast_check(x, y)
+    assert x_args == dict(new_axes=(0,), keepdim_axes=(2,))
+    assert y_args == dict(new_axes=tuple(), keepdim_axes=tuple())
 
 
 @given(st.data())
 def test_numerical_gradient_no_broadcast(data):
-    def f(x, y): return x * y**2
 
     x = data.draw(hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=3),
                              dtype=float,
@@ -20,19 +55,34 @@ def test_numerical_gradient_no_broadcast(data):
                              dtype=float,
                              elements=st.floats(-100, 100)))
 
+    z = data.draw(hnp.arrays(shape=x.shape,
+                             dtype=float,
+                             elements=st.floats(-100, 100)))
+
     grad = data.draw(hnp.arrays(shape=x.shape,
                                 dtype=float,
                                 elements=st.floats(-100, 100)))
 
+
+    # check variable-selection
+    assert numerical_gradient(unary_func, x, back_grad=grad, vary_ind=[])[0] is None
+
     # no broadcast
-    dx, dy = numerical_gradient(f, x, y, back_grad=grad)
+    dx = numerical_gradient(unary_func, x, back_grad=grad)
+    assert np.allclose(dx, grad * 2 * x)
+
+    dx, dy = numerical_gradient(binary_func, x, y, back_grad=grad)
     assert np.allclose(dx, grad * y ** 2)
     assert np.allclose(dy, grad * 2 * x * y)
+
+    dx, dy, dz = numerical_gradient(ternary_func, x, y, z, back_grad=grad)
+    assert np.allclose(dx, grad * z * y ** 2)
+    assert np.allclose(dy, grad * z * 2 * x * y)
+    assert np.allclose(dz, grad * x * y ** 2)
 
 
 @given(st.data())
 def test_numerical_gradient_x_broadcast(data):
-    def f(x, y): return x * y**2
 
     x = data.draw(hnp.arrays(shape=(3, 4),
                              dtype=float,
@@ -47,14 +97,13 @@ def test_numerical_gradient_x_broadcast(data):
                                 elements=st.floats(-100, 100)))
 
     # broadcast x
-    dx, dy = numerical_gradient(f, x, y, back_grad=grad)
+    dx, dy = numerical_gradient(binary_func, x, y, back_grad=grad)
     assert np.allclose(dx, (grad * y ** 2).sum(axis=0))
     assert np.allclose(dy, grad * 2 * x * y)
 
 
 @given(st.data())
 def test_numerical_gradient_y_broadcast(data):
-    def f(x, y): return x * y**2
 
     y = data.draw(hnp.arrays(shape=(3, 4),
                              dtype=float,
@@ -69,14 +118,13 @@ def test_numerical_gradient_y_broadcast(data):
                                 elements=st.floats(-100, 100)))
 
     # broadcast x
-    dx, dy = numerical_gradient(f, x, y, back_grad=grad)
+    dx, dy = numerical_gradient(binary_func, x, y, back_grad=grad)
     assert np.allclose(dx, grad * y ** 2)
     assert np.allclose(dy, (grad * 2 * x * y).sum(axis=0))
 
 
 @given(st.data())
 def test_numerical_gradient_xy_broadcast(data):
-    def f(x, y): return x * y**2
 
     x = data.draw(hnp.arrays(shape=(2, 1, 4),
                              dtype=float,
@@ -91,7 +139,7 @@ def test_numerical_gradient_xy_broadcast(data):
                                 elements=st.floats(-100, 100)))
 
     # broadcast x
-    dx, dy = numerical_gradient(f, x, y, back_grad=grad)
+    dx, dy = numerical_gradient(binary_func, x, y, back_grad=grad)
     x_grad = (grad * y ** 2).sum(axis=1, keepdims=True)
     y_grad = (grad * 2 * x * y).sum(axis=0, keepdims=True)
     assert np.allclose(dx, x_grad)
