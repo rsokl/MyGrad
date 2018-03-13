@@ -30,8 +30,6 @@ class Cos(Operation):
 class Tan(Operation):
     def __call__(self, a):
         self.a = a
-        if np.any(a.data % (np.pi / 2) == 0) and np.any(a.data % np.pi != 0):
-            raise ValueError("Invalid tan-domain value")
         return np.tan(a.data)
 
     def backward_a(self, grad):
@@ -41,8 +39,6 @@ class Tan(Operation):
 class Csc(Operation):
     def __call__(self, a):
         self.a = a
-        if np.any(a.data % np.pi == 0):
-            raise ValueError("Invalid csc-domain value")
         return 1 / np.sin(a.data)
 
     def backward_a(self, grad):
@@ -52,8 +48,6 @@ class Csc(Operation):
 class Sec(Operation):
     def __call__(self, a):
         self.a = a
-        if np.any(a.data % (np.pi / 2) == 0) and np.any(a % np.pi != 0):
-            raise ValueError("Invalid sec-domain value")
         return 1 / np.cos(a.data)
 
     def backward_a(self, grad):
@@ -63,8 +57,6 @@ class Sec(Operation):
 class Cot(Operation):
     def __call__(self, a):
         self.a = a
-        if np.any(a.data % np.pi == 0):
-            raise ValueError("Invalid cot-domain value")
         return 1 / np.tan(a.data)
 
     def backward_a(self, grad):

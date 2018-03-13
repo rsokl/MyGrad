@@ -5,7 +5,6 @@ __all__ = ["Arcsinh",
            "Arccosh",
            "Arctanh",
            "Arccsch",
-           "Arcsech",
            "Arccoth"]
 
 
@@ -21,8 +20,6 @@ class Arcsinh(Operation):
 class Arccosh(Operation):
     def __call__(self, a):
         self.a = a
-        if np.any(a < 1):
-            raise ValueError("Invalid arccosh-domain value")
         return np.arccosh(a.data)
 
     def backward_a(self, grad):
@@ -32,8 +29,6 @@ class Arccosh(Operation):
 class Arctanh(Operation):
     def __call__(self, a):
         self.a = a
-        if np.any(1 <= a) or np.any(a <= -1):
-            raise ValueError("Invalid arctanh-domain value")
         return np.arctanh(a.data)
 
     def backward_a(self, grad):
@@ -43,30 +38,15 @@ class Arctanh(Operation):
 class Arccsch(Operation):
     def __call__(self, a):
         self.a = a
-        if np.any(a == 0):
-            raise ValueError("Invalid arccsch-domain value")
         return np.arcsinh(1 / a.data)
 
     def backward_a(self, grad):
         return self.a.backward(-grad / (np.abs(self.a.data) * np.sqrt(1 + self.a.data ** 2)))
 
 
-class Arcsech(Operation):
-    def __call__(self, a):
-        self.a = a
-        if np.any(1 < a) or np.any(a <= 0):
-            raise ValueError("Invalid arcsech-domain value")
-        return np.arccosh(1 / a.data)
-
-    def backward_a(self, grad):
-        return self.a.backward(-grad / (self.a.data * np.sqrt(1 - self.a.data ** 2)))
-
-
 class Arccoth(Operation):
     def __call__(self, a):
         self.a = a
-        if np.any(-1 <= a) and np.any(a <= 1):
-            raise ValueError("Invalid arccoth-domain value")
         return np.arctanh(1 / a.data)
 
     def backward_a(self, grad):

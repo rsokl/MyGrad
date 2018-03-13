@@ -1,6 +1,9 @@
 """ Custom hypothesis search strategies """
 import hypothesis.strategies as st
 
+__all__ = ["broadcastable_shape",
+           "choices",
+           "valid_axes"]
 
 def choices(seq, size, replace=True):
     """Randomly choose elements from `seq`, producing a tuple of length `size`."""
@@ -16,7 +19,7 @@ def choices(seq, size, replace=True):
 
 
 @st.composite
-def rand_neg_axis(draw, axes, ndim):
+def _rand_neg_axis(draw, axes, ndim):
     """Randomly replace axis values with negative counterpart: axis - ndim"""
     size = draw(st.integers(0, len(axes)))
     neg_inds = draw(choices(range(len(axes)), size, replace=False))
@@ -37,7 +40,8 @@ def valid_axes(draw, ndim, pos_only=False):
 
         Returns
         -------
-        hypothesis.searchstrategy.lazy.LazyStrategy
+        hypothesis.searchstrategy.SearchStrategy
+         -> [Union[NoneType, Tuple[int...]]
 
         Examples
         --------
@@ -49,5 +53,33 @@ def valid_axes(draw, ndim, pos_only=False):
     num_axes = draw(st.integers(min_value=0, max_value=ndim))
     axes = draw(choices(range(ndim), num_axes, replace=False))
     if not pos_only:
-        axes = draw(rand_neg_axis(axes, ndim))
+        axes = draw(_rand_neg_axis(axes, ndim))
     return draw(st.none()) if not axes else axes
+
+
+@st.composite
+def broadcastable_shape(draw, shape, min_dim=0, max_dim=5):
+    """ Hypothesis search strategy: given an array shape, generate a
+        broadcast-compatible shape, specifying the minimum/maximum permissable
+        number of dimensions in the resulting shape (both values are inclusive).
+
+        `draw` is a parameter reserved by hypothesis, and should not be specified
+        by the user.
+
+        Parameters
+        ----------
+        shape : Tuple[int, ...]
+        min_dim : int
+        max_dim : int
+
+        Returns
+        -------
+        hypothesis.searchstrategy.SearchStrategy
+            -> Tuple[int, ...]
+        """
+    ndim = draw(st.integers(min_dim, max_dim))
+    n_aligned = min(len(shape), ndim)
+    n_leading = ndim - n_aligned
+    aligned_dims = draw(st.tuples(*(st.sampled_from([1, size]) for size in shape[::-1][:n_aligned])))[::-1]
+    leading_dims = draw(st.tuples(*(st.integers(1, 5) for i in range(n_leading))))
+    return leading_dims + aligned_dims
