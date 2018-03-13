@@ -73,24 +73,25 @@ def broadcast_back(grad, new_axes, keepdim_axes):
     return grad
 
 
-def numerical_gradient(f, *, x, y, back_grad, vary_ind=None, h=1e-8):
+def numerical_gradient(f, *args, back_grad, vary_ind=None, h=1e-8):
     """ Computes numerical partial derivatives of f(x, y)
 
         Parameters
         ----------
         f : Callable[[numpy.ndarray, numpy.ndarray], numpy.ndarray]
-            f(x, y) -> numpy.ndarray
+            f(x, ...) -> numpy.ndarray
 
-        x : numpy.ndarray
-
-        y : numpy.ndarray
+        *args : Tuple[numpy.ndarray, ...]
+            The input arguments to be fed to f.
 
         back_grad : numpy.ndarray
             The gradient being back-propagated to x and y, via f
 
-        vary_ind : Optional[0 or 1]
-            If `None`, partials of f with respect to x and y, respectively, are
-            both computes. Otherwise 0 -> w.r.t x only, 1 -> w.r.t y only.
+        vary_ind : Optional[Tuple[int, ...]]
+            If `None`, the partials of f with respect to all the inputs are.
+            computed. Otherwise you can specify a sequence of the indices
+            of the variables whose partials are to be computed
+               0 -> w.r.t x only, 1 -> w.r.t y only, etc.
 
         h : float, optional, (default=1e-8)
             Approximating infinitesimal.
@@ -103,20 +104,27 @@ def numerical_gradient(f, *, x, y, back_grad, vary_ind=None, h=1e-8):
     if vary_ind not in {None, 0, 1}:
         raise ValueError("`vary_ind` must be `None`, `0`, or `1`. Passed {}".format(vary_ind))
 
+    outshape = np.broadcast(*args).shape
+
     h = Decimal(h)
-    x = to_decimal_array(x)
-    y = to_decimal_array(y)
+    args = tuple(to_decimal_array(arr) for arr in args)
 
-    outshape = np.broadcast(x, y).shape
-    x_args, y_args = broadcast_check(x, y, out_shape=outshape)
-    dx, dy, = None, None
-    if vary_ind is None or vary_ind == 0:
-        dx = (f(x + h, y) - f(x - h, y)) / (Decimal(2) * h)
-        dx = broadcast_back(back_grad * dx.astype(float), **x_args)
-    if vary_ind is None or vary_ind == 1:
-        dy = (f(x, y + h) - f(x, y - h)) / (Decimal(2) * h)
-        dy = broadcast_back(back_grad * dy.astype(float), **y_args)
+    all_broad_args = broadcast_check(*args, out_shape=outshape)
 
-    return dx, dy
+    grads = [None]*len(args)
+
+    def gen_fwd_diff(i):
+        return ((var if j != i else var + h) for j, var in enumerate(args))
+
+    def gen_bkwd_diff(i):
+        return ((var if j != i else var - h) for j, var in enumerate(args))
+
+    for n, broad_args in enumerate(all_broad_args):
+        if vary_ind is not None and n not in vary_ind:
+            continue
+        dvar = (f(*gen_fwd_diff(n)) - f(*gen_bkwd_diff(n))) / (Decimal(2) * h)
+        grads[n] = broadcast_back(back_grad * dvar.astype(float), **broad_args)
+
+    return grads
 
 

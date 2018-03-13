@@ -25,7 +25,7 @@ def test_numerical_gradient_no_broadcast(data):
                                 elements=st.floats(-100, 100)))
 
     # no broadcast
-    dx, dy = numerical_gradient(f, x=x, y=y, back_grad=grad)
+    dx, dy = numerical_gradient(f, x, y, back_grad=grad)
     assert np.allclose(dx, grad * y ** 2)
     assert np.allclose(dy, grad * 2 * x * y)
 
@@ -47,7 +47,7 @@ def test_numerical_gradient_x_broadcast(data):
                                 elements=st.floats(-100, 100)))
 
     # broadcast x
-    dx, dy = numerical_gradient(f, x=x, y=y, back_grad=grad)
+    dx, dy = numerical_gradient(f, x, y, back_grad=grad)
     assert np.allclose(dx, (grad * y ** 2).sum(axis=0))
     assert np.allclose(dy, grad * 2 * x * y)
 
@@ -69,7 +69,7 @@ def test_numerical_gradient_y_broadcast(data):
                                 elements=st.floats(-100, 100)))
 
     # broadcast x
-    dx, dy = numerical_gradient(f, x=x, y=y, back_grad=grad)
+    dx, dy = numerical_gradient(f, x, y, back_grad=grad)
     assert np.allclose(dx, grad * y ** 2)
     assert np.allclose(dy, (grad * 2 * x * y).sum(axis=0))
 
@@ -91,7 +91,7 @@ def test_numerical_gradient_xy_broadcast(data):
                                 elements=st.floats(-100, 100)))
 
     # broadcast x
-    dx, dy = numerical_gradient(f, x=x, y=y, back_grad=grad)
+    dx, dy = numerical_gradient(f, x, y, back_grad=grad)
     x_grad = (grad * y ** 2).sum(axis=1, keepdims=True)
     y_grad = (grad * 2 * x * y).sum(axis=0, keepdims=True)
     assert np.allclose(dx, x_grad)
