@@ -1,11 +1,12 @@
-""" Test `numerical_gradient` and `broadcast_check`"""
+""" Test `numerical_gradient`, `numerical_derivative`, and `broadcast_check`"""
+
+from tests.utils.numerical_gradient import numerical_gradient, broadcast_check, numerical_derivative
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
-import numpy as np
 from hypothesis import given
 
-from tests.utils.numerical_gradient import numerical_gradient, broadcast_check
+import numpy as np
 
 
 def unary_func(x): return x ** 2
@@ -42,6 +43,12 @@ def test_broadcast_check3():
     x_args, y_args = broadcast_check(x, y)
     assert x_args == dict(new_axes=(0,), keepdim_axes=(2,))
     assert y_args == dict(new_axes=tuple(), keepdim_axes=tuple())
+
+
+@given(x=st.decimals(-100, 100))
+def test_numerical_derivative(x):
+    num_der = numerical_derivative(unary_func, x)
+    assert np.isclose(float(num_der), float(x) * 2.)
 
 
 @given(st.data())

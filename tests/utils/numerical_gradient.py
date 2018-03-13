@@ -81,6 +81,34 @@ def broadcast_back(grad, new_axes, keepdim_axes):
     return grad
 
 
+def numerical_derivative(f, x, h=1e-8):
+    """ Computes the numerical derivate of f(x) at `x`::
+
+                  dfdx = (f(x + h) - f(x - h)) / (2h)
+
+        Makes use of `decimal.Decimal` for high-precision arithmetic.
+
+        Parameters
+        ----------
+        f : Callable[[Real], Real]
+            A unary function: f(x)
+
+        x : Decimal
+            The value at at which the derivative is computed
+
+        h : Real, optional (default=1e-8)
+            Approximating infinitesimal.
+
+        Returns
+        -------
+        Decimal
+            df/dx @ `x` """
+
+    h = Decimal(h)
+    dx = (Decimal(f(x + h)) - Decimal(f(x - h))) / (Decimal(2) * h)
+    return dx
+
+
 def numerical_gradient(f, *args, back_grad, vary_ind=None, h=1e-8):
     """ Computes numerical partial derivatives of f(x0, x1, ...) in each
         of its variables, using the central difference method.
