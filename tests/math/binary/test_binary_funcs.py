@@ -1,3 +1,4 @@
+""" Test all binary arithmetic operations, checks for appropriate broadcast behavior"""
 from ...wrappers.binary_func import fwdprop_test_factory, backprop_test_factory
 
 from mygrad.math import add, subtract, multiply, divide, power, logaddexp
@@ -88,6 +89,7 @@ def test_logaddexp_bkwd(data, x):
                                 dtype=float,
                                 elements=st.floats(-100, 100)))
 
+    # calculate logaddexp manually via mygrad-arithmetic
     x_o = Tensor(x)
     y_o = Tensor(y)
     out_o = mg.log(mg.exp(x_o) + mg.exp(y_o))
