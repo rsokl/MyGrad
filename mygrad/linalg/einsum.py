@@ -5,6 +5,20 @@ import numpy as np
 from numpy.core.einsumfunc import _parse_einsum_input
 
 
+def reduce_broadcast(grad, outshape):
+
+    if grad.shape == outshape:
+        return grad
+
+    if grad.ndim != len(outshape):
+        assert grad.ndim > len(outshape)
+        grad = grad.sum(axis=range(grad.ndim - len(outshape)))
+
+    keepdims = tuple(n for n,i in enumerate(grad.shape) if i != outshape[n])
+    if keepdims:
+        grad = grad.sum(axis=keepdims, keepdims=True)
+    return grad
+
 class EinSum(MultiVarBroadcastableOp):
     def __call__(self, *variables, in_lbls, out_lbls, **kwargs):
         self.in_lbls = in_lbls
@@ -13,8 +27,14 @@ class EinSum(MultiVarBroadcastableOp):
         return np.einsum("->".join((in_lbls, out_lbls)), *(var.data for var in self.variables))
 
     def backward_var(self, grad, index):
-        # fwd:          "ijk, k -> ji", x, y
-        # bkwd (var-1): "ji, ijk -> k", x, grad
+        """"""
+        """
+        example
+        -------
+        fwd:          "ijk, k -> ji", x, y
+        bkwd (var: 0): "ji, k -> ijk", grad, y
+        bkwd (var: 1): "ji, ijk -> k", grad, x
+        """
 
         # ijk, k
         in_lbls = self.in_lbls.split(',')
@@ -32,7 +52,8 @@ class EinSum(MultiVarBroadcastableOp):
         operands = (grad,) + arrays[:index] + arrays[index + 1:]
 
         # einsum(ji, ijk -> k", x, grad)
-        dfdx = np.einsum(back_prop_lbls, *operands)
+        outshape = self.variables[index].shape
+        dfdx = reduce_broadcast(np.einsum(back_prop_lbls, *operands), outshape)
         self.variables[index].backward(dfdx)
 
 

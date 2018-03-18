@@ -80,7 +80,7 @@ def test_einsum_static_fwd():
        data=st.data())
 def test_einsum_bkwd1(x, data):
     x = Tensor(x)
-    y = Tensor(data.draw(hnp.arrays(shape=x.shape,
+    y = Tensor(data.draw(hnp.arrays(shape=broadcastable_shape(x.shape, min_dim=1, max_dim=1),
                                     dtype=float,
                                     elements=st.floats(-100, 100))))
 
