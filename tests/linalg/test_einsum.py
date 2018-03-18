@@ -98,46 +98,18 @@ def test_einsum_bkwd1(x, data):
     o.null_gradients()
 
 
-
 def test_einsum_bkwd2():
     x = Tensor(np.random.rand(3, 4))
     y = Tensor(np.random.rand(3))
-    grad = np.random.rand(1).item()
+    grad = np.random.rand(4)
 
-    o = einsum("ia, i -> a", x, y).sum()
+    o = einsum("ia, i -> a", x, y)
     o.backward(grad)
 
     def f(x, y): return np.einsum("ia, i -> a", x, y)
 
     dx, dy = backprop_linalg(f, x.data, y.data, back_grad=grad)
 
-    assert np.allclose(x.grad, dx)
-    assert np.allclose(x.grad, dy)
+    assert np.allclose(x.grad, dx, atol=1e-6)
+    assert np.allclose(y.grad, dy, atol=1e-6)
 
-
-def test_einsum_bkwd3():
-    x = Tensor(np.array([0.]))
-    y = Tensor(np.array([0.]))
-
-    grad = 0.
-    o = einsum("i, i", x, y)
-    o.backward(grad)
-
-    def f(x, y): return np.einsum("i, i", x, y)
-
-    dx, dy = backprop_linalg(f, x.data, y.data, back_grad=grad)
-
-    assert np.allclose(x.grad, dx)
-    assert np.allclose(y.grad, dy)
-
-    o.null_gradients()
-
-    o = einsum("i, i", y, x)
-    o.backward(grad)
-
-    def f(x, y): return np.einsum("i, i", x, y)
-
-    dy, dx = backprop_linalg(f, y.data, x.data, back_grad=grad)
-
-    assert np.allclose(x.grad, dx)
-    assert np.allclose(y.grad, dy)
