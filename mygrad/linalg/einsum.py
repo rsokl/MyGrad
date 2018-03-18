@@ -19,6 +19,7 @@ def reduce_broadcast(grad, outshape):
         grad = grad.sum(axis=keepdims, keepdims=True)
     return grad
 
+
 class EinSum(MultiVarBroadcastableOp):
     def __call__(self, *variables, in_lbls, out_lbls, **kwargs):
         self.in_lbls = in_lbls

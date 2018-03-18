@@ -92,11 +92,25 @@ def test_einsum_bkwd1(x, data):
 
     dx, dy = backprop_linalg(f, x.data, y.data, back_grad=grad)
 
-    assert np.allclose(x.grad, dx, atol=1e-6)
-    assert np.allclose(y.grad, dy, atol=1e-6)
+    assert np.allclose(x.grad, dx, atol=1e-4)
+    assert np.allclose(y.grad, dy, atol=1e-4)
 
     o.null_gradients()
+    assert x.grad is None
+    assert y.grad is None
 
+    # test broadcasting in reverse direction
+    o = einsum("i, i", y, x)
+    o.backward(grad)
+
+    def f(x, y): return np.einsum("i, i", x, y)
+
+    dy, dx = backprop_linalg(f, y.data, x.data, back_grad=grad)
+
+    assert np.allclose(x.grad, dx, atol=1e-4)
+    assert np.allclose(y.grad, dy, atol=1e-4)
+
+    o.null_gradients()
 
 def test_einsum_bkwd2():
     x = Tensor(np.random.rand(3, 4))
