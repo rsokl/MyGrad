@@ -219,3 +219,44 @@ def numerical_gradient_sequence(f, *, x, back_grad,  axis=None, keepdims=False, 
     return grad.astype(float)
 
 
+def numerical_gradient_full(f, *, x, back_grad,  h=1e-8):
+    """ Computes numerical partial derivatives of f(x), by
+        varying each entry of `x` independently.
+
+        Parameters
+        ----------
+        f : Callable[[numpy.ndarray], numpy.ndarray]
+            f(x) -> numpy.ndarray
+
+        x : numpy.ndarray
+            An array storing the sequence(s) of values in the array. More than once
+            sequence may be designated, according to the `axis` argument of `f`.
+
+        back_grad : numpy.ndarray
+            The gradient being back-propagated to {x}, via f
+
+        h : float, optional, (default=1e-8)
+            Approximating infinitesimal.
+
+        Returns
+        -------
+        numpy.ndarray
+            df/dx
+        """
+
+    grad = np.empty_like(x)
+    x = to_decimal_array(x)
+    h = Decimal(h)
+
+    for ind, val in np.ndenumerate(x):
+        x_fwd = np.copy(x)
+        x_fwd[ind] += h
+        f_fwd = to_decimal_array(f(x_fwd.astype(float)))
+
+        x_bkwd = x_fwd
+        x_bkwd[ind] -= Decimal(2) * h
+        f_bkwd = to_decimal_array(f(x_bkwd.astype(float)))
+
+        dxi = to_decimal_array((f_fwd - f_bkwd) / (Decimal(2) * h))
+        grad[ind] = (dxi.astype('float') * back_grad).sum()
+    return grad.astype(float)
