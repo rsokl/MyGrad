@@ -11,18 +11,20 @@ class EinSum(MultiVarBroadcastableOp):
         self.variables = variables
         return np.einsum("->".join((in_lbls, out_lbls)), *(var.data for var in self.variables))
 
+    def backward_var(self, grad, index):
+        raise NotImplementedError
+
 
 def einsum(*operands, **kwargs):
     """ f(a, b, ...) -> a * b * ...
 
         Parameters
         ----------
-        variables : Sequence[Union[tensor-like, Number]]
+        variables : Sequence[Union[ArrayLike, Real]]
 
         Returns
         -------
         mygrad.Tensor"""
-
 
     in_lbls, out_lbls, variables = _parse_einsum_input(operands)
     return Tensor._op(EinSum, *variables, op_kwargs=dict(in_lbls=in_lbls,
