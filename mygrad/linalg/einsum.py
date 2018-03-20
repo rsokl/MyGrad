@@ -1,6 +1,7 @@
 from mygrad.operations.multivar_operations import MultiVarBroadcastableOp
 from mygrad import Tensor
 import numpy as np
+from itertools import chain
 
 from numpy.core.einsumfunc import _parse_einsum_input
 
@@ -39,20 +40,35 @@ class EinSum(MultiVarBroadcastableOp):
 
         # ijk, k
         in_lbls = self.in_lbls.split(',')
+        var_lbl = in_lbls.pop(index)
 
         # ji
         grad_lbl = self.out_lbls
-        var_lbl = in_lbls[index]
 
-        arrays = tuple(i.data for i in self.variables)
+        unique_in_lbls = (set(chain.from_iterable(in_lbls)) | set(grad_lbl))
+        new_axes = []
+        if len(set(var_lbl) - unique_in_lbls) > 0:
+            for n, lbl in enumerate(var_lbl):
+                if lbl not in unique_in_lbls:
+                    new_axes.append(n)
+                    grad_lbl = grad_lbl[:n] + lbl + grad_lbl[n:]
+
+        if new_axes:
+            exp_dims = [slice(None) for i in range(grad.ndim)]
+            grad_shape = list(grad.shape)
+            for ax in new_axes:
+                exp_dims.insert(ax, np.newaxis)
+                grad_shape.insert(ax, self.variables[index].shape[ax])
+            grad = np.broadcast_to(grad if not grad.ndim else grad[exp_dims], grad_shape)
 
         # ji, ijk -> k
-        back_prop_lbls = ",".join([grad_lbl] + in_lbls[:index] + in_lbls[index + 1:]) + "->" + var_lbl
+        back_prop_lbls = ",".join([grad_lbl] + in_lbls) + "->" + var_lbl
 
         # grad, x
+        arrays = tuple(i.data for i in self.variables)
         operands = (grad,) + arrays[:index] + arrays[index + 1:]
 
-        # einsum(ji, ijk -> k", x, grad)
+        # einsum(ji, ijk -> k", grad, x)
         outshape = self.variables[index].shape
         dfdx = reduce_broadcast(np.einsum(back_prop_lbls, *operands), outshape)
         self.variables[index].backward(dfdx)
