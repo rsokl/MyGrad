@@ -148,7 +148,7 @@ def test_einsum_bkwd3():
 
 def test_einsum_bkwd4():
     x = Tensor(np.random.rand(3, 4))
-    y = Tensor(np.random.rand(3))
+    y = Tensor(np.random.rand(1))
     grad = np.random.rand(1).item()
 
     o = einsum("ia, i -> ", x, y)

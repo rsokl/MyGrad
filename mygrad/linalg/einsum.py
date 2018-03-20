@@ -45,6 +45,9 @@ class EinSum(MultiVarBroadcastableOp):
         # ji
         grad_lbl = self.out_lbls
 
+        # catch indices over which uncontracted sum was performed
+        # for the given variable: e.g for var-0 in "ijk, jk -> k"
+        # i is summed over without contraction with another tensor
         unique_in_lbls = (set(chain.from_iterable(in_lbls)) | set(grad_lbl))
         new_axes = []
         if len(set(var_lbl) - unique_in_lbls) > 0:
