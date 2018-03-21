@@ -102,21 +102,18 @@ class EinSum(MultiVarBroadcastableOp):
 
         # ijk, k
         in_lbls = self.in_lbls.split(',')
-        var_lbl = in_lbls.pop(index)
-        unique_lbls = _unique_from_end(var_lbl)
-        repeat_lbls = len(unique_lbls) != len(var_lbl)
+        original_var_lbl = in_lbls.pop(index)
+        var_lbl = _unique_from_end(original_var_lbl)
+        repeat_lbls = len(var_lbl) != len(original_var_lbl)
 
         if repeat_lbls:
             # example fwd-prop: einsum("iji -> ij", x)
             # "iji" becomes "ji"
-            original_var_lbl = var_lbl
-            var_lbl = unique_lbls
             mapping_gen = ({k: v for k, v in zip(lbl, arr.shape)}
                             for lbl, arr in zip(self.in_lbls.split(','), numpy_arrays))
             lbl_to_size = _merge_max_mappings(*mapping_gen)
             var_shape = tuple(lbl_to_size[lbl] for lbl in var_lbl)
         else:
-            original_var_lbl = None
             var_shape = self.variables[index].shape
 
         # ji
