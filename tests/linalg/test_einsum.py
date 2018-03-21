@@ -1,12 +1,11 @@
 from ..utils.numerical_gradient import numerical_gradient_full
-from ..custom_strategies import valid_axes, broadcastable_shape
+from ..custom_strategies import broadcastable_shape
 
 from mygrad import Tensor
-from hypothesis import given, assume
+from hypothesis import given
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
 import numpy as np
-from functools import wraps
 
 
 from mygrad.linalg.einsum import einsum
@@ -17,6 +16,13 @@ def compare_einsum(*operands):
     assert isinstance(mygrad_out, Tensor)
     operands = tuple(i.data if isinstance(i, Tensor) else i for i in operands)
     assert np.allclose(np.einsum(*operands), einsum(*operands).data)
+
+
+def compare_backprop(script, *vars):
+    vars = tuple(i.astype(float) for i in vars)
+    tensors = tuple(Tensor(i) for i in vars)
+    def f(*args): return np.einsum(script, *vars)
+
 
 
 def backprop_linalg(f, *args, back_grad):
@@ -74,15 +80,12 @@ def test_einsum_static_fwd():
     compare_einsum(a, [0, Ellipsis], b, [2, 0])
 
 
-@given(x=hnp.arrays(shape=(hnp.array_shapes(min_dims=1, max_dims=1)),
-                    dtype=float,
-                    elements=st.floats(-100, 100)),
+@given(num=st.integers(1, 10),
        data=st.data())
-def test_einsum_bkwd1(x, data):
-    x = Tensor(x)
-    y = Tensor(data.draw(hnp.arrays(shape=broadcastable_shape(x.shape, min_dim=1, max_dim=1),
-                                    dtype=float,
-                                    elements=st.floats(-100, 100))))
+def test_einsum_bkwd1(num, data):
+    x = Tensor(np.random.rand(num))
+    y_shape = data.draw(broadcastable_shape(x.shape, min_dim=1, max_dim=1))
+    y = Tensor(np.random.rand(*y_shape))
 
     grad = data.draw(st.floats(-100, 100))
     o = einsum("i, i", x, y)
@@ -92,8 +95,8 @@ def test_einsum_bkwd1(x, data):
 
     dx, dy = backprop_linalg(f, x.data, y.data, back_grad=grad)
 
-    assert np.allclose(x.grad, dx, atol=1e-3)
-    assert np.allclose(y.grad, dy, atol=1e-3)
+    assert np.allclose(x.grad, dx, atol=1e-5, rtol=1e-5)
+    assert np.allclose(y.grad, dy, atol=1e-5, rtol=1e-5)
 
     o.null_gradients()
     assert x.grad is None
@@ -103,19 +106,23 @@ def test_einsum_bkwd1(x, data):
     o = einsum("i, i", y, x)
     o.backward(grad)
 
-    def f(x, y): return np.einsum("i, i", x, y)
-
     dy, dx = backprop_linalg(f, y.data, x.data, back_grad=grad)
 
-    assert np.allclose(x.grad, dx, atol=1e-3)
-    assert np.allclose(y.grad, dy, atol=1e-3)
+    assert np.allclose(x.grad, dx, atol=1e-5, rtol=1e-5)
+    assert np.allclose(y.grad, dy, atol=1e-5, rtol=1e-5)
 
     o.null_gradients()
 
-def test_einsum_bkwd2():
-    x = Tensor(np.random.rand(3, 4))
-    y = Tensor(np.random.rand(3))
-    grad = np.random.rand(4)
+
+@given(num=st.integers(1, 10),
+       data=st.data())
+def test_einsum_bkwd2(num, data):
+    y = Tensor(np.random.rand(num))
+
+    # flip so that leading dim of x is broadcastable with y
+    x_shape = data.draw(broadcastable_shape(y.shape, min_dim=2, max_dim=2))[::-1]
+    x = Tensor(np.random.rand(*x_shape))
+    grad = np.random.rand(x.shape[-1])
 
     o = einsum("ia, i -> a", x, y)
     o.backward(grad)
@@ -128,16 +135,24 @@ def test_einsum_bkwd2():
     assert np.allclose(y.grad, dy, atol=1e-6)
 
 
-def test_einsum_bkwd3():
-    x = Tensor(np.random.rand(3, 4))
-    y = Tensor(np.random.rand(3, 4))
-    z = Tensor(np.random.rand(3, ))
-    grad = np.random.rand(4)
+@given(shape=hnp.array_shapes(min_dims=2, max_dims=2),
+       data=st.data())
+def test_einsum_bkwd3(shape, data):
+    script = "ia, ia, i -> a"
+    x = Tensor(np.random.rand(*shape))
 
-    o = einsum("ia, ia, i -> a", x, y, z)
+    y_shape = data.draw(broadcastable_shape(shape, min_dim=2, max_dim=2))
+    y = Tensor(np.random.rand(*y_shape))
+
+    z_shape = data.draw(broadcastable_shape(x.shape[:1], min_dim=1, max_dim=1))
+    z = Tensor(np.random.rand(*z_shape ))
+
+    grad = np.random.rand(x.shape[1])
+
+    o = einsum(script, x, y, z)
     o.backward(grad)
 
-    def f(x, y, z): return np.einsum("ia, ia, i -> a", x, y, z)
+    def f(x, y, z): return np.einsum(script, x, y, z)
 
     dx, dy, dz = backprop_linalg(f, x.data, y.data, z.data, back_grad=grad)
 
@@ -146,15 +161,22 @@ def test_einsum_bkwd3():
     assert np.allclose(z.grad, dz, atol=1e-6)
 
 
-def test_einsum_bkwd4():
-    x = Tensor(np.random.rand(3, 4))
-    y = Tensor(np.random.rand(1))
+@given(shape=hnp.array_shapes(min_dims=2, max_dims=2),
+       data=st.data())
+def test_einsum_bkwd4(shape, data):
+    script = "ia, i -> "
+
+    x = Tensor(np.random.rand(*shape))
+
+    y_shape = data.draw(broadcastable_shape(x.shape[:1], min_dim=1, max_dim=1))
+    y = Tensor(np.random.rand(*y_shape))
+
     grad = np.random.rand(1).item()
 
-    o = einsum("ia, i -> ", x, y)
+    o = einsum(script, x, y)
     o.backward(grad)
 
-    def f(x, y): return np.einsum("ia, i -> ", x, y)
+    def f(x, y): return np.einsum(script, x, y)
 
     dx, dy = backprop_linalg(f, x.data, y.data, back_grad=grad)
 
@@ -178,11 +200,13 @@ def test_einsum_bkwd5():
     assert np.allclose(y.grad, dy, atol=1e-6)
 
 
-def test_einsum_bkwd6():
+@given(shape=hnp.array_shapes(min_dims=3, max_dims=3),
+       data=st.data())
+def test_einsum_bkwd6(shape, data):
     sig = "ijk, -> j"
-    x = Tensor(np.random.rand(3, 4, 5))
+    x = Tensor(np.random.rand(*shape))
     y = Tensor(np.random.rand(1).item())
-    grad = np.random.rand(4)
+    grad = np.random.rand(x.shape[1])
 
     o = einsum(sig, x, y)
     o.backward(grad)

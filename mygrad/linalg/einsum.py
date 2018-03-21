@@ -49,19 +49,15 @@ class EinSum(MultiVarBroadcastableOp):
         # for the given variable: e.g for var-0 in "ijk, jk -> k"
         # i is summed over without contraction with another tensor
         unique_in_lbls = (set(chain.from_iterable(in_lbls)) | set(grad_lbl))
-        new_axes = []
-        if len(set(var_lbl) - unique_in_lbls) > 0:
-            for n, lbl in enumerate(var_lbl):
-                if lbl not in unique_in_lbls:
-                    new_axes.append(n)
-                    grad_lbl = grad_lbl[:n] + lbl + grad_lbl[n:]
 
-        if new_axes:
+        if len(set(var_lbl) - unique_in_lbls) > 0:
             exp_dims = [slice(None) for i in range(grad.ndim)]
             grad_shape = list(grad.shape)
-            for ax in new_axes:
-                exp_dims.insert(ax, np.newaxis)
-                grad_shape.insert(ax, self.variables[index].shape[ax])
+            for n, lbl in enumerate(var_lbl):
+                if lbl not in unique_in_lbls:
+                    grad_lbl = grad_lbl[:n] + lbl + grad_lbl[n:]
+                    exp_dims.insert(n, np.newaxis)
+                    grad_shape.insert(n, self.variables[index].shape[n])
             grad = np.broadcast_to(grad if not grad.ndim else grad[exp_dims], grad_shape)
 
         # ji, ijk -> k
