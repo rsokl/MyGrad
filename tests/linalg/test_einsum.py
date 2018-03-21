@@ -18,10 +18,21 @@ def compare_einsum(*operands):
     assert np.allclose(np.einsum(*operands), einsum(*operands).data)
 
 
-def compare_backprop(script, *vars):
-    vars = tuple(i.astype(float) for i in vars)
+def compare_backprop(script, *vars, atol=1e-5, rtol=1e-5):
+    vars = tuple(np.asarray(i).astype(float) for i in vars)
     tensors = tuple(Tensor(i) for i in vars)
-    def f(*args): return np.einsum(script, *vars)
+
+    def f(*args): return np.einsum(script, *args)
+
+    out = einsum(script, *tensors)
+    grad = np.random.rand(*out.shape)
+    #    grad = np.ones(out.shape)
+    out.backward(grad)
+
+    numerical_derivs = backprop_linalg(f, *vars, back_grad=grad)
+
+    for dnum, tensor in zip(numerical_derivs, tensors):
+        assert np.allclose(dnum, tensor.grad, atol=atol, rtol=rtol)
 
 
 
@@ -34,6 +45,29 @@ def backprop_linalg(f, *args, back_grad):
     return grads
 
 
+def test_einsum_static_bkwd():
+    """no trace included"""
+    a = np.arange(25).reshape(5, 5)
+    b = np.arange(5)
+    c = np.arange(6).reshape(2, 3)
+    compare_backprop('ij,j', a, b)
+    compare_backprop('...j,j', a, b)
+    compare_backprop('ji', c)
+    compare_backprop('..., ...', 3, c)
+    compare_backprop('i,i', b, b)
+    compare_backprop('i,j', np.arange(2) + 1, b)
+
+    a = np.arange(60.).reshape(3, 4, 5)
+    b = np.arange(24.).reshape(4, 3, 2)
+    compare_backprop('ijk,jil->kl', a, b, atol=1e-3, rtol=1e-3)
+
+    a = np.arange(6).reshape((3, 2))
+    b = np.arange(12).reshape((4, 3))
+    compare_backprop('ki,jk->ij', a, b)
+    compare_backprop('ki,...k->i...', a, b)
+    compare_backprop('k...,jk', a, b)
+
+    
 def test_einsum_static_fwd():
     """ Check all einsum examples from numpy doc"""
     a = Tensor(np.arange(25).reshape(5, 5))
