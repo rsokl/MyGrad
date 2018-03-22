@@ -139,10 +139,10 @@ class EinSum(MultiVarBroadcastableOp):
 
             grad = np.broadcast_to(grad if not grad.ndim else grad[exp_dims], grad_shape)
 
-        # ji, ijk -> k
+        # "ji, k -> ijk"
         back_prop_lbls = ",".join([grad_lbl] + in_lbls) + "->" + var_lbl
 
-        # grad, x
+        # (grad, y)
         operands = (grad,) + numpy_arrays[:index] + numpy_arrays[index + 1:]
 
         if not repeat_lbls:

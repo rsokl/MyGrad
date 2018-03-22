@@ -7,7 +7,7 @@ import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
 import numpy as np
 
-
+from itertools import chain
 from mygrad.linalg.einsum import einsum
 
 
@@ -18,13 +18,33 @@ def compare_einsum(*operands):
     assert np.allclose(np.einsum(*operands), einsum(*operands).data)
 
 
-def compare_backprop(script, *vars, atol=1e-5, rtol=1e-5):
-    vars = tuple(np.asarray(i).astype(float) for i in vars)
-    tensors = tuple(Tensor(i) for i in vars)
+def compare_backprop(*operands, atol=1e-5, rtol=1e-5):
+    if isinstance(operands[0], str):
+        # operands form: "ijk, ijk", x, y
+        script = operands[0]
+        vars = operands[1:]
+        vars = tuple(np.asarray(i).astype(float) for i in vars)
+        tensors = tuple(Tensor(i) for i in vars)
 
-    def f(*args): return np.einsum(script, *args)
+        def f(*args): return np.einsum(script, *args)
+        out = einsum(script, *tensors)
+    else:
+        # operands form: op0, sublist0, op1, sublist1, ..., [sublistout]
+        end = -1 if len(operands) % 2 else None  # -1 if sublistout is included
+        vars = tuple(np.asarray(i).astype(float) for i in operands[:end:2])
+        tensors = tuple(Tensor(i) for i in vars)
 
-    out = einsum(script, *tensors)
+        def f(*args):
+            x = tuple(chain.from_iterable(zip(args, operands[1::2])))
+            if end is not None:
+                x += (operands[-1],)
+            return np.einsum(*x)
+
+        x = tuple(chain.from_iterable(zip(tensors, operands[1::2])))
+        if end is not None:
+            x += (operands[-1],)
+        out = einsum(*x)
+
     grad = np.random.rand(*out.shape)
     #    grad = np.ones(out.shape)
     out.backward(grad)
@@ -61,6 +81,7 @@ def test_einsum_static_fwd():
     compare_einsum(a, [0, 1], b, [1])
 
     compare_einsum('...j,j', a, b)
+    compare_einsum(a, [Ellipsis, 0], b, [Ellipsis, 0])
 
     compare_einsum('ji', c)
     compare_einsum(c, [1,0])
@@ -91,11 +112,62 @@ def test_einsum_static_fwd():
     compare_einsum(a, [0, Ellipsis], b, [2, 0])
 
 
+def test_einsum_static_bkwd():
+    """ Check all einsum examples from numpy doc"""
+    a = np.arange(25).reshape(5, 5)
+    b = np.arange(5)
+    c = np.arange(6).reshape(2, 3)
+
+    compare_backprop('ii', a)
+    compare_backprop(a, [0, 0])
+
+    compare_backprop('ii->i', a)
+    compare_backprop(a, [0, 0], [0])
+
+    compare_backprop('ij->', a)
+    compare_backprop(a, [0, 0], [0])
+
+    compare_backprop('ij,j', a, b)
+    compare_backprop(a, [0, 1], b, [1])
+
+    compare_backprop('...j,j', a, b)
+    compare_backprop(a, [Ellipsis, 0], b, [Ellipsis, 0])
+    
+    compare_backprop('ji', c)
+    compare_backprop(c, [1, 0])
+    
+    compare_backprop('..., ...', 3, c)
+    compare_backprop(3, [Ellipsis], c, [Ellipsis])
+    
+    compare_backprop('i,i', b, b)
+    compare_backprop(b, [0], b, [0])
+    
+    compare_backprop('i,j', np.arange(2) + 1, b)
+
+    a = np.arange(60.).reshape(3, 4, 5)
+    b = np.arange(24.).reshape(4, 3, 2)
+    compare_backprop('ijk,jil->kl', a, b, atol=1e-3, rtol=1e-3)
+    compare_backprop(a, [0, 1, 2], b, [1, 0, 3], [2, 3], atol=1e-3, rtol=1e-3)
+    
+    a = np.arange(6).reshape((3, 2))
+    b = np.arange(12).reshape((4, 3))
+    compare_backprop('ki,jk->ij', a, b)
+    compare_backprop(a, [0, 1], b, [2, 0], [1, 2])
+    
+    compare_backprop('ki,...k->i...', a, b)
+    compare_backprop(a, [0, 1], b, [Ellipsis, 0], [1, Ellipsis])
+    
+    compare_backprop('k...,jk', a, b)
+    compare_backprop(a, [0, Ellipsis], b, [2, 0])
+
+
 def test_traces_bkwd():
     a = np.random.rand(5, 2, 2, 5)
     b = np.random.rand(3, 2, 1)
     c = np.random.rand(2, 2)
     compare_backprop('ijji -> i', a)
+    compare_backprop(a, [0, 1, 1, 0], [0])
+
     compare_backprop('ijji -> j', a)
     compare_backprop('ijji -> ij', a)
     compare_backprop('ijji -> ji', a)
@@ -105,32 +177,6 @@ def test_traces_bkwd():
     compare_backprop('ijji,kji,jj-> kj', a, b, c)
     compare_backprop('ijji,kji,jj-> ijk', a, b, c)
     compare_backprop('ijji,kji,jj-> jk', a, b, c)
-
-
-
-def test_einsum_static_bkwd():
-    """ Check all einsum examples from numpy doc"""
-    a = np.arange(25).reshape(5, 5)
-    b = np.arange(5)
-    c = np.arange(6).reshape(2, 3)
-    compare_backprop('ii', a)
-    compare_backprop('ij->', a)
-    compare_backprop('ij,j', a, b)
-    compare_backprop('...j,j', a, b)
-    compare_backprop('ji', c)
-    compare_backprop('..., ...', 3, c)
-    compare_backprop('i,i', b, b)
-    compare_backprop('i,j', np.arange(2) + 1, b)
-
-    a = np.arange(60.).reshape(3, 4, 5)
-    b = np.arange(24.).reshape(4, 3, 2)
-    compare_backprop('ijk,jil->kl', a, b, atol=1e-3, rtol=1e-3)
-
-    a = np.arange(6).reshape((3, 2))
-    b = np.arange(12).reshape((4, 3))
-    compare_backprop('ki,jk->ij', a, b)
-    compare_backprop('ki,...k->i...', a, b)
-    compare_backprop('k...,jk', a, b)
 
 
 @given(num=st.integers(1, 10),
