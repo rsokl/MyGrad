@@ -19,6 +19,8 @@ def compare_einsum(*operands):
 
 
 def compare_backprop(*operands, atol=1e-5, rtol=1e-5):
+    """ Compare back-propagation through mygrad-einsum, and compare
+        against numerical derivative"""
     if isinstance(operands[0], str):
         # operands form: "ijk, ijk", x, y
         script = operands[0]
