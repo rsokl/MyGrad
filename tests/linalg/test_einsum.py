@@ -67,6 +67,24 @@ def backprop_linalg(f, *args, back_grad):
     return grads
 
 
+def test_unique_from_end():
+    from mygrad.linalg.einsum import _unique_from_end
+    assert _unique_from_end("") == ""
+    assert _unique_from_end("a") == "a"
+    assert _unique_from_end("aaaa") == "a"
+    assert _unique_from_end("aba") == "ba"
+    assert _unique_from_end("abccbac") == "bac"
+
+
+def test_merge_mappings():
+    from mygrad.linalg.einsum import _merge_max_mappings
+    a = dict(a=0, b=100, c=3)
+    b = dict(a=10, b=10)
+    c = dict(c=50)
+    d = dict(d=70)
+    assert _merge_max_mappings(a, b, c, d) == dict(a=10, b=100, c=50, d=70)
+
+
 def test_einsum_static_fwd():
     """ Check all einsum examples from numpy doc"""
     a = Tensor(np.arange(25).reshape(5, 5))

@@ -7,6 +7,8 @@ from numpy.core.einsumfunc import _parse_einsum_input
 from numpy.lib.stride_tricks import as_strided
 from itertools import filterfalse
 
+__all__ = ["einsum"]
+
 
 def reduce_broadcast(grad, outshape):
 
@@ -186,8 +188,8 @@ def einsum(*operands, **kwargs):
     subscripts : str
         Specifies the subscripts for summation.
 
-    operands : list of array_like
-        These are the arrays for the operation.
+    operands : Tuple[ArrayLike]
+        The tensors used in the summation.
 
     Returns
     -------
@@ -199,7 +201,7 @@ def einsum(*operands, **kwargs):
     The subscripts string is a comma-separated list of subscript labels,
     where each label refers to a dimension of the corresponding operand.
     Repeated subscripts labels in one operand take the diagonal.  For example,
-    ``np.einsum('ii', a)`` is equivalent to ``np.trace(a)``.
+    ``einsum('ii', a)`` is equivalent to ``np.trace(a)``.
 
     Whenever a label is repeated, it is summed, so ``einsum('i,i', a, b)``
     is equivalent to ``np.inner(a,b)``.  If a label appears only once,
@@ -208,7 +210,7 @@ def einsum(*operands, **kwargs):
 
     The order of labels in the output is by default alphabetical.  This
     means that ``np.einsum('ij', a)`` doesn't affect a 2D array, while
-    ``np.einsum('ji', a)`` takes its transpose.
+    ``einsum('ji', a)`` takes its transpose.
 
     The output can be controlled by specifying output subscript labels
     as well.  This specifies the label order, and allows summing to
