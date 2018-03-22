@@ -24,10 +24,8 @@ class MultiVarOperation:
 
     def null_gradients(self):
         """ Back-propagates `None` to the gradients of the operation's input Tensors."""
-        for attr in self.__dict__:
-            var = getattr(self, attr)
-            if hasattr(var, 'null_gradients'):
-                var.null_gradients()
+        for var in self.variables:
+            var.null_gradients()
 
 
 class MultiVarBroadcastableOp(MultiVarOperation):
