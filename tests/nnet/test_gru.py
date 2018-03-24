@@ -154,6 +154,7 @@ def test_gru_fwd(data):
 
 @given(st.data())
 def test_gru_backward(data):
+    tolerances = dict(atol=1e-5, rtol=1e-5)
     X = data.draw(hnp.arrays(shape=hnp.array_shapes(max_side=5, min_dims=3, max_dims=3),
                              dtype=float,
                              elements=st.floats(-10, 10)))
@@ -266,23 +267,23 @@ def test_gru_backward(data):
 
     rec_s_grad = np.stack([i.grad for i in all_s[1:]])
 
-    assert_allclose(rec_s_grad, s.grad)
+    assert_allclose(rec_s_grad, s.grad, **tolerances)
 
-    assert_allclose(Wz.grad, Wz2.grad)
-    assert_allclose(Wr.grad, Wr2.grad)
-    assert_allclose(Wh.grad, Wh2.grad)
+    assert_allclose(Wz.grad, Wz2.grad, **tolerances)
+    assert_allclose(Wr.grad, Wr2.grad, **tolerances)
+    assert_allclose(Wh.grad, Wh2.grad, **tolerances)
 
-    assert_allclose(Uz.grad, Uz2.grad)
-    assert_allclose(Ur.grad, Ur2.grad)
-    assert_allclose(Uh.grad, Uh2.grad)
+    assert_allclose(Uz.grad, Uz2.grad, **tolerances)
+    assert_allclose(Ur.grad, Ur2.grad, **tolerances)
+    assert_allclose(Uh.grad, Uh2.grad, **tolerances)
 
-    assert_allclose(bz.grad, bz2.grad)
-    assert_allclose(br.grad, br2.grad)
-    assert_allclose(bh.grad, bh2.grad)
+    assert_allclose(bz.grad, bz2.grad, **tolerances)
+    assert_allclose(br.grad, br2.grad, **tolerances)
+    assert_allclose(bh.grad, bh2.grad, **tolerances)
 
-    assert_allclose(V.grad, V2.grad)
+    assert_allclose(V.grad, V2.grad, **tolerances)
 
-    assert_allclose(X.grad, X2.grad)
+    assert_allclose(X.grad, X2.grad, **tolerances)
 
     ls.null_gradients()
     ls2.null_gradients()
