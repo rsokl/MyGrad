@@ -1,6 +1,7 @@
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
+from numpy.testing import assert_allclose
 from hypothesis import given
 
 from mygrad.tensor_base import Tensor
@@ -54,7 +55,7 @@ def test_reshape_fwd(a):
     a = a.reshape(new_shape)
 
     assert x.shape == a.shape, "Tensor.reshape failed"
-    assert np.allclose(a, x.data), "Tensor.reshape failed"
+    assert_allclose(a, x.data), "Tensor.reshape failed"
 
 
 @given(a=hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=5),
@@ -70,4 +71,4 @@ def test_reshape_backward(a):
     o.backward(grad.reshape(new_shape))
 
     assert x.grad.shape == grad.shape
-    assert np.allclose(x.grad, grad)
+    assert_allclose(x.grad, grad)

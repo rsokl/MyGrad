@@ -1,6 +1,6 @@
 from mygrad.tensor_base import Tensor
 from mygrad.math import multiply_sequence, add_sequence
-import numpy as np
+from numpy.testing import assert_allclose
 
 
 def test_seq_add():
@@ -16,11 +16,11 @@ def test_seq_add():
     f1 = a1 + b1 + c1
     f1.sum().backward()
 
-    assert np.allclose(f.data, f1.data)
-    assert np.allclose(f.grad, f1.grad)
-    assert np.allclose(a.grad, a1.grad)
-    assert np.allclose(b.grad, b1.grad)
-    assert np.allclose(c.grad, c1.grad)
+    assert_allclose(f.data, f1.data)
+    assert_allclose(f.grad, f1.grad)
+    assert_allclose(a.grad, a1.grad)
+    assert_allclose(b.grad, b1.grad)
+    assert_allclose(c.grad, c1.grad)
 
 
 def test_seq_mult():
@@ -36,8 +36,8 @@ def test_seq_mult():
     f1 = a1 * b1 * c1
     f1.sum().backward()
 
-    assert np.allclose(f.data, f1.data)
-    assert np.allclose(f.grad, f1.grad)
-    assert np.allclose(a.grad, a1.grad)
-    assert np.allclose(b.grad, b1.grad)
-    assert np.allclose(c.grad, c1.grad)
+    assert_allclose(f.data, f1.data)
+    assert_allclose(f.grad, f1.grad)
+    assert_allclose(a.grad, a1.grad)
+    assert_allclose(b.grad, b1.grad)
+    assert_allclose(c.grad, c1.grad)

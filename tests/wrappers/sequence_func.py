@@ -5,7 +5,10 @@ from mygrad import Tensor
 from hypothesis import given, assume
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
+
 import numpy as np
+from numpy.testing import assert_allclose
+
 from functools import wraps
 
 
@@ -36,7 +39,8 @@ class fwdprop_test_factory():
             true_out = self.true_func(x, axis=axis, keepdims=keepdims)
 
             assert isinstance(o, Tensor), "`mygrad_func` returned type {}, should return `mygrad.Tensor`".format(type(o))
-            assert np.allclose(tensor_out, true_out), "`mygrad_func(x)` and `true_func(x)` produce different results"
+            assert_allclose(tensor_out, true_out,
+                            err_msg="`mygrad_func(x)` and `true_func(x)` produce different results")
         return wrapper
 
 
@@ -89,7 +93,8 @@ class backprop_test_factory():
             dx = numerical_gradient_sequence(self.func, x=x.data, back_grad=grad,
                                              axis=axis, keepdims=keepdims, h=self.h)
 
-            assert np.allclose(my_grad, dx, **self.tolerances), \
-                "x: numerical derivative and mygrad derivative do not match"
+            assert_allclose(my_grad, dx,
+                            err_msg="x: numerical derivative and mygrad derivative do not match",
+                            **self.tolerances)
 
         return wrapper

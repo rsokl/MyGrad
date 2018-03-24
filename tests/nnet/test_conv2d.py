@@ -1,6 +1,7 @@
 from mygrad.tensor_base import Tensor
 from mygrad.nnet.layers import conv2d
 import numpy as np
+from numpy.testing import assert_allclose
 from scipy.signal import fftconvolve, convolve
 from itertools import product
 
@@ -200,7 +201,7 @@ def test_conv2d(data):
     b = np.zeros((w.shape[0],))
     out, _ = conv_forward_naive(dat, w_dat, b, {'stride': stride, 'pad': pad})
 
-    assert np.allclose(f.data, out)
+    assert_allclose(f.data, out)
 
     dout = data.draw(hnp.arrays(shape=f.shape,
                                 dtype=float,
@@ -208,8 +209,8 @@ def test_conv2d(data):
 
     f.backward(dout)
     dx, dw, db = conv_backward_naive(dout, _)
-    assert np.allclose(x.grad, dx)
-    assert np.allclose(w.grad, dw)
+    assert_allclose(x.grad, dx)
+    assert_allclose(w.grad, dw)
 
 
 def test_bad_conv_shapes():

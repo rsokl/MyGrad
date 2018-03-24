@@ -8,6 +8,7 @@ from hypothesis import given
 import hypothesis.extra.numpy as hnp
 
 import numpy as np
+from numpy.testing import assert_allclose
 
 @given(st.data())
 def test_gru_fwd(data):
@@ -126,25 +127,25 @@ def test_gru_fwd(data):
 
     rec_s_dat = np.stack([i.data for i in all_s])
 
-    assert np.allclose(ls.data, ls2.data)
+    assert_allclose(ls.data, ls2.data)
 
-    assert np.allclose(rec_s_dat, s.data)
+    assert_allclose(rec_s_dat, s.data)
 
-    assert np.allclose(Wz.data, Wz2.data)
-    assert np.allclose(Wr.data, Wr2.data)
-    assert np.allclose(Wh.data, Wh2.data)
+    assert_allclose(Wz.data, Wz2.data)
+    assert_allclose(Wr.data, Wr2.data)
+    assert_allclose(Wh.data, Wh2.data)
 
-    assert np.allclose(Uz.data, Uz2.data)
-    assert np.allclose(Ur.data, Ur2.data)
-    assert np.allclose(Uh.data, Uh2.data)
+    assert_allclose(Uz.data, Uz2.data)
+    assert_allclose(Ur.data, Ur2.data)
+    assert_allclose(Uh.data, Uh2.data)
 
-    assert np.allclose(bz.data, bz2.data)
-    assert np.allclose(br.data, br2.data)
-    assert np.allclose(bh.data, bh2.data)
+    assert_allclose(bz.data, bz2.data)
+    assert_allclose(br.data, br2.data)
+    assert_allclose(bh.data, bh2.data)
 
-    assert np.allclose(V.data, V2.data)
+    assert_allclose(V.data, V2.data)
 
-    assert np.allclose(X.data, X2.data)
+    assert_allclose(X.data, X2.data)
 
     ls.null_gradients()
     for x in [s, Wz, Wr, Wh, bz, br, bh, X, Uz, Ur, Uh, V]:
@@ -153,6 +154,7 @@ def test_gru_fwd(data):
 
 @given(st.data())
 def test_gru_backward(data):
+    tolerances = dict(atol=1e-5, rtol=1e-5)
     X = data.draw(hnp.arrays(shape=hnp.array_shapes(max_side=5, min_dims=3, max_dims=3),
                              dtype=float,
                              elements=st.floats(-10, 10)))
@@ -265,23 +267,23 @@ def test_gru_backward(data):
 
     rec_s_grad = np.stack([i.grad for i in all_s[1:]])
 
-    assert np.allclose(rec_s_grad, s.grad)
+    assert_allclose(rec_s_grad, s.grad, **tolerances)
 
-    assert np.allclose(Wz.grad, Wz2.grad)
-    assert np.allclose(Wr.grad, Wr2.grad)
-    assert np.allclose(Wh.grad, Wh2.grad)
+    assert_allclose(Wz.grad, Wz2.grad, **tolerances)
+    assert_allclose(Wr.grad, Wr2.grad, **tolerances)
+    assert_allclose(Wh.grad, Wh2.grad, **tolerances)
 
-    assert np.allclose(Uz.grad, Uz2.grad)
-    assert np.allclose(Ur.grad, Ur2.grad)
-    assert np.allclose(Uh.grad, Uh2.grad)
+    assert_allclose(Uz.grad, Uz2.grad, **tolerances)
+    assert_allclose(Ur.grad, Ur2.grad, **tolerances)
+    assert_allclose(Uh.grad, Uh2.grad, **tolerances)
 
-    assert np.allclose(bz.grad, bz2.grad)
-    assert np.allclose(br.grad, br2.grad)
-    assert np.allclose(bh.grad, bh2.grad)
+    assert_allclose(bz.grad, bz2.grad, **tolerances)
+    assert_allclose(br.grad, br2.grad, **tolerances)
+    assert_allclose(bh.grad, bh2.grad, **tolerances)
 
-    assert np.allclose(V.grad, V2.grad)
+    assert_allclose(V.grad, V2.grad, **tolerances)
 
-    assert np.allclose(X.grad, X2.grad)
+    assert_allclose(X.grad, X2.grad, **tolerances)
 
     ls.null_gradients()
     ls2.null_gradients()

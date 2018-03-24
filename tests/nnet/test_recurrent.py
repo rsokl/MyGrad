@@ -8,7 +8,7 @@ from hypothesis import given
 import hypothesis.extra.numpy as hnp
 
 import numpy as np
-
+from numpy.testing import assert_allclose
 
 @given(st.data())
 def test_recurrent(data):
@@ -66,17 +66,17 @@ def test_recurrent(data):
 
     rec_s_dat = np.stack([i.data for i in all_s])
     rec_s_grad = np.stack([i.grad for i in all_s[1:]])
-    assert np.allclose(rec_s_dat, s.data)
-    assert np.allclose(rec_s_grad, s.grad[1:])
-    assert np.allclose(ls.data, ls2.data)
-    assert np.allclose(W.data, W2.data)
-    assert np.allclose(W.grad, W2.grad)
-    assert np.allclose(U.data, U2.data)
-    assert np.allclose(U.grad, U2.grad)
-    assert np.allclose(V.data, V2.data)
-    assert np.allclose(V.grad, V2.grad)
-    assert np.allclose(X.data, X2.data)
-    assert np.allclose(X.grad, X2.grad)
+    assert_allclose(rec_s_dat, s.data)
+    assert_allclose(rec_s_grad, s.grad[1:])
+    assert_allclose(ls.data, ls2.data)
+    assert_allclose(W.data, W2.data)
+    assert_allclose(W.grad, W2.grad)
+    assert_allclose(U.data, U2.data)
+    assert_allclose(U.grad, U2.grad)
+    assert_allclose(V.data, V2.data)
+    assert_allclose(V.grad, V2.grad)
+    assert_allclose(X.data, X2.data)
+    assert_allclose(X.grad, X2.grad)
 
     ls.null_gradients()
     for x in [s, W, X, U, V]:

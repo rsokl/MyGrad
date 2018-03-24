@@ -2,9 +2,11 @@ from mygrad.tensor_base import Tensor
 from mygrad.nnet.losses import multiclass_hinge
 
 import numpy as np
+from numpy.testing import assert_allclose
 import hypothesis.strategies as st
 from hypothesis import given
 import hypothesis.extra.numpy as hnp
+
 
 @given(st.data())
 def test_multiclass_hinge(data):
@@ -29,5 +31,5 @@ def test_multiclass_hinge(data):
 
     pygrad_loss = Lij.sum() / pygrad_scores.shape[0]
     pygrad_loss.backward()
-    assert np.allclose(hinge_loss.data, pygrad_loss.data)
-    assert np.allclose(pygrad_scores.grad, hinge_scores.grad)
+    assert_allclose(hinge_loss.data, pygrad_loss.data)
+    assert_allclose(pygrad_scores.grad, hinge_scores.grad)
