@@ -1,5 +1,5 @@
 import numpy as np
-
+from numpy.testing import assert_allclose
 from mygrad.nnet.layers import max_pool
 from mygrad.tensor_base import Tensor
 from pytest import raises
@@ -41,8 +41,8 @@ def test_1d_case():
                          [24.,  0.,  0., 51.,  0., 27.],
                          [ 0.,  0., 87.,  0.,  0., 31.]]])
     assert isinstance(out, Tensor)
-    assert np.allclose(fwd_ans, out.data)
-    assert np.allclose(bkc_ans, x.grad)
+    assert_allclose(fwd_ans, out.data)
+    assert_allclose(bkc_ans, x.grad)
 
 
 def test_2d_case():
@@ -77,8 +77,8 @@ def test_2d_case():
                          [1., 0., 0., 0., 0., 1.],
                          [0., 0., 2., 0., 0., 0.]]])
     assert isinstance(out, Tensor)
-    assert np.allclose(fwd_ans, out.data)
-    assert np.allclose(bkc_ans, x.grad)
+    assert_allclose(fwd_ans, out.data)
+    assert_allclose(bkc_ans, x.grad)
 
 
 def test_3d_case():
@@ -112,8 +112,8 @@ def test_3d_case():
                          [ 0.,  9.,  4.,  0.,  0., 13.],
                          [ 0.,  0.,  7.,  0.,  0.,  0.]]])
     assert isinstance(out, Tensor)
-    assert np.allclose(fwd_ans, out.data)
-    assert np.allclose(bkc_ans, x.grad)
+    assert_allclose(fwd_ans, out.data)
+    assert_allclose(bkc_ans, x.grad)
 
 
 def test_bad_max_shapes():

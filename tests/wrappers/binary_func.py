@@ -2,11 +2,15 @@ from ..utils.numerical_gradient import numerical_gradient
 from ..custom_strategies import broadcastable_shape
 
 from mygrad import Tensor
+
 from hypothesis import given, assume
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
+
 import numpy as np
+from numpy.testing import assert_allclose, assert_array_almost_equal
 from functools import wraps
+
 
 class fwdprop_test_factory():
     def __init__(self, *, mygrad_func, true_func, xbnds=(-100, 100),
@@ -39,7 +43,8 @@ class fwdprop_test_factory():
             tensor_out = o.data
             true_out = self.true_func(x, y)
             assert isinstance(o, Tensor), "`mygrad_func` returned type {}, should return `mygrad.Tensor`".format(type(o))
-            assert np.allclose(tensor_out, true_out), "`mygrad_func(x)` and `true_func(x)` produce different results"
+            assert_allclose(tensor_out, true_out,
+                            err_msg="`mygrad_func(x)` and `true_func(x)` produce different results")
         return wrapper
 
 
@@ -98,8 +103,8 @@ class backprop_test_factory():
 
             dx, dy = numerical_gradient(self.func, x.data, y.data, back_grad=grad)
 
-            assert np.allclose(x.grad, dx, **self.tolerances), \
-                "x: numerical derivative and mygrad derivative do not match"
-            assert np.allclose(y.grad, dy, **self.tolerances), \
-                "y: numerical derivative and mygrad derivative do not match"
+            assert_allclose(x.grad, dx, **self.tolerances,
+                            err_msg="x: numerical derivative and mygrad derivative do not match")
+            assert_allclose(y.grad, dy, **self.tolerances,
+                            err_msg="y: numerical derivative and mygrad derivative do not match")
         return wrapper

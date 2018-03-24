@@ -5,6 +5,7 @@ from hypothesis import given, assume
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
 import numpy as np
+from numpy.testing import assert_allclose, assert_almost_equal
 from functools import wraps
 from decimal import Decimal
 
@@ -30,7 +31,8 @@ class fwdprop_test_factory():
             tensor_out = o.data
             true_out = self.true_func(x)
             assert isinstance(o, Tensor), "`mygrad_func` returned type {}, should return `mygrad.Tensor`".format(type(o))
-            assert np.allclose(tensor_out, true_out), "`mygrad_func(x)` and `true_func(x)` produce different results"
+            assert_allclose(tensor_out, true_out, err_msg=\
+                "`mygrad_func(x)` and `true_func(x)` produce different results")
         return wrapper
 
 

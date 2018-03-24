@@ -1,5 +1,5 @@
 import hypothesis.strategies as st
-import numpy as np
+from numpy.testing import assert_allclose
 from hypothesis import given
 
 from mygrad.tensor_base import Tensor
@@ -21,8 +21,8 @@ def test_chainrule_scalar(x, y, z):
     w = 1*f
 
     g.backward()
-    assert np.allclose(f.grad, 2 * z.data * f.data)
-    assert np.allclose(x.grad, 1 + 2 * z.data * f.data * y.data)
-    assert np.allclose(y.grad, 2 * z.data * f.data * x.data)
-    assert np.allclose(z.grad, f.data**2 + z.data * 2 * f.data)
+    assert_allclose(f.grad, 2 * z.data * f.data)
+    assert_allclose(x.grad, 1 + 2 * z.data * f.data * y.data)
+    assert_allclose(y.grad, 2 * z.data * f.data * x.data)
+    assert_allclose(z.grad, f.data**2 + z.data * 2 * f.data)
     assert w.grad is None

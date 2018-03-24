@@ -5,8 +5,9 @@ from mygrad import Tensor
 from hypothesis import given
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
-import numpy as np
 
+import numpy as np
+from numpy.testing import assert_allclose
 from itertools import chain
 from mygrad.linalg.einsum import einsum
 
@@ -15,7 +16,7 @@ def compare_einsum(*operands):
     mygrad_out = einsum(*operands)
     assert isinstance(mygrad_out, Tensor)
     operands = tuple(i.data if isinstance(i, Tensor) else i for i in operands)
-    assert np.allclose(np.einsum(*operands), einsum(*operands).data)
+    assert_allclose(np.einsum(*operands), einsum(*operands).data)
 
 
 def compare_backprop(*operands, atol=1e-5, rtol=1e-5):
@@ -55,7 +56,7 @@ def compare_backprop(*operands, atol=1e-5, rtol=1e-5):
 
     for dnum, tensor in zip(numerical_derivs, tensors):
         assert dnum.shape == tensor.grad.shape
-        assert np.allclose(dnum, tensor.grad, atol=atol, rtol=rtol)
+        assert_allclose(dnum, tensor.grad, atol=atol, rtol=rtol)
 
 
 def backprop_linalg(f, *args, back_grad):
@@ -214,8 +215,8 @@ def test_einsum_bkwd1(num, data):
 
     dx, dy = backprop_linalg(f, x.data, y.data, back_grad=grad)
 
-    assert np.allclose(x.grad, dx, atol=1e-5, rtol=1e-5)
-    assert np.allclose(y.grad, dy, atol=1e-5, rtol=1e-5)
+    assert_allclose(x.grad, dx, atol=1e-5, rtol=1e-5)
+    assert_allclose(y.grad, dy, atol=1e-5, rtol=1e-5)
 
     o.null_gradients()
     assert x.grad is None
@@ -227,8 +228,8 @@ def test_einsum_bkwd1(num, data):
 
     dy, dx = backprop_linalg(f, y.data, x.data, back_grad=grad)
 
-    assert np.allclose(x.grad, dx, atol=1e-5, rtol=1e-5)
-    assert np.allclose(y.grad, dy, atol=1e-5, rtol=1e-5)
+    assert_allclose(x.grad, dx, atol=1e-5, rtol=1e-5)
+    assert_allclose(y.grad, dy, atol=1e-5, rtol=1e-5)
 
     o.null_gradients()
 
@@ -250,8 +251,8 @@ def test_einsum_bkwd2(num, data):
 
     dx, dy = backprop_linalg(f, x.data, y.data, back_grad=grad)
 
-    assert np.allclose(x.grad, dx, atol=1e-6)
-    assert np.allclose(y.grad, dy, atol=1e-6)
+    assert_allclose(x.grad, dx, atol=1e-6)
+    assert_allclose(y.grad, dy, atol=1e-6)
 
 
 @given(shape=hnp.array_shapes(min_dims=2, max_dims=2),
@@ -275,9 +276,9 @@ def test_einsum_bkwd3(shape, data):
 
     dx, dy, dz = backprop_linalg(f, x.data, y.data, z.data, back_grad=grad)
 
-    assert np.allclose(x.grad, dx, atol=1e-6)
-    assert np.allclose(y.grad, dy, atol=1e-6)
-    assert np.allclose(z.grad, dz, atol=1e-6)
+    assert_allclose(x.grad, dx, atol=1e-6)
+    assert_allclose(y.grad, dy, atol=1e-6)
+    assert_allclose(z.grad, dz, atol=1e-6)
 
 
 @given(shape=hnp.array_shapes(min_dims=2, max_dims=2),
@@ -299,8 +300,8 @@ def test_einsum_bkwd4(shape, data):
 
     dx, dy = backprop_linalg(f, x.data, y.data, back_grad=grad)
 
-    assert np.allclose(x.grad, dx, atol=1e-6)
-    assert np.allclose(y.grad, dy, atol=1e-6)
+    assert_allclose(x.grad, dx, atol=1e-6)
+    assert_allclose(y.grad, dy, atol=1e-6)
 
 
 def test_einsum_bkwd5():
@@ -315,8 +316,8 @@ def test_einsum_bkwd5():
 
     dx, dy = backprop_linalg(f, x.data, y.data, back_grad=grad)
 
-    assert np.allclose(x.grad, dx, atol=1e-6)
-    assert np.allclose(y.grad, dy, atol=1e-6)
+    assert_allclose(x.grad, dx, atol=1e-6)
+    assert_allclose(y.grad, dy, atol=1e-6)
 
 
 @given(shape=hnp.array_shapes(min_dims=3, max_dims=3),
@@ -334,5 +335,5 @@ def test_einsum_bkwd6(shape, data):
 
     dx, dy = backprop_linalg(f, x.data, y.data, back_grad=grad)
 
-    assert np.allclose(x.grad, dx, atol=1e-6)
-    assert np.allclose(y.grad, dy, atol=1e-6)
+    assert_allclose(x.grad, dx, atol=1e-6)
+    assert_allclose(y.grad, dy, atol=1e-6)

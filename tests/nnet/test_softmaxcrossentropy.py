@@ -4,6 +4,7 @@ from mygrad.nnet.activations import softmax
 from mygrad.math import log
 
 import numpy as np
+from numpy.testing import assert_allclose
 import hypothesis.strategies as st
 from hypothesis import given
 import hypothesis.extra.numpy as hnp
@@ -31,5 +32,5 @@ def test_softmax_crossentropy(data):
 
     pygrad_cross = (-1/s.shape[0]) * (log(probs) * truth).sum()
     pygrad_cross.backward()
-    assert np.allclose(softmax_cross.data, pygrad_cross.data)
-    assert np.allclose(scores.grad, pygrad_scores.grad)
+    assert_allclose(softmax_cross.data, pygrad_cross.data)
+    assert_allclose(scores.grad, pygrad_scores.grad)

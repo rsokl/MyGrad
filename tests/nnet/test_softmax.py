@@ -1,5 +1,5 @@
 import numpy as np
-
+from numpy.testing import assert_allclose
 from mygrad import Tensor
 from mygrad.nnet.activations import softmax, logsoftmax
 
@@ -19,14 +19,14 @@ def test_static_softmax():
     f = (softmax(x) * skew).sum()
 
     out = np.array(1.449875865467131)
-    assert np.allclose(f.data, out)
+    assert_allclose(f.data, out)
 
     f.backward()
     dx = np.array([[ 0.01720112,  0.01715422,  0.12266443, -0.15701977],
                    [-0.01179518,  0.01108053, -0.10425844,  0.10497309],
                    [ 0.00502799, -0.00723393,  0.12698131, -0.12477536]])
 
-    assert np.allclose(x.grad, dx)
+    assert_allclose(x.grad, dx)
 
 
 def test_static_logsoftmax():
@@ -43,12 +43,12 @@ def test_static_logsoftmax():
     f = (logsoftmax(x) * skew).sum()
 
     out = np.array(-13.722895761739732)
-    assert np.allclose(f.data, out)
+    assert_allclose(f.data, out)
 
     f.backward()
     dx = np.array([[ 0.79988389,  0.3299668 ,  0.29699009, -1.42684078],
                    [ 0.24859989,  0.62057111, -0.281343  , -0.587828  ],
                    [ 0.5119002 ,  0.15601518,  0.45965687, -1.12757225]])
 
-    assert np.allclose(x.grad, dx)
+    assert_allclose(x.grad, dx)
 

@@ -2,7 +2,10 @@
 from ...wrappers.binary_func import fwdprop_test_factory, backprop_test_factory
 
 from mygrad.math import add, subtract, multiply, divide, power, logaddexp
+
 import numpy as np
+from numpy.testing import assert_allclose
+
 from hypothesis import given
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
@@ -103,7 +106,7 @@ def test_logaddexp_bkwd(data, x):
         out.backward(grad)
         out_o.backward(grad)
 
-    assert np.allclose(x.grad, x_o.grad), \
-        "x: numerical derivative and mygrad derivative do not match"
-    assert np.allclose(y.grad, y_o.grad), \
-        "y: numerical derivative and mygrad derivative do not match"
+    assert_allclose(x.grad, x_o.grad,
+                    err_msg="x: numerical derivative and mygrad derivative do not match")
+    assert_allclose(y.grad, y_o.grad,
+                    err_msg="y: numerical derivative and mygrad derivative do not match")
