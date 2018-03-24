@@ -171,7 +171,7 @@ def test_einsum_static_bkwd():
     compare_backprop(a, [0, 1, 2], b, [1, 0, 3], [2, 3], atol=1e-3, rtol=1e-3)
     
     a = np.arange(6).reshape((3, 2))
-    b = np.arange(12).reshape((4, 3))
+    b = np.arange(4).reshape((4, 1))
     compare_backprop('ki,jk->ij', a, b)
     compare_backprop(a, [0, 1], b, [2, 0], [1, 2])
     
@@ -185,7 +185,7 @@ def test_einsum_static_bkwd():
 def test_traces_bkwd():
     a = np.random.rand(5, 2, 2, 5)
     b = np.random.rand(3, 2, 1)
-    c = np.random.rand(2, 2)
+    c = np.random.rand(1, 1)
     compare_backprop('ijji -> i', a)
     compare_backprop(a, [0, 1, 1, 0], [0])
 

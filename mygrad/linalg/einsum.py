@@ -11,7 +11,6 @@ __all__ = ["einsum"]
 
 
 def reduce_broadcast(grad, outshape):
-
     if grad.shape == outshape:
         return grad
 
@@ -22,6 +21,7 @@ def reduce_broadcast(grad, outshape):
     keepdims = tuple(n for n,i in enumerate(grad.shape) if i != outshape[n])
     if keepdims:
         grad = grad.sum(axis=keepdims, keepdims=True)
+
     return grad
 
 
@@ -151,6 +151,10 @@ class EinSum(MultiVarBroadcastableOp):
             # dfdx: einsum("ji, k -> ijk", grad, y)
             outshape = self.variables[index].shape
             dfdx = reduce_broadcast(np.einsum(back_prop_lbls, *operands), outshape)
+            if var_shape != dfdx.shape:
+                # if y was broadcast over x, the gradient needs to
+                # be broadcast to x's shape: dfdx-shape (i,j,1) -> (i,j,k)
+                dfdx = np.broadcast_to(dfdx, var_shape)
             self.variables[index].backward(dfdx)
             return None
 
