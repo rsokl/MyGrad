@@ -26,7 +26,7 @@ def test_static_softmax():
                    [-0.01179518,  0.01108053, -0.10425844,  0.10497309],
                    [ 0.00502799, -0.00723393,  0.12698131, -0.12477536]])
 
-    assert_allclose(x.grad, dx)
+    assert_allclose(x.grad, dx, atol=1e-5, rtol=1e-5)
 
 
 def test_static_logsoftmax():
@@ -50,5 +50,5 @@ def test_static_logsoftmax():
                    [ 0.24859989,  0.62057111, -0.281343  , -0.587828  ],
                    [ 0.5119002 ,  0.15601518,  0.45965687, -1.12757225]])
 
-    assert_allclose(x.grad, dx)
+    assert_allclose(x.grad, dx, atol=1e-5, rtol=1e-5)
 

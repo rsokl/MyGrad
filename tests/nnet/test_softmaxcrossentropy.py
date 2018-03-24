@@ -32,5 +32,5 @@ def test_softmax_crossentropy(data):
 
     pygrad_cross = (-1/s.shape[0]) * (log(probs) * truth).sum()
     pygrad_cross.backward()
-    assert_allclose(softmax_cross.data, pygrad_cross.data)
-    assert_allclose(scores.grad, pygrad_scores.grad)
+    assert_allclose(softmax_cross.data, pygrad_cross.data, atol=1e-5, rtol=1e-5)
+    assert_allclose(scores.grad, pygrad_scores.grad, atol=1e-5, rtol=1e-5)
