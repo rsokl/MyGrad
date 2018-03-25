@@ -1,4 +1,4 @@
-from .operation_base import Operation
+from mygrad.operations.multivar_operations import MultiVarOperation
 import numpy as np
 
 __all__ = ["Arcsinh",
@@ -8,46 +8,51 @@ __all__ = ["Arcsinh",
            "Arccoth"]
 
 
-class Arcsinh(Operation):
+class Arcsinh(MultiVarOperation):
     def __call__(self, a):
-        self.a = a
+        self.variables = (a,)
         return np.arcsinh(a.data)
 
-    def backward_a(self, grad):
-        return self.a.backward(grad / np.sqrt(1 + self.a.data ** 2))
+    def backward_var(self, grad, index, **kwargs):
+        a = self.variables[index]
+        a.backward(grad / np.sqrt(1 + a.data ** 2))
 
 
-class Arccosh(Operation):
+class Arccosh(MultiVarOperation):
     def __call__(self, a):
-        self.a = a
+        self.variables = (a,)
         return np.arccosh(a.data)
 
-    def backward_a(self, grad):
-        return self.a.backward(grad / np.sqrt(self.a.data ** 2 - 1))
+    def backward_var(self, grad, index, **kwargs):
+        a = self.variables[index]
+        a.backward(grad / np.sqrt(a.data ** 2 - 1))
 
 
-class Arctanh(Operation):
+class Arctanh(MultiVarOperation):
     def __call__(self, a):
-        self.a = a
+        self.variables = (a,)
         return np.arctanh(a.data)
 
-    def backward_a(self, grad):
-        return self.a.backward(grad / (1 - self.a.data ** 2))
+    def backward_var(self, grad, index, **kwargs):
+        a = self.variables[index]
+        a.backward(grad / (1 - a.data ** 2))
 
 
-class Arccsch(Operation):
+class Arccsch(MultiVarOperation):
     def __call__(self, a):
-        self.a = a
+        self.variables = (a,)
         return np.arcsinh(1 / a.data)
 
-    def backward_a(self, grad):
-        return self.a.backward(-grad / (np.abs(self.a.data) * np.sqrt(1 + self.a.data ** 2)))
+    def backward_var(self, grad, index, **kwargs):
+        a = self.variables[index]
+        a.backward(-grad / (np.abs(a.data) * np.sqrt(1 + a.data ** 2)))
 
 
-class Arccoth(Operation):
+class Arccoth(MultiVarOperation):
     def __call__(self, a):
-        self.a = a
+        self.variables = (a,)
         return np.arctanh(1 / a.data)
 
-    def backward_a(self, grad):
-        return self.a.backward(grad / (1 - self.a.data ** 2))
+    def backward_var(self, grad, index, **kwargs):
+        a = self.variables[index]
+        a.backward(grad / (1 - a.data ** 2))
