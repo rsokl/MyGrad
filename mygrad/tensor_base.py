@@ -309,22 +309,12 @@ class Tensor:
         old_tensor._creator = self.creator
         old_tensor._ops = self._ops
 
-        # point all ops involving self to old_tensor instead
+        # point all ops involving `self` to old_tensor instead
         for op in old_tensor._ops:
-            if hasattr(op, "variables"):
-                for i in range(len(op.variables)):
-                    if op.variables[i] is self:
-                        op.variables[i] = old_tensor
-                        break
-            elif op.a is self:
-                op.a = old_tensor
-            else:
-                try:
-                    op.b = old_tensor
-                except AttributeError:
-                    msg = """"self._op contains an Operation which does not reference self.
-                              This is likely due to a bug in the Operation's implementation."""
-                    raise AttributeError(msg)
+            for i in range(len(op.variables)):
+                if op.variables[i] is self:
+                    op.variables = op.variables[:i] + (old_tensor,) + op.variables[i+1:]
+                    break
 
         # self becomes the tensor post-setitem
         out = self._op(SetItem, old_tensor, value, op_args=(key,))
