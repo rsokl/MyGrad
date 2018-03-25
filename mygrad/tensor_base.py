@@ -1,5 +1,7 @@
 from .operations import *
+from mygrad.operations.multivar_operations import MultiVarBroadcastableOp
 import numpy as np
+from mygrad._utils import reduce_broadcast
 
 __all__ = ['Tensor']
 
@@ -102,7 +104,7 @@ class Tensor:
 
         return cls(op_out, constant=is_const, _creator=f, _scalar_only=scalar_only)
 
-    def backward(self, grad=None):
+    def backward(self, grad=None, *, _broadcastable=False):
         """ Compute set or accumulate `self.grad` with `grad`, and pass `self.creator.backward(grad)`.
             In effect, calling `self.backward()` will trigger a "back-propagation" from `self` through
             the preceding nodes in the computational graph. Thus a node, `a`, will have the attribute
@@ -122,6 +124,9 @@ class Tensor:
 
         if grad is not None:
             grad = np.asarray(grad.data if isinstance(grad, Tensor) else grad)
+
+            if _broadcastable:
+                grad = reduce_broadcast(grad, self.shape)
         else:
             if self.ndim > 0 and self.scalar_only:
                 raise Exception("Invalid Backprop: scalar-only violation")
@@ -131,7 +136,7 @@ class Tensor:
         self.grad = np.asarray(grad if self.grad is None else self.grad + grad)
 
         if self._creator is not None:
-            self._creator.backward(grad)
+            self._creator.backward(grad, _broadcastable=isinstance(self._creator, MultiVarBroadcastableOp))
 
     def null_gradients(self):
         self.grad = None

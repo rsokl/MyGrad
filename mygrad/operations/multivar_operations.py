@@ -20,7 +20,7 @@ class MultiVarOperation:
             by an operation if that operation takes more than 2 Tensor arguments."""
         for index, var in enumerate(self.variables):
             if not var.constant:
-                self.backward_var(grad, index)
+                self.backward_var(grad, index, **kwargs)
 
     def null_gradients(self):
         """ Back-propagates `None` to the gradients of the operation's input Tensors."""
