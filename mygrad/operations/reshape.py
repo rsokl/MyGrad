@@ -1,10 +1,11 @@
-from ..operations.operation_base import Operation
+from mygrad.operations.multivar_operations import MultiVarOperation
 
 
-class Reshape(Operation):
+class Reshape(MultiVarOperation):
     def __call__(self, a, shape):
-        self.a = a
+        self.variables = (a,)
         return a.data.reshape(shape)
 
-    def backward_a(self, grad):
-        self.a.backward(grad.reshape(*self.a.shape))
+    def backward_var(self, grad, index, **kwargs):
+        a = self.variables[index]
+        a.backward(grad.reshape(*a.shape), **kwargs)
