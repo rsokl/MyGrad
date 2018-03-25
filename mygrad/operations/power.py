@@ -4,6 +4,12 @@ import numpy as np
 
 class Power(MultiVarBroadcastableOp):
     def __call__(self, a, b):
+        """ f(a, b) -> a ** b
+
+            Parameters
+            ----------
+            a: mygrad.Tensor
+            b: mygrad.Tensor"""
         self.variables = (a, b)
         out = a.data ** b.data
         return out

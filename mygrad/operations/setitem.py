@@ -5,7 +5,13 @@ import numpy as np
 class SetItem(MultiVarBroadcastableOp):
 
     def __call__(self, a, b, index):
-        """ a[index] = b"""
+        """ a[index] = b
+
+            Parameters
+            ----------
+            a : mygrad.Tensor
+            b : mygrad.Tensor
+            index : valid-array-index"""
         self.variables = (a, b)
 
         self.index = index

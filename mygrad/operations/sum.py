@@ -1,14 +1,17 @@
-from .operation_base import Operation
+from mygrad.operations.multivar_operations import MultiVarOperation
 import numpy as np
 
 
 __all__ = ["Sum", "Mean"]
 
 
-class Sum(Operation):
+class Sum(MultiVarOperation):
 
     def __call__(self, a, axis=None, keepdims=False):
-        self.a = a
+        """ Parameters
+            ----------
+            a : mygrad.Tensor"""
+        self.variables = (a,)
 
         if axis is not None and not hasattr(axis, "__iter__"):
             axis = (axis,)
@@ -18,19 +21,20 @@ class Sum(Operation):
         out = a.data.sum(axis=axis, keepdims=keepdims)
         self.outshape = out.shape if isinstance(out, np.ndarray) else None
         return out
-
-    def backward_a(self, grad):
+    
+    def backward_var(self, grad, index, **kwargs):
+        a = self.variables[index]
         if self.outshape is None:
-            self.a.backward(np.full(self.a.shape, grad, dtype=float))
+            a.backward(np.full(a.shape, grad, dtype=float))
             return None
 
         if not self.keepdims:
-            index = [slice(None) for i in range(self.a.ndim)]
+            index = [slice(None) for i in range(a.ndim)]
             for i in self.axis:
                 index[i] = np.newaxis
             grad = grad[index]
 
-        self.a.backward(np.broadcast_to(grad, self.a.data.shape).astype(float))
+        a.backward(np.broadcast_to(grad, a.data.shape).astype(float), **kwargs)
 
 
 class Mean(Sum):
@@ -39,5 +43,5 @@ class Mean(Sum):
         self.n = a.data.size if not self.axis else np.prod([a.shape[i] for i in self.axis])
         return out / self.n
 
-    def backward_a(self, grad):
-        super(Mean, self).backward_a(grad / self.n)
+    def backward_var(self, grad, index, **kwargs):
+        super(Mean, self).backward_var(grad / self.n, index, **kwargs)
