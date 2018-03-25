@@ -1,4 +1,4 @@
-from ..operations import Operation
+from mygrad.operations.operation_base import Operation
 import numpy as np
 
 class Tensor_Transpose_Property(Operation):

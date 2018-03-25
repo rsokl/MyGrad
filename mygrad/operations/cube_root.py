@@ -1,11 +1,13 @@
-from .operation_base import Operation
+from .multivar_operations import MultiVarOperation
 import numpy as np
 
 
-class Cbrt(Operation):
+class Cbrt(MultiVarOperation):
     def __call__(self, a):
-        self.a = a
+        self.variables = (a,)
         return np.cbrt(a.data)
 
-    def backward_a(self, grad):
-        return self.a.backward(grad / (3 * np.cbrt(self.a.data ** 2)))
+    def backward_var(self, grad, index, **kwargs):
+        a = self.variables[index]
+        a.backward(grad / (3 * np.cbrt(a.data ** 2)), **kwargs)
+

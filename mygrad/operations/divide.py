@@ -1,6 +1,7 @@
 from .multivar_operations import MultiVarBroadcastableOp
 import numpy as np
 
+
 class Divide(MultiVarBroadcastableOp):
     def __call__(self, a, b):
         """ f(a, b) -> a / b"""

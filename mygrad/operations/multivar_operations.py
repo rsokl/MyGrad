@@ -12,7 +12,7 @@ class MultiVarOperation:
         self.variables = input_vars
         return NotImplementedError
 
-    def backward_var(self, grad, index):
+    def backward_var(self, grad, index, **kwargs):
         raise NotImplementedError
 
     def backward(self, grad, **kwargs):

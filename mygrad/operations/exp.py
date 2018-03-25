@@ -1,12 +1,24 @@
-from .operation_base import Operation
+from .multivar_operations import MultiVarOperation
 import numpy as np
 
 __all__ = ["Exp"]
 
-class Exp(Operation):
+
+class Exp(MultiVarOperation):
     def __call__(self, a):
-        self.a = a
+        """ f(a) -> exp(a)
+
+            Parameters
+            ----------
+            a : mygrad.Tensor
+
+            Returns
+            -------
+            numpy.ndarray"""
+        self.variables = (a,)
         return np.exp(a.data)
 
-    def backward_a(self, grad):
-        return self.a.backward(grad * np.exp(self.a.data))
+    def backward_var(self, grad, index, **kwargs):
+        var = self.variables[index]
+        var.backward(grad * np.exp(var.data))
+
