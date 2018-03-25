@@ -1,37 +1,16 @@
 import numpy as np
 from scipy.misc import logsumexp
 
-from ..operations.operation_base import Operation
-from ..tensor_base import Tensor
+from mygrad.operations.multivar_operations import MultiVarOperation
+from mygrad.tensor_base import Tensor
+from mygrad.math import tanh
 
 __all__ = ['tanh', 'sigmoid', 'relu', 'softmax', 'logsoftmax']
 
 
-class Tanh(Operation):
+class Sigmoid(MultiVarOperation):
     def __call__(self, a):
-        self.a = a
-        return np.tanh(a.data)
-
-    def backward_a(self, grad):
-        self.a.backward(grad * (1 - np.tanh(self.a.data) ** 2))
-
-
-def tanh(x):
-    """ f(x) = tanh(x)
-
-        Parameters
-        ----------
-        x : Union[Tensor, array_like]
-
-        Returns
-        -------
-        Tensor """
-    return Tensor._op(Tanh, x)
-
-
-class Sigmoid(Operation):
-    def __call__(self, a):
-        self.a = a
+        self.variables = (a,)
         x = -1. * a.data
         np.exp(x, out=x)
         x += 1
@@ -39,8 +18,9 @@ class Sigmoid(Operation):
         self.sigmoid = x
         return self.sigmoid
 
-    def backward_a(self, grad):
-        self.a.backward(grad * self.sigmoid * (1. - self.sigmoid))
+    def backward_var(self, grad, index, **kwargs):
+        self.variables[index].backward(grad * self.sigmoid * (1. - self.sigmoid), **kwargs)
+        self.sigmoid = None
 
 
 def sigmoid(x):
@@ -56,14 +36,15 @@ def sigmoid(x):
     return Tensor._op(Sigmoid, x)
 
 
-class ReLu(Operation):
+class ReLu(MultiVarOperation):
     def __call__(self, a):
-        self.a = a
-        self.back = np.asarray(a > 0, dtype=self.a.dtype)
-        return a.data * self.back
+        self.variables = (a,)
+        self.back = np.asarray(a > 0, dtype=a.dtype)
+        a.data * self.back
 
-    def backward_a(self, grad):
-        return self.a.backward(grad * self.back)
+    def backward_var(self, grad, index, **kwargs):
+        self.variables[index].backward(grad * self.back, **kwargs)
+        self.back = None
 
 
 def relu(x):
@@ -80,11 +61,11 @@ def relu(x):
     return Tensor._op(ReLu, x)
 
 
-class Softmax(Operation):
+class Softmax(MultiVarOperation):
     scalar_only = True
 
     def __call__(self, a):
-        self.a = a
+        self.variables = (a,)
         x = a.data
         assert 0 < a.ndim < 3
 
@@ -95,10 +76,11 @@ class Softmax(Operation):
         x /= x.sum(**self.__kw)
         return x
 
-    def backward_a(self, grad):
-        soft = self(self.a)
+    def backward_var(self, grad, index, **kwargs):
+        a = self.variables[index]
+        soft = self(a)
         sg = soft * grad
-        self.a.backward(sg - soft * np.sum(sg, **self.__kw))
+        a.backward(sg - soft * np.sum(sg, **self.__kw), **kwargs)
 
 
 def softmax(x):
@@ -117,25 +99,26 @@ def softmax(x):
     return Tensor._op(Softmax, x)
 
 
-class LogSoftmax(Operation):
+class LogSoftmax(MultiVarOperation):
     scalar_only = True
 
     def __call__(self, a):
-        self.a = a
+        self.variables = (a,)
         x = a.data
         assert 0 < a.ndim < 3
 
         self.__kw = dict(axis=1, keepdims=True) if x.ndim == 2 else dict(axis=None, keepdims=False)
         return x - logsumexp(x, **self.__kw)
 
-    def backward_a(self, grad):
-        x = self.a.data
+    def backward_var(self, grad, index, **kwargs):
+        a = self.variables[index]
+        x = a.data
 
         soft = x - x.max(**self.__kw)
         np.exp(soft, out=soft)
         soft /= soft.sum(**self.__kw)
 
-        self.a.backward(grad - soft * np.sum(grad, **self.__kw))
+        a.backward(grad - soft * np.sum(grad, **self.__kw), **kwargs)
 
 
 def logsoftmax(x):

@@ -16,7 +16,7 @@ class Sin(MultiVarOperation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad * np.cos(a.data))
+        a.backward(grad * np.cos(a.data), **kwargs)
 
 
 class Cos(MultiVarOperation):
@@ -26,7 +26,7 @@ class Cos(MultiVarOperation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad * -np.sin(a.data))
+        a.backward(grad * -np.sin(a.data), **kwargs)
 
 
 class Tan(MultiVarOperation):
@@ -36,7 +36,7 @@ class Tan(MultiVarOperation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad / np.cos(a.data)**2)
+        a.backward(grad / np.cos(a.data)**2, **kwargs)
 
 
 class Csc(MultiVarOperation):
@@ -46,7 +46,7 @@ class Csc(MultiVarOperation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad * -np.cos(a.data) / np.sin(a.data)**2)
+        a.backward(grad * -np.cos(a.data) / np.sin(a.data)**2, **kwargs)
 
 
 class Sec(MultiVarOperation):
@@ -56,7 +56,7 @@ class Sec(MultiVarOperation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad * np.sin(a.data) / np.cos(a.data)**2)
+        a.backward(grad * np.sin(a.data) / np.cos(a.data)**2, **kwargs)
 
 
 class Cot(MultiVarOperation):
@@ -66,4 +66,4 @@ class Cot(MultiVarOperation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(-grad / np.sin(a.data)**2)
+        a.backward(-grad / np.sin(a.data)**2, **kwargs)
