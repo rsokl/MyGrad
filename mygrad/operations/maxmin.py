@@ -1,10 +1,10 @@
-from ..operations.operation_base import Operation
+from mygrad.operations.multivar_operations import MultiVarOperation
 import numpy as np
 
 __all__ = ["MaxMin"]
 
 
-class MaxMin(Operation):
+class MaxMin(MultiVarOperation):
     def __call__(self, a, axis=None, keepdims=False, maxmin=None):
         """ Return the maximum (minimum) of a tensor, or along its axes.
 
@@ -44,7 +44,7 @@ class MaxMin(Operation):
         elif axis is not None:
             axis = (axis % a.ndim,)
 
-        self.a = a
+        self.variables = (a,)
         self.axis = axis
         self.keepdims = keepdims
 
@@ -82,40 +82,40 @@ class MaxMin(Operation):
             return dat
 
         elif self.axis is None:
-            keep_index = [np.newaxis for i in range(self.a.ndim)]
+            keep_index = [np.newaxis for i in range(a.ndim)]
         else:
-            keep_index = [slice(None) for i in range(self.a.ndim)]
+            keep_index = [slice(None) for i in range(a.ndim)]
             for i in self.axis:
                 keep_index[i] = np.newaxis
 
         return np.asarray(dat)[keep_index]
 
-    def backward_a(self, grad):
-
-        if self.a.ndim == 0:
-            self.a.backward(grad)
+    def backward_var(self, grad, index, **kwargs):
+        a = self.variables[index]
+        if a.ndim == 0:
+            a.backward(grad, **kwargs)
 
         # normalize shape of grad to be same as when keepdims=False
         if self.keepdims:
             if self.axis is not None:
-                reduce = [slice(None) for i in range(self.a.ndim)]
+                reduce = [slice(None) for i in range(a.ndim)]
                 for i in self.axis:
                     reduce[i] = 0
             else:
-                reduce = (0 for i in range(self.a.ndim))
+                reduce = (0 for i in range(a.ndim))
             grad = grad[tuple(reduce)]
 
         # use argmax indices to broadcast grad to correct elements
         if self.axis is None or len(self.axis) == 1:
-            out = np.zeros_like(self.a.data, dtype=float)
+            out = np.zeros_like(a.data, dtype=float)
             out[self.indices] = grad
-            self.a.backward(out)
+            a.backward(out, **kwargs)
         else:
-            tmp = [slice(None) for i in range(self.a.ndim)]
+            tmp = [slice(None) for i in range(a.ndim)]
             for i in self.axis:
                 tmp[i] = np.newaxis
 
             out = np.zeros(self.tmp_grad_shape, dtype=float)
             out[self.indices] = grad
-            shape = tuple(self.a.shape[i] for i in self.to_trans)
-            self.a.backward(out.reshape(shape).transpose(*self.from_trans))
+            shape = tuple(a.shape[i] for i in self.to_trans)
+            a.backward(out.reshape(shape).transpose(*self.from_trans), **kwargs)

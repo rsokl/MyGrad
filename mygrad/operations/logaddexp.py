@@ -26,3 +26,4 @@ class Logaddexp(MultiVarBroadcastableOp):
         else:
             dLdb = grad / (1 + np.exp(a.data - b.data))
             b.backward(dLdb, **kwargs)
+
