@@ -1,11 +1,11 @@
-from ..operations.operation_base import Operation
+from mygrad.operations.multivar_operations import MultiVarOperation
 from ..tensor_base import Tensor
 import numpy as np
 
 __all__ = ["multiclass_hinge"]
 
 
-class MulticlassHinge(Operation):
+class MulticlassHinge(MultiVarOperation):
     def __call__(self, a, y, hinge=1.):
         """ Parameters
             ----------
@@ -18,7 +18,7 @@ class MulticlassHinge(Operation):
             Returns
             -------
             The average multiclass hinge loss"""
-        self.a = a
+        self.variables = (a,)
         scores = a.data
         correct_labels = (range(len(y)), y)
         correct_class_scores = scores[correct_labels]  # Nx1
@@ -37,8 +37,8 @@ class MulticlassHinge(Operation):
         self.back /= scores.shape[0]
         return np.sum(Lij) / scores.shape[0]
 
-    def backward_a(self, grad):
-        self.a.backward(grad * self.back)
+    def backward_var(self, grad, index, **kwargs):
+        self.variables[index].backward(grad * self.back, **kwargs)
 
 
 def multiclass_hinge(x, y_true, hinge=1.):
@@ -56,7 +56,7 @@ def multiclass_hinge(x, y_true, hinge=1.):
     return Tensor._op(MulticlassHinge, x, op_args=(y_true, hinge))
 
 
-class SoftmaxCrossEntropy(Operation):
+class SoftmaxCrossEntropy(MultiVarOperation):
     """ Given the classification scores of C classes for N pieces of data,
         computes the NxC softmax classification probabilities. The
         cross entropy is then computed by using the true classifications."""
@@ -71,7 +71,7 @@ class SoftmaxCrossEntropy(Operation):
             Returns
             -------
             The average softmax loss"""
-        self.a = a
+        self.variables = (a,)
         scores = np.copy(a.data)
         max_scores = np.max(scores, axis=1, keepdims=True)
         np.exp(scores - max_scores, out=scores)
@@ -85,8 +85,8 @@ class SoftmaxCrossEntropy(Operation):
         self.back /= scores.shape[0]
         return loss
 
-    def backward_a(self, grad):
-        self.a.backward(grad * self.back)
+    def backward_var(self, grad, index, **kwargs):
+        self.variables[index].backward(grad * self.back, **kwargs)
 
 
 def softmax_crossentropy(x, y_true):
