@@ -1,5 +1,3 @@
-from itertools import zip_longest
-
 __all__ = ["MultiVarOperation",
            "MultiVarBroadcastableOp"]
 

@@ -1,5 +1,5 @@
 from .operations import *
-from mygrad.operations.multivar_operations import MultiVarBroadcastableOp
+from mygrad.operations.multivar_operations import MultiVarOperation, MultiVarBroadcastableOp
 import numpy as np
 from mygrad._utils import reduce_broadcast
 
@@ -58,7 +58,7 @@ class Tensor:
 
             Parameters
             ----------
-            Op : Operation
+            Op : MultiVarOperation
                 Operation-class, used to perform forward-pass on `input_vars`.
 
             input_vars : Sequence[Union[Number, numpy.ndarray]]
@@ -90,6 +90,10 @@ class Tensor:
 
         f = Op()
         op_out = f(*tensor_vars, *op_args, **op_kwargs)
+
+        # check if broadcasting occurred
+        if isinstance(f, MultiVarBroadcastableOp) and any(op_out.shape != i.shape for i in tensor_vars):
+            f.scalar_only = True
 
         # record that a variable participated in that op
         for var in tensor_vars:
