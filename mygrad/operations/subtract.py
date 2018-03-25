@@ -24,4 +24,4 @@ class Subtract(MultiVarBroadcastableOp):
         if index == 0:
             a.backward(grad, **kwargs)
         else:
-            b.backward(grad, **kwargs)
+            b.backward(-grad, **kwargs)

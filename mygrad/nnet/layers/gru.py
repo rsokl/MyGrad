@@ -1,5 +1,5 @@
-from ...operations.operation_base import Operation
-from ...tensor_base import Tensor
+from mygrad.operations.multivar_operations import MultiVarOperation
+from mygrad.tensor_base import Tensor
 from numbers import Integral
 import numpy as np
 
@@ -153,7 +153,7 @@ def _gru_bptt(X, dLds, s, z, r, Wz, Wh, Wr, dz, dh, dr, s_h, one_z, bp_lim, old_
 
 
 
-class GRUnit(Operation):
+class GRUnit(MultiVarOperation):
     def __call__(self, X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None, dropout=0.):
         if bp_lim is not None:
             assert isinstance(bp_lim, Integral) and 0 <= bp_lim < len(X)
@@ -177,9 +177,6 @@ class GRUnit(Operation):
 
         seq = self.X.data
 
-        z = np.zeros((seq.shape[0], seq.shape[1], self.Uz.shape[-1]))
-        r = np.zeros((seq.shape[0], seq.shape[1], self.Ur.shape[-1]))
-        h = np.zeros((seq.shape[0], seq.shape[1], self.Uh.shape[-1]))
         out = np.zeros((seq.shape[0] + 1, seq.shape[1], self.Uz.shape[-1]))
 
         if s0 is not None:
@@ -214,8 +211,7 @@ class GRUnit(Operation):
 
         return self._hidden_seq
 
-
-    def backward(self, grad):
+    def backward(self, grad, **kwargs):
         if all(i.constant for i in [self.X,
                                     self.Uz, self.Wz, self.bz,
                                     self.Ur, self.Wr, self.br,
@@ -268,31 +264,31 @@ class GRUnit(Operation):
             dz = zgrad * const["z*(1 - z)"]
 
         if not self.Uz.constant:
-            self.Uz.backward(np.tensordot(self.X.data, dz, ([0, 1], [0, 1])))
+            self.Uz.backward(np.tensordot(self.X.data, dz, ([0, 1], [0, 1])), **kwargs)
         if not self.Wz.constant:
-            self.Wz.backward(np.tensordot(s, dz, ([0, 1], [0, 1])))
+            self.Wz.backward(np.tensordot(s, dz, ([0, 1], [0, 1])), **kwargs)
         if not self.bz.constant:
-            self.bz.backward(dz.sum(axis=(0, 1)))
+            self.bz.backward(dz.sum(axis=(0, 1)), **kwargs)
 
         if any(not const for const in (self.Ur.constant, self.Wr.constant, self.br.constant)):
             dr = rgrad * const["r*(1 - r)"]
 
         if not self.Ur.constant:
-            self.Ur.backward(np.tensordot(self.X.data, dr, ([0, 1], [0, 1])))
+            self.Ur.backward(np.tensordot(self.X.data, dr, ([0, 1], [0, 1])), **kwargs)
         if not self.Wr.constant:
-            self.Wr.backward(np.tensordot(s, dr, ([0, 1], [0, 1])))
+            self.Wr.backward(np.tensordot(s, dr, ([0, 1], [0, 1])), **kwargs)
         if not self.br.constant:
-            self.br.backward(dr.sum(axis=(0, 1)))
+            self.br.backward(dr.sum(axis=(0, 1)), **kwargs)
 
         if any(not const for const in (self.Uh.constant, self.Wh.constant, self.bh.constant)):
             dh = hgrad * const["1 - h**2"]
 
         if not self.Uh.constant:
-            self.Uh.backward(np.tensordot(self.X.data, dh, ([0, 1], [0, 1])))
+            self.Uh.backward(np.tensordot(self.X.data, dh, ([0, 1], [0, 1])), **kwargs)
         if not self.Wh.constant:
-            self.Wh.backward(np.tensordot((s * r), dh, ([0, 1], [0, 1])))
+            self.Wh.backward(np.tensordot((s * r), dh, ([0, 1], [0, 1])), **kwargs)
         if not self.bh.constant:
-            self.bh.backward(dh.sum(axis=(0, 1)))
+            self.bh.backward(dh.sum(axis=(0, 1)), **kwargs)
 
         if not self.X.constant:
             tmp = dLds * const["1 - z"] * const["1 - h**2"]
@@ -301,12 +297,14 @@ class GRUnit(Operation):
             dLdX += dot(tmp, self.Uh.data.T)
             dLdX += dot(dot(tmp, self.Wh.data.T) * s * const["r*(1 - r)"], self.Ur.data.T)
 
-            self.X.backward(dLdX)
-
+            self.X.backward(dLdX, **kwargs)
 
     def null_gradients(self):
         """ Back-propagates `None` to the gradients of the operation's input Tensors."""
-        for x in [self.X, self.Uz, self.Wz, self.bz, self.Ur, self.Wr, self.br, self.Uh, self.Wh, self.bh]:
+        for x in [self.X,
+                  self.Uz, self.Wz, self.bz,
+                  self.Ur, self.Wr, self.br,
+                  self.Uh, self.Wh, self.bh]:
             x.null_gradients()
 
 

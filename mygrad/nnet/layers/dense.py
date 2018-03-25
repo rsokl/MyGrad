@@ -17,14 +17,14 @@ class Dense(MultiVarOperation):
         a, b = self.variables
         if index == 0:
             if a.ndim == 2:
-                a.backward(np.dot(grad, b.data.T))
+                a.backward(np.dot(grad, b.data.T), **kwargs)
             else:
                 # grad: (T, N, D)
                 # b: (C, D)
                 a.backward(np.einsum("ijk, nk", grad, b.data), **kwargs)
         else:
             if a.ndim == 2:
-                b.backward(np.dot(a.data.T, grad))
+                b.backward(np.dot(a.data.T, grad), **kwargs)
             else:
                 # a: (T, N, C)
                 # grad: (T, N, D)

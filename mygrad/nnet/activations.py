@@ -20,7 +20,6 @@ class Sigmoid(MultiVarOperation):
 
     def backward_var(self, grad, index, **kwargs):
         self.variables[index].backward(grad * self.sigmoid * (1. - self.sigmoid), **kwargs)
-        self.sigmoid = None
 
 
 def sigmoid(x):
@@ -40,11 +39,10 @@ class ReLu(MultiVarOperation):
     def __call__(self, a):
         self.variables = (a,)
         self.back = np.asarray(a > 0, dtype=a.dtype)
-        a.data * self.back
+        return a.data * self.back
 
     def backward_var(self, grad, index, **kwargs):
         self.variables[index].backward(grad * self.back, **kwargs)
-        self.back = None
 
 
 def relu(x):
