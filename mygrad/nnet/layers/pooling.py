@@ -1,11 +1,11 @@
-from mygrad.operations.operation_base import Operation
+from mygrad.operations.multivar_operations import MultiVarOperation
 from mygrad.tensor_base import Tensor
 import numpy as np
 from numbers import Integral
 from mygrad.nnet.layers.utils import sliding_window_view
 
 
-class MaxPoolND(Operation):
+class MaxPoolND(MultiVarOperation):
     def __call__(self, x, pool, stride):
         """ Perform max-pooling over the last N dimensions of a data batch.
 
@@ -53,7 +53,7 @@ class MaxPoolND(Operation):
             window cannot extend passed the "boundaries" of the data
             dimensions.
             """
-        self.a = x  # data: ((N0, ...), C0, ...)
+        self.variables = (x,)  # data: ((N0, ...), C0, ...)
         x = np.copy(x.data)  # prevent window-view weirdness with views
 
         pool = np.asarray(pool, dtype=int)
@@ -84,20 +84,21 @@ class MaxPoolND(Operation):
         pool_axes = tuple(-(i + 1) for i in range(num_pool))
         
         # (G0, ...) is the tuple of grid-positions for placing each window (not including stride)
-        # sliding_window_view(x): ((N0, ...), C0, ...) -> (G0, ..., (N0, ...), P0, ...)
-        # max-pool: (G0, ..., (N0, ...), P0, ...) -> (G0, ..., (N0, ...))
+        # sliding_window_view(x): ((N0, ...), C0, ...)          -> (G0, ..., (N0, ...), P0, ...)
+        # max-pool:               (G0, ..., (N0, ...), P0, ...) -> (G0, ..., (N0, ...))
         maxed = sliding_window_view(x, self.pool, self.stride).max(axis=pool_axes)
         axes = tuple(range(maxed.ndim))
 
         # (G0, ..., (N0, ...)) -> ((N0, ...), G0, ...)
         return maxed.transpose(axes[-num_no_pool:] + axes[:-num_no_pool])
 
-    def backward_a(self, grad):
+    def backward_var(self, grad, index, **kwargs):
         """ Parameters
             ----------
-            grad : numpy.ndarray, shape=((N0, ...), G0, ...)"""
-        
-        x = self.a.data
+            grad : numpy.ndarray, shape=((N0, ...), G0, ...),
+            index : int"""
+        var = self.variables[index]
+        x = var.data
         num_pool = len(self.pool)
 
         sl = sliding_window_view(x, self.pool, self.stride)
@@ -132,7 +133,7 @@ class MaxPoolND(Operation):
         # accumulate gradient within pool-axis-flattened dx, then reshape to match shape of `x`
         dx = np.zeros(x.shape[:-num_pool] + (np.prod(x.shape[-num_pool:]),))
         np.add.at(dx, tuple(index), grad.reshape(*x.shape[:-num_pool], -1))
-        self.a.backward(dx.reshape(x.shape))
+        var.backward(dx.reshape(x.shape), **kwargs)
 
 
 def max_pool(x, pool, stride):
