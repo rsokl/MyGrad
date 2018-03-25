@@ -26,7 +26,6 @@ class Cosh(MultiVarOperation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-
         a.backward(grad * np.sinh(a.data))
 
 
