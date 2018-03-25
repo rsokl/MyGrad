@@ -16,7 +16,7 @@ class Sinh(MultiVarOperation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad * np.cosh(a.data))
+        a.backward(grad * np.cosh(a.data), **kwargs)
 
 
 class Cosh(MultiVarOperation):
@@ -26,7 +26,7 @@ class Cosh(MultiVarOperation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad * np.sinh(a.data))
+        a.backward(grad * np.sinh(a.data), **kwargs)
 
 
 class Tanh(MultiVarOperation):
@@ -36,7 +36,7 @@ class Tanh(MultiVarOperation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad * (1 - np.tanh(a.data) ** 2))
+        a.backward(grad * (1 - np.tanh(a.data) ** 2), **kwargs)
 
 
 class Csch(MultiVarOperation):
@@ -56,7 +56,7 @@ class Sech(MultiVarOperation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad * -np.sinh(a.data) / np.cosh(a.data)**2)
+        a.backward(grad * -np.sinh(a.data) / np.cosh(a.data)**2, **kwargs)
 
 
 class Coth(MultiVarOperation):
@@ -66,4 +66,4 @@ class Coth(MultiVarOperation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad * -1 / np.sinh(a.data)**2)
+        a.backward(grad * -1 / np.sinh(a.data)**2, **kwargs)

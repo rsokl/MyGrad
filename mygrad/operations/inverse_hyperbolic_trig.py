@@ -15,7 +15,7 @@ class Arcsinh(MultiVarOperation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad / np.sqrt(1 + a.data ** 2))
+        a.backward(grad / np.sqrt(1 + a.data ** 2), **kwargs)
 
 
 class Arccosh(MultiVarOperation):
@@ -25,7 +25,7 @@ class Arccosh(MultiVarOperation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad / np.sqrt(a.data ** 2 - 1))
+        a.backward(grad / np.sqrt(a.data ** 2 - 1), **kwargs)
 
 
 class Arctanh(MultiVarOperation):
@@ -35,7 +35,7 @@ class Arctanh(MultiVarOperation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad / (1 - a.data ** 2))
+        a.backward(grad / (1 - a.data ** 2), **kwargs)
 
 
 class Arccsch(MultiVarOperation):
@@ -45,7 +45,7 @@ class Arccsch(MultiVarOperation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(-grad / (np.abs(a.data) * np.sqrt(1 + a.data ** 2)))
+        a.backward(-grad / (np.abs(a.data) * np.sqrt(1 + a.data ** 2)), **kwargs)
 
 
 class Arccoth(MultiVarOperation):
@@ -55,4 +55,4 @@ class Arccoth(MultiVarOperation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad / (1 - a.data ** 2))
+        a.backward(grad / (1 - a.data ** 2), **kwargs)
