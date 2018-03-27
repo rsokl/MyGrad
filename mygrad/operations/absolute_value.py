@@ -1,12 +1,13 @@
-from .operation_base import Operation
+from .multivar_operations import Operation
 import numpy as np
 
 
 class Abs(Operation):
     def __call__(self, a):
-        self.a = a
+        self.variables = (a,)
         return np.abs(a.data)
+    
+    def backward_var(self, grad, index, **kwargs):
+        a = self.variables[index]
+        a.backward(grad * np.piecewise(a.data, [a.data < 0, a.data == 0, a.data > 0], [-1, 0, 1]), **kwargs)
 
-    def backward_a(self, grad):
-        # d abs / dx at x = 0 returns 0, not NaN
-        return self.a.backward(grad * np.piecewise(self.a.data, [self.a.data < 0, self.a.data == 0, self.a.data > 0], [-1, 0, 1]))

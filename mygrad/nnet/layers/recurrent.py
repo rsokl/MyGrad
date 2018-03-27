@@ -1,5 +1,5 @@
-from ...operations.operation_base import Operation
-from ...tensor_base import Tensor
+from mygrad.operations.multivar_operations import Operation
+from mygrad.tensor_base import Tensor
 from numbers import Integral
 import numpy as np
 
@@ -112,8 +112,7 @@ class RecurrentUnit(Operation):
 
         return self._hidden_seq.data
 
-
-    def backward(self, grad):
+    def backward(self, grad, **kwargs):
         """ Performs back propagation through time (with optional truncation), using the
             following notation:
 
@@ -135,12 +134,11 @@ class RecurrentUnit(Operation):
         dLt_dft = dLt_dst[1:] * dst_dft[1:]  # dL_{t} / df_{t} + ... + dL_{T_lim} / df_{t}
 
         if not self.U.constant:
-            self.U.backward(np.einsum("ijk, ijl -> kl", self.X.data, dLt_dft))  # dL_{1} / dU + ... + dL_{T} / dU
+            self.U.backward(np.einsum("ijk, ijl -> kl", self.X.data, dLt_dft), **kwargs)  # dL_{1} / dU + ... + dL_{T} / dU
         if not self.W.constant:
-            self.W.backward(np.einsum("ijk, ijl -> kl", s.data[:-1], dLt_dft))  # dL_{1} / dW + ... + dL_{T} / dW
+            self.W.backward(np.einsum("ijk, ijl -> kl", s.data[:-1], dLt_dft), **kwargs)  # dL_{1} / dW + ... + dL_{T} / dW
         if not self.X.constant:
-            self.X.backward(dot(dLt_dft, self.U.data.T))  # dL_{1} / dX + ... + dL_{T} / dX
-
+            self.X.backward(dot(dLt_dft, self.U.data.T), **kwargs)  # dL_{1} / dX + ... + dL_{T} / dX
 
     def null_gradients(self):
         """ Back-propagates `None` to the gradients of the operation's input Tensors."""

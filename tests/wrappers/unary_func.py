@@ -76,9 +76,13 @@ class backprop_test_factory():
 
             # compute df/dx via mygrad
             var = Tensor(float(x))
-            self.op(var).backward(float(grad))
+            o = self.op(var)
+            o.backward(float(grad))
             tensor_grad = var.grad.item()
 
             assert np.isclose(numerical_grad, tensor_grad, **self.tolerances), \
                 "numerical derivative and mygrad derivative do not match"
+
+            o.null_gradients()
+            assert var.grad is None, "`null_gradients()` failed"
         return wrapper

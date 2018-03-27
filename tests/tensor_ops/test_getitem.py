@@ -2,6 +2,7 @@ from mygrad.tensor_base import Tensor
 import numpy as np
 from numpy.testing import assert_allclose
 
+
 def test_getitem():
     x = Tensor([1, 2, 3])
     a, b, c = x

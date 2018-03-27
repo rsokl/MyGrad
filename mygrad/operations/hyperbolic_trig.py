@@ -1,4 +1,4 @@
-from .operation_base import Operation
+from .multivar_operations import Operation
 import numpy as np
 
 __all__ = ["Sinh",
@@ -8,55 +8,62 @@ __all__ = ["Sinh",
            "Sech",
            "Coth"]
 
+
 class Sinh(Operation):
     def __call__(self, a):
-        self.a = a
+        self.variables = (a,)
         return np.sinh(a.data)
 
-    def backward_a(self, grad):
-        return self.a.backward(grad * np.cosh(self.a.data))
+    def backward_var(self, grad, index, **kwargs):
+        a = self.variables[index]
+        a.backward(grad * np.cosh(a.data), **kwargs)
 
 
 class Cosh(Operation):
     def __call__(self, a):
-        self.a = a
+        self.variables = (a,)
         return np.cosh(a.data)
 
-    def backward_a(self, grad):
-        return self.a.backward(grad * np.sinh(self.a.data))
+    def backward_var(self, grad, index, **kwargs):
+        a = self.variables[index]
+        a.backward(grad * np.sinh(a.data), **kwargs)
 
 
 class Tanh(Operation):
     def __call__(self, a):
-        self.a = a
+        self.variables = (a,)
         return np.tanh(a.data)
 
-    def backward_a(self, grad):
-        return self.a.backward(grad * (1 - np.tanh(self.a.data) ** 2))
+    def backward_var(self, grad, index, **kwargs):
+        a = self.variables[index]
+        a.backward(grad * (1 - np.tanh(a.data) ** 2), **kwargs)
 
 
 class Csch(Operation):
     def __call__(self, a):
-        self.a = a
+        self.variables = (a,)
         return 1 / np.sinh(a.data)
 
-    def backward_a(self, grad):
-        return self.a.backward(grad * -np.cosh(self.a.data) / np.sinh(self.a.data)**2)
+    def backward_var(self, grad, index, **kwargs):
+        a = self.variables[index]
+        a.backward(grad * -np.cosh(a.data) / np.sinh(a.data)**2)
 
 
 class Sech(Operation):
     def __call__(self, a):
-        self.a = a
+        self.variables = (a,)
         return 1 / np.cosh(a.data)
 
-    def backward_a(self, grad):
-        return self.a.backward(grad * -np.sinh(self.a.data) / np.cosh(self.a.data)**2)
+    def backward_var(self, grad, index, **kwargs):
+        a = self.variables[index]
+        a.backward(grad * -np.sinh(a.data) / np.cosh(a.data)**2, **kwargs)
 
 
 class Coth(Operation):
     def __call__(self, a):
-        self.a = a
+        self.variables = (a,)
         return 1 / np.tanh(a.data)
 
-    def backward_a(self, grad):
-        return self.a.backward(grad * -1 / np.sinh(self.a.data)**2)
+    def backward_var(self, grad, index, **kwargs):
+        a = self.variables[index]
+        a.backward(grad * -1 / np.sinh(a.data)**2, **kwargs)

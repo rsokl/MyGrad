@@ -1,4 +1,4 @@
-from mygrad.operations.multivar_operations import MultiVarBroadcastableOp
+from mygrad.operations.multivar_operations import BroadcastableOp
 from mygrad import Tensor
 import numpy as np
 from itertools import chain
@@ -83,14 +83,14 @@ def _get_indices(item, seq):
     return (n for n, x in enumerate(seq) if x == item)
 
 
-class EinSum(MultiVarBroadcastableOp):
+class EinSum(BroadcastableOp):
     def __call__(self, *variables, in_lbls, out_lbls, **kwargs):
         self.in_lbls = in_lbls
         self.out_lbls = out_lbls
         self.variables = variables
         return np.einsum("->".join((in_lbls, out_lbls)), *(var.data for var in self.variables), **kwargs)
 
-    def backward_var(self, grad, index):
+    def backward_var(self, grad, index, **kwargs):
         """"""
         """
         example
@@ -155,23 +155,21 @@ class EinSum(MultiVarBroadcastableOp):
                 # if y was broadcast over x, the gradient needs to
                 # be broadcast to x's shape: dfdx-shape (i,j,1) -> (i,j,k)
                 dfdx = np.broadcast_to(dfdx, var_shape)
-            self.variables[index].backward(dfdx)
+            self.variables[index].backward(dfdx, _broadcastable=False)
             return None
 
         # accommodate trace by writing to strided view on array of zeros
         # example
         # fwd:  einsum('ijkji, k -> jk', x, y)
         # dfdx: einsum('jk, k -> ijkji', grad, y)
-        out = np.zeros(tuple(lbl_to_size[i] for i in original_var_lbl))
+        dfdx = np.zeros(tuple(lbl_to_size[i] for i in original_var_lbl))
         out_view_shape = tuple(lbl_to_size[i] for i in var_lbl)
 
-        strides = tuple(sum(out.strides[ind] for ind in _get_indices(lbl, original_var_lbl))
+        strides = tuple(sum(dfdx.strides[ind] for ind in _get_indices(lbl, original_var_lbl))
                         for lbl in var_lbl)
-        out_view = as_strided(out, shape=out_view_shape, strides=strides)
+        out_view = as_strided(dfdx, shape=out_view_shape, strides=strides)
         np.einsum(back_prop_lbls, *operands, out=out_view)
-
-        dfdx = reduce_broadcast(out, self.variables[index].shape)
-        self.variables[index].backward(dfdx)
+        self.variables[index].backward(dfdx, **kwargs)
 
 
 def einsum(*operands, **kwargs):
@@ -192,7 +190,7 @@ def einsum(*operands, **kwargs):
     subscripts : str
         Specifies the subscripts for summation.
 
-    operands : Tuple[ArrayLike]
+    operands : Tuple[ArrayLike, ...]
         The tensors used in the summation.
 
     Returns

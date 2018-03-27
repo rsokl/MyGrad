@@ -1,4 +1,4 @@
-from mygrad.operations.operation_base import Operation
+from mygrad.operations.multivar_operations import Operation
 from mygrad.tensor_base import Tensor
 import numpy as np
 from numbers import Integral
@@ -7,8 +7,9 @@ from mygrad.nnet.layers.utils import sliding_window_view
 
 class Conv2D(Operation):
     def __call__(self, x, w, stride, padding=(0, 0)):
-        self.a = x  # data: (N, C, H, W)
-        self.b = w  # filters: (F, C, Hf, Wf)
+        self.variables = (x, w)
+        # x ... data:    (N, C, H, W)
+        # w ... filters: (F, C, Hf, Wf)
 
         x = x.data
         w = w.data
@@ -55,49 +56,46 @@ class Conv2D(Operation):
         # (F, H', W', N) -> (N, F, H', W')
         return conv_out.transpose([3, 0, 1, 2])
 
-    def backward_a(self, grad):
+    def backward_var(self, grad, index, **kwargs):
         """ Computes dX, where X is the data batch"""
-        x = self.a.data
-        w = self.b.data
+        x, w = (i.data for i in self.variables)
 
-        x_shape = x.shape[:-2] + tuple(i+2*p for i, p in zip(x.shape[-2:], self.padding))
-        dx = np.zeros(x_shape, dtype=x.dtype)  # (N, C, H + 2*ph, W + 2*pw)
+        if index == 0:  # backprop through x
+            x_shape = x.shape[:-2] + tuple(i+2*p for i, p in zip(x.shape[-2:], self.padding))
+            dx = np.zeros(x_shape, dtype=x.dtype)  # (N, C, H + 2*ph, W + 2*pw)
 
-        # `gp` stores all of the various broadcast multiplications of each grad
-        # element against the conv filter.
-        # (N, F, H', W') -tdot- (F, C, Hf, Wf) --> (N, H', W', C, Hf, Wf)
-        gp = np.tensordot(grad, w, axes=[[1], [0]])
-        for ind in np.ndindex(grad.shape[-len(self.stride):]):
-            # ind: (h', w') - grid-position of filter placement
-            slices = tuple(slice(i * s, i * s + w * d, d) for i, w, s, d in zip(ind, w.shape[-2:],
-                                                                                self.stride, self.dilation))
-            # Add (grad-element * filter) to each appropriate window position in `dx`
-            # dx[N, C, h'*sh : h'*sh + Wh, w'*sw : w'*sh + Wh] += gp[N, h', w', C, Hf, Wf]
-            dx[(..., *slices)] += gp[(slice(None), *ind, ...)]
+            # `gp` stores all of the various broadcast multiplications of each grad
+            # element against the conv filter.
+            # (N, F, H', W') -tdot- (F, C, Hf, Wf) --> (N, H', W', C, Hf, Wf)
+            gp = np.tensordot(grad, w, axes=[[1], [0]])
+            for ind in np.ndindex(grad.shape[-len(self.stride):]):
+                # ind: (h', w') - grid-position of filter placement
+                slices = tuple(slice(i * s, i * s + w * d, d) for i, w, s, d in zip(ind, w.shape[-2:],
+                                                                                    self.stride, self.dilation))
+                # Add (grad-element * filter) to each appropriate window position in `dx`
+                # dx[N, C, h'*sh : h'*sh + Wh, w'*sw : w'*sh + Wh] += gp[N, h', w', C, Hf, Wf]
+                dx[(..., *slices)] += gp[(slice(None), *ind, ...)]
 
-        # remove padding from dx
-        if sum(self.padding):
-            no_pads = tuple(slice(p, -p if p else None) for p in self.padding)
-            dx = dx[(..., *no_pads)]
-        self.a.backward(dx)
+            # remove padding from dx
+            if sum(self.padding):
+                no_pads = tuple(slice(p, -p if p else None) for p in self.padding)
+                dx = dx[(..., *no_pads)]
+            self.variables[index].backward(dx, **kwargs)
 
-    def backward_b(self, grad):
-        """ Computes dW, where W are the conv filters"""
-        x = self.a.data
-        w = self.b.data
-        # backprop into f
-        # symmetric 0-padding for H, W dimensions
-        axis_pad = tuple((i, i) for i in (0, 0, *self.padding))
-        x = np.pad(x, axis_pad, mode='constant') if sum(self.padding) else x
+        else:  # backprop through w
+            # backprop into f
+            # symmetric 0-padding for H, W dimensions
+            axis_pad = tuple((i, i) for i in (0, 0, *self.padding))
+            x = np.pad(x, axis_pad, mode='constant') if sum(self.padding) else x
 
-        windowed_data = sliding_window_view(x,
-                                            window_shape=w.shape[-2:],
-                                            step=self.stride,
-                                            dilation=self.dilation)
+            windowed_data = sliding_window_view(x,
+                                                window_shape=w.shape[-2:],
+                                                step=self.stride,
+                                                dilation=self.dilation)
 
-        # (N, F, H', W') -tdot- (H', W', N, C, Hf, Wf) --> (F, C, Hf, Wf)
-        df = np.tensordot(grad, windowed_data, axes=[[2, 3, 0], [0, 1, 2]])
-        self.b.backward(df)
+            # (N, F, H', W') -tdot- (H', W', N, C, Hf, Wf) --> (F, C, Hf, Wf)
+            df = np.tensordot(grad, windowed_data, axes=[[2, 3, 0], [0, 1, 2]])
+            self.variables[index].backward(df, **kwargs)
 
 
 def conv2d(x, filter_bank, stride, padding=(0, 0)):

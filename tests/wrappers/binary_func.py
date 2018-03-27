@@ -107,4 +107,8 @@ class backprop_test_factory():
                             err_msg="x: numerical derivative and mygrad derivative do not match")
             assert_allclose(y.grad, dy, **self.tolerances,
                             err_msg="y: numerical derivative and mygrad derivative do not match")
+
+            out.null_gradients()
+            assert all(i.grad is None for i in (x, y)), "null_gradients failed"
+
         return wrapper

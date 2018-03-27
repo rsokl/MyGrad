@@ -1,4 +1,4 @@
-from ...operations.operation_base import Operation
+from mygrad.operations.multivar_operations import Operation
 from ...tensor_base import Tensor
 import numpy as np
 
@@ -7,28 +7,28 @@ class Dense(Operation):
     scalar_only = True
 
     def __call__(self, a, b):
-        self.a = a
-        self.b = b
+        self.variables = (a, b)
         assert b.ndim == 2
         assert 3 >= a.ndim >= 2
 
         return np.dot(a.data, b.data)
 
-    def backward_a(self, grad):
-        if self.a.ndim == 2:
-            self.a.backward(np.dot(grad, self.b.data.T))
+    def backward_var(self, grad, index, **kwargs):
+        a, b = self.variables
+        if index == 0:
+            if a.ndim == 2:
+                a.backward(np.dot(grad, b.data.T), **kwargs)
+            else:
+                # grad: (T, N, D)
+                # b: (C, D)
+                a.backward(np.einsum("ijk, nk", grad, b.data), **kwargs)
         else:
-            # grad: (T, N, D)
-            # b: (C, D)
-            self.a.backward(np.einsum("ijk, nk", grad, self.b.data))
-
-    def backward_b(self, grad):
-        if self.a.ndim == 2:
-            self.b.backward(np.dot(self.a.data.T, grad))
-        else:
-            # a: (T, N, C)
-            # grad: (T, N, D)
-            self.b.backward(np.tensordot(self.a.data, grad, ((0, 1), (0, 1))))
+            if a.ndim == 2:
+                b.backward(np.dot(a.data.T, grad), **kwargs)
+            else:
+                # a: (T, N, C)
+                # grad: (T, N, D)
+                b.backward(np.tensordot(a.data, grad, ((0, 1), (0, 1))), **kwargs)
 
 
 def dense(x, w):

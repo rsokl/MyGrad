@@ -1,4 +1,4 @@
-from .operation_base import Operation
+from mygrad.operations.multivar_operations import Operation
 import numpy as np
 
 __all__ = ["Sin",
@@ -11,53 +11,59 @@ __all__ = ["Sin",
 
 class Sin(Operation):
     def __call__(self, a):
-        self.a = a
+        self.variables = (a,)
         return np.sin(a.data)
 
-    def backward_a(self, grad):
-        return self.a.backward(grad * np.cos(self.a.data))
+    def backward_var(self, grad, index, **kwargs):
+        a = self.variables[index]
+        a.backward(grad * np.cos(a.data), **kwargs)
 
 
 class Cos(Operation):
     def __call__(self, a):
-        self.a = a
+        self.variables = (a,)
         return np.cos(a.data)
 
-    def backward_a(self, grad):
-        return self.a.backward(grad * -np.sin(self.a.data))
+    def backward_var(self, grad, index, **kwargs):
+        a = self.variables[index]
+        a.backward(grad * -np.sin(a.data), **kwargs)
 
 
 class Tan(Operation):
     def __call__(self, a):
-        self.a = a
+        self.variables = (a,)
         return np.tan(a.data)
 
-    def backward_a(self, grad):
-        return self.a.backward(grad / np.cos(self.a.data)**2)
+    def backward_var(self, grad, index, **kwargs):
+        a = self.variables[index]
+        a.backward(grad / np.cos(a.data)**2, **kwargs)
 
 
 class Csc(Operation):
     def __call__(self, a):
-        self.a = a
+        self.variables = (a,)
         return 1 / np.sin(a.data)
 
-    def backward_a(self, grad):
-        return self.a.backward(grad * -np.cos(self.a.data) / np.sin(self.a.data)**2)
+    def backward_var(self, grad, index, **kwargs):
+        a = self.variables[index]
+        a.backward(grad * -np.cos(a.data) / np.sin(a.data)**2, **kwargs)
 
 
 class Sec(Operation):
     def __call__(self, a):
-        self.a = a
+        self.variables = (a,)
         return 1 / np.cos(a.data)
 
-    def backward_a(self, grad):
-        return self.a.backward(grad * np.sin(self.a.data) / np.cos(self.a.data)**2)
+    def backward_var(self, grad, index, **kwargs):
+        a = self.variables[index]
+        a.backward(grad * np.sin(a.data) / np.cos(a.data)**2, **kwargs)
 
 
 class Cot(Operation):
     def __call__(self, a):
-        self.a = a
+        self.variables = (a,)
         return 1 / np.tan(a.data)
 
-    def backward_a(self, grad):
-        return self.a.backward(-grad / np.sin(self.a.data)**2)
+    def backward_var(self, grad, index, **kwargs):
+        a = self.variables[index]
+        a.backward(-grad / np.sin(a.data)**2, **kwargs)

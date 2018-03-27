@@ -1,5 +1,7 @@
 from .operations import *
+from mygrad.operations.multivar_operations import Operation, BroadcastableOp
 import numpy as np
+from mygrad._utils import reduce_broadcast
 
 __all__ = ['Tensor']
 
@@ -89,6 +91,10 @@ class Tensor:
         f = Op()
         op_out = f(*tensor_vars, *op_args, **op_kwargs)
 
+        # check if broadcasting occurred
+        if isinstance(f, BroadcastableOp) and any(op_out.shape != i.shape for i in tensor_vars):
+            f.scalar_only = True
+
         # record that a variable participated in that op
         for var in tensor_vars:
             if not var.constant:
@@ -102,7 +108,7 @@ class Tensor:
 
         return cls(op_out, constant=is_const, _creator=f, _scalar_only=scalar_only)
 
-    def backward(self, grad=None):
+    def backward(self, grad=None, *, _broadcastable=False):
         """ Compute set or accumulate `self.grad` with `grad`, and pass `self.creator.backward(grad)`.
             In effect, calling `self.backward()` will trigger a "back-propagation" from `self` through
             the preceding nodes in the computational graph. Thus a node, `a`, will have the attribute
@@ -114,6 +120,10 @@ class Tensor:
                 The value of the incoming derivative. If self.grad is None, it is set to `grad`,
                 otherwise its value is added with `grad`.
 
+            _broadcastable : bool, optional (default:False)
+                Devs-only: Indicates whether or not the up-stream op
+                can utilize broadcasting.
+
             Raises
             ------
             InvalidNonScalarBackprop
@@ -122,6 +132,9 @@ class Tensor:
 
         if grad is not None:
             grad = np.asarray(grad.data if isinstance(grad, Tensor) else grad)
+
+            if _broadcastable:
+                grad = reduce_broadcast(grad, self.shape)
         else:
             if self.ndim > 0 and self.scalar_only:
                 raise Exception("Invalid Backprop: scalar-only violation")
@@ -131,7 +144,7 @@ class Tensor:
         self.grad = np.asarray(grad if self.grad is None else self.grad + grad)
 
         if self._creator is not None:
-            self._creator.backward(grad)
+            self._creator.backward(grad, _broadcastable=isinstance(self._creator, BroadcastableOp))
 
     def null_gradients(self):
         self.grad = None
@@ -304,22 +317,12 @@ class Tensor:
         old_tensor._creator = self.creator
         old_tensor._ops = self._ops
 
-        # point all ops involving self to old_tensor instead
+        # point all ops involving `self` to old_tensor instead
         for op in old_tensor._ops:
-            if hasattr(op, "variables"):
-                for i in range(len(op.variables)):
-                    if op.variables[i] is self:
-                        op.variables[i] = old_tensor
-                        break
-            elif op.a is self:
-                op.a = old_tensor
-            else:
-                try:
-                    op.b = old_tensor
-                except AttributeError:
-                    msg = """"self._op contains an Operation which does not reference self.
-                              This is likely due to a bug in the Operation's implementation."""
-                    raise AttributeError(msg)
+            for i in range(len(op.variables)):
+                if op.variables[i] is self:
+                    op.variables = op.variables[:i] + (old_tensor,) + op.variables[i+1:]
+                    break
 
         # self becomes the tensor post-setitem
         out = self._op(SetItem, old_tensor, value, op_args=(key,))

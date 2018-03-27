@@ -1,5 +1,5 @@
 from mygrad.tensor_base import Tensor
-from mygrad.operations.operation_base import Operation
+from mygrad.operations.multivar_operations import Operation
 from hypothesis import given
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp

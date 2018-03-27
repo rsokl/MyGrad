@@ -1,4 +1,4 @@
-from .operation_base import BroadcastableOp
+from .multivar_operations import BroadcastableOp
 
 __all__ = ["Add"]
 
@@ -15,18 +15,12 @@ class Add(BroadcastableOp):
             Returns
             -------
             out : numpy.ndarray """
-        self.a = a
-        self.b = b
-        out = a.data + b.data
 
-        self.broadcast_check(a, b, out.shape)
+        self.variables = (a, b)
+        out = a.data + b.data
         return out
 
-    def backward_a(self, grad):
-        broadcasted_grad = super(Add, self).backward_a(grad)
-        self.a.backward(broadcasted_grad)
+    def backward_var(self, grad, index, **kwargs):
+        self.variables[index].backward(grad, **kwargs)
 
-    def backward_b(self, grad):
-        broadcasted_grad = super(Add, self).backward_b(grad)
-        self.b.backward(broadcasted_grad)
 

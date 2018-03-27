@@ -1,4 +1,4 @@
-from .operation_base import BroadcastableOp
+from mygrad.operations.multivar_operations import BroadcastableOp
 import numpy as np
 
 
@@ -14,19 +14,16 @@ class Logaddexp(BroadcastableOp):
             Returns
             -------
             out : numpy.ndarray """
-        self.a = a
-        self.b = b
+        self.variables = (a, b)
         out = np.logaddexp(a.data, b.data)
-
-        self.broadcast_check(a, b, out.shape)
         return out
 
-    def backward_a(self, grad):
-        dLda = grad / (1 + np.exp(self.b.data - self.a.data))
-        broadcasted_grad = super(Logaddexp, self).backward_a(dLda)
-        self.a.backward(broadcasted_grad)
+    def backward_var(self, grad, index, **kwargs):
+        a, b = self.variables
+        if index == 0:
+            dLda = grad / (1 + np.exp(b.data - a.data))
+            a.backward(dLda, **kwargs)
+        else:
+            dLdb = grad / (1 + np.exp(a.data - b.data))
+            b.backward(dLdb, **kwargs)
 
-    def backward_b(self, grad):
-        dLdb = grad / (1 + np.exp(self.a.data - self.b.data))
-        broadcasted_grad = super(Logaddexp, self).backward_b(dLdb)
-        self.b.backward(broadcasted_grad)
