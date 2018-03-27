@@ -1,9 +1,9 @@
-from .multivar_operations import MultiVarBroadcastableOp
+from .multivar_operations import BroadcastableOp
 
 __all__ = ["Add"]
 
 
-class Add(MultiVarBroadcastableOp):
+class Add(BroadcastableOp):
     def __call__(self, a, b):
         """ Performs 'add' forward-pass: f(a,b) -> a + b
 

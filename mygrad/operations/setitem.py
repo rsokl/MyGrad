@@ -1,8 +1,8 @@
-from mygrad.operations.multivar_operations import MultiVarBroadcastableOp
+from mygrad.operations.multivar_operations import BroadcastableOp
 import numpy as np
 
 
-class SetItem(MultiVarBroadcastableOp):
+class SetItem(BroadcastableOp):
 
     def __call__(self, a, b, index):
         """ a[index] = b

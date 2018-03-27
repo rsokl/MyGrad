@@ -1,11 +1,11 @@
-from mygrad.operations.multivar_operations import MultiVarOperation
+from mygrad.operations.multivar_operations import Operation
 from ..tensor_base import Tensor
 import numpy as np
 
 __all__ = ["multiclass_hinge"]
 
 
-class MulticlassHinge(MultiVarOperation):
+class MulticlassHinge(Operation):
     def __call__(self, a, y, hinge=1.):
         """ Parameters
             ----------
@@ -56,7 +56,7 @@ def multiclass_hinge(x, y_true, hinge=1.):
     return Tensor._op(MulticlassHinge, x, op_args=(y_true, hinge))
 
 
-class SoftmaxCrossEntropy(MultiVarOperation):
+class SoftmaxCrossEntropy(Operation):
     """ Given the classification scores of C classes for N pieces of data,
         computes the NxC softmax classification probabilities. The
         cross entropy is then computed by using the true classifications."""

@@ -1,4 +1,4 @@
-from .multivar_operations import MultiVarOperation
+from .multivar_operations import Operation
 import numpy as np
 
 __all__ = ["Sinh",
@@ -9,7 +9,7 @@ __all__ = ["Sinh",
            "Coth"]
 
 
-class Sinh(MultiVarOperation):
+class Sinh(Operation):
     def __call__(self, a):
         self.variables = (a,)
         return np.sinh(a.data)
@@ -19,7 +19,7 @@ class Sinh(MultiVarOperation):
         a.backward(grad * np.cosh(a.data), **kwargs)
 
 
-class Cosh(MultiVarOperation):
+class Cosh(Operation):
     def __call__(self, a):
         self.variables = (a,)
         return np.cosh(a.data)
@@ -29,7 +29,7 @@ class Cosh(MultiVarOperation):
         a.backward(grad * np.sinh(a.data), **kwargs)
 
 
-class Tanh(MultiVarOperation):
+class Tanh(Operation):
     def __call__(self, a):
         self.variables = (a,)
         return np.tanh(a.data)
@@ -39,7 +39,7 @@ class Tanh(MultiVarOperation):
         a.backward(grad * (1 - np.tanh(a.data) ** 2), **kwargs)
 
 
-class Csch(MultiVarOperation):
+class Csch(Operation):
     def __call__(self, a):
         self.variables = (a,)
         return 1 / np.sinh(a.data)
@@ -49,7 +49,7 @@ class Csch(MultiVarOperation):
         a.backward(grad * -np.cosh(a.data) / np.sinh(a.data)**2)
 
 
-class Sech(MultiVarOperation):
+class Sech(Operation):
     def __call__(self, a):
         self.variables = (a,)
         return 1 / np.cosh(a.data)
@@ -59,7 +59,7 @@ class Sech(MultiVarOperation):
         a.backward(grad * -np.sinh(a.data) / np.cosh(a.data)**2, **kwargs)
 
 
-class Coth(MultiVarOperation):
+class Coth(Operation):
     def __call__(self, a):
         self.variables = (a,)
         return 1 / np.tanh(a.data)

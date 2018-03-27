@@ -1,11 +1,11 @@
-from mygrad.operations.multivar_operations import MultiVarOperation
+from mygrad.operations.multivar_operations import Operation
 from mygrad.tensor_base import Tensor
 import numpy as np
 from numbers import Integral
 from mygrad.nnet.layers.utils import sliding_window_view
 
 
-class Conv2D(MultiVarOperation):
+class Conv2D(Operation):
     def __call__(self, x, w, stride, padding=(0, 0)):
         self.variables = (x, w)
         # x ... data:    (N, C, H, W)

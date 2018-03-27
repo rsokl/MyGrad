@@ -1,4 +1,4 @@
-from mygrad.operations.multivar_operations import MultiVarOperation
+from mygrad.operations.multivar_operations import Operation
 import numpy as np
 
 __all__ = ["Log",
@@ -6,7 +6,7 @@ __all__ = ["Log",
            "Log10"]
 
 
-class Log(MultiVarOperation):
+class Log(Operation):
     def __call__(self, a):
         self.variables = (a,)
         if np.any(a <= 0):
@@ -18,7 +18,7 @@ class Log(MultiVarOperation):
         a.backward(grad / a.data, **kwargs)
 
 
-class Log2(MultiVarOperation):
+class Log2(Operation):
     def __call__(self, a):
         self.variables = (a,)
         if np.any(a <= 0):
@@ -30,7 +30,7 @@ class Log2(MultiVarOperation):
         a.backward(grad / (a.data * np.log(2)), **kwargs)
 
 
-class Log10(MultiVarOperation):
+class Log10(Operation):
     def __call__(self, a):
         self.variables = (a,)
         if np.any(a <= 0):

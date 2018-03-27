@@ -1,4 +1,4 @@
-from mygrad.operations.multivar_operations import MultiVarBroadcastableOp
+from mygrad.operations.multivar_operations import BroadcastableOp
 from mygrad import Tensor
 import numpy as np
 from itertools import chain
@@ -83,7 +83,7 @@ def _get_indices(item, seq):
     return (n for n, x in enumerate(seq) if x == item)
 
 
-class EinSum(MultiVarBroadcastableOp):
+class EinSum(BroadcastableOp):
     def __call__(self, *variables, in_lbls, out_lbls, **kwargs):
         self.in_lbls = in_lbls
         self.out_lbls = out_lbls

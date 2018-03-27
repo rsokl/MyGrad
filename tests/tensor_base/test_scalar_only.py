@@ -3,12 +3,12 @@ from hypothesis import given
 from pytest import raises
 
 from mygrad.tensor_base import Tensor
-from mygrad.operations.multivar_operations import MultiVarOperation
+from mygrad.operations.multivar_operations import Operation
 
 import numpy as np
 
 
-class ScalarOnlyOp(MultiVarOperation):
+class ScalarOnlyOp(Operation):
     def __init__(self):
         self.scalar_only = True
 
@@ -17,7 +17,7 @@ class ScalarOnlyOp(MultiVarOperation):
         return np.array([0])
 
 
-class NotScalarOnlyOp(MultiVarOperation):
+class NotScalarOnlyOp(Operation):
     def __init__(self):
         self.scalar_only = False
 

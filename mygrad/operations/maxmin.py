@@ -1,10 +1,10 @@
-from mygrad.operations.multivar_operations import MultiVarOperation
+from mygrad.operations.multivar_operations import Operation
 import numpy as np
 
 __all__ = ["MaxMin"]
 
 
-class MaxMin(MultiVarOperation):
+class MaxMin(Operation):
     def __call__(self, a, axis=None, keepdims=False, maxmin=None):
         """ Return the maximum (minimum) of a tensor, or along its axes.
 

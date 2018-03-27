@@ -1,8 +1,8 @@
-from mygrad.operations.multivar_operations import MultiVarBroadcastableOp
+from mygrad.operations.multivar_operations import BroadcastableOp
 import numpy as np
 
 
-class Power(MultiVarBroadcastableOp):
+class Power(BroadcastableOp):
     def __call__(self, a, b):
         """ f(a, b) -> a ** b
 

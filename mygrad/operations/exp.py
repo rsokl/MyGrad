@@ -1,10 +1,10 @@
-from .multivar_operations import MultiVarOperation
+from .multivar_operations import Operation
 import numpy as np
 
 __all__ = ["Exp"]
 
 
-class Exp(MultiVarOperation):
+class Exp(Operation):
     def __call__(self, a):
         """ f(a) -> exp(a)
 

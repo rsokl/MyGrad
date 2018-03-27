@@ -1,11 +1,11 @@
-from mygrad.operations.multivar_operations import MultiVarOperation
+from mygrad.operations.multivar_operations import Operation
 from mygrad.tensor_base import Tensor
 import numpy as np
 from numbers import Integral
 from mygrad.nnet.layers.utils import sliding_window_view
 
 
-class MaxPoolND(MultiVarOperation):
+class MaxPoolND(Operation):
     def __call__(self, x, pool, stride):
         """ Perform max-pooling over the last N dimensions of a data batch.
 

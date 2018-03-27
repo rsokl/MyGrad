@@ -1,8 +1,8 @@
-from .multivar_operations import MultiVarOperation
+from .multivar_operations import Operation
 import numpy as np
 
 
-class Abs(MultiVarOperation):
+class Abs(Operation):
     def __call__(self, a):
         self.variables = (a,)
         return np.abs(a.data)

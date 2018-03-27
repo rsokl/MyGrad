@@ -1,11 +1,11 @@
-from .multivar_operations import MultiVarBroadcastableOp
+from .multivar_operations import BroadcastableOp
 from functools import reduce
 import numpy as np
 
 __all__ = ["MultiplySequence"]
 
 
-class MultiplySequence(MultiVarBroadcastableOp):
+class MultiplySequence(BroadcastableOp):
     """ Performs f(a, b, ..., z) = a * b * ... * z"""
     def __call__(self, *input_vars):
         assert len(input_vars) > 1, "`multiply_sequence` requires at least two operands"

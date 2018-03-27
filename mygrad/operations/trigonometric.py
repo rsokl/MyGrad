@@ -1,4 +1,4 @@
-from mygrad.operations.multivar_operations import MultiVarOperation
+from mygrad.operations.multivar_operations import Operation
 import numpy as np
 
 __all__ = ["Sin",
@@ -9,7 +9,7 @@ __all__ = ["Sin",
            "Cot"]
 
 
-class Sin(MultiVarOperation):
+class Sin(Operation):
     def __call__(self, a):
         self.variables = (a,)
         return np.sin(a.data)
@@ -19,7 +19,7 @@ class Sin(MultiVarOperation):
         a.backward(grad * np.cos(a.data), **kwargs)
 
 
-class Cos(MultiVarOperation):
+class Cos(Operation):
     def __call__(self, a):
         self.variables = (a,)
         return np.cos(a.data)
@@ -29,7 +29,7 @@ class Cos(MultiVarOperation):
         a.backward(grad * -np.sin(a.data), **kwargs)
 
 
-class Tan(MultiVarOperation):
+class Tan(Operation):
     def __call__(self, a):
         self.variables = (a,)
         return np.tan(a.data)
@@ -39,7 +39,7 @@ class Tan(MultiVarOperation):
         a.backward(grad / np.cos(a.data)**2, **kwargs)
 
 
-class Csc(MultiVarOperation):
+class Csc(Operation):
     def __call__(self, a):
         self.variables = (a,)
         return 1 / np.sin(a.data)
@@ -49,7 +49,7 @@ class Csc(MultiVarOperation):
         a.backward(grad * -np.cos(a.data) / np.sin(a.data)**2, **kwargs)
 
 
-class Sec(MultiVarOperation):
+class Sec(Operation):
     def __call__(self, a):
         self.variables = (a,)
         return 1 / np.cos(a.data)
@@ -59,7 +59,7 @@ class Sec(MultiVarOperation):
         a.backward(grad * np.sin(a.data) / np.cos(a.data)**2, **kwargs)
 
 
-class Cot(MultiVarOperation):
+class Cot(Operation):
     def __call__(self, a):
         self.variables = (a,)
         return 1 / np.tan(a.data)

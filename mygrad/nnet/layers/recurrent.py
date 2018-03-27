@@ -1,4 +1,4 @@
-from mygrad.operations.multivar_operations import MultiVarOperation
+from mygrad.operations.multivar_operations import Operation
 from mygrad.tensor_base import Tensor
 from numbers import Integral
 import numpy as np
@@ -48,7 +48,7 @@ def _rnn_bptt(X, dLt_dst, dst_dft, W, bp_lim, old_dst=None):
         dLt_dst[target_index] += dot(dLn_ft1, W)
 
 
-class RecurrentUnit(MultiVarOperation):
+class RecurrentUnit(Operation):
     """ Defines a basic recurrent unit for a RNN.
 
         This unit operates on a sequence of data {X_j | (0 <= j <= T - 1)}, producing

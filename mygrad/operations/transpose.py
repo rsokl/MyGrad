@@ -1,8 +1,8 @@
-from mygrad.operations.multivar_operations import MultiVarOperation
+from mygrad.operations.multivar_operations import Operation
 import numpy as np
 
 
-class Tensor_Transpose_Property(MultiVarOperation):
+class Tensor_Transpose_Property(Operation):
     def __call__(self, a):
         """ Same as a.transpose(), except that a is returned if
             a.ndim < 2.
@@ -17,7 +17,7 @@ class Tensor_Transpose_Property(MultiVarOperation):
         self.variables[index].backward(grad.T, **kwargs)
 
 
-class Transpose(MultiVarOperation):
+class Transpose(Operation):
     def __call__(self, a, axes=None):
         self.variables = (a,)
         if axes is not None:

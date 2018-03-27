@@ -1,9 +1,9 @@
-from mygrad.operations.multivar_operations import MultiVarOperation
+from mygrad.operations.multivar_operations import Operation
 from ...tensor_base import Tensor
 import numpy as np
 
 
-class Dense(MultiVarOperation):
+class Dense(Operation):
     scalar_only = True
 
     def __call__(self, a, b):

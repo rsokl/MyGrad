@@ -1,8 +1,8 @@
-from mygrad.operations.multivar_operations import MultiVarBroadcastableOp
+from mygrad.operations.multivar_operations import BroadcastableOp
 import numpy as np
 
 
-class Logaddexp(MultiVarBroadcastableOp):
+class Logaddexp(BroadcastableOp):
     def __call__(self, a, b):
         """ Performs 'logaddexp' forward-pass: f(a,b) -> log(exp(a) + exp(b))
 

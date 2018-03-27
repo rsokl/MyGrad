@@ -1,8 +1,8 @@
-from mygrad.operations.multivar_operations import MultiVarOperation
+from mygrad.operations.multivar_operations import Operation
 import numpy as np
 
 
-class Sqrt(MultiVarOperation):
+class Sqrt(Operation):
     def __call__(self, a):
         """ f(a) = sqrt(a)
 

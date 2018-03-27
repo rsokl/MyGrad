@@ -1,8 +1,8 @@
-from .multivar_operations import MultiVarBroadcastableOp
+from .multivar_operations import BroadcastableOp
 import numpy as np
 
 
-class Divide(MultiVarBroadcastableOp):
+class Divide(BroadcastableOp):
     def __call__(self, a, b):
         """ f(a, b) -> a / b"""
         if np.any(b == 0):

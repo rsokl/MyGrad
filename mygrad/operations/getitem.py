@@ -17,11 +17,11 @@
 #         self.a.backward(out)
 
 
-from mygrad.operations.multivar_operations import MultiVarOperation
+from mygrad.operations.multivar_operations import Operation
 import numpy as np
 
 
-class GetItem(MultiVarOperation):
+class GetItem(Operation):
     def __call__(self, a, index):
         self.variables = (a,)
         self.index = index

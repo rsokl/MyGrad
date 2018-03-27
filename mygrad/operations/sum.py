@@ -1,11 +1,11 @@
-from mygrad.operations.multivar_operations import MultiVarOperation
+from mygrad.operations.multivar_operations import Operation
 import numpy as np
 
 
 __all__ = ["Sum", "Mean"]
 
 
-class Sum(MultiVarOperation):
+class Sum(Operation):
 
     def __call__(self, a, axis=None, keepdims=False):
         """ Parameters

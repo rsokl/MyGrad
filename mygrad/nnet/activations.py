@@ -1,14 +1,14 @@
 import numpy as np
 from scipy.misc import logsumexp
 
-from mygrad.operations.multivar_operations import MultiVarOperation
+from mygrad.operations.multivar_operations import Operation
 from mygrad.tensor_base import Tensor
 from mygrad.math import tanh
 
 __all__ = ['tanh', 'sigmoid', 'relu', 'softmax', 'logsoftmax']
 
 
-class Sigmoid(MultiVarOperation):
+class Sigmoid(Operation):
     def __call__(self, a):
         self.variables = (a,)
         x = -1. * a.data
@@ -35,7 +35,7 @@ def sigmoid(x):
     return Tensor._op(Sigmoid, x)
 
 
-class ReLu(MultiVarOperation):
+class ReLu(Operation):
     def __call__(self, a):
         self.variables = (a,)
         self.back = np.asarray(a > 0, dtype=a.dtype)
@@ -59,7 +59,7 @@ def relu(x):
     return Tensor._op(ReLu, x)
 
 
-class Softmax(MultiVarOperation):
+class Softmax(Operation):
     scalar_only = True
 
     def __call__(self, a):
@@ -97,7 +97,7 @@ def softmax(x):
     return Tensor._op(Softmax, x)
 
 
-class LogSoftmax(MultiVarOperation):
+class LogSoftmax(Operation):
     scalar_only = True
 
     def __call__(self, a):

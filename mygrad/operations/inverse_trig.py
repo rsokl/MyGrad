@@ -1,4 +1,4 @@
-from mygrad.operations.multivar_operations import MultiVarOperation
+from mygrad.operations.multivar_operations import Operation
 import numpy as np
 
 __all__ = ["Arcsin",
@@ -9,7 +9,7 @@ __all__ = ["Arcsin",
            "Arccot"]
 
 
-class Arcsin(MultiVarOperation):
+class Arcsin(Operation):
     def __call__(self, a):
         self.variables = (a,)
         if np.any(1 < a) or np.any(a < -1):
@@ -22,7 +22,7 @@ class Arcsin(MultiVarOperation):
         a.backward(np.select([np.abs(a.data) != 1], [grad / np.sqrt(1 - a.data ** 2)]), **kwargs)
 
 
-class Arccos(MultiVarOperation):
+class Arccos(Operation):
     def __call__(self, a):
         self.variables = (a,)
         if np.any(1 < a) or np.any(a < -1):
@@ -35,7 +35,7 @@ class Arccos(MultiVarOperation):
         a.backward(np.select([np.abs(a.data) != 1], [-grad / np.sqrt(1 - a.data ** 2)]), **kwargs)
 
 
-class Arctan(MultiVarOperation):
+class Arctan(Operation):
     def __call__(self, a):
         self.variables = (a,)
         return np.arctan(a.data)
@@ -45,7 +45,7 @@ class Arctan(MultiVarOperation):
         a.backward(grad / (1 + a.data ** 2), **kwargs)
 
 
-class Arccsc(MultiVarOperation):
+class Arccsc(Operation):
     def __call__(self, a):
         self.variables = (a,)
         if np.any(-1 < a) and np.any(a < 1):
@@ -58,7 +58,7 @@ class Arccsc(MultiVarOperation):
         a.backward(np.select([np.abs(a.data) != 1], [-grad / (np.abs(a.data) * np.sqrt(a.data ** 2 - 1))]), **kwargs)
 
 
-class Arcsec(MultiVarOperation):
+class Arcsec(Operation):
     def __call__(self, a):
         self.variables = (a,)
         if np.any(-1 < a) and np.any(a < 1):
@@ -71,7 +71,7 @@ class Arcsec(MultiVarOperation):
         a.backward(np.select([np.abs(a.data) != 1], [grad / (np.abs(a.data) * np.sqrt(a.data ** 2 - 1))]), **kwargs)
 
 
-class Arccot(MultiVarOperation):
+class Arccot(Operation):
     def __call__(self, a):
         self.variables = (a,)
         return np.piecewise(a.data, [a.data == 0, a.data != 0], [np.pi / 2, lambda x: np.arctan(1 / x)])

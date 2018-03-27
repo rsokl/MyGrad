@@ -1,7 +1,7 @@
-from mygrad.operations.multivar_operations import MultiVarOperation
+from mygrad.operations.multivar_operations import Operation
 
 
-class Reshape(MultiVarOperation):
+class Reshape(Operation):
     def __call__(self, a, shape):
         """ Parameters
             ----------

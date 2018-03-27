@@ -1,9 +1,9 @@
-from mygrad.operations.multivar_operations import MultiVarBroadcastableOp
+from mygrad.operations.multivar_operations import BroadcastableOp
 
 __all__ = ["Subtract"]
 
 
-class Subtract(MultiVarBroadcastableOp):
+class Subtract(BroadcastableOp):
     def __call__(self, a, b):
         """ f(a,b) -> a - b
 

@@ -1,7 +1,7 @@
-from mygrad.operations.multivar_operations import MultiVarBroadcastableOp
+from mygrad.operations.multivar_operations import BroadcastableOp
 
 
-class Multiply(MultiVarBroadcastableOp):
+class Multiply(BroadcastableOp):
     def __call__(self, a, b):
         """ Parameters
             ----------
