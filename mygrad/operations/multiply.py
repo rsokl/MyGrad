@@ -1,24 +1,19 @@
-from .operation_base import BroadcastableOp
+from mygrad.operations.multivar_operations import MultiVarBroadcastableOp
 
 
-class Multiply(BroadcastableOp):
+class Multiply(MultiVarBroadcastableOp):
     def __call__(self, a, b):
-        self.a = a
-        self.b = b
-
+        """ Parameters
+            ----------
+            a : mygrad.Tensor
+            b : mygrad.Tensor"""
+        self.variables = (a, b)
         out = a.data * b.data
-        self.broadcast_check(a, b, out.shape)
         return out
 
-    def backward_a(self, grad):
-        dLda = grad * self.b.data  # dL/df * df/da -> dL/da
-        broadcasted_grad = super(Multiply, self).backward_a(dLda)
-        self.a.backward(broadcasted_grad)
-
-    def backward_b(self, grad):
-        dLdb = grad * self.a.data  # dL/df * df/da -> dL/da
-        broadcasted_grad = super(Multiply, self).backward_b(dLdb)
-        self.b.backward(broadcasted_grad)
-
-
-
+    def backward_var(self, grad, index, **kwargs):
+        a, b = self.variables
+        if index == 0:  # backprop through a
+            a.backward(grad * b.data, **kwargs)
+        elif index == 1:  # backprop through b
+            b.backward(grad * a.data, **kwargs)
