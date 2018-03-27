@@ -1,28 +1,15 @@
 from mygrad.operations.multivar_operations import BroadcastableOp
 from mygrad import Tensor
+from mygrad._utils import reduce_broadcast
 import numpy as np
 from itertools import chain
+from functools import reduce
 
 from numpy.core.einsumfunc import _parse_einsum_input
 from numpy.lib.stride_tricks import as_strided
 from itertools import filterfalse
 
 __all__ = ["einsum"]
-
-
-def reduce_broadcast(grad, outshape):
-    if grad.shape == outshape:
-        return grad
-
-    if grad.ndim != len(outshape):
-        assert grad.ndim > len(outshape)
-        grad = grad.sum(axis=range(grad.ndim - len(outshape)))
-
-    keepdims = tuple(n for n,i in enumerate(grad.shape) if i != outshape[n])
-    if keepdims:
-        grad = grad.sum(axis=keepdims, keepdims=True)
-
-    return grad
 
 
 def _unique_from_end(in_str):
@@ -45,13 +32,7 @@ def _unique_from_end(in_str):
         "jik"
     """
 
-    def seen(x, store=[]):
-        seen = x in store
-        if not seen:
-            store.append(x)
-        return seen
-
-    return "".join((filterfalse(seen, in_str[::-1])))[::-1]
+    return reduce(lambda acc, x: acc + x if x not in acc else acc, in_str[::-1], '')[::-1]
 
 
 def _merge_max_mappings(*mappings):
@@ -70,16 +51,19 @@ def _merge_max_mappings(*mappings):
         >>> _merge_max_mappings({"a":1, "b":4}, {"a":2})
         {"a":2, "b":4}
     """
-    assert len(mappings) > 0
-    mapping = mappings[0]
-    for mapp in mappings:
-        for key, val in mapp.items():
-            if mapping.get(key, 0) < val:
-                mapping[key] = val
-    return mapping
+
+    def _merge_max(d1, d2):
+        d1.update((k, v) for k, v in d2.items() if d1.get(k, 0) < v)
+        return d1
+    return reduce(_merge_max, mappings, {})
 
 
 def _get_indices(item, seq):
+    """ Return the indices where `item` occurs in `seq`
+
+        Returns
+        -------
+        Generator[int]"""
     return (n for n, x in enumerate(seq) if x == item)
 
 
