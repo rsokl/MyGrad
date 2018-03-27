@@ -1,5 +1,5 @@
 from mygrad.tensor_base import Tensor
-from mygrad.operations.operation_base import Operation
+from mygrad.operations.multivar_operations import MultiVarOperation
 from hypothesis import given
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
@@ -16,7 +16,7 @@ import numpy as np
 def test_properties(a, constant, scalar, creator):
     array = np.asarray(a)
     if creator:
-        ref = Operation()
+        ref = MultiVarOperation()
         tensor = Tensor(a, constant=constant, _creator=ref, _scalar_only=scalar)
     else:
         tensor = Tensor(a, constant=constant, _scalar_only=scalar)
@@ -36,7 +36,7 @@ def test_init_data():
         assert np.all(Tensor(Tensor(data)).data == np.asarray(data)), "Initialization with tensor failed"
 
 
-op = Operation()
+op = MultiVarOperation()
 @given(a=hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=5),
                     dtype=float,
                     elements=st.floats(-100, 100)),
