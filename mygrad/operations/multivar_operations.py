@@ -9,15 +9,19 @@ class MultiVarOperation:
     scalar_only = False
 
     def __call__(self, *input_vars):
-        """ An operation instance, `f`, performs a forward pass using this function. Typically,
-            it is called in this form:
-                f(a, b) -> out
+        """ Performs a forward pass, f, of this Operation:
+                f(x1, ...., xn) -> out
 
-            Where `a` and `b` are Tensor-instances, and `out` is a Numpy-array.
+            Parameters
+            ----------
+            *input_vars : mygrad.Tensor
+                The input-arguments of f. The tuple (x1, ...., xn)
+                should be bound to the instance-attribute `self.variables`
 
-            It must also bind `a` and `b` to the operation instance:
-                self.a = a
-                self.b = b"""
+            Returns
+            -------
+            numpy.ndarray
+                The output of the forward pass function."""
 
         self.variables = input_vars
         return NotImplementedError
