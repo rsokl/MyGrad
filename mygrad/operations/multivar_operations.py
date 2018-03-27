@@ -3,14 +3,37 @@ __all__ = ["MultiVarOperation",
 
 
 class MultiVarOperation:
-    """ Experimental! Permits arbitrary number of tensor operands."""
+    """ Base class for all tensor operations that support backprop.
+
+        Functions accept `Tensor` objects and return Python numeric types """
     scalar_only = False
 
     def __call__(self, *input_vars):
+        """ An operation instance, `f`, performs a forward pass using this function. Typically,
+            it is called in this form:
+                f(a, b) -> out
+
+            Where `a` and `b` are Tensor-instances, and `out` is a Numpy-array.
+
+            It must also bind `a` and `b` to the operation instance:
+                self.a = a
+                self.b = b"""
+
         self.variables = input_vars
         return NotImplementedError
 
     def backward_var(self, grad, index, **kwargs):
+        """ Given grad = d(L)/d(f), computes d(L)/d(var), and passes this result to var.backward(),
+            where var is the tensor-argument at position `index`
+
+            Parameters
+            ----------
+            grad : numpy.ndarray
+                The back-propagated total derivative with respect to the present operation (`f`): dL/df
+
+            Raises
+            ------
+            NotImplemented Error"""
         raise NotImplementedError
 
     def backward(self, grad, **kwargs):

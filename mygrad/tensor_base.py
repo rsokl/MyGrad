@@ -120,6 +120,10 @@ class Tensor:
                 The value of the incoming derivative. If self.grad is None, it is set to `grad`,
                 otherwise its value is added with `grad`.
 
+            _broadcastable : bool, optional (default:False)
+                Devs-only: Indicates whether or not the up-stream op
+                can utilize broadcasting.
+
             Raises
             ------
             InvalidNonScalarBackprop
