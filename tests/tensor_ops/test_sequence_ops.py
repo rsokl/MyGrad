@@ -1,5 +1,5 @@
 from mygrad.tensor_base import Tensor
-from mygrad.math import multiply_sequence, add_sequence
+from mygrad import multiply_sequence, add_sequence
 from numpy.testing import assert_allclose
 
 

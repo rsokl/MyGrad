@@ -1,4 +1,5 @@
 from mygrad.operations.math.arithmetic.ops import *
+from mygrad.operations.math.sequential.ops import *
 from .operations import *
 from mygrad.operations.multivar_operations import Operation, BroadcastableOp
 import numpy as np

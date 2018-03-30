@@ -3,7 +3,7 @@ from scipy.misc import logsumexp
 
 from mygrad.operations.multivar_operations import Operation
 from mygrad.tensor_base import Tensor
-from mygrad.math import tanh
+from mygrad import tanh
 
 __all__ = ['tanh', 'sigmoid', 'relu', 'softmax', 'logsoftmax']
 

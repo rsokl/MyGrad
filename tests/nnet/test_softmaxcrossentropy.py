@@ -1,7 +1,7 @@
 from mygrad.tensor_base import Tensor
 from mygrad.nnet.losses import softmax_crossentropy
 from mygrad.nnet.activations import softmax
-from mygrad.math import log
+from mygrad import log
 
 import numpy as np
 from numpy.testing import assert_allclose
