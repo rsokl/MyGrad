@@ -6,6 +6,7 @@ __all__ = ["Add",
            "Subtract",
            "Multiply",
            "Divide",
+           "Reciprocal"
            "Power",
            "Positive",
            "Negative",
@@ -89,6 +90,17 @@ class Divide(BroadcastableOp):
             a.backward(grad / b.data, **kwargs)
         else:           # broadcast through b
             b.backward(- grad * a.data / (b.data ** 2), **kwargs)
+
+
+class Reciprocal(BroadcastableOp):
+    def __call__(self, a, b):
+        """ f(a) -> 1 / a"""
+        self.variables = (a, )
+        return np.reciprocal(a.data)
+
+    def backward_var(self, grad, index, **kwargs):
+        a = self.variables[index]
+        a.backward(-grad * np.reciprocal(a.data ** 2), **kwargs)
 
 
 class Power(BroadcastableOp):

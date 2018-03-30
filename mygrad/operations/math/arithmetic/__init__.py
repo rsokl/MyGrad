@@ -1,12 +1,13 @@
 from .ops import Add, Subtract, Power, Divide, Multiply, MultiplySequence, AddSequence
-from .ops import Positive, Negative
+from .ops import Positive, Negative, Reciprocal
 from mygrad.tensor_base import Tensor
 
 
 __all__ = ["add",
            "subtract",
            "power",
-           "divide"
+           "divide",
+           "reciprocal",
            "multiply",
            "multiply_sequence",
            "add_sequence",
@@ -24,6 +25,10 @@ def subtract(a, b):
 
 def divide(a, b):
     return Tensor._op(Divide, a, b)
+
+
+def reciprocal(a):
+    return Tensor._op(Reciprocal, a)
 
 
 def power(a, b):
