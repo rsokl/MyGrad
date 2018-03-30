@@ -150,18 +150,6 @@ def abs(a):
 
 
 
-def arccos(a):
-    """ f(a)-> arccos(a)
-
-        Parameters
-        ----------
-        a : Union[tensor-like, Number]
-
-        Returns
-        -------
-        mygrad.Tensor"""
-    return Tensor._op(Arccos, a)
-
 
 def arccosh(a):
     """ f(a)-> arccosh(a)
@@ -202,17 +190,7 @@ def arccoth(a):
     return Tensor._op(Arccoth, a)
 
 
-def arccsc(a):
-    """ f(a)-> arccsc(a)
 
-        Parameters
-        ----------
-        a : Union[tensor-like, Number]
-
-        Returns
-        -------
-        mygrad.Tensor"""
-    return Tensor._op(Arccsc, a)
 
 
 def arccsch(a):
@@ -228,29 +206,8 @@ def arccsch(a):
     return Tensor._op(Arccsch, a)
 
 
-def arcsec(a):
-    """ f(a)-> arcsec(a)
 
-        Parameters
-        ----------
-        a : Union[tensor-like, Number]
 
-        Returns
-        -------
-        mygrad.Tensor"""
-    return Tensor._op(Arcsec, a)
-
-def arcsin(a):
-    """ f(a)-> arcsin(a)
-
-        Parameters
-        ----------
-        a : Union[tensor-like, Number]
-
-        Returns
-        -------
-        mygrad.Tensor"""
-    return Tensor._op(Arcsin, a)
 
 
 def arcsinh(a):
@@ -266,17 +223,7 @@ def arcsinh(a):
     return Tensor._op(Arcsinh, a)
 
 
-def arctan(a):
-    """ f(a)-> arctan(a)
 
-        Parameters
-        ----------
-        a : Union[tensor-like, Number]
-
-        Returns
-        -------
-        mygrad.Tensor"""
-    return Tensor._op(Arctan, a)
 
 def arctanh(a):
     """ f(a)-> arctanh(a)
@@ -304,17 +251,7 @@ def cbrt(a):
     return Tensor._op(Cbrt, a)
 
 
-def cos(a):
-    """ f(a)-> cos(a)
 
-        Parameters
-        ----------
-        a : Union[tensor-like, Number]
-
-        Returns
-        -------
-        mygrad.Tensor"""
-    return Tensor._op(Cos, a)
 
 
 def cosh(a):
@@ -330,17 +267,7 @@ def cosh(a):
     return Tensor._op(Cosh, a)
 
 
-def cot(a):
-    """ f(a)-> cot(a)
 
-        Parameters
-        ----------
-        a : Union[tensor-like, Number]
-
-        Returns
-        -------
-        mygrad.Tensor"""
-    return Tensor._op(Cot, a)
 
 
 def coth(a):
@@ -356,17 +283,7 @@ def coth(a):
     return Tensor._op(Coth, a)
 
 
-def csc(a):
-    """ f(a)-> csc(a)
 
-        Parameters
-        ----------
-        a : Union[tensor-like, Number]
-
-        Returns
-        -------
-        mygrad.Tensor"""
-    return Tensor._op(Csc, a)
 
 
 def csch(a):
@@ -385,17 +302,7 @@ def csch(a):
 
 
 
-def sec(a):
-    """ f(a)-> sec(a)
 
-        Parameters
-        ----------
-        a : Union[tensor-like, Number]
-
-        Returns
-        -------
-        mygrad.Tensor"""
-    return Tensor._op(Sec, a)
 
 
 def sech(a):
@@ -411,17 +318,7 @@ def sech(a):
     return Tensor._op(Sech, a)
 
 
-def sin(a):
-    """ f(a)-> sin(a)
 
-        Parameters
-        ----------
-        a : Union[tensor-like, Number]
-
-        Returns
-        -------
-        mygrad.Tensor"""
-    return Tensor._op(Sin, a)
 
 
 def sinh(a):
@@ -450,29 +347,8 @@ def sqrt(a):
     return Tensor._op(Sqrt, a)
 
 
-def subtract(a, b):
-    """ f(a, b) -> a - b
-        Parameters
-        ----------
-        a : Union[tensor-like, Number]
-        b : Union[tensor-like, Number]
-        Returns
-        -------
-        mygrad.Tensor"""
-    return Tensor._op(Subtract, a, b)
 
 
-def tan(a):
-    """ f(a)-> tan(a)
-
-        Parameters
-        ----------
-        a : Union[tensor-like, Number]
-
-        Returns
-        -------
-        mygrad.Tensor"""
-    return Tensor._op(Tan, a)
 
 def tanh(a):
     """ f(a)-> tanh(a)

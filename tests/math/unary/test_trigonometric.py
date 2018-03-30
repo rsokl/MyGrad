@@ -1,5 +1,5 @@
 from tests.wrappers.unary_func import fwdprop_test_factory, backprop_test_factory
-from mygrad.math import sin, cos, tan, csc, sec, cot
+from mygrad import sin, cos, tan, csc, sec, cot
 
 import numpy as np
 
