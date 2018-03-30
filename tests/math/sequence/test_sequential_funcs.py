@@ -1,5 +1,5 @@
 from ...wrappers.sequence_func import fwdprop_test_factory, backprop_test_factory
-from mygrad.math import max, min, sum, mean
+from mygrad import max, min, sum, mean
 
 import numpy as np
 

@@ -68,7 +68,7 @@ class MaxMin(Operation):
             self.from_trans = tuple(np.argsort(self.to_trans))
             outshape = tuple(a.shape[i] for i in self.static_ax)
 
-            z = a.data.transpose(*self.to_trans).reshape(*(outshape + (-1,)))  # (m, n, ..., i*j*[...])
+            z = a.data.transpose(*self.to_trans).reshape(*outshape, -1)  # (m, n, ..., i*j*[...])
 
             k = op(z, axis=-1)
             self.indices = tuple(i for i in np.indices(k.shape))
