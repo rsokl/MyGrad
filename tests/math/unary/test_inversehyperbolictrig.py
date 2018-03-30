@@ -1,5 +1,5 @@
 from tests.wrappers.unary_func import fwdprop_test_factory, backprop_test_factory
-from mygrad.math import arcsinh, arccosh, arctanh, arccsch, arccoth
+from mygrad import arcsinh, arccosh, arctanh, arccsch, arccoth
 import numpy as np
 
 
