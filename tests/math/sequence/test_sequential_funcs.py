@@ -25,6 +25,7 @@ def test_min_max_aliases():
     assert mygrad.max == amax
     assert mygrad.min == amin
 
+
 @fwdprop_test_factory(mygrad_func=sum, true_func=np.sum)
 def test_sum_fwd(): pass
 

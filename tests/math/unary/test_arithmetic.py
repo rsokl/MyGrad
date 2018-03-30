@@ -1,5 +1,5 @@
 from tests.wrappers.unary_func import fwdprop_test_factory, backprop_test_factory
-from mygrad import positive, negative
+from mygrad import positive, negative, reciprocal
 import numpy as np
 
 
@@ -17,3 +17,11 @@ def test_negative_fwd(): pass
 
 @backprop_test_factory(mygrad_func=negative)
 def test_negative_backward(): pass
+
+
+@fwdprop_test_factory(mygrad_func=reciprocal, true_func=np.reciprocal)
+def test_reciprocal_fwd(): pass
+
+
+@backprop_test_factory(mygrad_func=reciprocal, no_go=(0,))
+def test_reciprocal_backward(): pass

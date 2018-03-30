@@ -93,7 +93,7 @@ class Divide(BroadcastableOp):
 
 
 class Reciprocal(BroadcastableOp):
-    def __call__(self, a, b):
+    def __call__(self, a):
         """ f(a) -> 1 / a"""
         self.variables = (a, )
         return np.reciprocal(a.data)
