@@ -14,7 +14,8 @@ from functools import wraps
 
 class fwdprop_test_factory():
     def __init__(self, *, mygrad_func, true_func, xbnds=(-100, 100), x_no_go=(),
-                 max_dims=4, max_side=5, no_axis=False, no_keepdims=False):
+                 max_dims=4, max_side=5, no_axis=False, no_keepdims=False,
+                 unique=False):
 
         self.op = mygrad_func
         self.true_func = true_func
@@ -24,13 +25,14 @@ class fwdprop_test_factory():
         self.max_side = max_side
         self.no_keepdims = no_keepdims  # if True, don't pass `keepdims` arg argument
         self.no_axis = no_axis          # if True, don't pass `axis` arg
+        self.unique = unique
 
     def __call__(self, f):
         @given(x=hnp.arrays(shape=hnp.array_shapes(max_side=self.max_side,
                                                    max_dims=self.max_dims),
                             dtype=float,
                             elements=st.floats(*self.xbnds),
-                            unique=True),
+                            unique=self.unique),
                data=st.data())
         @wraps(f)
         def wrapper(x, data):
@@ -59,7 +61,9 @@ class fwdprop_test_factory():
 class backprop_test_factory():
     def __init__(self, *, mygrad_func, true_func, xbnds=(-1000, 1000),
                  x_no_go=(), h=1e-8, rtol=1e-05, atol=1e-08,
-                 max_dims=4, max_side=5, no_axis=False, no_keepdims=False):
+                 max_dims=4, max_side=5, no_axis=False, no_keepdims=False,
+                 unique=False, single_axis_only=False,
+                 draw_from_int=True):
 
         self.op = mygrad_func
         self.func = true_func
@@ -71,13 +75,16 @@ class backprop_test_factory():
         self.max_side = max_side
         self.no_keepdims = no_keepdims
         self.no_axis = no_axis
+        self.unique = unique
+        self.single_axis_only = single_axis_only
+        self.draw_from = st.integers if draw_from_int else st.floats
 
     def __call__(self, f):
         @given(x=hnp.arrays(shape=hnp.array_shapes(max_side=self.max_side,
                                                    max_dims=self.max_dims),
                             dtype=float,
-                            elements=st.integers(*self.xbnds),
-                            unique=True),
+                            elements=self.draw_from(*self.xbnds),
+                            unique=self.unique),
                data=st.data())
         @wraps(f)
         def wrapper(x, data):
@@ -88,7 +95,8 @@ class backprop_test_factory():
                 ------
                 AssertionError"""
 
-            axis = np.nan if self.no_axis else data.draw(valid_axes(x.ndim))
+            axis = np.nan if self.no_axis else data.draw(valid_axes(x.ndim,
+                                                                    single_axis_only=self.single_axis_only))
             keepdims = np.nan if self.no_keepdims else data.draw(st.booleans())
 
             for value in self.x_no_go:

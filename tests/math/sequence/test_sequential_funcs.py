@@ -9,7 +9,7 @@ import numpy as np
 def test_max_fwd(): pass
 
 
-@backprop_test_factory(mygrad_func=amax, true_func=np.amax)
+@backprop_test_factory(mygrad_func=amax, true_func=np.amax, unique=True)
 def test_max_bkwd(): pass
 
 
@@ -17,7 +17,7 @@ def test_max_bkwd(): pass
 def test_min_fwd(): pass
 
 
-@backprop_test_factory(mygrad_func=amin, true_func=np.amin)
+@backprop_test_factory(mygrad_func=amin, true_func=np.amin, unique=True)
 def test_min_bkwd(): pass
 
 
@@ -47,6 +47,14 @@ def test_cumprod_fwd(): pass
 
 
 @backprop_test_factory(mygrad_func=cumprod, true_func=np.cumprod,
-                       no_axis=True, no_keepdims=True,
-                       xbnds=(-10, 10))
+                       no_keepdims=True, single_axis_only=True,
+                       xbnds=(-2, 2), max_dims=4, max_side=5)
 def test_cumprod_bkwd(): pass
+
+
+
+@backprop_test_factory(mygrad_func=cumprod, true_func=np.cumprod,
+                       no_keepdims=True, single_axis_only=True,
+                       xbnds=(-.5, .5), max_dims=4, max_side=5, unique=True,
+                       draw_from_int=False)
+def test_cumprod_bkwd2(): pass

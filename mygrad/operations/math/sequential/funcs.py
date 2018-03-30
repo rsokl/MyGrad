@@ -115,5 +115,4 @@ min = amin
 max = amax
 
 
-def cumprod(a): return Tensor._op(CumProd, a)
-
+def cumprod(a, axis=None): return Tensor._op(CumProd, a, op_kwargs=dict(axis=axis))

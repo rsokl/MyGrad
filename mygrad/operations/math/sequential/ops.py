@@ -162,12 +162,40 @@ class Mean(Sum):
         super(Mean, self).backward_var(grad / self.n, index, **kwargs)
 
 
+from functools import reduce
+def add_to_seen(seen, inds):
+    if inds[1:] not in (i[1:] for i in seen):
+        seen.append(inds)
+    return seen
+
+
+def move(seq, origin, dest):
+    if origin == dest:
+        return seq
+    o = seq.pop(origin)
+    seq.insert(dest, o)
+    return seq
+
+
+def gen_first_indices(wer, axis):
+    if axis is None:
+        axis = 0
+    return (move(list(seq), origin=0, dest=axis) for seq in
+            reduce(add_to_seen, zip(*wer), []))
+
+
+def reverse_cumsum(x, axis=None):
+    """ (x0, x1, x2) -> (x0, x0 + x1, x0 + x1 + x2)"""
+    if axis is None:
+        axis = 0
+    return np.flip(np.cumsum(np.flip(x, axis=axis), axis=axis), axis=axis)
 
 
 class CumProd(Operation):
-    def __call__(self, a):
+    def __call__(self, a, axis=None):
         self.variables = (a,)
-        return np.cumprod(a.data)
+        self.axis = axis
+        return np.cumprod(a.data, axis)
 
     def backward_var(self, grad, index, **kwargs):
         def cumprod_lite(x, g):
@@ -177,6 +205,35 @@ class CumProd(Operation):
                 out.flat[l] = sum(g[jp] * np.prod([x[j] for j in range(jp + 1) if j != l])
                                   for jp in range(l, len(x)))
             return out
+
+        def cumprod(x, g, axis=None):
+            if axis is None:
+                orig_shape = x.shape
+                x = x.flat
+                g = g.flat
+            else:
+                orig_shape = None
+                if axis < 0:
+                    axis += x.ndim
+
+            g_cumprod = g * np.cumprod(x, axis=axis)
+
+            with np.errstate(divide='ignore', invalid='ignore'):
+                dldx = reverse_cumsum(g_cumprod, axis=axis) / x
+
+            if np.any(np.isnan(dldx)):
+                x = x.copy()
+                wer = np.where((np.moveaxis(x, axis, 0) if axis is not None else x) == 0)
+                locs = tuple(zip(*gen_first_indices(wer, axis=axis)))
+                x[locs] = 1
+                g_cumprod = g * np.cumprod(x, axis=axis)
+                with np.errstate(divide='ignore', invalid='ignore'):
+                    dldx[locs] = (reverse_cumsum(g_cumprod, axis=axis) / x)[locs]
+            if axis is None:
+                dldx.shape = orig_shape
+            return np.nan_to_num(dldx)
+
+
         a = self.variables[index]
         x = a.data
-        a.backward(cumprod_lite(x, grad))
+        a.backward(cumprod(x, grad, self.axis))
