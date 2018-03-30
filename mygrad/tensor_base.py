@@ -250,7 +250,7 @@ class Tensor:
         return self / other
 
     def __neg__(self):
-        return -1 * self
+        return self._op(Negative, self)
 
     def __repr__(self):
         if self.data.ndim == 0:

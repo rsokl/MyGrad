@@ -2,8 +2,6 @@ from .tensor_base import Tensor
 from .operations import *
 
 __all__ = ["abs",
-           "add",
-           "add_sequence",
            "arccos",
            "arccosh",
            "arccot",
@@ -22,24 +20,14 @@ __all__ = ["abs",
            "coth",
            "csc",
            "csch",
-           "divide",
-           "exp",
-           "log",
-           "log2",
-           "log10",
-           "logaddexp",
            "max",
            "mean"
-           "min"
-           "multiply",
-           "multiply_sequence",
-           "power",
+           "min",
            "sec",
            "sech",
            "sin",
            "sinh",
            "sqrt",
-           "subtract",
            "sum",
            "tan",
            "tanh"]
@@ -394,70 +382,8 @@ def csch(a):
     return Tensor._op(Csch, a)
 
 
-def exp(a):
-    """ f(a)-> exp(a)
-
-        Parameters
-        ----------
-        a : Union[tensor-like, Number]
-
-        Returns
-        -------
-        mygrad.Tensor"""
-    return Tensor._op(Exp, a)
 
 
-def log(a):
-    """ f(a)-> log(a)
-
-        Parameters
-        ----------
-        a : Union[tensor-like, Number]
-
-        Returns
-        -------
-        mygrad.Tensor"""
-    return Tensor._op(Log, a)
-
-
-def log2(a):
-    """ f(a)-> log2(a)
-
-        Parameters
-        ----------
-        a : Union[tensor-like, Number]
-
-        Returns
-        -------
-        mygrad.Tensor"""
-    return Tensor._op(Log2, a)
-
-
-def log10(a):
-    """ f(a)-> log10(a)
-
-        Parameters
-        ----------
-        a : Union[tensor-like, Number]
-
-        Returns
-        -------
-        mygrad.Tensor"""
-    return Tensor._op(Log10, a)
-
-
-def logaddexp(a, b):
-    """ f(a, b)-> log(exp(a) + exp(b))
-
-        Parameters
-        ----------
-        a : Union[tensor-like, Number]
-        b : Union[tensor-like, Number]
-
-        Returns
-        -------
-        mygrad.Tensor"""
-    return Tensor._op(Logaddexp, a, b)
 
 def sec(a):
     """ f(a)-> sec(a)

@@ -6,7 +6,7 @@ __all__ = ["Add",
            "Subtract",
            "Multiply",
            "Divide",
-           "Reciprocal"
+           "Reciprocal",
            "Power",
            "Positive",
            "Negative",
@@ -131,7 +131,7 @@ class Positive(Operation):
     def __call__(self, a, where=True):
         """ Parameters
             ----------
-            mygrad.Tensor
+            a: mygrad.Tensor
 
             where : array_like, optional
                 Values of True indicate to calculate the ufunc at that position,
@@ -141,7 +141,7 @@ class Positive(Operation):
         return np.positive(a.data, where=where)
 
     def backward_var(self, grad, index, **kwargs):
-        self.variables[index].backward(grad, **self.conf, **kwargs)
+        self.variables[index].backward(np.positive(grad, **self.conf), **kwargs)
 
 
 class Negative(Operation):
@@ -149,7 +149,7 @@ class Negative(Operation):
     def __call__(self, a, where=True):
         """ Parameters
             ----------
-            mygrad.Tensor
+            a : mygrad.Tensor
 
             where : array_like, optional
                 Values of True indicate to calculate the ufunc at that position,
@@ -159,7 +159,7 @@ class Negative(Operation):
         return np.negative(a.data, where=where)
 
     def backward_var(self, grad, index, **kwargs):
-        self.variables[index].backward(np.negative(grad), **self.conf, **kwargs)
+        self.variables[index].backward(np.negative(grad, **self.conf), **kwargs)
 
 
 class AddSequence(BroadcastableOp):
