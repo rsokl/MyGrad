@@ -3,6 +3,8 @@ from mygrad.tensor_base import Tensor
 
 __all__ = ["sum",
            "mean",
+           "amax",
+           "amin",
            "max",
            "min"]
 
@@ -66,8 +68,8 @@ def mean(x, axis=None, keepdims=False):
     return Tensor._op(Mean, x, op_args=(axis, keepdims))
 
 
-def max(x, axis=None, keepdims=False):
-    """ Return the maximum of a tensor, or along its axes.
+def amax(x, axis=None, keepdims=False):
+    """ Return the maximum of a tensor or maximum along its axes.
 
         Parameters
         ----------
@@ -88,8 +90,8 @@ def max(x, axis=None, keepdims=False):
     return Tensor._op(MaxMin, x, op_kwargs=dict(axis=axis, keepdims=keepdims, maxmin='max'))
 
 
-def min(x, axis=None, keepdims=False):
-    """ Return the minimum of a tensor, or along its axes.
+def amin(x, axis=None, keepdims=False):
+    """ Return the minimum of a tensor or minimum along its axes.
 
         Parameters
         ----------
@@ -106,3 +108,7 @@ def min(x, axis=None, keepdims=False):
         min : Tensor
             Minimum of `a`. If `axis` is None, the result is a 0-D tensor."""
     return Tensor._op(MaxMin, x, op_kwargs=dict(axis=axis, keepdims=keepdims, maxmin='min'))
+
+# aliases
+min = amin
+max = amax
