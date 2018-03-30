@@ -168,7 +168,8 @@ def numerical_gradient(f, *args, back_grad, vary_ind=None, h=1e-8):
     return grads
 
 
-def numerical_gradient_sequence(f, *, x, back_grad,  axis=None, keepdims=False, h=1e-8):
+def numerical_gradient_sequence(f, *, x, back_grad,  axis=None, keepdims=False, h=1e-8,
+                                no_axis=False, no_keepdims=False):
     """ Computes numerical partial derivatives of f({x}), where f is a numpy-style
         sequential function (e.g. numpy.sum, numpy.mean, ...). The partial derivative
         is computed for each member of {x}
@@ -204,14 +205,20 @@ def numerical_gradient_sequence(f, *, x, back_grad,  axis=None, keepdims=False, 
     x = to_decimal_array(x)
     h = Decimal(h)
 
+    kwargs = dict()
+    if not no_axis:
+        kwargs["axis"] = axis
+    if not no_keepdims:
+        kwargs["keepdims"] = keepdims
+
     for ind, val in np.ndenumerate(x):
         x_fwd = np.copy(x)
         x_fwd[ind] += h
-        f_fwd = f(x_fwd, axis=axis, keepdims=keepdims)
+        f_fwd = f(x_fwd, **kwargs)
 
         x_bkwd = x_fwd
         x_bkwd[ind] -= Decimal(2) * h
-        f_bkwd = f(x_bkwd, axis=axis, keepdims=keepdims)
+        f_bkwd = f(x_bkwd, **kwargs)
 
         dxi = to_decimal_array((f_fwd - f_bkwd) / (Decimal(2) * h))
         grad[ind] = (dxi.astype('float') * back_grad).sum()

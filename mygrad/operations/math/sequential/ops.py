@@ -1,7 +1,7 @@
 from mygrad.operations.multivar_operations import Operation
 import numpy as np
 
-__all__ = ["MaxMin", "Sum", "Mean"]
+__all__ = ["MaxMin", "Sum", "Mean", "CumProd"]
 
 
 class MaxMin(Operation):
@@ -160,3 +160,23 @@ class Mean(Sum):
 
     def backward_var(self, grad, index, **kwargs):
         super(Mean, self).backward_var(grad / self.n, index, **kwargs)
+
+
+
+
+class CumProd(Operation):
+    def __call__(self, a):
+        self.variables = (a,)
+        return np.cumprod(a.data)
+
+    def backward_var(self, grad, index, **kwargs):
+        def cumprod_lite(x, g):
+            out = np.zeros_like(x).astype(float)
+            x = x.flat
+            for l in range(len(x)):
+                out.flat[l] = sum(g[jp] * np.prod([x[j] for j in range(jp + 1) if j != l])
+                                  for jp in range(l, len(x)))
+            return out
+        a = self.variables[index]
+        x = a.data
+        a.backward(cumprod_lite(x, grad))
