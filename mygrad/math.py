@@ -159,31 +159,7 @@ def abs(a):
     return Tensor._op(Abs, a)
 
 
-def add(a, b):
-    """ f(a, b) -> a + b
 
-        Parameters
-        ----------
-        a : Union[tensor-like, Number]
-        b : Union[tensor-like, Number]
-
-        Returns
-        -------
-        mygrad.Tensor"""
-    return Tensor._op(Add, a, b)
-
-
-def add_sequence(*variables):
-    """ f(a, b, ...) -> a + b + ...
-
-        Parameters
-        ----------
-        variables : Sequence[Union[tensor-like, Number]]
-
-        Returns
-        -------
-        mygrad.Tensor"""
-    return Tensor._op(AddSequence, *variables)
 
 
 def arccos(a):
@@ -418,20 +394,6 @@ def csch(a):
     return Tensor._op(Csch, a)
 
 
-def divide(a, b):
-    """ f(a, b) -> a / b
-
-        Parameters
-        ----------
-        a : Union[tensor-like, Number]
-        b : Union[tensor-like, Number]
-
-        Returns
-        -------
-        mygrad.Tensor"""
-    return Tensor._op(Divide, a, b)
-
-
 def exp(a):
     """ f(a)-> exp(a)
 
@@ -496,48 +458,6 @@ def logaddexp(a, b):
         -------
         mygrad.Tensor"""
     return Tensor._op(Logaddexp, a, b)
-
-
-def multiply(a, b):
-    """ f(a, b) -> a * b
-
-        Parameters
-        ----------
-        a : Union[tensor-like, Number]
-        b : Union[tensor-like, Number]
-
-        Returns
-        -------
-        mygrad.Tensor"""
-    return Tensor._op(Multiply, a, b)
-
-
-def multiply_sequence(*variables):
-    """ f(a, b, ...) -> a * b * ...
-
-        Parameters
-        ----------
-        variables : Sequence[Union[tensor-like, Number]]
-
-        Returns
-        -------
-        mygrad.Tensor"""
-    return Tensor._op(MultiplySequence, *variables)
-
-
-def power(a, b):
-    """ f(a, b) -> a ** b
-
-        Parameters
-        ----------
-        a : Union[tensor-like, Number]
-        b : Union[tensor-like, Number]
-
-        Returns
-        -------
-        mygrad.Tensor"""
-    return Tensor._op(Power, a, b)
-
 
 def sec(a):
     """ f(a)-> sec(a)

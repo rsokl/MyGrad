@@ -1,7 +1,7 @@
 """ Test all binary arithmetic operations, checks for appropriate broadcast behavior"""
 from ...wrappers.binary_func import fwdprop_test_factory, backprop_test_factory
 
-from mygrad.math import add, subtract, multiply, divide, power, logaddexp
+from mygrad import add, subtract, multiply, divide, power, logaddexp
 
 import numpy as np
 from numpy.testing import assert_allclose
