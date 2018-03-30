@@ -1,5 +1,5 @@
 from tests.wrappers.unary_func import fwdprop_test_factory, backprop_test_factory
-from mygrad import sin, cos, tan, csc, sec, cot
+from mygrad import sin, cos, tan, csc, sec, cot, sinc
 
 import numpy as np
 
@@ -10,6 +10,14 @@ def test_sin_fwd(): pass
 
 @backprop_test_factory(mygrad_func=sin)
 def test_sin_backward(): pass
+
+
+@fwdprop_test_factory(mygrad_func=sinc, true_func=np.sinc)
+def test_sinc_fwd(): pass
+
+
+@backprop_test_factory(mygrad_func=sinc)
+def test_sinc_backward(): pass
 
 
 @fwdprop_test_factory(mygrad_func=cos, true_func=np.cos)

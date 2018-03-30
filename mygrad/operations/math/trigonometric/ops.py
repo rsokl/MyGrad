@@ -2,6 +2,7 @@ from mygrad.operations.multivar_operations import Operation
 import numpy as np
 
 __all__ = ["Sin",
+           "Sinc",
            "Cos",
            "Tan",
            "Csc",
@@ -24,6 +25,23 @@ class Sin(Operation):
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
         a.backward(grad * np.cos(a.data), **kwargs)
+
+
+def _dsinc(x):
+    x = x * np.pi
+    return (x * np.cos(x) - np.sin(x)) / x ** 2
+
+
+class Sinc(Operation):
+    """ f(a) -> sin(pi*a)/(pi*a)"""
+    def __call__(self, a):
+        self.variables = (a,)
+        return np.sinc(a.data)
+
+    def backward_var(self, grad, index, **kwargs):
+        a = self.variables[index]
+        x = a.data
+        a.backward(np.pi * grad * np.piecewise(x, [x == 0, x != 0], [np.zeros_like, _dsinc]), **kwargs)
 
 
 class Cos(Operation):

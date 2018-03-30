@@ -2,6 +2,7 @@ from .ops import *
 from mygrad.tensor_base import Tensor
 
 __all__ = ["sin",
+           "sinc",
            "cos",
            "tan",
            "cot",
@@ -18,6 +19,9 @@ __all__ = ["sin",
 def sin(a):
     return Tensor._op(Sin, a)
 
+
+def sinc(a):
+    return Tensor._op(Sinc, a)
 
 def cos(a):
     return Tensor._op(Cos, a)

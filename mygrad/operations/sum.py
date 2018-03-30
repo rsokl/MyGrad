@@ -21,7 +21,7 @@ class Sum(Operation):
         out = a.data.sum(axis=axis, keepdims=keepdims)
         self.outshape = out.shape if isinstance(out, np.ndarray) else None
         return out
-    
+
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
         if self.outshape is None:
