@@ -43,7 +43,7 @@ def test_tan_backward(): pass
 def test_csc_fwd(): pass
 
 
-@backprop_test_factory(mygrad_func=csc, xbnds=(0, np.pi), no_go=(0, np.pi))
+@backprop_test_factory(mygrad_func=csc, xbnds=(0.01, np.pi-.01), no_go=(0, np.pi), atol=1e-4, rtol=1e-4)
 def test_csc_backward(): pass
 
 
@@ -63,5 +63,5 @@ def test_sec_backward(): pass
 def test_cot_fwd(): pass
 
 
-@backprop_test_factory(mygrad_func=cot, xbnds=(0, np.pi), no_go=(0, np.pi))
+@backprop_test_factory(mygrad_func=cot, xbnds=(0, np.pi), no_go=(0, np.pi), atol=1e-4, rtol=1e-4)
 def test_cot_backward(): pass
