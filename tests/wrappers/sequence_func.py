@@ -13,9 +13,11 @@ from functools import wraps
 
 
 class fwdprop_test_factory():
-    def __init__(self, *, mygrad_func, true_func, xbnds=(-100, 100), x_no_go=(),
+    def __init__(self, *, mygrad_func, true_func, xbnds=(-100, 100),
+                 x_no_go=(),
                  max_dims=4, max_side=5, no_axis=False, no_keepdims=False,
-                 unique=False):
+                 unique=False, single_axis_only=False,
+                 draw_from_int=True):
 
         self.op = mygrad_func
         self.true_func = true_func
@@ -23,9 +25,11 @@ class fwdprop_test_factory():
         self.x_no_go = x_no_go
         self.max_dims = max_dims
         self.max_side = max_side
-        self.no_keepdims = no_keepdims  # if True, don't pass `keepdims` arg argument
-        self.no_axis = no_axis          # if True, don't pass `axis` arg
+        self.no_keepdims = no_keepdims
+        self.no_axis = no_axis
         self.unique = unique
+        self.single_axis_only = single_axis_only
+        self.draw_from = st.integers if draw_from_int else st.floats
 
     def __call__(self, f):
         @given(x=hnp.arrays(shape=hnp.array_shapes(max_side=self.max_side,
@@ -36,7 +40,8 @@ class fwdprop_test_factory():
                data=st.data())
         @wraps(f)
         def wrapper(x, data):
-            axis = np.nan if self.no_axis else data.draw(valid_axes(x.ndim))
+            axis = np.nan if self.no_axis else data.draw(valid_axes(x.ndim,
+                                                                    single_axis_only=self.single_axis_only))
             keepdims = np.nan if self.no_keepdims else data.draw(st.booleans())
 
             for value in self.x_no_go:

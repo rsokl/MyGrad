@@ -7,7 +7,8 @@ __all__ = ["sum",
            "amin",
            "max",
            "min",
-           "cumprod"]
+           "cumprod",
+           "cumsum"]
 
 
 def sum(x, axis=None, keepdims=False):
@@ -114,8 +115,6 @@ def amin(x, axis=None, keepdims=False):
 min = amin
 max = amax
 
-from typing import Optional
-
 
 def cumprod(a, axis=None):
     """
@@ -143,8 +142,8 @@ def cumprod(a, axis=None):
 
     Examples
     --------
-    >>> from mygrad import cumprod
-    >>> a = np.array([1,2,3])
+    >>> from mygrad import cumprod, Tensor
+    >>> a = Tensor([1, 2, 3])
     >>> cumprod(a) # intermediate results 1, 1*2
     ...               # total product 1*2*3 = 6
     Tensor([1, 2, 6])
@@ -162,3 +161,44 @@ def cumprod(a, axis=None):
            [  4,  20, 120]])"""
 
     return Tensor._op(CumProd, a, op_kwargs=dict(axis=axis))
+
+
+def cumsum(a, axis=None):
+    """
+    Return the cumulative sum of the elements along a given axis.
+
+    This docstring was adapted from the official numpy documentation
+
+    Parameters
+    ----------
+    a : array_like
+        Input array.
+
+    axis : int, optional
+        Axis along which the cumulative sum is computed. The default
+        (None) is to compute the cumsum over the flattened array.
+
+    Returns
+    -------
+    mygrad.Tensor
+
+
+    Examples
+    --------
+    >>> from mygrad import cumsum, Tensor
+    >>> a = Tensor([[1,2,3], [4,5,6]])
+    >>> a
+    Tensor([[1, 2, 3],
+            [4, 5, 6]])
+    >>> cumsum(a)
+    Tensor([ 1,  3,  6, 10, 15, 21])
+
+    >>> cumsum(a,axis=0)      # sum over rows for each of the 3 columns
+    Tensor([[1, 2, 3],
+            [5, 7, 9]])
+    >>> cumsum(a,axis=1)      # sum over columns for each of the 2 rows
+    Tensor([[ 1,  3,  6],
+            [ 4,  9, 15]])
+    """
+
+    return Tensor._op(CumSum, a, op_kwargs=dict(axis=axis))

@@ -2,7 +2,7 @@ from mygrad.operations.operation_base import Operation
 import numpy as np
 from functools import reduce
 
-__all__ = ["MaxMin", "Sum", "Mean", "CumProd"]
+__all__ = ["MaxMin", "Sum", "Mean", "CumProd", "CumSum"]
 
 
 class MaxMin(Operation):
@@ -287,3 +287,17 @@ class CumProd(Operation):
             dldx.shape = orig_shape
 
         self.variables[index].backward(dldx)
+
+
+class CumSum(Operation):
+    def __call__(self, a, axis=None):
+        self.variables = (a,)
+        self.axis = axis
+        return np.cumsum(a.data, axis)
+
+    def backward_var(self, grad, index, **kwargs):
+        a = self.variables[index]
+        g = _reverse_cumsum(grad, self.axis)
+        if self.axis is None:
+            g.shape = a.shape
+        a.backward(g)

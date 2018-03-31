@@ -2,7 +2,7 @@ from ...wrappers.sequence_func import fwdprop_test_factory, backprop_test_factor
 
 from pytest import raises
 
-from mygrad import amax, amin, sum, mean, cumprod
+from mygrad import amax, amin, sum, mean, cumprod, cumsum
 import mygrad
 
 import numpy as np
@@ -59,7 +59,7 @@ def test_int_axis_cumprod():
         cumprod(x, axis=(0, 1))
 
 
-@fwdprop_test_factory(mygrad_func=cumprod, true_func=np.cumprod, no_axis=True, no_keepdims=True)
+@fwdprop_test_factory(mygrad_func=cumprod, true_func=np.cumprod, single_axis_only=True, no_keepdims=True)
 def test_cumprod_fwd(): pass
 
 
@@ -69,9 +69,32 @@ def test_cumprod_fwd(): pass
 def test_cumprod_bkwd(): pass
 
 
-
 @backprop_test_factory(mygrad_func=cumprod, true_func=np.cumprod,
                        no_keepdims=True, single_axis_only=True,
                        xbnds=(-.5, .5), max_dims=4, max_side=5, unique=True,
                        draw_from_int=False)
 def test_cumprod_bkwd2(): pass
+
+
+def test_int_axis_cumsum():
+    """check if numpy cumsum begins to support tuples for the axis argument"""
+
+    x = np.array([[1, 1, 0],
+                  [1, 1, 0],
+                  [1, 1, 0]])
+    with raises(TypeError):
+        np.cumsum(x, axis=(0, 1))
+
+    with raises(TypeError):
+        cumsum(x, axis=(0, 1))
+
+
+@fwdprop_test_factory(mygrad_func=cumsum, true_func=np.cumsum, single_axis_only=True, no_keepdims=True)
+def test_cumsum_fwd(): pass
+
+
+@backprop_test_factory(mygrad_func=cumsum, true_func=np.cumsum,
+                       no_keepdims=True, single_axis_only=True,
+                       xbnds=(-2, 2), max_dims=4, max_side=5)
+def test_cumsum_bkwd(): pass
+
