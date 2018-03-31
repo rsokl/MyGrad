@@ -1,4 +1,4 @@
-from mygrad.operations.multivar_operations import BroadcastableOp
+from mygrad.operations.operation_base import BroadcastableOp
 from mygrad import Tensor
 from mygrad._utils import reduce_broadcast
 import numpy as np

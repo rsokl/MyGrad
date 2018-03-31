@@ -17,7 +17,7 @@
 #         self.a.backward(out)
 
 
-from mygrad.operations.multivar_operations import Operation
+from mygrad.operations.operation_base import Operation
 import numpy as np
 
 

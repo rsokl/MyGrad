@@ -1,4 +1,4 @@
-from mygrad.operations.multivar_operations import Operation, BroadcastableOp
+from mygrad.operations.operation_base import Operation, BroadcastableOp
 import numpy as np
 
 __all__ = ["Exp", "Expm1",

@@ -1,4 +1,4 @@
-from mygrad.operations.multivar_operations import BroadcastableOp
+from mygrad.operations.operation_base import BroadcastableOp
 import numpy as np
 
 

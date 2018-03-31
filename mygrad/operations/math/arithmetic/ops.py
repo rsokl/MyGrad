@@ -1,6 +1,6 @@
 from functools import reduce
 import numpy as np
-from mygrad.operations.multivar_operations import BroadcastableOp, Operation
+from mygrad.operations.operation_base import BroadcastableOp, Operation
 
 __all__ = ["Add",
            "Subtract",

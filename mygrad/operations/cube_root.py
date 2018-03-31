@@ -1,4 +1,4 @@
-from .multivar_operations import Operation
+from .operation_base import Operation
 import numpy as np
 
 

@@ -1,7 +1,7 @@
 from mygrad.operations.math.arithmetic.ops import *
 from mygrad.operations.math.sequential.ops import *
 from .operations import *
-from mygrad.operations.multivar_operations import Operation, BroadcastableOp
+from mygrad.operations.operation_base import Operation, BroadcastableOp
 import numpy as np
 from mygrad._utils import reduce_broadcast
 

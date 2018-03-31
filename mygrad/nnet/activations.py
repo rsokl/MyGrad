@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.misc import logsumexp
 
-from mygrad.operations.multivar_operations import Operation
+from mygrad.operations.operation_base import Operation
 from mygrad.tensor_base import Tensor
 from mygrad import tanh
 

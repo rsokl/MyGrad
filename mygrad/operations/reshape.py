@@ -1,4 +1,4 @@
-from mygrad.operations.multivar_operations import Operation
+from mygrad.operations.operation_base import Operation
 
 
 class Reshape(Operation):
