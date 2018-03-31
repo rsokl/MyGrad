@@ -255,17 +255,19 @@ class CumProd(Operation):
         g_cumprod = g * np.cumprod(x, axis=axis)
 
         # This is a valid method for taking the derivative
-        # only if there are no zeros in `x`. If there are
-        # zeros we need to patch some of the nans that we
-        # just created, with the correct derivative
+        # of cumprod(x) only if there are no zeros in `x`.
+        # If there are zeros we need to patch some of the nans
+        # that we just created, with the correct derivative.
         with np.errstate(divide='ignore', invalid='ignore'):
             dldx = _reverse_cumsum(g_cumprod, axis=axis) / x
 
-        # Only the first occurrence of a 0 along the specified
-        # axis need have its correct derivative computed. All
-        # other nans in `dldx` can be safely set to zero since
-        # they fall "downstream" from a 0 in the cumulative-product
-        # and the derivatives of all such an elements is 0.
+        # Only the first occurrences of 0 along the specified
+        # axis in x need have its correct derivative computed
+        # instead of being nan. All other nans in `dldx` can be
+        # safely set to zero since they fall "downstream" from
+        # a 0 in the cumulative-product and the derivatives of
+        # all such an elements is 0.
+        # See `_find_first_zeros_along_axis` for more details
         if np.any(np.isnan(dldx)):
             x = x.copy()
             locs = _find_first_zeros_along_axis(x, axis=axis)
