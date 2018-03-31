@@ -174,7 +174,7 @@ def test_conv2d_fwd():
 
         out = np.array([[[[-44.,  -64.],
                           [-84., -104.]]]])
-        assert isinstance(o, Tensor) and not o.constant and not o.scalar_only and np.all(o.data == out)
+        assert isinstance(o, Tensor) and not o.constant and o.scalar_only and np.all(o.data == out)
 
 
 def test_convnd_fwd():
@@ -198,7 +198,7 @@ def test_convnd_fwd():
 
     out = np.array([[[[-44.,  -64.],
                       [-84., -104.]]]])
-    assert isinstance(o, Tensor) and not o.constant and not o.scalar_only and np.all(o.data == out)
+    assert isinstance(o, Tensor) and not o.constant and o.scalar_only and np.all(o.data == out)
 
 
 @given(st.data())
@@ -271,8 +271,8 @@ def test_convnd(data):
 
     f.backward(dout)
     dx, dw, db = conv_backward_naive(dout, _)
-    assert_allclose(x.grad, dx)
-    assert_allclose(w.grad, dw)
+    assert_allclose(x.grad, dx, atol=1e-5, rtol=1e-5)
+    assert_allclose(w.grad, dw, atol=1e-5, rtol=1e-5)
 
 
 def test_bad_conv_shapes():

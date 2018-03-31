@@ -6,6 +6,7 @@ from mygrad.nnet.layers.utils import sliding_window_view
 
 
 class Conv2D(Operation):
+    scalar_only = True
     def __call__(self, x, w, stride, padding=(0, 0)):
         self.variables = (x, w)
         # x ... data:    (N, C, H, W)
@@ -154,6 +155,7 @@ def conv2d(x, filter_bank, stride, padding=(0, 0)):
 
 
 class ConvND(Operation):
+    scalar_only = True
     def __call__(self, x, w, stride, padding=0):
         self.variables = (x, w)
         # x ... data:    (N, C, X0, X1, ...)
@@ -220,6 +222,7 @@ class ConvND(Operation):
             ----------
             grad : numpy.ndarray, shape=(N, F, G0, ...)"""
         x, w = (i.data for i in self.variables)
+        num_conv_channels = grad.ndim - 2
 
         if index == 0:  # backprop through x
             x_shape = x.shape[:-2] + tuple(i+2*p for i, p in zip(x.shape[-2:], self.padding))
@@ -229,8 +232,8 @@ class ConvND(Operation):
             # element against the conv filter.
             # (N, F, G0, ...) -tdot- (F, C, W0, ...) --> (N, G0, ..., C, W0, ...)
             gp = np.tensordot(grad, w, axes=[[1], [0]])
-            for ind in np.ndindex(grad.shape[-len(self.stride):]):
-                # ind: (h', w') - grid-position of filter placement
+            for ind in np.ndindex(grad.shape[-num_conv_channels:]):
+                # ind: (g0, ...) - grid-position of filter placement
                 slices = tuple(slice(i * s, i * s + w * d, d) for i, w, s, d in zip(ind, w.shape[2:],
                                                                                     self.stride, self.dilation))
                 # Add (grad-element * filter) to each appropriate window position in `dx`
@@ -257,7 +260,6 @@ class ConvND(Operation):
                                                 dilation=self.dilation)
 
             # (N, F, G0, ...) -tdot- (G0, ..., N, C, W0, ...) --> (F, C, W0, ...)
-            num_conv_channels = grad.ndim - 2
             grad_axes = list(range(2, num_conv_channels + 2)) + [0]  # (G0, ..., N)
             window_axes = list(range(num_conv_channels + 1))         # (G0, ..., N)
             df = np.tensordot(grad, windowed_data, axes=[grad_axes, window_axes])
@@ -268,6 +270,8 @@ def conv_nd(x, filter_bank, stride, padding=0):
     """ Use `filter_bank` to perform strided N-dimensional neural network-style
         convolutions (see Notes) over `x`.
                            f(x, w) -> x ⋆ w
+
+                shapes:
                 (N, C, X0, ...) ⋆ (F, C, W0, ...) -> (N, F, G0, ...)
 
         `x` represents a batch of data over which the filters
