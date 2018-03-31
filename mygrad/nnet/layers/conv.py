@@ -283,7 +283,7 @@ def conv_nd(x, filter_bank, stride, padding=0):
 
         Thus convolving F filters, each with a shape (C, W0, ...),
         over the data batch will produce a tensor of shape
-        (N, F, G0, ...), where (G0, ...) is the shape over the grid
+        (N, F, G0, ...), where (G0, ...) is the shape of the grid
         commensurate with the filter placements
 
         Parameters
