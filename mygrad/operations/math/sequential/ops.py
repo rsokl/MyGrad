@@ -33,7 +33,7 @@ class MaxMin(Operation):
         op = np.argmax if maxmin == "max" else np.argmin
 
         # let numpy handle error checking
-        np.amax(np.empty([1 for i in range(a.ndim)]), axis=axis, keepdims=keepdims)
+        np.amax(np.empty([1]*a.ndim), axis=axis, keepdims=keepdims)
 
         if a.ndim == 0:
             return a.data
@@ -260,10 +260,11 @@ class CumProd(Operation):
         # that we just created, with the correct derivative.
         with np.errstate(divide='ignore', invalid='ignore'):
             # assuming x0, ..., xn are all non-zero
-            # [g0 + g1*x1 + g2*x1*x2 + ...,
-            #       g1*x0 + g2*x0*x2 + ...,
-            #               g2*x0*x1 + ...,
-            #  ...]
+            #
+            # dldx = [g0 + g1*x1 + g2*x1*x2 + ...,
+            #              g1*x0 + g2*x0*x2 + ...,
+            #                      g2*x0*x1 + ...,
+            #                               + ...]
             dldx = _reverse_cumsum(g_cumprod, axis=axis) / x
 
         # Only the first occurrences of 0 along the specified
