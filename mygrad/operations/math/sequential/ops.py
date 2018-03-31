@@ -1,5 +1,6 @@
 from mygrad.operations.multivar_operations import Operation
 import numpy as np
+from functools import reduce
 
 __all__ = ["MaxMin", "Sum", "Mean", "CumProd"]
 
@@ -162,33 +163,73 @@ class Mean(Sum):
         super(Mean, self).backward_var(grad / self.n, index, **kwargs)
 
 
-from functools import reduce
-def add_to_seen(seen, inds):
-    if inds[1:] not in (i[1:] for i in seen):
-        seen.append(inds)
-    return seen
-
-
-def move(seq, origin, dest):
-    if origin == dest:
-        return seq
-    o = seq.pop(origin)
-    seq.insert(dest, o)
-    return seq
-
-
-def gen_first_indices(wer, axis):
-    if axis is None:
-        axis = 0
-    return (move(list(seq), origin=0, dest=axis) for seq in
-            reduce(add_to_seen, zip(*wer), []))
-
-
-def reverse_cumsum(x, axis=None):
+def _reverse_cumsum(x, axis=None):
     """ (x0, x1, x2) -> (x0, x0 + x1, x0 + x1 + x2)"""
     if axis is None:
         axis = 0
     return np.flip(np.cumsum(np.flip(x, axis=axis), axis=axis), axis=axis)
+
+
+def _find_first_zeros_along_axis(x, axis):
+    """ Return the indices at which 0 first occurs in `x` as viewed
+        along the specified axis
+
+        Parameters
+        ----------
+        x : numpy.ndarray
+        axis : Union[None, int]
+            The axis along which zeros are looked for. If
+            `None`, then `x` must be a flat-array
+
+        Returns
+        -------
+        Tuple[Tuple[int, ...], ...]
+            x.ndim tuple-entries, specifying the corresponding
+            positions where the first 0 is encountered along the
+            given axis.
+
+        Examples
+        --------
+        >>> import numpy as np
+        >>> x = np.array([[1, 1, 0],
+                          [1, 1, 0],
+                          [1, 1, 0]])
+
+        All of the zeros fall along a single column, thus
+        only one is "encountered" when looking across rows
+        within each column for a single zero. It is located
+        at: row-0, col-2
+
+        >>> _find_first_zeros_along_axis(x, axis=0)
+        ((0,), (2,))
+
+        Looking along the columns within each row,
+        each of the three zeros are "found", they are
+        located at: row-0, col=2
+                    row-1, col=2
+                    row-2, col=2
+
+        >>> _find_first_zeros_along_axis(x, axis=1)
+        ((0, 1, 2), (2, 2, 2))"""
+    def add_to_seen(seen, inds):
+        if inds[1:] not in (i[1:] for i in seen):
+            seen.append(inds)
+        return seen
+
+    def move(seq, origin, dest):
+        if origin == dest:
+            return seq
+        o = seq.pop(origin)
+        seq.insert(dest, o)
+        return seq
+
+    wer = np.where((np.moveaxis(x, axis, 0) if axis is not None else x) == 0)
+
+    if axis is None:
+        axis = 0
+
+    gen_inds = (move(list(seq), origin=0, dest=axis) for seq in reduce(add_to_seen, zip(*wer), []))
+    return tuple(zip(*gen_inds))
 
 
 class CumProd(Operation):
@@ -198,42 +239,46 @@ class CumProd(Operation):
         return np.cumprod(a.data, axis)
 
     def backward_var(self, grad, index, **kwargs):
-        def cumprod_lite(x, g):
-            out = np.zeros_like(x).astype(float)
+        x = self.variables[index].data
+        axis = self.axis
+        g = grad
+
+        if axis is None:
+            orig_shape = x.shape
             x = x.flat
-            for l in range(len(x)):
-                out.flat[l] = sum(g[jp] * np.prod([x[j] for j in range(jp + 1) if j != l])
-                                  for jp in range(l, len(x)))
-            return out
+            g = g.flat
+        else:
+            orig_shape = None
+            if axis < 0:
+                axis += x.ndim
 
-        def cumprod(x, g, axis=None):
-            if axis is None:
-                orig_shape = x.shape
-                x = x.flat
-                g = g.flat
-            else:
-                orig_shape = None
-                if axis < 0:
-                    axis += x.ndim
+        g_cumprod = g * np.cumprod(x, axis=axis)
 
+        # This is a valid method for taking the derivative
+        # only if there are no zeros in `x`. If there are
+        # zeros we need to patch some of the nans that we
+        # just created, with the correct derivative
+        with np.errstate(divide='ignore', invalid='ignore'):
+            dldx = _reverse_cumsum(g_cumprod, axis=axis) / x
+
+        # Only the first occurrence of a 0 along the specified
+        # axis need have its correct derivative computed. All
+        # other nans in `dldx` can be safely set to zero since
+        # they fall "downstream" from a 0 in the cumulative-product
+        # and the derivatives of all such an elements is 0.
+        if np.any(np.isnan(dldx)):
+            x = x.copy()
+            locs = _find_first_zeros_along_axis(x, axis=axis)
+            x[locs] = 1
+
+            # compute valid derivatives where x is zero, setting
+            # all downstream nans to zero
             g_cumprod = g * np.cumprod(x, axis=axis)
-
             with np.errstate(divide='ignore', invalid='ignore'):
-                dldx = reverse_cumsum(g_cumprod, axis=axis) / x
+                dldx[locs] = (_reverse_cumsum(g_cumprod, axis=axis) / x)[locs]
+            dldx = np.nan_to_num(dldx)
 
-            if np.any(np.isnan(dldx)):
-                x = x.copy()
-                wer = np.where((np.moveaxis(x, axis, 0) if axis is not None else x) == 0)
-                locs = tuple(zip(*gen_first_indices(wer, axis=axis)))
-                x[locs] = 1
-                g_cumprod = g * np.cumprod(x, axis=axis)
-                with np.errstate(divide='ignore', invalid='ignore'):
-                    dldx[locs] = (reverse_cumsum(g_cumprod, axis=axis) / x)[locs]
-            if axis is None:
-                dldx.shape = orig_shape
-            return np.nan_to_num(dldx)
+        if axis is None:
+            dldx.shape = orig_shape
 
-
-        a = self.variables[index]
-        x = a.data
-        a.backward(cumprod(x, grad, self.axis))
+        self.variables[index].backward(dldx)
