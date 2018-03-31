@@ -94,7 +94,9 @@ class EinSum(BroadcastableOp):
 
         if repeat_lbls:
             # example fwd-prop: einsum("iji -> ij", x)
-            # "iji" becomes "ji"
+            # "iji" becomes "ji", later we will write along
+            # the diagonal of an array to reinstate this axis that
+            # we just removed
             mapping_gen = ({k: v for k, v in zip(lbl, arr.shape)}
                             for lbl, arr in zip(self.in_lbls.split(','), numpy_arrays))
             lbl_to_size = _merge_max_mappings(*mapping_gen)
@@ -142,10 +144,18 @@ class EinSum(BroadcastableOp):
             self.variables[index].backward(dfdx, _broadcastable=False)
             return None
 
-        # accommodate trace by writing to strided view on array of zeros
-        # example
+        # Accommodate trace by writing to strided view on array of zeros
+        # For example:
+        #
         # fwd:  einsum('ijkji, k -> jk', x, y)
+        # dfdx: einsum('jk, k -> kji', grad, y, out=view_of_x)
+        #
+        # writing to `view_of_x`, which is a view along the appropriate
+        # diagonals of x, is equivalent to:
+        #
         # dfdx: einsum('jk, k -> ijkji', grad, y)
+        #
+        # which is formally correct but not supported by einsum.
         dfdx = np.zeros(tuple(lbl_to_size[i] for i in original_var_lbl))
         out_view_shape = tuple(lbl_to_size[i] for i in var_lbl)
 
