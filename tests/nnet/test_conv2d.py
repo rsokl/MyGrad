@@ -1,5 +1,5 @@
 from mygrad.tensor_base import Tensor
-from mygrad.nnet.layers import conv2d
+from mygrad.nnet.layers import conv2d, conv_nd
 import numpy as np
 from numpy.testing import assert_allclose
 from scipy.signal import fftconvolve, convolve
@@ -175,6 +175,30 @@ def test_conv2d_fwd():
         out = np.array([[[[-44.,  -64.],
                           [-84., -104.]]]])
         assert isinstance(o, Tensor) and not o.constant and not o.scalar_only and np.all(o.data == out)
+
+
+def test_convnd_fwd():
+
+    # trivial by-hand test
+    # x:
+    # [ 1,  2,  3,  4],
+    # [ 5,  6,  7,  8],
+    # [ 9, 10, 11, 12]]
+
+    # k:
+    # [-1, -2],
+    # [-3, -4]
+
+    # stride = [1, 2]
+    # pad = [0, 0]
+    x = np.arange(1, 13).reshape(1, 1, 3, 4)
+    k = -1 * np.arange(1, 5).reshape(1, 1, 2, 2)
+
+    o = conv_nd(Tensor(x), k, [1, 2], 0)
+
+    out = np.array([[[[-44.,  -64.],
+                      [-84., -104.]]]])
+    assert isinstance(o, Tensor) and not o.constant and not o.scalar_only and np.all(o.data == out)
 
 
 @given(st.data())
