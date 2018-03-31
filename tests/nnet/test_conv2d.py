@@ -237,6 +237,44 @@ def test_conv2d(data):
     assert_allclose(w.grad, dw)
 
 
+@given(st.data())
+def test_convnd(data):
+
+    # test 2D
+    num_conv = 2
+    f = data.draw(st.sampled_from([1, 2, 3]))
+    c = data.draw(st.sampled_from([1, 2]))
+
+    # w, pad, stride
+    ws, pad, stride = data.draw(st.sampled_from([(1, 0, 4), (1, 0, 1), (3, 1, 2), (5, 0, 1)]))
+
+    dat = data.draw(hnp.arrays(shape=(2, c) + (5,)*num_conv,
+                               dtype=float,
+                               elements=st.floats(1, 100)))
+
+    w_dat = data.draw(hnp.arrays(shape=(f, c) + (ws,)*num_conv,
+                                 dtype=float,
+                                 elements=st.floats(1, 100)))
+
+    x = Tensor(dat)
+    w = Tensor(w_dat)
+    f = conv_nd(x, w, stride, pad)
+
+    b = np.zeros((w.shape[0],))
+    out, _ = conv_forward_naive(dat, w_dat, b, {'stride': stride, 'pad': pad})
+
+    assert_allclose(f.data, out)
+
+    dout = data.draw(hnp.arrays(shape=f.shape,
+                                dtype=float,
+                                elements=st.floats(-100, 100)))
+
+    f.backward(dout)
+    dx, dw, db = conv_backward_naive(dout, _)
+    assert_allclose(x.grad, dx)
+    assert_allclose(w.grad, dw)
+
+
 def test_bad_conv_shapes():
     x = np.zeros((1, 2, 2, 2))
     w = np.zeros((1, 3, 2, 2))
