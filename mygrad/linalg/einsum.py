@@ -75,7 +75,6 @@ class EinSum(BroadcastableOp):
         return np.einsum("->".join((in_lbls, out_lbls)), *(var.data for var in self.variables), **kwargs)
 
     def backward_var(self, grad, index, **kwargs):
-        """"""
         """
         example
         -------

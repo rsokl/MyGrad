@@ -1,4 +1,6 @@
 from ...wrappers.sequence_func import fwdprop_test_factory, backprop_test_factory
+from pytest import raises
+
 from mygrad import amax, amin, sum, mean, cumprod
 import mygrad
 
@@ -40,6 +42,21 @@ def test_mean_fwd(): pass
 
 @backprop_test_factory(mygrad_func=mean, true_func=np.mean)
 def test_mean_bkwd(): pass
+
+
+
+def test_int_axis_cumprod():
+    """check if numpy cumprod begins to support tuples for the axis argument"""
+    from pytest import raises
+
+    x = np.array([[1, 1, 0],
+                  [1, 1, 0],
+                  [1, 1, 0]])
+    with raises(TypeError):
+        np.cumprod(x, axis=(0, 1))
+
+    with raises(TypeError):
+        cumprod(x, axis=(0, 1))
 
 
 @fwdprop_test_factory(mygrad_func=cumprod, true_func=np.cumprod, no_axis=True, no_keepdims=True)

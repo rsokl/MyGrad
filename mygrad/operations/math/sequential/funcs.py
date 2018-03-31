@@ -114,5 +114,51 @@ def amin(x, axis=None, keepdims=False):
 min = amin
 max = amax
 
+from typing import Optional
 
-def cumprod(a, axis=None): return Tensor._op(CumProd, a, op_kwargs=dict(axis=axis))
+
+def cumprod(a, axis=None):
+    """
+    Return the cumulative product of elements along a given axis.
+
+    This docstring was adapted from the official numpy documentation
+
+    Parameters
+    ----------
+    a : array_like
+        Input array.
+
+    axis : Optional[int]
+        Axis along which the cumulative product is computed.  By default
+        the input is flattened.
+
+    Returns
+    -------
+    mygrad.Tensor
+
+    Notes
+    -----
+    Arithmetic is modular when using integer types, and no error is
+    raised on overflow.
+
+    Examples
+    --------
+    >>> from mygrad import cumprod
+    >>> a = np.array([1,2,3])
+    >>> cumprod(a) # intermediate results 1, 1*2
+    ...               # total product 1*2*3 = 6
+    Tensor([1, 2, 6])
+
+    The cumulative product for each column (i.e., over the rows) of `a`:
+
+    >>> cumprod(a, axis=0)
+    Tensor([[ 1,  2,  3],
+           [ 4, 10, 18]])
+
+    The cumulative product for each row (i.e. over the columns) of `a`:
+
+    >>> cumprod(a,axis=1)
+    Tensor([[  1,   2,   6],
+           [  4,  20, 120]])"""
+
+    return Tensor._op(CumProd, a, op_kwargs=dict(axis=axis))
