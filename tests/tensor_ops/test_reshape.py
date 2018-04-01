@@ -5,6 +5,7 @@ from numpy.testing import assert_allclose
 from hypothesis import given
 
 from mygrad.tensor_base import Tensor
+from mygrad import reshape
 
 
 def gen_shape(size):
@@ -48,10 +49,41 @@ def gen_shape(size):
                     dtype=float,
                     elements=st.floats(-100, 100))
        )
-def test_reshape_fwd(a):
+def test_reshape_method_fwd(a):
     new_shape = gen_shape(a.size)
 
     x = Tensor(a).reshape(new_shape)
+    a = a.reshape(new_shape)
+
+    assert x.shape == a.shape, "Tensor.reshape failed"
+    assert_allclose(a, x.data), "Tensor.reshape failed"
+
+
+@given(a=hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=5),
+                    dtype=float,
+                    elements=st.floats(-100, 100))
+       )
+def test_reshape_method_backward(a):
+    new_shape = gen_shape(a.size)
+    grad = np.arange(a.size).reshape(a.shape)
+
+    x = Tensor(a)
+    o = x.reshape(new_shape)
+    o.backward(grad.reshape(new_shape))
+
+    assert x.grad.shape == grad.shape
+    assert_allclose(x.grad, grad)
+
+
+@given(a=hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=5),
+                    dtype=float,
+                    elements=st.floats(-100, 100))
+       )
+def test_reshape_fwd(a):
+    new_shape = gen_shape(a.size)
+
+    x = Tensor(a)
+    x = reshape(x, new_shape)
     a = a.reshape(new_shape)
 
     assert x.shape == a.shape, "Tensor.reshape failed"
@@ -67,7 +99,7 @@ def test_reshape_backward(a):
     grad = np.arange(a.size).reshape(a.shape)
 
     x = Tensor(a)
-    o = x.reshape(new_shape)
+    o = reshape(x, new_shape)
     o.backward(grad.reshape(new_shape))
 
     assert x.grad.shape == grad.shape

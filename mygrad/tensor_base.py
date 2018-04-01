@@ -1,9 +1,13 @@
-from mygrad.operations.math.arithmetic.ops import *
-from mygrad.operations.math.sequential.ops import *
-from .operations import *
-from mygrad.operations.operation_base import Operation, BroadcastableOp
-import numpy as np
+from mygrad.math.arithmetic.ops import *
+from mygrad.math.sequential.ops import *
+from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property, Transpose
+from mygrad.tensor_manip.array_shape.ops import Reshape
+from mygrad.tensor_core_ops.indexing import GetItem, SetItem
+from mygrad.operation_base import Operation, BroadcastableOp
 from mygrad._utils import reduce_broadcast
+
+import numpy as np
+
 
 __all__ = ['Tensor']
 
@@ -30,7 +34,7 @@ class Tensor:
             _scalar_only : bool, optional (default=False)
                 Signals that self.backward() can only be invoked if self.ndim == 0.
 
-            _creator: Optional[pygrad.Operation]
+            _creator: Optional[mygrad.Operation]
                 The operation-instance whose forward pass produced `self`.
             """
         assert isinstance(constant, bool)
@@ -294,9 +298,6 @@ class Tensor:
     def __pos__(self):
         return self
 
-    def __invert__(self):
-        return -1 * self
-
     def __len__(self):
         return len(self.data)
 
@@ -453,6 +454,7 @@ class Tensor:
                 `self` with its axes permuted.  A new tensor is returned. """
         return self._op(Transpose, self, op_args=(axes,))
 
+    @property
     def T(self):
         """ Same as self.transpose(), except that self is returned if self.ndim < 2 and
             a view of the underlying data is utilized whenever possible.

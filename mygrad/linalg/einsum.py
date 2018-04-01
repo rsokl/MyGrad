@@ -1,4 +1,4 @@
-from mygrad.operations.operation_base import BroadcastableOp
+from mygrad.operation_base import BroadcastableOp
 from mygrad import Tensor
 from mygrad._utils import reduce_broadcast
 import numpy as np
@@ -7,7 +7,6 @@ from functools import reduce
 
 from numpy.core.einsumfunc import _parse_einsum_input
 from numpy.lib.stride_tricks import as_strided
-from itertools import filterfalse
 
 __all__ = ["einsum"]
 

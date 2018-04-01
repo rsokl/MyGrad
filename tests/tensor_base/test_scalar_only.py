@@ -3,7 +3,7 @@ from hypothesis import given
 from pytest import raises
 
 from mygrad.tensor_base import Tensor
-from mygrad.operations.operation_base import Operation
+from mygrad.operation_base import Operation
 
 import numpy as np
 

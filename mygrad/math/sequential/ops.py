@@ -1,4 +1,4 @@
-from mygrad.operations.operation_base import Operation
+from mygrad.operation_base import Operation
 import numpy as np
 from functools import reduce
 
