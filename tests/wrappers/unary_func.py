@@ -1,11 +1,14 @@
 from ..utils.numerical_gradient import numerical_derivative
 
 from mygrad import Tensor
+
+from copy import copy
+
 from hypothesis import given, assume
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
 import numpy as np
-from numpy.testing import assert_allclose, assert_almost_equal
+from numpy.testing import assert_allclose, assert_array_equal
 from functools import wraps
 from decimal import Decimal
 
@@ -27,12 +30,15 @@ class fwdprop_test_factory():
             for value in self.no_go:
                 assume(np.all(x != value))
 
+            x_copy = copy(x)
             o = self.op(x)
             tensor_out = o.data
             true_out = self.true_func(x)
             assert isinstance(o, Tensor), "`mygrad_func` returned type {}, should return `mygrad.Tensor`".format(type(o))
-            assert_allclose(tensor_out, true_out, err_msg=\
-                "`mygrad_func(x)` and `true_func(x)` produce different results")
+            assert_allclose(tensor_out, true_out,
+                            err_msg="`mygrad_func(x)` and `true_func(x)` produce different results")
+            assert_array_equal(x, x_copy,
+                               err_msg="`x` was mutated during forward prop")
         return wrapper
 
 

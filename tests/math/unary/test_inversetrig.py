@@ -1,5 +1,5 @@
 from mygrad.tensor_base import Tensor
-from mygrad.math import arcsin, arccos, arctan, arccsc, arcsec, arccot
+from mygrad import arcsin, arccos, arctan, arccsc, arcsec, arccot
 
 import hypothesis.strategies as st
 from hypothesis import given

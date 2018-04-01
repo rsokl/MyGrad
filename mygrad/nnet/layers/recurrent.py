@@ -1,4 +1,4 @@
-from mygrad.operations.multivar_operations import Operation
+from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor
 from numbers import Integral
 import numpy as np

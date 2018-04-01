@@ -1,4 +1,4 @@
-from mygrad.math import log, log2, log10
+from mygrad import log, log2, log10, log1p
 from tests.wrappers.unary_func import backprop_test_factory, fwdprop_test_factory
 
 import numpy as np
@@ -26,3 +26,11 @@ def test_log10_fwd(): pass
 
 @backprop_test_factory(mygrad_func=log10, xbnds=[0, 100], no_go=(0,))
 def test_log10_backward(): pass
+
+
+@fwdprop_test_factory(mygrad_func=log1p, true_func=np.log1p, xbnds=[0, 100], no_go=(0,))
+def test_log1p_fwd(): pass
+
+
+@backprop_test_factory(mygrad_func=log1p, xbnds=[0, 100], no_go=(0,))
+def test_log1p_backward(): pass

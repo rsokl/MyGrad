@@ -28,7 +28,7 @@ def _rand_neg_axis(draw, axes, ndim):
 
 
 @st.composite
-def valid_axes(draw, ndim, pos_only=False):
+def valid_axes(draw, ndim, pos_only=False, single_axis_only=False):
     """ Hypothesis search strategy: Given array dimensionality, generate valid
         `axis` arguments (including `None`).
 
@@ -50,11 +50,20 @@ def valid_axes(draw, ndim, pos_only=False):
         """
     if 0 > ndim:
         raise ValueError("`ndim` must be an integer 0 or greater.")
-    num_axes = draw(st.integers(min_value=0, max_value=ndim))
+    if single_axis_only:
+        num_axes = draw(st.integers(min_value=0, max_value=1))
+    else:
+        num_axes = draw(st.integers(min_value=0, max_value=ndim))
+
     axes = draw(choices(range(ndim), num_axes, replace=False))
+
     if not pos_only:
         axes = draw(_rand_neg_axis(axes, ndim))
-    return draw(st.none()) if not axes else axes
+
+    if single_axis_only and axes:
+        axes = axes[0]
+
+    return draw(st.none()) if axes == () else axes
 
 
 @st.composite

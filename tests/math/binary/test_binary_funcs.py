@@ -1,7 +1,8 @@
 """ Test all binary arithmetic operations, checks for appropriate broadcast behavior"""
 from ...wrappers.binary_func import fwdprop_test_factory, backprop_test_factory
 
-from mygrad.math import add, subtract, multiply, divide, power, logaddexp
+from mygrad import add, subtract, multiply, divide, power, logaddexp, log, exp
+from mygrad import logaddexp2, log2
 
 import numpy as np
 from numpy.testing import assert_allclose
@@ -10,7 +11,6 @@ from hypothesis import given
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
 from ...custom_strategies import broadcastable_shape
-import mygrad.math as mg
 from mygrad import Tensor
 
 
@@ -95,7 +95,57 @@ def test_logaddexp_bkwd(data, x):
     # calculate logaddexp manually via mygrad-arithmetic
     x_o = Tensor(x)
     y_o = Tensor(y)
-    out_o = mg.log(mg.exp(x_o) + mg.exp(y_o))
+    out_o = log(exp(x_o) + exp(y_o))
+
+    if any(out.shape != i.shape for i in (x, y)):
+        # broadcasting occurred, must reduce `out` to scalar
+        # first multiply by `grad` to simulate non-trivial back-prop
+        (grad * out).sum().backward()
+        (grad * out_o).sum().backward()
+    else:
+        out.backward(grad)
+        out_o.backward(grad)
+
+    assert_allclose(x.grad, x_o.grad,
+                    err_msg="x: numerical derivative and mygrad derivative do not match")
+    assert_allclose(y.grad, y_o.grad,
+                    err_msg="y: numerical derivative and mygrad derivative do not match")
+
+
+@fwdprop_test_factory(mygrad_func=logaddexp2, true_func=np.logaddexp2)
+def test_logaddexp_fwd(): pass
+
+
+# built-in numpy logaddexp doesn't work with object arrays
+@given(data=st.data(),
+       x=hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=3),
+                    dtype=float,
+                    elements=st.floats(-10, 10)))
+def test_logaddexp2_bkwd(data, x):
+    """ Performs hypothesis unit test for checking back-propagation
+        through a `mygrad` op.
+
+        Raises
+        ------
+        AssertionError"""
+
+    y = data.draw(hnp.arrays(shape=broadcastable_shape(x.shape),
+                             dtype=float,
+                             elements=st.floats(-10, 10)))
+
+    # gradient to be backpropped through this operation
+    x = Tensor(x)
+    y = Tensor(y)
+    out = logaddexp2(x, y)
+
+    grad = data.draw(hnp.arrays(shape=out.shape,
+                                dtype=float,
+                                elements=st.floats(-100, 100)))
+
+    # calculate logaddexp manually via mygrad-arithmetic
+    x_o = Tensor(x)
+    y_o = Tensor(y)
+    out_o = log2(exp(x_o) + exp(y_o))
 
     if any(out.shape != i.shape for i in (x, y)):
         # broadcasting occurred, must reduce `out` to scalar

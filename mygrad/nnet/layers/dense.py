@@ -1,5 +1,5 @@
-from mygrad.operations.multivar_operations import Operation
-from ...tensor_base import Tensor
+from mygrad.operation_base import Operation
+from mygrad.tensor_base import Tensor
 import numpy as np
 
 

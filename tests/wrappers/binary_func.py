@@ -3,12 +3,14 @@ from ..custom_strategies import broadcastable_shape
 
 from mygrad import Tensor
 
+from copy import copy
+
 from hypothesis import given, assume
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
 
 import numpy as np
-from numpy.testing import assert_allclose, assert_array_almost_equal
+from numpy.testing import assert_allclose, assert_array_equal
 from functools import wraps
 
 
@@ -33,6 +35,8 @@ class fwdprop_test_factory():
             y = data.draw(hnp.arrays(shape=broadcastable_shape(x.shape),
                                      dtype=float,
                                      elements=st.floats(*self.ybnds)))
+            x_copy = copy(x)
+            y_copy = copy(y)
             for value in self.x_no_go:
                 assume(np.all(x != value))
 
@@ -45,6 +49,11 @@ class fwdprop_test_factory():
             assert isinstance(o, Tensor), "`mygrad_func` returned type {}, should return `mygrad.Tensor`".format(type(o))
             assert_allclose(tensor_out, true_out,
                             err_msg="`mygrad_func(x)` and `true_func(x)` produce different results")
+
+            assert_array_equal(x, x_copy,
+                               err_msg="`x` was mutated during forward prop")
+            assert_array_equal(y, y_copy,
+                               err_msg="`y` was mutated during forward prop")
         return wrapper
 
 
@@ -94,6 +103,9 @@ class backprop_test_factory():
                                         dtype=float,
                                         elements=st.floats(1, 10)))
 
+            x_copy = copy(x)
+            y_copy = copy(y)
+            grad_copy = copy(grad)
             if any(out.shape != i.shape for i in (x, y)):
                 # broadcasting occurred, must reduce `out` to scalar
                 # first multiply by `grad` to simulate non-trivial back-prop
@@ -111,4 +123,10 @@ class backprop_test_factory():
             out.null_gradients()
             assert all(i.grad is None for i in (x, y)), "null_gradients failed"
 
+            assert_array_equal(x, x_copy,
+                               err_msg="`x` was mutated during backward prop")
+            assert_array_equal(y, y_copy,
+                               err_msg="`y` was mutated during backward prop")
+            assert_array_equal(grad, grad_copy,
+                               err_msg="`grad` was mutated during backward prop")
         return wrapper

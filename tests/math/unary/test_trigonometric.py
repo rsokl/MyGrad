@@ -1,5 +1,5 @@
 from tests.wrappers.unary_func import fwdprop_test_factory, backprop_test_factory
-from mygrad.math import sin, cos, tan, csc, sec, cot
+from mygrad import sin, cos, tan, csc, sec, cot, sinc
 
 import numpy as np
 
@@ -10,6 +10,14 @@ def test_sin_fwd(): pass
 
 @backprop_test_factory(mygrad_func=sin)
 def test_sin_backward(): pass
+
+
+@fwdprop_test_factory(mygrad_func=sinc, true_func=np.sinc)
+def test_sinc_fwd(): pass
+
+
+@backprop_test_factory(mygrad_func=sinc)
+def test_sinc_backward(): pass
 
 
 @fwdprop_test_factory(mygrad_func=cos, true_func=np.cos)
@@ -35,7 +43,7 @@ def test_tan_backward(): pass
 def test_csc_fwd(): pass
 
 
-@backprop_test_factory(mygrad_func=csc, xbnds=(0, np.pi), no_go=(0, np.pi))
+@backprop_test_factory(mygrad_func=csc, xbnds=(0.01, np.pi-.01), no_go=(0, np.pi), atol=1e-4, rtol=1e-4)
 def test_csc_backward(): pass
 
 
@@ -55,5 +63,5 @@ def test_sec_backward(): pass
 def test_cot_fwd(): pass
 
 
-@backprop_test_factory(mygrad_func=cot, xbnds=(0, np.pi), no_go=(0, np.pi))
+@backprop_test_factory(mygrad_func=cot, xbnds=(0, np.pi), no_go=(0, np.pi), atol=1e-4, rtol=1e-4)
 def test_cot_backward(): pass
