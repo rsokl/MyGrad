@@ -2,7 +2,7 @@ from mygrad.operations.operation_base import Operation
 import numpy as np
 from functools import reduce
 
-__all__ = ["MaxMin", "Sum", "Mean", "CumProd", "CumSum"]
+__all__ = ["MaxMin", "Sum", "Mean", "Prod", "CumProd", "CumSum"]
 
 
 class MaxMin(Operation):
@@ -163,6 +163,56 @@ class Mean(Sum):
         super(Mean, self).backward_var(grad / self.n, index, **kwargs)
 
 
+class Prod(Operation):
+    def __call__(self, a, axis=None, keepdims=False):
+        """ Parameters
+            ----------
+            a : mygrad.Tensor"""
+        self.variables = (a,)
+        if axis is not None and not hasattr(axis, "__iter__"):
+            axis = (axis,)
+        self.axis = axis
+        self.keepdims = keepdims
+        return a.data.prod(axis=axis, keepdims=keepdims)
+
+    def backward_var(self, grad, index, **kwargs):
+        a = self.variables[index]
+        x = a.data
+        grad = np.asarray(grad)
+        axes = tuple(i if i >= 0 else a.ndim + i for i in self.axis) \
+            if self.axis is not None else tuple(range(a.ndim))
+        axes = set(axes)
+
+        # make grad broadcast-compatible against x
+        grad = grad.reshape(*(1 if n in axes else i for n, i in enumerate(a.shape)))
+
+        # This is a valid method for taking the derivative
+        # of prod(x) only if there are no zeros in `x`.
+        # If there are zeros we need to patch some of the nans
+        # that we just created, with the correct derivative.
+        with np.errstate(divide='ignore', invalid='ignore'):
+            dldx = np.prod(x, axis=self.axis, keepdims=True) / x
+
+        # if two or more zeros occur within a given sequence, then
+        # the nans in the sequences can simply be set to 0
+        if np.any(np.isnan(dldx)):
+            x = x.copy()
+            has_zero = np.broadcast_to(np.sum(x == 0, axis=self.axis, keepdims=True), x.shape)
+            dldx[has_zero > 1] = np.nan_to_num(dldx[has_zero > 1])
+
+            # if only a single 0 occurs within a given sequence, the
+            # derivative needs to be recomputed at that location by
+            # setting that element 0 -> 1
+            if np.any(np.isnan(dldx)):
+                is_zero = x == 0
+                x[is_zero] = 1
+                with np.errstate(divide='ignore', invalid='ignore'):
+                    loc = np.logical_and(is_zero, has_zero == 1)
+                    dldx[loc] = (np.prod(x, axis=self.axis, keepdims=True) / x)[loc]
+
+        a.backward(grad*dldx)
+
+
 def _reverse_cumsum(x, axis=None):
     """ (x0, x1, x2) -> (x0, x0 + x1, x0 + x1 + x2)"""
     if axis is None:
@@ -282,7 +332,7 @@ class CumProd(Operation):
             g_cumprod = g * np.cumprod(x, axis=axis)
             with np.errstate(divide='ignore', invalid='ignore'):
                 dldx[locs] = (_reverse_cumsum(g_cumprod, axis=axis) / x)[locs]
-            dldx = np.nan_to_num(dldx)
+            np.nan_to_num(dldx, copy=False)
 
         if axis is None:
             dldx.shape = orig_shape

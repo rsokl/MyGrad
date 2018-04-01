@@ -2,7 +2,7 @@ from ...wrappers.sequence_func import fwdprop_test_factory, backprop_test_factor
 
 from pytest import raises
 
-from mygrad import amax, amin, sum, mean, cumprod, cumsum
+from mygrad import amax, amin, sum, mean, cumprod, cumsum, prod
 import mygrad
 
 import numpy as np
@@ -44,6 +44,13 @@ def test_mean_fwd(): pass
 @backprop_test_factory(mygrad_func=mean, true_func=np.mean)
 def test_mean_bkwd(): pass
 
+
+@fwdprop_test_factory(mygrad_func=prod, true_func=np.prod)
+def test_prod_fwd(): pass
+
+
+@backprop_test_factory(mygrad_func=prod, true_func=np.prod, xbnds=(-2, 2))
+def test_prod_bkwd(): pass
 
 
 def test_int_axis_cumprod():

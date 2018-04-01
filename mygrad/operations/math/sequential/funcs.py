@@ -7,6 +7,7 @@ __all__ = ["sum",
            "amin",
            "max",
            "min",
+           "prod",
            "cumprod",
            "cumsum"]
 
@@ -114,6 +115,10 @@ def amin(x, axis=None, keepdims=False):
 # aliases
 min = amin
 max = amax
+
+
+def prod(a, axis=None, keepdims=False):
+    return Tensor._op(Prod, a, op_kwargs=dict(axis=axis, keepdims=keepdims))
 
 
 def cumprod(a, axis=None):
