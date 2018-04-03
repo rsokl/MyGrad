@@ -50,7 +50,7 @@ def test_divide_bkwd(): pass
 def test_power_fwd(): pass
 
 
-@backprop_test_factory(mygrad_func=power, true_func=np.power, xbnds=(1, 10), ybnds=(-3, 3))
+@backprop_test_factory(mygrad_func=power, true_func=np.power, xbnds=(0.1, 10), ybnds=(-3, 3))
 def test_power_bkwd(): pass
 
 
