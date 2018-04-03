@@ -117,12 +117,13 @@ class Power(BroadcastableOp):
 
     def backward_var(self, grad, index, **kwargs):
         a, b = self.variables
+        x, y = a.data, b.data
         if index == 0:
-            grad = grad * b.data * (a.data ** (b.data - 1))
+            grad = grad * y * (x ** np.where(y, (y - 1), 1))
             a.backward(grad, **kwargs)
 
         else:
-            grad = np.nan_to_num(grad * (a.data ** b.data) * np.log(a.data))
+            grad = grad * (x ** y) * np.log(np.where(x, x, 1))
             b.backward(grad, **kwargs)
 
 
