@@ -34,7 +34,7 @@ def test_subtract_bkwd(): pass
 def test_multiply_fwd(): pass
 
 
-@backprop_test_factory(mygrad_func=multiply, true_func=np.multiply)
+@backprop_test_factory(mygrad_func=multiply, true_func=np.multiply, atol=1e-4, rtol=1e-4)
 def test_multiply_bkwd(): pass
 
 

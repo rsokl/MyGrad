@@ -1,4 +1,4 @@
-from ..utils.numerical_gradient import numerical_gradient, _numerical_gradient_full
+from ..utils.numerical_gradient import numerical_gradient_full, numerical_gradient
 from ..custom_strategies import broadcastable_shape
 
 from mygrad import Tensor
@@ -124,7 +124,50 @@ class backprop_test_factory():
         ...     pass"""
 
     def __init__(self, *, mygrad_func, true_func, xbnds=(-100, 100),
-                 ybnds=(-100, 100), x_no_go=(), y_no_go=(), h=1e-8, rtol=1e-05, atol=1e-08):
+                 ybnds=(-100, 100),
+                 x_no_go=(),
+                 y_no_go=(),
+                 h=1e-8,
+                 rtol=1e-05,
+                 atol=1e-08,
+                 func_is_mapping=True,
+                 as_decimal=True,
+                 kwargs={}):
+        """
+        Parameters
+        ----------
+        mygrad_func : Callable[[numpy.ndarray, numpy.ndarray], mygrad.Tensor]
+            The mygrad function whose forward pass validity is being checked.
+
+        true_func : Callable[[numpy.ndarray, numpy.ndarray], numpy.ndarray]
+            A known correct version of the function
+
+        xbnds : Tuple[int, int], optional (default=(-100, 100))
+            Bounds for values of x
+
+        ybnds : Tuple[int, int], optional (default=(-100, 100))
+            Permissible bounds for values of y
+
+        x_no_go : Tuple[float, ...]
+            Values that x cannot posses
+
+        y_no_go : Tuple[float, ...]
+            Values that y cannot possess
+
+        kwargs : Dict[str, Union[hypothesis.searchstrategy.SearchStrategy, Any]]
+            Keyword arguments and their values to be passed to the functions.
+            The values can be hypothesis search strategies, in which case
+            a value when be drawn at test time for that argument.
+
+        func_is_mapping : bool, optional (default=True)
+            If True, then use a faster numerical derivative that varies entire
+            arrays at once; valid only for functions that map over entries, like
+            'add' and 'sum'.
+
+        as_decimal : bool, optional (default=False)
+            If False, x is passed to f as a Decimal-type array. This
+            improves numerical precision, but is not permitted by some functions.
+        """
 
         self.op = mygrad_func
         self.func = true_func
@@ -134,6 +177,9 @@ class backprop_test_factory():
         self.y_no_go = y_no_go
         self.h = h
         self.tolerances = dict(rtol=rtol, atol=atol)
+        self.func_is_mapping = func_is_mapping
+        self.as_decimal = as_decimal
+        self.kwargs = kwargs
 
     def __call__(self, f):
         @given(data=st.data(),
@@ -159,6 +205,9 @@ class backprop_test_factory():
             for value in self.y_no_go:
                 assume(np.all(y != value))
 
+            S = st.SearchStrategy
+            kwargs = {k: (data.draw(v) if isinstance(v, S) else v) for k, v in self.kwargs}
+
             # gradient to be backpropped through this operation
             x = Tensor(x)
             y = Tensor(y)
@@ -178,7 +227,13 @@ class backprop_test_factory():
             else:
                 out.backward(grad)
 
-            dx, dy = numerical_gradient(self.func, x.data, y.data, back_grad=grad)
+            numerical_grad = numerical_gradient if self.func_is_mapping else numerical_gradient_full
+            if self.func_is_mapping:
+                dx, dy = numerical_grad(self.func, x.data, y.data, back_grad=grad, kwargs=kwargs)
+            else:
+                dx, dy = numerical_gradient_full(self.func, x.data, y.data,
+                                                 back_grad=grad, kwargs=kwargs,
+                                                 as_decimal=self.as_decimal)
 
             assert_allclose(x.grad, dx, **self.tolerances,
                             err_msg="x: numerical derivative and mygrad derivative do not match")

@@ -3,6 +3,8 @@ from decimal import Decimal
 import numpy as np
 from itertools import zip_longest
 
+from mygrad._utils import reduce_broadcast
+
 
 def to_decimal_array(arr):
     """ Convert numpy ND-array to Decimal-type object array of the same shape.
@@ -18,68 +20,6 @@ def to_decimal_array(arr):
         Decimal-type object array"""
     arr = np.asarray(arr)
     return np.array(tuple(Decimal(float(i)) for i in arr.flat), dtype=Decimal).reshape(arr.shape)
-
-
-def broadcast_check(*variables):
-    """ Given {a, b, ...} and the shape of op(a, b, ...), detect if any non-constant Tensor undergoes
-        broadcasting via f. If so, set op.scalar_only to True, and record the broadcasted
-        axes for each such tensor.
-
-        Broadcast-incompatible shapes need not be accounted for by this function, since
-        the shape of f(a, b, ...) must already be known.
-
-        Parameters
-        ----------
-        variables : Sequence[ArrayLike]
-
-        Returns
-        -------
-        Tuple[Dict[str, Tuple[int, ...]]
-            ({'new_axes': (...), 'keepdim_axes: (...)}, ...)
-            For each variable, indicates which, if any, axes need be summed over
-            to reduce the broadcasted gradient for back-prop through that variable."""
-    variables = variables
-    out_shape = np.broadcast(*variables).shape
-    new_axes = [[] for i in range(len(variables))]
-    keepdims = [[] for i in range(len(variables))]
-
-    # no broadcasting occurs for non-constants
-    if all(var.shape == out_shape for var in variables):
-        return tuple(dict(new_axes=tuple(new), keepdim_axes=tuple(keep))
-                     for new, keep in zip(new_axes, keepdims))
-
-    # check size of aligned dimensions
-    for n, dims in enumerate(zip_longest(*(var.shape[::-1] for var in variables))):
-        axis = len(out_shape) - 1 - n
-        if len(set(i for i in dims if (i is not None))) <= 1:
-            continue
-
-        for var_index, i in enumerate(dims):
-            # broadcasting occurs over existing dim: e.g. (2,1,5) w/ (2,3,5) -> (2,3,5)
-            if i == 1:
-                keepdims[var_index].append(axis)
-
-    for var_index, var in enumerate(variables):
-        keepdims[var_index] = tuple(keepdims[var_index])
-
-        # a new axis is created to allow broadcasting: e.g. (3,) w/ (2,3) -> (2,3)
-        if var.ndim < len(out_shape):
-            new_axes[var_index] = tuple(range(len(out_shape) - var.ndim))
-    return tuple(dict(new_axes=tuple(new), keepdim_axes=tuple(keep))
-                 for new, keep in zip(new_axes, keepdims))
-
-
-def broadcast_back(grad, new_axes, keepdim_axes):
-    """ Sum-reduce df/dx, where f was produced by broadcasting x along
-        the broadcasting axes. This assumes that that the gradient of a scalar
-        is ultimately being computed. """
-    if keepdim_axes:
-        grad = grad.sum(axis=keepdim_axes, keepdims=True)
-
-    if new_axes:
-        grad = grad.sum(axis=new_axes)
-
-    return grad
 
 
 def numerical_derivative(f, x, h=1e-8):
@@ -110,9 +50,14 @@ def numerical_derivative(f, x, h=1e-8):
     return dx
 
 
-def numerical_gradient(f, *args, back_grad, vary_ind=None, h=1e-8):
+def numerical_gradient(f, *args, back_grad, vary_ind=None, h=1e-8, as_decimal=None, kwargs={}):
     """ Computes numerical partial derivatives of f(x0, x1, ...) in each
         of its variables, using the central difference method.
+
+        This is a "fast" method - it varies entire arrays at once. Thus
+        this is only appropriate for trivial vectorized functions that
+        map accross entries of arrays (like add or multiply). E.g.
+        matrix multiplication is *not* suited for this style of gradient.
 
         Parameters
         ----------
@@ -146,9 +91,6 @@ def numerical_gradient(f, *args, back_grad, vary_ind=None, h=1e-8):
     h = Decimal(h)
     args = tuple(to_decimal_array(arr) for arr in args)
 
-    # get axis & keepdims args for collapsing a broadcasted gradient
-    all_broad_args = broadcast_check(*args)
-
     grads = [None]*len(args)
 
     def gen_fwd_diff(i):
@@ -159,12 +101,12 @@ def numerical_gradient(f, *args, back_grad, vary_ind=None, h=1e-8):
         # x1, ..., x_i - h, ..., xn
         return ((var if j != i else var - h) for j, var in enumerate(args))
 
-    for n, broad_args in enumerate(all_broad_args):
+    for n in range(len(args)):
         if vary_ind is not None and n not in vary_ind:
             continue
         # central difference in variable n
-        dvar = (f(*gen_fwd_diff(n)) - f(*gen_bkwd_diff(n))) / (Decimal(2) * h)
-        grads[n] = broadcast_back(back_grad * dvar.astype(float), **broad_args)
+        dvar = (f(*gen_fwd_diff(n), **kwargs) - f(*gen_bkwd_diff(n), **kwargs)) / (Decimal(2) * h)
+        grads[n] = reduce_broadcast(back_grad * dvar.astype(float), args[n].shape)
 
     return grads
 

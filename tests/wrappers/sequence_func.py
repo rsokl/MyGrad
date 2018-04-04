@@ -1,4 +1,4 @@
-from ..utils.numerical_gradient import numerical_gradient_sequence
+from ..utils.numerical_gradient import numerical_gradient_sequence, numerical_gradient_full
 from ..custom_strategies import valid_axes
 
 from mygrad import Tensor
