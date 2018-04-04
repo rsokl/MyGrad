@@ -1,4 +1,4 @@
-from ..utils.numerical_gradient import numerical_gradient
+from ..utils.numerical_gradient import numerical_gradient, _numerical_gradient_full
 from ..custom_strategies import broadcastable_shape
 
 from mygrad import Tensor
@@ -15,15 +15,52 @@ from functools import wraps
 
 
 class fwdprop_test_factory():
-    def __init__(self, *, mygrad_func, true_func, xbnds=(-100, 100),
-                 ybnds=(-100, 100), x_no_go=(), y_no_go=()):
+    """ Decorator
 
+        Randomly draw arrays x and y, to verify that a binary mygrad function,
+        `f(x, y, **kwargs)` returns a correct result.
+
+        This decorator is extremely uber: the decorated function's body is
+        never executed. The function definition is effectively there to name
+        the test being constructed. This constructs the entire test
+
+        Examples
+        --------
+        >>> from mygrad import add
+        >>> import numpy as np
+        >>> @fwdprop_test_factory(mygrad_func=add, true_func=np.add)
+        ... def test_add():
+        ...     pass"""
+    def __init__(self, *, mygrad_func, true_func, xbnds=(-100, 100),
+                 ybnds=(-100, 100), x_no_go=(), y_no_go=(),
+                 kwargs={}):
+        """
+        Parameters
+        ----------
+        mygrad_func : Callable[[numpy.ndarray, numpy.ndarray], mygrad.Tensor]
+            The mygrad function whose forward pass validity is being checked.
+        true_func : Callable[[numpy.ndarray, numpy.ndarray], numpy.ndarray]
+            A known correct version of the function
+        xbnds : Tuple[int, int], optional (default=(-100, 100))
+            Bounds for values of x
+        ybnds : Tuple[int, int], optional (default=(-100, 100))
+            Permissible bounds for values of y
+        x_no_go : Tuple[int, ...]
+            Values that x cannot posses
+        y_no_go : Tuple[int, ...]
+            Values that y cannot possess
+        kwargs : Dict[str, Union[hypothesis.searchstrategy.SearchStrategy, Any]]
+            Keyword arguments and their values to be passed to the functions.
+            The values can be hypothesis search strategies, in which case
+            a value when be drawn at test time for that argument.
+        """
         self.op = mygrad_func
         self.true_func = true_func
         self.xbnds = xbnds
         self.ybnds = ybnds
         self.x_no_go = x_no_go
         self.y_no_go = y_no_go
+        self.kwargs = kwargs
 
     def __call__(self, f):
         @given(x=hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=3),
@@ -37,15 +74,19 @@ class fwdprop_test_factory():
                                      elements=st.floats(*self.ybnds)))
             x_copy = copy(x)
             y_copy = copy(y)
+
+            S = st.SearchStrategy
+            kwargs = {k: (data.draw(v) if isinstance(v, S) else v) for k, v in self.kwargs}
+
             for value in self.x_no_go:
                 assume(np.all(x != value))
 
             for value in self.y_no_go:
                 assume(np.all(y != value))
 
-            o = self.op(x, y)
+            o = self.op(x, y, **kwargs)
             tensor_out = o.data
-            true_out = self.true_func(x, y)
+            true_out = self.true_func(x, y, **kwargs)
             assert isinstance(o, Tensor), "`mygrad_func` returned type {}, should return `mygrad.Tensor`".format(type(o))
             assert_allclose(tensor_out, true_out,
                             err_msg="`mygrad_func(x)` and `true_func(x)` produce different results")
@@ -58,6 +99,30 @@ class fwdprop_test_factory():
 
 
 class backprop_test_factory():
+    """ Decorator
+
+        Randomly draw arrays x and y, to verify that a binary mygrad function,
+        `f(x, y, **kwargs)` performs backpropagation appropriately.
+
+        x.grad and y.grad are compared against numerical derivatives of f.
+        THe numerical derivative is arrived at
+
+        **IMPORTANT**
+        f must be a trivial mapping over the individual parameters of x and y,
+        such as vectorized add or multiply. An example of an invalid
+
+        This decorator is extremely uber: the decorated function's body is
+        never executed. The function definition is effectively there to name
+        the test being constructed. This constructs the entire test
+
+        Examples
+        --------
+        >>> from mygrad import add
+        >>> import numpy as np
+        >>> @backprop_test_factory(mygrad_func=add, true_func=np.add)
+        ... def test_add():
+        ...     pass"""
+
     def __init__(self, *, mygrad_func, true_func, xbnds=(-100, 100),
                  ybnds=(-100, 100), x_no_go=(), y_no_go=(), h=1e-8, rtol=1e-05, atol=1e-08):
 

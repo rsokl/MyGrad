@@ -81,6 +81,7 @@ def broadcast_back(grad, new_axes, keepdim_axes):
 
     return grad
 
+
 def numerical_derivative(f, x, h=1e-8):
     """ Computes the numerical derivate of f(x) at `x`::
 
@@ -225,7 +226,63 @@ def numerical_gradient_sequence(f, *, x, back_grad,  axis=None, keepdims=False, 
     return grad.astype(float)
 
 
-def numerical_gradient_full(f, *, x, back_grad,  h=1e-8):
+def numerical_gradient_full(f, *args, back_grad, as_decimal=False, kwargs={}, vary_ind=None):
+    """ Computes numerical partial derivatives of f(x, y, ..., **kwargs), by
+        varying each entry of x, y, ... independently producing a gradient
+        in each variable.
+
+        Parameters
+        ----------
+        f : Callable[[numpy.ndarray], numpy.ndarray]
+            f(x) -> numpy.ndarray
+
+        x : numpy.ndarray
+            An array storing the sequence(s) of values in the array. More than once
+            sequence may be designated, according to the `axis` argument of `f`.
+
+        back_grad : numpy.ndarray
+            The gradient being back-propagated to {x}, via f
+
+        h : float, optional, (default=1e-8)
+            Approximating infinitesimal.
+
+        as_decimal : bool, optional (default=False)
+            If False, x is passed to f as a Decimal-type array. This
+            improves numerical precision, but is not permitted by some functions.
+
+        kwargs : Dict[str, Any], optional (default=dict())
+            The keyword arguments to be passed to f.
+
+        vary_ind : Optional[Tuple[int, ...]]
+            If `None`, the partials of f with respect to all the inputs are.
+            computed. Otherwise you can specify a sequence of the indices
+            of the variables whose partials are to be computed
+               0 -> w.r.t x only, 1 -> w.r.t y only, etc.
+
+        Returns
+        -------
+        Tuple[numpy.ndarray, ...]
+            df/dx, df/dy, ...
+            df/dvar will be None if var was excluded via `vary_ind`
+        """
+
+    args = tuple(to_decimal_array(i) if as_decimal else i for i in args)
+    grads = [None] * len(args)
+    if isinstance(vary_ind, int):
+        vary_ind = [vary_ind]
+
+    for n in range(len(args)):
+        if vary_ind is not None and n not in vary_ind:
+            continue
+        tmp_f = lambda var: f(*args[:n], var, *args[n+1:], **kwargs)
+        grads[n] = _numerical_gradient_full(tmp_f,
+                                            x=args[n],
+                                            back_grad=back_grad,
+                                            as_decimal=as_decimal)
+    return tuple(grads)
+
+
+def _numerical_gradient_full(f, *, x, back_grad, h=1e-8, as_decimal=False):
     """ Computes numerical partial derivatives of f(x), by
         varying each entry of `x` independently.
 
@@ -244,6 +301,10 @@ def numerical_gradient_full(f, *, x, back_grad,  h=1e-8):
         h : float, optional, (default=1e-8)
             Approximating infinitesimal.
 
+        as_decimal : bool, optional (default=False)
+            If False, x is passed to f as a Decimal-type array. This
+            improves numerical precision, but is not permitted by some functions.
+
         Returns
         -------
         numpy.ndarray
@@ -257,12 +318,12 @@ def numerical_gradient_full(f, *, x, back_grad,  h=1e-8):
     for ind, val in np.ndenumerate(x):
         x_fwd = np.copy(x)
         x_fwd[ind] += h
-        f_fwd = to_decimal_array(f(x_fwd.astype(float)))
+        f_fwd = to_decimal_array(f(x_fwd) if as_decimal else f(x_fwd.astype(float)))
 
         x_bkwd = x_fwd
         x_bkwd[ind] -= Decimal(2) * h
-        f_bkwd = to_decimal_array(f(x_bkwd.astype(float)))
+        f_bkwd = to_decimal_array(f(x_bkwd) if as_decimal else f(x_bkwd.astype(float)))
 
-        dxi = to_decimal_array((f_fwd - f_bkwd) / (Decimal(2) * h))
-        grad[ind] = (dxi.astype('float') * back_grad).sum()
+        df_dxi = to_decimal_array((f_fwd - f_bkwd) / (Decimal(2) * h))
+        grad[ind] = (df_dxi.astype('float') * back_grad).sum()
     return grad.astype(float)
