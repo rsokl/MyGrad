@@ -297,7 +297,4 @@ class backprop_test_factory():
                                    err_msg="arr-{} was mutated during forward prop".format(n))
             assert_array_equal(grad, grad_copy,
                                err_msg="`grad` was mutated during backward prop")
-            for a in arrs:
-                print(a)
-            print("**")
         return wrapper
