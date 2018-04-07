@@ -1,11 +1,14 @@
 """ Custom hypothesis search strategies """
 import hypothesis.strategies as st
+import hypothesis.extra.numpy as hnp
 import numpy as np
 
-__all__ = ["broadcastable_shape",
+__all__ = ["adv_integer_index",
+           "broadcastable_shape",
            "choices",
            "valid_axes",
            "basic_index"]
+
 
 def choices(seq, size, replace=True):
     """Randomly choose elements from `seq`, producing a tuple of length `size`."""
@@ -171,3 +174,34 @@ def basic_index(draw, shape, max_dim=5):
             for ind in draw(choices(range(min_dim + 1), num_newaxis)):
                 index.insert(ind, np.newaxis)
     return tuple(index)
+
+
+
+@st.composite
+def adv_integer_index(draw, shape, max_dim=3):
+    """ Hypothesis search strategy: given an array shape, generate a
+        a valid index for specifying an element/subarray of that array,
+        using advanced indexing with integer-valued arrays.
+
+        `draw` is a parameter reserved by hypothesis, and should not be specified
+        by the user.
+
+        Parameters
+        ----------
+        shape : Tuple[int, ...]
+            The shape of the array whose indices are being generated
+
+        max_dim : int
+            The max dimensionality permitted for the index-arrays.
+
+        Returns
+        -------
+        hypothesis.searchstrategy.SearchStrategy
+            -> Tuple[numpy.ndarray, ...]
+        """
+    index_shape = draw(hnp.array_shapes(max_dims=max_dim))
+    index = draw(st.tuples(*(hnp.arrays(dtype=int,
+                                        shape=index_shape, elements=st.integers(0, size - 1))
+                             for size in shape)))
+
+    return index

@@ -112,7 +112,7 @@ class fwdprop_test_factory():
                 for value in self.index_to_no_go.get(i, ()):
                     assume(np.all(arr != value))
 
-            o = self.op(*arrs, **kwargs)
+            o = self.op(*(Tensor(i) for i in arrs), **kwargs)
             tensor_out = o.data
             true_out = self.true_func(*arrs, **kwargs)
             assert isinstance(o, Tensor), "`mygrad_func` returned type {}, should return `mygrad.Tensor`".format(type(o))
@@ -249,13 +249,14 @@ class backprop_test_factory():
                 y = data.draw(hnp.arrays(shape=self.index_to_arr_shapes.get(i,
                                                                             broadcastable_shape(x.shape)),
                                          dtype=float,
-                                         elements=st.floats(*self.index_to_bnds.get(i, (-10., 10.))))
-                              )
+                                         elements=st.floats(*self.index_to_bnds.get(i, (-10., 10.)))),
+                              label="array-{}".format(i))
                 arrs.append(y)
 
             arrs = tuple(Tensor(arr) for arr in arrs)
             arr_copies = tuple(copy(arr) for arr in arrs)
-            kwargs = {k: (data.draw(v(*arrs)) if callable(v) else v) for k, v in self.kwargs.items()}
+            kwargs = {k: (data.draw(v(*arrs), label="kwarg: {}".format(k)) if callable(v) else v)
+                      for k, v in self.kwargs.items()}
 
             for i, arr in enumerate(arrs):
                 for value in self.index_to_no_go.get(i, ()):
@@ -266,9 +267,9 @@ class backprop_test_factory():
 
             grad = data.draw(hnp.arrays(shape=out.shape,
                                         dtype=float,
-                                        elements=st.floats(1, 10)))
+                                        elements=st.floats(1, 10)),
+                             label="grad")
 
-            #print(out)
             grad_copy = copy(grad)
             if any(out.shape != i.shape for i in arrs):
                 # broadcasting occurred, must reduce `out` to scalar
