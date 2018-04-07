@@ -17,7 +17,7 @@ class GetItem(Operation):
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
         out = np.zeros_like(a.data)
-        out[self.index] = grad
+        np.add.at(out, self.index, grad)
         a.backward(out, **kwargs)
 
 
