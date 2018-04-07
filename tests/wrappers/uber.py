@@ -101,12 +101,13 @@ class fwdprop_test_factory():
                 y = data.draw(hnp.arrays(shape=self.index_to_arr_shapes.get(i,
                                                                             broadcastable_shape(x.shape)),
                                          dtype=float,
-                                         elements=st.floats(*self.index_to_bnds.get(i, (-10., 10.))))
-                              )
+                                         elements=st.floats(*self.index_to_bnds.get(i, (-10., 10.)))),
+                              label="array-{}".format(i))
                 arrs.append(y)
 
             arr_copies = [copy(arr) for arr in arrs]
-            kwargs = {k: (data.draw(v(*arrs)) if callable(v) else v) for k, v in self.kwargs.items()}
+            kwargs = {k: (data.draw(v(*arrs), label="kwarg: {}".format(k)) if callable(v) else v)
+                      for k, v in self.kwargs.items()}
 
             for i, arr in enumerate(arrs):
                 for value in self.index_to_no_go.get(i, ()):

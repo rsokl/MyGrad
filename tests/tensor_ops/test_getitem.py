@@ -36,6 +36,10 @@ def adv_index_int_wrap(*arrs):
     return adv_integer_index(arrs[0].shape)
 
 
+def adv_index_bool_wrap(*arrs):
+    return hnp.arrays(shape=arrs[0].shape, dtype=bool)
+
+
 @fwdprop_test_factory(mygrad_func=get_item, true_func=get_item, num_arrays=1,
                       index_to_arr_shapes={0: hnp.array_shapes(max_side=6, max_dims=4)},
                       kwargs=dict(index=basic_index_wrap))
@@ -60,5 +64,19 @@ def test_getitem_advindex_int_fwdprop():
 @backprop_test_factory(mygrad_func=get_item, true_func=get_item, num_arrays=1,
                        index_to_arr_shapes={0: hnp.array_shapes(max_side=6, max_dims=4)},
                        kwargs=dict(index=adv_index_int_wrap))
+def test_getitem_advindex_int_bkwdprop():
+    pass
+
+
+@fwdprop_test_factory(mygrad_func=get_item, true_func=get_item, num_arrays=1,
+                      index_to_arr_shapes={0: hnp.array_shapes(max_side=6, max_dims=4)},
+                      kwargs=dict(index=adv_index_bool_wrap))
+def test_getitem_advindex_int_fwdprop():
+    pass
+
+
+@backprop_test_factory(mygrad_func=get_item, true_func=get_item, num_arrays=1,
+                       index_to_arr_shapes={0: hnp.array_shapes(max_side=6, max_dims=4)},
+                       kwargs=dict(index=adv_index_bool_wrap))
 def test_getitem_advindex_int_bkwdprop():
     pass
