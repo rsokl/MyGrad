@@ -1,162 +1,69 @@
 """ Test all binary arithmetic operations, checks for appropriate broadcast behavior"""
-from ...wrappers.binary_func import fwdprop_test_factory, backprop_test_factory
+from ...wrappers.uber import fwdprop_test_factory, backprop_test_factory
 
-from mygrad import add, subtract, multiply, divide, power, logaddexp, log, exp
-from mygrad import logaddexp2, log2
+from mygrad import add, subtract, multiply, divide, power, logaddexp
+from mygrad import logaddexp2
 
 import numpy as np
-from numpy.testing import assert_allclose
-
-from hypothesis import given
-import hypothesis.strategies as st
-import hypothesis.extra.numpy as hnp
-from ...custom_strategies import broadcastable_shape
-from mygrad import Tensor
 
 
-@fwdprop_test_factory(mygrad_func=add, true_func=np.add)
+@fwdprop_test_factory(mygrad_func=add, true_func=np.add, num_arrays=2)
 def test_add_fwd(): pass
 
 
-@backprop_test_factory(mygrad_func=add, true_func=np.add)
+@backprop_test_factory(mygrad_func=add, true_func=np.add, num_arrays=2)
 def test_add_bkwd(): pass
 
 
-@fwdprop_test_factory(mygrad_func=subtract, true_func=np.subtract)
+@fwdprop_test_factory(mygrad_func=subtract, true_func=np.subtract, num_arrays=2)
 def test_subtract_fwd(): pass
 
 
-@backprop_test_factory(mygrad_func=subtract, true_func=np.subtract)
+@backprop_test_factory(mygrad_func=subtract, true_func=np.subtract, num_arrays=2)
 def test_subtract_bkwd(): pass
 
 
-@fwdprop_test_factory(mygrad_func=multiply, true_func=np.multiply)
+@fwdprop_test_factory(mygrad_func=multiply, true_func=np.multiply, num_arrays=2)
 def test_multiply_fwd(): pass
 
 
-@backprop_test_factory(mygrad_func=multiply, true_func=np.multiply, atol=1e-4, rtol=1e-4)
+@backprop_test_factory(mygrad_func=multiply, true_func=np.multiply, atol=1e-4, rtol=1e-4, num_arrays=2)
 def test_multiply_bkwd(): pass
 
 
-@fwdprop_test_factory(mygrad_func=divide, true_func=np.divide, ybnds=(1, 10))
+@fwdprop_test_factory(mygrad_func=divide, true_func=np.divide, index_to_bnds={1: (1, 10)}, num_arrays=2)
 def test_divide_fwd(): pass
 
 
-@backprop_test_factory(mygrad_func=divide, true_func=np.divide, ybnds=(1, 10))
+@backprop_test_factory(mygrad_func=divide, true_func=np.divide, index_to_bnds={1: (1, 10)}, num_arrays=2)
 def test_divide_bkwd(): pass
 
 
-@fwdprop_test_factory(mygrad_func=power, true_func=np.power, xbnds=(1, 10), ybnds=(-3, 3))
+@fwdprop_test_factory(mygrad_func=power, true_func=np.power,
+                      index_to_bnds={0: (1, 10), 1: (-3, 3)},
+                      num_arrays=2)
 def test_power_fwd(): pass
 
 
-@backprop_test_factory(mygrad_func=power, true_func=np.power, xbnds=(0.1, 10), ybnds=(-3, 3))
+@backprop_test_factory(mygrad_func=power, true_func=np.power,
+                       index_to_bnds={0: (1, 10), 1: (-3, 3)},
+                       num_arrays=2, atol=1e-4, rtol=1e-4)
 def test_power_bkwd(): pass
 
 
-@fwdprop_test_factory(mygrad_func=add, true_func=np.add)
-def test_add_fwd(): pass
-
-
-@backprop_test_factory(mygrad_func=add, true_func=np.add)
-def test_add_bkwd(): pass
-
-
-@fwdprop_test_factory(mygrad_func=logaddexp, true_func=np.logaddexp)
+@fwdprop_test_factory(mygrad_func=logaddexp, true_func=np.logaddexp, num_arrays=2)
 def test_logaddexp_fwd(): pass
 
 
-# built-in numpy logaddexp doesn't work with object arrays
-@given(data=st.data(),
-       x=hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=3),
-                    dtype=float,
-                    elements=st.floats(-10, 10)))
-def test_logaddexp_bkwd(data, x):
-    """ Performs hypothesis unit test for checking back-propagation
-        through a `mygrad` op.
-
-        Raises
-        ------
-        AssertionError"""
-
-    y = data.draw(hnp.arrays(shape=broadcastable_shape(x.shape),
-                             dtype=float,
-                             elements=st.floats(-10, 10)))
-
-    # gradient to be backpropped through this operation
-    x = Tensor(x)
-    y = Tensor(y)
-    out = logaddexp(x, y)
-
-    grad = data.draw(hnp.arrays(shape=out.shape,
-                                dtype=float,
-                                elements=st.floats(-100, 100)))
-
-    # calculate logaddexp manually via mygrad-arithmetic
-    x_o = Tensor(x)
-    y_o = Tensor(y)
-    out_o = log(exp(x_o) + exp(y_o))
-
-    if any(out.shape != i.shape for i in (x, y)):
-        # broadcasting occurred, must reduce `out` to scalar
-        # first multiply by `grad` to simulate non-trivial back-prop
-        (grad * out).sum().backward()
-        (grad * out_o).sum().backward()
-    else:
-        out.backward(grad)
-        out_o.backward(grad)
-
-    assert_allclose(x.grad, x_o.grad,
-                    err_msg="x: numerical derivative and mygrad derivative do not match")
-    assert_allclose(y.grad, y_o.grad,
-                    err_msg="y: numerical derivative and mygrad derivative do not match")
+@backprop_test_factory(mygrad_func=logaddexp, true_func=np.logaddexp, num_arrays=2,
+                       as_decimal=False, atol=1e-4, rtol=1e-4)
+def test_logaddexp_bkwd(): pass
 
 
-@fwdprop_test_factory(mygrad_func=logaddexp2, true_func=np.logaddexp2)
-def test_logaddexp_fwd(): pass
+@fwdprop_test_factory(mygrad_func=logaddexp2, true_func=np.logaddexp2, num_arrays=2)
+def test_logaddexp2_fwd(): pass
 
 
-# built-in numpy logaddexp doesn't work with object arrays
-@given(data=st.data(),
-       x=hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=3),
-                    dtype=float,
-                    elements=st.floats(-10, 10)))
-def test_logaddexp2_bkwd(data, x):
-    """ Performs hypothesis unit test for checking back-propagation
-        through a `mygrad` op.
-
-        Raises
-        ------
-        AssertionError"""
-
-    y = data.draw(hnp.arrays(shape=broadcastable_shape(x.shape),
-                             dtype=float,
-                             elements=st.floats(-10, 10)))
-
-    # gradient to be backpropped through this operation
-    x = Tensor(x)
-    y = Tensor(y)
-    out = logaddexp2(x, y)
-
-    grad = data.draw(hnp.arrays(shape=out.shape,
-                                dtype=float,
-                                elements=st.floats(-100, 100)))
-
-    # calculate logaddexp manually via mygrad-arithmetic
-    x_o = Tensor(x)
-    y_o = Tensor(y)
-    out_o = log2(exp(x_o) + exp(y_o))
-
-    if any(out.shape != i.shape for i in (x, y)):
-        # broadcasting occurred, must reduce `out` to scalar
-        # first multiply by `grad` to simulate non-trivial back-prop
-        (grad * out).sum().backward()
-        (grad * out_o).sum().backward()
-    else:
-        out.backward(grad)
-        out_o.backward(grad)
-
-    assert_allclose(x.grad, x_o.grad,
-                    err_msg="x: numerical derivative and mygrad derivative do not match")
-    assert_allclose(y.grad, y_o.grad,
-                    err_msg="y: numerical derivative and mygrad derivative do not match")
+@backprop_test_factory(mygrad_func=logaddexp2, true_func=np.logaddexp2, num_arrays=2,
+                       as_decimal=False, atol=1e-4, rtol=1e-4)
+def test_logaddexp_bkwd(): pass
