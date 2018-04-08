@@ -323,7 +323,7 @@ def test_gru_backward(data):
 
     assert_allclose(V.grad, V2.grad, **tolerances)
 
-    # assert_allclose(X.grad, X2.grad, **tolerances)
+    assert_allclose(X.grad, X2.grad, **tolerances)
 
     ls.null_gradients()
     ls2.null_gradients()

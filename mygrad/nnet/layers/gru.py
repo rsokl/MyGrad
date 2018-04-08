@@ -55,11 +55,25 @@ def dot(a, b):
 def _gru_layer(s, z, r, h, Wz, Wr, Wh):
     """ Given:
             S(t=0)
-            X(t) Uz + bz
-            X(t) Ur + br
-            X(t) Uh + bh
+            z = X(t) Uz + bz
+            r = X(t) Ur + br
+            h = X(t) Uh + bh
 
-        Compute Z(t), R(t), H(t), S(t) for all 1 <= t <= T"""
+        Compute Z(t), R(t), H(t), S(t) for all 1 <= t <= T
+
+        Parameters
+        ----------
+        s : numpy.ndarray, shape=(T+1, N, D)
+            Modified in-place
+        z : numpy.ndarray, shape=(T, N, D)
+            Modified in-place
+        r : numpy.ndarray, shape=(T, N, D)
+            Modified in-place
+        h : numpy.ndarray, shape=(T, N, D)
+            Modified in-place
+        Wz : numpy.ndarray, shape=(D, D)
+        Wr : numpy.ndarray, shape=(D, D)
+        Wh : numpy.ndarray, shape=(D, D) """
     for n in range(len(s) - 1):
         z[n] += np.dot(s[n], Wz)
         z[n] = sig(z[n])
@@ -305,13 +319,17 @@ class GRUnit(Operation):
                 dh *= self._dropUh  # IMPORTANT augmented update: this must come after Wh and bh backprop
             self.Uh.backward(np.tensordot(self.X.data, dh, ([0, 1], [0, 1])), **kwargs)
 
+        # backprop through X
         if not self.X.constant:
             tmp = dLds * const["1 - z"] * const["1 - h**2"]
-
-            dLdX = dot((dLds * const["s - h"]) * const["z*(1 - z)"], self.Uz.data.T)
-            dLdX += dot(tmp, self.Uh.data.T)
-            dLdX += dot(dot(tmp, self.Wh.data.T) * s * const["r*(1 - r)"], self.Ur.data.T)
-
+            if not self._dropout:
+                dLdX = dot((dLds * const["s - h"]) * const["z*(1 - z)"], self.Uz.data.T)
+                dLdX += dot(tmp, self.Uh.data.T)
+                dLdX += dot(dot(tmp, Wh.T) * s * const["r*(1 - r)"], self.Ur.data.T)
+            else:
+                dLdX = dot((self._dropUz * (dLds * const["s - h"]) * const["z*(1 - z)"]), self.Uz.data.T)
+                dLdX += dot(self._dropUh * tmp, self.Uh.data.T)
+                dLdX += dot(self._dropUr * (dot(tmp, Wh.T) * s * const["r*(1 - r)"]), self.Ur.data.T)
             self.X.backward(dLdX, **kwargs)
 
     def null_gradients(self):
