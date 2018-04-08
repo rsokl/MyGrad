@@ -36,7 +36,7 @@ class SetItem(BroadcastableOp):
             index : valid-array-index"""
         self.variables = (a, b)
 
-        self.index = index
+        self.index = index if isinstance(index, tuple) else (index,)
         a.data[index] = b.data
 
         return a.data
@@ -49,18 +49,19 @@ class SetItem(BroadcastableOp):
             kwargs["_broadcastable"] = False
             a.backward(grad, **kwargs)
         elif index == 1:
-            grad_sel = grad[self.index]
+            grad_sel = np.asarray(grad[self.index])
 
-            if not np.shares_memory(grad_sel, grad):
-                unique = arr(*grad.shape)
-                sub_sel = unique[self.index].flat
-                elements, first_inds, = np.unique(np.flip(sub_sel, axis=0), return_index=True)
-                if len(first_inds) < len(sub_sel):
-                    first_inds = (len(sub_sel) - 1) - first_inds
-                    mask = np.zeros_like(sub_sel)
-                    mask[first_inds] = 1
-                    mask = mask.reshape(grad_sel.shape)
-                    grad_sel *= mask
+            if not np.shares_memory(grad_sel, grad) and grad_sel.size > 0 and grad_sel.ndim > 0:
+                if len(self.index) > 1 or not np.issubdtype(np.asarray(self.index[0]).dtype, np.bool_):
+                    unique = arr(*grad.shape)
+                    sub_sel = unique[self.index].flat
+                    elements, first_inds, = np.unique(np.flip(sub_sel, axis=0), return_index=True)
+                    if len(first_inds) < len(sub_sel):
+                        first_inds = (len(sub_sel) - 1) - first_inds
+                        mask = np.zeros_like(sub_sel)
+                        mask[first_inds] = 1
+                        mask = mask.reshape(grad_sel.shape)
+                        grad_sel *= mask
 
             # handle the edge case of "projecting down" on setitem. E.g:
             # x = Tensor([0, 1, 2])
