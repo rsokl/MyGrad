@@ -7,7 +7,21 @@ __all__ = ["GetItem",
 
 
 class GetItem(Operation):
+    """ Defines the __getitem__ interface for a Tensor, supporting back-propagation
+
+        Supports back-propagation through all valid numpy-indexing (basic, advanced, mixed, etc.)"""
     def __call__(self, a, index):
+        """ a[index]
+
+            Parameters
+            ----------
+            a : mygrad.Tensor
+                The tensor whose entries are being accessed.
+
+            index : valid-array-index
+                An n-dimensional index for specifying entries or subregions of `a`.
+                All means of numpy-array indexing (basic, advanced, mixed, etc) are
+                supported."""
         self.variables = (a,)
         self.index = index
         out = a.data[index]
@@ -62,15 +76,32 @@ def _is_bool_array_index(index):
 
 
 class SetItem(BroadcastableOp):
+    """ Defines the __setitem__ interface for a Tensor, supporting back-propagation through
+        both the tensor being set and the tensor whose .
 
+        Supports back-propagation through all valid numpy-indexing (basic, advanced, mixed, etc.),
+        as well as """
     def __call__(self, a, b, index):
         """ a[index] = b
 
             Parameters
             ----------
             a : mygrad.Tensor
+                The tensor whose entries are being set
+
             b : mygrad.Tensor
-            index : valid-array-index"""
+                `b` must be broadcast-compatible with `a[index]`
+
+            index : valid-array-index
+                An n-dimensional index for specifying entries or subregions of `a`.
+                All means of numpy-array indexing (basic, advanced, mixed, etc) are
+                supported.
+
+            Notes
+            -----
+            Additional computational overhead is required for back-propagation when
+            `index` contains any integer-valued arrays, to accommodate for the scenario
+            in which a single element is set multiple times."""
         self.variables = (a, b)
 
         self.index = index if isinstance(index, tuple) else (index,)
