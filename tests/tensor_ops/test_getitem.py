@@ -71,12 +71,77 @@ def test_getitem_advindex_int_bkwdprop():
 @fwdprop_test_factory(mygrad_func=get_item, true_func=get_item, num_arrays=1,
                       index_to_arr_shapes={0: hnp.array_shapes(max_side=6, max_dims=4)},
                       kwargs=dict(index=adv_index_bool_wrap))
-def test_getitem_advindex_int_fwdprop():
+def test_getitem_advindex_bool_fwdprop():
     pass
 
 
 @backprop_test_factory(mygrad_func=get_item, true_func=get_item, num_arrays=1,
                        index_to_arr_shapes={0: hnp.array_shapes(max_side=6, max_dims=4)},
                        kwargs=dict(index=adv_index_bool_wrap))
-def test_getitem_advindex_int_bkwdprop():
+def test_getitem_advindex_bool_bkwdprop():
+    pass
+
+
+# test broadcast-compatible int-arrays
+rows = np.array([0, 3], dtype=np.intp)
+columns = np.array([0, 2], dtype=np.intp)
+
+
+@fwdprop_test_factory(mygrad_func=get_item, true_func=get_item, num_arrays=1,
+                      index_to_arr_shapes={0: (4, 3)},
+                      kwargs=dict(index=np.ix_(rows, columns)))
+def test_getitem_broadcast_index_fwdprop():
+    pass
+
+
+@backprop_test_factory(mygrad_func=get_item, true_func=get_item, num_arrays=1,
+                       index_to_arr_shapes={0: (4, 3)},
+                       kwargs=dict(index=np.ix_(rows, columns)))
+def test_getitem_broadcast_index_bkprop():
+    pass
+
+
+@fwdprop_test_factory(mygrad_func=get_item, true_func=get_item, num_arrays=1,
+                      index_to_arr_shapes={0: (3, 2, 4, 3)},
+                      kwargs=dict(index=(Ellipsis, 2, 0)))
+def test_getitem_ellipsis_index_fwdprop():
+    pass
+
+
+@backprop_test_factory(mygrad_func=get_item, true_func=get_item, num_arrays=1,
+                       index_to_arr_shapes={0: (3, 2, 4, 3)},
+                       kwargs=dict(index=(Ellipsis, 2, 0)))
+def test_getitem_ellipsis_index_bkprop():
+    pass
+
+
+rows1 = np.array([False,  True, False,  True])
+columns1 = [0, 2]
+
+
+@fwdprop_test_factory(mygrad_func=get_item, true_func=get_item, num_arrays=1,
+                      index_to_arr_shapes={0: (4, 3)},
+                      kwargs=dict(index=np.ix_(rows1, columns1)))
+def test_getitem_bool_int_fwdprop():
+    pass
+
+
+@backprop_test_factory(mygrad_func=get_item, true_func=get_item, num_arrays=1,
+                       index_to_arr_shapes={0: (4, 3)},
+                       kwargs=dict(index=np.ix_(rows1, columns1)))
+def test_getitem_bool_int_bkprop():
+    pass
+
+
+@fwdprop_test_factory(mygrad_func=get_item, true_func=get_item, num_arrays=1,
+                      index_to_arr_shapes={0: (4, 3)},
+                      kwargs=dict(index=(slice(1, 2), [1, 2])))
+def test_getitem_basic_w_adv_fwdprop():
+    pass
+
+
+@backprop_test_factory(mygrad_func=get_item, true_func=get_item, num_arrays=1,
+                       index_to_arr_shapes={0: (4, 3)},
+                       kwargs=dict(index=(slice(1, 2), [1, 2])))
+def test_getitem_basic_w_adv_bkprop():
     pass
