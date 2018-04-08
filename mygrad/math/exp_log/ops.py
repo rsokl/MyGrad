@@ -67,12 +67,10 @@ class Logaddexp2(BroadcastableOp):
     def backward_var(self, grad, index, **kwargs):
         a, b = self.variables
         if index == 0:
-            dLda = grad / (1 + np.exp(b.data - a.data))
-            dLda /= np.log(2)
+            dLda = grad / (1 + 2 ** (b.data - a.data))
             a.backward(dLda, **kwargs)
         else:
-            dLdb = grad / (1 + np.exp(a.data - b.data))
-            dLdb /= np.log(2)
+            dLdb = grad / (1 + 2 ** (a.data - b.data))
             b.backward(dLdb, **kwargs)
 
 

@@ -139,7 +139,8 @@ class SetItem(BroadcastableOp):
                     if len(first_inds) < len(sub_sel):
                         # one or more elements were set redundantly, identify the entries in `b`
                         # that actually were set to those elements (the last-most set-item calls
-                        # for those elements).
+                        # for those elements) and propagate only the corresponding elements from grad
+
                         first_inds = (len(sub_sel) - 1) - first_inds
                         mask = np.zeros_like(sub_sel)
                         mask[first_inds] = 1
