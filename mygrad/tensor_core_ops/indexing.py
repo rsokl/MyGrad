@@ -21,7 +21,44 @@ class GetItem(Operation):
         a.backward(out, **kwargs)
 
 
-def arr(*shape): return np.arange(np.prod(shape)).reshape(shape)
+def _arr(*shape):
+    """ Construct an array of a specified consisting of values [0, _arr.size)
+        filled in row-major order.
+
+        Parameters
+        ----------
+        *shape : int
+
+        Returns
+        -------
+        numpy.ndarray"""
+    return np.arange(np.prod(shape)).reshape(shape)
+
+
+def _is_int_array_index(index):
+    """ Returns True if `index` contains any array-like integer-valued sequences
+
+        Parameters
+        ----------
+        index : Tuple[Any]
+
+        Returns
+        -------
+        bool """
+    return any(np.issubdtype(np.asarray(ind).dtype, np.int_) and np.asarray(ind).ndim for ind in index)
+
+
+def _is_bool_array_index(index):
+    """ Returns True if `index` solely contains a boolean-valued array
+
+        Parameters
+        ----------
+        index : Tuple[Any]
+
+        Returns
+        -------
+        bool """
+    return len(index) == 1 and np.issubdtype(np.asarray(index[0]).dtype, np.bool_)
 
 
 class SetItem(BroadcastableOp):
@@ -52,8 +89,8 @@ class SetItem(BroadcastableOp):
             grad_sel = np.asarray(grad[self.index])
 
             if not np.shares_memory(grad_sel, grad) and grad_sel.size > 0 and grad_sel.ndim > 0:
-                if len(self.index) > 1 or not np.issubdtype(np.asarray(self.index[0]).dtype, np.bool_):
-                    unique = arr(*grad.shape)
+                if not _is_bool_array_index(self.index) and _is_int_array_index(self.index):
+                    unique = _arr(*grad.shape)
                     sub_sel = unique[self.index].flat
                     elements, first_inds, = np.unique(np.flip(sub_sel, axis=0), return_index=True)
                     if len(first_inds) < len(sub_sel):

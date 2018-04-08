@@ -52,7 +52,8 @@ def compare_backprop(*operands, atol=1e-5, rtol=1e-5):
     #    grad = np.ones(out.shape)
     out.backward(grad)
 
-    numerical_derivs = numerical_gradient_full(f, *vars, back_grad=grad)
+    numerical_derivs = numerical_gradient_full(f, *vars, back_grad=grad,
+                                               as_decimal=False)
 
     for n, (dnum, tensor) in enumerate(zip(numerical_derivs, tensors)):
         assert dnum.shape == tensor.grad.shape
@@ -206,7 +207,7 @@ def test_einsum_bkwd1(num, data):
 
     def f(x, y): return np.einsum("i, i", x, y)
 
-    dx, dy = numerical_gradient_full(f, x.data, y.data, back_grad=grad)
+    dx, dy = numerical_gradient_full(f, x.data, y.data, back_grad=grad, as_decimal=False)
 
     assert_allclose(x.grad, dx, atol=1e-5, rtol=1e-5)
     assert_allclose(y.grad, dy, atol=1e-5, rtol=1e-5)
@@ -219,7 +220,7 @@ def test_einsum_bkwd1(num, data):
     o = einsum("i, i", y, x)
     o.backward(grad)
 
-    dy, dx = numerical_gradient_full(f, y.data, x.data, back_grad=grad)
+    dy, dx = numerical_gradient_full(f, y.data, x.data, back_grad=grad, as_decimal=False)
 
     assert_allclose(x.grad, dx, atol=1e-5, rtol=1e-5)
     assert_allclose(y.grad, dy, atol=1e-5, rtol=1e-5)
@@ -242,7 +243,7 @@ def test_einsum_bkwd2(num, data):
 
     def f(x, y): return np.einsum("ia, i -> a", x, y)
 
-    dx, dy = numerical_gradient_full(f, x.data, y.data, back_grad=grad)
+    dx, dy = numerical_gradient_full(f, x.data, y.data, back_grad=grad, as_decimal=False)
 
     assert_allclose(x.grad, dx, atol=1e-6)
     assert_allclose(y.grad, dy, atol=1e-6)
@@ -267,7 +268,8 @@ def test_einsum_bkwd3(shape, data):
 
     def f(x, y, z): return np.einsum(script, x, y, z)
 
-    dx, dy, dz = numerical_gradient_full(f, x.data, y.data, z.data, back_grad=grad)
+    dx, dy, dz = numerical_gradient_full(f, x.data, y.data, z.data, back_grad=grad,
+                                         as_decimal=False)
 
     assert_allclose(x.grad, dx, atol=1e-6)
     assert_allclose(y.grad, dy, atol=1e-6)
@@ -291,7 +293,8 @@ def test_einsum_bkwd4(shape, data):
 
     def f(x, y): return np.einsum(script, x, y)
 
-    dx, dy = numerical_gradient_full(f, x.data, y.data, back_grad=grad)
+    dx, dy = numerical_gradient_full(f, x.data, y.data, back_grad=grad,
+                                     as_decimal=False)
 
     assert_allclose(x.grad, dx, atol=1e-6)
     assert_allclose(y.grad, dy, atol=1e-6)
@@ -307,7 +310,8 @@ def test_einsum_bkwd5():
     o = einsum("iBCj, aijd -> aBCd", x, y)
     o.backward(grad)
 
-    dx, dy = numerical_gradient_full(f, x.data, y.data, back_grad=grad)
+    dx, dy = numerical_gradient_full(f, x.data, y.data, back_grad=grad,
+                                     as_decimal=False)
 
     assert_allclose(x.grad, dx, atol=1e-6)
     assert_allclose(y.grad, dy, atol=1e-6)
@@ -326,7 +330,8 @@ def test_einsum_bkwd6(shape, data):
 
     def f(x, y): return np.einsum(sig, x, y)
 
-    dx, dy = numerical_gradient_full(f, x.data, y.data, back_grad=grad)
+    dx, dy = numerical_gradient_full(f, x.data, y.data, back_grad=grad,
+                                     as_decimal=False)
 
     assert_allclose(x.grad, dx, atol=1e-6)
     assert_allclose(y.grad, dy, atol=1e-6)

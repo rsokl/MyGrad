@@ -286,7 +286,8 @@ class backprop_test_factory():
                                                           back_grad=grad, kwargs=kwargs,
                                                           as_decimal=self.as_decimal)
             else:
-                grads_numerical = numerical_grad(self.true_func, *(i.data for i in arrs), back_grad=grad, kwargs=kwargs)
+                grads_numerical = numerical_grad(self.true_func, *(i.data for i in arrs), back_grad=grad,
+                                                 kwargs=kwargs, as_decimal=self.as_decimal)
 
             for n, (arr, d_num) in enumerate(zip(arrs, grads_numerical)):
                 assert_allclose(arr.grad, d_num, **self.tolerances,

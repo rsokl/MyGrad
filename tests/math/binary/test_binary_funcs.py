@@ -11,7 +11,8 @@ import numpy as np
 def test_add_fwd(): pass
 
 
-@backprop_test_factory(mygrad_func=add, true_func=np.add, num_arrays=2)
+@backprop_test_factory(mygrad_func=add, true_func=np.add, num_arrays=2,
+                       atol=1e-4, rtol=1e-4)
 def test_add_bkwd(): pass
 
 
@@ -19,7 +20,8 @@ def test_add_bkwd(): pass
 def test_subtract_fwd(): pass
 
 
-@backprop_test_factory(mygrad_func=subtract, true_func=np.subtract, num_arrays=2)
+@backprop_test_factory(mygrad_func=subtract, true_func=np.subtract, num_arrays=2,
+                       atol=1e-4, rtol=1e-4)
 def test_subtract_bkwd(): pass
 
 
@@ -35,7 +37,8 @@ def test_multiply_bkwd(): pass
 def test_divide_fwd(): pass
 
 
-@backprop_test_factory(mygrad_func=divide, true_func=np.divide, index_to_bnds={1: (1, 10)}, num_arrays=2)
+@backprop_test_factory(mygrad_func=divide, true_func=np.divide, index_to_bnds={1: (1, 10)}, num_arrays=2,
+                       atol=1e-4, rtol=1e-4)
 def test_divide_bkwd(): pass
 
 
@@ -66,4 +69,4 @@ def test_logaddexp2_fwd(): pass
 
 @backprop_test_factory(mygrad_func=logaddexp2, true_func=np.logaddexp2, num_arrays=2,
                        as_decimal=False, atol=1e-4, rtol=1e-4)
-def test_logaddexp_bkwd(): pass
+def test_logaddexp2_bkwd(): pass
