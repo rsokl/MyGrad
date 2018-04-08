@@ -256,42 +256,54 @@ class GRUnit(Operation):
 
         if any(not const for const in (self.Uz.constant, self.Wz.constant, self.bz.constant)):
             dz = zgrad * const["z*(1 - z)"]
-
-        if not self.Uz.constant:
-            self.Uz.backward(np.tensordot(self.X.data, dz, ([0, 1], [0, 1])), **kwargs)
+        # backprop through Wz
         if not self.Wz.constant:
             dWz = np.tensordot(s, dz, ([0, 1], [0, 1]))
             if self._dropout:
                 dWz *= self._dropWz
             self.Wz.backward(dWz, **kwargs)
+        # backprop through bz
         if not self.bz.constant:
             self.bz.backward(dz.sum(axis=(0, 1)), **kwargs)
+        # backprop through bz
+        if not self.Uz.constant:
+            if self._dropout:
+                dz *= self._dropUz  # IMPORTANT augmented update: this must come after Wz and bz backprop
+            self.Uz.backward(np.tensordot(self.X.data, dz, ([0, 1], [0, 1])), **kwargs)
 
         if any(not const for const in (self.Ur.constant, self.Wr.constant, self.br.constant)):
             dr = rgrad * const["r*(1 - r)"]
-
+        # backprop through Wr
         if not self.Wr.constant:
             dWr = np.tensordot(s, dr, ([0, 1], [0, 1]))
             if self._dropout:
                 dWr *= self._dropWr
             self.Wr.backward(dWr, **kwargs)
+        # backprop through br
         if not self.br.constant:
             self.br.backward(dr.sum(axis=(0, 1)), **kwargs)
+        # backprop through Ur
         if not self.Ur.constant:
+            if self._dropout:
+                dr *= self._dropUr  # IMPORTANT augmented update: this must come after Wr and br backprop
             self.Ur.backward(np.tensordot(self.X.data, dr, ([0, 1], [0, 1])), **kwargs)
 
         if any(not const for const in (self.Uh.constant, self.Wh.constant, self.bh.constant)):
             dh = hgrad * const["1 - h**2"]
-
-        if not self.Uh.constant:
-            self.Uh.backward(np.tensordot(self.X.data, dh, ([0, 1], [0, 1])), **kwargs)
+        # backprop through Wh
         if not self.Wh.constant:
             dWh = np.tensordot((s * r), dh, ([0, 1], [0, 1]))
             if self._dropout:
                 dWh *= self._dropWh
             self.Wh.backward(dWh, **kwargs)
+        # backprop through bh
         if not self.bh.constant:
             self.bh.backward(dh.sum(axis=(0, 1)), **kwargs)
+        # backprop through Uh
+        if not self.Uh.constant:
+            if self._dropout:
+                dh *= self._dropUh  # IMPORTANT augmented update: this must come after Wh and bh backprop
+            self.Uh.backward(np.tensordot(self.X.data, dh, ([0, 1], [0, 1])), **kwargs)
 
         if not self.X.constant:
             tmp = dLds * const["1 - z"] * const["1 - h**2"]
