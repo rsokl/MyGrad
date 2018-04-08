@@ -185,8 +185,8 @@ class GRUnit(Operation):
             Wh = self._dropWh * self.Wh.data
 
         else:
-            self._dropUz, self._dropUr, self.dropUh = None, None, None
-            self._dropWz, self._dropWr, self.dropWh = None, None, None
+            self._dropUz, self._dropUr, self._dropUh = None, None, None
+            self._dropWz, self._dropWr, self._dropWh = None, None, None
             Wz = self.Wz.data
             Wr = self.Wr.data
             Wh = self.Wh.data
@@ -223,30 +223,31 @@ class GRUnit(Operation):
                  "r*(1 - r)": d_sig(r)}
 
         if self._dropout:
-            const["1 - h**2"] *= self._droph
-            const["r*(1 - r)"] *= self._dropr
-            const["z*(1 - z)"] *= self._dropz
-            h *= self._droph
-            r *= self._dropr
-            z *= self._dropz
+            Wz = self._dropWz * self.Wz.data
+            Wr = self._dropWr * self.Wr.data
+            Wh = self._dropWh * self.Wh.data
+        else:
+            Wz = self.Wz.data
+            Wr = self.Wr.data
+            Wh = self.Wh.data
 
         const["s - h"] = s - h
         const["1 - z"] = 1 - z
 
         _gru_bptt(self.X.data, dLds, s, z, r,
-                   self.Wz.data,
-                   self.Wh.data,
-                   self.Wr.data,
-                   const["z*(1 - z)"],
-                   const["1 - h**2"],
-                   const["r*(1 - r)"],
-                   const["s - h"],
-                   const["1 - z"],
-                   self.bp_lim)
+                  Wz,
+                  Wh,
+                  Wr,
+                  const["z*(1 - z)"],
+                  const["1 - h**2"],
+                  const["r*(1 - r)"],
+                  const["s - h"],
+                  const["1 - z"],
+                  self.bp_lim)
 
         zgrad = dLds * const["s - h"]   # dL / dz
         hgrad = dLds * const["1 - z"]   # dL / dh
-        rgrad = dot(const["1 - h**2"] * hgrad, self.Wh.data.T) * s  # dL / dr
+        rgrad = dot(const["1 - h**2"] * hgrad, Wh.T) * s  # dL / dr
 
         self._hidden_seq.grad = dLds
         self._z.grad = zgrad
@@ -259,19 +260,25 @@ class GRUnit(Operation):
         if not self.Uz.constant:
             self.Uz.backward(np.tensordot(self.X.data, dz, ([0, 1], [0, 1])), **kwargs)
         if not self.Wz.constant:
-            self.Wz.backward(np.tensordot(s, dz, ([0, 1], [0, 1])), **kwargs)
+            dWz = np.tensordot(s, dz, ([0, 1], [0, 1]))
+            if self._dropout:
+                dWz *= self._dropWz
+            self.Wz.backward(dWz, **kwargs)
         if not self.bz.constant:
             self.bz.backward(dz.sum(axis=(0, 1)), **kwargs)
 
         if any(not const for const in (self.Ur.constant, self.Wr.constant, self.br.constant)):
             dr = rgrad * const["r*(1 - r)"]
 
-        if not self.Ur.constant:
-            self.Ur.backward(np.tensordot(self.X.data, dr, ([0, 1], [0, 1])), **kwargs)
         if not self.Wr.constant:
-            self.Wr.backward(np.tensordot(s, dr, ([0, 1], [0, 1])), **kwargs)
+            dWr = np.tensordot(s, dr, ([0, 1], [0, 1]))
+            if self._dropout:
+                dWr *= self._dropWr
+            self.Wr.backward(dWr, **kwargs)
         if not self.br.constant:
             self.br.backward(dr.sum(axis=(0, 1)), **kwargs)
+        if not self.Ur.constant:
+            self.Ur.backward(np.tensordot(self.X.data, dr, ([0, 1], [0, 1])), **kwargs)
 
         if any(not const for const in (self.Uh.constant, self.Wh.constant, self.bh.constant)):
             dh = hgrad * const["1 - h**2"]
@@ -279,7 +286,10 @@ class GRUnit(Operation):
         if not self.Uh.constant:
             self.Uh.backward(np.tensordot(self.X.data, dh, ([0, 1], [0, 1])), **kwargs)
         if not self.Wh.constant:
-            self.Wh.backward(np.tensordot((s * r), dh, ([0, 1], [0, 1])), **kwargs)
+            dWh = np.tensordot((s * r), dh, ([0, 1], [0, 1]))
+            if self._dropout:
+                dWh *= self._dropWh
+            self.Wh.backward(dWh, **kwargs)
         if not self.bh.constant:
             self.bh.backward(dh.sum(axis=(0, 1)), **kwargs)
 
