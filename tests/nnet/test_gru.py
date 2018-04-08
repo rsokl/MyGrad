@@ -10,55 +10,67 @@ import hypothesis.extra.numpy as hnp
 import numpy as np
 from numpy.testing import assert_allclose
 
+
 @given(st.data())
 def test_gru_fwd(data):
     X = data.draw(hnp.arrays(shape=hnp.array_shapes(max_side=5, min_dims=3, max_dims=3),
                              dtype=float,
-                             elements=st.floats(-10, 10)))
+                             elements=st.floats(-10, 10)),
+                  label="X")
     T, N, C = X.shape
-    D = data.draw(st.sampled_from(list(range(1, 5))))
-    dropout = data.draw(st.sampled_from([0, .33]))
+    D = data.draw(st.sampled_from(list(range(1, 5))), label="D")
+    dropout = data.draw(st.sampled_from([0, .45]), label="dropout")
 
 
     Wz = data.draw(hnp.arrays(shape=(D, D),
-                             dtype=float,
-                             elements=st.floats(-10.0, 10.0)))
+                              dtype=float,
+                              elements=st.floats(-10.0, 10.0)),
+                   label="Wz")
 
     Uz = data.draw(hnp.arrays(shape=(C, D),
-                             dtype=float,
-                             elements=st.floats(-10.0, 10.0)))
+                              dtype=float,
+                              elements=st.floats(-10.0, 10.0)),
+                   label="Uz")
 
     bz = data.draw(hnp.arrays(shape=(D,),
-                             dtype=float,
-                             elements=st.floats(-10.0, 10.0)))
+                              dtype=float,
+                              elements=st.floats(-10.0, 10.0)),
+                   label="bz")
 
     Wr = data.draw(hnp.arrays(shape=(D, D),
-                             dtype=float,
-                             elements=st.floats(-10.0, 10.0)))
+                              dtype=float,
+                              elements=st.floats(-10.0, 10.0)),
+                   label="Wr")
 
     Ur = data.draw(hnp.arrays(shape=(C, D),
-                             dtype=float,
-                             elements=st.floats(-10.0, 10.0)))
+                              dtype=float,
+                              elements=st.floats(-10.0, 10.0)),
+                   label="Ur")
 
     br = data.draw(hnp.arrays(shape=(D,),
-                             dtype=float,
-                             elements=st.floats(-10.0, 10.0)))
+                              dtype=float,
+                              elements=st.floats(-10.0, 10.0)),
+                   label="br")
 
     Wh = data.draw(hnp.arrays(shape=(D, D),
-                             dtype=float,
-                             elements=st.floats(-10.0, 10.0)))
+                              dtype=float,
+                              elements=st.floats(-10.0, 10.0)),
+                   label="Wh")
 
     Uh = data.draw(hnp.arrays(shape=(C, D),
-                             dtype=float,
-                             elements=st.floats(-10.0, 10.0)))
+                              dtype=float,
+                              elements=st.floats(-10.0, 10.0)),
+                   label="Uh")
 
     bh = data.draw(hnp.arrays(shape=(D,),
-                             dtype=float,
-                             elements=st.floats(-10.0, 10.0)))
+                              dtype=float,
+                              elements=st.floats(-10.0, 10.0)),
+                   label="bh")
 
     V = data.draw(hnp.arrays(shape=(D, C),
                              dtype=float,
-                             elements=st.floats(-10.0, 10.0)))
+                             elements=st.floats(-10.0, 10.0)),
+                  label="V")
 
 
     s0 = np.zeros((N, D), dtype=float)
@@ -104,22 +116,31 @@ def test_gru_fwd(data):
     ls = o.sum()
 
     if dropout:
-        for d in [s.creator._dropr, s.creator._dropz, s.creator._droph]:
+        for d in [s.creator._dropUr, s.creator._dropUz, s.creator._dropUh,
+                  s.creator._dropWr, s.creator._dropWz, s.creator._dropWh]:
             assert np.all(np.logical_or(d == 1 / (1 - dropout), d == 0))
 
     stt = s2
     all_s = [s0.data]
     ls2 = 0
+    if dropout:
+        Wz2d = s.creator._dropWz * Wz2
+        Wr2d = s.creator._dropWr * Wr2
+        Wh2d = s.creator._dropWh * Wh2
+    else:
+        Wz2d = Wz2
+        Wr2d = Wr2
+        Wh2d = Wh2
     for n, x in enumerate(X2):
-        z = sigmoid(dense(x, Uz2) + dense(stt, Wz2) + bz2)
-        if dropout:
-            z *= s.creator._dropz[n]
-        r = sigmoid(dense(x, Ur2) + dense(stt, Wr2) + br2)
-        if dropout:
-            r *= s.creator._dropr[n]
-        h = tanh(dense(x, Uh2) + dense((r * stt), Wh2) + bh2)
-        if dropout:
-            h *= s.creator._droph[n]
+        if not dropout:
+            z = sigmoid(dense(x, Uz2) + dense(stt, Wz2d) + bz2)
+            r = sigmoid(dense(x, Ur2) + dense(stt, Wr2d) + br2)
+            h = tanh(dense(x, Uh2) + dense((r * stt), Wh2d) + bh2)
+        else:
+            z = sigmoid((s.creator._dropUz[0] * dense(x, Uz2)) + dense(stt, Wz2d) + bz2)
+            r = sigmoid((s.creator._dropUr[0] * dense(x, Ur2)) + dense(stt, Wr2d) + br2)
+            h =    tanh((s.creator._dropUh[0] * dense(x, Uh2)) + dense((r * stt), Wh2d) + bh2)
+
         stt = (1 - z) * h + z * stt
         all_s.append(stt)
         o = dense(stt, V2)
@@ -158,51 +179,62 @@ def test_gru_backward(data):
     tolerances = dict(atol=1e-5, rtol=1e-5)
     X = data.draw(hnp.arrays(shape=hnp.array_shapes(max_side=5, min_dims=3, max_dims=3),
                              dtype=float,
-                             elements=st.floats(-10, 10)))
+                             elements=st.floats(-10, 10)),
+                  label="X")
     T, N, C = X.shape
-    D = data.draw(st.sampled_from(list(range(1, 5))))
-    dropout = data.draw(st.sampled_from([0, .33]))
+    D = data.draw(st.sampled_from(list(range(1, 5))), label="D")
+    dropout = data.draw(st.sampled_from([0, .45]), label="dropout")
 
 
     Wz = data.draw(hnp.arrays(shape=(D, D),
                               dtype=float,
-                              elements=st.floats(-10.0, 10.0)))
+                              elements=st.floats(-10.0, 10.0)),
+                   label="Wz")
 
     Uz = data.draw(hnp.arrays(shape=(C, D),
                               dtype=float,
-                              elements=st.floats(-10.0, 10.0)))
+                              elements=st.floats(-10.0, 10.0)),
+                   label="Uz")
 
     bz = data.draw(hnp.arrays(shape=(D,),
                               dtype=float,
-                              elements=st.floats(-10.0, 10.0)))
+                              elements=st.floats(-10.0, 10.0)),
+                   label="bz")
 
     Wr = data.draw(hnp.arrays(shape=(D, D),
                               dtype=float,
-                              elements=st.floats(-10.0, 10.0)))
+                              elements=st.floats(-10.0, 10.0)),
+                   label="Wr")
 
     Ur = data.draw(hnp.arrays(shape=(C, D),
                               dtype=float,
-                              elements=st.floats(-10.0, 10.0)))
+                              elements=st.floats(-10.0, 10.0)),
+                   label="Ur")
 
     br = data.draw(hnp.arrays(shape=(D,),
                               dtype=float,
-                              elements=st.floats(-10.0, 10.0)))
+                              elements=st.floats(-10.0, 10.0)),
+                   label="br")
 
     Wh = data.draw(hnp.arrays(shape=(D, D),
                               dtype=float,
-                              elements=st.floats(-10.0, 10.0)))
+                              elements=st.floats(-10.0, 10.0)),
+                   label="Wh")
 
     Uh = data.draw(hnp.arrays(shape=(C, D),
                               dtype=float,
-                              elements=st.floats(-10.0, 10.0)))
+                              elements=st.floats(-10.0, 10.0)),
+                   label="Uh")
 
     bh = data.draw(hnp.arrays(shape=(D,),
                               dtype=float,
-                              elements=st.floats(-10.0, 10.0)))
+                              elements=st.floats(-10.0, 10.0)),
+                   label="bh")
 
     V = data.draw(hnp.arrays(shape=(D, C),
                              dtype=float,
-                             elements=st.floats(-10.0, 10.0)))
+                             elements=st.floats(-10.0, 10.0)),
+                  label="V")
 
     s0 = np.zeros((N, D), dtype=float)
 

@@ -52,34 +52,25 @@ def dot(a, b):
 
 
 @njit
-def _gru_layer(s, z, r, h, Wz, Wr, Wh, bz, br, bh):
+def _gru_layer(s, z, r, h, Wz, Wr, Wh):
+    """ Given:
+            S(t=0)
+            X(t) Uz + bz
+            X(t) Ur + br
+            X(t) Uh + bh
+
+        Compute Z(t), R(t), H(t), S(t) for all 1 <= t <= T"""
     for n in range(len(s) - 1):
-        z[n] += np.dot(s[n], Wz) + bz
+        z[n] += np.dot(s[n], Wz)
         z[n] = sig(z[n])
 
-        r[n] += np.dot(s[n], Wr) + br
+        r[n] += np.dot(s[n], Wr)
         r[n] = sig(r[n])
 
-        h[n] += np.dot(r[n] * s[n], Wh) + bh
+        h[n] += np.dot(r[n] * s[n], Wh)
         h[n] = np.tanh(h[n])
 
         s[n + 1] = (1 - z[n]) * h[n] + z[n] * s[n]
-
-
-@njit
-def _gru_layer_dropout(s, z, r, h, Wz, Wr, Wh, bz, br, bh, dropz, dropr, droph):
-    for n in range(len(s) - 1):
-        z[n] += np.dot(s[n], Wz) + bz
-        z[n] = (1 / (1 + np.exp(-z[n])))
-
-        r[n] += np.dot(s[n], Wr) + br
-        r[n] = (1 / (1 + np.exp(-r[n])))
-
-        h[n] += np.dot(dropr[n] * r[n] * s[n], Wh) + bh
-        h[n] = np.tanh(h[n])
-
-        zd = dropz[n] * z[n]
-        s[n + 1] = (1 - zd) * droph[n] * h[n] + zd * s[n]
 
 
 @njit
@@ -140,7 +131,6 @@ def _gru_bptt(X, dLds, s, z, r, Wz, Wh, Wr, dz, dh, dr, s_h, one_z, bp_lim, old_
                                         one_z[source_index])
 
 
-import mygrad
 class GRUnit(Operation):
     def __call__(self, X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None, dropout=0.):
         if bp_lim is not None:
@@ -174,27 +164,38 @@ class GRUnit(Operation):
         if s0 is not None:
             out[0] = s0.data if isinstance(s0, Tensor) else s0
 
-        z = dot(seq, self.Uz.data)
-        r = dot(seq, self.Ur.data)
-        h = dot(seq, self.Uh.data)
+        # compute all contributions to Z, R, H from the input sequence
+        # shape: T, N, D
+        z = np.tensordot(seq, self.Uz.data, [[-1], [0]])
+        r = np.tensordot(seq, self.Ur.data, [[-1], [0]])
+        h = np.tensordot(seq, self.Uh.data, [[-1], [0]])
 
-        if not dropout:
-            self._dropz = None
-            self._dropr = None
-            self._droph = None
-            _gru_layer(out, z, r, h,
-                       self.Wz.data, self.Wr.data, self.Wh.data,
-                       self.bz.data, self.br.data, self.bh.data)
-        else:
+        if dropout:
             p = 1 - dropout
-            self._dropz = np.random.binomial(1, p, size=z.shape) / p
-            self._dropr = np.random.binomial(1, p, size=r.shape) / p
-            self._droph = np.random.binomial(1, p, size=h.shape) / p
+            # For Uz/Ur/Uh: a dropout mask is generated for each datum and is applied uniformly across T
+            self._dropUz, self._dropUr, self._dropUh = np.random.binomial(1, p, size=(3, 1, N, D)) / p
+            self._dropWz, self._dropWr, self._dropWh = np.random.binomial(1, p, size=(3, D, D)) / p
 
-            _gru_layer_dropout(out, z, r, h,
-                               self.Wz.data, self.Wr.data, self.Wh.data,
-                               self.bz.data, self.br.data, self.bh.data,
-                               self._dropz, self._dropr, self._droph)
+            z *= self._dropUz
+            r *= self._dropUr
+            h *= self._dropUh
+
+            Wz = self._dropWz * self.Wz.data
+            Wr = self._dropWr * self.Wr.data
+            Wh = self._dropWh * self.Wh.data
+
+        else:
+            self._dropUz, self._dropUr, self.dropUh = None, None, None
+            self._dropWz, self._dropWr, self.dropWh = None, None, None
+            Wz = self.Wz.data
+            Wr = self.Wr.data
+            Wh = self.Wh.data
+
+        z += bz.data  # X Uz + bz
+        r += br.data  # X Ur + br
+        h += bh.data  # X Uh + bh
+
+        _gru_layer(out, z, r, h, Wz, Wr, Wh)
 
         self._hidden_seq = Tensor(out, _creator=self)
         self._z = Tensor(z, _creator=self)
