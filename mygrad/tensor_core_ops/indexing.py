@@ -88,12 +88,27 @@ class SetItem(BroadcastableOp):
         elif index == 1:
             grad_sel = np.asarray(grad[self.index])
 
+            # Basic indexing and indexing with a single boolean-array is trivial. The
+            # gradient into b can just be accessed by indexing into `grad`.
+            # Indexing with integer-valued arrays can be problematic, as the same
+            # item can be specified multiple for "setting"; here only the last set-item
+            # for that element has an effect. For example:
+            #     x[np.array([0, 0])] = np.array([2, 3])  # `3` gets set to x[0]; 2 has no effect
+            # Thus only that corresponding element in `grad` (that corresponding to `3`)
+            # should be propagated back into b. Thus we must check to see if any items are
+            # being set redundantly, and mask out any elements in `grad` corresponding to
+            # the elements in `b` that weren't actually set.
             if not np.shares_memory(grad_sel, grad) and grad_sel.size > 0 and grad_sel.ndim > 0:
                 if not _is_bool_array_index(self.index) and _is_int_array_index(self.index):
+                    # create an array of unique elements, and see if indexing into it produces
+                    # any redundant elements
                     unique = _arr(*grad.shape)
                     sub_sel = unique[self.index].flat
                     elements, first_inds, = np.unique(np.flip(sub_sel, axis=0), return_index=True)
                     if len(first_inds) < len(sub_sel):
+                        # one or more elements were set redundantly, identify the entries in `b`
+                        # that actually were set to those elements (the last-most set-item calls
+                        # for those elements).
                         first_inds = (len(sub_sel) - 1) - first_inds
                         mask = np.zeros_like(sub_sel)
                         mask[first_inds] = 1
