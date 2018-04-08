@@ -65,18 +65,6 @@ def _gru_layer(s, z, r, h, Wz, Wr, Wh, bz, br, bh):
 
         s[n + 1] = (1 - z[n]) * h[n] + z[n] * s[n]
 
-@njit
-def _gru_layer_dropout(s, z, r, h, Wz, Wr, Wh, bz, br, bh, dropz, dropr, droph):
-    for n in range(len(s) - 1):
-        z[n] += np.dot(s[n], Wz) + bz
-        z[n] = (1 / (1 + np.exp(-z[n])))
-
-        r[n] += np.dot(s[n], Wr) + br
-        r[n] = (1 / (1 + np.exp(-r[n])))
-
-        h[n] += np.dot(dropr[n] * r[n] * s[n], Wh) + bh
-        h[n] = np.tanh(h[n])
-
 
 @njit
 def _gru_layer_dropout(s, z, r, h, Wz, Wr, Wh, bz, br, bh, dropz, dropr, droph):
@@ -152,7 +140,7 @@ def _gru_bptt(X, dLds, s, z, r, Wz, Wh, Wr, dz, dh, dr, s_h, one_z, bp_lim, old_
                                         one_z[source_index])
 
 
-
+import mygrad
 class GRUnit(Operation):
     def __call__(self, X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None, dropout=0.):
         if bp_lim is not None:
@@ -161,23 +149,27 @@ class GRUnit(Operation):
         self._dropout = dropout
         self.bp_lim = bp_lim if bp_lim is not None else len(X) - 1
 
-        self.X = X
+        self.X = X    # type: Tensor  # shape=(T, N, C)
 
-        self.Uz = Uz
-        self.Wz = Wz
-        self.bz = bz
+        self.Uz = Uz  # type: Tensor  # shape=(C, D)
+        self.Wz = Wz  # type: Tensor  # shape=(D, D)
+        self.bz = bz  # type: Tensor  # shape=(D,)
 
-        self.Ur = Ur
-        self.Wr = Wr
-        self.br = br
+        self.Ur = Ur  # type: Tensor  # shape=(C, D)
+        self.Wr = Wr  # type: Tensor  # shape=(D, D)
+        self.br = br  # type: Tensor  # shape=(D,)
 
-        self.Uh = Uh
-        self.Wh = Wh
-        self.bh = bh
+        self.Uh = Uh  # type: Tensor  # shape=(C, D)
+        self.Wh = Wh  # type: Tensor  # shape=(D, D)
+        self.bh = bh  # type: Tensor  # shape=(D,)
+
+        T, N, C = X.shape
+        D, = bz.shape
 
         seq = self.X.data
 
-        out = np.zeros((seq.shape[0] + 1, seq.shape[1], self.Uz.shape[-1]))
+        # t starts at 0 for S; all other sequences begin at t = 1
+        out = np.zeros((T + 1, N, D))
 
         if s0 is not None:
             out[0] = s0.data if isinstance(s0, Tensor) else s0
@@ -322,7 +314,7 @@ def gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None, dropout=0.)
         X : mygrad.Tensor, shape=(T, N, C)
            The sequential data to be passed forward.
 
-        Uz/Ur/Uh : mygrad.Tensor, shape=(D, C)
+        Uz/Ur/Uh : mygrad.Tensor, shape=(C, D)
            The weights used to map sequential data to its hidden-descriptor representation
 
         Wz/Wr/Wh : mygrad.Tensor, shape=(D, D)

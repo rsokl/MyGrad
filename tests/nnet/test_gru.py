@@ -125,27 +125,28 @@ def test_gru_fwd(data):
         o = dense(stt, V2)
         ls2 += o.sum()
 
+    tolerances = dict(atol=1e-5, rtol=1e-5)
     rec_s_dat = np.stack([i.data for i in all_s])
 
-    assert_allclose(ls.data, ls2.data)
+    assert_allclose(ls.data, ls2.data, **tolerances)
 
-    assert_allclose(rec_s_dat, s.data)
+    assert_allclose(rec_s_dat, s.data, **tolerances)
 
-    assert_allclose(Wz.data, Wz2.data)
-    assert_allclose(Wr.data, Wr2.data)
-    assert_allclose(Wh.data, Wh2.data)
+    assert_allclose(Wz.data, Wz2.data, **tolerances)
+    assert_allclose(Wr.data, Wr2.data, **tolerances)
+    assert_allclose(Wh.data, Wh2.data, **tolerances)
 
-    assert_allclose(Uz.data, Uz2.data)
-    assert_allclose(Ur.data, Ur2.data)
-    assert_allclose(Uh.data, Uh2.data)
+    assert_allclose(Uz.data, Uz2.data, **tolerances)
+    assert_allclose(Ur.data, Ur2.data, **tolerances)
+    assert_allclose(Uh.data, Uh2.data, **tolerances)
 
-    assert_allclose(bz.data, bz2.data)
-    assert_allclose(br.data, br2.data)
-    assert_allclose(bh.data, bh2.data)
+    assert_allclose(bz.data, bz2.data, **tolerances)
+    assert_allclose(br.data, br2.data, **tolerances)
+    assert_allclose(bh.data, bh2.data, **tolerances)
 
-    assert_allclose(V.data, V2.data)
+    assert_allclose(V.data, V2.data, **tolerances)
 
-    assert_allclose(X.data, X2.data)
+    assert_allclose(X.data, X2.data, **tolerances)
 
     ls.null_gradients()
     for x in [s, Wz, Wr, Wh, bz, br, bh, X, Uz, Ur, Uh, V]:
