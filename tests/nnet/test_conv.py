@@ -233,8 +233,8 @@ def test_conv2d(data):
 
     f.backward(dout)
     dx, dw, db = conv_backward_naive(dout, _)
-    assert_allclose(x.grad, dx)
-    assert_allclose(w.grad, dw)
+    assert_allclose(x.grad, dx, atol=1e-5, rtol=1e-5)
+    assert_allclose(w.grad, dw, atol=1e-5, rtol=1e-5)
 
 
 @given(st.data())

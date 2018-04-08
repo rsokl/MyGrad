@@ -1,6 +1,6 @@
 """ Test `numerical_gradient`, `numerical_derivative`, and `broadcast_check`"""
 
-from tests.utils.numerical_gradient import numerical_gradient, numerical_derivative
+from tests.utils.numerical_gradient import numerical_gradient, numerical_derivative, numerical_gradient_full
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
@@ -17,32 +17,6 @@ def binary_func(x, y): return x * y ** 2
 
 def ternary_func(x, y, z): return z * x * y ** 2
 
-
-# def test_broadcast_check1():
-#     x = np.empty((3, 1, 4))
-#     y = np.empty((4,))
-#     z = np.empty((3, 2, 4))
-#     x_args, y_args, z_args = broadcast_check(x, y, z)
-#     assert x_args == dict(new_axes=tuple(), keepdim_axes=(1,))
-#     assert y_args == dict(new_axes=(0, 1), keepdim_axes=tuple())
-#     assert z_args == dict(new_axes=tuple(), keepdim_axes=tuple())
-#
-#
-# def test_broadcast_check2():
-#     # no broadcasting
-#     x = np.empty((3,))
-#     y = np.empty((3,))
-#     x_args, y_args = broadcast_check(x, y)
-#     assert x_args == dict(new_axes=tuple(), keepdim_axes=tuple())
-#     assert y_args == dict(new_axes=tuple(), keepdim_axes=tuple())
-#
-#
-# def test_broadcast_check3():
-#     x = np.empty((3, 1, 4))
-#     y = np.empty((5, 3, 2, 4))
-#     x_args, y_args = broadcast_check(x, y)
-#     assert x_args == dict(new_axes=(0,), keepdim_axes=(2,))
-#     assert y_args == dict(new_axes=tuple(), keepdim_axes=tuple())
 
 
 @given(x=st.decimals(-100, 100))
@@ -152,3 +126,26 @@ def test_numerical_gradient_xy_broadcast(data):
     y_grad = (grad * 2 * x * y).sum(axis=0, keepdims=True)
     assert_allclose(dx, x_grad)
     assert_allclose(dy, y_grad)
+
+
+@given(st.data())
+def test_numerical_gradient_full_xy_broadcast(data):
+
+    x = data.draw(hnp.arrays(shape=(2, 1, 4),
+                             dtype=float,
+                             elements=st.floats(-100, 100)))
+
+    y = data.draw(hnp.arrays(shape=(1, 3, 4),
+                             dtype=float,
+                             elements=st.floats(-100, 100)))
+
+    grad = data.draw(hnp.arrays(shape=(2, 3, 4),
+                                dtype=float,
+                                elements=st.floats(-100, 100)))
+
+    # broadcast x
+    dx, dy = numerical_gradient_full(binary_func, x, y, back_grad=grad)
+    x_grad = (grad * y ** 2).sum(axis=1, keepdims=True)
+    y_grad = (grad * 2 * x * y).sum(axis=0, keepdims=True)
+    assert_allclose(dx, x_grad, atol=1e-4, rtol=1e-4)
+    assert_allclose(dy, y_grad, atol=1e-4, rtol=1e-4)
