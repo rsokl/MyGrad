@@ -268,7 +268,8 @@ class backprop_test_factory():
 
             grad = data.draw(hnp.arrays(shape=out.shape,
                                         dtype=float,
-                                        elements=st.floats(1, 10)),
+                                        elements=st.floats(-10, 10),
+                                        unique=True),
                              label="grad")
 
             grad_copy = copy(grad)

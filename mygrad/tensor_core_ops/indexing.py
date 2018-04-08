@@ -21,6 +21,9 @@ class GetItem(Operation):
         a.backward(out, **kwargs)
 
 
+def arr(*shape): return np.arange(np.prod(shape)).reshape(shape)
+
+
 class SetItem(BroadcastableOp):
 
     def __call__(self, a, b, index):
@@ -43,14 +46,29 @@ class SetItem(BroadcastableOp):
         if index == 0:
             grad = np.copy(grad)
             grad[self.index] = 0
-            a.backward(grad, _broadcastable=False)
-        else:
-            grad = grad[self.index]
+            kwargs["_broadcastable"] = False
+            a.backward(grad, **kwargs)
+        elif index == 1:
+            grad_sel = grad[self.index]
+
+            if not np.shares_memory(grad_sel, grad):
+                unique = arr(*grad.shape)
+                sub_sel = unique[self.index].flat
+                elements, first_inds, = np.unique(np.flip(sub_sel, axis=0), return_index=True)
+                if len(first_inds) < len(sub_sel):
+                    first_inds = (len(sub_sel) - 1) - first_inds
+                    mask = np.zeros_like(sub_sel)
+                    mask[first_inds] = 1
+                    mask = mask.reshape(grad_sel.shape)
+                    grad_sel *= mask
 
             # handle the edge case of "projecting down" on setitem. E.g:
             # x = Tensor([0, 1, 2])
             # y = Tensor([3])
             # x[0] = y  # this is legal since x[0] and y have the same size
-            if grad.ndim < b.ndim:
-                grad = grad.reshape(b.shape)
-            b.backward(grad, **kwargs)
+            if grad_sel.ndim < b.ndim:
+                grad_sel = grad_sel.reshape(b.shape)
+            b.backward(grad_sel, **kwargs)
+        else:
+            raise IndexError
+

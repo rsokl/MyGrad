@@ -50,7 +50,7 @@ def numerical_derivative(f, x, h=1e-8):
     return dx
 
 
-def numerical_gradient(f, *args, back_grad, vary_ind=None, h=1e-8, as_decimal=None, kwargs={}):
+def numerical_gradient(f, *args, back_grad, vary_ind=None, h=1e-8, as_decimal=True, kwargs={}):
     """ Computes numerical partial derivatives of f(x0, x1, ...) in each
         of its variables, using the central difference method.
 
@@ -89,7 +89,7 @@ def numerical_gradient(f, *args, back_grad, vary_ind=None, h=1e-8, as_decimal=No
         raise ValueError("At least one value must be passed to `args`")
 
     h = Decimal(h)
-    args = tuple(to_decimal_array(arr) for arr in args)
+    args = tuple(to_decimal_array(i) if as_decimal else i for i in args)
 
     grads = [None]*len(args)
 
@@ -168,7 +168,7 @@ def numerical_gradient_sequence(f, *, x, back_grad,  axis=None, keepdims=False, 
     return grad.astype(float)
 
 
-def numerical_gradient_full(f, *args, back_grad, as_decimal=False, kwargs={}, vary_ind=None):
+def numerical_gradient_full(f, *args, back_grad, as_decimal=True, kwargs={}, vary_ind=None):
     """ Computes numerical partial derivatives of f(x, y, ..., **kwargs), by
         varying each entry of x, y, ... independently producing a gradient
         in each variable.
