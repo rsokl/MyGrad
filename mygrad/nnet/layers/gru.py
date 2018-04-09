@@ -265,9 +265,6 @@ class GRUnit(Operation):
         rgrad = dot(const["1 - h**2"] * hgrad, Wh.T) * s  # dL / dr
 
         self._hidden_seq.grad = dLds
-        self._z.grad = zgrad
-        self._r.grad = rgrad
-        self._h.grad = hgrad
 
         if any(not const for const in (self.Uz.constant, self.Wz.constant, self.bz.constant)):
             dz = zgrad * const["z*(1 - z)"]
@@ -332,6 +329,10 @@ class GRUnit(Operation):
                 dLdX += dot(self._dropUh * tmp, self.Uh.data.T)
                 dLdX += dot(self._dropUr * (dot(tmp, Wh.T) * s * const["r*(1 - r)"]), self.Ur.data.T)
             self.X.backward(dLdX, **kwargs)
+
+        del self._z
+        del self._r
+        del self._h
 
     def null_gradients(self):
         """ Back-propagates `None` to the gradients of the operation's input Tensors."""
