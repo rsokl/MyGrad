@@ -97,10 +97,11 @@ def _gru_dLds(s, z, r, dLds, Wz, Wh, Wr, dz, dh, dr, s_h, one_z):
 
     Returns
     --------
-        partial dL / ds(t+1) * ds(t+1) / ds(t) +
-        partial dL / ds(t+1) * ds(t+1) / dz(t) * dz(t) / ds(t) +
-        partial dL / ds(t+1) * ds(t+1) / dh(t) * dh(t) / ds(t) +
-        partial dL / ds(t+1) * ds(t+1) / dh(t) * dh(t) / dr(t) * dr(t) / ds(t)
+
+        dL / ds(t) =   partial dL / ds(t+1) * ds(t+1) / ds(t)
+                     + partial dL / ds(t+1) * ds(t+1) / dz(t) * dz(t) / ds(t)
+                     + partial dL / ds(t+1) * ds(t+1) / dh(t) * dh(t) / ds(t)
+                     + partial dL / ds(t+1) * ds(t+1) / dh(t) * dh(t) / dr(t) * dr(t) / ds(t)
     """
     dLdh = dot(dLds * one_z * dh, Wh)
 
@@ -342,12 +343,13 @@ class GRUnit(Operation):
 
 
 def gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None, dropout=0.):
+
     """ Performs a forward pass of sequential data through a Gated Recurrent Unit layer, returning
         the 'hidden-descriptors' arrived at by utilizing the trainable parameters as follows:
 
-                    Z_{t} = drop_z * sigmoid(Uz X_{t} + Wz S_{t-1} + bz)
-                    R_{t} = drop_r * sigmoid(Ur X_{t} + Wr S_{t-1} + br)
-                    H_{t} = drop_h * tanh(Uh X_{t} + Wh (R{t} * S_{t-1}) + bh)
+                    Z_{t} = sigmoid(X_{t} Uz + S_{t-1} Wz + bz)
+                    R_{t} = sigmoid(X_{t} Ur + S_{t-1} Wr + br)
+                    H_{t} =    tanh(X_{t} Uh + (R{t} * S_{t-1}) Wh + bh)
                     S_{t} = (1 - Z{t}) * H{t} + Z{t} * S_{t-1}
 
         Parameters
@@ -376,12 +378,8 @@ def gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None, dropout=0.)
             recursive sequence.
 
         dropout : float (default=0.), 0 <= dropout < 1
-            If non-zero, the expected proportion of a layer's outputs to be set to zero. Applied
-            to the layers Z, R, and H, - *not* S.
-
-            These layers are also scaled by 1 / dropout, such that the test-time forward pass
-            of the gru-layer can be executed without dropout, and with no additional scaling.
-            (only if `dropout` is non-zero)
+            If non-zero, the dropout scheme described in [1]_ is applied. See Notes
+            for more details.
 
         Returns
         -------
@@ -393,7 +391,25 @@ def gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None, dropout=0.)
         T : Sequence length
         N : Batch size
         C : Length of single datum
-        D : Length of 'hidden' descriptor"""
+        D : Length of 'hidden' descriptor
+
+        Following the dropout scheme specified in [1]_, the hidden-hidden weights (Wz/Wr/Wh)
+        randomly have their weights dropped prior to forward/back-prop. The input connections
+        (via Uz/Ur/Uh) have variational dropout ([2]_) applied to them with a common dropout
+        mask across all t. That is three static dropout masks, each with shape-(N,D), are
+        applied to
+                                              X_{t} Uz
+                                              X_{t} Ur
+                                              X_{t} Uh
+        respectively, for all t.
+
+        References
+        ----------
+        .. [1] S. Merity, et. al. "Regularizing and Optimizing LSTM Language Models",
+               arXiv:1708.02182v1, 2017.
+
+        .. [2] Y. Gal, Z. Ghahramani "A Theoretically Grounded Application of Dropout
+               in Recurrent Neural Networks" arXiv:1512.05287v5, 2016. """
     s = Tensor._op(GRUnit, X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, op_kwargs=dict(s0=s0, bp_lim=bp_lim, dropout=dropout))
     s.creator._hidden_seq = s
     return s

@@ -183,7 +183,7 @@ def test_gru_backward(data):
                   label="X")
     T, N, C = X.shape
     D = data.draw(st.sampled_from(list(range(1, 5))), label="D")
-    dropout = data.draw(st.sampled_from([0.45]), label="dropout")  # TODO: RESTORE DROPOUT
+    dropout = data.draw(st.sampled_from([0, 0.45]), label="dropout")  # TODO: RESTORE DROPOUT
 
 
     Wz = data.draw(hnp.arrays(shape=(D, D),
