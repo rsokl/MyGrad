@@ -50,36 +50,36 @@ class Cbrt(Operation):
 class Maximum(BroadcastableOp):
     def __call__(self, a, b):
         self.variables = (a, b)
-        self.max_mask = a.data > b.data
+        self.greater_than_mask = a.data > b.data
         self.equal_mask = a.data == b.data
-        return np.where(self.max_mask, a.data, b.data)
+        return np.where(self.greater_than_mask, a.data, b.data)
 
     def backward_var(self, grad, index, **kwargs):
         if index == 0:
-            mask = self.max_mask
+            mask = self.greater_than_mask
         elif index == 1:
-            mask = np.logical_not(self.max_mask)
+            mask = np.logical_not(self.greater_than_mask)
+            np.logical_not(mask, out=mask, where=self.equal_mask)
         else:
             raise IndexError
 
-        #np.logical_not(mask, out=mask, where=self.equal_mask)
         self.variables[index].backward(mask * grad, **kwargs)
 
 
 class Minimum(BroadcastableOp):
     def __call__(self, a, b):
         self.variables = (a, b)
-        self.max_mask = a.data < b.data
+        self.less_than_mask = a.data < b.data
         self.equal_mask = a.data == b.data
-        return np.where(self.max_mask, a.data, b.data)
+        return np.where(self.less_than_mask, a.data, b.data)
 
     def backward_var(self, grad, index, **kwargs):
         if index == 0:
-            mask = self.max_mask
+            mask = self.less_than_mask
         elif index == 1:
-            mask = np.logical_not(self.max_mask)
+            mask = np.logical_not(self.less_than_mask)
+            np.logical_not(mask, out=mask, where=self.equal_mask)
         else:
             raise IndexError
 
-        #np.logical_not(mask, out=mask, where=self.equal_mask)
         self.variables[index].backward(mask * grad, **kwargs)

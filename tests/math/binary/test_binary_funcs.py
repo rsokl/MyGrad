@@ -92,8 +92,6 @@ def test_maximum_fwd(): pass
                     elements=st.floats(-10., 10.)),
        data=st.data())
 def test_maximum_bkwd(x, data):
-    """ index conforms strictly to basic indexing """
-
     y = data.draw(hnp.arrays(shape=broadcastable_shape(x.shape, max_dim=5),
                              dtype=float,
                              elements=st.floats(-10., 10.)), label="y")
@@ -117,6 +115,31 @@ def test_maximum_bkwd(x, data):
 
     assert_allclose(x_arr.grad, dx)
     assert_allclose(y_arr.grad, dy)
+
+
+def test_maximum_minimum_bkwd_equal():
+    """ regression test for documented behavior of maximum/minimum where
+        x == y"""
+
+    x = Tensor([1., 0., 2.])
+    y = Tensor([2., 0., 1.])
+
+    o = maximum(x, y)
+    o.backward()
+
+    assert_allclose(x.grad, [0., 0., 1])
+    assert_allclose(y.grad, [1., 0., 0])
+    o.null_gradients()
+
+    x = Tensor([1., 0., 2.])
+    y = Tensor([2., 0., 1.])
+
+    o = minimum(x, y)
+    o.backward()
+
+    assert_allclose(x.grad, [1., 0., 0.])
+    assert_allclose(y.grad, [0., 0., 1.])
+    o.null_gradients()
 
 
 @fwdprop_test_factory(mygrad_func=minimum, true_func=np.minimum, num_arrays=2)
