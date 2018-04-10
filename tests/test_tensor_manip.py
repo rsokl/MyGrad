@@ -16,8 +16,6 @@ from .utils.numerical_gradient import numerical_gradient_full
                     elements=st.floats(-10., 10.)),
        data=st.data())
 def test_moveaxis(x, data):
-    """ index conforms strictly to basic indexing """
-
     src = data.draw(valid_axes(x.ndim, permit_none=False), label="source")
     dest = data.draw(valid_axes(x.ndim, permit_none=False), label="destination")
     assume(len(src) == len(dest))
@@ -47,8 +45,6 @@ def test_moveaxis(x, data):
                     elements=st.floats(-10., 10.)),
        data=st.data())
 def test_swapaxes(x, data):
-    """ index conforms strictly to basic indexing """
-
     axis1 = data.draw(st.integers(-x.ndim, x.ndim - 1), label="axis1")
     axis2 = data.draw(st.integers(-x.ndim, x.ndim - 1), label="axis2")
 
@@ -77,8 +73,6 @@ def test_swapaxes(x, data):
                     elements=st.floats(-10., 10.)),
        data=st.data())
 def test_transpose(x, data):
-    """ index conforms strictly to basic indexing """
-
     axes = data.draw(valid_axes(x.ndim), label="axes")
     if axes is not None:
         assume(len(axes) == x.ndim)
