@@ -28,7 +28,7 @@ class Transpose(Operation):
             self.axes = tuple(axis % a.ndim for axis in axes)
         else:
             self.axes = tuple(range(a.ndim)[::-1])
-        return a.data.transpose(axes)
+        return np.transpose(a.data, axes)
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
