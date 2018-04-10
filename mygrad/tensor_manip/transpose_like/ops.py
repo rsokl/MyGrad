@@ -2,7 +2,8 @@ from mygrad.operation_base import Operation
 import numpy as np
 
 __all__ = ["Tensor_Transpose_Property",
-           "Transpose"]
+           "Transpose",
+           "MoveAxis"]
 
 
 class Tensor_Transpose_Property(Operation):
@@ -34,3 +35,30 @@ class Transpose(Operation):
         if a.ndim > 1:
             grad = grad.transpose(np.argsort(self.axes))
         a.backward(grad)
+
+
+class MoveAxis(Operation):
+    def __call__(self, a, source, destination):
+        self.variables = (a,)
+        self.source = source
+        self.destination = destination
+        return np.moveaxis(a, source, destination)
+
+    def backward_var(self, grad, index, **kwargs):
+        if not index == 0:
+            raise IndexError
+        self.variables[index].backward(np.moveaxis(grad, self.destination, self.source),
+                                       **kwargs)
+
+
+class SwapAxes(Operation):
+    def __call__(self, a, axis1, axis2):
+        self.variables = (a,)
+        self.axes = axis1, axis2
+        return np.swapaxes(a.data, axis1, axis2)
+
+    def backward_var(self, grad, index, **kwargs):
+        if not index == 0:
+            raise IndexError
+        self.variables[index].backward(np.swapaxes(grad, *self.axes[::-1]),
+                                       **kwargs)

@@ -245,6 +245,7 @@ class backprop_test_factory():
                data=st.data())
         @wraps(f)
         def wrapper(x, data):
+
             arrs = [x]
             for i in range(1, self.num_arrays):
                 y = data.draw(hnp.arrays(shape=self.index_to_arr_shapes.get(i,
@@ -264,6 +265,7 @@ class backprop_test_factory():
                     assume(np.all(arr != value))
 
             # gradient to be backpropped through this operation
+            print(kwargs)
             out = self.op(*arrs, **kwargs)
 
             grad = data.draw(hnp.arrays(shape=out.shape,
