@@ -54,11 +54,12 @@ class MoveAxis(Operation):
 class SwapAxes(Operation):
     def __call__(self, a, axis1, axis2):
         self.variables = (a,)
-        self.axes = axis1, axis2
+        self.axis1 = axis1
+        self.axis2 = axis2
         return np.swapaxes(a.data, axis1, axis2)
 
     def backward_var(self, grad, index, **kwargs):
         if not index == 0:
             raise IndexError
-        self.variables[index].backward(np.swapaxes(grad, *self.axes[::-1]),
+        self.variables[index].backward(np.swapaxes(grad, self.axis2, self.axis1),
                                        **kwargs)
