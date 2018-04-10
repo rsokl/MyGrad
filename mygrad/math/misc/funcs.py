@@ -1,10 +1,12 @@
-from .ops import Sqrt, Cbrt, Abs
+from .ops import Sqrt, Cbrt, Abs, Maximum, Minimum
 from mygrad.tensor_base import Tensor
 
 
 __all__ = ["abs",
            "cbrt",
-           "sqrt"]
+           "sqrt",
+           "maximum",
+           "minimum"]
 
 
 def abs(a):
@@ -20,3 +22,20 @@ def sqrt(a):
 
 def cbrt(a):
     return Tensor._op(Cbrt, a)
+
+
+def maximum(a, b):
+    """ Element-wise maximum of array elements.
+
+        The gradient does not exist where a == b; we use a
+        value of 0 here."""
+    return Tensor._op(Maximum, a, b)
+
+
+def minimum(a, b):
+    """ Element-wise minimum of array elements.
+
+        The gradient does not exist where a == b; we use a
+        value of 0 here."""
+    return Tensor._op(Minimum, a, b)
+
