@@ -16,6 +16,7 @@ __all__ = ["empty",
            "logspace",
            "geomspace"]
 
+
 def empty(shape, dtype=np.float32, constant=False):
     """ Return a new Tensor of the given shape and type, without initializing entries.
 
@@ -36,6 +37,7 @@ def empty(shape, dtype=np.float32, constant=False):
             A tensor of uninitialized data of the given shape and dtype.
     """
     return Tensor(np.empty(shape, dtype), constant=constant)
+
 
 def empty_like(other, dtype=None, constant=False):
     """ Return a new Tensor of the same shape and type as the given array.
@@ -60,6 +62,7 @@ def empty_like(other, dtype=None, constant=False):
         other = other.data
         
     return Tensor(np.empty_like(other, dtype), constant=constant)
+
 
 def eye(rows, cols=None, diag_idx=0, dtype=np.float32, constant=False):
     """ Return a 2D Tensor with ones on the diagonal and zeros elsewhere.
@@ -88,6 +91,7 @@ def eye(rows, cols=None, diag_idx=0, dtype=np.float32, constant=False):
             A tensor whose elements are 0, except for the :math:`k`-th diagonal, whose values are 1.
     """
     return Tensor(np.eye(rows, cols, diag_idx, dtype), constant=constant)
+
 
 def identity(n, dtype=np.float32, constant=False):
     """ Return the identity Tensor; a square Tensor with 1s on the main diagonal and 0s elsewhere.
@@ -132,6 +136,7 @@ def ones(shape, dtype=np.float32, constant=False):
     """
     return Tensor(np.ones(shape, dtype), constant=constant)
 
+
 def ones_like(other, dtype=None, constant=False):
     """ Return a Tensor of the same shape and type as the given, filled with ones.
 
@@ -156,6 +161,7 @@ def ones_like(other, dtype=None, constant=False):
 
     return Tensor(np.ones_like(other, dtype), constant=constant)
 
+
 def zeros(shape, dtype=np.float32, constant=False):
     """ Return a Tensor of the given shape and type, filled with zeros.
 
@@ -176,6 +182,7 @@ def zeros(shape, dtype=np.float32, constant=False):
             A Tensor of zeros with the given shape and data type.
     """
     return Tensor(np.zeros(shape, dtype), constant=constant)
+
 
 def zeros_like(other, dtype=None, constant=False):
     """ Return a Tensor of the same shape and type as the given, filled with zeros.
@@ -201,6 +208,7 @@ def zeros_like(other, dtype=None, constant=False):
 
     return Tensor(np.zeros_like(other, dtype), constant=constant)
 
+
 def full(shape, fill_value, dtype=None, constant=False):
     """ Return a Tensor of the given shape and type, filled with `fill_value`.
 
@@ -225,6 +233,7 @@ def full(shape, fill_value, dtype=None, constant=False):
     """
     return Tensor(np.full(shape, fill_value, dtype), constant=constant)
 
+
 def full_like(other, fill_value, dtype=None, constant=False):
     """ Return a Tensor of the same shape and type as the given, filled with `fill_value`.
 
@@ -248,6 +257,7 @@ def full_like(other, fill_value, dtype=None, constant=False):
         other = other.data
 
     return Tensor(np.full_like(other, fill_value, dtype), constant=constant)
+
 
 def arange(stop, start=0, step=1, dtype=None, constant=False):
     """ Return a Tensor with evenly-spaced values within a given interval.
@@ -283,6 +293,7 @@ def arange(stop, start=0, step=1, dtype=None, constant=False):
         stop = tmp
     return Tensor(np.arange(start, stop, step, dtype), constant=constant)
 
+
 def linspace(start, stop, num=50, include_endpoint=True, dtype=None, constant=False):
     """ Return a Tensor with evenly-spaced numbers over a specified interval.
 
@@ -316,6 +327,7 @@ def linspace(start, stop, num=50, include_endpoint=True, dtype=None, constant=Fa
             `include_endpoint`.
     """
     return Tensor(np.linspace(start, stop, num, include_endpoint, dtype=dtype), constant=constant)
+
 
 def logspace(start, stop, num=50, include_endpoint=True, base=10, dtype=None, constant=False):
     """ Return a Tensor with evenly-spaced numbers over a specified interval on a log scale.
@@ -354,6 +366,7 @@ def logspace(start, stop, num=50, include_endpoint=True, base=10, dtype=None, co
             A Tensor of `num` evenly-spaced values in the log interval [base**start, base**stop].
     """
     return Tensor(np.logspace(start, stop, num, include_endpoint, base, dtype), constant=constant)
+
 
 def geomspace(start, stop, num=50, include_endpoint=True, dtype=None, constant=False):
     """ Return a Tensor with evenly-spaced values in a geometric progression.
