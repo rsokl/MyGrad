@@ -257,6 +257,35 @@ class Tensor:
     def __neg__(self):
         return self._op(Negative, self)
 
+    def __xor__(self, other):
+        ''' Return the bitwise-xor of `self` and `other`. This is the `^` operator. '''
+        assert np.issubdtype(self.dtype, np.int_), 'The bitwise-xor (^) operator requires an integer type'
+        if isinstance(other, Tensor):
+            other = other.data
+
+        return self.data ^ other
+
+    def __and__(self, other):
+        ''' Return the bitwise-and of `self` and `other`. This is the `&` operator. '''
+        assert np.issubdtype(self.dtype, np.int_), 'The bitwise-and (&) operator requires an integer type'
+        if isinstance(other, Tensor):
+            other = other.data
+
+        return self.data | other
+
+    def __or__(self, other):
+        ''' Return the bitwise-or of `self` and `other`. This is the `|` operator. '''
+        assert np.issubdtype(self.dtype, np.int_), 'The bitwise-or (|) operator requires an integer type'
+        if isinstance(other, Tensor):
+            other = other.data
+
+        return self.data & other
+
+    def __invert__(self):
+        ''' Return the twos-complement of `self`. This is the `~` operator. '''
+        assert np.issubdtype(self.dtype, np.int_), 'The invert (~) operator requires an integer type'
+        return -self.data - 1
+
     def __repr__(self):
         if self.data.ndim == 0:
             return "Tensor({})".format(self.data.item())
