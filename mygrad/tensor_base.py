@@ -271,7 +271,7 @@ class Tensor:
         if isinstance(other, Tensor):
             other = other.data
 
-        return self.data | other
+        return self.data & other
 
     def __or__(self, other):
         ''' Return the bitwise-or of `self` and `other`. This is the `|` operator. '''
@@ -279,7 +279,7 @@ class Tensor:
         if isinstance(other, Tensor):
             other = other.data
 
-        return self.data & other
+        return self.data | other
 
     def __invert__(self):
         ''' Return the twos-complement of `self`. This is the `~` operator. '''
