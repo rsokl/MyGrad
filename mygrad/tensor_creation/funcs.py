@@ -391,6 +391,9 @@ def geomspace(start, stop, num=50, include_endpoint=True, dtype=None, constant=F
         dtype : data-type, optional (default=None)
             The data type of the output Tensor, or None to infer from the inputs.
 
+        constant : bool, optional (default=False)
+            Whether the output Tensor is a constant Tensor.
+            
         Returns
         -------
         Tensor

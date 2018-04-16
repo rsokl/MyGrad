@@ -83,7 +83,7 @@ def test_reshape_fwd(a):
     new_shape = gen_shape(a.size)
 
     x = Tensor(a)
-    x = reshape(x, new_shape)
+    x = reshape(x, new_shape, constant=True)
     a = a.reshape(new_shape)
 
     assert x.shape == a.shape, "Tensor.reshape failed"
@@ -99,7 +99,7 @@ def test_reshape_backward(a):
     grad = np.arange(a.size).reshape(a.shape)
 
     x = Tensor(a)
-    o = reshape(x, new_shape)
+    o = reshape(x, new_shape, constant=False)
     o.backward(grad.reshape(new_shape))
 
     assert x.grad.shape == grad.shape

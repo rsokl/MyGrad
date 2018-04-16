@@ -24,17 +24,20 @@ class fwdprop_test_factory():
     def __call__(self, f):
         @given(x=hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=3),
                             dtype=float,
-                            elements=st.floats(*self.xbnds)))
+                            elements=st.floats(*self.xbnds)),
+               data=st.data())
         @wraps(f)
-        def wrapper(x):
+        def wrapper(x, data):
             for value in self.no_go:
                 assume(np.all(x != value))
 
             x_copy = copy(x)
-            o = self.op(x)
+            constant = data.draw(st.booleans(), label="constant")
+            o = self.op(Tensor(x), constant=constant)
             tensor_out = o.data
             true_out = self.true_func(x)
             assert isinstance(o, Tensor), "`mygrad_func` returned type {}, should return `mygrad.Tensor`".format(type(o))
+            assert o.constant is constant, "mygrad_func did not handle the constant keyword arg appropriately."
             assert_allclose(tensor_out, true_out,
                             err_msg="`mygrad_func(x)` and `true_func(x)` produce different results")
             assert_array_equal(x, x_copy,

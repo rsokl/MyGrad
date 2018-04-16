@@ -111,9 +111,11 @@ def test_gru_fwd(data):
     s0 = Tensor(s0)
     s2 = s0.__copy__()
 
-    s = gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, dropout=dropout)
+    s = gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, dropout=dropout, constant=True)
     o = dense(s[1:], V)
     ls = o.sum()
+
+    assert s.constant is True
 
     if dropout:
         for d in [s.creator._dropUr, s.creator._dropUz, s.creator._dropUh,
@@ -274,7 +276,7 @@ def test_gru_backward(data):
     s0 = Tensor(s0)
     s2 = s0.__copy__()
 
-    s = gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, dropout=dropout)
+    s = gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, dropout=dropout, constant=False)
     o = dense(s[1:], V)
     ls = o.sum()
     ls.backward()

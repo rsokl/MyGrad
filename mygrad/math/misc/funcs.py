@@ -9,33 +9,33 @@ __all__ = ["abs",
            "minimum"]
 
 
-def abs(a):
+def abs(a, constant=False):
     """ f(a)-> |a|
 
         The derivative at a == 0 returns nan"""
-    return Tensor._op(Abs, a)
+    return Tensor._op(Abs, a, constant=constant)
 
 
-def sqrt(a):
-    return Tensor._op(Sqrt, a)
+def sqrt(a, constant=False):
+    return Tensor._op(Sqrt, a, constant=constant)
 
 
-def cbrt(a):
-    return Tensor._op(Cbrt, a)
+def cbrt(a, constant=False):
+    return Tensor._op(Cbrt, a, constant=constant)
 
 
-def maximum(a, b):
+def maximum(a, b, constant=False):
     """ Element-wise maximum of array elements.
 
         The gradient does not exist where a == b; we use a
         value of 0 here."""
-    return Tensor._op(Maximum, a, b)
+    return Tensor._op(Maximum, a, b, constant=constant)
 
 
-def minimum(a, b):
+def minimum(a, b, constant=False):
     """ Element-wise minimum of array elements.
 
         The gradient does not exist where a == b; we use a
         value of 0 here."""
-    return Tensor._op(Minimum, a, b)
+    return Tensor._op(Minimum, a, b, constant=constant)
 

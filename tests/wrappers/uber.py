@@ -112,13 +112,17 @@ class fwdprop_test_factory():
             for i, arr in enumerate(arrs):
                 for value in self.index_to_no_go.get(i, ()):
                     assume(np.all(arr != value))
-
-            o = self.op(*(Tensor(i) for i in arrs), **kwargs)
+            constant = data.draw(st.booleans(), label="constant")
+            o = self.op(*(Tensor(i) for i in arrs), **kwargs, constant=constant)
             tensor_out = o.data
             true_out = self.true_func(*arrs, **kwargs)
+
             assert isinstance(o, Tensor), "`mygrad_func` returned type {}, should return `mygrad.Tensor`".format(type(o))
+
             assert_allclose(tensor_out, true_out,
                             err_msg="`mygrad_func(x)` and `true_func(x)` produce different results")
+
+            constant = data.draw(st.booleans(), label="constant")
 
             for n, (arr, arr_copy) in enumerate(zip(arrs, arr_copies)):
                 assert_array_equal(arr, arr_copy,
@@ -265,7 +269,6 @@ class backprop_test_factory():
                     assume(np.all(arr != value))
 
             # gradient to be backpropped through this operation
-            print(kwargs)
             out = self.op(*arrs, **kwargs)
 
             grad = data.draw(hnp.arrays(shape=out.shape,

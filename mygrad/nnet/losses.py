@@ -41,7 +41,7 @@ class MulticlassHinge(Operation):
         self.variables[index].backward(grad * self.back, **kwargs)
 
 
-def multiclass_hinge(x, y_true, hinge=1.):
+def multiclass_hinge(x, y_true, hinge=1., constant=False):
     """ Parameters
         ----------
         x : mygrad.Tensor, shape=(N, K)
@@ -53,7 +53,7 @@ def multiclass_hinge(x, y_true, hinge=1.):
         Returns
         -------
         The average multiclass hinge loss"""
-    return Tensor._op(MulticlassHinge, x, op_args=(y_true, hinge))
+    return Tensor._op(MulticlassHinge, x, op_args=(y_true, hinge), constant=constant)
 
 
 class SoftmaxCrossEntropy(Operation):
@@ -89,7 +89,7 @@ class SoftmaxCrossEntropy(Operation):
         self.variables[index].backward(grad * self.back, **kwargs)
 
 
-def softmax_crossentropy(x, y_true):
+def softmax_crossentropy(x, y_true, constant=False):
     """ Parameters
         ----------
         x : pygrad.Tensor, shape=(N, C)
@@ -99,6 +99,6 @@ def softmax_crossentropy(x, y_true):
         Returns
         -------
         The average softmax loss"""
-    return Tensor._op(SoftmaxCrossEntropy, x, op_args=(y_true,))
+    return Tensor._op(SoftmaxCrossEntropy, x, op_args=(y_true,), constant=constant)
 
 

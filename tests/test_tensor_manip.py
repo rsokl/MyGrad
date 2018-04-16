@@ -22,7 +22,7 @@ def test_moveaxis(x, data):
 
     x_arr = Tensor(np.copy(x))
 
-    o = moveaxis(x_arr, src, dest)
+    o = moveaxis(x_arr, src, dest, constant=False)
     grad = data.draw(hnp.arrays(shape=o.shape,
                                 dtype=float,
                                 elements=st.floats(1, 10),
@@ -50,7 +50,7 @@ def test_swapaxes(x, data):
 
     x_arr = Tensor(np.copy(x))
 
-    o = swapaxes(x_arr, axis1, axis2)
+    o = swapaxes(x_arr, axis1, axis2, constant=False)
     grad = data.draw(hnp.arrays(shape=o.shape,
                                 dtype=float,
                                 elements=st.floats(1, 10),
@@ -79,7 +79,7 @@ def test_transpose(x, data):
 
     x_arr = Tensor(np.copy(x))
 
-    o = transpose(x_arr, axes)
+    o = transpose(x_arr, axes, constant=False)
     grad = data.draw(hnp.arrays(shape=o.shape,
                                 dtype=float,
                                 elements=st.floats(1, 10),

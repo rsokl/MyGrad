@@ -16,43 +16,44 @@ __all__ = ["sin",
            "arccot"]
 
 
-def sin(a):
-    return Tensor._op(Sin, a)
+def sin(a, constant=False):
+    return Tensor._op(Sin, a, constant=constant)
 
 
-def sinc(a):
-    return Tensor._op(Sinc, a)
-
-def cos(a):
-    return Tensor._op(Cos, a)
+def sinc(a, constant=False):
+    return Tensor._op(Sinc, a, constant=constant)
 
 
-def tan(a):
-    return Tensor._op(Tan, a)
+def cos(a, constant=False):
+    return Tensor._op(Cos, a, constant=constant)
 
 
-def cot(a):
-    return Tensor._op(Cot, a)
+def tan(a, constant=False):
+    return Tensor._op(Tan, a, constant=constant)
 
 
-def csc(a):
-    return Tensor._op(Csc, a)
+def cot(a, constant=False):
+    return Tensor._op(Cot, a, constant=constant)
 
 
-def sec(a):
-    return Tensor._op(Sec, a)
+def csc(a, constant=False):
+    return Tensor._op(Csc, a, constant=constant)
 
 
-def arccos(a):
-    return Tensor._op(Arccos, a)
+def sec(a, constant=False):
+    return Tensor._op(Sec, a, constant=constant)
 
 
-def arccsc(a):
-    return Tensor._op(Arccsc, a)
+def arccos(a, constant=False):
+    return Tensor._op(Arccos, a, constant=constant)
 
 
-def arccot(a):
-    return Tensor._op(Arccot, a)
+def arccsc(a, constant=False):
+    return Tensor._op(Arccsc, a, constant=constant)
+
+
+def arccot(a, constant=False):
+    return Tensor._op(Arccot, a, constant=constant)
 
 
 def arcsin(a):

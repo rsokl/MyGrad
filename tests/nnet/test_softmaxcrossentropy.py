@@ -20,7 +20,7 @@ def test_softmax_crossentropy(data):
                              dtype=int,
                              elements=st.integers(min_value=0, max_value=s.shape[1] - 1)))
     scores = Tensor(s)
-    softmax_cross = softmax_crossentropy(scores, l)
+    softmax_cross = softmax_crossentropy(scores, l, constant=False)
     softmax_cross.backward()
 
     pygrad_scores = Tensor(s)

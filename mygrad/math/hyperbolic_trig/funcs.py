@@ -14,45 +14,45 @@ __all__ = ["arccosh",
            "tanh"]
 
 
-def arccosh(a):
-    return Tensor._op(Arccosh, a)
+def arccosh(a, constant=False):
+    return Tensor._op(Arccosh, a, constant=constant)
 
 
-def arccoth(a):
-    return Tensor._op(Arccoth, a)
+def arccoth(a, constant=False):
+    return Tensor._op(Arccoth, a, constant=constant)
 
 
-def arccsch(a):
-    return Tensor._op(Arccsch, a)
+def arccsch(a, constant=False):
+    return Tensor._op(Arccsch, a, constant=constant)
 
 
-def arcsinh(a):
-    return Tensor._op(Arcsinh, a)
+def arcsinh(a, constant=False):
+    return Tensor._op(Arcsinh, a, constant=constant)
 
 
-def arctanh(a):
-    return Tensor._op(Arctanh, a)
+def arctanh(a, constant=False):
+    return Tensor._op(Arctanh, a, constant=constant)
 
 
-def cosh(a):
-    return Tensor._op(Cosh, a)
+def cosh(a, constant=False):
+    return Tensor._op(Cosh, a, constant=constant)
 
 
-def coth(a):
-    return Tensor._op(Coth, a)
+def coth(a, constant=False):
+    return Tensor._op(Coth, a, constant=constant)
 
 
-def csch(a):
-    return Tensor._op(Csch, a)
+def csch(a, constant=False):
+    return Tensor._op(Csch, a, constant=constant)
 
 
-def sech(a):
-    return Tensor._op(Sech, a)
+def sech(a, constant=False):
+    return Tensor._op(Sech, a, constant=constant)
 
 
-def sinh(a):
-    return Tensor._op(Sinh, a)
+def sinh(a, constant=False):
+    return Tensor._op(Sinh, a, constant=constant)
 
 
-def tanh(a):
-    return Tensor._op(Tanh, a)
+def tanh(a, constant=False):
+    return Tensor._op(Tanh, a, constant=constant)

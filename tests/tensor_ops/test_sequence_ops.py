@@ -7,7 +7,7 @@ def test_seq_add():
     a = Tensor(3)
     b = Tensor([1, 2, 3])
     c = Tensor([[1, 2, 3], [2, 3, 4]])
-    f = add_sequence(a, b, c)
+    f = add_sequence(a, b, c, constant=False)
     f.sum().backward()
 
     a1 = Tensor(3)
@@ -27,7 +27,7 @@ def test_seq_mult():
     a = Tensor(3.)
     b = Tensor([1., 2., 3.])
     c = Tensor([[1., 2., 3.], [2., 3., 4.]])
-    f = multiply_sequence(a, b, c)
+    f = multiply_sequence(a, b, c, constant=False)
     f.sum().backward()
 
     a1 = Tensor(3.)

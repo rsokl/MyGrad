@@ -156,6 +156,7 @@ def conv2d(x, filter_bank, stride, padding=(0, 0)):
 
 class ConvND(Operation):
     scalar_only = True
+
     def __call__(self, x, w, stride, padding=0):
         self.variables = (x, w)
         # x ... data:    (N, C, X0, X1, ...)
@@ -267,7 +268,7 @@ class ConvND(Operation):
             self.variables[index].backward(df, **kwargs)
 
 
-def conv_nd(x, filter_bank, stride, padding=0):
+def conv_nd(x, filter_bank, stride, padding=0, constant=False):
     """ Use `filter_bank` to perform strided N-dimensional neural network-style
         convolutions (see Notes) over `x`.
                            f(x, w) -> x ⋆ w
@@ -307,6 +308,9 @@ def conv_nd(x, filter_bank, stride, padding=0):
             integer is provided, this padding is used for all of
             the convolved axes
 
+        constant : bool, optional (default=False)
+            If True, the resulting Tensor is a constant.
+
         Returns
         -------
         Tensor, shape=(N, F, G0, ...)
@@ -325,4 +329,4 @@ def conv_nd(x, filter_bank, stride, padding=0):
            this layer assumes that a scalar (i.e. a 0-dimensional tensor) will invoke
            `tensor.backward()` for the computational graph. This is standard for a
            neural network, which terminates in a scalar loss."""
-    return Tensor._op(ConvND, x, filter_bank, op_args=(stride, padding))
+    return Tensor._op(ConvND, x, filter_bank, op_args=(stride, padding), constant=constant)

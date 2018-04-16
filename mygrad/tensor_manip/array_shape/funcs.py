@@ -5,7 +5,7 @@ from mygrad.tensor_base import Tensor
 __all__ = ["reshape"]
 
 
-def reshape(a, newshape):
+def reshape(a, newshape, constant=False):
     """ Returns a tensor with a new shape, without changing its data.
 
         Parameters
@@ -29,4 +29,4 @@ def reshape(a, newshape):
         `reshape` utilizes C-ordering, meaning that it reads & writes elements using
         C-like index ordering; the last axis index changing fastest, and, proceeding
         in reverse order, the first axis index changing slowest. """
-    return Tensor._op(Reshape, a, op_args=(newshape,))
+    return Tensor._op(Reshape, a, op_args=(newshape,), constant=constant)

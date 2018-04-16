@@ -22,7 +22,7 @@ class Sigmoid(Operation):
         self.variables[index].backward(grad * self.sigmoid * (1. - self.sigmoid), **kwargs)
 
 
-def sigmoid(x):
+def sigmoid(x, constant=False):
     """ f(x) = 1 / (1 + exp(-x))
 
         Parameters
@@ -32,7 +32,7 @@ def sigmoid(x):
         Returns
         -------
         Tensor """
-    return Tensor._op(Sigmoid, x)
+    return Tensor._op(Sigmoid, x, constant=constant)
 
 
 class ReLu(Operation):
@@ -45,7 +45,7 @@ class ReLu(Operation):
         self.variables[index].backward(grad * self.back, **kwargs)
 
 
-def relu(x):
+def relu(x, constant=False):
     """ f(x) = {x, x > 0
                 0, x <= 0 }
 
@@ -56,7 +56,7 @@ def relu(x):
         Returns
         -------
         Tensor """
-    return Tensor._op(ReLu, x)
+    return Tensor._op(ReLu, x, constant=constant)
 
 
 class Softmax(Operation):
@@ -81,7 +81,7 @@ class Softmax(Operation):
         a.backward(sg - soft * np.sum(sg, **self.__kw), **kwargs)
 
 
-def softmax(x):
+def softmax(x, constant=False):
     """ f(x) = exp(x) / sum( exp(x) )
 
         Compute the softmax over a 1D tensor of data, or over the respective rows
@@ -94,7 +94,7 @@ def softmax(x):
         Returns
         -------
         Tensor """
-    return Tensor._op(Softmax, x)
+    return Tensor._op(Softmax, x, constant=constant)
 
 
 class LogSoftmax(Operation):
@@ -119,7 +119,7 @@ class LogSoftmax(Operation):
         a.backward(grad - soft * np.sum(grad, **self.__kw), **kwargs)
 
 
-def logsoftmax(x):
+def logsoftmax(x, constant=False):
     """ f(x) = log ( exp(x) / sum( exp(x) ) )
 
         Compute the log-softmax over a 1D tensor of data, or over the respective rows
@@ -132,4 +132,4 @@ def logsoftmax(x):
         Returns
         -------
         Tensor """
-    return Tensor._op(LogSoftmax, x)
+    return Tensor._op(LogSoftmax, x, constant=constant)

@@ -146,7 +146,7 @@ class RecurrentUnit(Operation):
             x.null_gradients()
 
 
-def simple_RNN(X, U, W, s0=None, bp_lim=None):
+def simple_RNN(X, U, W, s0=None, bp_lim=None, constant=False):
     """ Performs a forward pass of sequential data through a simple RNN layer, returning
         the 'hidden-descriptors' arrived at by utilizing the trainable parameters U and V:
 
@@ -174,6 +174,9 @@ def simple_RNN(X, U, W, s0=None, bp_lim=None):
             E.g. `bp_lim=3` will propagate gradients only up to 3 steps backward through the
             recursive sequence.
 
+        constant : bool, optional (default=False)
+            If True, the resulting Tensor is a constant.
+
         Returns
         -------
         mygrad.Tensor
@@ -185,6 +188,7 @@ def simple_RNN(X, U, W, s0=None, bp_lim=None):
         N : Batch size
         C : Length of single datum
         D : Length of 'hidden' descriptor"""
-    s = Tensor._op(RecurrentUnit, X, U, W, op_kwargs=dict(s0=s0, bp_lim=bp_lim))
+    s = Tensor._op(RecurrentUnit, X, U, W, op_kwargs=dict(s0=s0, bp_lim=bp_lim),
+                   constant=constant)
     s.creator._hidden_seq = s
     return s

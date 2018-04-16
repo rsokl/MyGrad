@@ -77,6 +77,7 @@ class fwdprop_test_factory():
 
             S = st.SearchStrategy
             kwargs = {k: (data.draw(v) if isinstance(v, S) else v) for k, v in self.kwargs}
+            constant = data.draw(st.booleans(), label="constant")
 
             for value in self.x_no_go:
                 assume(np.all(x != value))
@@ -84,13 +85,13 @@ class fwdprop_test_factory():
             for value in self.y_no_go:
                 assume(np.all(y != value))
 
-            o = self.op(x, y, **kwargs)
+            o = self.op(x, y, **kwargs, constant=constant)
             tensor_out = o.data
             true_out = self.true_func(x, y, **kwargs)
             assert isinstance(o, Tensor), "`mygrad_func` returned type {}, should return `mygrad.Tensor`".format(type(o))
             assert_allclose(tensor_out, true_out,
                             err_msg="`mygrad_func(x)` and `true_func(x)` produce different results")
-
+            assert o.constant is constant, "mygrad_func did not handle the constant keyword arg appropriately."
             assert_array_equal(x, x_copy,
                                err_msg="`x` was mutated during forward prop")
             assert_array_equal(y, y_copy,

@@ -15,41 +15,41 @@ __all__ = ["add",
            "negative"]
 
 
-def add(a, b):
-    return Tensor._op(Add, a, b)
+def add(a, b, constant=False):
+    return Tensor._op(Add, a, b, constant=constant)
 
 
-def subtract(a, b):
-    return Tensor._op(Subtract, a, b)
+def subtract(a, b, constant=False):
+    return Tensor._op(Subtract, a, b, constant=constant)
 
 
-def divide(a, b):
-    return Tensor._op(Divide, a, b)
+def divide(a, b, constant=False):
+    return Tensor._op(Divide, a, b, constant=constant)
 
 
-def reciprocal(a):
-    return Tensor._op(Reciprocal, a)
+def reciprocal(a, constant=False):
+    return Tensor._op(Reciprocal, a, constant=constant)
 
 
-def power(a, b):
-    return Tensor._op(Power, a, b)
+def power(a, b, constant=False):
+    return Tensor._op(Power, a, b, constant=constant)
 
 
-def multiply(a, b):
-    return Tensor._op(Multiply, a, b)
+def multiply(a, b, constant=False):
+    return Tensor._op(Multiply, a, b, constant=constant)
 
 
-def multiply_sequence(*variables):
-    return Tensor._op(MultiplySequence, *variables)
+def multiply_sequence(*variables, constant=False):
+    return Tensor._op(MultiplySequence, *variables, constant=constant)
 
 
-def add_sequence(*variables):
-    return Tensor._op(AddSequence, *variables)
+def add_sequence(*variables, constant=False):
+    return Tensor._op(AddSequence, *variables, constant=constant)
 
 
-def positive(a, where=True):
-    return Tensor._op(Positive, a, op_kwargs=(dict(where=where)))
+def positive(a, where=True, constant=False):
+    return Tensor._op(Positive, a, op_kwargs=(dict(where=where)), constant=constant)
 
 
-def negative(a, where=True):
-    return Tensor._op(Negative, a, op_kwargs=(dict(where=where)))
+def negative(a, where=True, constant=False):
+    return Tensor._op(Negative, a, op_kwargs=(dict(where=where)), constant=constant)

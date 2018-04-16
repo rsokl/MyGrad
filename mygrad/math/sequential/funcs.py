@@ -12,7 +12,7 @@ __all__ = ["sum",
            "cumsum"]
 
 
-def sum(x, axis=None, keepdims=False):
+def sum(x, axis=None, keepdims=False, constant=False):
     """ Sum of tensor elements over a given axis.
 
         Parameters
@@ -38,10 +38,10 @@ def sum(x, axis=None, keepdims=False):
             A Tensor with the same shape as `self`, with the specified
             axis/axes removed. If `self` is a 0-d tensor, or if `axis` is None,
             a 0-dim Tensor is returned."""
-    return Tensor._op(Sum, x, op_args=(axis, keepdims))
+    return Tensor._op(Sum, x, op_args=(axis, keepdims), constant=constant)
 
 
-def mean(x, axis=None, keepdims=False):
+def mean(x, axis=None, keepdims=False, constant=False):
     """ Mean of tensor elements over a given axis.
 
         Parameters
@@ -68,10 +68,10 @@ def mean(x, axis=None, keepdims=False):
             A Tensor with the same shape as `self`, with the specified
             axis/axes removed. If `self` is a 0-d tensor, or if `axis` is None,
             a 0-dim Tensor is returned."""
-    return Tensor._op(Mean, x, op_args=(axis, keepdims))
+    return Tensor._op(Mean, x, op_args=(axis, keepdims), constant=constant)
 
 
-def amax(x, axis=None, keepdims=False):
+def amax(x, axis=None, keepdims=False, constant=False):
     """ Return the maximum of a tensor or maximum along its axes.
 
         Parameters
@@ -90,10 +90,10 @@ def amax(x, axis=None, keepdims=False):
         -------
         max : Tensor
             Maximum of `a`. If `axis` is None, the result is a 0-D tensor."""
-    return Tensor._op(MaxMin, x, op_kwargs=dict(axis=axis, keepdims=keepdims, maxmin='max'))
+    return Tensor._op(MaxMin, x, op_kwargs=dict(axis=axis, keepdims=keepdims, maxmin='max'), constant=constant)
 
 
-def amin(x, axis=None, keepdims=False):
+def amin(x, axis=None, keepdims=False, constant=False):
     """ Return the minimum of a tensor or minimum along its axes.
 
         Parameters
@@ -110,18 +110,18 @@ def amin(x, axis=None, keepdims=False):
         -------
         min : Tensor
             Minimum of `a`. If `axis` is None, the result is a 0-D tensor."""
-    return Tensor._op(MaxMin, x, op_kwargs=dict(axis=axis, keepdims=keepdims, maxmin='min'))
+    return Tensor._op(MaxMin, x, op_kwargs=dict(axis=axis, keepdims=keepdims, maxmin='min'), constant=constant)
 
 # aliases
 min = amin
 max = amax
 
 
-def prod(a, axis=None, keepdims=False):
-    return Tensor._op(Prod, a, op_kwargs=dict(axis=axis, keepdims=keepdims))
+def prod(a, axis=None, keepdims=False, constant=False):
+    return Tensor._op(Prod, a, op_kwargs=dict(axis=axis, keepdims=keepdims), constant=constant)
 
 
-def cumprod(a, axis=None):
+def cumprod(a, axis=None, constant=False):
     """
     Return the cumulative product of elements along a given axis.
 
@@ -165,10 +165,10 @@ def cumprod(a, axis=None):
     Tensor([[  1,   2,   6],
            [  4,  20, 120]])"""
 
-    return Tensor._op(CumProd, a, op_kwargs=dict(axis=axis))
+    return Tensor._op(CumProd, a, op_kwargs=dict(axis=axis), constant=constant)
 
 
-def cumsum(a, axis=None):
+def cumsum(a, axis=None, constant=False):
     """
     Return the cumulative sum of the elements along a given axis.
 
@@ -206,4 +206,4 @@ def cumsum(a, axis=None):
             [ 4,  9, 15]])
     """
 
-    return Tensor._op(CumSum, a, op_kwargs=dict(axis=axis))
+    return Tensor._op(CumSum, a, op_kwargs=dict(axis=axis), constant=constant)
