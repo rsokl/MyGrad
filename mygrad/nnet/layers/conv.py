@@ -213,7 +213,8 @@ class ConvND(Operation):
                                 axes=[w_conv_channels, window_conv_channels])
 
         # (F, G0, ..., N) -> (N, F, G0, ...)
-        return np.moveaxis(conv_out, source=-1, destination=0)
+        out = np.moveaxis(conv_out, source=-1, destination=0)
+        return out if out.flags['C_CONTIGUOUS'] else np.ascontiguousarray(out)
 
     def backward_var(self, grad, index, **kwargs):
         """ Computes dX, where X is the data batch
