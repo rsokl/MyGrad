@@ -213,7 +213,7 @@ class ConvND(Operation):
                                 axes=[w_conv_channels, window_conv_channels])
 
         # (F, G0, ..., N) -> (N, F, G0, ...)
-        return np.rollaxis(conv_out, axis=-1, start=0)
+        return np.moveaxis(conv_out, source=-1, destination=0)
 
     def backward_var(self, grad, index, **kwargs):
         """ Computes dX, where X is the data batch
