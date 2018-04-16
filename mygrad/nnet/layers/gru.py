@@ -343,7 +343,7 @@ class GRUnit(Operation):
             x.null_gradients()
 
 
-def gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None, dropout=0.):
+def gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None, dropout=0., constant=False):
 
     """ Performs a forward pass of sequential data through a Gated Recurrent Unit layer, returning
         the 'hidden-descriptors' arrived at by utilizing the trainable parameters as follows:
@@ -382,6 +382,9 @@ def gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None, dropout=0.)
             If non-zero, the dropout scheme described in [1]_ is applied. See Notes
             for more details.
 
+        constant : bool, optional (default=False)
+            If True, the resulting Tensor is a constant.
+
         Returns
         -------
         mygrad.Tensor
@@ -411,6 +414,8 @@ def gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None, dropout=0.)
 
         .. [2] Y. Gal, Z. Ghahramani "A Theoretically Grounded Application of Dropout
                in Recurrent Neural Networks" arXiv:1512.05287v5, 2016. """
-    s = Tensor._op(GRUnit, X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, op_kwargs=dict(s0=s0, bp_lim=bp_lim, dropout=dropout))
+    s = Tensor._op(GRUnit, X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh,
+                   op_kwargs=dict(s0=s0, bp_lim=bp_lim, dropout=dropout),
+                   constant=constant)
     s.creator._hidden_seq = s
     return s

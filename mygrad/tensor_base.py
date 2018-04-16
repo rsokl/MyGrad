@@ -59,7 +59,7 @@ class Tensor:
             raise TypeError("Tensor data must be a numeric type")
 
     @classmethod
-    def _op(cls, Op, *input_vars, op_args=None, op_kwargs=None):
+    def _op(cls, Op, *input_vars, op_args=None, op_kwargs=None, constant=False):
         """ Wraps operations performed between tensors: f(a, b, ...).
 
             Parameters
@@ -71,11 +71,14 @@ class Tensor:
                 An arbitrary number of tensor-like objects, which are used as the input
                 tensors to the forward-pass of the operation.
 
-            *op_args
+            op_args : Optional[Tuple[Any]]
                 Arbitrary positional arguments passed to the operation's forward pass.
 
-            **op_kwargs
+            op_kwargs : Optional[Dict[str, Any]]
                 Arbitrary keyword arguments passed to the operation's forward pass.
+
+            constant : bool, optional (default=False)
+                If True, the resulting Tensor is a constant.
 
             Returns
             -------
@@ -101,12 +104,13 @@ class Tensor:
         if isinstance(f, BroadcastableOp) and any(op_out.shape != i.shape for i in tensor_vars):
             f.scalar_only = True
 
-        # record that a variable participated in that op
-        for var in tensor_vars:
-            if not var.constant:
-                var._ops.append(f)
+        is_const = constant or all(var.constant for var in tensor_vars)
 
-        is_const = all(var.constant for var in tensor_vars)
+        if not is_const:
+            # record that a variable participated in that op
+            for var in tensor_vars:
+                if not var.constant:
+                    var._ops.append(f)
 
         scalar_only = f.scalar_only and not is_const
         for var in tensor_vars:

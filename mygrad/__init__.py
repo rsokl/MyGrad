@@ -7,4 +7,5 @@ from mygrad.math.sequential.funcs import *
 from mygrad.math.misc.funcs import *
 from mygrad.tensor_manip.array_shape.funcs import *
 from mygrad.tensor_manip.transpose_like.funcs import *
+from mygrad.tensor_creation.funcs import *
 version = "0.0"

@@ -67,11 +67,11 @@ def _get_indices(item, seq):
 
 
 class EinSum(BroadcastableOp):
-    def __call__(self, *variables, in_lbls, out_lbls, **kwargs):
+    def __call__(self, *variables, in_lbls, out_lbls):
         self.in_lbls = in_lbls
         self.out_lbls = out_lbls
         self.variables = variables
-        return np.einsum("->".join((in_lbls, out_lbls)), *(var.data for var in self.variables), **kwargs)
+        return np.einsum("->".join((in_lbls, out_lbls)), *(var.data for var in self.variables))
 
     def backward_var(self, grad, index, **kwargs):
         """
@@ -164,7 +164,7 @@ class EinSum(BroadcastableOp):
         self.variables[index].backward(dfdx, **kwargs)
 
 
-def einsum(*operands, **kwargs):
+def einsum(*operands, constant=False):
     """
     einsum(subscripts, *operands)
 
@@ -184,6 +184,9 @@ def einsum(*operands, **kwargs):
 
     operands : Tuple[ArrayLike, ...]
         The tensors used in the summation.
+
+    constant : bool, optional (default=False)
+        If True, the resulting Tensor is a constant.
 
     Returns
     -------
@@ -365,5 +368,5 @@ def einsum(*operands, **kwargs):
 
     in_lbls, out_lbls, _ = _parse_einsum_input(operands)
     return Tensor._op(EinSum, *variables, op_kwargs=dict(in_lbls=in_lbls,
-                                                         out_lbls=out_lbls,
-                                                         **kwargs))
+                                                         out_lbls=out_lbls),
+                      constant=constant)

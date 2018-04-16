@@ -31,7 +31,7 @@ class Dense(Operation):
                 b.backward(np.tensordot(a.data, grad, ((0, 1), (0, 1))), **kwargs)
 
 
-def dense(x, w):
+def dense(x, w, constant=False):
     """ Perform a dense-layer pass (i.e. matrix multiplication) of a (N, D)-shape
         tensor with a (D, M)-shape tensor.
 
@@ -40,6 +40,9 @@ def dense(x, w):
         x : Union[mygrad.Tensor, array_like], shape=(N, D) or (T, N, D)
 
         w : Union[mygrad.Tensor, array_like], shape=(D, M)
+
+        constant : bool, optional (default=False)
+            If True, the resulting Tensor is a constant.
 
         Returns
         -------
@@ -52,4 +55,4 @@ def dense(x, w):
         this layer assumes that a scalar (i.e. a 0-dimensional tensor) will invoke
         `tensor.backward()` for the computational graph. This is standard for a
         neural network, which terminates in a scalar loss."""
-    return Tensor._op(Dense, x, w)
+    return Tensor._op(Dense, x, w, constant=constant)

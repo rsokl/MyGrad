@@ -18,7 +18,7 @@ def test_multiclass_hinge(data):
                              dtype=int,
                              elements=st.integers(min_value=0, max_value=s.shape[1] - 1)))
     hinge_scores = Tensor(s)
-    hinge_loss = multiclass_hinge(hinge_scores, l)
+    hinge_loss = multiclass_hinge(hinge_scores, l, constant=False)
     hinge_loss.backward()
 
     pygrad_scores = Tensor(s)

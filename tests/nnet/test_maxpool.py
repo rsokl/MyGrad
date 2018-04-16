@@ -5,6 +5,22 @@ from mygrad.tensor_base import Tensor
 from pytest import raises
 
 
+def text_constant():
+    x = np.array([[[17, 10, 15, 28, 25, 23],
+                   [44, 26, 18, 16, 39, 34],
+                   [ 5, 42, 36,  0,  2, 46],
+                   [30, 20,  1, 31, 35, 43]],
+
+                  [[ 6,  7, 45, 27, 11,  8],
+                   [37,  4, 41, 22,  9, 33],
+                   [47,  3, 13, 32, 21, 38],
+                   [19, 12, 40, 24, 14, 29]]])
+    x = Tensor(x)
+    pool = (3,)
+    stride = (1,)
+    assert max_pool(x, pool, stride, constant=True).constant is True
+    assert max_pool(x, pool, stride, constant=False).constant is False
+
 def test_1d_case():
     x = np.array([[[17, 10, 15, 28, 25, 23],
                    [44, 26, 18, 16, 39, 34],
@@ -43,6 +59,8 @@ def test_1d_case():
     assert isinstance(out, Tensor)
     assert_allclose(fwd_ans, out.data)
     assert_allclose(bkc_ans, x.grad)
+    assert max_pool(x, pool, stride, constant=True).constant is True
+    assert max_pool(x, pool, stride, constant=False).constant is False
 
 
 def test_2d_case():

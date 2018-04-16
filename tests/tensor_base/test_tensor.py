@@ -64,3 +64,44 @@ def test_init_params(a, creator, constant, scalar_only, dtype):
     assert tensor.scalar_only is scalar_only
     assert tensor.dtype == a.astype(dtype).dtype
     assert tensor.grad is None
+
+
+@given(x=st.floats(min_value=-1E-6, max_value=1E6),
+       y=st.floats(min_value=-1E-6, max_value=1E6),
+       z=st.floats(min_value=-1E-6, max_value=1E6))
+def test_null_gradients(x, y, z):
+    x = Tensor(x)
+    y = Tensor(y)
+    z = Tensor(z)
+
+    f = x*y + z
+    g = x + z*f*f
+
+    # check side effects
+    unused = 2*g - f
+    w = 1*f
+
+    g.backward()
+    assert x.grad is not None
+    assert y.grad is not None
+    assert z.grad is not None
+    assert f.grad is not None
+    assert g.grad is not None
+    assert len(x._ops) > 0
+    assert len(y._ops) > 0
+    assert len(z._ops) > 0
+    assert len(f._ops) > 0
+    assert len(g._ops) > 0
+    assert w.grad is None
+
+    g.null_gradients()
+    assert x.grad is None
+    assert y.grad is None
+    assert z.grad is None
+    assert f.grad is None
+    assert g.grad is None
+    assert len(x._ops) == 0
+    assert len(y._ops) == 0
+    assert len(z._ops) == 0
+    assert len(f._ops) == 0
+    assert len(g._ops) == 0

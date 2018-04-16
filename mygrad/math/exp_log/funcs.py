@@ -12,33 +12,33 @@ __all__ = ["exp",
            "log1p"]
 
 
-def exp(a):
-    return Tensor._op(Exp, a)
+def exp(a, constant=False):
+    return Tensor._op(Exp, a, constant=constant)
 
 
-def expm1(a):
-    return Tensor._op(Expm1, a)
+def expm1(a, constant=False):
+    return Tensor._op(Expm1, a, constant=constant)
 
 
-def logaddexp(a, b):
-    return Tensor._op(Logaddexp, a, b)
+def logaddexp(a, b, constant=False):
+    return Tensor._op(Logaddexp, a, b, constant=constant)
 
 
-def logaddexp2(a, b):
-    return Tensor._op(Logaddexp2, a, b)
+def logaddexp2(a, b, constant=False):
+    return Tensor._op(Logaddexp2, a, b, constant=constant)
 
 
-def log(a):
-    return Tensor._op(Log, a)
+def log(a, constant=False):
+    return Tensor._op(Log, a, constant=constant)
 
 
-def log2(a):
-    return Tensor._op(Log2, a)
+def log2(a, constant=False):
+    return Tensor._op(Log2, a, constant=constant)
 
 
-def log10(a):
-    return Tensor._op(Log10, a)
+def log10(a, constant=False):
+    return Tensor._op(Log10, a, constant=constant)
 
 
-def log1p(a):
-    return Tensor._op(Log1p, a)
+def log1p(a, constant=False):
+    return Tensor._op(Log1p, a, constant=constant)

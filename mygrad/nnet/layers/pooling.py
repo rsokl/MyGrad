@@ -137,7 +137,7 @@ class MaxPoolND(Operation):
         var.backward(dx.reshape(x.shape), **kwargs)
 
 
-def max_pool(x, pool, stride):
+def max_pool(x, pool, stride, constant=False):
     """ Perform max-pooling over the last N dimensions of a data batch.
 
         Parameters
@@ -155,6 +155,9 @@ def max_pool(x, pool, stride):
             The spacing used to place the pooling window, along (P0, ...) axes, respectively.
             If a single value is provided, it is used for all N pooling axes.
 
+        constant : bool, optional (default=False)
+            If True, the resulting Tensor is a constant.
+
         Returns
         -------
         numpy.ndarray, shape=((N0, ...), C0', ...)
@@ -167,4 +170,4 @@ def max_pool(x, pool, stride):
         dimensions.
         """
     if isinstance(pool, Integral): pool = (pool, pool)
-    return Tensor._op(MaxPoolND, x, op_args=(pool, stride))
+    return Tensor._op(MaxPoolND, x, op_args=(pool, stride), constant=constant)

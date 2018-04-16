@@ -16,7 +16,7 @@ def test_static_softmax():
                   [  8.,   9.,  10.,  11.]])
 
     x = Tensor(x)
-    f = (softmax(x) * skew).sum()
+    f = (softmax(x, constant=False) * skew).sum()
 
     out = np.array(1.449875865467131)
     assert_allclose(f.data, out)
@@ -40,7 +40,7 @@ def test_static_logsoftmax():
                   [  8.,   9.,  10.,  11.]])
 
     x = Tensor(x)
-    f = (logsoftmax(x) * skew).sum()
+    f = (logsoftmax(x, constant=False) * skew).sum()
 
     out = np.array(-13.722895761739732)
     assert_allclose(f.data, out)

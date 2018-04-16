@@ -24,8 +24,11 @@ def test_getitem():
     assert_allclose(x.grad, np.array([2, 3, 4]))
 
 
-def get_item(*arrs, index):
-    return arrs[0][index]
+def get_item(*arrs, index, constant=False):
+    o = arrs[0][index]
+    if isinstance(o, Tensor):
+        o._constant = constant
+    return o
 
 
 def basic_index_wrap(*arrs):

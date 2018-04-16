@@ -6,7 +6,7 @@ __all__ = ["transpose",
            "swapaxes"]
 
 
-def transpose(a, axes=None):
+def transpose(a, axes=None, constant=False):
     """ Permute the dimensions of an array.
 
         Parameters
@@ -22,10 +22,10 @@ def transpose(a, axes=None):
         -------
         mygrad.Tensor
             `a` with its axes permuted.  A new tensor is returned. """
-    return Tensor._op(Transpose, a, op_args=(axes,))
+    return Tensor._op(Transpose, a, op_args=(axes,), constant=constant)
 
 
-def moveaxis(a, source, destination):
+def moveaxis(a, source, destination, constant=False):
     """ Move axes of an array to new positions. Other axes remain in their
         original order.
 
@@ -57,10 +57,10 @@ def moveaxis(a, source, destination):
         (5, 3, 4)
         >>> moveaxis(x, [0, 1], [-1, -2]).shape
         (5, 4, 3) """
-    return Tensor._op(MoveAxis, a, op_args=(source, destination))
+    return Tensor._op(MoveAxis, a, op_args=(source, destination), constant=constant)
 
 
-def swapaxes(a, axis1, axis2):
+def swapaxes(a, axis1, axis2, constant=False):
     """ Interchange two axes of a tensor.
 
         Parameters
@@ -98,4 +98,4 @@ def swapaxes(a, axis1, axis2):
                [[1, 5],
                 [3, 7]]])
     """
-    return Tensor._op(SwapAxes, a, op_args=(axis1, axis2))
+    return Tensor._op(SwapAxes, a, op_args=(axis1, axis2), constant=constant)

@@ -177,6 +177,15 @@ def test_conv2d_fwd():
         assert isinstance(o, Tensor) and not o.constant and o.scalar_only and np.all(o.data == out)
 
 
+def test_constant():
+
+    x = Tensor(np.arange(1, 13).reshape(1, 1, 3, 4))
+    k = Tensor(-1 * np.arange(1, 5).reshape(1, 1, 2, 2))
+
+    assert conv_nd(Tensor(x), k, [1, 2], 0, constant=True).constant is True
+    assert conv_nd(Tensor(x), k, [1, 2], 0, constant=False).constant is False
+
+
 def test_convnd_fwd():
 
     # trivial by-hand test
@@ -191,14 +200,27 @@ def test_convnd_fwd():
 
     # stride = [1, 2]
     # pad = [0, 0]
-    x = np.arange(1, 13).reshape(1, 1, 3, 4)
-    k = -1 * np.arange(1, 5).reshape(1, 1, 2, 2)
+    x = Tensor(np.arange(1, 13).reshape(1, 1, 3, 4))
+    k = Tensor(-1 * np.arange(1, 5).reshape(1, 1, 2, 2))
 
-    o = conv_nd(Tensor(x), k, [1, 2], 0)
+    o = conv_nd(Tensor(x), k, [1, 2], 0, constant=True)
 
     out = np.array([[[[-44.,  -64.],
                       [-84., -104.]]]])
-    assert isinstance(o, Tensor) and not o.constant and o.scalar_only and np.all(o.data == out)
+    assert isinstance(o, Tensor)
+    assert o.constant is True
+    assert o.scalar_only is False
+    assert np.all(o.data == out)
+
+
+    x = Tensor(np.arange(1, 13).reshape(1, 1, 3, 4))
+    k = Tensor(-1 * np.arange(1, 5).reshape(1, 1, 2, 2))
+
+    o = conv_nd(Tensor(x), k, [1, 2], 0, constant=False)
+
+    assert isinstance(o, Tensor)
+    assert o.constant is False
+    assert o.scalar_only is True
 
 
 @given(st.data())
