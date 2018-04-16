@@ -90,7 +90,8 @@ class MaxPoolND(Operation):
         axes = tuple(range(maxed.ndim))
 
         # (G0, ..., (N0, ...)) -> ((N0, ...), G0, ...)
-        return maxed.transpose(axes[-num_no_pool:] + axes[:-num_no_pool])
+        out = maxed.transpose(axes[-num_no_pool:] + axes[:-num_no_pool])
+        return out if out.flags['C_CONTIGUOUS'] else np.ascontiguousarray(out)
 
     def backward_var(self, grad, index, **kwargs):
         """ Parameters
