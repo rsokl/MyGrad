@@ -14,8 +14,10 @@ def sliding_window_view(arr, window_shape, step, dilation=None):
         Parameters
         ----------
         arr : numpy.ndarray, shape=(..., [x, (...), z])
-            C-ordered array over which sliding view-window is applied along the trailing
+            C-contiguous array over which sliding view-window is applied along the trailing
             dimensions [x, ..., z], as determined by the length of `window_shape`.
+
+            If `arr` is not C-contiguous, it will be replaced by `numpy.ascontiguousarray(arr)`
 
         window_shape : Sequence[int]
             Specifies the shape of the view-window: [Wx, (...), Wz].
@@ -130,6 +132,9 @@ def sliding_window_view(arr, window_shape, step, dilation=None):
             if any(w * d > s for w, d, s in zip(window_shape[::-1], dilation[::-1], arr.shape[::-1])):
                 msg = """ The dilated window must fit within the trailing dimensions of `arr`."""
                 raise AssertionError(msg)
+
+    if not arr.flags['C_CONTIGUOUS']:
+        arr = np.ascontiguousarray(arr)
 
     step = np.array(step)  # (Sx, ..., Sz)
     window_shape = np.array(window_shape)  # (Wx, ..., Wz)
