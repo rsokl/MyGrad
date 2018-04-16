@@ -78,7 +78,7 @@ class Tensor:
                 Arbitrary keyword arguments passed to the operation's forward pass.
 
             constant : bool, optional (default=False)
-                Controls whether or not the tensor from the wrapped operation is a constant.
+                If True, the resulting Tensor is a constant.
 
             Returns
             -------
