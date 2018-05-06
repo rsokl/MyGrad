@@ -83,6 +83,12 @@ def test_var_ddof_backward(x, ddof):
 def test_std_fwd(): pass
 
 
+@given(x=hnp.arrays(shape=(10,), dtype=float, elements=st.floats(-10, 10)),
+       ddof=st.integers(0, 9))
+def test_std_ddof(x, ddof):
+    assert np.std(x, ddof=ddof) == std(x, ddof=ddof).data
+
+
 @fwdprop_test_factory(mygrad_func=prod, true_func=np.prod)
 def test_prod_fwd(): pass
 
