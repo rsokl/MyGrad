@@ -1,12 +1,17 @@
+from ...utils.numerical_gradient import numerical_gradient_full
 from ...wrappers.sequence_func import fwdprop_test_factory, backprop_test_factory
-
+from numpy.testing import assert_allclose
 from pytest import raises
 
-from mygrad import amax, amin, sum, mean, cumprod, cumsum, prod
+from mygrad import amax, amin, sum, mean, cumprod, cumsum, prod, var, std
 import mygrad
 
 import numpy as np
 
+from mygrad import Tensor
+from hypothesis import given, assume
+import hypothesis.strategies as st
+import hypothesis.extra.numpy as hnp
 
 @fwdprop_test_factory(mygrad_func=amax, true_func=np.amax)
 def test_max_fwd(): pass
@@ -43,6 +48,39 @@ def test_mean_fwd(): pass
 
 @backprop_test_factory(mygrad_func=mean, true_func=np.mean)
 def test_mean_bkwd(): pass
+
+
+@fwdprop_test_factory(mygrad_func=var, true_func=np.var)
+def test_var_fwd(): pass
+
+
+@backprop_test_factory(mygrad_func=var, true_func=np.var)
+def test_var_bkwd(): pass
+
+
+@given(x=hnp.arrays(shape=(10,), dtype=float, elements=st.floats(-10, 10)),
+       ddof=st.integers(0, 9))
+def test_var_ddof(x, ddof):
+    assert np.var(x, ddof=ddof) == var(x, ddof=ddof).data
+
+
+@given(x=hnp.arrays(shape=(10,), dtype=float, elements=st.floats(-10, 10)),
+       ddof=st.integers(0, 9))
+def test_var_ddof_backward(x, ddof):
+    y = Tensor(x)
+
+    def f(z): return np.var(z, ddof=ddof)
+
+    o = var(y, ddof=ddof)
+    o.backward(2.)
+
+    g, = numerical_gradient_full(f, x, back_grad=np.asarray(2.))
+    assert_allclose(g, y.grad, rtol=1e-5, atol=1e-5)
+
+
+# std composes mygrad's sqrt and var, backprop need not be tested
+@fwdprop_test_factory(mygrad_func=std, true_func=np.std, unique=True)
+def test_std_fwd(): pass
 
 
 @fwdprop_test_factory(mygrad_func=prod, true_func=np.prod)
