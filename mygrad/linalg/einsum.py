@@ -8,6 +8,7 @@ from functools import reduce
 from numpy.core.einsumfunc import _parse_einsum_input
 from numpy.lib.stride_tricks import as_strided
 
+
 __all__ = ["einsum"]
 
 
@@ -67,11 +68,13 @@ def _get_indices(item, seq):
 
 
 class EinSum(BroadcastableOp):
-    def __call__(self, *variables, in_lbls, out_lbls):
+    def __call__(self, *variables, in_lbls, out_lbls, optimize=False):
         self.in_lbls = in_lbls
         self.out_lbls = out_lbls
         self.variables = variables
-        return np.einsum("->".join((in_lbls, out_lbls)), *(var.data for var in self.variables))
+        self.optimize = optimize
+        return np.einsum("->".join((in_lbls, out_lbls)), *(var.data for var in self.variables),
+                         optimize=optimize)
 
     def backward_var(self, grad, index, **kwargs):
         """
@@ -134,7 +137,8 @@ class EinSum(BroadcastableOp):
         if not repeat_lbls:
             # dfdx: einsum("ji, k -> ijk", grad, y)
             outshape = self.variables[index].shape
-            dfdx = reduce_broadcast(np.einsum(back_prop_lbls, *operands), outshape)
+            dfdx = reduce_broadcast(np.einsum(back_prop_lbls, *operands, optimize=self.optimize),
+                                    outshape)
             if var_shape != dfdx.shape:
                 # if y was broadcast over x, the gradient needs to
                 # be broadcast to x's shape: dfdx-shape (i,j,1) -> (i,j,k)
@@ -160,11 +164,11 @@ class EinSum(BroadcastableOp):
         strides = tuple(sum(dfdx.strides[ind] for ind in _get_indices(lbl, original_var_lbl))
                         for lbl in var_lbl)
         out_view = as_strided(dfdx, shape=out_view_shape, strides=strides)
-        np.einsum(back_prop_lbls, *operands, out=out_view)
+        np.einsum(back_prop_lbls, *operands, out=out_view, optimize=self.optimize)
         self.variables[index].backward(dfdx, **kwargs)
 
 
-def einsum(*operands, constant=False):
+def einsum(*operands, optimize=False, constant=False):
     """
     einsum(subscripts, *operands)
 
@@ -184,6 +188,16 @@ def einsum(*operands, constant=False):
 
     operands : Tuple[ArrayLike, ...]
         The tensors used in the summation.
+
+    optimize : {False, True, 'greedy', 'optimal'}, optional
+        Controls if intermediate optimization should occur; also enables
+        the use of BLAS where possible. This can produce significant speedups
+        for computations like matrix multiplication.
+
+        No optimization will occur if False and True will default to the 'greedy'
+        algorithm. Also accepts an explicit contraction list from the
+        ``np.einsum_path`` function. See ``np.einsum_path`` for more details.
+        Default is True.
 
     constant : bool, optional (default=False)
         If True, the resulting Tensor is a constant.
@@ -368,5 +382,6 @@ def einsum(*operands, constant=False):
 
     in_lbls, out_lbls, _ = _parse_einsum_input(operands)
     return Tensor._op(EinSum, *variables, op_kwargs=dict(in_lbls=in_lbls,
-                                                         out_lbls=out_lbls),
+                                                         out_lbls=out_lbls,
+                                                         optimize=optimize),
                       constant=constant)
