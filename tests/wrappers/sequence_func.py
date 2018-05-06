@@ -49,8 +49,9 @@ class fwdprop_test_factory():
         def wrapper(x, data):
             x_copy = copy(x)
             axis = np.nan if self.no_axis else data.draw(valid_axes(x.ndim,
-                                                                    single_axis_only=self.single_axis_only))
-            keepdims = np.nan if self.no_keepdims else data.draw(st.booleans())
+                                                                    single_axis_only=self.single_axis_only),
+                                                         label="axis")
+            keepdims = np.nan if self.no_keepdims else data.draw(st.booleans(), label="keepdims")
 
             for value in self.x_no_go:
                 assume(np.all(x != value))
@@ -123,8 +124,9 @@ class backprop_test_factory():
 
             x_copy = copy(x)
             axis = np.nan if self.no_axis else data.draw(valid_axes(x.ndim,
-                                                                    single_axis_only=self.single_axis_only))
-            keepdims = np.nan if self.no_keepdims else data.draw(st.booleans())
+                                                                    single_axis_only=self.single_axis_only),
+                                                         label="axis")
+            keepdims = np.nan if self.no_keepdims else data.draw(st.booleans(), label="keepdims")
 
             for value in self.x_no_go:
                 assume(np.all(x != value))
@@ -144,7 +146,8 @@ class backprop_test_factory():
             # gradient to be backpropped through this operation
             grad = data.draw(hnp.arrays(shape=out.shape,
                                         dtype=float,
-                                        elements=st.floats(1, 10)))
+                                        elements=st.floats(1, 10)),
+                             label="grad")
             grad_copy = copy(grad)
 
             out.backward(grad)

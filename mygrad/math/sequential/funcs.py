@@ -1,8 +1,11 @@
 from .ops import *
 from mygrad.tensor_base import Tensor
+from mygrad.math.misc.funcs import sqrt
 
 __all__ = ["sum",
            "mean",
+           "var",
+           "std",
            "amax",
            "amin",
            "max",
@@ -69,6 +72,95 @@ def mean(x, axis=None, keepdims=False, constant=False):
             axis/axes removed. If `self` is a 0-d tensor, or if `axis` is None,
             a 0-dim Tensor is returned."""
     return Tensor._op(Mean, x, op_args=(axis, keepdims), constant=constant)
+
+
+def var(x, axis=None, ddof=0, keepdims=False, constant=False):
+    """
+    Compute the variance along the specified axis.
+
+    Returns the variance of the array elements, a measure of the spread of a
+    distribution.  The variance is computed for the flattened array by
+    default, otherwise over the specified axis.
+
+    Parameters
+    ----------
+    a : array_like
+        Array containing numbers whose variance is desired.  If `a` is not an
+        array, a conversion is attempted.
+    axis : None or int or tuple of ints, optional
+        Axis or axes along which the variance is computed.  The default is to
+        compute the variance of the flattened array.
+    ddof : int, optional
+        "Delta Degrees of Freedom": the divisor used in the calculation is
+        ``N - ddof``, where ``N`` represents the number of elements. By
+        default `ddof` is zero.
+    keepdims : bool, optional
+        If this is set to True, the axes which are reduced are left
+        in the result as dimensions with size one. With this option,
+        the result will broadcast correctly against the input array.
+
+    Returns
+    -------
+    variance : mygrad.Tensor
+
+    Notes
+    -----
+    The variance is the average of the squared deviations from the mean,
+    i.e.,  ``var = mean(abs(x - x.mean())**2)``.
+
+    The mean is normally calculated as ``x.sum() / N``, where ``N = len(x)``.
+    If, however, `ddof` is specified, the divisor ``N - ddof`` is used
+    instead.  In standard statistical practice, ``ddof=1`` provides an
+    unbiased estimator of the variance of a hypothetical infinite population.
+    ``ddof=0`` provides a maximum likelihood estimate of the variance for
+    normally distributed variables.
+    """
+    return Tensor._op(Variance, x, op_kwargs=dict(axis=axis,
+                                                  keepdims=keepdims,
+                                                  ddof=ddof), constant=constant)
+
+def std(x, axis=None, ddof=0, keepdims=False, constant=False):
+    """
+    Compute the standard deviation along the specified axis.
+
+    Returns the variance of the array elements, a measure of the spread of a
+    distribution.  The variance is computed for the flattened array by
+    default, otherwise over the specified axis.
+
+    Parameters
+    ----------
+    a : array_like
+        Array containing numbers whose variance is desired.  If `a` is not an
+        array, a conversion is attempted.
+    axis : None or int or tuple of ints, optional
+        Axis or axes along which the variance is computed.  The default is to
+        compute the variance of the flattened array.
+    ddof : int, optional
+        "Delta Degrees of Freedom": the divisor used in the calculation is
+        ``N - ddof``, where ``N`` represents the number of elements. By
+        default `ddof` is zero.
+    keepdims : bool, optional
+        If this is set to True, the axes which are reduced are left
+        in the result as dimensions with size one. With this option,
+        the result will broadcast correctly against the input array.
+
+    Returns
+    -------
+    std : mygrad.Tensor
+
+    Notes
+    -----
+    The variance is the average of the squared deviations from the mean,
+    i.e.,  ``var = mean(abs(x - x.mean())**2)``.
+
+    The mean is normally calculated as ``x.sum() / N``, where ``N = len(x)``.
+    If, however, `ddof` is specified, the divisor ``N - ddof`` is used
+    instead.  In standard statistical practice, ``ddof=1`` provides an
+    unbiased estimator of the variance of a hypothetical infinite population.
+    ``ddof=0`` provides a maximum likelihood estimate of the variance for
+    normally distributed variables.
+    """
+    return sqrt(var(x, axis=axis, keepdims=keepdims, ddof=ddof, constant=constant))
 
 
 def amax(x, axis=None, keepdims=False, constant=False):
