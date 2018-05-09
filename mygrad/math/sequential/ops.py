@@ -3,7 +3,7 @@ import numpy as np
 from functools import reduce
 
 __all__ = ["MaxMin", "Sum", "Mean", "Prod", "CumProd", "CumSum",
-           "Variance", "StdDev"]
+           "Variance"]
 
 
 class MaxMin(Operation):
