@@ -119,6 +119,7 @@ def var(x, axis=None, ddof=0, keepdims=False, constant=False):
                                                   keepdims=keepdims,
                                                   ddof=ddof), constant=constant)
 
+
 def std(x, axis=None, ddof=0, keepdims=False, constant=False):
     """
     Compute the standard deviation along the specified axis.

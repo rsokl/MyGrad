@@ -180,9 +180,11 @@ def test_traces_bkwd():
     a = np.random.rand(5, 2, 2, 5)
     b = np.random.rand(3, 2, 1)
     c = np.random.rand(1, 1)
+    d = np.random.rand(5, 5, 5)
     compare_backprop('ijji -> i', a)
     compare_backprop(a, [0, 1, 1, 0], [0])
 
+    compare_backprop("iii -> i", d)
     compare_backprop('ijji -> j', a)
     compare_backprop('ijji -> ij', a)
     compare_backprop('ijji -> ji', a)
