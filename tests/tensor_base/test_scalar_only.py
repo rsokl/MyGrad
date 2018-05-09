@@ -3,12 +3,12 @@ from hypothesis import given
 from pytest import raises
 
 from mygrad.tensor_base import Tensor
-from mygrad.operation_base import Operation
+from mygrad.operation_base import Operation, BroadcastableOp
 
 import numpy as np
 
 
-class ScalarOnlyOp(Operation):
+class ScalarOnlyOp(BroadcastableOp):
     def __init__(self):
         self.scalar_only = True
 
@@ -104,4 +104,21 @@ def test_practical_scalar_only():
     a = Tensor([1, 2, 3], constant=True)
     b = Tensor(3, constant=True)
     out = a + b
+    out.backward()
+
+    a = Tensor([1, 2, 3])
+    b = 3
+    out = a + b
+    out.backward()
+
+    out = a * b
+    out.backward()
+
+    out = a - b
+    out.backward()
+
+    out = a / b
+    out.backward()
+
+    out = a ** b
     out.backward()
