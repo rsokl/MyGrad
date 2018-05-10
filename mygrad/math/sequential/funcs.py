@@ -245,10 +245,11 @@ def cumprod(a, axis=None, constant=False):
     Examples
     --------
     >>> from mygrad import cumprod, Tensor
-    >>> a = Tensor([1, 2, 3])
-    >>> cumprod(a) # intermediate results 1, 1*2
-    ...               # total product 1*2*3 = 6
-    Tensor([1, 2, 6])
+    >>> a = Tensor([[1, 2, 3],
+    ...             [4, 5, 6]])
+
+    >>> cumprod(a)
+    Tensor([  1   2   6  24 120 720])
 
     The cumulative product for each column (i.e., over the rows) of `a`:
 
@@ -260,7 +261,7 @@ def cumprod(a, axis=None, constant=False):
 
     >>> cumprod(a,axis=1)
     Tensor([[  1,   2,   6],
-           [  4,  20, 120]])"""
+            [  4,  20, 120]])"""
 
     return Tensor._op(CumProd, a, op_kwargs=dict(axis=axis), constant=constant)
 
@@ -288,10 +289,8 @@ def cumsum(a, axis=None, constant=False):
     Examples
     --------
     >>> from mygrad import cumsum, Tensor
-    >>> a = Tensor([[1,2,3], [4,5,6]])
-    >>> a
-    Tensor([[1, 2, 3],
-            [4, 5, 6]])
+    >>> a = Tensor([[1, 2, 3],
+    ...             [4, 5, 6]])
     >>> cumsum(a)
     Tensor([ 1,  3,  6, 10, 15, 21])
 
