@@ -191,7 +191,7 @@ def einsum(*operands, optimize=False, constant=False):
     operands : Tuple[ArrayLike, ...]
         The tensors used in the summation.
 
-    optimize : {False, True, 'greedy', 'optimal'}, optional
+    optimize : {False, True, 'greedy', 'optimal'}, optional (default=False)
         Controls if intermediate optimization should occur; also enables
         the use of BLAS where possible. This can produce significant speedups
         for computations like matrix multiplication.
@@ -199,7 +199,6 @@ def einsum(*operands, optimize=False, constant=False):
         No optimization will occur if False and True will default to the 'greedy'
         algorithm. Also accepts an explicit contraction list from the
         ``np.einsum_path`` function. See ``np.einsum_path`` for more details.
-        Default is True.
 
     constant : bool, optional (default=False)
         If True, the resulting Tensor is a constant.

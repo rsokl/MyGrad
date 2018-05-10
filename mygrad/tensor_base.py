@@ -125,7 +125,7 @@ class Tensor:
 
             Parameters
             ----------
-            grad : Optional[float, array_like]
+            grad : Optional[array_like]
                 The value of the incoming derivative. If self.grad is None, it is set to `grad`,
                 otherwise its value is added with `grad`.
 
@@ -135,9 +135,9 @@ class Tensor:
 
             Raises
             ------
-            InvalidNonScalarBackprop
+            Exception
                 The configuration of the computational graph is such that `self` must be a 0D tensor
-                (i.e. scalar) to invoke self.backprop(grad)."""
+                (i.e. scalar) to invoke self.backward()."""
 
         if grad is not None:
             grad = np.asarray(grad.data if isinstance(grad, Tensor) else grad)
@@ -150,6 +150,7 @@ class Tensor:
 
             grad = np.ones(self.shape, dtype=float) if self.ndim > 0 else np.asarray(1)
 
+        assert grad.shape == self.shape, "A tensor and its associated gradient must possess the same shape"
         self.grad = np.asarray(grad if self.grad is None else self.grad + grad)
 
         if self._creator is not None:
@@ -185,7 +186,7 @@ class Tensor:
 
             Returns
             -------
-            pygrad.Operation
+            mygrad.Operation
             """
         return self._creator
 
