@@ -77,7 +77,7 @@ def test_2d_case():
     pool = (2, 3)
     stride = (2, 1)
     out = max_pool(x, pool, stride)
-    out.backward()
+    out.sum().backward()
 
     fwd_ans = np.array([[[44, 28, 39, 39],
                          [42, 42, 36, 46]],

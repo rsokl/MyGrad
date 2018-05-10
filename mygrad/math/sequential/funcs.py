@@ -22,7 +22,7 @@ def sum(x, axis=None, keepdims=False, constant=False):
         ----------
         x : Union[numpy.ndarray, mygrad.Tensor]
 
-        axis : Optional[int, Tuple[ints, ...]
+        axis : Optional[int, Tuple[ints, ...]]
             Axis or axes along which a sum is performed.  The default,
             axis=None, will sum all of the elements of the input tensor.  If
             axis is negative it counts from the last to the first axis.
@@ -84,20 +84,22 @@ def var(x, axis=None, ddof=0, keepdims=False, constant=False):
 
     Parameters
     ----------
-    a : array_like
-        Array containing numbers whose variance is desired.  If `a` is not an
-        array, a conversion is attempted.
-    axis : None or int or tuple of ints, optional
+    x : array_like
+        Array containing numbers whose variance is desired.
+
+    axis : Optional[int, Tuple[int, ...]]
         Axis or axes along which the variance is computed.  The default is to
         compute the variance of the flattened array.
-    ddof : int, optional
+
+    ddof : int, optional (default=0)
         "Delta Degrees of Freedom": the divisor used in the calculation is
         ``N - ddof``, where ``N`` represents the number of elements. By
         default `ddof` is zero.
-    keepdims : bool, optional
+
+    keepdims : bool, optional (default=False)
         If this is set to True, the axes which are reduced are left
         in the result as dimensions with size one. With this option,
-        the result will broadcast correctly against the input array.
+        the result will broadcast correctly against the input array..
 
     Returns
     -------
@@ -130,17 +132,19 @@ def std(x, axis=None, ddof=0, keepdims=False, constant=False):
 
     Parameters
     ----------
-    a : array_like
-        Array containing numbers whose variance is desired.  If `a` is not an
-        array, a conversion is attempted.
-    axis : None or int or tuple of ints, optional
+    x : array_like
+        Array containing numbers whose standard deviation is desired.
+
+    axis : Optional[int, Tuple[int, ...]]
         Axis or axes along which the variance is computed.  The default is to
         compute the variance of the flattened array.
-    ddof : int, optional
+
+    ddof : int, optional (default=0)
         "Delta Degrees of Freedom": the divisor used in the calculation is
         ``N - ddof``, where ``N`` represents the number of elements. By
         default `ddof` is zero.
-    keepdims : bool, optional
+
+    keepdims : bool, optional (default=False)
         If this is set to True, the axes which are reduced are left
         in the result as dimensions with size one. With this option,
         the result will broadcast correctly against the input array.
