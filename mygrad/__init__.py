@@ -10,4 +10,4 @@ from mygrad.tensor_manip.transpose_like.funcs import *
 from mygrad.tensor_creation.funcs import *
 from mygrad.linalg.einsum import einsum
 
-__version__ = "0.9"
+__version__ = "0.5"
