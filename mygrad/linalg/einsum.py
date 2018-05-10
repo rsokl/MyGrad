@@ -68,6 +68,8 @@ def _get_indices(item, seq):
 
 
 class EinSum(BroadcastableOp):
+    scalar_only = True
+
     def __call__(self, *variables, in_lbls, out_lbls, optimize=False):
         self.in_lbls = in_lbls
         self.out_lbls = out_lbls

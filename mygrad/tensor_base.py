@@ -22,7 +22,7 @@ class Tensor:
             ----------
             x : array_like
                 Input data, in any form that can be converted to an array.  This
-                includes numbers, seqeunces, nested sequences, and numpy-ndarrays.
+                includes numbers, sequences, nested sequences, and numpy-ndarrays.
 
             Keyword-Only Arguments
             ----------------------
@@ -99,8 +99,8 @@ class Tensor:
         f = Op()
         op_out = f(*tensor_vars, *op_args, **op_kwargs)
 
-        # check if broadcasting occurred
-        if isinstance(f, BroadcastableOp):
+        if isinstance(f, BroadcastableOp) and not f.scalar_only:
+            # if broadcasting occurred: scalar-only -> True
             f.scalar_only = any(op_out.shape != i.shape for i in tensor_vars if not i.constant)
 
         is_const = constant or all(var.constant for var in tensor_vars)

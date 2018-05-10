@@ -6,6 +6,8 @@ from mygrad.nnet.layers.utils import sliding_window_view
 
 
 class MaxPoolND(Operation):
+    scalar_only = True
+
     def __call__(self, x, pool, stride):
         """ Perform max-pooling over the last N dimensions of a data batch.
 

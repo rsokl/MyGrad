@@ -60,6 +60,8 @@ class RecurrentUnit(Operation):
         For a language model, S_{t} is traditionally mapped to a prediction of X_t via: softmax(V S_t),
         where V is yet another trainable parameter (not built into the recurrent unit)."""
 
+    scalar_only = True
+
     def __call__(self, X, U, W, s0=None, bp_lim=None):
         """ Performs a forward pass of sequential data through a simple RNN layer, returning
             the 'hidden-descriptors' arrived at by utilizing the trainable parameters U and V:

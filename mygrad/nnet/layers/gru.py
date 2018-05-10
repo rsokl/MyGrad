@@ -147,6 +147,8 @@ def _gru_bptt(X, dLds, s, z, r, Wz, Wh, Wr, dz, dh, dr, s_h, one_z, bp_lim, old_
 
 
 class GRUnit(Operation):
+    scalar_only = True
+
     def __call__(self, X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None, dropout=0.):
         if bp_lim is not None:
             assert isinstance(bp_lim, Integral) and 0 <= bp_lim < len(X)

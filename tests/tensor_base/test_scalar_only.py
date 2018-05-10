@@ -71,32 +71,24 @@ def test_standard_op(a_const, a_scalar_only, b_const, b_scalar_only):
 
 
 def test_practical_scalar_only():
-    a = Tensor([1, 2, 3])
+    a = np.array([1, 2, 3])
     b = Tensor(3)
     out = a + b
     with raises(Exception):
         out.backward()
 
-    a = Tensor([1, 2, 3])
-    b = Tensor(3)
     out = a * b
     with raises(Exception):
         out.backward()
 
-    a = Tensor([1, 2, 3])
-    b = Tensor(3)
     out = a - b
     with raises(Exception):
         out.backward()
 
-    a = Tensor([1, 2, 3])
-    b = Tensor(3)
     out = a / b
     with raises(Exception):
         out.backward()
 
-    a = Tensor([1, 2, 3])
-    b = Tensor(3)
     out = a ** b
     with raises(Exception):
         out.backward()
