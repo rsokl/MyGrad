@@ -1,10 +1,13 @@
 from mygrad.tensor_base import Tensor
 from mygrad.operation_base import Operation
+
 from hypothesis import given
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
+
 from pytest import raises
 import numpy as np
+from  numpy.testing import assert_allclose
 
 
 @given(a=hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=5),
@@ -34,6 +37,18 @@ def test_init_data():
     for data in [0, [], (0, 0), ((0, 0), (0, 0)), np.random.rand(3, 4, 2)]:
         assert np.all(Tensor(data).data == np.asarray(data)), "Initialization with non-tensor failed"
         assert np.all(Tensor(Tensor(data)).data == np.asarray(data)), "Initialization with tensor failed"
+
+
+@given(x=hnp.arrays(dtype=float, shape=hnp.array_shapes()))
+def test_items(x):
+    """ verify that tensor.item() mirrors array.item()"""
+    tensor = Tensor(x)
+    try:
+        value = x.item()
+        assert_allclose(value, tensor.item())
+    except ValueError:
+        with raises(ValueError):
+            tensor.item()
 
 
 op = Operation()
