@@ -16,11 +16,12 @@ def choices(seq, size, replace=True):
         raise ValueError("`size` must not exceed the length of `seq` when `replace` is `False`")
     if size > len(seq) and not seq:
         raise ValueError("`size` must be 0, given an empty `seq`")
-    inds = range(len(seq))
-    strat = st.tuples(*[st.sampled_from(inds)]*size)
-    if not replace:
-        strat = strat.filter(lambda x: len(set(x)) == size)
-    return strat.map(lambda x: tuple(seq[i] for i in x))
+    inds = list(range(len(seq)))
+    if replace:
+        strat = st.tuples(*[st.sampled_from(inds)]*size)
+    else:
+        strat = st.permutations(inds)
+    return strat.map(lambda x: tuple(seq[i] for i in x[:size]))
 
 
 @st.composite

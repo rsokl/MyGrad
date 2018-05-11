@@ -338,6 +338,17 @@ class Tensor:
         self._ops = out._ops
         self.data = out.data
 
+    def item(self):
+        """ Copy an element of a tensor to a standard Python scalar and return it.
+
+            Returns
+            -------
+            z : Standard Python scalar object
+                A copy of the specified element of the tensor as a suitable
+                Python scalar"""
+        if self.size > 1:
+            raise ValueError("can only convert a tensor of size 1 to a Python scalar")
+        return self.data.item()
 
     @property
     def size(self):
