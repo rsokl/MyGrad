@@ -54,6 +54,7 @@ def test_setitem_sanity_check(x_constant, y_constant, data):
     y = Tensor([1., 0.], constant=y_constant) if as_tensor else np.array([1., 0.])
 
     w[::2] = np.array([-1., -2.]) * y
+    assert_allclose(np.array((-1., 8., 0., 16.)), w.data)
     w.sum().backward()
 
     assert isinstance(w, Tensor)
@@ -76,6 +77,16 @@ def test_setitem_sanity_check(x_constant, y_constant, data):
 
     if as_tensor:
         assert y.grad is None, "null_gradients failed"
+
+
+def test_no_mutate():
+    x = Tensor([1., 2.])
+    y = Tensor([3., 4.])
+    x + y
+    y[:] = 0
+    y_old = x._ops[0].variables[-1]  # version of y that participated in x + y
+    assert_allclose(np.array([3., 4.]), y_old.data)
+    assert_allclose(np.array([0., 0.]), y.data)
 
 
 @given(x=hnp.arrays(shape=hnp.array_shapes(max_side=4, max_dims=5),
