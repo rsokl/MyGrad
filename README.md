@@ -44,10 +44,10 @@ functions of tensor-valued variables!
 
 ## Some Bells and Whistles
 `mygrad` supports all of NumPy's essential features, including:
- - N-dimensional tensors that can be reshaped and have their axes transposed
- - vectorization
- - broadcasting
- - basic and advanced indexing (including all varieties of mixed indexing schemes) for "getting" and "setting" items from/to tensors
+ - [N-dimensional tensors](http://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/IntroducingTheNDarray.html) that can be reshaped and have their axes transposed
+ - [vectorization](http://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/VectorizedOperations.html)
+ - [broadcasting](http://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/Broadcasting.html)
+ - [basic and advanced indexing](http://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/BasicIndexing.html) (including all varieties of mixed indexing schemes) for "getting" and "setting" items from/to tensors
  - fully-fledged support for [einsum](https://rockt.github.io/2018/04/30/einsum) (including broadcasting and traces,
    which are not supported by PyTorch, TensorFlow, or HIPS-autograd)
 
