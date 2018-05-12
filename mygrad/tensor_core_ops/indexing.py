@@ -87,7 +87,8 @@ class SetItem(BroadcastableOp):
             Parameters
             ----------
             a : mygrad.Tensor
-                The tensor whose entries are being set
+                The tensor whose entries are being set. A copy of the underlying
+                data is made if `a` is a non-constant tensor.
 
             b : mygrad.Tensor
                 `b` must be broadcast-compatible with `a[index]`
@@ -102,12 +103,12 @@ class SetItem(BroadcastableOp):
             Additional computational overhead is required for back-propagation when
             `index` contains any integer-valued arrays, to accommodate for the scenario
             in which a single element is set multiple times."""
+
+        out = np.copy(a.data) if not a.constant else a.data
         self.variables = (a, b)
-
         self.index = index if isinstance(index, tuple) else (index,)
-        a.data[index] = b.data
-
-        return a.data
+        out[index] = b.data
+        return out
 
     def backward_var(self, grad, index, **kwargs):
         a, b = self.variables

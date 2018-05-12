@@ -321,8 +321,7 @@ class Tensor:
             return None
 
         # old_tensor is the tensor pre-setitem
-        old_tensor = self.__copy__()
-        old_tensor._creator = self.creator
+        old_tensor = Tensor(self, constant=self.constant, _scalar_only=self.scalar_only, _creator=self.creator)
         old_tensor._ops = self._ops
 
         # point all ops involving `self` to old_tensor instead
