@@ -79,6 +79,19 @@ def test_setitem_sanity_check(x_constant, y_constant, data):
         assert y.grad is None, "null_gradients failed"
 
 
+def test_setitem_sanity_check2():
+    x = Tensor([1., 2., 3., 4.])
+    y = Tensor([-1., -2., -3., -4.])
+
+    z = x * y
+    y[:] = 0
+
+    z.backward()
+    assert_allclose(np.array([-1., -2., -3., -4.]), x.grad)
+    assert_allclose(np.array([0., 0., 0., 0.]), y.data)
+    assert y.grad is None
+
+
 def test_no_mutate():
     """ Ensure setitem doesn't mutate variable non-constant tensor"""
     x = Tensor([1., 2.])
