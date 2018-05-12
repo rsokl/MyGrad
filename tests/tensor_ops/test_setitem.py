@@ -80,6 +80,7 @@ def test_setitem_sanity_check(x_constant, y_constant, data):
 
 
 def test_no_mutate():
+    """ Ensure setitem doesn't mutate variable non-constant tensor"""
     x = Tensor([1., 2.])
     y = Tensor([3., 4.])
     x + y
