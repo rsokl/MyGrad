@@ -316,8 +316,9 @@ class Tensor:
         return self._op(GetItem, self, op_args=(item,))
 
     def __setitem__(self, key, value):
-        if self.constant:
-            raise ValueError("Tensor constants do not support __setitem__")
+        if self.constant and (not isinstance(value, Tensor) or value.constant):
+            self.data[key] = value.data if isinstance(value, Tensor) else value
+            return None
 
         # old_tensor is the tensor pre-setitem
         old_tensor = self.__copy__()
@@ -337,6 +338,7 @@ class Tensor:
         self._scalar_only = out.scalar_only
         self._ops = out._ops
         self.data = out.data
+        self._constant = out.constant
 
     def item(self):
         """ Copy an element of a tensor to a standard Python scalar and return it.
