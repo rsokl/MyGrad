@@ -1,14 +1,12 @@
 # Introducing mygrad
 `mygrad` is a simple, NumPy-centric autograd library (automatically computes derivatives of mathematical functions). It
 is designed to serve primarily as an education tool; it is easy to install, has a readable and easily customizable code
-base, and provides a sleek interface that mimics NumPy.
+base, and provides a sleek interface that mimics NumPy. Furthermore, it leverages NumPy's vectorization
+to achieve good performance despite the library's simplicity. 
 
 This is not meant to be a competitor to libraries like PyTorch (which `mygrad` most closely resembles) or
 TensorFlow. Rather, it is meant to serve as a useful tool for students who are learning about training neural networks
 using back propagation.
-
-Ultimately, `mygrad` is a general-purpose autograd library that does an effective job leveraging NumPy's vectorization
-capabilities to achieve good performance.
 
 ## A Simple Application
 Let's use `mygrad` to compute the derivative of
