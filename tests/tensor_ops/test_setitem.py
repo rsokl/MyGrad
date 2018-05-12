@@ -42,6 +42,42 @@ def setitem(x, y, index):
     return x_copy
 
 
+@given(x_constant=st.booleans(),
+       y_constant=st.booleans(),
+       data=st.data())
+def test_setitem_sanity_check(x_constant, y_constant, data):
+    """ Ensure proper setitem behavior for all combinations of constant/variable Tensors"""
+    x = Tensor([1., 2., 3., 4.], constant=x_constant)
+    w = 4 * x
+
+    as_tensor = data.draw(st.booleans()) if y_constant else True
+    y = Tensor([1., 0.], constant=y_constant) if as_tensor else np.array([1., 0.])
+
+    w[::2] = np.array([-1., -2.]) * y
+    w.sum().backward()
+
+    assert isinstance(w, Tensor)
+    assert_allclose(w.data, np.array([-1., 8., 0., 16.]))
+    assert w.constant is (x.constant and (not as_tensor or y.constant))
+
+    if x.constant:
+        assert x.grad is None
+    else:
+        assert_allclose(x.grad, np.array([0., 4., 0., 4.]))
+
+    if as_tensor:
+        if y.constant:
+            assert y.grad is None
+        else:
+            assert_allclose(y.grad, np.array([-1., -2.]))
+
+    w.null_gradients()
+    assert x.grad is None, "null_gradients failed"
+
+    if as_tensor:
+        assert y.grad is None, "null_gradients failed"
+
+
 @given(x=hnp.arrays(shape=hnp.array_shapes(max_side=4, max_dims=5),
                     dtype=float,
                     elements=st.floats(-10., 10.)),
