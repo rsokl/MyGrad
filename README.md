@@ -85,11 +85,11 @@ The following is an example of using `mygrad` to compute the [hinge loss](https:
 >>> class_labels = (range(len(class_labels)), class_labels)
 >>> correct_class_scores = class_scores[class_labels]
 
->>> Lij = class_scores - correct_class_scores[:, np.newaxis] + 1.  # NxC margins
+>>> Lij = class_scores - correct_class_scores[:, np.newaxis] + 1.  # 100x10 margins
 >>> Lij[Lij <= 0] = 0
 >>> Lij[class_labels] = 0
 
->>> loss = Lij.sum() / class_scores.shape[0]
+>>> loss = Lij.sum() / class_scores.shape[0]  # compute mean hinge loss
 >>> loss.backward()
 >>> class_scores.grad  # d(loss)/d(class_scores)
 array([[ 0.01,  0.01,  0.01,  0.01,  0.01,  0.01,  0.01, -0.09,  0.01, 0.01], ...])
