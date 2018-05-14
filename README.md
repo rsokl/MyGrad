@@ -1,6 +1,6 @@
 # Introducing mygrad
-`mygrad` is a simple, NumPy-centric autograd library (automatically computes derivatives of mathematical functions). It
-is designed to serve primarily as an education tool; it is easy to install, has a readable and easily customizable code
+`mygrad` is a simple, NumPy-centric autograd library. An autograd library enables you to automatically compute derivatives of mathematical functions. This library
+is designed to serve primarily as an education tool for learning about gradient-based machine learning; it is easy to install, has a readable and easily customizable code
 base, and provides a sleek interface that mimics NumPy. Furthermore, it leverages NumPy's vectorization
 to achieve good performance despite the library's simplicity. 
 
@@ -35,11 +35,11 @@ src="https://latex.codecogs.com/gif.latex?df/dx&" title="\frac{df}{dx}" /></a> a
 
 ```python
 >>> f.backward()  # triggers computation of `df/dx`
->>> x.grad  # df/dx = 2x = 6.
-array(6.)
+>>> x.grad  # df/dx = 2x = 6.0
+array(6.0)
 ```
 
-This is the absolute tip of the iceberg. `mygrad` can compute derivatives of multivariable, composite/recursive
+This is the absolute tip of the iceberg. `mygrad` can compute derivatives of multivariable composite
 functions of tensor-valued variables!
 
 ## Some Bells and Whistles
@@ -47,7 +47,7 @@ functions of tensor-valued variables!
  - [N-dimensional tensors](http://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/IntroducingTheNDarray.html) that can be reshaped and have their axes transposed
  - [vectorization](http://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/VectorizedOperations.html)
  - [broadcasting](http://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/Broadcasting.html)
- - [basic and advanced indexing](http://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/BasicIndexing.html) (including all varieties of mixed indexing schemes) for "getting" and "setting" items from/to tensors
+ - [basic and advanced indexing](http://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/BasicIndexing.html) (including all varieties of mixed indexing schemes) for both getting and setting items.
  - fully-fledged support for [einsum](https://rockt.github.io/2018/04/30/einsum) (including broadcasting and traces,
    which are not supported by PyTorch, TensorFlow, or HIPS-autograd)
 
@@ -74,3 +74,23 @@ view](https://github.com/rsokl/MyGrad/blob/a72ebc26acf5c254f59a562c8045698387763
 function, which produces convolution-style windowed views of arrays/tensors without making copies of them, to
 intuitively (and quite efficiently) perform the neural network-style convolutions and pooling.
 
+## Advanced Example
+The following is an example of using `mygrad` to compute the [hinge loss](https://en.wikipedia.org/wiki/Hinge_loss) of classification scores and to "backpropagate" through (compute the gradient of) this loss:
+
+```python
+>>> from mygrad import Tensor
+>>> import numpy as np
+>>> class_scores = Tensor(np.random.rand(100, 10))              # 10 scores for 100 samples
+>>> class_labels = np.random.randint(low=0, high=10, size=100)  # correct label for each datum
+>>> class_labels = (range(len(class_labels)), class_labels)
+>>> correct_class_scores = class_scores[class_labels]
+
+>>> Lij = class_scores - correct_class_scores[:, np.newaxis] + 1.  # NxC margins
+>>> Lij[Lij <= 0] = 0
+>>> Lij[class_labels] = 0
+
+>>> loss = Lij.sum() / class_scores.shape[0]
+>>> loss.backward()
+>>> class_scores.grad  # d(loss)/d(class_scores)
+array([[ 0.01,  0.01,  0.01,  0.01,  0.01,  0.01,  0.01, -0.09,  0.01, 0.01], ...])
+```
