@@ -86,11 +86,11 @@ The following is an example of using `mygrad` to compute the [hinge loss](https:
 >>> correct_class_scores = class_scores[class_labels]
 
 >>> Lij = class_scores - correct_class_scores[:, np.newaxis] + 1.  # 100x10 margins
->>> Lij[Lij <= 0] = 0
->>> Lij[class_labels] = 0
+>>> Lij[Lij <= 0] = 0      # scores within the hinge incur no loss
+>>> Lij[class_labels] = 0  # the score corresponding to the correct label incurs no loss
 
 >>> loss = Lij.sum() / class_scores.shape[0]  # compute mean hinge loss
->>> loss.backward()
+>>> loss.backward()    # compute gradient of loss w.r.t all dependent tensors
 >>> class_scores.grad  # d(loss)/d(class_scores)
 array([[ 0.01,  0.01,  0.01,  0.01,  0.01,  0.01,  0.01, -0.09,  0.01, 0.01], ...])
 ```
