@@ -11,8 +11,8 @@ using back propagation.
 ## A Simple Application
 Let's use `mygrad` to compute the derivative of
 ![CodeCogsEqn.gif](https://user-images.githubusercontent.com/29104956/39901776-9e5ed362-5498-11e8-9890-e84aa2b6dae1.gif),
-which is <a href="https://www.codecogs.com/eqnedit.php?latex=\frac{df}{dx}&space;=&space;2x" target="_blank"><img
-src="https://latex.codecogs.com/gif.latex?\frac{df}{dx}&space;=&space;2x" title="\frac{df}{dx} = 2x"
+which is <a href="https://www.codecogs.com/eqnedit.php?latex=df/dx&space;=&space;2x" target="_blank"><img
+src="https://latex.codecogs.com/gif.latex?df/dx&space;=&space;2x" title="\frac{df}{dx} = 2x"
 /></a>
 
 `mygrad.Tensor` behaves nearly identically to NumPy's ndarray, in addition to having the machinery needed to
@@ -29,8 +29,8 @@ Tensor(9.0)
 
 Invoking `f.backward()` instructs `mygrad` to trace through the computational graph that produced `f` and compute the
 derivatives of `f` with respect to all of its independent variables. Thus, executing `f.backward()` will compute <a
-href="https://www.codecogs.com/eqnedit.php?latex=\frac{df}{dx}" target="_blank"><img
-src="https://latex.codecogs.com/gif.latex?\frac{df}{dx}" title="\frac{df}{dx}" /></a> and will store the value in
+href="https://www.codecogs.com/eqnedit.php?latex=df/dx&" target="_blank"><img
+src="https://latex.codecogs.com/gif.latex?df/dx&" title="\frac{df}{dx}" /></a> and will store the value in
 `x.grad`:
 
 ```python
