@@ -80,7 +80,7 @@ The following is an example of using `mygrad` to compute the [hinge loss](https:
 ```python
 >>> from mygrad import Tensor
 >>> import numpy as np
->>> class_scores = Tensor(np.random.rand(100, 10))              # 10 scores for 100 samples
+>>> class_scores = Tensor(10 * np.random.rand(100, 10))         # 100 samples, 10 possible classes for each
 >>> class_labels = np.random.randint(low=0, high=10, size=100)  # correct label for each datum
 >>> class_labels = (range(len(class_labels)), class_labels)
 >>> correct_class_scores = class_scores[class_labels]
@@ -92,5 +92,5 @@ The following is an example of using `mygrad` to compute the [hinge loss](https:
 >>> loss = Lij.sum() / class_scores.shape[0]  # compute mean hinge loss
 >>> loss.backward()    # compute gradient of loss w.r.t all dependent tensors
 >>> class_scores.grad  # d(loss)/d(class_scores)
-array([[ 0.01,  0.01,  0.01,  0.01,  0.01,  0.01,  0.01, -0.09,  0.01, 0.01], ...])
+array([[ 0.  ,  0.01,  0.  , -0.04,  0.  ,  0.  ,  0.01,  0.  ,  0.01, 0.01], ...])
 ```
