@@ -75,7 +75,7 @@ function, which produces convolution-style windowed views of arrays/tensors with
 intuitively (and quite efficiently) perform the neural network-style convolutions and pooling.
 
 ## Advanced Example
-The following is an example of using `mygrad` to compute the [hinge loss](https://en.wikipedia.org/wiki/Hinge_loss) of classification scores and to "backpropagate" through (compute the gradient of) this loss:
+The following is an example of using `mygrad` to compute the [hinge loss](https://en.wikipedia.org/wiki/Hinge_loss) of classification scores and to "backpropagate" through (compute the gradient of) this loss. This example demonstrates some of mygrad's ability to perform backpropagation through broadcasted operations, basic indexing, advanced indexing, and in-place assignments.
 
 ```python
 >>> from mygrad import Tensor
