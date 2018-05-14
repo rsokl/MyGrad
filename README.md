@@ -13,7 +13,9 @@ Let's use `mygrad` to compute the derivative of
 ![CodeCogsEqn.gif](https://user-images.githubusercontent.com/29104956/39901776-9e5ed362-5498-11e8-9890-e84aa2b6dae1.gif),
 which is <a href="https://www.codecogs.com/eqnedit.php?latex=\frac{df}{dx}&space;=&space;2x" target="_blank"><img
 src="https://latex.codecogs.com/gif.latex?\frac{df}{dx}&space;=&space;2x" title="\frac{df}{dx} = 2x"
-/></a>`mygrad.Tensor` behaves nearly identically to NumPy's ndarray, in addition to having the machinery needed to
+/></a>
+
+`mygrad.Tensor` behaves nearly identically to NumPy's ndarray, in addition to having the machinery needed to
 compute the analytic derivatives of functions. Suppose we want to compute this derivative at `x = 3`. We can create a
 0-dimensional tensor (a scalar) for x and compute `f(x)`:
 
