@@ -188,7 +188,7 @@ def einsum(*operands, optimize=False, constant=False):
     subscripts : str
         Specifies the subscripts for summation.
 
-    operands : Tuple[ArrayLike, ...]
+    operands : array_like
         The tensors used in the summation.
 
     optimize : {False, True, 'greedy', 'optimal'}, optional (default=False)
@@ -254,14 +254,14 @@ def einsum(*operands, optimize=False, constant=False):
     >>> b = np.arange(5)
     >>> c = np.arange(6).reshape(2,3)
     
-    >>> einsum('ii', a)
+    >>> einsum('ii', a)  # the trace of a
     Tensor(0)
-    >>> einsum(a, [0,0])
+    >>> einsum(a, [0, 0])
     Tensor(60)
     >>> np.trace(a)
     Tensor(60)
 
-    >>> einsum('ii->i', a)
+    >>> einsum('ii->i', a)  # view along diagonal of a
     Tensor([ 0,  6, 12, 18, 24])
     >>> einsum(a, [0,0], [0])
     Tensor([ 0,  6, 12, 18, 24])
@@ -277,11 +277,11 @@ def einsum(*operands, optimize=False, constant=False):
     >>> einsum('...j,j', a, b)
     Tensor([ 30,  80, 130, 180, 230])
 
-    >>> einsum('ji', c)
+    >>> einsum('ji', c)  # transpose of c
     Tensor([[0, 3],
            [1, 4],
            [2, 5]])
-    >>> einsum(c, [1,0])
+    >>> einsum(c, [1, 0])
     Tensor([[0, 3],
            [1, 4],
            [2, 5]])

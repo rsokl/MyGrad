@@ -92,32 +92,31 @@ def test_items(x):
 
 
 op = Operation()
-@given(a=hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=5),
-                    dtype=float,
-                    elements=st.floats(-100, 100)),
+dtype_strat = st.sampled_from((None, int, float,
+                               np.int8, np.int16, np.int32, np.int64,
+                               np.float16, np.float32, np.float64))
+dtype_strat_numpy = st.sampled_from((np.int8, np.int16, np.int32, np.int64,
+                                     np.float16, np.float32, np.float64))
+@given(data=st.data(),
        creator=st.sampled_from((None, op)),
        constant=st.booleans(),
        scalar_only=st.booleans(),
-       dtype=st.sampled_from((None,)))
-def test_init_params(a, creator, constant, scalar_only, dtype):
-    kwargs = dict(_creator=creator, constant=constant, _scalar_only=scalar_only)
+       dtype=dtype_strat)
+def test_init_params(data, creator, constant, scalar_only, dtype):
+    a = data.draw(hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=5),
+                             dtype=dtype_strat_numpy,
+                             elements=st.floats(-100, 100)),
+                  label="a")
     if dtype is not None:
-        kwargs["dtype"] = dtype
+        a = a.astype(dtype)
 
-    if dtype is str or dtype == "bad":
-        with raises(TypeError):
-            Tensor(a, **kwargs)
-        return None
-    else:
-        tensor = Tensor(a, **kwargs)
-
-    if dtype is None:
-        dtype = a.dtype
+    tensor = Tensor(a, _creator=creator, constant=constant, _scalar_only=scalar_only, dtype=dtype)
 
     assert tensor.creator is creator
     assert tensor.constant is constant
     assert tensor.scalar_only is scalar_only
-    assert tensor.dtype == a.astype(dtype).dtype
+    assert tensor.dtype is a.dtype
+    assert_equal(tensor.data, a)
     assert tensor.grad is None
 
 

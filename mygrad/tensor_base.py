@@ -232,7 +232,8 @@ class Tensor:
             if self.ndim > 0 and self.scalar_only:
                 raise Exception("Invalid Backprop: backpropagation must be triggered by a scalar for this computational graph")
 
-            grad = np.ones(self.shape, dtype=float) if self.ndim > 0 else np.asarray(1)
+            dtype = float if np.issubdtype(self.dtype, np.signedinteger) else self.dtype
+            grad = np.ones(self.shape, dtype=dtype) if self.ndim > 0 else np.asarray(1., dtype=dtype)
 
         assert grad.shape == self.shape, "A tensor and its associated gradient must possess the same shape"
         self.grad = np.asarray(grad if self.grad is None else self.grad + grad)
