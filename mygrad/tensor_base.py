@@ -1,6 +1,7 @@
+from functools import wraps
+
 from mygrad.math.arithmetic.ops import *
-from mygrad.math.sequential.ops import *
-from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property, Transpose
+from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property
 from mygrad.tensor_manip.array_shape.ops import Reshape
 from mygrad.tensor_core_ops.indexing import GetItem, SetItem
 from mygrad.operation_base import Operation, BroadcastableOp
@@ -146,7 +147,7 @@ class Tensor:
                 grad = reduce_broadcast(grad, self.shape)
         else:
             if self.ndim > 0 and self.scalar_only:
-                raise Exception("Invalid Backprop: scalar-only violation")
+                raise Exception("Invalid Backprop: backpropagation must be triggered by a scalar for this computational graph")
 
             grad = np.ones(self.shape, dtype=float) if self.ndim > 0 else np.asarray(1)
 
@@ -164,7 +165,7 @@ class Tensor:
 
     @property
     def scalar_only(self):
-        """ Indicates whether or not `self.ndim` must be 0 in order to invoke `self.backprop()`.
+        """ Indicates whether or not `self.ndim` must be 0 in order to invoke `self.backward()`.
 
             Returns
             -------
@@ -173,7 +174,7 @@ class Tensor:
 
     @property
     def constant(self):
-        """ A constant will not facilitate back-propagation at its node in the computational graph.
+        """ If `True`, this tensor is a constant - it will not propagate any gradient.
 
             Returns
             -------
@@ -190,31 +191,38 @@ class Tensor:
             """
         return self._creator
 
-    def reshape(self, *shape):
-        """ Returns a tensor with a new shape, without changing its data.
+    def __len__(self):
+        return len(self.data)
+    
+    def __contains__(self, item):
+        return self.data.__contains__(item)
 
-            Parameters
-            ----------
-            newshape : Union[int, Tuple[int, ...]]
-                The new shape should be compatible with the original shape. If
-                an integer, then the result will be a 1-D array of that length.
-                One shape dimension can be -1. In this case, the value is
-                inferred from the length of the array and remaining dimensions.
+    def __getitem__(self, item):
+        return self._op(GetItem, self, op_args=(item,))
 
-            Returns
-            -------
-            Tensor
+    def __setitem__(self, key, value):
+        if self.constant and (not isinstance(value, Tensor) or value.constant):
+            self.data[key] = value.data if isinstance(value, Tensor) else value
+            return None
 
-            Notes
-            -----
-            `reshape` utilizes C-ordering, meaning that it reads & writes elements using
-            C-like index ordering; the last axis index changing fastest, and, proceeding
-            in reverse order, the first axis index changing slowest. """
-        if hasattr(shape[0], "__iter__"):
-            if len(shape) > 1:
-                raise TypeError("an integer is required")
-            shape = shape[0]
-        return self._op(Reshape, self, op_args=(shape,))
+        # old_tensor is the tensor pre-setitem
+        old_tensor = Tensor(self, constant=self.constant, _scalar_only=self.scalar_only, _creator=self.creator)
+        old_tensor._ops = self._ops
+
+        # point all ops involving `self` to old_tensor instead
+        for op in old_tensor._ops:
+            for i in range(len(op.variables)):
+                if op.variables[i] is self:
+                    op.variables = op.variables[:i] + (old_tensor,) + op.variables[i+1:]
+                    break
+
+        # self becomes the tensor post-setitem
+        out = self._op(SetItem, old_tensor, value, op_args=(key,))
+        self._creator = out.creator
+        self._scalar_only = out.scalar_only
+        self._ops = out._ops
+        self.data = out.data
+        self._constant = out.constant
 
     def __add__(self, other):
         return self._op(Add, self, other)
@@ -246,98 +254,18 @@ class Tensor:
     def __rpow__(self, other):
         return self._op(Power, other, self)
 
-    def __iadd__(self, other):
-        return self + other
-
-    def __imul__(self, other):
-        return self * other
-
-    def __isub__(self, other):
-        return self - other
-
-    def __idiv__(self, other):
-        return self / other
-
     def __neg__(self):
         return self._op(Negative, self)
-
-    def __repr__(self):
-        if self.data.ndim == 0:
-            return "Tensor({})".format(self.data.item())
-        elif self.data.ndim == 1:
-            return "Tensor({})".format(self.data)
-        else:
-            return "Tensor(\n{}\n)".format(self.data)
-
-    def __lt__(self, value):
-        if isinstance(value, Tensor):
-            value = value.data
-        return self.data < value
-
-    def __le__(self, value):
-        if isinstance(value, Tensor):
-            value = value.data
-        return self.data <= value
-
-    def __gt__(self, value):
-        if isinstance(value, Tensor):
-            value = value.data
-        return self.data > value
-
-    def __ge__(self, value):
-        if isinstance(value, Tensor):
-            value = value.data
-        return self.data >= value
-
-    def __eq__(self, value):
-        if isinstance(value, Tensor):
-            value = value.data
-        return self.data == value
-
-    def __ne__(self, value):
-        if isinstance(value, Tensor):
-            value = value.data
-        return self.data != value
 
     def __pos__(self):
         return self
 
-    def __len__(self):
-        return len(self.data)
+    def __repr__(self):
+        return repr(self.data).replace("array", "Tensor").replace("\n", "\n ")
 
     def __copy__(self):
         """ Produces a copy of self with copy.creator=None"""
         return Tensor(np.copy(self.data), _creator=None, constant=self.constant, _scalar_only=self.scalar_only)
-
-    def __contains__(self, item):
-        return self.data.__contains__(item)
-
-    def __getitem__(self, item):
-        return self._op(GetItem, self, op_args=(item,))
-
-    def __setitem__(self, key, value):
-        if self.constant and (not isinstance(value, Tensor) or value.constant):
-            self.data[key] = value.data if isinstance(value, Tensor) else value
-            return None
-
-        # old_tensor is the tensor pre-setitem
-        old_tensor = Tensor(self, constant=self.constant, _scalar_only=self.scalar_only, _creator=self.creator)
-        old_tensor._ops = self._ops
-
-        # point all ops involving `self` to old_tensor instead
-        for op in old_tensor._ops:
-            for i in range(len(op.variables)):
-                if op.variables[i] is self:
-                    op.variables = op.variables[:i] + (old_tensor,) + op.variables[i+1:]
-                    break
-
-        # self becomes the tensor post-setitem
-        out = self._op(SetItem, old_tensor, value, op_args=(key,))
-        self._creator = out.creator
-        self._scalar_only = out.scalar_only
-        self._ops = out._ops
-        self.data = out.data
-        self._constant = out.constant
 
     def item(self):
         """ Copy an element of a tensor to a standard Python scalar and return it.
@@ -350,6 +278,16 @@ class Tensor:
         if self.size > 1:
             raise ValueError("can only convert a tensor of size 1 to a Python scalar")
         return self.data.item()
+
+    def __float__(self):
+        if self.size > 1:
+            raise TypeError("can only convert a tensor of size 1 to a Python scalar")
+        return float(self.data)
+
+    def __int__(self):
+        if self.size > 1:
+            raise TypeError("can only convert a tensor of size 1 to a Python scalar")
+        return int(self.data)
 
     @property
     def size(self):
@@ -367,109 +305,6 @@ class Tensor:
     def shape(self):
         return self.data.shape
 
-    def sum(self, axis=None, keepdims=False):
-        """ Sum of tensor elements over a given axis.
-            Parameters
-            ----------
-            axis : Optional[int, Tuple[ints, ...]
-                Axis or axes along which a sum is performed.  The default,
-                axis=None, will sum all of the elements of the input tensor.  If
-                axis is negative it counts from the last to the first axis.
-                If axis is a tuple of ints, a sum is performed on all of the axes
-                specified in the tuple instead of a single axis or all the axes as
-                before.
-            keepdims : bool, optional
-                If this is set to True, the axes which are reduced are left
-                in the result as dimensions with size one. With this option,
-                the result will broadcast correctly against the input tensor.
-            Returns
-            -------
-            sum_along_axis : Tensor
-                A Tensor with the same shape as `self`, with the specified
-                axis/axes removed. If `self` is a 0-d tensor, or if `axis` is None,
-                a 0-dim Tensor is returned."""
-        return self._op(Sum, self, op_args=(axis, keepdims))
-
-    def mean(self, axis=None, keepdims=False):
-        """ Mean of tensor elements over a given axis.
-
-            Parameters
-            ----------
-            axis : Optional[int, Tuple[ints, ...]
-                Axis or axes along which a mean is performed.  The default,
-                axis=None, will mean all of the elements of the input tensor.  If
-                axis is negative it counts from the last to the first axis.
-
-                If axis is a tuple of ints, a mean is performed on all of the axes
-                specified in the tuple instead of a single axis or all the axes as
-                before.
-
-            keepdims : bool, optional
-                If this is set to True, the axes which are reduced are left
-                in the result as dimensions with size one. With this option,
-                the result will broadcast correctly against the input tensor.
-
-            Returns
-            -------
-            mean_along_axis : Tensor
-                A Tensor with the same shape as `self`, with the specified
-                axis/axes removed. If `self` is a 0-d tensor, or if `axis` is None,
-                a 0-dim Tensor is returned."""
-        return self._op(Mean, self, op_args=(axis, keepdims))
-
-    def max(self, axis=None, keepdims=False):
-        """ Return the maximum of a tensor, or along its axes.
-
-            Parameters
-            ----------
-            axis : Optional[int, Tuple[int, ...]]
-                Axis or axes along which to operate. By default, flattened input is used.
-
-            keepdims : bool, optional
-                If this is set to True, the axes which are reduced are left
-                in the result as dimensions with size one. With this option,
-                the result will broadcast correctly against the original `arr`.
-
-            Returns
-            -------
-            max : Tensor
-                Maximum of `a`. If `axis` is None, the result is a 0-D tensor."""
-        return self._op(MaxMin, self, op_kwargs=dict(axis=axis, keepdims=keepdims, maxmin='max'))
-
-    def min(self, axis=None, keepdims=False):
-        """ Return the minimum of a tensor, or along its axes.
-
-            Parameters
-            ----------
-            axis : Optional[int, Tuple[int, ...]]
-                Axis or axes along which to operate. By default, flattened input is used.
-
-            keepdims : bool, optional
-                If this is set to True, the axes which are reduced are left
-                in the result as dimensions with size one. With this option,
-                the result will broadcast correctly against the original `arr`.
-
-            Returns
-            -------
-            min : Tensor
-                Minimum of `a`. If `axis` is None, the result is a 0-D tensor."""
-        return self._op(MaxMin, self, op_kwargs=dict(axis=axis, keepdims=keepdims, maxmin='min'))
-
-    def transpose(self, axes=None):
-        """ Permute the dimensions of an array.
-
-            Parameters
-            ----------
-            axes : list of ints, optional
-                By default, reverse the dimensions, otherwise permute the axes
-                according to the values given.
-
-            Returns
-            -------
-            Tensor
-                `self` with its axes permuted.  A new tensor is returned. """
-        return self._op(Transpose, self, op_args=(axes,))
-
     @property
     def T(self):
         """ Same as self.transpose(), except that self is returned if self.ndim < 2 and
@@ -479,3 +314,41 @@ class Tensor:
             -------
             Tensor"""
         return self._op(Tensor_Transpose_Property, self)
+
+    def reshape(self, *shape):
+        """ Returns a tensor with a new shape, without changing its data.
+
+            Parameters
+            ----------
+            newshape : Union[int, Tuple[int, ...]]
+                The new shape should be compatible with the original shape. If
+                an integer, then the result will be a 1-D array of that length.
+                One shape dimension can be -1. In this case, the value is
+                inferred from the length of the array and remaining dimensions.
+
+            Returns
+            -------
+            Tensor
+
+            Notes
+            -----
+            `reshape` utilizes C-ordering, meaning that it reads & writes elements using
+            C-like index ordering; the last axis index changing fastest, and, proceeding
+            in reverse order, the first axis index changing slowest. """
+        if hasattr(shape[0], "__iter__"):
+            if len(shape) > 1:
+                raise TypeError("an integer is required")
+            shape = shape[0]
+        return self._op(Reshape, self, op_args=(shape,))
+
+
+# set all comparison operators - mirrors ndarray methods
+def tensor_to_array_wrapper(func):
+    @wraps(func)
+    def wrapped(x, y):
+        return func(x.data, y.data if isinstance(y, Tensor) else y)
+    return wrapped
+
+for op in ("__lt__", "__le__", "__gt__", "__ge__", "__eq__", "__ne__"):
+    setattr(Tensor, op, tensor_to_array_wrapper(getattr(np.ndarray, op)))
+

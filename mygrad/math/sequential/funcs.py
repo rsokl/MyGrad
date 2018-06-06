@@ -168,7 +168,7 @@ def std(x, axis=None, ddof=0, keepdims=False, constant=False):
     return sqrt(var(x, axis=axis, keepdims=keepdims, ddof=ddof, constant=constant))
 
 
-def amax(x, axis=None, keepdims=False, constant=False):
+def max(x, axis=None, keepdims=False, constant=False):
     """ Return the maximum of a tensor or maximum along its axes.
 
         Parameters
@@ -190,7 +190,7 @@ def amax(x, axis=None, keepdims=False, constant=False):
     return Tensor._op(MaxMin, x, op_kwargs=dict(axis=axis, keepdims=keepdims, maxmin='max'), constant=constant)
 
 
-def amin(x, axis=None, keepdims=False, constant=False):
+def min(x, axis=None, keepdims=False, constant=False):
     """ Return the minimum of a tensor or minimum along its axes.
 
         Parameters
@@ -210,8 +210,8 @@ def amin(x, axis=None, keepdims=False, constant=False):
     return Tensor._op(MaxMin, x, op_kwargs=dict(axis=axis, keepdims=keepdims, maxmin='min'), constant=constant)
 
 # aliases
-min = amin
-max = amax
+amin = min
+amax = max
 
 
 def prod(a, axis=None, keepdims=False, constant=False):
