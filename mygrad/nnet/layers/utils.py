@@ -76,27 +76,33 @@ def sliding_window_view(arr, window_shape, step, dilation=None):
 
         Apply an 3x2 window with step-sizes of (2, 2). This results in
         the window being placed twice along axis-0 and three times along axis-1.
+
         >>> y = sliding_window_view(x, step=(2, 2), window_shape=(3, 2))
         >>> y.shape
         (2, 3, 3, 2)
 
-        # window applied at (0, 0)
+        window applied at (0, 0)
+
         >>> y[0, 0]
         array([[ 0,  1],
                [ 6,  7],
                [12, 13]])
 
-        # window applied at (2, 0)
+        window applied at (2, 0)
+
         >>> y[1, 0]
         array([[12, 13],
                [18, 19],
                [24, 25]])
 
-        # window applied at (0, 2)
+        window applied at (0, 2)
+
         >>> y[0, 1]
         array([[ 2,  3],
                [ 8,  9],
                [14, 15]])
+
+        verify that an element in this window-view is correct
 
         >>> i, j = np.random.randint(0, 2, size=2)
         >>> wx, wy = (2, 2)

@@ -38,17 +38,6 @@ class MaxPoolND(Operation):
             numpy.ndarray, shape=((N0, ...), C0', ...)
                 The pooled data batch.
 
-            Examples
-            --------
-            >>> import numpy as np
-            >>> from mygrad.nnet.layers import max_pool
-            >>> x = np.random.rand(10, 3, 12, 12)
-            >>> pool = (2, 2)   # 2x2 pooling over the last axes
-            >>> stride = (2, 1) # Apply 2x1 stride
-            >>> out = max_pool(x, pool, stride)
-            >>> out.shape
-            (10, 3, 6, 11)
-
             Notes
             -----
             Only 'valid' placements of the pooling window are permitted - the pooling
@@ -144,7 +133,7 @@ def max_pool(x, pool, stride, constant=False):
 
         Parameters
         ----------
-        x : mygrad.Tensor, shape=([(N0, ...), C0, ...])
+        x : array_like, shape=([(N0, ...), C0, ...])
             The data batch; to be pooled along the H and W axes
 
         pool : Tuple[Integral, ...]
@@ -162,8 +151,21 @@ def max_pool(x, pool, stride, constant=False):
 
         Returns
         -------
-        numpy.ndarray, shape=((N0, ...), C0', ...)
+        mygrad.Tensor, shape=((N0, ...), C0', ...)
             The pooled data batch.
+
+        Examples
+        --------
+
+        >>> import numpy as np
+        >>> from mygrad.nnet.layers import max_pool
+        >>> from mygrad import Tensor
+        >>> x = Tensor(np.random.rand(10, 3, 12, 12))
+        >>> pool = (2, 2)   # 2x2 pooling over the last axes
+        >>> stride = (2, 1) # Apply 2x1 stride
+        >>> out = max_pool(x, pool, stride)  # max-pooled Tensor
+        >>> out.shape
+        (10, 3, 6, 11)
 
         Notes
         -----

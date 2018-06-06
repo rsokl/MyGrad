@@ -357,19 +357,37 @@ def gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None, dropout=0.,
 
         Parameters
         ----------
-        X : mygrad.Tensor, shape=(T, N, C)
+        X : array_like, shape=(T, N, C)
            The sequential data to be passed forward.
 
-        Uz/Ur/Uh : mygrad.Tensor, shape=(C, D)
+        Uz : array_like, shape=(C, D)
            The weights used to map sequential data to its hidden-descriptor representation
 
-        Wz/Wr/Wh : mygrad.Tensor, shape=(D, D)
+        Wz : array_like, shape=(D, D)
             The weights used to map a hidden-descriptor to a hidden-descriptor.
 
-        bz/br/bh : mygrad.Tensor, shape=(D,)
+        bz : array_like, shape=(D,)
            The biases used to scale a hidden-descriptor.
 
-        s0 : Optional[mygrad.Tensor, numpy.ndarray], shape=(N, D)
+        Ur : array_like, shape=(C, D)
+           The weights used to map sequential data to its hidden-descriptor representation
+
+        Wr : array_like, shape=(D, D)
+            The weights used to map a hidden-descriptor to a hidden-descriptor.
+
+        br : array_like, shape=(D,)
+           The biases used to scale a hidden-descriptor.
+
+        Uh : array_like, shape=(C, D)
+           The weights used to map sequential data to its hidden-descriptor representation
+
+        Wh : array_like, shape=(D, D)
+            The weights used to map a hidden-descriptor to a hidden-descriptor.
+
+        bh : array_like, shape=(D,)
+           The biases used to scale a hidden-descriptor.
+
+        s0 : Optional[array_like], shape=(N, D)
             The 'seed' hidden descriptors to feed into the RNN. If None, a Tensor
             of zeros of shape (N, D) is created.
 
