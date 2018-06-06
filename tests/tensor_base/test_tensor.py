@@ -160,6 +160,15 @@ def test_special_methods():
     assert tensor_out.creator.variables[0] is x
 
 
+def test_comparison_ops():
+    x = Tensor([1, 3, 5])
+    y = Tensor([1, 4, 2])
+    for op in ("__lt__", "__le__", "__gt__", "__ge__", "__eq__", "__ne__"):
+        tensor_out = getattr(Tensor, op)(x, y)
+        array_out = getattr(np.ndarray, op)(x.data, y.data)
+        assert_equal(actual=tensor_out, desired=array_out)
+
+
 @given(x=st.floats(min_value=-1E-6, max_value=1E6),
        y=st.floats(min_value=-1E-6, max_value=1E6),
        z=st.floats(min_value=-1E-6, max_value=1E6))
