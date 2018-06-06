@@ -35,12 +35,16 @@ def moveaxis(a, source, destination, constant=False):
         a : array_like
             The array whose axes should be reordered.
 
-        source : int or sequence of int
+        source : Union[int, Sequence[int]]
             Original positions of the axes to move. These must be unique.
 
-        destination : int or sequence of int
+        destination : Union[int, Sequence[int]]
             Destination positions for each of the original axes. These must also be
             unique.
+
+        constant : bool, optional(default=False)
+            If ``True``, the returned tensor is a constant (it
+            does not back-propagate a gradient)
 
         Returns
         -------
@@ -73,6 +77,10 @@ def swapaxes(a, axis1, axis2, constant=False):
 
         axis2 : int
             Second axis.
+
+        constant : bool, optional(default=False)
+            If ``True``, the returned tensor is a constant (it
+            does not back-propagate a gradient)
 
         Returns
         -------
