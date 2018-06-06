@@ -16,7 +16,7 @@ __all__ = ["add",
 
 
 def add(a, b, constant=False):
-    """ f(a, b) -> a + b
+    """ ``f(a, b) -> a + b``
 
         Parameters
         ----------
@@ -25,7 +25,7 @@ def add(a, b, constant=False):
         b : array_like
 
         constant : bool, optional(default=False)
-            If `True`, the returned tensor is a constant (it
+            If ``True``, the returned tensor is a constant (it
             does not backpropagate a gradient)
 
         Returns
@@ -35,7 +35,7 @@ def add(a, b, constant=False):
 
 
 def subtract(a, b, constant=False):
-    """ f(a, b) -> a - b
+    """ ``f(a, b) -> a - b``
 
         Parameters
         ----------
@@ -44,7 +44,7 @@ def subtract(a, b, constant=False):
         b : array_like
 
         constant : bool, optional(default=False)
-            If `True`, the returned tensor is a constant (it
+            If ``True``, the returned tensor is a constant (it
             does not backpropagate a gradient)
 
         Returns
@@ -54,7 +54,7 @@ def subtract(a, b, constant=False):
 
 
 def divide(a, b, constant=False):
-    """ f(a, b) -> a / b
+    """ ``f(a, b) -> a / b``
 
         Parameters
         ----------
@@ -63,7 +63,7 @@ def divide(a, b, constant=False):
         b : array_like
 
         constant : bool, optional(default=False)
-            If `True`, the returned tensor is a constant (it
+            If ``True``, the returned tensor is a constant (it
             does not backpropagate a gradient)
 
         Returns
@@ -73,14 +73,14 @@ def divide(a, b, constant=False):
 
 
 def reciprocal(a, constant=False):
-    """ f(a) -> 1 / a
+    """ ``f(a) -> 1 / a``
 
         Parameters
         ----------
         a : array_like
 
         constant : bool, optional(default=False)
-            If `True`, the returned tensor is a constant (it
+            If ``True``, the returned tensor is a constant (it
             does not backpropagate a gradient)
 
         Returns
@@ -90,7 +90,7 @@ def reciprocal(a, constant=False):
 
 
 def power(a, b, constant=False):
-    """ f(a, b) -> a ** b
+    """ ``f(a, b) -> a ** b``
 
         Parameters
         ----------
@@ -99,7 +99,7 @@ def power(a, b, constant=False):
         b : array_like
 
         constant : bool, optional(default=False)
-            If `True`, the returned tensor is a constant (it
+            If ``True``, the returned tensor is a constant (it
             does not backpropagate a gradient)
 
         Returns
@@ -109,7 +109,7 @@ def power(a, b, constant=False):
 
 
 def multiply(a, b, constant=False):
-    """ f(a, b) -> a * b
+    """ ``f(a, b) -> a * b``
 
         Parameters
         ----------
@@ -118,7 +118,7 @@ def multiply(a, b, constant=False):
         b : array_like
 
         constant : bool, optional(default=False)
-            If `True`, the returned tensor is a constant (it
+            If ``True``, the returned tensor is a constant (it
             does not backpropagate a gradient)
 
         Returns
@@ -130,14 +130,14 @@ def multiply(a, b, constant=False):
 def multiply_sequence(*variables, constant=False):
     """ Add a sequence of N tensors.
 
-        f(a, b, ...) -> a + b + ...
+        ``f(a, b, ...) -> a + b + ...``
 
         Parameters
         ----------
         variables : array_like
 
         constant : bool, optional(default=False)
-            If `True`, the returned tensor is a constant (it
+            If ``True``, the returned tensor is a constant (it
             does not backpropagate a gradient)
 
         Returns
@@ -155,14 +155,14 @@ def multiply_sequence(*variables, constant=False):
 def add_sequence(*variables, constant=False):
     """ Multiply a sequence of N tensors.
 
-        f(a, b, ...) -> a * b * ...
+        ``f(a, b, ...) -> a * b * ...``
 
         Parameters
         ----------
         variables : array_like
 
         constant : bool, optional(default=False)
-            If `True`, the returned tensor is a constant (it
+            If ``True``, the returned tensor is a constant (it
             does not backpropagate a gradient)
 
         Returns
@@ -178,7 +178,7 @@ def add_sequence(*variables, constant=False):
 
 
 def positive(a, where=True, constant=False):
-    """ f(a) -> +a
+    """ ``f(a) -> +a``
 
         Parameters
         ----------
@@ -191,7 +191,7 @@ def positive(a, where=True, constant=False):
             to leave the value in the output alone.
 
         constant : bool, optional(default=False)
-            If `True`, the returned tensor is a constant (it
+            If ``True``, the returned tensor is a constant (it
             does not backpropagate a gradient)
 
         Returns
@@ -201,7 +201,7 @@ def positive(a, where=True, constant=False):
 
 
 def negative(a, where=True, constant=False):
-    """ f(a) -> -a
+    """ ``f(a) -> -a``
 
         Parameters
         ----------
@@ -214,7 +214,7 @@ def negative(a, where=True, constant=False):
             to leave the value in the output alone.
 
         constant : bool, optional(default=False)
-            If `True`, the returned tensor is a constant (it
+            If ``True``, the returned tensor is a constant (it
             does not backpropagate a gradient)
 
         Returns
