@@ -4,7 +4,7 @@ from mygrad.math.arithmetic.ops import *
 from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property
 from mygrad.tensor_manip.array_shape.ops import Reshape
 from mygrad.tensor_core_ops.indexing import GetItem, SetItem
-from mygrad.operation_base import Operation, BroadcastableOp
+from mygrad.operation_base import BroadcastableOp
 from mygrad._utils import reduce_broadcast
 
 import numpy as np
@@ -14,28 +14,110 @@ __all__ = ['Tensor']
 
 
 class Tensor:
-    """ A numpy.array-like object capable of serving as a node in a computational graph that
-        supports back-propagation of derivatives via the chain rule."""
+    """ A numpy-array-like object capable of serving as a node in a computational
+        graph that supports back-propagation of derivatives via the chain rule.
+        See the Examples section of the docstring for more details.
+
+        Like the numpy array, mygrad's tensor stores data as an N-dimensional array
+        and provides an interface accessing, setting, and performing vectorized
+        operations along the various dimensions of this array. Vectorized operations
+        support numpy-style broadcasting semantics.
+
+        The contents of a tensor can be accessed and written to using all variety
+        of basic and advanced indexing (along with mixtures of the two).
+
+        Creating a Tensor
+        -----------------
+        ``mygrad.Tensor`` can be passed any "array-like" object of numerical data.
+        This includes numbers, sequences (e.g. lists), nested sequences, numpy-ndarrays,
+        and other mygrad-tensors. mygrad also provides familiar numpy-style tensor-creation
+        functions (e.g. ``mygrad.arange``, ``mygrad.linspace``, etc.)
+
+        >>> import mygrad as mg
+        >>> mg.Tensor(2.3)  # creating a 0-dimensional tensor
+        Tensor(2.3)
+        >>> mg.Tensor(np.array([1.2, 3.0]))  # casting a numpy-array to a tensor
+        Tensor([1.2, 3.0])
+        >>> mg.Tensor([[1, 2], [3, 4]])  # creating a 2-dimensional tensor
+        Tensor([[1, 2],
+                [3, 4]])
+        >>> mg.arange(4)    # using numpy-style tensor creation functions
+        Tensor([0, 1, 2, 3])
+
+
+        Forward and Back-Propagation
+        ----------------------------
+        Let's construct a computational graph consisting of two zero-dimensional
+        tensors, ``x`` and ``y``, which are used to compute an output tensor,
+        ``f``. This is a "forward pass imperative" style for creating a computational
+        graph - the graph is constructed as we carry out the forward-pass computation.
+
+        >>> x = Tensor(3.0)
+        >>> y = Tensor(2.0)
+        >>> f = 2 * x + y ** 2
+
+        Invoking ``f.backward()`` signals the computational graph to
+        compute the total-derivative of ``f`` with respect to each one of its dependent
+        variables. I.e. ``x.grad`` will store ``df/dx`` and ``y.grad`` will store
+        ``df/dy``. Thus we have back-propagated a gradient from ``f`` through our graph.
+        Each tensor of derivatives is computed elementwise.
+
+        >>> f.backward()  # computes df/dx and df/dy
+        >>> x.grad  # df/dx
+        array(6.0)
+        >>> y.grad  # df/dy
+        array(4.0)
+        >>> f.grad
+        array(1.0)  # df/df
+
+        Before utilizing ``x`` and ``y`` in a new computational graph, you must
+        'clear' their stored derivative values. ``f.null_gradients()`` signals
+        ``f`` and all preceding tensors in its computational graph to clear their
+        derivatives.
+
+        >>> f.null_gradients()
+        >>> x.grad is None and y.grad is None and f.grad is Nonw
+        True
+
+        Accessing the Underlying NumPy Array
+        ------------------------------------
+        ``mygrad.Tensor`` is a thin wrapper on ``numpy.ndarray``. A tensor's
+        underlying numpy-array can be accessed via ``.data``:
+
+        >>> x = mg.Tensor([1, 2])
+        >>> x.data
+        array([1, 2])
+
+        **Do not modify this underlying array**. Any in-place modifications made to this
+        array will not be tracked by any computational graph involving that tensor, thus
+        back-propagation through that tensor will likely be incorrect."""
     __array_priority__ = 15.0
 
-    def __init__(self, x, *, constant=False, _scalar_only=False, _creator=None):
+    def __init__(self, x, *, dtype=None, constant=False, _scalar_only=False, _creator=None):
         """ Parameters
             ----------
             x : array_like
                 Input data, in any form that can be converted to an array.  This
-                includes numbers, sequences, nested sequences, and numpy-ndarrays.
+                includes numbers, sequences, nested sequences, numpy-ndarrays,
+                and mygrad-tensors.
 
             Keyword-Only Arguments
             ----------------------
+            dtype : Optional[type]
+                `int`, `float`, or a real-valued numpy data type. By default the
+                data type is inferred from ``x`` via ``numpy.asarray(x)``.
+
             constant : bool, optional (default=False)
                 If True, this node is treated as a constant, and thus does not facilitate
                 back propagation; `self.grad` will always return `None`.
 
             _scalar_only : bool, optional (default=False)
                 Signals that self.backward() can only be invoked if self.ndim == 0.
+                Should not be set manually by users.
 
             _creator: Optional[mygrad.Operation]
-                The operation-instance whose forward pass produced `self`.
+                The operation-instance whose forward pass produced `self`. Should not
+                be set manually by users.
             """
         assert isinstance(constant, bool)
         self._scalar_only = _scalar_only
@@ -44,7 +126,7 @@ class Tensor:
         if isinstance(x, Tensor):
             self.data = x.data
         else:
-            self.data = np.asarray(x)
+            self.data = np.asarray(x, dtype=dtype)
             self._check_valid_dtype(self.data.dtype)
 
         self.grad = None
@@ -56,7 +138,7 @@ class Tensor:
     @staticmethod
     def _check_valid_dtype(dtype):
         if not np.issubdtype(dtype, np.number):
-            raise TypeError("Tensor data must be a numeric type")
+            raise TypeError("Tensor data must be a numeric type, received {}".format(dtype))
 
     @classmethod
     def _op(cls, Op, *input_vars, op_args=None, op_kwargs=None, constant=False):
@@ -64,12 +146,13 @@ class Tensor:
 
             Parameters
             ----------
-            Op : Operation
+            Op : mygrad.operation_base.Operation
                 Operation-class, used to perform forward-pass on `input_vars`.
 
-            input_vars : Sequence[Union[Number, numpy.ndarray]]
-                An arbitrary number of tensor-like objects, which are used as the input
-                tensors to the forward-pass of the operation.
+            input_vars : array_like
+                An arbitrary number of input-tensors. These can take any form that
+                can be converted to an array.  This includes numbers, sequences, nested
+                numerical sequences, numpy-ndarrays, and mygrad-tensors.
 
             op_args : Optional[Tuple[Any]]
                 Arbitrary positional arguments passed to the operation's forward pass.
@@ -82,7 +165,7 @@ class Tensor:
 
             Returns
             -------
-            Tensor
+            mygrad.Tensor
                 The tensor-result of the operation's forward-pass."""
 
         if op_args is None:
@@ -131,7 +214,7 @@ class Tensor:
                 otherwise its value is added with `grad`.
 
             _broadcastable : bool, optional (default:False)
-                Devs-only: Indicates whether or not the up-stream op
+                Devs-only: Indicates whether or not the up-stream operation
                 can utilize broadcasting.
 
             Raises
