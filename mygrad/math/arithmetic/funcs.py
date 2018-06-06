@@ -128,7 +128,9 @@ def multiply(a, b, constant=False):
 
 
 def multiply_sequence(*variables, constant=False):
-    """ f(a, b) -> a + b
+    """ Add a sequence of N tensors.
+
+        f(a, b, ...) -> a + b + ...
 
         Parameters
         ----------
@@ -140,11 +142,38 @@ def multiply_sequence(*variables, constant=False):
 
         Returns
         -------
-        mygrad.Tensor"""
+        mygrad.Tensor
+
+        Notes
+        -----
+        It is more efficient to backpropagate through this
+        function than it is through a computational graph
+        with N-1 corresponding addition operations."""
     return Tensor._op(MultiplySequence, *variables, constant=constant)
 
 
 def add_sequence(*variables, constant=False):
+    """ Multiply a sequence of N tensors.
+
+        f(a, b, ...) -> a * b * ...
+
+        Parameters
+        ----------
+        variables : array_like
+
+        constant : bool, optional(default=True)
+            If `True`, the returned tensor is a constant (it
+            does not backpropagate a gradient)
+
+        Returns
+        -------
+        mygrad.Tensor
+
+        Notes
+        -----
+        It is more efficient to backpropagate through this
+        function than it is through a computational graph
+        with N-1 corresponding multiplication operations."""
     return Tensor._op(AddSequence, *variables, constant=constant)
 
 
