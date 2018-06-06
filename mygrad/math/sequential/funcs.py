@@ -20,7 +20,7 @@ def sum(x, axis=None, keepdims=False, constant=False):
 
         Parameters
         ----------
-        x : Union[numpy.ndarray, mygrad.Tensor]
+        x : array_like
 
         axis : Optional[int, Tuple[ints, ...]]
             Axis or axes along which a sum is performed.  The default,
@@ -35,9 +35,13 @@ def sum(x, axis=None, keepdims=False, constant=False):
             in the result as dimensions with size one. With this option,
             the result will broadcast correctly against the input tensor.
 
+        constant : bool, optional(default=False)
+            If ``True``, the returned tensor is a constant (it
+            does not backpropagate a gradient)
+
         Returns
         -------
-        sum_along_axis : Tensor
+        sum_along_axis : mygrad.Tensor
             A Tensor with the same shape as `self`, with the specified
             axis/axes removed. If `self` is a 0-d tensor, or if `axis` is None,
             a 0-dim Tensor is returned."""
@@ -49,7 +53,7 @@ def mean(x, axis=None, keepdims=False, constant=False):
 
         Parameters
         ----------
-        x : Union[numpy.ndarray, mygrad.Tensor]
+        x : array_like
 
         axis : Optional[int, Tuple[ints, ...]
             Axis or axes along which a mean is performed.  The default,
@@ -64,6 +68,10 @@ def mean(x, axis=None, keepdims=False, constant=False):
             If this is set to True, the axes which are reduced are left
             in the result as dimensions with size one. With this option,
             the result will broadcast correctly against the input tensor.
+
+        constant : bool, optional(default=False)
+            If ``True``, the returned tensor is a constant (it
+            does not backpropagate a gradient)
 
         Returns
         -------
@@ -100,6 +108,10 @@ def var(x, axis=None, ddof=0, keepdims=False, constant=False):
         If this is set to True, the axes which are reduced are left
         in the result as dimensions with size one. With this option,
         the result will broadcast correctly against the input array..
+
+    constant : bool, optional(default=False)
+        If ``True``, the returned tensor is a constant (it
+        does not backpropagate a gradient)
 
     Returns
     -------
@@ -149,6 +161,10 @@ def std(x, axis=None, ddof=0, keepdims=False, constant=False):
         in the result as dimensions with size one. With this option,
         the result will broadcast correctly against the input array.
 
+    constant : bool, optional(default=False)
+        If ``True``, the returned tensor is a constant (it
+        does not backpropagate a gradient)
+
     Returns
     -------
     std : mygrad.Tensor
@@ -173,7 +189,7 @@ def max(x, axis=None, keepdims=False, constant=False):
 
         Parameters
         ----------
-        x : Union[numpy.ndarray, mygrad.Tensor]
+        x : array_like
 
         axis : Optional[int, Tuple[int, ...]]
             Axis or axes along which to operate. By default, flattened input is used.
@@ -183,9 +199,13 @@ def max(x, axis=None, keepdims=False, constant=False):
             in the result as dimensions with size one. With this option,
             the result will broadcast correctly against the original `arr`.
 
+        constant : bool, optional(default=False)
+            If ``True``, the returned tensor is a constant (it
+            does not backpropagate a gradient)
+
         Returns
         -------
-        max : Tensor
+        max : mygrad.Tensor
             Maximum of `a`. If `axis` is None, the result is a 0-D tensor."""
     return Tensor._op(MaxMin, x, op_kwargs=dict(axis=axis, keepdims=keepdims, maxmin='max'), constant=constant)
 
@@ -203,9 +223,13 @@ def min(x, axis=None, keepdims=False, constant=False):
             in the result as dimensions with size one. With this option,
             the result will broadcast correctly against the original `arr`.
 
+        constant : bool, optional(default=False)
+            If ``True``, the returned tensor is a constant (it
+            does not backpropagate a gradient)
+
         Returns
         -------
-        min : Tensor
+        min : mygrad.Tensor
             Minimum of `a`. If `axis` is None, the result is a 0-D tensor."""
     return Tensor._op(MaxMin, x, op_kwargs=dict(axis=axis, keepdims=keepdims, maxmin='min'), constant=constant)
 
@@ -215,6 +239,26 @@ amax = max
 
 
 def prod(a, axis=None, keepdims=False, constant=False):
+    """
+    Return the product of array elements over given axes.
+
+    Parameters
+    ----------
+    a : array_like
+        Input data.
+
+    axis : Optional[int, Tuple[int, ...]]
+        Axis or axes along which to operate. By default, flattened input is used.
+
+    keepdims : bool, optional (default=False)
+        If this is set to True, the axes which are reduced are left in the
+        result as dimensions with size one. With this option, the result
+        will broadcast correctly against the input array.
+
+    Returns
+    -------
+    product_along_axis : mygrad.Tensor
+        A tensor shaped as `a` but with the specified axis removed."""
     return Tensor._op(Prod, a, op_kwargs=dict(axis=axis, keepdims=keepdims), constant=constant)
 
 
@@ -232,6 +276,10 @@ def cumprod(a, axis=None, constant=False):
     axis : Optional[int]
         Axis along which the cumulative product is computed.  By default
         the input is flattened.
+
+    constant : bool, optional(default=False)
+        If ``True``, the returned tensor is a constant (it
+        does not backpropagate a gradient)
 
     Returns
     -------
@@ -281,10 +329,13 @@ def cumsum(a, axis=None, constant=False):
         Axis along which the cumulative sum is computed. The default
         (None) is to compute the cumsum over the flattened array.
 
+    constant : bool, optional(default=False)
+        If ``True``, the returned tensor is a constant (it
+        does not backpropagate a gradient)
+
     Returns
     -------
     mygrad.Tensor
-
 
     Examples
     --------
