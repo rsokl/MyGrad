@@ -24,7 +24,7 @@ def add(a, b, constant=False):
 
         b : array_like
 
-        constant : bool, optional(default=True)
+        constant : bool, optional(default=False)
             If `True`, the returned tensor is a constant (it
             does not backpropagate a gradient)
 
@@ -43,7 +43,7 @@ def subtract(a, b, constant=False):
 
         b : array_like
 
-        constant : bool, optional(default=True)
+        constant : bool, optional(default=False)
             If `True`, the returned tensor is a constant (it
             does not backpropagate a gradient)
 
@@ -62,7 +62,7 @@ def divide(a, b, constant=False):
 
         b : array_like
 
-        constant : bool, optional(default=True)
+        constant : bool, optional(default=False)
             If `True`, the returned tensor is a constant (it
             does not backpropagate a gradient)
 
@@ -79,7 +79,7 @@ def reciprocal(a, constant=False):
         ----------
         a : array_like
 
-        constant : bool, optional(default=True)
+        constant : bool, optional(default=False)
             If `True`, the returned tensor is a constant (it
             does not backpropagate a gradient)
 
@@ -98,7 +98,7 @@ def power(a, b, constant=False):
 
         b : array_like
 
-        constant : bool, optional(default=True)
+        constant : bool, optional(default=False)
             If `True`, the returned tensor is a constant (it
             does not backpropagate a gradient)
 
@@ -117,7 +117,7 @@ def multiply(a, b, constant=False):
 
         b : array_like
 
-        constant : bool, optional(default=True)
+        constant : bool, optional(default=False)
             If `True`, the returned tensor is a constant (it
             does not backpropagate a gradient)
 
@@ -136,7 +136,7 @@ def multiply_sequence(*variables, constant=False):
         ----------
         variables : array_like
 
-        constant : bool, optional(default=True)
+        constant : bool, optional(default=False)
             If `True`, the returned tensor is a constant (it
             does not backpropagate a gradient)
 
@@ -161,7 +161,7 @@ def add_sequence(*variables, constant=False):
         ----------
         variables : array_like
 
-        constant : bool, optional(default=True)
+        constant : bool, optional(default=False)
             If `True`, the returned tensor is a constant (it
             does not backpropagate a gradient)
 
@@ -190,7 +190,7 @@ def positive(a, where=True, constant=False):
             the function at that position, values of False indicate
             to leave the value in the output alone.
 
-        constant : bool, optional(default=True)
+        constant : bool, optional(default=False)
             If `True`, the returned tensor is a constant (it
             does not backpropagate a gradient)
 
@@ -213,7 +213,7 @@ def negative(a, where=True, constant=False):
             the function at that position, values of False indicate
             to leave the value in the output alone.
 
-        constant : bool, optional(default=True)
+        constant : bool, optional(default=False)
             If `True`, the returned tensor is a constant (it
             does not backpropagate a gradient)
 
