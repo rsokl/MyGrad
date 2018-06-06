@@ -40,7 +40,6 @@ def test_contains():
     t = Tensor([[0, 1, 2], [3, 4, 5]])
     assert 0 in t and 0 in t.data
     assert [0, 1, 2] in t and [0, 1, 2] in t.data
-    assert [0, 3] in t and [0, 3] in t.data
     assert -1 not in t and -1 not in t.data
 
 
@@ -63,7 +62,7 @@ def test_properties(a, constant, scalar, creator):
     assert tensor.size == array.size
     assert len(tensor) == len(array)
     assert tensor.dtype == array.dtype
-    assert assert_equal(actual=tensor.data, desired=a)
+    assert_equal(actual=tensor.data, desired=a)
     assert (not creator) or tensor.creator is ref
 
 
@@ -167,6 +166,32 @@ def test_comparison_ops():
         tensor_out = getattr(Tensor, op)(x, y)
         array_out = getattr(np.ndarray, op)(x.data, y.data)
         assert_equal(actual=tensor_out, desired=array_out)
+
+
+def test_math_methods():
+    x = Tensor([[1, 2, 3],
+                [4, 5, 6]])
+    for attr in ("sum", "prod", "cumprod", "cumsum",
+                 "mean", "std", "var",
+                 "max", "min",
+                 "transpose"):
+        method_out = getattr(x, attr).__call__()
+        function_out = getattr(mg, attr).__call__(x)
+        assert_equal(method_out.data, function_out.data)
+        assert not method_out.constant
+        assert type(method_out.creator) is type(function_out.creator)
+
+    method_out = x.moveaxis(0, -1)
+    function_out = mg.moveaxis(x, 0, -1)
+    assert_equal(method_out.data, function_out.data)
+    assert not method_out.constant
+    assert type(method_out.creator) is type(function_out.creator)
+
+    method_out = x.swapaxes(0, -1)
+    function_out = mg.swapaxes(x, 0, -1)
+    assert_equal(method_out.data, function_out.data)
+    assert not method_out.constant
+    assert type(method_out.creator) is type(function_out.creator)
 
 
 @given(x=st.floats(min_value=-1E-6, max_value=1E6),
