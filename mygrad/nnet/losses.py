@@ -44,11 +44,19 @@ class MulticlassHinge(Operation):
 def multiclass_hinge(x, y_true, hinge=1., constant=False):
     """ Parameters
         ----------
-        x : mygrad.Tensor, shape=(N, K)
+        x : array_like, shape=(N, K)
             The K class scores for each of the N pieces of data.
 
-        y : Sequence[int]
+        y : array_like, shape=(N,)
             The correct class-indices, in [0, K), for each datum.
+
+        hinge : float
+            The size of the "hinge" outside of which a nonzero loss
+            is incurred.
+
+        constant : bool, optional(default=False)
+            If ``True``, the returned tensor is a constant (it
+            does not back-propagate a gradient)
 
         Returns
         -------
@@ -92,10 +100,16 @@ class SoftmaxCrossEntropy(Operation):
 def softmax_crossentropy(x, y_true, constant=False):
     """ Parameters
         ----------
-        x : pygrad.Tensor, shape=(N, C)
+        x : array_like, shape=(N, C)
             The C class scores for each of the N pieces of data.
-        y_true : Sequence[int]
+
+        y_true : array_like, shape=(N,)
             The correct class-indices, in [0, C), for each datum.
+
+        constant : bool, optional(default=False)
+            If ``True``, the returned tensor is a constant (it
+            does not back-propagate a gradient)
+
         Returns
         -------
         The average softmax loss"""

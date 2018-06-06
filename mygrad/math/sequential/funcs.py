@@ -37,7 +37,7 @@ def sum(x, axis=None, keepdims=False, constant=False):
 
         constant : bool, optional(default=False)
             If ``True``, the returned tensor is a constant (it
-            does not backpropagate a gradient)
+            does not back-propagate a gradient)
 
         Returns
         -------
@@ -71,7 +71,7 @@ def mean(x, axis=None, keepdims=False, constant=False):
 
         constant : bool, optional(default=False)
             If ``True``, the returned tensor is a constant (it
-            does not backpropagate a gradient)
+            does not back-propagate a gradient)
 
         Returns
         -------
@@ -111,7 +111,7 @@ def var(x, axis=None, ddof=0, keepdims=False, constant=False):
 
     constant : bool, optional(default=False)
         If ``True``, the returned tensor is a constant (it
-        does not backpropagate a gradient)
+        does not back-propagate a gradient)
 
     Returns
     -------
@@ -163,7 +163,7 @@ def std(x, axis=None, ddof=0, keepdims=False, constant=False):
 
     constant : bool, optional(default=False)
         If ``True``, the returned tensor is a constant (it
-        does not backpropagate a gradient)
+        does not back-propagate a gradient)
 
     Returns
     -------
@@ -201,7 +201,7 @@ def max(x, axis=None, keepdims=False, constant=False):
 
         constant : bool, optional(default=False)
             If ``True``, the returned tensor is a constant (it
-            does not backpropagate a gradient)
+            does not back-propagate a gradient)
 
         Returns
         -------
@@ -225,7 +225,7 @@ def min(x, axis=None, keepdims=False, constant=False):
 
         constant : bool, optional(default=False)
             If ``True``, the returned tensor is a constant (it
-            does not backpropagate a gradient)
+            does not back-propagate a gradient)
 
         Returns
         -------
@@ -279,7 +279,7 @@ def cumprod(a, axis=None, constant=False):
 
     constant : bool, optional(default=False)
         If ``True``, the returned tensor is a constant (it
-        does not backpropagate a gradient)
+        does not back-propagate a gradient)
 
     Returns
     -------
@@ -331,7 +331,7 @@ def cumsum(a, axis=None, constant=False):
 
     constant : bool, optional(default=False)
         If ``True``, the returned tensor is a constant (it
-        does not backpropagate a gradient)
+        does not back-propagate a gradient)
 
     Returns
     -------

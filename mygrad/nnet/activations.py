@@ -27,11 +27,15 @@ def sigmoid(x, constant=False):
 
         Parameters
         ----------
-        x : Union[Tensor, array_like]
+        x : array_like
 
+        constant : bool, optional(default=False)
+            If ``True``, the returned tensor is a constant (it
+            does not back-propagate a gradient)
+            
         Returns
         -------
-        Tensor """
+        mygrad.Tensor """
     return Tensor._op(Sigmoid, x, constant=constant)
 
 
@@ -51,11 +55,15 @@ def relu(x, constant=False):
 
         Parameters
         ----------
-        x : Union[Tensor, array_like]
+        x : array_like
 
+        constant : bool, optional(default=False)
+            If ``True``, the returned tensor is a constant (it
+            does not back-propagate a gradient)
+            
         Returns
         -------
-        Tensor """
+        mygrad.Tensor """
     return Tensor._op(ReLu, x, constant=constant)
 
 
@@ -84,16 +92,20 @@ class Softmax(Operation):
 def softmax(x, constant=False):
     """ f(x) = exp(x) / sum( exp(x) )
 
-        Compute the softmax over a 1D tensor of data, or over the respective rows
-        of a 2D tensor
+        Compute the softmax over a 1D tensor of data, or over the 
+        respective rows of a 2D tensor
 
         Parameters
         ----------
-        x : Union[Tensor, array_like]
+        x : array_like
 
+        constant : bool, optional(default=False)
+            If ``True``, the returned tensor is a constant (it
+            does not back-propagate a gradient)
+            
         Returns
         -------
-        Tensor """
+        mygrad.Tensor """
     return Tensor._op(Softmax, x, constant=constant)
 
 
@@ -127,9 +139,13 @@ def logsoftmax(x, constant=False):
 
         Parameters
         ----------
-        x : Union[Tensor, array_like]
+        x : array_like
 
+        constant : bool, optional(default=False)
+            If ``True``, the returned tensor is a constant (it
+            does not back-propagate a gradient)
+            
         Returns
         -------
-        Tensor """
+        mygrad.Tensor """
     return Tensor._op(LogSoftmax, x, constant=constant)
