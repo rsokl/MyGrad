@@ -1,4 +1,4 @@
-from mygrad.tensor_base import Tensor
+from mygrad import Tensor
 from mygrad.operation_base import Operation
 import mygrad as mg
 
@@ -8,7 +8,7 @@ import hypothesis.extra.numpy as hnp
 
 from pytest import raises
 import numpy as np
-from numpy.testing import assert_allclose
+from numpy.testing import assert_allclose, assert_equal
 
 
 def test_to_scalar():
@@ -22,10 +22,10 @@ def test_to_scalar():
     with raises(ValueError):
         nd_tensor.item()
 
-    size1_tensor = Tensor([[1]])
-    assert float(size1_tensor) == 1.
-    assert int(size1_tensor) == 1
-    assert size1_tensor.item() == 1.
+    for size1_tensor in (Tensor(1), Tensor([[1]])):
+        assert float(size1_tensor) == 1.
+        assert int(size1_tensor) == 1
+        assert size1_tensor.item() == 1.
 
 
 def test_repr():
@@ -63,14 +63,21 @@ def test_properties(a, constant, scalar, creator):
     assert tensor.size == array.size
     assert len(tensor) == len(array)
     assert tensor.dtype == array.dtype
-    assert np.all(tensor.data == a)
+    assert assert_equal(actual=tensor.data, desired=a)
     assert (not creator) or tensor.creator is ref
 
 
 def test_init_data():
     for data in [0, [], (0, 0), ((0, 0), (0, 0)), np.random.rand(3, 4, 2)]:
-        assert np.all(Tensor(data).data == np.asarray(data)), "Initialization with non-tensor failed"
-        assert np.all(Tensor(Tensor(data)).data == np.asarray(data)), "Initialization with tensor failed"
+        assert_equal(actual=Tensor(data).data, desired=np.asarray(data),
+                     err_msg="Initialization with non-tensor failed")
+        assert_equal(actual=Tensor(Tensor(data)).data, desired=np.asarray(data),
+                     err_msg="Initialization with tensor failed")
+
+
+@given(x=hnp.arrays(dtype=float, shape=hnp.array_shapes(min_dims=1, max_dims=4)))
+def test_init_data_rand(x):
+    assert_equal(actual=Tensor(x).data, desired=x)
 
 
 @given(x=hnp.arrays(dtype=float, shape=hnp.array_shapes()))
