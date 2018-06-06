@@ -1,8 +1,7 @@
 from functools import wraps
 
 from mygrad.math.arithmetic.ops import *
-from mygrad.math.sequential.ops import *
-from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property, Transpose
+from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property
 from mygrad.tensor_manip.array_shape.ops import Reshape
 from mygrad.tensor_core_ops.indexing import GetItem, SetItem
 from mygrad.operation_base import Operation, BroadcastableOp
@@ -274,7 +273,7 @@ class Tensor:
         return self
 
     def __repr__(self):
-        return repr(self.data).replace("array", "tensor")
+        return repr(self.data).replace("array", "Tensor").replace("\n", "\n ")
 
     def __copy__(self):
         """ Produces a copy of self with copy.creator=None"""
@@ -291,6 +290,16 @@ class Tensor:
         if self.size > 1:
             raise ValueError("can only convert a tensor of size 1 to a Python scalar")
         return self.data.item()
+
+    def __float__(self):
+        if self.size > 1:
+            raise TypeError("can only convert a tensor of size 1 to a Python scalar")
+        return float(self.data)
+
+    def __int__(self):
+        if self.size > 1:
+            raise TypeError("can only convert a tensor of size 1 to a Python scalar")
+        return int(self.data)
 
     @property
     def size(self):
@@ -317,7 +326,7 @@ class Tensor:
             -------
             Tensor"""
         return self._op(Tensor_Transpose_Property, self)
-        
+
     def reshape(self, *shape):
         """ Returns a tensor with a new shape, without changing its data.
 
@@ -343,6 +352,7 @@ class Tensor:
                 raise TypeError("an integer is required")
             shape = shape[0]
         return self._op(Reshape, self, op_args=(shape,))
+
 
 # set all comparison operators - mirrors ndarray methods
 def tensor_to_array_wrapper(func):
