@@ -19,14 +19,18 @@ def reshape(a, newshape, constant=False):
             One shape dimension can be -1. In this case, the value is
             inferred from the length of the array and remaining dimensions.
 
+        constant : bool, optional(default=False)
+            If ``True``, the returned tensor is a constant (it
+            does not back-propagate a gradient)
+
         Returns
         -------
         mygrad.Tensor
-            `a` with its shape changed permuted.  A new tensor is returned.
+            ``a`` with its shape changed permuted.  A new tensor is returned.
 
         Notes
         -----
-        `reshape` utilizes C-ordering, meaning that it reads & writes elements using
+        ``reshape`` utilizes C-ordering, meaning that it reads & writes elements using
         C-like index ordering; the last axis index changing fastest, and, proceeding
         in reverse order, the first axis index changing slowest. """
     return Tensor._op(Reshape, a, op_args=(newshape,), constant=constant)

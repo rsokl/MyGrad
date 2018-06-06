@@ -25,7 +25,7 @@ def sin(a, constant=False):
 
         constant : bool, optional(default=False)
             If ``True``, the returned tensor is a constant (it
-            does not backpropagate a gradient)
+            does not back-propagate a gradient)
 
         Returns
         -------
@@ -42,7 +42,7 @@ def sinc(a, constant=False):
 
         constant : bool, optional(default=False)
             If ``True``, the returned tensor is a constant (it
-            does not backpropagate a gradient)
+            does not back-propagate a gradient)
 
         Returns
         -------
@@ -59,7 +59,7 @@ def cos(a, constant=False):
 
         constant : bool, optional(default=False)
             If ``True``, the returned tensor is a constant (it
-            does not backpropagate a gradient)
+            does not back-propagate a gradient)
 
         Returns
         -------
@@ -76,7 +76,7 @@ def tan(a, constant=False):
 
         constant : bool, optional(default=False)
             If ``True``, the returned tensor is a constant (it
-            does not backpropagate a gradient)
+            does not back-propagate a gradient)
 
         Returns
         -------
@@ -93,7 +93,7 @@ def cot(a, constant=False):
 
         constant : bool, optional(default=False)
             If ``True``, the returned tensor is a constant (it
-            does not backpropagate a gradient)
+            does not back-propagate a gradient)
 
         Returns
         -------
@@ -110,7 +110,7 @@ def csc(a, constant=False):
 
         constant : bool, optional(default=False)
             If ``True``, the returned tensor is a constant (it
-            does not backpropagate a gradient)
+            does not back-propagate a gradient)
 
         Returns
         -------
@@ -127,7 +127,7 @@ def sec(a, constant=False):
 
         constant : bool, optional(default=False)
             If ``True``, the returned tensor is a constant (it
-            does not backpropagate a gradient)
+            does not back-propagate a gradient)
 
         Returns
         -------
@@ -144,7 +144,7 @@ def arccos(a, constant=False):
 
         constant : bool, optional(default=False)
             If ``True``, the returned tensor is a constant (it
-            does not backpropagate a gradient)
+            does not back-propagate a gradient)
 
         Returns
         -------
@@ -161,7 +161,7 @@ def arccsc(a, constant=False):
 
         constant : bool, optional(default=False)
             If ``True``, the returned tensor is a constant (it
-            does not backpropagate a gradient)
+            does not back-propagate a gradient)
 
         Returns
         -------
@@ -178,7 +178,7 @@ def arccot(a, constant=False):
 
         constant : bool, optional(default=False)
             If ``True``, the returned tensor is a constant (it
-            does not backpropagate a gradient)
+            does not back-propagate a gradient)
 
         Returns
         -------
@@ -195,7 +195,7 @@ def arcsin(a):
 
         constant : bool, optional(default=False)
             If ``True``, the returned tensor is a constant (it
-            does not backpropagate a gradient)
+            does not back-propagate a gradient)
 
         Returns
         -------
@@ -212,7 +212,7 @@ def arctan(a):
 
         constant : bool, optional(default=False)
             If ``True``, the returned tensor is a constant (it
-            does not backpropagate a gradient)
+            does not back-propagate a gradient)
 
         Returns
         -------
@@ -229,7 +229,7 @@ def arcsec(a):
 
         constant : bool, optional(default=False)
             If ``True``, the returned tensor is a constant (it
-            does not backpropagate a gradient)
+            does not back-propagate a gradient)
 
         Returns
         -------

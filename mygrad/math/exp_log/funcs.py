@@ -21,7 +21,7 @@ def exp(a, constant=False):
 
         constant : bool, optional(default=False)
             If ``True``, the returned tensor is a constant (it
-            does not backpropagate a gradient)
+            does not back-propagate a gradient)
 
         Returns
         -------
@@ -40,7 +40,7 @@ def expm1(a, constant=False):
 
         constant : bool, optional(default=True)
             If ``True``, the returned tensor is a constant (it
-            does not backpropagate a gradient)
+            does not back-propagate a gradient)
 
         Returns
         -------
@@ -64,7 +64,7 @@ def logaddexp(a, b, constant=False):
 
         constant : bool, optional(default=False)
             If ``True``, the returned tensor is a constant (it
-            does not backpropagate a gradient)
+            does not back-propagate a gradient)
 
         Returns
         -------
@@ -94,7 +94,7 @@ def logaddexp2(a, b, constant=False):
 
         constant : bool, optional(default=False)
             If ``True``, the returned tensor is a constant (it
-            does not backpropagate a gradient)
+            does not back-propagate a gradient)
 
         Returns
         -------
@@ -122,7 +122,7 @@ def log(a, constant=False):
 
         constant : bool, optional(default=True)
             If ``True``, the returned tensor is a constant (it
-            does not backpropagate a gradient)
+            does not back-propagate a gradient)
 
         Returns
         -------
@@ -146,7 +146,7 @@ def log2(a, constant=False):
 
         constant : bool, optional(default=True)
             If ``True``, the returned tensor is a constant (it
-            does not backpropagate a gradient)
+            does not back-propagate a gradient)
 
         Returns
         -------
@@ -165,7 +165,7 @@ def log10(a, constant=False):
 
         constant : bool, optional(default=True)
             If ``True``, the returned tensor is a constant (it
-            does not backpropagate a gradient)
+            does not back-propagate a gradient)
 
         Returns
         -------
@@ -184,7 +184,7 @@ def log1p(a, constant=False):
 
         constant : bool, optional(default=True)
             If ``True``, the returned tensor is a constant (it
-            does not backpropagate a gradient)
+            does not back-propagate a gradient)
 
         Returns
         -------

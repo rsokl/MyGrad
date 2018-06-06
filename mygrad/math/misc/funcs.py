@@ -18,7 +18,7 @@ def abs(a, constant=False):
 
         constant : bool, optional(default=False)
             If ``True``, the returned tensor is a constant (it
-            does not backpropagate a gradient)
+            does not back-propagate a gradient)
 
         Returns
         -------
