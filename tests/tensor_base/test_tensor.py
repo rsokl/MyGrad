@@ -1,5 +1,6 @@
 from mygrad.tensor_base import Tensor
 from mygrad.operation_base import Operation
+import mygrad as mg
 
 from hypothesis import given
 import hypothesis.strategies as st
@@ -7,7 +8,40 @@ import hypothesis.extra.numpy as hnp
 
 from pytest import raises
 import numpy as np
-from  numpy.testing import assert_allclose
+from numpy.testing import assert_allclose
+
+
+def test_to_scalar():
+    nd_tensor = Tensor([1, 2])
+    with raises(TypeError):
+        float(nd_tensor)
+
+    with raises(TypeError):
+        int(nd_tensor)
+
+    with raises(ValueError):
+        nd_tensor.item()
+
+    size1_tensor = Tensor([[1]])
+    assert float(size1_tensor) == 1.
+    assert int(size1_tensor) == 1
+    assert size1_tensor.item() == 1.
+
+
+def test_repr():
+    assert repr(Tensor(1)) == 'Tensor(1)'
+    assert repr(Tensor([1])) == 'Tensor([1])'
+    assert repr(Tensor([1, 2])) == 'Tensor([1, 2])'
+    tmp_rep = 'Tensor([[0, 1, 2],\n        [3, 4, 5],\n        [6, 7, 8]])'
+    assert repr(mg.arange(9).reshape((3, 3))) == tmp_rep
+
+
+def test_contains():
+    t = Tensor([[0, 1, 2], [3, 4, 5]])
+    assert 0 in t and 0 in t.data
+    assert [0, 1, 2] in t and [0, 1, 2] in t.data
+    assert [0, 3] in t and [0, 3] in t.data
+    assert -1 not in t and -1 not in t.data
 
 
 @given(a=hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=5),
