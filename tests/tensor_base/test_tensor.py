@@ -122,6 +122,44 @@ def test_init_params(a, creator, constant, scalar_only, dtype):
     assert tensor.grad is None
 
 
+def test_special_methods():
+    from mygrad.math.arithmetic.ops import Add, Subtract, Multiply, Divide, Power
+    from mygrad.math.arithmetic.ops import Negative
+
+    x = Tensor([2, 8, 5])
+    y = Tensor([1, 3, 2])
+
+    for op_name, op in zip(("__add__", "__sub__", "__mul__", "__truediv__", "__pow__"),
+                           (Add, Subtract, Multiply, Divide, Power)):
+        tensor_out = getattr(Tensor, op_name)(x, y)
+        numpy_out = getattr(np.ndarray, op_name)(x.data, y.data)
+        assert isinstance(tensor_out, Tensor)
+        assert not tensor_out.constant
+        assert_equal(tensor_out.data, numpy_out)
+        assert isinstance(tensor_out.creator, op)
+        assert tensor_out.creator.variables[0] is x
+        assert tensor_out.creator.variables[1] is y
+
+    for op_name, op in zip(("__radd__", "__rsub__", "__rmul__", "__rtruediv__", "__rpow__"),
+                           (Add, Subtract, Multiply, Divide, Power)):
+        tensor_out = getattr(Tensor, op_name)(x, y)
+        numpy_out = getattr(np.ndarray, op_name)(x.data, y.data)
+        assert isinstance(tensor_out, Tensor)
+        assert not tensor_out.constant
+        assert_equal(tensor_out.data, numpy_out)
+        assert isinstance(tensor_out.creator, op)
+        assert tensor_out.creator.variables[0] is y
+        assert tensor_out.creator.variables[1] is x
+
+    tensor_out = getattr(Tensor, "__neg__")(x)
+    numpy_out = getattr(np.ndarray, "__neg__")(x.data)
+    assert isinstance(tensor_out, Tensor)
+    assert not tensor_out.constant
+    assert_equal(tensor_out.data, numpy_out)
+    assert isinstance(tensor_out.creator, Negative)
+    assert tensor_out.creator.variables[0] is x
+
+
 @given(x=st.floats(min_value=-1E-6, max_value=1E6),
        y=st.floats(min_value=-1E-6, max_value=1E6),
        z=st.floats(min_value=-1E-6, max_value=1E6))

@@ -254,18 +254,6 @@ class Tensor:
     def __rpow__(self, other):
         return self._op(Power, other, self)
 
-    def __iadd__(self, other):
-        return self + other
-
-    def __imul__(self, other):
-        return self * other
-
-    def __isub__(self, other):
-        return self - other
-
-    def __idiv__(self, other):
-        return self / other
-
     def __neg__(self):
         return self._op(Negative, self)
 
