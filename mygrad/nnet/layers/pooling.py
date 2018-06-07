@@ -173,5 +173,4 @@ def max_pool(x, pool, stride, constant=False):
         window cannot extend passed the "boundaries" of the data
         dimensions.
         """
-    if isinstance(pool, Integral): pool = (pool, pool)
     return Tensor._op(MaxPoolND, x, op_args=(pool, stride), constant=constant)
