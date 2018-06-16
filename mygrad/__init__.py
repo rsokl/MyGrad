@@ -17,5 +17,5 @@ __version__ = "0.5"
 for attr in (sum, prod, cumprod, cumsum,
              mean, std, var,
              max, min,
-             transpose, swapaxes, moveaxis):
+             swapaxes, moveaxis):
     setattr(Tensor, attr.__name__, attr)
