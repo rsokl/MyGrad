@@ -110,7 +110,17 @@ def test_transpose_property():
 def test_transpose_method():
     dat = np.arange(24).reshape(2, 3, 4)
     x = Tensor(dat)
-    f = x.transpose(axes=(2, 1, 0))
+
+    # passing tuple of integers
+    f = x.transpose((2, 1, 0))
+    f.backward(dat.transpose((2, 1, 0)))
+
+    assert_allclose(f.data, dat.transpose((2, 1, 0)))
+    assert_allclose(x.grad, dat)
+    
+    # passing integers directly
+    x = Tensor(dat)
+    f = x.transpose(2, 1, 0)
     f.backward(dat.transpose((2, 1, 0)))
 
     assert_allclose(f.data, dat.transpose((2, 1, 0)))
