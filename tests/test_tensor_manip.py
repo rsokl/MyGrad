@@ -1,5 +1,5 @@
 from mygrad.tensor_base import Tensor
-from mygrad import transpose, moveaxis, swapaxes
+from mygrad import transpose, moveaxis, swapaxes, squeeze
 from numpy.testing import assert_allclose
 import numpy as np
 
@@ -124,4 +124,12 @@ def test_transpose_method():
     f.backward(dat.transpose((2, 1, 0)))
 
     assert_allclose(f.data, dat.transpose((2, 1, 0)))
+    assert_allclose(x.grad, dat)
+
+    # passing integers directly
+    x = Tensor(dat)
+    f = x.transpose()
+    f.backward(dat.transpose())
+
+    assert_allclose(f.data, dat.transpose())
     assert_allclose(x.grad, dat)

@@ -471,7 +471,9 @@ class Tensor:
             >>> a.transpose(1, 0)
             Tensor([[1, 3],
                 [2, 4]]) """
-        if hasattr(axes[0], "__iter__"):
+        if not axes:
+            axes = None
+        elif hasattr(axes[0], "__iter__"):
             if len(axes) > 1:
                 raise TypeError("'{}' object cannot be interpreted as an integer".format(type(axes[0])))
             axes = axes[0]
