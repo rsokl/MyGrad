@@ -1,3 +1,4 @@
+from itertools import permutations
 from mygrad.tensor_base import Tensor
 from mygrad import transpose, moveaxis, swapaxes, squeeze
 from numpy.testing import assert_allclose
@@ -109,22 +110,23 @@ def test_transpose_property():
 
 def test_transpose_method():
     dat = np.arange(24).reshape(2, 3, 4)
-    x = Tensor(dat)
 
-    # passing tuple of integers
-    f = x.transpose((2, 1, 0))
-    f.backward(dat.transpose((2, 1, 0)))
+    for axes in permutations(range(3)):
+        # passing tuple of integers
+        x = Tensor(dat)
+        f = x.transpose(axes)
+        f.backward(dat.transpose(axes))
 
-    assert_allclose(f.data, dat.transpose((2, 1, 0)))
-    assert_allclose(x.grad, dat)
-    
-    # passing integers directly
-    x = Tensor(dat)
-    f = x.transpose(2, 1, 0)
-    f.backward(dat.transpose((2, 1, 0)))
+        assert_allclose(f.data, dat.transpose(axes))
+        assert_allclose(x.grad, dat)
 
-    assert_allclose(f.data, dat.transpose((2, 1, 0)))
-    assert_allclose(x.grad, dat)
+        # passing integers directly
+        x = Tensor(dat)
+        f = x.transpose(*axes)
+        f.backward(dat.transpose(axes))
+
+        assert_allclose(f.data, dat.transpose(axes), err_msg="{}".format(axes))
+        assert_allclose(x.grad, dat, err_msg="{}".format(axes))
 
     # passing integers directly
     x = Tensor(dat)

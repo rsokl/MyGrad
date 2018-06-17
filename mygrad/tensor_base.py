@@ -1,8 +1,7 @@
 from functools import wraps
 
 from mygrad.math.arithmetic.ops import *
-from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property, Transpose
-from mygrad.tensor_manip.array_shape.ops import Reshape
+from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property
 from mygrad.tensor_core_ops.indexing import GetItem, SetItem
 from mygrad.operation_base import BroadcastableOp
 from mygrad._utils import reduce_broadcast
@@ -399,85 +398,6 @@ class Tensor:
             Tensor"""
         return self._op(Tensor_Transpose_Property, self)
 
-    def reshape(self, *shape):
-        """ Returns a tensor with a new shape, without changing its data.
-
-            Parameters
-            ----------
-            newshape : Union[int, Tuple[int, ...]]
-                The new shape should be compatible with the original shape. If
-                an integer, then the result will be a 1-D array of that length.
-                One shape dimension can be -1. In this case, the value is
-                inferred from the length of the array and remaining dimensions.
-
-            Returns
-            -------
-            Tensor
-
-            Notes
-            -----
-            `reshape` utilizes C-ordering, meaning that it reads & writes elements using
-            C-like index ordering; the last axis index changing fastest, and, proceeding
-            in reverse order, the first axis index changing slowest. """
-        if hasattr(shape[0], "__iter__"):
-            if len(shape) > 1:
-                raise TypeError("an integer is required")
-            shape = shape[0]
-        return self._op(Reshape, self, op_args=(shape,))
-
-    def transpose(self, *axes):
-        """ a.transpose(*axes)
-
-            Returns a view of the array with axes transposed.
-
-            For a 1-D array, this has no effect. (To change between column and
-            row vectors, first cast the 1-D array into a matrix object.)
-            For a 2-D array, this is the usual matrix transpose.
-            For an n-D array, if axes are given, their order indicates how the
-            axes are permuted (see Examples). If axes are not provided and
-            ``a.shape = (i[0], i[1], ... i[n-2], i[n-1])``, then
-            ``a.transpose().shape = (i[n-1], i[n-2], ... i[1], i[0])``.
-
-            Parameters
-            ----------
-            axes : Union[None, Tuple[int, ...], int]
-
-                * None or no argument: reverses the order of the axes.
-
-                * tuple of ints: `i` in the `j`-th place in the tuple means `a`'s
-                `i`-th axis becomes `a.transpose()`'s `j`-th axis.
-
-                * `n` ints: same as an n-tuple of the same ints (this form is
-                intended simply as a "convenience" alternative to the tuple form)
-
-            Returns
-            -------
-            out : mygrad.Tensor
-                View of `a`, with axes suitably permuted.
-
-            Examples
-            --------
-            >>> import mygrad as mg
-            >>> a = mg.Tensor([[1, 2], [3, 4]])
-            >>> a
-            Tensor([[1, 2],
-                [3, 4]])
-            >>> a.transpose()
-            Tensor([[1, 3],
-                [2, 4]])
-            >>> a.transpose((1, 0))
-            Tensor([[1, 3],
-                [2, 4]])
-            >>> a.transpose(1, 0)
-            Tensor([[1, 3],
-                [2, 4]]) """
-        if not axes:
-            axes = None
-        elif hasattr(axes[0], "__iter__"):
-            if len(axes) > 1:
-                raise TypeError("'{}' object cannot be interpreted as an integer".format(type(axes[0])))
-            axes = axes[0]
-        return self._op(Transpose, self, op_args=(axes,))
 
 # set all comparison operators - mirrors ndarray methods
 def tensor_to_array_wrapper(func):
@@ -485,6 +405,7 @@ def tensor_to_array_wrapper(func):
     def wrapped(x, y):
         return func(x.data, y.data if isinstance(y, Tensor) else y)
     return wrapped
+
 
 for op in ("__lt__", "__le__", "__gt__", "__ge__", "__eq__", "__ne__"):
     setattr(Tensor, op, tensor_to_array_wrapper(getattr(np.ndarray, op)))
