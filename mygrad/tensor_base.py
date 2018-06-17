@@ -2,7 +2,6 @@ from functools import wraps
 
 from mygrad.math.arithmetic.ops import *
 from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property
-from mygrad.tensor_manip.array_shape.ops import Reshape
 from mygrad.tensor_core_ops.indexing import GetItem, SetItem
 from mygrad.operation_base import BroadcastableOp
 from mygrad._utils import reduce_broadcast
@@ -399,32 +398,6 @@ class Tensor:
             Tensor"""
         return self._op(Tensor_Transpose_Property, self)
 
-    def reshape(self, *shape):
-        """ Returns a tensor with a new shape, without changing its data.
-
-            Parameters
-            ----------
-            newshape : Union[int, Tuple[int, ...]]
-                The new shape should be compatible with the original shape. If
-                an integer, then the result will be a 1-D array of that length.
-                One shape dimension can be -1. In this case, the value is
-                inferred from the length of the array and remaining dimensions.
-
-            Returns
-            -------
-            Tensor
-
-            Notes
-            -----
-            `reshape` utilizes C-ordering, meaning that it reads & writes elements using
-            C-like index ordering; the last axis index changing fastest, and, proceeding
-            in reverse order, the first axis index changing slowest. """
-        if hasattr(shape[0], "__iter__"):
-            if len(shape) > 1:
-                raise TypeError("an integer is required")
-            shape = shape[0]
-        return self._op(Reshape, self, op_args=(shape,))
-
 
 # set all comparison operators - mirrors ndarray methods
 def tensor_to_array_wrapper(func):
@@ -433,6 +406,6 @@ def tensor_to_array_wrapper(func):
         return func(x.data, y.data if isinstance(y, Tensor) else y)
     return wrapped
 
+
 for op in ("__lt__", "__le__", "__gt__", "__ge__", "__eq__", "__ne__"):
     setattr(Tensor, op, tensor_to_array_wrapper(getattr(np.ndarray, op)))
-

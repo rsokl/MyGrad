@@ -6,7 +6,7 @@ __all__ = ["transpose",
            "swapaxes"]
 
 
-def transpose(a, axes=None, constant=False):
+def transpose(a, *axes, constant=False):
     """ Permute the dimensions of an array.
 
         Parameters
@@ -21,7 +21,30 @@ def transpose(a, axes=None, constant=False):
         Returns
         -------
         mygrad.Tensor
-            `a` with its axes permuted.  A new tensor is returned. """
+            `a` with its axes permuted.  A new tensor is returned. 
+
+        Examples
+        --------
+        >>> import mygrad as mg
+        >>> a = mg.Tensor([[1, 2], [3, 4]])
+        >>> a
+        Tensor([[1, 2],
+                [3, 4]])
+        >>> a.transpose()
+        Tensor([[1, 3],
+                [2, 4]])
+        >>> a.transpose((1, 0))
+        Tensor([[1, 3],
+                [2, 4]])
+        >>> a.transpose(1, 0)
+        Tensor([[1, 3],
+                [2, 4]]) """
+    if not axes:
+        axes = None
+    elif hasattr(axes[0], "__iter__") or axes[0] is None:
+        if len(axes) > 1:
+            raise TypeError("'{}' object cannot be interpreted as an integer".format(type(axes[0])))
+        axes = axes[0]
     return Tensor._op(Transpose, a, op_args=(axes,), constant=constant)
 
 

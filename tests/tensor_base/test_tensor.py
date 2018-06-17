@@ -173,7 +173,7 @@ def test_math_methods():
     for attr in ("sum", "prod", "cumprod", "cumsum",
                  "mean", "std", "var",
                  "max", "min",
-                 "transpose"):
+                 "transpose", "squeeze"):
         method_out = getattr(x, attr).__call__()
         function_out = getattr(mg, attr).__call__(x)
         assert_equal(method_out.data, function_out.data)
