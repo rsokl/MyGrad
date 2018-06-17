@@ -8,6 +8,7 @@ from mygrad.operation_base import BroadcastableOp
 from mygrad._utils import reduce_broadcast
 
 import numpy as np
+import pydot
 
 
 __all__ = ['Tensor']
@@ -134,6 +135,13 @@ class Tensor:
 
         # used for setitem
         self._ops = []  # Operation instances that utilized self an input tensor
+
+        # used to contruct network graph
+        # CURRENTLY NEED C-PYTHON; use of id()
+        self._graph_dict = {str(self.data) + "\n" + str(id(self)):self._creator}
+        if self._creator is not None:
+            for var in self._creator.variables:
+                self._graph_dict.update(var._graph_dict)
 
     @staticmethod
     def _check_valid_dtype(dtype):
@@ -277,7 +285,7 @@ class Tensor:
 
     def __len__(self):
         return len(self.data)
-    
+
     def __contains__(self, item):
         return self.data.__contains__(item)
 
@@ -425,6 +433,19 @@ class Tensor:
             shape = shape[0]
         return self._op(Reshape, self, op_args=(shape,))
 
+    def build_graph(self):
+        """ Builds and saves a network graph as PNG file. """
+        graph = pydot.Dot(graph_type='digraph')
+
+        for out, op in self._graph_dict.items():
+            if op is not None:
+                op_node = pydot.Node(op.__repr__().rpartition(".")[-1].replace(" object at ", "\n")[:-1], style="filled", fillcolor="red")
+                graph.add_node(op_node)
+                for var in op.variables:
+                    graph.add_edge(pydot.Edge(str(var.data) + "\n" + str(id(var)), op_node))
+                graph.add_edge(pydot.Edge(op_node, out))
+
+        graph.write_png('network_graph.png')
 
 # set all comparison operators - mirrors ndarray methods
 def tensor_to_array_wrapper(func):
@@ -435,4 +456,3 @@ def tensor_to_array_wrapper(func):
 
 for op in ("__lt__", "__le__", "__gt__", "__ge__", "__eq__", "__ne__"):
     setattr(Tensor, op, tensor_to_array_wrapper(getattr(np.ndarray, op)))
-
