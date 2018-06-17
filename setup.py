@@ -9,7 +9,7 @@ def do_setup():
           license='MIT',
           platforms=['Windows', 'Linux', 'Mac OS-X', 'Unix'],
           packages=find_packages(),
-          install_requires=['numpy>=1.11'])
+          install_requires=['numpy>=1.12'])
 
 if __name__ == "__main__":
     do_setup()

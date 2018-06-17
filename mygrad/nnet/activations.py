@@ -1,37 +1,16 @@
 import numpy as np
 from scipy.misc import logsumexp
 
-from ..operations.operation_base import Operation
-from ..tensor_base import Tensor
+from mygrad.operation_base import Operation
+from mygrad.tensor_base import Tensor
+from mygrad import tanh
 
 __all__ = ['tanh', 'sigmoid', 'relu', 'softmax', 'logsoftmax']
 
 
-class Tanh(Operation):
-    def __call__(self, a):
-        self.a = a
-        return np.tanh(a.data)
-
-    def backward_a(self, grad):
-        self.a.backward(grad * (1 - np.tanh(self.a.data) ** 2))
-
-
-def tanh(x):
-    """ f(x) = tanh(x)
-
-        Parameters
-        ----------
-        x : Union[Tensor, array_like]
-
-        Returns
-        -------
-        Tensor """
-    return Tensor._op(Tanh, x)
-
-
 class Sigmoid(Operation):
     def __call__(self, a):
-        self.a = a
+        self.variables = (a,)
         x = -1. * a.data
         np.exp(x, out=x)
         x += 1
@@ -39,52 +18,60 @@ class Sigmoid(Operation):
         self.sigmoid = x
         return self.sigmoid
 
-    def backward_a(self, grad):
-        self.a.backward(grad * self.sigmoid * (1. - self.sigmoid))
+    def backward_var(self, grad, index, **kwargs):
+        self.variables[index].backward(grad * self.sigmoid * (1. - self.sigmoid), **kwargs)
 
 
-def sigmoid(x):
+def sigmoid(x, constant=False):
     """ f(x) = 1 / (1 + exp(-x))
 
         Parameters
         ----------
-        x : Union[Tensor, array_like]
+        x : array_like
 
+        constant : bool, optional(default=False)
+            If ``True``, the returned tensor is a constant (it
+            does not back-propagate a gradient)
+            
         Returns
         -------
-        Tensor """
-    return Tensor._op(Sigmoid, x)
+        mygrad.Tensor """
+    return Tensor._op(Sigmoid, x, constant=constant)
 
 
 class ReLu(Operation):
     def __call__(self, a):
-        self.a = a
-        self.back = np.asarray(a > 0, dtype=self.a.dtype)
+        self.variables = (a,)
+        self.back = np.asarray(a > 0, dtype=a.dtype)
         return a.data * self.back
 
-    def backward_a(self, grad):
-        return self.a.backward(grad * self.back)
+    def backward_var(self, grad, index, **kwargs):
+        self.variables[index].backward(grad * self.back, **kwargs)
 
 
-def relu(x):
+def relu(x, constant=False):
     """ f(x) = {x, x > 0
                 0, x <= 0 }
 
         Parameters
         ----------
-        x : Union[Tensor, array_like]
+        x : array_like
 
+        constant : bool, optional(default=False)
+            If ``True``, the returned tensor is a constant (it
+            does not back-propagate a gradient)
+            
         Returns
         -------
-        Tensor """
-    return Tensor._op(ReLu, x)
+        mygrad.Tensor """
+    return Tensor._op(ReLu, x, constant=constant)
 
 
 class Softmax(Operation):
     scalar_only = True
 
     def __call__(self, a):
-        self.a = a
+        self.variables = (a,)
         x = a.data
         assert 0 < a.ndim < 3
 
@@ -95,50 +82,56 @@ class Softmax(Operation):
         x /= x.sum(**self.__kw)
         return x
 
-    def backward_a(self, grad):
-        soft = self(self.a)
+    def backward_var(self, grad, index, **kwargs):
+        a = self.variables[index]
+        soft = self(a)
         sg = soft * grad
-        self.a.backward(sg - soft * np.sum(sg, **self.__kw))
+        a.backward(sg - soft * np.sum(sg, **self.__kw), **kwargs)
 
 
-def softmax(x):
+def softmax(x, constant=False):
     """ f(x) = exp(x) / sum( exp(x) )
 
-        Compute the softmax over a 1D tensor of data, or over the respective rows
-        of a 2D tensor
+        Compute the softmax over a 1D tensor of data, or over the 
+        respective rows of a 2D tensor
 
         Parameters
         ----------
-        x : Union[Tensor, array_like]
+        x : array_like
 
+        constant : bool, optional(default=False)
+            If ``True``, the returned tensor is a constant (it
+            does not back-propagate a gradient)
+            
         Returns
         -------
-        Tensor """
-    return Tensor._op(Softmax, x)
+        mygrad.Tensor """
+    return Tensor._op(Softmax, x, constant=constant)
 
 
 class LogSoftmax(Operation):
     scalar_only = True
 
     def __call__(self, a):
-        self.a = a
+        self.variables = (a,)
         x = a.data
         assert 0 < a.ndim < 3
 
         self.__kw = dict(axis=1, keepdims=True) if x.ndim == 2 else dict(axis=None, keepdims=False)
         return x - logsumexp(x, **self.__kw)
 
-    def backward_a(self, grad):
-        x = self.a.data
+    def backward_var(self, grad, index, **kwargs):
+        a = self.variables[index]
+        x = a.data
 
         soft = x - x.max(**self.__kw)
         np.exp(soft, out=soft)
         soft /= soft.sum(**self.__kw)
 
-        self.a.backward(grad - soft * np.sum(grad, **self.__kw))
+        a.backward(grad - soft * np.sum(grad, **self.__kw), **kwargs)
 
 
-def logsoftmax(x):
+def logsoftmax(x, constant=False):
     """ f(x) = log ( exp(x) / sum( exp(x) ) )
 
         Compute the log-softmax over a 1D tensor of data, or over the respective rows
@@ -146,9 +139,13 @@ def logsoftmax(x):
 
         Parameters
         ----------
-        x : Union[Tensor, array_like]
+        x : array_like
 
+        constant : bool, optional(default=False)
+            If ``True``, the returned tensor is a constant (it
+            does not back-propagate a gradient)
+            
         Returns
         -------
-        Tensor """
-    return Tensor._op(LogSoftmax, x)
+        mygrad.Tensor """
+    return Tensor._op(LogSoftmax, x, constant=constant)

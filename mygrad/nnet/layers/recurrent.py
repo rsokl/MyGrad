@@ -1,5 +1,5 @@
-from ...operations.operation_base import Operation
-from ...tensor_base import Tensor
+from mygrad.operation_base import Operation
+from mygrad.tensor_base import Tensor
 from numbers import Integral
 import numpy as np
 
@@ -60,6 +60,8 @@ class RecurrentUnit(Operation):
         For a language model, S_{t} is traditionally mapped to a prediction of X_t via: softmax(V S_t),
         where V is yet another trainable parameter (not built into the recurrent unit)."""
 
+    scalar_only = True
+
     def __call__(self, X, U, W, s0=None, bp_lim=None):
         """ Performs a forward pass of sequential data through a simple RNN layer, returning
             the 'hidden-descriptors' arrived at by utilizing the trainable parameters U and V:
@@ -112,8 +114,7 @@ class RecurrentUnit(Operation):
 
         return self._hidden_seq.data
 
-
-    def backward(self, grad):
+    def backward(self, grad, **kwargs):
         """ Performs back propagation through time (with optional truncation), using the
             following notation:
 
@@ -135,12 +136,11 @@ class RecurrentUnit(Operation):
         dLt_dft = dLt_dst[1:] * dst_dft[1:]  # dL_{t} / df_{t} + ... + dL_{T_lim} / df_{t}
 
         if not self.U.constant:
-            self.U.backward(np.einsum("ijk, ijl -> kl", self.X.data, dLt_dft))  # dL_{1} / dU + ... + dL_{T} / dU
+            self.U.backward(np.einsum("ijk, ijl -> kl", self.X.data, dLt_dft), **kwargs)  # dL_{1} / dU + ... + dL_{T} / dU
         if not self.W.constant:
-            self.W.backward(np.einsum("ijk, ijl -> kl", s.data[:-1], dLt_dft))  # dL_{1} / dW + ... + dL_{T} / dW
+            self.W.backward(np.einsum("ijk, ijl -> kl", s.data[:-1], dLt_dft), **kwargs)  # dL_{1} / dW + ... + dL_{T} / dW
         if not self.X.constant:
-            self.X.backward(dot(dLt_dft, self.U.data.T))  # dL_{1} / dX + ... + dL_{T} / dX
-
+            self.X.backward(dot(dLt_dft, self.U.data.T), **kwargs)  # dL_{1} / dX + ... + dL_{T} / dX
 
     def null_gradients(self):
         """ Back-propagates `None` to the gradients of the operation's input Tensors."""
@@ -148,7 +148,7 @@ class RecurrentUnit(Operation):
             x.null_gradients()
 
 
-def simple_RNN(X, U, W, s0=None, bp_lim=None):
+def simple_RNN(X, U, W, s0=None, bp_lim=None, constant=False):
     """ Performs a forward pass of sequential data through a simple RNN layer, returning
         the 'hidden-descriptors' arrived at by utilizing the trainable parameters U and V:
 
@@ -176,6 +176,9 @@ def simple_RNN(X, U, W, s0=None, bp_lim=None):
             E.g. `bp_lim=3` will propagate gradients only up to 3 steps backward through the
             recursive sequence.
 
+        constant : bool, optional (default=False)
+            If True, the resulting Tensor is a constant.
+
         Returns
         -------
         mygrad.Tensor
@@ -187,6 +190,7 @@ def simple_RNN(X, U, W, s0=None, bp_lim=None):
         N : Batch size
         C : Length of single datum
         D : Length of 'hidden' descriptor"""
-    s = Tensor._op(RecurrentUnit, X, U, W, op_kwargs=dict(s0=s0, bp_lim=bp_lim))
+    s = Tensor._op(RecurrentUnit, X, U, W, op_kwargs=dict(s0=s0, bp_lim=bp_lim),
+                   constant=constant)
     s.creator._hidden_seq = s
     return s

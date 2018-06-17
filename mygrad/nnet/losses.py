@@ -1,4 +1,4 @@
-from ..operations.operation_base import Operation
+from mygrad.operation_base import Operation
 from ..tensor_base import Tensor
 import numpy as np
 
@@ -18,7 +18,7 @@ class MulticlassHinge(Operation):
             Returns
             -------
             The average multiclass hinge loss"""
-        self.a = a
+        self.variables = (a,)
         scores = a.data
         correct_labels = (range(len(y)), y)
         correct_class_scores = scores[correct_labels]  # Nx1
@@ -37,23 +37,31 @@ class MulticlassHinge(Operation):
         self.back /= scores.shape[0]
         return np.sum(Lij) / scores.shape[0]
 
-    def backward_a(self, grad):
-        self.a.backward(grad * self.back)
+    def backward_var(self, grad, index, **kwargs):
+        self.variables[index].backward(grad * self.back, **kwargs)
 
 
-def multiclass_hinge(x, y_true, hinge=1.):
+def multiclass_hinge(x, y_true, hinge=1., constant=False):
     """ Parameters
         ----------
-        x : mygrad.Tensor, shape=(N, K)
+        x : array_like, shape=(N, K)
             The K class scores for each of the N pieces of data.
 
-        y : Sequence[int]
+        y : array_like, shape=(N,)
             The correct class-indices, in [0, K), for each datum.
+
+        hinge : float
+            The size of the "hinge" outside of which a nonzero loss
+            is incurred.
+
+        constant : bool, optional(default=False)
+            If ``True``, the returned tensor is a constant (it
+            does not back-propagate a gradient)
 
         Returns
         -------
         The average multiclass hinge loss"""
-    return Tensor._op(MulticlassHinge, x, op_args=(y_true, hinge))
+    return Tensor._op(MulticlassHinge, x, op_args=(y_true, hinge), constant=constant)
 
 
 class SoftmaxCrossEntropy(Operation):
@@ -71,7 +79,7 @@ class SoftmaxCrossEntropy(Operation):
             Returns
             -------
             The average softmax loss"""
-        self.a = a
+        self.variables = (a,)
         scores = np.copy(a.data)
         max_scores = np.max(scores, axis=1, keepdims=True)
         np.exp(scores - max_scores, out=scores)
@@ -85,20 +93,26 @@ class SoftmaxCrossEntropy(Operation):
         self.back /= scores.shape[0]
         return loss
 
-    def backward_a(self, grad):
-        self.a.backward(grad * self.back)
+    def backward_var(self, grad, index, **kwargs):
+        self.variables[index].backward(grad * self.back, **kwargs)
 
 
-def softmax_crossentropy(x, y_true):
+def softmax_crossentropy(x, y_true, constant=False):
     """ Parameters
         ----------
-        x : pygrad.Tensor, shape=(N, C)
+        x : array_like, shape=(N, C)
             The C class scores for each of the N pieces of data.
-        y_true : Sequence[int]
+
+        y_true : array_like, shape=(N,)
             The correct class-indices, in [0, C), for each datum.
+
+        constant : bool, optional(default=False)
+            If ``True``, the returned tensor is a constant (it
+            does not back-propagate a gradient)
+
         Returns
         -------
         The average softmax loss"""
-    return Tensor._op(SoftmaxCrossEntropy, x, op_args=(y_true,))
+    return Tensor._op(SoftmaxCrossEntropy, x, op_args=(y_true,), constant=constant)
 
 
