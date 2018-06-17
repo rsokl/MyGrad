@@ -5,11 +5,13 @@ from numpy.testing import assert_allclose
 import numpy as np
 
 from .custom_strategies import valid_axes
+from .utils.numerical_gradient import numerical_gradient_full
 
 import hypothesis.extra.numpy as hnp
 from hypothesis import given, assume
 import hypothesis.strategies as st
-from .utils.numerical_gradient import numerical_gradient_full
+
+from pytest import raises
 
 
 @given(x=hnp.arrays(shape=hnp.array_shapes(max_side=4, max_dims=5),
@@ -97,6 +99,9 @@ def test_transpose(x, data):
 
     assert_allclose(x_arr.grad, dx)
 
+    out = transpose(x, constant=True)
+    assert out.constant and not x_arr.constant
+
 
 def test_transpose_property():
     dat = np.arange(6).reshape(2, 3)
@@ -135,3 +140,48 @@ def test_transpose_method():
 
     assert_allclose(f.data, dat.transpose())
     assert_allclose(x.grad, dat)
+
+    # check that constant=True works
+    x = Tensor(dat)
+    f = x.transpose(constant=True)
+    assert f.constant and not x.constant
+
+    f = x.transpose(1, 0, 2, constant=True)
+    assert f.constant and not x.constant
+
+
+@given(x=hnp.arrays(shape=hnp.array_shapes(max_side=2, max_dims=3),
+                    dtype=float,
+                    elements=st.floats(-10., 10.)),
+       data=st.data())
+def test_squeeze(x, data):
+    axes = data.draw(valid_axes(x.ndim), label="axes")
+    x_arr = Tensor(np.copy(x))
+    x_arr2 = Tensor(np.copy(x))
+
+    def f(x): return np.squeeze(x, axes)
+
+    try:
+        numpy_out = np.squeeze(x, axes)
+    except ValueError as e:
+        with raises(ValueError):
+            squeeze(x_arr, axes, constant=False)
+        return
+
+    o = squeeze(x_arr, axes, constant=False)
+    o_method = x_arr2.squeeze(axes)
+    assert_allclose(o.data, numpy_out)
+    assert_allclose(o_method.data, numpy_out)
+
+    grad = data.draw(hnp.arrays(shape=o.shape,
+                                dtype=float,
+                                elements=st.floats(1, 10),
+                                unique=True),
+                     label="grad")
+    o.backward(grad)
+    o_method.backward(grad)
+
+    dx, = numerical_gradient_full(f, x, back_grad=grad, as_decimal=True)
+
+    assert_allclose(x_arr.grad, dx)
+    assert_allclose(x_arr2.grad, dx)
