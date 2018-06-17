@@ -30,12 +30,7 @@ class Concatenate(Operation):
 
         return out
 
-    def backward(self, grad):
-        for index, var in enumerate(self.variables):
-            if not var.constant:
-                self.backward_var(grad, index)
-
-    def backward_var(self, grad, index):
+    def backward_var(self, grad, index, **kwargs):
         var = self.variables[index]
         grad_slice = [slice(None, None, None) if dim is not self.axis else slice(self.indices[index], self.indices[index+1]) for dim in range(var.data.ndim)]
         var.backward(grad[grad_slice])
@@ -55,12 +50,7 @@ class Stack(Operation):
 
         return out
 
-    def backward(self, grad):
-        for index, var in enumerate(self.variables):
-            if not var.constant:
-                self.backward_var(grad, index)
-
-    def backward_var(self, grad, index):
+    def backward_var(self, grad, index, **kwargs):
         var = self.variables[index]
         grad_slice = [slice(None, None, None) if dim is not self.axis else slice(self.indices[index], self.indices[index+1]) for dim in range(var.data.ndim+1)]
         var.backward(np.squeeze(grad[grad_slice], axis=self.axis))
@@ -83,12 +73,7 @@ class Dstack(Operation):
 
         return out
 
-    def backward(self, grad):
-        for index, var in enumerate(self.variables):
-            if not var.constant:
-                self.backward_var(grad, index)
-
-    def backward_var(self, grad, index):
+    def backward_var(self, grad, index, **kwargs):
         var = self.variables[index]
         if not var.data.ndim:
             var.backward(np.asscalar(grad[:,:,self.indices[index]:self.indices[index+1]]))
@@ -117,12 +102,7 @@ class Hstack(Operation):
         out = np.hstack([var.data for var in input_vars])
         return out
 
-    def backward(self, grad):
-        for index, var in enumerate(self.variables):
-            if not var.constant:
-                self.backward_var(grad, index)
-
-    def backward_var(self, grad, index):
+    def backward_var(self, grad, index, **kwargs):
         var = self.variables[index]
         if not var.data.ndim:
             var.backward(np.asscalar(grad[self.indices[index]:self.indices[index+1]]))
@@ -149,12 +129,7 @@ class Vstack(Operation):
 
         return out
 
-    def backward(self, grad):
-        for index, var in enumerate(self.variables):
-            if not var.constant:
-                self.backward_var(grad, index)
-
-    def backward_var(self, grad, index):
+    def backward_var(self, grad, index, **kwargs):
         var = self.variables[index]
         if not var.data.ndim:
             var.backward(np.asscalar(grad[self.indices[index]:self.indices[index+1]]))

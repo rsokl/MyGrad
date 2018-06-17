@@ -1,5 +1,5 @@
 from mygrad.tensor_base import Tensor
-from mygrad.join import hstack
+from mygrad import hstack
 
 import hypothesis.strategies as st
 from hypothesis import given
