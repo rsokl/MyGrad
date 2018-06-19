@@ -45,7 +45,6 @@ class MaxPoolND(Operation):
             dimensions.
             """
         self.variables = (x,)  # data: ((N0, ...), C0, ...)
-        x = np.copy(x.data)  # prevent window-view weirdness with views
 
         pool = np.asarray(pool, dtype=int)
         assert all(i > 0 for i in pool)
