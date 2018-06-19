@@ -82,7 +82,7 @@ def logaddexp(a, b, constant=False):
 
 
 def logaddexp2(a, b, constant=False):
-    """ ``f(a, b) -> log_2(exp(a) + exp(b))``
+    """ ``f(a, b) -> log_2(2 ** a + 2 ** b)``
 
         Utilizes base-2 log.
 
