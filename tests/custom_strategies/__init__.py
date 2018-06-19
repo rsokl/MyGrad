@@ -97,6 +97,17 @@ def broadcastable_shape(draw, shape, min_dim=0, max_dim=5):
         -------
         hypothesis.searchstrategy.SearchStrategy
             -> Tuple[int, ...]
+
+        Examples
+        --------
+        >>> for i in range(5):
+        ...    print(broadcastable_shape(shape=(2, 3)).example())
+        (1, 3)
+        ()
+        (2, 3)
+        (5, 2, 3)
+        (8, 5, 1, 3)
+        (3, )
         """
     ndim = draw(st.integers(min_dim, max_dim))
     n_aligned = min(len(shape), ndim)
@@ -107,7 +118,8 @@ def broadcastable_shape(draw, shape, min_dim=0, max_dim=5):
 
 
 def integer_index(size):
-    """ Generate a valid integer-index for an axis of a given size
+    """ Generate a valid integer-index for an axis of a given size,
+        either a positive or negative value.
 
         Parameters
         ----------
