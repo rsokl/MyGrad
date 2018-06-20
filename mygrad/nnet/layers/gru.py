@@ -407,7 +407,7 @@ def gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None, dropout=0.,
 
         Returns
         -------
-        mygrad.Tensor
+        mygrad.Tensor, shape=(T+1, N, D)
             The sequence of 'hidden-descriptors' produced by the forward pass of the RNN.
 
         Notes
