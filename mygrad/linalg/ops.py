@@ -35,13 +35,19 @@ class MatMul(BroadcastableOp):
         
         if index == 0:  # compute grad through a
             if b.ndim > 1:  # any-D w/ ND
+                if a.ndim == 1:
+                    grad = np.expand_dims(grad, -2)
                 dfdx = np.matmul(grad, b.swapaxes(-1, -2))
             else:           # any-D w/ 1-D
                 dfdx = np.expand_dims(grad, -1) * b
         
         if index == 1:  # compute grad through b
             if a.ndim > 1:  # ND w/ any-D  
+                if b.ndim == 1:
+                    grad = np.expand_dims(grad, -1)
                 dfdx = np.matmul(a.swapaxes(-1, -2), grad)
+                if b.ndim == 1:
+                    dfdx = dfdx.squeeze(-1)
             else:           # 1-D w/ any-D
                 dfdx = a[:, np.newaxis] * np.expand_dims(grad, -2)
             
