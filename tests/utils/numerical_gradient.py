@@ -175,12 +175,11 @@ def numerical_gradient_full(f, *args, back_grad, as_decimal=True, kwargs={}, var
 
         Parameters
         ----------
-        f : Callable[[numpy.ndarray], numpy.ndarray]
-            f(x) -> numpy.ndarray
+        f : Callable[[numpy.ndarray, ...], numpy.ndarray]
+            f(x, ...) -> numpy.ndarray
 
-        x : numpy.ndarray
-            An array storing the sequence(s) of values in the array. More than once
-            sequence may be designated, according to the `axis` argument of `f`.
+        *args : numpy.ndarray
+            The array(s) to be passed to f
 
         back_grad : numpy.ndarray
             The gradient being back-propagated to {x}, via f
@@ -188,8 +187,8 @@ def numerical_gradient_full(f, *args, back_grad, as_decimal=True, kwargs={}, var
         h : float, optional, (default=1e-8)
             Approximating infinitesimal.
 
-        as_decimal : bool, optional (default=False)
-            If False, x is passed to f as a Decimal-type array. This
+        as_decimal : bool, optional (default=True)
+            If True, f's arguments are passed as Decimal-type arrays. This
             improves numerical precision, but is not permitted by some functions.
 
         kwargs : Dict[str, Any], optional (default=dict())
@@ -224,7 +223,7 @@ def numerical_gradient_full(f, *args, back_grad, as_decimal=True, kwargs={}, var
     return tuple(grads)
 
 
-def _numerical_gradient_full(f, *, x, back_grad, h=1e-8, as_decimal=False):
+def _numerical_gradient_full(f, *, x, back_grad, h=1e-8, as_decimal=True):
     """ Computes numerical partial derivatives of f(x), by
         varying each entry of `x` independently.
 
@@ -243,8 +242,8 @@ def _numerical_gradient_full(f, *, x, back_grad, h=1e-8, as_decimal=False):
         h : float, optional, (default=1e-8)
             Approximating infinitesimal.
 
-        as_decimal : bool, optional (default=False)
-            If False, x is passed to f as a Decimal-type array. This
+        as_decimal : bool, optional (default=True)
+            If True, x is passed to f as a Decimal-type array. This
             improves numerical precision, but is not permitted by some functions.
 
         Returns
