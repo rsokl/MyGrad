@@ -48,7 +48,7 @@ def matmul(a, b, constant=False):
     multiplying a stack of matrices with a vector will result in a stack of
     vectors, but matmul will not recognize it as such.
 
-    ``matmul`` differs from ``dot`` in two important ways.
+    ``matmul`` differs from ``numpy.dot`` in two important ways.
 
     - Multiplication by scalars is not allowed.
     - Stacks of matrices are broadcast together as if the matrices
