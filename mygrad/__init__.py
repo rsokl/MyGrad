@@ -10,6 +10,7 @@ from mygrad.tensor_manip.array_shape.funcs import *
 from mygrad.tensor_manip.transpose_like.funcs import *
 from mygrad.tensor_creation.funcs import *
 from mygrad.linalg.einsum import einsum
+from mygrad.linalg.funcs import *
 
 __version__ = "0.5"
 
