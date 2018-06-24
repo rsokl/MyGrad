@@ -118,11 +118,11 @@ class fwdprop_test_factory():
             true_out = self.true_func(*arrs, **kwargs)
 
             assert isinstance(o, Tensor), "`mygrad_func` returned type {}, should return `mygrad.Tensor`".format(type(o))
+            assert o.constant is constant, "`mygrad_func` returned tensor.constant={}, should be constant={}".format(o.constant, constant)
 
             assert_allclose(tensor_out, true_out,
                             err_msg="`mygrad_func(x)` and `true_func(x)` produce different results")
 
-            constant = data.draw(st.booleans(), label="constant")
 
             for n, (arr, arr_copy) in enumerate(zip(arrs, arr_copies)):
                 assert_array_equal(arr, arr_copy,
