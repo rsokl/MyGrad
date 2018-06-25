@@ -73,7 +73,7 @@ def test_matmul_bkwd_1d_nd():
 
 @backprop_test_factory(mygrad_func=matmul, true_func=np.matmul, num_arrays=2, 
                        index_to_arr_shapes={0: special_shape((4,), min_dim=1, max_dim=2), 
-                                            1: special_shape((4, 5), max_dim=0)}, 
+                                            1: (4, 5)}, 
                        as_decimal=False,
                        vary_each_element=True,
                        atol=1e-4, rtol=1e-4)
@@ -83,7 +83,7 @@ def test_matmul_bkwd_nd_nd():
 
 
 @backprop_test_factory(mygrad_func=matmul, true_func=np.matmul, num_arrays=2, 
-                       index_to_arr_shapes={0: special_shape((2, 4), max_dim=0), 
+                       index_to_arr_shapes={0: (2, 4), 
                                             1: special_shape((4, 5), max_dim=2)}, 
                        as_decimal=False,
                        vary_each_element=True,
