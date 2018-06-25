@@ -1,173 +1,113 @@
-from mygrad.operation_base import BroadcastableOp
-from mygrad import Tensor
-from mygrad._utils import reduce_broadcast
-import numpy as np
-from itertools import chain
-from functools import reduce
-
+from .ops import *
+from mygrad.tensor_base import Tensor
 from numpy.core.einsumfunc import _parse_einsum_input
-from numpy.lib.stride_tricks import as_strided
+
+__all__ = ["matmul", "einsum"]
 
 
-__all__ = ["einsum"]
+def matmul(a, b, constant=False):
+    """ 
+    ``f(a, b) -> matmul(a, b)``
+
+    Matrix product of two arrays.
+
+    Parameters
+    ----------
+    a : array_like
+    
+    b : array_like
+
+    constant : bool, optional(default=False)
+        If ``True``, the returned tensor is a constant (it
+        does not back-propagate a gradient)
+
+    Returns
+    -------
+    mygrad.Tensor
+        Returns the matrix product of `a` and `b`.  If `a` and `b` are both
+        1-D arrays then a scalar is returned; otherwise an array is
+        returned.
+
+    
+    Extended Summary
+    ----------------
+    This documentation was adapted from ``numpy.matmul``
+
+    The behavior depends on the arguments in the following way.
+
+    - If both arguments are 2-D they are multiplied like conventional
+      matrices.
+    - If either argument is N-D, N > 2, it is treated as a stack of
+      matrices residing in the last two indexes and broadcast accordingly.
+    - If the first argument is 1-D, it is promoted to a matrix by
+      prepending a 1 to its dimensions. After matrix multiplication
+      the prepended 1 is removed.
+    - If the second argument is 1-D, it is promoted to a matrix by
+      appending a 1 to its dimensions. After matrix multiplication
+      the appended 1 is removed.
+
+    Multiplication by a scalar is not allowed, use ``*`` instead. Note that
+    multiplying a stack of matrices with a vector will result in a stack of
+    vectors, but matmul will not recognize it as such.
+
+    ``matmul`` differs from ``numpy.dot`` in two important ways.
+
+    - Multiplication by scalars is not allowed.
+    - Stacks of matrices are broadcast together as if the matrices
+      were elements.
+
+    Raises
+    ------
+    ValueError
+        If the last dimension of `a` is not the same size as
+        the second-to-last dimension of `b`.
+
+        If scalar value is passed.
+
+    Notes
+    -----
+    The matmul function implements the semantics of the `@` operator introduced
+    in Python 3.5 following PEP465.
+
+    Examples
+    --------
+    For 2-D tensores it is the matrix product:
+
+    >>> import mygrad as mg
+    >>> a = [[1, 0], [0, 1]]
+    >>> b = [[4, 1], [2, 2]]
+    >>> mg.matmul(a, b)
+    Tensor([[4, 1],
+            [2, 2]])
+
+    For 2-D mixed with 1-D, the result is the usual.
+
+    >>> a = [[1, 0], [0, 1]]
+    >>> b = [1, 2]
+    >>> mg.matmul(a, b)
+    Tensor([1, 2])
+    >>> mg.matmul(b, a)
+    Tensor([1, 2])
 
 
-def _unique_from_end(in_str):
-    """ Return a string with all redundant characters removed,
-        removing left-most redundant entries
+    Broadcasting is conventional for stacks of arrays
 
-        i.e. "ijikik" -> "jik"
+    >>> a = mg.arange(2*2*4).reshape((2,2,4))
+    >>> b = mg.arange(2*2*4).reshape((2,4,2))
+    >>> mg.matmul(a,b).shape
+    (2, 2, 2)
+    >>> mg.matmul(a,b)[0,1,1]
+    Tensor(98)
+    >>> mg.sum(a[0,1,:] * b[0,:,1])
+    Tensor(98)
 
-        Parameters
-        ----------
-        in_str: str
+    Scalar multiplication raises an error.
 
-        Returns
-        -------
-        str
-
-        Examples
-        --------
-        >>> _unique_from_end("ijikik")
-        "jik"
-    """
-
-    return reduce(lambda acc, x: acc + x if x not in acc else acc, in_str[::-1], '')[::-1]
-
-
-def _merge_max_mappings(*mappings):
-    """ Merge dictionaries based on largest values in key->value.
-
-        Parameters
-        ----------
-        *mappings : Dict[Any, Any]
-
-        Returns
-        -------
-        Dict[Any, Any]
-        
-        Examples
-        --------
-        >>> _merge_max_mappings({"a":1, "b":4}, {"a":2})
-        {"a":2, "b":4}
-    """
-
-    def _merge_max(d1, d2):
-        d1.update((k, v) for k, v in d2.items() if d1.get(k, 0) < v)
-        return d1
-    return reduce(_merge_max, mappings, {})
-
-
-def _get_indices(item, seq):
-    """ Return the indices where `item` occurs in `seq`
-
-        Returns
-        -------
-        Generator[int]"""
-    return (n for n, x in enumerate(seq) if x == item)
-
-
-class EinSum(BroadcastableOp):
-    scalar_only = True
-
-    def __call__(self, *variables, in_lbls, out_lbls, optimize=False):
-        self.in_lbls = in_lbls
-        self.out_lbls = out_lbls
-        self.variables = variables
-        self.optimize = optimize
-        return np.einsum("->".join((in_lbls, out_lbls)), *(var.data for var in self.variables),
-                         optimize=optimize)
-
-    def backward_var(self, grad, index, **kwargs):
-        """
-        example
-        -------
-        fwd:          "ijk, k -> ji", x, y
-        bkwd (var: 0): "ji, k -> ijk", grad, y
-        bkwd (var: 1): "ji, ijk -> k", grad, x
-        """
-
-        numpy_arrays = tuple(i.data for i in self.variables)
-
-        # ijk, k
-        in_lbls = self.in_lbls.split(',')
-        original_var_lbl = in_lbls.pop(index)
-        var_lbl = _unique_from_end(original_var_lbl)
-        repeat_lbls = len(var_lbl) != len(original_var_lbl)
-
-        if repeat_lbls:
-            # example fwd-prop: einsum("iji -> ij", x)
-            # "iji" becomes "ji", later we will write along
-            # the diagonal of an array to reinstate this axis that
-            # we just removed
-            mapping_gen = ({k: v for k, v in zip(lbl, arr.shape)}
-                            for lbl, arr in zip(self.in_lbls.split(','), numpy_arrays))
-            lbl_to_size = _merge_max_mappings(*mapping_gen)
-            var_shape = tuple(lbl_to_size[lbl] for lbl in var_lbl)
-        else:
-            var_shape = self.variables[index].shape
-
-        # ji
-        grad_lbl = self.out_lbls
-
-        # Catch indices over which un-contracted sum was performed
-        # for the given variable: e.g for var-0 in "ijk, jk -> k"
-        # i is summed over without contraction with another tensor
-        #
-        # Backpropping through this is illegal, as it requires the creation
-        # of an axis; e.g. k, jk -> ijk
-        # Broadcast the gradient along all such dimensions; e.g. k -> ik
-        # then proceed as usual; e.g. ik, jk -> ijk
-        unique_in_lbls = (set(chain.from_iterable(in_lbls)) | set(grad_lbl))
-        if len(set(var_lbl) - unique_in_lbls) > 0:
-            exp_dims = [slice(None) for i in range(grad.ndim)]
-            grad_shape = list(grad.shape)
-            for n, lbl in enumerate(var_lbl):
-                if lbl not in unique_in_lbls:
-                    grad_lbl = grad_lbl[:n] + lbl + grad_lbl[n:]
-                    exp_dims.insert(n, np.newaxis)
-                    grad_shape.insert(n, var_shape[n])
-
-            grad = np.broadcast_to(grad if not grad.ndim else grad[exp_dims], grad_shape)
-
-        # "ji, k -> ijk"
-        back_prop_lbls = ",".join([grad_lbl] + in_lbls) + "->" + var_lbl
-
-        # (grad, y)
-        operands = (grad,) + numpy_arrays[:index] + numpy_arrays[index + 1:]
-
-        if not repeat_lbls:
-            # dfdx: einsum("ji, k -> ijk", grad, y)
-            outshape = self.variables[index].shape
-            dfdx = reduce_broadcast(np.einsum(back_prop_lbls, *operands, optimize=self.optimize),
-                                    outshape)
-            if var_shape != dfdx.shape:
-                # if y was broadcast over x, the gradient needs to
-                # be broadcast to x's shape: dfdx-shape (i,j,1) -> (i,j,k)
-                dfdx = np.broadcast_to(dfdx, var_shape)
-            self.variables[index].backward(dfdx, _broadcastable=False)
-            return None
-
-        # Accommodate trace by writing to strided view on array of zeros
-        # For example:
-        #
-        # fwd:  einsum('ijkji, k -> jk', x, y)
-        # dfdx: einsum('jk, k -> kji', grad, y, out=view_of_x)
-        #
-        # writing to `view_of_x`, which is a view along the appropriate
-        # diagonals of x, is equivalent to:
-        #
-        # dfdx: einsum('jk, k -> ijkji', grad, y)
-        #
-        # which is formally correct but not supported by einsum.
-        dfdx = np.zeros(tuple(lbl_to_size[i] for i in original_var_lbl))
-        out_view_shape = tuple(lbl_to_size[i] for i in var_lbl)
-
-        strides = tuple(sum(dfdx.strides[ind] for ind in _get_indices(lbl, original_var_lbl))
-                        for lbl in var_lbl)
-        out_view = as_strided(dfdx, shape=out_view_shape, strides=strides)
-        np.einsum(back_prop_lbls, *operands, out=out_view, optimize=self.optimize)
-        self.variables[index].backward(dfdx, **kwargs)
+    >>> mg.matmul([1,2], 3)
+    Traceback (most recent call last):
+    ...
+    ValueError: Scalar operands are not allowed, use '*' instead"""
+    return Tensor._op(MatMul, a, b, constant=constant)
 
 
 def einsum(*operands, optimize=False, constant=False):
@@ -279,29 +219,29 @@ def einsum(*operands, optimize=False, constant=False):
 
     >>> einsum('ji', c)  # transpose of c
     Tensor([[0, 3],
-           [1, 4],
-           [2, 5]])
+        [1, 4],
+        [2, 5]])
     >>> einsum(c, [1, 0])
     Tensor([[0, 3],
-           [1, 4],
-           [2, 5]])
+        [1, 4],
+        [2, 5]])
     >>> c.T
     array([[0, 3],
-           [1, 4],
-           [2, 5]])
+        [1, 4],
+        [2, 5]])
 
     >>> einsum('..., ...', 3, c)
     Tensor([[ 0,  3,  6],
-           [ 9, 12, 15]])
+        [ 9, 12, 15]])
     >>> einsum(',ij', 3, C)
     Tensor([[ 0,  3,  6],
-           [ 9, 12, 15]])
+        [ 9, 12, 15]])
     >>> einsum(3, [Ellipsis], c, [Ellipsis])
     Tensor([[ 0,  3,  6],
-           [ 9, 12, 15]])
+        [ 9, 12, 15]])
     >>> np.multiply(3, c)
     array([[ 0,  3,  6],
-           [ 9, 12, 15]])
+        [ 9, 12, 15]])
 
     >>> einsum('i,i', b, b)
     Tensor(30)
@@ -312,13 +252,13 @@ def einsum(*operands, optimize=False, constant=False):
 
     >>> einsum('i,j', np.arange(2)+1, b)
     Tensor([[0, 1, 2, 3, 4],
-           [0, 2, 4, 6, 8]])
+        [0, 2, 4, 6, 8]])
     >>> einsum(np.arange(2)+1, [0], b, [1])
     Tensor([[0, 1, 2, 3, 4],
-           [0, 2, 4, 6, 8]])
+        [0, 2, 4, 6, 8]])
     >>> np.outer(np.arange(2)+1, b)
     array([[0, 1, 2, 3, 4],
-           [0, 2, 4, 6, 8]])
+        [0, 2, 4, 6, 8]])
     >>> einsum('i...->...', a)
     Tensor([50, 55, 60, 65, 70])
     >>> einsum(a, [0,Ellipsis], [Ellipsis])
@@ -330,41 +270,41 @@ def einsum(*operands, optimize=False, constant=False):
     >>> b = np.arange(24.).reshape(4,3,2)
     >>> einsum('ijk,jil->kl', a, b)
     Tensor([[ 4400.,  4730.],
-           [ 4532.,  4874.],
-           [ 4664.,  5018.],
-           [ 4796.,  5162.],
-           [ 4928.,  5306.]])
+        [ 4532.,  4874.],
+        [ 4664.,  5018.],
+        [ 4796.,  5162.],
+        [ 4928.,  5306.]])
     >>> einsum(a, [0,1,2], b, [1,0,3], [2,3])
     Tensor([[ 4400.,  4730.],
-           [ 4532.,  4874.],
-           [ 4664.,  5018.],
-           [ 4796.,  5162.],
-           [ 4928.,  5306.]])
+        [ 4532.,  4874.],
+        [ 4664.,  5018.],
+        [ 4796.,  5162.],
+        [ 4928.,  5306.]])
     >>> np.tensordot(a,b, axes=([1,0],[0,1]))
     array([[ 4400.,  4730.],
-           [ 4532.,  4874.],
-           [ 4664.,  5018.],
-           [ 4796.,  5162.],
-           [ 4928.,  5306.]])
+        [ 4532.,  4874.],
+        [ 4664.,  5018.],
+        [ 4796.,  5162.],
+        [ 4928.,  5306.]])
 
     >>> a = np.arange(6).reshape((3,2))
     >>> b = np.arange(12).reshape((4,3))
     >>> einsum('ki,jk->ij', a, b)
     Tensor([[10, 28, 46, 64],
-           [13, 40, 67, 94]])
+        [13, 40, 67, 94]])
     >>> einsum('ki,...k->i...', a, b)
     Tensor([[10, 28, 46, 64],
-           [13, 40, 67, 94]])
+        [13, 40, 67, 94]])
     >>> einsum('k...,jk', a, b)
     Tensor([[10, 28, 46, 64],
-           [13, 40, 67, 94]])
+        [13, 40, 67, 94]])
 
     >>> a = Tensor(np.zeros((3, 3)))
     >>> einsum('ii->i', a).data[:] = 1
     >>> a
     Tensor([[ 1.,  0.,  0.],
-           [ 0.,  1.,  0.],
-           [ 0.,  0.,  1.]])
+        [ 0.,  1.,  0.],
+        [ 0.,  0.,  1.]])
     """
 
     # TODO: normalize error handling for invalid inputs

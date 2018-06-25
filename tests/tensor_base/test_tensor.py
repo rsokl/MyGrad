@@ -123,12 +123,13 @@ def test_init_params(data, creator, constant, scalar_only, dtype):
 def test_special_methods():
     from mygrad.math.arithmetic.ops import Add, Subtract, Multiply, Divide, Power
     from mygrad.math.arithmetic.ops import Negative
+    from mygrad.linalg.ops import MatMul
 
     x = Tensor([2, 8, 5])
     y = Tensor([1, 3, 2])
 
-    for op_name, op in zip(("__add__", "__sub__", "__mul__", "__truediv__", "__pow__"),
-                           (Add, Subtract, Multiply, Divide, Power)):
+    for op_name, op in zip(("__add__", "__sub__", "__mul__", "__truediv__", "__pow__", "__matmul__"),
+                           (Add, Subtract, Multiply, Divide, Power, MatMul)):
         tensor_out = getattr(Tensor, op_name)(x, y)
         numpy_out = getattr(np.ndarray, op_name)(x.data, y.data)
         assert isinstance(tensor_out, Tensor)

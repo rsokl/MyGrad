@@ -1,3 +1,8 @@
 *.pyc
 *.idea
 *.egg-info
+.hypothesis/*
+**/.hypothesis/*
+*.ipynb
+.vscode
+.pytest_cache

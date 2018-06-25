@@ -3,6 +3,7 @@ from functools import wraps
 from mygrad.math.arithmetic.ops import *
 from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property
 from mygrad.tensor_core_ops.indexing import GetItem, SetItem
+from mygrad.linalg.ops import MatMul
 from mygrad.operation_base import BroadcastableOp
 from mygrad._utils import reduce_broadcast
 
@@ -330,6 +331,9 @@ class Tensor:
 
     def __rmul__(self, other):
         return self._op(Multiply, other, self)
+    
+    def __matmul__(self, other):
+        return self._op(MatMul, self, other)
 
     def __pow__(self, other):
         return self._op(Power, self, other)

@@ -118,11 +118,11 @@ class fwdprop_test_factory():
             true_out = self.true_func(*arrs, **kwargs)
 
             assert isinstance(o, Tensor), "`mygrad_func` returned type {}, should return `mygrad.Tensor`".format(type(o))
+            assert o.constant is constant, "`mygrad_func` returned tensor.constant={}, should be constant={}".format(o.constant, constant)
 
             assert_allclose(tensor_out, true_out,
                             err_msg="`mygrad_func(x)` and `true_func(x)` produce different results")
 
-            constant = data.draw(st.booleans(), label="constant")
 
             for n, (arr, arr_copy) in enumerate(zip(arrs, arr_copies)):
                 assert_array_equal(arr, arr_copy,
@@ -133,15 +133,10 @@ class fwdprop_test_factory():
 class backprop_test_factory():
     """ Decorator
 
-        Randomly draw arrays x and y, to verify that a binary mygrad function,
-        `f(x, y, **kwargs)` performs backpropagation appropriately.
+        Randomly draw arrays x, ... to verify that a binary mygrad function,
+        `f(x, ..., **kwargs)` performs backpropagation appropriately.
 
-        x.grad and y.grad are compared against numerical derivatives of f.
-        THe numerical derivative is arrived at
-
-        **IMPORTANT**
-        f must be a trivial mapping over the individual parameters of x and y,
-        such as vectorized add or multiply. An example of an invalid
+        x.grad, ... are compared against numerical derivatives of f.
 
         This decorator is extremely uber: the decorated function's body is
         never executed. The function definition is effectively there to name
@@ -303,7 +298,7 @@ class backprop_test_factory():
 
             for n, (arr, arr_copy) in enumerate(zip(arrs, arr_copies)):
                 assert_array_equal(arr, arr_copy,
-                                   err_msg="arr-{} was mutated during forward prop".format(n))
+                                   err_msg="arr-{} was mutated during backward prop".format(n))
             assert_array_equal(grad, grad_copy,
                                err_msg="`grad` was mutated during backward prop")
         return wrapper
