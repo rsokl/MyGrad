@@ -1,7 +1,8 @@
 from graphviz import Digraph
 from mygrad.tensor_base import Tensor
+import numpy as np
 
-def build_graph(fin, names=None, render=True, save=False):
+def build_graph(fin, names=None, render=True, save=False, dims=False, dtypes=False, sum_stats=False):
     """ Builds and renders a computational graph.
 
         Parameters
@@ -34,6 +35,16 @@ def build_graph(fin, names=None, render=True, save=False):
             If True, build_graph will save a rendered computational graph to
             the current working directory as `computational_graph.pdf`.
 
+        dims : bool, optional (default=False)
+            If True, Tensor dimensions are added to Node labels.
+
+        dtypes : bool, optional (default=False)
+            If True, Tensor data types are added to Node labels.
+
+        sum_stats : bool, optional (default=False)
+            If True, Tensor minimums, maximums, medians, and means are
+            added to Node labels.
+
         Returns
         -------
         graphviz.Digraph
@@ -48,8 +59,10 @@ def build_graph(fin, names=None, render=True, save=False):
     assert isinstance(save, bool)
 
     graph = Digraph()
+    graph.node_attr.update(fontsize="12")
 
-    for out, op in fin._graph_dict.items():
+    for out, dat in fin._graph_dict.items():
+        op, out_tensor = dat
         if op is not None:
             op_name = op.__repr__().rpartition(".")[-1].replace(" object at ", "\n")[:-1]
             graph.node(name=op_name, label=op_name.rpartition("\n")[0], style="filled", fillcolor="red")
@@ -62,6 +75,16 @@ def build_graph(fin, names=None, render=True, save=False):
                         if id(names[key]) == id(var):
                             var_label = key
 
+                if dims:
+                    var_label = var_label + "\nDims: " + str(var.shape)
+                if dtypes:
+                    var_label = var_label + "\nDtype: " + str(var.dtype)
+                if sum_stats:
+                    var_label = var_label + "\nMin: " + str(np.amin(var.data)) \
+                                          + "\nMedian: " + str(np.median(var.data)) \
+                                          + "\nMean: " + str(np.mean(var.data)) \
+                                          + "\nMax: " + str(np.amax(var.data))
+
                 graph.node(name=var_name, label=var_label)
                 graph.edge(var_name, op_name)
 
@@ -71,6 +94,16 @@ def build_graph(fin, names=None, render=True, save=False):
                 for key in names:
                     if id(names[key]) == int(out_id):
                         out_label = key
+
+            if dims:
+                out_label = out_label + "\nDims: " + str(out_tensor.shape)
+            if dtypes:
+                out_label = out_label + "\nDtype: " + str(out_tensor.dtype)
+            if sum_stats:
+                out_label = out_label + "\nMin: " + str(np.amin(out_tensor.data)) \
+                                      + "\nMedian: " + str(np.median(out_tensor.data)) \
+                                      + "\nMean: " + str(np.mean(out_tensor.data)) \
+                                      + "\nMax: " + str(np.amax(out_tensor.data))
 
             graph.node(name=out, label=out_label)
             graph.edge(op_name, out)

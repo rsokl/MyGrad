@@ -136,7 +136,7 @@ class Tensor:
         self._ops = []  # Operation instances that utilized self an input tensor
 
         # used to contruct computational graph
-        self._graph_dict = {str(self.data) + "\n" + str(id(self)):self._creator}
+        self._graph_dict = {str(self.data) + "\n" + str(id(self)):(self._creator, self)}
         if self._creator is not None:
             for var in self._creator.variables:
                 self._graph_dict.update(var._graph_dict)
