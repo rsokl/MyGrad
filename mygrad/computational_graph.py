@@ -1,8 +1,8 @@
-import pydot
+from graphviz import Digraph
 from mygrad.tensor_base import Tensor
 
-def build_graph(fin, names=None):
-    """ Builds and saves a computational graph as a PNG file.
+def build_graph(fin, names=None, render=True, save=False):
+    """ Builds and renders a computational graph.
 
         Parameters
         ----------
@@ -14,7 +14,8 @@ def build_graph(fin, names=None):
             A dictionary that maps names of Tensors to Tensor objects. If
             an argument is passed to names, the key name that maps to a Tensor
             included in the computational graph will be used as a label for the
-            Tensor's node.
+            Tensor's node. If no argument is passed, the nodes on the
+            computational graph will display the full Tensor.
 
             To use the names assigned in the local environment,
             pass `names=locals()` to the build_graph function.
@@ -24,23 +25,34 @@ def build_graph(fin, names=None):
             of the original Tensor should not be created as the value in the
             dictionary.
 
+        render : bool, optional (default=True)
+            If True, build_graph will return a graphviz Digraph object that,
+            when called, will render the computational graph in a Jupyter
+            notebook or the Jupyter Qt console. If False, nothing is returned.
+
+        save : bool, optional (default=False)
+            If True, build_graph will save a rendered computational graph to
+            the current working directory as `computational_graph.pdf`.
+
+        Returns
+        -------
+        graphviz.Digraph
 
         Notes
         -----
-        build_graph requires that Graphviz and pydot are installed.
-
-        The PNG file will be written to the current working directory.
+        build_graph requires that Graphviz is installed.
     """
     assert isinstance(fin, Tensor), "fin must be a Tensor"
-    assert isinstance(names, dict), "names must be a dictionary"
+    assert isinstance(names, dict)
+    assert isinstance(render, bool)
+    assert isinstance(save, bool)
 
-    graph = pydot.Dot(graph_type='digraph')
+    graph = Digraph()
 
     for out, op in fin._graph_dict.items():
         if op is not None:
             op_name = op.__repr__().rpartition(".")[-1].replace(" object at ", "\n")[:-1]
-            op_node = pydot.Node(name=op_name, label=op_name.rpartition("\n")[0], style="filled", fillcolor="red")
-            graph.add_node(op_node)
+            graph.node(name=op_name, label=op_name.rpartition("\n")[0], style="filled", fillcolor="red")
 
             for var in op.variables:
                 var_name = str(var.data) + "\n" + str(id(var))
@@ -50,9 +62,8 @@ def build_graph(fin, names=None):
                         if id(names[key]) == id(var):
                             var_label = key
 
-                var_node = pydot.Node(name=var_name, label=var_label)
-                graph.add_node(var_node)
-                graph.add_edge(pydot.Edge(var_node, op_node))
+                graph.node(name=var_name, label=var_label)
+                graph.edge(var_name, op_name)
 
             out_label = out.rpartition("\n")[0]
             if names is not None:
@@ -61,8 +72,11 @@ def build_graph(fin, names=None):
                     if id(names[key]) == int(out_id):
                         out_label = key
 
-            out_node = pydot.Node(name=out, label=out_label)
-            graph.add_node(out_node)
-            graph.add_edge(pydot.Edge(op_node, out_node))
+            graph.node(name=out, label=out_label)
+            graph.edge(op_name, out)
 
-    graph.write_png('computational_graph.png')
+    if save:
+        graph.render(filename="computational_graph", cleanup=True)
+
+    if render:
+        return graph
