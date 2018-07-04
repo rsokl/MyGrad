@@ -11,6 +11,8 @@ from mygrad.tensor_manip.transpose_like.funcs import *
 from mygrad.tensor_creation.funcs import *
 from mygrad.linalg.funcs import *
 
+from mygrad.nnet.layers.utils import sliding_window_view
+
 __version__ = "0.5"
 
 
