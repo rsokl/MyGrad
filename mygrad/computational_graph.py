@@ -54,62 +54,54 @@ def build_graph(fin, names=None, render=True, save=False, dims=False, dtypes=Fal
         build_graph requires that Graphviz is installed.
     """
     assert isinstance(fin, Tensor), "fin must be a Tensor"
-    assert isinstance(names, dict)
+    assert isinstance(names, (dict, type(None)))
     assert isinstance(render, bool)
     assert isinstance(save, bool)
 
     graph = Digraph()
     graph.node_attr.update(fontsize="12")
 
-    for out, dat in fin._graph_dict.items():
-        op, out_tensor = dat
-        if op is not None:
-            op_name = op.__repr__().rpartition(".")[-1].replace(" object at ", "\n")[:-1]
-            graph.node(name=op_name, label=op_name.rpartition("\n")[0], style="filled", fillcolor="red")
-
-            for var in op.variables:
-                var_name = str(var.data) + "\n" + str(id(var))
-                var_label = var_name.rpartition("\n")[0]
-                if names is not None:
-                    for key in names:
-                        if id(names[key]) == id(var):
-                            var_label = key
-
-                if dims:
-                    var_label = var_label + "\nDims: " + str(var.shape)
-                if dtypes:
-                    var_label = var_label + "\nDtype: " + str(var.dtype)
-                if sum_stats:
-                    var_label = var_label + "\nMin: " + str(np.amin(var.data)) \
-                                          + "\nMedian: " + str(np.median(var.data)) \
-                                          + "\nMean: " + str(np.mean(var.data)) \
-                                          + "\nMax: " + str(np.amax(var.data))
-
-                graph.node(name=var_name, label=var_label)
-                graph.edge(var_name, op_name)
-
-            out_label = out.rpartition("\n")[0]
-            if names is not None:
-                out_id = out.rpartition("\n")[-1]
-                for key in names:
-                    if id(names[key]) == int(out_id):
-                        out_label = key
-
-            if dims:
-                out_label = out_label + "\nDims: " + str(out_tensor.shape)
-            if dtypes:
-                out_label = out_label + "\nDtype: " + str(out_tensor.dtype)
-            if sum_stats:
-                out_label = out_label + "\nMin: " + str(np.amin(out_tensor.data)) \
-                                      + "\nMedian: " + str(np.median(out_tensor.data)) \
-                                      + "\nMean: " + str(np.mean(out_tensor.data)) \
-                                      + "\nMax: " + str(np.amax(out_tensor.data))
-
-            graph.node(name=out, label=out_label)
-            graph.edge(op_name, out)
+    _add_node(fin, graph, **{'names':names, 'dims':dims, 'dtypes':dtypes, 'sum_stats':sum_stats})
 
     if save:
         graph.render(filename="computational_graph", cleanup=True)
 
     if render:
         return graph
+
+
+def _add_node(node, graph, op_id=None, **kwargs):
+    """ Recursively traces computational graph and adds nodes to Digraph. """
+    node_lab = node.__repr__()
+    if kwargs['names'] is not None:
+        for key in kwargs['names']:
+            if id(kwargs['names'][key]) == id(node):
+                node_lab = key
+    if kwargs['dims']:
+        node_lab = node_lab + "\nDims: " + str(node.shape)
+    if kwargs['dtypes']:
+        node_lab = node_lab + "\nDtype: " + str(node.dtype)
+    if kwargs['sum_stats']:
+        node_lab = node_lab + "\nMin: " + str(np.amin(node.data)) \
+                            + "\nMedian: " + str(np.median(node.data)) \
+                            + "\nMean: " + str(np.mean(node.data)) \
+                            + "\nMax: " + str(np.amax(node.data))
+    node_id = str(id(node))
+
+    graph.node(name=node_id, label=node_lab)
+
+    if node._creator is None:
+        if op_id is not None:
+            graph.edge(node_id, op_id)
+        return
+    else:
+        op_lab = node._creator.__repr__().rpartition(".")[-1].split(" ")[0]
+        if op_id is not None:
+            graph.edge(node_id, op_id)
+        op_id = str(id(node._creator))
+
+        graph.node(name=op_id, label=op_lab, style="filled", fillcolor="red")
+        graph.edge(op_id, node_id)
+
+        for var in node._creator.variables:
+            _add_node(var, graph, op_id=op_id, **kwargs)
