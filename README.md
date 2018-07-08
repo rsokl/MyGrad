@@ -8,6 +8,15 @@ This is not meant to be a competitor to libraries like PyTorch (which `mygrad` m
 TensorFlow. Rather, it is meant to serve as a useful tool for students who are learning about training neural networks
 using back propagation.
 
+## Installing mygrad (this project)
+To install MyGrad clone this repository and navigate to the MyGrad directory, then run: 
+```shell
+python setup.py install
+```
+
+MyGrad requires `numpy`. It is highly recommended that you utilized `numpy` built with [MKL](https://en.wikipedia.org/wiki/Math_Kernel_Library)
+ for access to optimized math routines.
+
 ## A Simple Application
 Let's use `mygrad` to compute the derivative of
 ![CodeCogsEqn.gif](https://user-images.githubusercontent.com/29104956/39901776-9e5ed362-5498-11e8-9890-e84aa2b6dae1.gif),

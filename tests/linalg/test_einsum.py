@@ -9,7 +9,7 @@ import hypothesis.extra.numpy as hnp
 import numpy as np
 from numpy.testing import assert_allclose
 from itertools import chain
-from mygrad.linalg.einsum import einsum
+from mygrad.linalg.funcs import einsum
 
 
 def compare_einsum(*operands):
