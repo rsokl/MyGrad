@@ -7,7 +7,7 @@ def build_graph(fin, names=None, render=True, save=False, dims=False, dtypes=Fal
 
         Parameters
         ----------
-        fin : Tensor
+        fin : mygrad.Tensor
             The tensor object that will be the final node in the
             computational graph.
 
@@ -57,6 +57,9 @@ def build_graph(fin, names=None, render=True, save=False, dims=False, dtypes=Fal
     assert isinstance(names, (dict, type(None)))
     assert isinstance(render, bool)
     assert isinstance(save, bool)
+    assert isinstance(dims, bool)
+    assert isinstance(dtypes, bool)
+    assert isinstance(sum_stats, bool)
 
     graph = Digraph()
     graph.node_attr.update(fontsize="12")
@@ -72,20 +75,17 @@ def build_graph(fin, names=None, render=True, save=False, dims=False, dtypes=Fal
 
 def _add_node(node, graph, op_id=None, **kwargs):
     """ Recursively traces computational graph and adds nodes to Digraph. """
-    node_lab = node.__repr__()
+    node_lab = repr(node)
     if kwargs['names'] is not None:
         for key in kwargs['names']:
             if id(kwargs['names'][key]) == id(node):
                 node_lab = key
     if kwargs['dims']:
-        node_lab = node_lab + "\nDims: " + str(node.shape)
+        node_lab = node_lab + "\nDims: {}".format(node.shape)
     if kwargs['dtypes']:
-        node_lab = node_lab + "\nDtype: " + str(node.dtype)
+        node_lab = node_lab + "\nDtype: {}".format(node.dtype)
     if kwargs['sum_stats']:
-        node_lab = node_lab + "\nMin: " + str(np.amin(node.data)) \
-                            + "\nMedian: " + str(np.median(node.data)) \
-                            + "\nMean: " + str(np.mean(node.data)) \
-                            + "\nMax: " + str(np.amax(node.data))
+        node_lab = node_lab + "\nMin: {min}\nMedian: {med}\nMean: {mean}\nMax: {max}".format(min=np.amin(node.data), med=np.median(node.data), mean=np.mean(node.data), max=np.amax(node.data))
     node_id = str(id(node))
 
     graph.node(name=node_id, label=node_lab)
@@ -95,7 +95,7 @@ def _add_node(node, graph, op_id=None, **kwargs):
             graph.edge(node_id, op_id)
         return
     else:
-        op_lab = node._creator.__repr__().rpartition(".")[-1].split(" ")[0]
+        op_lab = repr(node._creator).rpartition(".")[-1].split(" ")[0]
         if op_id is not None:
             graph.edge(node_id, op_id)
         op_id = str(id(node._creator))
