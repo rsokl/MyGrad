@@ -1,6 +1,7 @@
 from mygrad.operation_base import Operation
-from ..tensor_base import Tensor
+from mygrad.tensor_base import Tensor
 import numpy as np
+from scipy.misc import logsumexp
 
 __all__ = ["multiclass_hinge"]
 
@@ -67,7 +68,9 @@ def multiclass_hinge(x, y_true, hinge=1., constant=False):
 class SoftmaxCrossEntropy(Operation):
     """ Given the classification scores of C classes for N pieces of data,
         computes the NxC softmax classification probabilities. The
-        cross entropy is then computed by using the true classifications."""
+        cross entropy is then computed by using the true classification labels.
+        
+        log-softmax is used for improved numerical stability"""
     def __call__(self, a, y):
         """ Parameters
             ----------
@@ -76,19 +79,17 @@ class SoftmaxCrossEntropy(Operation):
 
             y : Sequence[int]
                 The correct class-indices, in [0, C), for each datum.
+                
             Returns
             -------
             The average softmax loss"""
         self.variables = (a,)
         scores = np.copy(a.data)
-        max_scores = np.max(scores, axis=1, keepdims=True)
-        np.exp(scores - max_scores, out=scores)
-        scores /= np.sum(scores, axis=1, keepdims=True)
+        log_softmax = scores - logsumexp(scores, axis=-1, keepdims=True)
         label_locs = (range(len(scores)), y)
-
-        loss = -np.sum(np.log(scores[label_locs])) / scores.shape[0]
-
-        self.back = scores
+        loss = -np.sum(log_softmax[label_locs]) / scores.shape[0]
+        
+        self.back = np.exp(log_softmax)
         self.back[label_locs] -= 1.
         self.back /= scores.shape[0]
         return loss
@@ -98,7 +99,13 @@ class SoftmaxCrossEntropy(Operation):
 
 
 def softmax_crossentropy(x, y_true, constant=False):
-    """ Parameters
+    """ Given the classification scores of C classes for N pieces of data,
+        computes the NxC softmax classification probabilities. The
+        cross entropy is then computed by using the true classification labels.
+        
+        log-softmax is used for improved numerical stability.
+        
+        Parameters
         ----------
         x : array_like, shape=(N, C)
             The C class scores for each of the N pieces of data.
