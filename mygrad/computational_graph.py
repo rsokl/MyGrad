@@ -11,7 +11,7 @@ def build_graph(fin, names=None, render=True, save=False, dims=False, dtypes=Fal
             The tensor object that will be the final node in the
             computational graph.
 
-        names : Optional[Dict[str, Tensor]]
+        names : Optional[Dict[str, Union[mygrad.Tensor, numpy.ndarray]]]
             A dictionary that maps names of Tensors to Tensor objects. If
             an argument is passed to names, the key name that maps to a Tensor
             included in the computational graph will be used as a label for the
@@ -25,6 +25,15 @@ def build_graph(fin, names=None, render=True, save=False, dims=False, dtypes=Fal
             the key must map to the exact Tensor object. A new Tensor or copy
             of the original Tensor should not be created as the value in the
             dictionary.
+
+            Only instances of mygrad.Tensor or numpy.ndarray can have labels
+            assigned to Nodes. If a list or tuple is used in an operation
+            with a Tensor, and names is not None, the Node label will be
+            set to *Constant*. If a list or tuple is used in multiple operations,
+            a unique Node will be created for each time it is used.
+
+            A scalar will always be used as the label for a 0-dimensional
+            Tensor's Node.
 
         render : bool, optional (default=True)
             If True, build_graph will return a graphviz Digraph object that,
@@ -61,7 +70,7 @@ def build_graph(fin, names=None, render=True, save=False, dims=False, dtypes=Fal
     assert isinstance(dtypes, bool)
     assert isinstance(sum_stats, bool)
 
-    graph = Digraph()
+    graph = Digraph(strict=True)
     graph.node_attr.update(fontsize="12")
 
     _add_node(fin, graph, **{'names':names, 'dims':dims, 'dtypes':dtypes, 'sum_stats':sum_stats})
@@ -75,18 +84,31 @@ def build_graph(fin, names=None, render=True, save=False, dims=False, dtypes=Fal
 
 def _add_node(node, graph, op_id=None, **kwargs):
     """ Recursively traces computational graph and adds nodes to Digraph. """
+    node_id = str(id(node))
     node_lab = repr(node)
     if kwargs['names'] is not None:
         for key in kwargs['names']:
             if id(kwargs['names'][key]) == id(node):
                 node_lab = key
+                break
+            elif id(kwargs['names'][key]) == id(node.data):
+                node_lab = key + "\n*Constant*"
+                node_id = str(id(node.data))
+                break
+        if node_lab == repr(node):
+            if not node.ndim:
+                node_lab = str(node.data)
+            elif node._constant:
+                node_lab = "*Constant*"
+            else:
+                node_lab = "Intermediary Tensor"
+
     if kwargs['dims']:
         node_lab = node_lab + "\nDims: {}".format(node.shape)
     if kwargs['dtypes']:
         node_lab = node_lab + "\nDtype: {}".format(node.dtype)
     if kwargs['sum_stats']:
         node_lab = node_lab + "\nMin: {min}\nMedian: {med}\nMean: {mean}\nMax: {max}".format(min=np.amin(node.data), med=np.median(node.data), mean=np.mean(node.data), max=np.amax(node.data))
-    node_id = str(id(node))
 
     graph.node(name=node_id, label=node_lab)
 
