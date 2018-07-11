@@ -1,5 +1,5 @@
 from mygrad.tensor_base import Tensor
-from mygrad.nnet.layers import conv2d, conv_nd
+from mygrad.nnet.layers import conv_nd
 import numpy as np
 from numpy.testing import assert_allclose
 from scipy.signal import fftconvolve, convolve
@@ -152,31 +152,6 @@ def flip_ndarray(x):
     return x[loc]
 
 
-def test_conv2d_fwd():
-    for mem_constr in [True, False]:
-
-        # trivial by-hand test
-        # x:
-        # [ 1,  2,  3,  4],
-        # [ 5,  6,  7,  8],
-        # [ 9, 10, 11, 12]]
-
-        # k:
-        # [-1, -2],
-        # [-3, -4]
-
-        # stride = [1, 2]
-        # pad = [0, 0]
-        x = np.arange(1, 13).reshape(1, 1, 3, 4)
-        k = -1 * np.arange(1, 5).reshape(1, 1, 2, 2)
-
-        o = conv2d(Tensor(x), k, [1, 2], 0)
-
-        out = np.array([[[[-44.,  -64.],
-                          [-84., -104.]]]])
-        assert isinstance(o, Tensor) and not o.constant and o.scalar_only and np.all(o.data == out)
-
-
 def test_constant():
 
     x = Tensor(np.arange(1, 13).reshape(1, 1, 3, 4))
@@ -224,42 +199,6 @@ def test_convnd_fwd():
 
 
 @given(st.data())
-def test_conv2d(data):
-
-    f = data.draw(st.sampled_from([1, 2, 3]))
-    c = data.draw(st.sampled_from([1, 2]))
-
-    # w, pad, stride
-    ws, pad, stride = data.draw(st.sampled_from([(1, 0, 4), (1, 0, 1), (3, 1, 2), (5, 0, 1)]))
-
-    dat = data.draw(hnp.arrays(shape=(2, c, 5, 5),
-                               dtype=float,
-                               elements=st.floats(1, 100)))
-
-    w_dat = data.draw(hnp.arrays(shape=(f, c, ws, ws),
-                                 dtype=float,
-                                 elements=st.floats(1, 100)))
-
-    x = Tensor(dat)
-    w = Tensor(w_dat)
-    f = conv2d(x, w, stride, pad)
-
-    b = np.zeros((w.shape[0],))
-    out, _ = conv_forward_naive(dat, w_dat, b, {'stride': stride, 'pad': pad})
-
-    assert_allclose(f.data, out)
-
-    dout = data.draw(hnp.arrays(shape=f.shape,
-                                dtype=float,
-                                elements=st.floats(-100, 100)))
-
-    f.backward(dout)
-    dx, dw, db = conv_backward_naive(dout, _)
-    assert_allclose(x.grad, dx, atol=1e-5, rtol=1e-5)
-    assert_allclose(w.grad, dw, atol=1e-5, rtol=1e-5)
-
-
-@given(st.data())
 def test_convnd(data):
 
     # test 2D
@@ -297,28 +236,28 @@ def test_convnd(data):
     assert_allclose(w.grad, dw, atol=1e-5, rtol=1e-5)
 
 
-def test_bad_conv_shapes():
-    x = np.zeros((1, 2, 2, 2))
-    w = np.zeros((1, 3, 2, 2))
-    with raises(AssertionError):
-        conv2d(x, w, 1, 0)  # mismatched channels
-
-    w = np.zeros((1, 2, 3, 2))
-    with raises(ValueError):
-        conv2d(x, w, 1, 0)  # large filter
-
-    w = np.zeros((1, 2, 2, 2))
-    with raises(AssertionError):
-        conv2d(x, w, 0, 0)  # bad stride
-
-    with raises(AssertionError):
-        conv2d(x, w, [1, 2, 3], 0)  # bad stride
-
-    with raises(AssertionError):
-        conv2d(x, w, 1, -1)  # bad pad
-
-    with raises(AssertionError):
-        conv2d(x, w, 1, [1, 2, 3])  # bad pad
-
-    with raises(ValueError):
-        conv2d(x, w, 3, 1)  # shape mismatch
+# def test_bad_conv_shapes():
+#     x = np.zeros((1, 2, 2, 2))
+#     w = np.zeros((1, 3, 2, 2))
+#     with raises(AssertionError):
+#         conv2d(x, w, 1, 0)  # mismatched channels
+#
+#     w = np.zeros((1, 2, 3, 2))
+#     with raises(ValueError):
+#         conv2d(x, w, 1, 0)  # large filter
+#
+#     w = np.zeros((1, 2, 2, 2))
+#     with raises(AssertionError):
+#         conv2d(x, w, 0, 0)  # bad stride
+#
+#     with raises(AssertionError):
+#         conv2d(x, w, [1, 2, 3], 0)  # bad stride
+#
+#     with raises(AssertionError):
+#         conv2d(x, w, 1, -1)  # bad pad
+#
+#     with raises(AssertionError):
+#         conv2d(x, w, 1, [1, 2, 3])  # bad pad
+#
+#     with raises(ValueError):
+#         conv2d(x, w, 3, 1)  # shape mismatch
