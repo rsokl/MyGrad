@@ -277,7 +277,7 @@ class Tensor:
 
     def __len__(self):
         return len(self.data)
-
+    
     def __contains__(self, item):
         return self.data.__contains__(item)
 
@@ -435,3 +435,4 @@ def tensor_to_array_wrapper(func):
 
 for op in ("__lt__", "__le__", "__gt__", "__ge__", "__eq__", "__ne__"):
     setattr(Tensor, op, tensor_to_array_wrapper(getattr(np.ndarray, op)))
+

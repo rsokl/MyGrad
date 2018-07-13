@@ -96,7 +96,7 @@ array([[ 0.  ,  0.01,  0.  , -0.04,  0.  ,  0.  ,  0.01,  0.  ,  0.01, 0.01], ..
 ```
 
 ## Computational Graph Visualization
-`mygrad` uses [Graphviz](http://www.graphviz.org) to construct computational graphs of the networks built using tensors. These graphs can be rendered in Jupyter notebooks, allowing for quick checks of network structure, or can be saved to file for later reference.
+`mygrad` uses [Graphviz](http://www.graphviz.org) to render the computational graphs built using tensors. These graphs can be rendered in Jupyter notebooks, allowing for quick checks of graph structure structure, or can be saved to file for later reference.
 
 `graphviz` can be installed with:
 ```shell
