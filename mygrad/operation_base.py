@@ -1,3 +1,6 @@
+""" Defines the base class for mathematical operations capable of back-propagating
+    gradients to their input tensors."""
+
 __all__ = ["Operation",
            "BroadcastableOp"]
 
@@ -19,6 +22,19 @@ class Operation:
         the gradient to its inputs, which are recorded as ``a`` and ``b``. Each
         node then back-propagates to any Operation-instance that is recorded
         as its creator, and so on.
+
+        If an operation class has `scalar_only=True`, then the terminal node of a
+        computational graph involving that operation can only trigger back-propagation
+        from a 0-dimensional tensor (i.e. a scalar). This is `False` for operations that
+        manifest as trivial element-wise operations over tensors. In such cases, the
+        gradient of the operation can also be treated element-wise, and thus be computed
+        unambiguously.
+
+        The matrix-multiplication operation, for example, is a scalar-only operation because
+        computing the derivative of A_{ij} B_{jk} (summed over j)) with respect to A_{pq}
+        produces a 4-tensor. This is the case unless the terminal node of this graph is a
+        scalar, in which  case the elements of the 2-tensor d(scalar)/ d(A_{pq}) has a trivial
+        correspondence to the elements of A_{pq}.
         """
     scalar_only = False
 

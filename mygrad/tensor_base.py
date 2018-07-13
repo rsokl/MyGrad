@@ -1,3 +1,8 @@
+""" This module defines the base tensor class along with all of its essential
+    attributes and special methods. Public math methods, e.g. ``sum``, ``mean``,
+    etc., are bound to the Tensor class in ``mygrad.__init__.py``.
+    """
+
 from functools import wraps
 
 from mygrad.math.arithmetic.ops import *
@@ -60,7 +65,9 @@ class Tensor:
         compute the total-derivative of ``f`` with respect to each one of its dependent
         variables. I.e. ``x.grad`` will store ``df/dx`` and ``y.grad`` will store
         ``df/dy``. Thus we have back-propagated a gradient from ``f`` through our graph.
-        Each tensor of derivatives is computed elementwise.
+
+        Each tensor of derivatives is computed elementwise. That is, if `x = Tensor(x0, x1, x2)`,
+        then df/dx represents `[df/d(x0), df/d(x1), df/d(x2)]`
 
         >>> f.backward()  # computes df/dx and df/dy
         >>> x.grad  # df/dx
