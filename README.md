@@ -2,7 +2,7 @@
 `mygrad` is a simple, NumPy-centric autograd library. An autograd library enables you to automatically compute derivatives of mathematical functions. This library
 is designed to serve primarily as an education tool for learning about gradient-based machine learning; it is easy to install, has a readable and easily customizable code
 base, and provides a sleek interface that mimics NumPy. Furthermore, it leverages NumPy's vectorization
-to achieve good performance despite the library's simplicity. 
+to achieve good performance despite the library's simplicity.
 
 This is not meant to be a competitor to libraries like PyTorch (which `mygrad` most closely resembles) or
 TensorFlow. Rather, it is meant to serve as a useful tool for students who are learning about training neural networks
@@ -102,4 +102,13 @@ The following is an example of using `mygrad` to compute the [hinge loss](https:
 >>> loss.backward()    # compute gradient of loss w.r.t all dependent tensors
 >>> class_scores.grad  # d(loss)/d(class_scores)
 array([[ 0.  ,  0.01,  0.  , -0.04,  0.  ,  0.  ,  0.01,  0.  ,  0.01, 0.01], ...])
+```
+
+## Computational Graph Visualization
+`mygrad` uses [Graphviz](http://www.graphviz.org) to render the computational graphs built using tensors. These graphs can be rendered in Jupyter notebooks, allowing for quick checks of graph structure structure, or can be saved to file for later reference.
+
+`graphviz` can be installed with:
+```shell
+conda install -c anaconda graphviz
+conda install -c anaconda python-graphviz
 ```
