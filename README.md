@@ -103,3 +103,13 @@ The following is an example of using `mygrad` to compute the [hinge loss](https:
 >>> class_scores.grad  # d(loss)/d(class_scores)
 array([[ 0.  ,  0.01,  0.  , -0.04,  0.  ,  0.  ,  0.01,  0.  ,  0.01, 0.01], ...])
 ```
+
+## Computational Graph Visualization
+`mygrad` uses [Graphviz](http://www.graphviz.org) and a [Python interface for Graphviz](https://graphviz.readthedocs.io/en/stable/) to render the computational graphs built using tensors. These graphs can be rendered in Jupyter notebooks, allowing for quick checks of graph structure, or can be saved to file for later reference.
+
+The dependencies can be installed with:
+
+```shell
+conda install graphviz
+conda install python-graphviz
+```
