@@ -47,14 +47,15 @@ def build_graph(fin, names=None, *, render=True, save=False, dims=False, dtypes=
             the current working directory as ``computational_graph.pdf``.
 
         dims : bool, optional (default=False)
-            If True, Tensor dimensions are added to Node labels.
+            If True, Tensor dimensions are added to Node labels. Dimensions
+            will not be displayed for scalar values.
 
         dtypes : bool, optional (default=False)
             If True, Tensor data types are added to Node labels.
 
         sum_stats : bool, optional (default=False)
             If True, Tensor minimums, maximums, medians, and means are
-            added to Node labels.
+            added to Node labels. These will not be displayed for scalar values.
 
         Returns
         -------
@@ -105,12 +106,16 @@ def _add_node(node, graph, op_id=None, **kwargs):
             else:
                 node_lab = "Intermediary Tensor"
 
-    if kwargs['dims']:
-        node_lab = node_lab + "\nDims: {}".format(node.shape)
-    if kwargs['dtypes']:
-        node_lab = node_lab + "\nDtype: {}".format(node.dtype)
-    if kwargs['sum_stats']:
-        node_lab = node_lab + "\nMin: {min}\nMedian: {med}\nMean: {mean}\nMax: {max}".format(min=np.amin(node.data), med=np.median(node.data), mean=np.mean(node.data), max=np.amax(node.data))
+    if node.ndim:
+        if kwargs['dims']:
+            node_lab = node_lab + "\nDims: {}".format(node.shape)
+        if kwargs['dtypes']:
+            node_lab = node_lab + "\nDtype: {}".format(node.dtype)
+        if kwargs['sum_stats']:
+            node_lab = node_lab + "\nMin: {min}\nMedian: {med}\nMean: {mean}\nMax: {max}".format(min=np.amin(node.data), med=np.median(node.data), mean=np.mean(node.data), max=np.amax(node.data))
+    else:
+        if kwargs['dtypes']:
+            node_lab = node_lab + "\nDtype: {}".format(node.dtype)
 
     graph.node(name=node_id, label=node_lab)
 
