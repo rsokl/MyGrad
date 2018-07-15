@@ -2,7 +2,7 @@ from graphviz import Digraph
 from mygrad.tensor_base import Tensor
 import numpy as np
 
-def build_graph(fin, names=None, render=True, save=False, dims=False, dtypes=False, sum_stats=False):
+def build_graph(fin, names=None, *, render=True, save=False, dims=False, dtypes=False, sum_stats=False):
     """ Builds and renders a computational graph.
 
         Parameters
@@ -19,7 +19,7 @@ def build_graph(fin, names=None, render=True, save=False, dims=False, dtypes=Fal
             computational graph will display the full Tensor.
 
             To use the names assigned in the local environment,
-            pass `names=locals()` to the build_graph function.
+            pass ``names=locals()`` to the build_graph function.
 
             If different names are used from the local environment,
             the key must map to the exact Tensor object. A new Tensor or copy
@@ -35,6 +35,8 @@ def build_graph(fin, names=None, render=True, save=False, dims=False, dtypes=Fal
             A scalar will always be used as the label for a 0-dimensional
             Tensor's Node.
 
+        Keyword-Only Arguments
+        ----------------------
         render : bool, optional (default=True)
             If True, build_graph will return a graphviz Digraph object that,
             when called, will render the computational graph in a Jupyter
@@ -42,7 +44,7 @@ def build_graph(fin, names=None, render=True, save=False, dims=False, dtypes=Fal
 
         save : bool, optional (default=False)
             If True, build_graph will save a rendered computational graph to
-            the current working directory as `computational_graph.pdf`.
+            the current working directory as ``computational_graph.pdf``.
 
         dims : bool, optional (default=False)
             If True, Tensor dimensions are added to Node labels.
@@ -56,7 +58,7 @@ def build_graph(fin, names=None, render=True, save=False, dims=False, dtypes=Fal
 
         Returns
         -------
-        graphviz.Digraph
+        Union[graphviz.Digraph, None]
 
         Notes
         -----
