@@ -81,7 +81,7 @@ class ConvND(Operation):
         num_conv_channels = grad.ndim - 2
 
         if index == 0:  # backprop through x
-            x_shape = x.shape[:-2] + tuple(i+2*p for i, p in zip(x.shape[-2:], self.padding))
+            x_shape = x.shape[:2] + tuple(i+2*p for i, p in zip(x.shape[-num_conv_channels:], self.padding))
             dx = np.zeros(x_shape, dtype=x.dtype)  # (N, C, X0, ...)
 
             # `gp` stores all of the various broadcast multiplications of each grad
