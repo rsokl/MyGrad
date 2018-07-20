@@ -4,7 +4,25 @@ from mygrad import Tensor
 from mygrad.nnet.activations import softmax, logsoftmax
 
 
-def test_static_softmax():
+def test_static_softmax1d():
+    # Verified against theano.tensor.softmax
+
+    skew = np.array([ 0.87566484,  0.53596079,  0.85693981,  0.09526036])
+    x = np.array([  0.,   1.,   2.,   3.])
+
+    x = Tensor(x)
+    f = (softmax(x, constant=False) * skew).sum()
+
+    out = np.array(0.33911235096116465)
+    assert_allclose(actual=f.data, desired=out)
+
+    f.backward()
+    dx = np.array([0.01720112,  0.01715422,  0.12266443, -0.15701977])
+
+    assert_allclose(x.grad, dx, atol=1e-5, rtol=1e-5)
+
+
+def test_static_softmax2d():
     # Verified against theano.tensor.softmax
 
     skew = np.array([[ 0.87566484,  0.53596079,  0.85693981,  0.09526036],
@@ -19,7 +37,7 @@ def test_static_softmax():
     f = (softmax(x, constant=False) * skew).sum()
 
     out = np.array(1.449875865467131)
-    assert_allclose(f.data, out)
+    assert_allclose(actual=f.data, desired=out)
 
     f.backward()
     dx = np.array([[ 0.01720112,  0.01715422,  0.12266443, -0.15701977],
@@ -29,7 +47,25 @@ def test_static_softmax():
     assert_allclose(x.grad, dx, atol=1e-5, rtol=1e-5)
 
 
-def test_static_logsoftmax():
+def test_static_logsoftmax1d():
+    # Verified against theano.tensor.softmax
+
+    skew = np.array([ 0.87566484,  0.53596079,  0.85693981,  0.09526036])
+    x = np.array([  0.,   1.,   2.,   3.])
+
+    x = Tensor(x)
+    f = (logsoftmax(x, constant=False) * skew).sum()
+
+    out = np.array(-5.596387676353177)
+    assert_allclose(actual=f.data, desired=out)
+
+    f.backward()
+    dx = np.array([ 0.79988389,  0.3299668 ,  0.29699009, -1.42684078])
+
+    assert_allclose(x.grad, dx, atol=1e-5, rtol=1e-5)
+
+
+def test_static_logsoftmax2d():
     # Verified against theano.tensor.softmax
     skew = np.array([[ 0.87566484,  0.53596079,  0.85693981,  0.09526036],
                      [ 0.32024455,  0.81532148,  0.2480434 ,  0.85119342],
@@ -43,7 +79,7 @@ def test_static_logsoftmax():
     f = (logsoftmax(x, constant=False) * skew).sum()
 
     out = np.array(-13.722895761739732)
-    assert_allclose(f.data, out)
+    assert_allclose(actual=f.data, desired=out)
 
     f.backward()
     dx = np.array([[ 0.79988389,  0.3299668 ,  0.29699009, -1.42684078],
@@ -51,4 +87,3 @@ def test_static_logsoftmax():
                    [ 0.5119002 ,  0.15601518,  0.45965687, -1.12757225]])
 
     assert_allclose(x.grad, dx, atol=1e-5, rtol=1e-5)
-

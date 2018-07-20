@@ -67,6 +67,13 @@ def relu(x, constant=False):
     return Tensor._op(ReLu, x, constant=constant)
 
 
+def _softmax(x, kwargs):
+    x = x - x.max(**kwargs)
+    np.exp(x, out=x)
+    x /= x.sum(**kwargs)
+    return x
+
+
 class Softmax(Operation):
     scalar_only = True
 
@@ -76,15 +83,11 @@ class Softmax(Operation):
         assert 0 < a.ndim < 3
 
         self.__kw = dict(axis=1, keepdims=True) if a.ndim == 2 else dict(axis=None, keepdims=False)
-
-        x = x - x.max(**self.__kw)
-        np.exp(x, out=x)
-        x /= x.sum(**self.__kw)
-        return x
+        return _softmax(x, self.__kw)
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        soft = self(a)
+        soft = _softmax(a.data, self.__kw)
         sg = soft * grad
         a.backward(sg - soft * np.sum(sg, **self.__kw), **kwargs)
 
@@ -123,11 +126,7 @@ class LogSoftmax(Operation):
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
         x = a.data
-
-        soft = x - x.max(**self.__kw)
-        np.exp(soft, out=soft)
-        soft /= soft.sum(**self.__kw)
-
+        soft = _softmax(x, self.__kw)
         a.backward(grad - soft * np.sum(grad, **self.__kw), **kwargs)
 
 
