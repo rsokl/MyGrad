@@ -1,3 +1,5 @@
+""" Test conv fwd-prop and back-prop for 1D, 2D, and 3D"""
+
 from ..wrappers.uber import backprop_test_factory
 
 import hypothesis.extra.numpy as hnp
