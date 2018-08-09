@@ -133,32 +133,32 @@ def test_conv_1d_fwd(x, w):
     assert_allclose(actual=mygrad_conv, desired=numpy_conv)
 
 
-# @given(x=hnp.arrays(shape=(1, 2, 7, 6),
-#                     dtype=np.float64,
-#                     elements=st.floats(-10, 10)),
-#        w=hnp.arrays(shape=(2, 2, 3, 3),
-#                     dtype=np.float64,
-#                     elements=st.floats(-10, 10)))
-# def test_conv1_2d_fwd(x, w):
-#     """ (N=1, C=2, H=7, W=6) x (F=2, C=2, Hf=3, Wf=3); stride=(2, 1), dilation=1"""
-#     stride = (2, 1)
-#     numpy_conv = conv_bank(x, w, stride=stride)
-#     mygrad_conv = conv_nd(x, w, stride=stride).data
-#     assert_allclose(actual=mygrad_conv, desired=numpy_conv)
+@given(x=hnp.arrays(shape=(1, 2, 7, 6),
+                    dtype=np.float64,
+                    elements=st.floats(-10, 10)),
+       w=hnp.arrays(shape=(2, 2, 3, 3),
+                    dtype=np.float64,
+                    elements=st.floats(-10, 10)))
+def test_conv1_2d_fwd(x, w):
+    """ (N=1, C=2, H=7, W=6) x (F=2, C=2, Hf=3, Wf=3); stride=(2, 1), dilation=1"""
+    stride = (2, 1)
+    numpy_conv = conv_bank(x, w, stride=stride)
+    mygrad_conv = conv_nd(x, w, stride=stride).data
+    assert_allclose(actual=mygrad_conv, desired=numpy_conv)
 
 
-# @given(x=hnp.arrays(shape=(1, 2, 7, 6, 4),
-#                     dtype=float,
-#                     elements=st.floats(-10, 10)),
-#        w=hnp.arrays(shape=(2, 2, 3, 2, 1),
-#                     dtype=float,
-#                     elements=st.floats(-10, 10)))
-# def test_conv1_3d_fwd(x, w):
-#     """ (N=1, C=2, 7, 6, 4) x (F=2, C=2, 3, 2, 1); stride=(2, 1, 3)"""
-#     stride = (2, 1, 3)
-#     numpy_conv = conv_bank(x, w, stride=stride)
-#     mygrad_conv = conv_nd(x, w, stride=stride).data
-#     assert_allclose(actual=mygrad_conv, desired=numpy_conv)
+@given(x=hnp.arrays(shape=(1, 2, 7, 6, 4),
+                    dtype=float,
+                    elements=st.floats(-10, 10)),
+       w=hnp.arrays(shape=(2, 2, 3, 2, 1),
+                    dtype=float,
+                    elements=st.floats(-10, 10)))
+def test_conv1_3d_fwd(x, w):
+    """ (N=1, C=2, 7, 6, 4) x (F=2, C=2, 3, 2, 1); stride=(2, 1, 3)"""
+    stride = (2, 1, 3)
+    numpy_conv = conv_bank(x, w, stride=stride)
+    mygrad_conv = conv_nd(x, w, stride=stride).data
+    assert_allclose(actual=mygrad_conv, desired=numpy_conv)
 
 
 def _conv_nd(x, w, stride, dilation=None):
@@ -167,45 +167,45 @@ def _conv_nd(x, w, stride, dilation=None):
         Returns
         -------
         numpy.ndarray"""
-    # return conv_nd(x, w, stride=stride, dilation=dilation, constant=True).data
+    # return conv_nd(x, w, stride=stride, dilation=1, constant=True).data
     return conv_bank(x, w, stride=stride, dilation=dilation)
 
 
-# @backprop_test_factory(mygrad_func=conv_nd,
-#                        true_func=_conv_nd,
-#                        num_arrays=2,
-#                        index_to_arr_shapes={0: (1, 1, 7), 1: (1, 1, 3)},
-#                        kwargs={"stride": (1,)},
-#                        vary_each_element=True, as_decimal=True, atol=1e-4, rtol=1e-4)
-# def test_conv_1d_bkwd():
-#     pass
+@backprop_test_factory(mygrad_func=conv_nd,
+                       true_func=_conv_nd,
+                       num_arrays=2,
+                       index_to_arr_shapes={0: (2, 1, 7), 1: (2, 1, 3)},
+                       kwargs={"stride": (1,)},
+                       vary_each_element=True, as_decimal=False, atol=1e-4, rtol=1e-4)
+def test_conv_1d_bkwd():
+    pass
 
 
-# @backprop_test_factory(mygrad_func=conv_nd,
-#                        true_func=_conv_nd,
-#                        num_arrays=2,
-#                        index_to_arr_shapes={0: (1, 2, 7), 1: (2, 2, 3)},
-#                        kwargs={"stride": (2,)},
-#                        vary_each_element=True, as_decimal=False, atol=1e-4, rtol=1e-4)
-# def test_conv_1d_bkwd2():
-#     pass
+@backprop_test_factory(mygrad_func=conv_nd,
+                       true_func=_conv_nd,
+                       num_arrays=2,
+                       index_to_arr_shapes={0: (1, 2, 7), 1: (2, 2, 3)},
+                       kwargs={"stride": (2,)},
+                       vary_each_element=True, as_decimal=False, atol=1e-4, rtol=1e-4)
+def test_conv_1d_bkwd2():
+    pass
 
 
-# @backprop_test_factory(mygrad_func=conv_nd,
-#                        true_func=_conv_nd,
-#                        num_arrays=2,
-#                        index_to_arr_shapes={0: (1, 1, 7, 6), 1: (2, 1, 3, 3)},
-#                        kwargs={"stride": (2, 1)},
-#                        vary_each_element=True, as_decimal=False, atol=1e-4, rtol=1e-4)
-# def test_conv_2d_bkwd():
-#     pass
+@backprop_test_factory(mygrad_func=conv_nd,
+                       true_func=_conv_nd,
+                       num_arrays=2,
+                       index_to_arr_shapes={0: (1, 1, 7, 6), 1: (2, 1, 3, 3)},
+                       kwargs={"stride": (2, 1)},
+                       vary_each_element=True, as_decimal=False, atol=1e-4, rtol=1e-4)
+def test_conv_2d_bkwd():
+    pass
 
 
-# @backprop_test_factory(mygrad_func=conv_nd,
-#                        true_func=_conv_nd,
-#                        num_arrays=2,
-#                        index_to_arr_shapes={0: (1, 1, 2, 2, 4), 1: (1, 1, 2, 2, 2)},
-#                        kwargs={"stride": (1, 1, 2)},
-#                        vary_each_element=True, as_decimal=False, atol=1e-3, rtol=1e-3)
-# def test_conv_3d_bkwd():
-#     pass
+@backprop_test_factory(mygrad_func=conv_nd,
+                       true_func=_conv_nd,
+                       num_arrays=2,
+                       index_to_arr_shapes={0: (1, 1, 2, 2, 4), 1: (1, 1, 2, 2, 2)},
+                       kwargs={"stride": (1, 1, 2)},
+                       vary_each_element=True, as_decimal=False, atol=1e-3, rtol=1e-3)
+def test_conv_3d_bkwd():
+    pass
