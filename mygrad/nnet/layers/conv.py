@@ -11,7 +11,7 @@ __all__ = ["conv_nd"]
 class ConvND(Operation):
     scalar_only = True
 
-    def __call__(self, x, w, stride, padding=0):
+    def __call__(self, x, w, *, stride, padding=0, dilation=1):
         self.variables = (x, w)
         # x ... data:    (N, C, X0, X1, ...)
         # w ... filters: (F, C, W0, W1, ...)
@@ -27,13 +27,19 @@ class ConvND(Operation):
         x_shape = np.array(x.shape[2:])  # (X0, ...): shape of the channels being convolved over
         w_shape = np.array(w.shape[2:])  # (W0, ...): shape of each conv filter
 
-        padding = np.array((padding,) * num_conv_channels) if isinstance(padding, Integral) else np.array(padding, dtype=int)
+        dilation = np.array((dilation,) * num_conv_channels) if isinstance(dilation, Integral) else np.array(dilation,
+                                                                                                             dtype=int)
+
+        assert len(dilation) == num_conv_channels and all(d >= 1 and isinstance(d, Integral) for d in dilation)
+
+        padding = np.array((padding,) * num_conv_channels) if isinstance(padding, Integral) else np.array(padding,
+                                                                                                          dtype=int)
         assert len(padding) == num_conv_channels and all(p >= 0 and isinstance(p, Integral) for p in padding)
 
         stride = np.array((stride,) * num_conv_channels) if isinstance(stride, Integral) else np.asarray(stride, dtype=int)
         assert len(stride) == num_conv_channels and all(s >= 1 and isinstance(s, Integral) for s in stride)
 
-        out_shape = (x_shape + 2 * padding - w_shape) / stride + 1
+        out_shape = (x_shape + 2 * padding - ((w_shape - 1)*dilation + 1)) / stride + 1
 
         if not all(i.is_integer() and i > 0 for i in out_shape):
             msg = "Stride and kernel dimensions are incompatible: \n"
@@ -41,11 +47,12 @@ class ConvND(Operation):
             msg += "Stride dimensions: {}\n".format(tuple(stride))
             msg += "Kernel dimensions: {}\n".format(tuple(w_shape))
             msg += "Padding dimensions: {}\n".format(tuple(padding))
+            msg += "Dilation dimensions: {}\n".format(tuple(dilation))
             raise ValueError(msg)
 
         self.padding = padding
         self.stride = stride
-        self.dilation = (1,) * num_conv_channels
+        self.dilation = dilation
 
         # symmetric 0-padding for X0, X1, ... dimensions
         axis_pad = tuple((i, i) for i in (0, 0, *padding))
@@ -90,10 +97,12 @@ class ConvND(Operation):
             gp = np.tensordot(grad, w, axes=[[1], [0]])
             for ind in np.ndindex(grad.shape[-num_conv_channels:]):
                 # ind: (g0, ...) - grid-position of filter placement
-                slices = tuple(slice(i * s, i * s + w * d, d) for i, w, s, d in zip(ind, w.shape[2:],
-                                                                                    self.stride, self.dilation))
+                slices = tuple(slice(i * s, i * s + w * d, d) for i, w, s, d in zip(ind, 
+                                                                                    w.shape[2:],
+                                                                                    self.stride, 
+                                                                                    self.dilation))
                 # Add (grad-element * filter) to each appropriate window position in `dx`
-                # dx[N, C, g0*s0 : g0*s0 + w0, (...)] += gp[N, g0, (...), C, W0, (...)]
+                # dx[N, C, g0*s0 : g0*s0 + w0*d0 : d0, (...)] += gp[N, g0, (...), C, W0, (...)]
                 dx[(..., *slices)] += gp[(slice(None), *ind, ...)]
 
             # remove padding from dx
@@ -122,7 +131,7 @@ class ConvND(Operation):
             self.variables[index].backward(df, **kwargs)
 
 
-def conv_nd(x, filter_bank, stride, padding=0, constant=False):
+def conv_nd(x, filter_bank, *, stride, padding=0, dilation=1, constant=False):
     """ Use `filter_bank` to perform strided N-dimensional neural network-style
         convolutions (see Notes) over `x`.
                            f(x, w) -> x ⋆ w
@@ -150,17 +159,28 @@ def conv_nd(x, filter_bank, stride, padding=0, constant=False):
         filter_bank : Union[Tensor, array_like], shape=(F, C, W0, ...)
             The filters used to perform the convolutions.
 
-        stride : Union[int, Tuple[int]]
-            The step-size with which each filter is placed along the
-            H and W axes during the convolution. The tuple indicates
-            (stride-0, ...). If a single integer is provided, this
-            stride is used for all convolved dimensions
+        stride : Union[int, Tuple[int, ...]]
+            (keyword-only argument) The step-size with which each 
+            filter is placed along the H and W axes during the 
+            convolution. The tuple indicates (stride-0, ...). If a 
+            single integer is provided, this stride is used for all 
+            convolved dimensions
 
-        padding : Union[int, Tuple[int]]
-            The number of zeros to be padded to both ends of
-            each convolved dimension, respectively. If a single
-            integer is provided, this padding is used for all of
-            the convolved axes
+        padding : Union[int, Tuple[int, ...]]
+            (keyword-only argument) The number of zeros to be padded 
+            to both ends of each convolved dimension, respectively. 
+            If a single integer is provided, this padding is used for 
+            all of the convolved axes
+
+        dilation : Union[int, Tuple[int, ...]], optional (default=1)
+            (keyword-only argument) The spacing used when placing kernel 
+            elements along the data. E.g. for a 1D convolution the ith 
+            placement of the kernel multiplied  against the dilated-window: 
+            `x[:, :, i*s:(i*s + w*d):d]`, where s is
+            the stride, w is the kernel-size, and d is the dilation factor.
+
+            If a single integer is provided, that dilation value is used for all
+            of the convolved axes
 
         constant : bool, optional (default=False)
             If True, the resulting Tensor is a constant.
@@ -183,4 +203,4 @@ def conv_nd(x, filter_bank, stride, padding=0, constant=False):
            this layer assumes that a scalar (i.e. a 0-dimensional tensor) will invoke
            `tensor.backward()` for the computational graph. This is standard for a
            neural network, which terminates in a scalar loss."""
-    return Tensor._op(ConvND, x, filter_bank, op_args=(stride, padding), constant=constant)
+    return Tensor._op(ConvND, x, filter_bank, op_kwargs=dict(stride=stride, padding=padding, dilation=dilation), constant=constant)

@@ -223,7 +223,7 @@ def numerical_gradient_full(f, *args, back_grad, as_decimal=True, kwargs={}, var
     return tuple(grads)
 
 
-def _numerical_gradient_full(f, *, x, back_grad, h=1e-8, as_decimal=True):
+def _numerical_gradient_full(f, *, x, back_grad, h=Decimal(1)/Decimal(10**8), as_decimal=True):
     """ Computes numerical partial derivatives of f(x), by
         varying each entry of `x` independently.
 
@@ -239,7 +239,7 @@ def _numerical_gradient_full(f, *, x, back_grad, h=1e-8, as_decimal=True):
         back_grad : numpy.ndarray
             The gradient being back-propagated to {x}, via f
 
-        h : float, optional, (default=1e-8)
+        h : float, optional, (default=Decimal(1e-8))
             Approximating infinitesimal.
 
         as_decimal : bool, optional (default=True)
@@ -251,20 +251,20 @@ def _numerical_gradient_full(f, *, x, back_grad, h=1e-8, as_decimal=True):
         numpy.ndarray
             df/dx
         """
-
     grad = np.empty_like(x)
-    x = to_decimal_array(x)
+    if not as_decimal:
+        x = to_decimal_array(x)
     h = Decimal(h)
-
+    back_grad = back_grad.astype(np.float64)
     for ind, val in np.ndenumerate(x):
         x_fwd = np.copy(x)
         x_fwd[ind] += h
-        f_fwd = to_decimal_array(f(x_fwd) if as_decimal else f(x_fwd.astype(float)))
+        f_fwd = to_decimal_array(f(x_fwd) if as_decimal else f(x_fwd.astype(np.float64)))
 
         x_bkwd = x_fwd
         x_bkwd[ind] -= Decimal(2) * h
-        f_bkwd = to_decimal_array(f(x_bkwd) if as_decimal else f(x_bkwd.astype(float)))
+        f_bkwd = to_decimal_array(f(x_bkwd) if as_decimal else f(x_bkwd.astype(np.float64)))
 
         df_dxi = to_decimal_array((f_fwd - f_bkwd) / (Decimal(2) * h))
-        grad[ind] = (df_dxi.astype('float') * back_grad).sum()
-    return grad.astype(float)
+        grad[ind] = (df_dxi.astype(np.float64) * back_grad).sum()
+    return grad.astype(np.float64)
