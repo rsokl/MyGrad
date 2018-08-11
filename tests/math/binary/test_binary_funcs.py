@@ -70,7 +70,7 @@ def test_logaddexp_fwd(): pass
 
 
 @backprop_test_factory(mygrad_func=logaddexp, true_func=np.logaddexp, num_arrays=2,
-                       as_decimal=False, atol=1e-4, rtol=1e-4)
+                       as_decimal=False, atol=1e-4, rtol=1e-4, vary_each_element=True)
 def test_logaddexp_bkwd(): pass
 
 
@@ -79,7 +79,7 @@ def test_logaddexp2_fwd(): pass
 
 
 @backprop_test_factory(mygrad_func=logaddexp2, true_func=np.logaddexp2, num_arrays=2,
-                       as_decimal=False, atol=1e-4, rtol=1e-4)
+                       as_decimal=False, atol=1e-4, rtol=1e-4, vary_each_element=True)
 def test_logaddexp2_bkwd(): pass
 
 
