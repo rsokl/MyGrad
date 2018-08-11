@@ -145,4 +145,4 @@ class BroadcastableOp(Operation):
 
         for var in {i for i in self.variables if not i.constant}:
             var._accum_ops.add(self)
-            var._backward(kwargs["graph"])
+            var._backward(graph)
