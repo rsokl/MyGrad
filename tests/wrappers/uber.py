@@ -25,7 +25,7 @@ class fwdprop_test_factory():
         This decorator is extremely uber: the decorated function's body is
         never executed; this decorator builds the entire unit tests The
         function definition is effectively there to name the test being
-        constructed. This decorator constructs the entire test.
+        constructed.
 
         The user specifies the number of arrays to be generated (at least one must be
         generated), along with the bounds on their elements, their shapes, as well
@@ -33,11 +33,14 @@ class fwdprop_test_factory():
 
         Examples
         --------
+        Writing a test that compares mygrad's add to numpy's add
+
         >>> from mygrad import add
         >>> import numpy as np
         >>> @fwdprop_test_factory(mygrad_func=add, true_func=np.add, num_array_args=2)
         ... def test_add():
-        ...     pass"""
+        ...     pass
+        """
     def __init__(self, *,
                  mygrad_func,
                  true_func,
@@ -49,10 +52,10 @@ class fwdprop_test_factory():
         """
         Parameters
         ----------
-        mygrad_func : Callable[[numpy.ndarray, numpy.ndarray], mygrad.Tensor]
+        mygrad_func : Callable[[numpy.ndarray, ...], mygrad.Tensor]
             The mygrad function whose forward pass validity is being checked.
 
-        true_func : Callable[[numpy.ndarray, numpy.ndarray], numpy.ndarray]
+        true_func : Callable[[numpy.ndarray, ...], numpy.ndarray]
             A known correct version of the function
 
         index_to_bnds : Dict[int, Tuple[int, int]]
@@ -63,7 +66,7 @@ class fwdprop_test_factory():
             Values that array-i cannot possess. By default, no values are
             excluded.
 
-        index_to_arr_shapes : Dict[i, Union[Sequence[int], hypothesis.searchstrategy.SearchStrategy]]
+        index_to_arr_shapes : Dict[int, Union[Sequence[int], hypothesis.searchstrategy.SearchStrategy]]
             The shape for array-i. This can be an exact shape or a hypothesis search
             strategy that draws shapes.
                 Default for array-0: `hnp.array_shapes(max_side=3, max_dims=3)`
@@ -71,8 +74,9 @@ class fwdprop_test_factory():
 
         kwargs : Dict[str, Union[Any, Callable[[Any], hypothesis.searchstrategy.SearchStrategy]]]
             Keyword arguments and their values to be passed to the functions.
-            The values can be hypothesis search strategies, in which case
-            a value when be drawn at test time for that argument.
+            The values can be hypothesis search-strategies, in which case
+            a value when be drawn at test time for that argument using the provided
+            strategy.
 
             Note that any search strategy must be "wrapped" in a function, which
             will be called, passing it the list of arrays as an input argument, such
@@ -93,11 +97,13 @@ class fwdprop_test_factory():
                                                                hnp.array_shapes(max_side=3, max_dims=3)),
                             dtype=float,
                             elements=st.floats(*self.index_to_bnds.get(0, (-10., 10.)))),
+               constant=st.booleans(),
                data=st.data())
         @wraps(f)
-        def wrapper(x, data):
-            arrs = [x]
-            for i in range(1, self.num_arrays):
+        def wrapper(x, constant, data):
+            arrs = [x]  # list of drawn arrays to feed to functions
+
+            for i in range(1, self.num_arrays):  # draw additional arrays according to `num_arrays`
                 y = data.draw(hnp.arrays(shape=self.index_to_arr_shapes.get(i,
                                                                             broadcastable_shape(x.shape)),
                                          dtype=float,
@@ -105,24 +111,28 @@ class fwdprop_test_factory():
                               label="array-{}".format(i))
                 arrs.append(y)
 
-            arr_copies = [copy(arr) for arr in arrs]
+            arr_copies = [copy(arr) for arr in arrs]  # list of array-copies to check for mutation
+
+            # set or draw keyword args to be passed to functions
             kwargs = {k: (data.draw(v(*arrs), label="kwarg: {}".format(k)) if callable(v) else v)
                       for k, v in self.kwargs.items()}
 
-            for i, arr in enumerate(arrs):
+            for i, arr in enumerate(arrs):  # assure arrays don't contain forbidden values
                 for value in self.index_to_no_go.get(i, ()):
                     assume(np.all(arr != value))
-            constant = data.draw(st.booleans(), label="constant")
+
+            # execute mygrad and "true" functions. Compare outputs and check mygrad behavior
             o = self.op(*(Tensor(i) for i in arrs), **kwargs, constant=constant)
             tensor_out = o.data
             true_out = self.true_func(*arrs, **kwargs)
 
-            assert isinstance(o, Tensor), "`mygrad_func` returned type {}, should return `mygrad.Tensor`".format(type(o))
-            assert o.constant is constant, "`mygrad_func` returned tensor.constant={}, should be constant={}".format(o.constant, constant)
+            assert isinstance(o, Tensor), \
+                "`mygrad_func` returned type {}, should return `mygrad.Tensor`".format(type(o))
+            assert o.constant is constant, \
+                "`mygrad_func` returned tensor.constant={}, should be constant={}".format(o.constant, constant)
 
-            assert_allclose(tensor_out, true_out,
+            assert_allclose(actual=tensor_out, desired=true_out,
                             err_msg="`mygrad_func(x)` and `true_func(x)` produce different results")
-
 
             for n, (arr, arr_copy) in enumerate(zip(arrs, arr_copies)):
                 assert_array_equal(arr, arr_copy,
@@ -167,10 +177,10 @@ class backprop_test_factory():
         """
         Parameters
         ----------
-        mygrad_func : Callable[[numpy.ndarray, numpy.ndarray], mygrad.Tensor]
+        mygrad_func : Callable[[numpy.ndarray, ...], mygrad.Tensor]
             The mygrad function whose forward pass validity is being checked.
 
-        true_func : Callable[[numpy.ndarray, numpy.ndarray], numpy.ndarray]
+        true_func : Callable[[numpy.ndarray, ...], numpy.ndarray]
             A known correct version of the function
 
         index_to_bnds : Dict[int, Tuple[int, int]]
@@ -244,9 +254,8 @@ class backprop_test_factory():
                data=st.data())
         @wraps(f)
         def wrapper(x, data):
-
-            arrs = [x]
-            for i in range(1, self.num_arrays):
+            arrs = [x]  # list of drawn arrays to feed to functions
+            for i in range(1, self.num_arrays):  # draw additional arrays according to `num_arrays`
                 y = data.draw(hnp.arrays(shape=self.index_to_arr_shapes.get(i,
                                                                             broadcastable_shape(x.shape)),
                                          dtype=float,
@@ -259,7 +268,7 @@ class backprop_test_factory():
             kwargs = {k: (data.draw(v(*arrs), label="kwarg: {}".format(k)) if callable(v) else v)
                       for k, v in self.kwargs.items()}
 
-            for i, arr in enumerate(arrs):
+            for i, arr in enumerate(arrs):  # assure arrays don't contain forbidden values
                 for value in self.index_to_no_go.get(i, ()):
                     assume(np.all(arr != value))
 
@@ -281,13 +290,10 @@ class backprop_test_factory():
                 out.backward(grad)
 
             numerical_grad = numerical_gradient if self.vary_each_element else numerical_gradient_full
-            if self.vary_each_element:
-                grads_numerical = numerical_gradient_full(self.true_func, *(i.data for i in arrs),
-                                                          back_grad=grad, kwargs=kwargs,
-                                                          as_decimal=self.as_decimal)
-            else:
-                grads_numerical = numerical_grad(self.true_func, *(i.data for i in arrs), back_grad=grad,
-                                                 kwargs=kwargs, as_decimal=self.as_decimal)
+
+            grads_numerical = numerical_grad(self.true_func, *(i.data for i in arrs),
+                                             back_grad=grad, kwargs=kwargs,
+                                             as_decimal=self.as_decimal)
 
             for n, (arr, d_num) in enumerate(zip(arrs, grads_numerical)):
                 assert_allclose(arr.grad, d_num, **self.tolerances,
