@@ -139,8 +139,8 @@ def test_special_methods():
         assert tensor_out.creator.variables[0] is x
         assert tensor_out.creator.variables[1] is y
 
-    for op_name, op in zip(("__radd__", "__rsub__", "__rmul__", "__rtruediv__", "__rpow__"),
-                           (Add, Subtract, Multiply, Divide, Power)):
+    for op_name, op in zip(("__radd__", "__rsub__", "__rmul__", "__rtruediv__", "__rpow__", "__rmatmul__"),
+                           (Add, Subtract, Multiply, Divide, Power, MatMul)):
         tensor_out = getattr(Tensor, op_name)(x, y)
         numpy_out = getattr(np.ndarray, op_name)(x.data, y.data)
         assert isinstance(tensor_out, Tensor)

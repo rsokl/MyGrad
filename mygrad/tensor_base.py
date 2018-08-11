@@ -342,6 +342,9 @@ class Tensor:
     def __matmul__(self, other):
         return self._op(MatMul, self, other)
 
+    def __rmatmul__(self, other):
+        return self._op(MatMul, other, self)
+
     def __pow__(self, other):
         return self._op(Power, self, other)
 
