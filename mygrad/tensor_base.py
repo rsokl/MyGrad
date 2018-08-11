@@ -9,11 +9,10 @@ from mygrad.math.arithmetic.ops import *
 from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property
 from mygrad.tensor_core_ops.indexing import GetItem, SetItem
 from mygrad.linalg.ops import MatMul
-from mygrad.operation_base import BroadcastableOp
-from mygrad._utils import reduce_broadcast
+from mygrad.operation_base import Operation, BroadcastableOp
 
 import numpy as np
-
+from typing import Union, Set, Type, List
 
 __all__ = ['Tensor']
 
@@ -136,11 +135,14 @@ class Tensor:
             self.data = np.asarray(x, dtype=dtype)
             self._check_valid_dtype(self.data.dtype)
 
-        self.grad = None
+        self.grad = None  # type: Union[None, np.ndarray]
         self._constant = constant
 
-        # used for setitem
-        self._ops = []  # Operation instances that utilized self an input tensor
+        # track all operations that this tensor participates in
+        self._ops = set()  # type: Set[Operation]
+
+        # track the operations that have contributed to this tensor's gradient during a back-prop
+        self._accum_ops = set()  # type: Set[Operation]
 
     @staticmethod
     def _check_valid_dtype(dtype):
@@ -148,12 +150,12 @@ class Tensor:
             raise TypeError("Tensor data must be a numeric type, received {}".format(dtype))
 
     @classmethod
-    def _op(cls, Op, *input_vars, op_args=None, op_kwargs=None, constant=False):
+    def _op(cls, Op: Type[Operation], *input_vars, op_args=None, op_kwargs=None, constant=False):
         """ Wraps operations performed between tensors: f(a, b, ...).
 
             Parameters
             ----------
-            Op : mygrad.operation_base.Operation
+            Op : Type[Operation]
                 Operation-class, used to perform forward-pass on `input_vars`.
 
             input_vars : array_like
@@ -181,13 +183,15 @@ class Tensor:
         if op_kwargs is None:
             op_kwargs = dict()
 
-        tensor_vars = []
+        tensor_vars = []  # type: List[Tensor]
         for var in input_vars:
             if not isinstance(var, cls):
                 var = cls(var, constant=True)
             tensor_vars.append(var)
 
         f = Op()
+        f.graph = {f}
+        f.graph.update(*(var._creator.graph for var in tensor_vars if var._creator is not None))
         op_out = f(*tensor_vars, *op_args, **op_kwargs)
 
         if isinstance(f, BroadcastableOp) and not f.scalar_only:
@@ -200,7 +204,7 @@ class Tensor:
             # record that a variable participated in that op
             for var in tensor_vars:
                 if not var.constant:
-                    var._ops.append(f)
+                    var._ops.add(f)
 
         scalar_only = f.scalar_only and not is_const
         for var in tensor_vars:
@@ -231,27 +235,31 @@ class Tensor:
                 (i.e. scalar) to invoke self.backward()."""
 
         if grad is not None:
-            grad = np.asarray(grad.data if isinstance(grad, Tensor) else grad)
-
-            if _broadcastable:
-                grad = reduce_broadcast(grad, self.shape)
+            self.grad = np.asarray(grad.data if isinstance(grad, Tensor) else grad)
         else:
-            if self.ndim > 0 and self.scalar_only:
+            if self.ndim > 0 and self._scalar_only:
                 raise Exception("Invalid Backprop: backpropagation must be triggered by a scalar for this computational graph")
-
             dtype = float if np.issubdtype(self.dtype, np.signedinteger) else self.dtype
-            grad = np.ones(self.shape, dtype=dtype) if self.ndim > 0 else np.asarray(1., dtype=dtype)
+            self.grad = np.ones(self.shape, dtype=dtype) if self.ndim > 0 else np.asarray(1., dtype=dtype)
 
-        assert grad.shape == self.shape, "A tensor and its associated gradient must possess the same shape"
-        self.grad = np.asarray(grad if self.grad is None else self.grad + grad)
+        if self.creator is not None:
+            self._backward(graph=self.creator.graph)
 
-        if self._creator is not None:
-            self._creator.backward(grad, _broadcastable=isinstance(self._creator, BroadcastableOp))
+    def _backward(self, graph):
+        """
+        Parameters
+        ----------
+        graph : Set[Operation]
+        """
+        assert self.grad.shape == self.shape, "A tensor and its associated gradient must possess the same shape"
+        if self._creator is not None and not bool(graph & (self._ops - self._accum_ops)):
+            self._accum_ops.clear()
+            self._creator.backward(self.grad, graph=graph)
 
     def null_gradients(self):
-        self.grad = None
-        self._ops = []
-        if self._creator is not None:
+        if self._creator is not None and self.grad is not None:
+            self.grad = None
+            self._ops.clear()
             self._creator.null_gradients()
 
     @property
@@ -297,7 +305,7 @@ class Tensor:
             return None
 
         # old_tensor is the tensor pre-setitem
-        old_tensor = Tensor(self, constant=self.constant, _scalar_only=self.scalar_only, _creator=self.creator)
+        old_tensor = Tensor(self, constant=self.constant, _scalar_only=self._scalar_only, _creator=self.creator)
         old_tensor._ops = self._ops
 
         # point all ops involving `self` to old_tensor instead
@@ -310,7 +318,7 @@ class Tensor:
         # self becomes the tensor post-setitem
         out = self._op(SetItem, old_tensor, value, op_args=(key,))
         self._creator = out.creator
-        self._scalar_only = out.scalar_only
+        self._scalar_only = out._scalar_only
         self._ops = out._ops
         self.data = out.data
         self._constant = out.constant
@@ -362,7 +370,7 @@ class Tensor:
 
     def __copy__(self):
         """ Produces a copy of self with copy.creator=None"""
-        return Tensor(np.copy(self.data), _creator=None, constant=self.constant, _scalar_only=self.scalar_only)
+        return Tensor(np.copy(self.data), _creator=None, constant=self.constant, _scalar_only=self._scalar_only)
 
     def item(self):
         """ Copy an element of a tensor to a standard Python scalar and return it.

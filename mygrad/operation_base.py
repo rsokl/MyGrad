@@ -1,6 +1,11 @@
 """ Defines the base class for mathematical operations capable of back-propagating
     gradients to their input tensors."""
 
+from mygrad._utils import reduce_broadcast
+
+
+import numpy as np
+
 __all__ = ["Operation",
            "BroadcastableOp"]
 
@@ -80,13 +85,15 @@ class Operation:
             NotImplemented Error"""
         raise NotImplementedError
 
-    def backward(self, grad, **kwargs):
+    def backward(self, grad, *, graph, **kwargs):
         """ Back-propagates the gradient through all of the operation's inputs.
             Constant tensors do not propagate a gradient.
 
             grad : numpy.ndarray
                 The back-propagated total derivative with respect to the present
                 operation (`f`): d(out)/df
+
+            graph : Set[Operation]
 
             Other Parameters
             ----------------
@@ -95,7 +102,14 @@ class Operation:
                 can utilize broadcasting."""
         for index, var in enumerate(self.variables):
             if not var.constant:
-                self.backward_var(grad, index, **kwargs)
+                if var.grad is None:
+                    var.grad = np.asarray(self.backward_var(grad, index, **kwargs))
+                else:
+                    var.grad += self.backward_var(grad, index, **kwargs)
+
+        for var in {i for i in self.variables if not i.constant}:
+            var._accum_ops.add(self)
+            var._backward(graph)
 
     def null_gradients(self):
         """ Back-propagates `None` to the gradients of the operation's input tensors,
@@ -107,4 +121,28 @@ class Operation:
 class BroadcastableOp(Operation):
     """ Signals that an Operation's forward pass can broadcast its tensor
         arguments."""
-    pass
+    def backward(self, grad, *, graph, **kwargs):
+        """ Back-propagates the gradient through all of the operation's inputs.
+            Constant tensors do not propagate a gradient.
+
+            grad : numpy.ndarray
+                The back-propagated total derivative with respect to the present
+                operation (`f`): d(out)/df
+
+            graph : Set[Operation]
+
+            Other Parameters
+            ----------------
+            _broadcastable : bool, optional (default:False)
+                Devs-only: Indicates whether or not the up-stream operation
+                can utilize broadcasting."""
+        for index, var in enumerate(self.variables):
+            if not var.constant:
+                if var.grad is None:
+                    var.grad = reduce_broadcast(np.asarray(self.backward_var(grad, index, **kwargs)), var.shape)
+                else:
+                    var.grad += reduce_broadcast(self.backward_var(grad, index, **kwargs), var.shape)
+
+        for var in {i for i in self.variables if not i.constant}:
+            var._accum_ops.add(self)
+            var._backward(kwargs["graph"])
