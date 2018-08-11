@@ -142,8 +142,7 @@ class Sum(Operation):
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
         if self.outshape is None:
-            a.backward(np.full(a.shape, grad, dtype=float))
-            return None
+            return np.full(a.shape, grad, dtype=float)
 
         if not self.keepdims:
             index = [slice(None) for i in range(a.ndim)]
@@ -151,7 +150,7 @@ class Sum(Operation):
                 index[i] = np.newaxis
             grad = grad[index]
 
-        a.backward(np.broadcast_to(grad, a.data.shape).astype(float), **kwargs)
+        return np.broadcast_to(grad, a.data.shape).astype(float)
 
 
 class Mean(Sum):

@@ -35,12 +35,11 @@ class MatMul(BroadcastableOp):
         # handle 1D w/ 1D (dot product of vectors)
         if a.ndim == 1 and b.ndim == 1:
             if index == 0:
-                dfdx = grad * b
+                return grad * b
             elif index == 1:
-                dfdx = grad * a
-            
-            self.variables[index].backward(dfdx, **kwargs)
-            return
+                return grad * a
+            else:
+                raise IndexError
         
         if index == 0:  # compute grad through a
             if b.ndim > 1:  # ([...], j) w/ ([...], j, k)
@@ -60,7 +59,7 @@ class MatMul(BroadcastableOp):
             else:           # (j,) w/ ([...], j, k)
                 dfdx = a[:, np.newaxis] * np.expand_dims(grad, -2)
             
-        self.variables[index].backward(dfdx, **kwargs)
+        return dfdx
 
 
 ### EinSum ###
