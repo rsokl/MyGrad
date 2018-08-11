@@ -126,7 +126,7 @@ class MaxPoolND(Operation):
         # accumulate gradient within pool-axis-flattened dx, then reshape to match shape of `x`
         dx = np.zeros(x.shape[:-num_pool] + (np.prod(x.shape[-num_pool:]),))
         np.add.at(dx, tuple(index), grad.reshape(*x.shape[:-num_pool], -1))
-        var.backward(dx.reshape(x.shape), **kwargs)
+        return dx.reshape(x.shape)
 
 
 def max_pool(x, pool, stride, constant=False):
