@@ -289,7 +289,7 @@ class backprop_test_factory():
             else:
                 out.backward(grad)
 
-            numerical_grad = numerical_gradient if self.vary_each_element else numerical_gradient_full
+            numerical_grad = numerical_gradient_full if self.vary_each_element else numerical_gradient
 
             grads_numerical = numerical_grad(self.true_func, *(i.data for i in arrs),
                                              back_grad=grad, kwargs=kwargs,
