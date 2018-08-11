@@ -212,7 +212,7 @@ class Tensor:
 
         return cls(op_out, constant=is_const, _creator=f, _scalar_only=scalar_only)
 
-    def backward(self, grad=None, *, _broadcastable=False):
+    def backward(self, grad=None):
         """ Compute set or accumulate `self.grad` with `grad`, and pass `self.creator.backward(grad)`.
             In effect, calling `self.backward()` will trigger a "back-propagation" from `self` through
             the preceding nodes in the computational graph. Thus a node, `a`, will have the attribute
@@ -224,10 +224,6 @@ class Tensor:
                 The value of the incoming derivative. If self.grad is None, it is set to `grad`,
                 otherwise its value is added with `grad`.
 
-            _broadcastable : bool, optional (default:False)
-                Devs-only: Indicates whether or not the up-stream operation
-                can utilize broadcasting.
-
             Raises
             ------
             Exception
@@ -238,29 +234,81 @@ class Tensor:
             self.grad = np.asarray(grad.data if isinstance(grad, Tensor) else grad)
         else:
             if self.ndim > 0 and self._scalar_only:
-                raise Exception("Invalid Backprop: backpropagation must be triggered by a scalar for this computational graph")
+                raise Exception("Invalid Backprop: backpropagation must be triggered by a "
+                                "scalar for this computational graph")
             dtype = float if np.issubdtype(self.dtype, np.signedinteger) else self.dtype
             self.grad = np.ones(self.shape, dtype=dtype) if self.ndim > 0 else np.asarray(1., dtype=dtype)
 
         if self.creator is not None:
-            self._backward(graph=self.creator.graph)
+            self._backward(graph=self.creator.graph, terminal_node=True)
 
-    def _backward(self, graph):
+    def _backward(self, *, graph, terminal_node=False):
         """
+        **For dev-use only**
+
+        If `self` has accumulated incoming gradients from all operations in the terminal node's
+        computational graph, back-propagate the accumulated gradient to the creator of `self`.
+
         Parameters
         ----------
         graph : Set[Operation]
+            The set of all operations relevant to the terminal node of the computational graph,
+            which triggered back-propagation
+
+        terminal_node : bool, optional (default=False)
+            If `False` check to see if the tensor is attempting to back-prop into a cleared graph.
+
+        Raises
+        ------
+        AssertionError
+            Raises if the tensor and its associated gradient possess different shapes.
+
+        Exception
+            Raises if the tensor was passed a gradient and yet the tensor's _ops set is empty. This occurs
+            when part of the graph involving this tensor was cleared previously.
         """
         assert self.grad.shape == self.shape, "A tensor and its associated gradient must possess the same shape"
+        if not terminal_node and not self._ops:
+            raise Exception("Invalid Backprop: part of the computational graph containing "
+                            "this tensor was cleared prior to backprop")
         if self._creator is not None and not bool(graph & (self._ops - self._accum_ops)):
             self._accum_ops.clear()
             self._creator.backward(self.grad, graph=graph)
 
-    def null_gradients(self):
-        if self._creator is not None and self.grad is not None:
-            self.grad = None
+    def null_gradients(self, clear_graph=True):
+        """
+        Sets the gradient for this tensor and for all preceding tensors in the computation graph
+        to ``None``.
+
+        Additionally, the computational graph that terminates in this tensor can also be cleared
+        during this process.
+
+        Parameters
+        ----------
+        clear_graph : bool, optional (default=True)
+            If ``True`` clear the computational graph in addition to nulling the gradients."""
+        if self.grad is None:
+            return None
+
+        self.grad = None
+        if clear_graph:
             self._ops.clear()
-            self._creator.null_gradients()
+
+        if self._creator is not None:
+            creator = self._creator
+            if clear_graph:
+                self._creator = None
+            creator.null_gradients(clear_graph)
+
+    def clear_graph(self):
+        """
+        Clear the computational graph for all of the nodes preceding this tensor.
+        """
+        self._ops.clear()
+        if self._creator is not None:
+            creator = self._creator
+            self._creator = None
+            creator.clear_graph()
 
     @property
     def scalar_only(self):

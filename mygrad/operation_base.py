@@ -43,6 +43,9 @@ class Operation:
         """
     scalar_only = False
 
+    def __init__(self):
+        self.graph = set()
+
     def __call__(self, *input_vars):
         """ Performs a forward pass, f, of this Operation:
                   f(x1, ...., xn) -> out
@@ -111,11 +114,19 @@ class Operation:
             var._accum_ops.add(self)
             var._backward(graph)
 
-    def null_gradients(self):
+    def null_gradients(self, clear_graph=True):
         """ Back-propagates `None` to the gradients of the operation's input tensors,
             and to all preceding tensors in the computational graph."""
+        if clear_graph:
+            self.graph.clear()
+
         for var in self.variables:
-            var.null_gradients()
+            var.null_gradients(clear_graph)
+
+    def clear_graph(self):
+        self.graph.clear()
+        for var in self.variables:
+            var.clear_graph()
 
 
 class BroadcastableOp(Operation):
