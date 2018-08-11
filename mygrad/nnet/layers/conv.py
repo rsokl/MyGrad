@@ -109,7 +109,7 @@ class ConvND(Operation):
             if sum(self.padding):
                 no_pads = tuple(slice(p, -p if p else None) for p in self.padding)
                 dx = dx[(..., *no_pads)]
-            self.variables[index].backward(dx, **kwargs)
+            return dx
 
         else:  # backprop through w
             # backprop into f
@@ -127,8 +127,7 @@ class ConvND(Operation):
             # (N, F, G0, ...) -tdot- (G0, ..., N, C, W0, ...) --> (F, C, W0, ...)
             grad_axes = list(range(2, num_conv_channels + 2)) + [0]  # (G0, ..., N)
             window_axes = list(range(num_conv_channels + 1))         # (G0, ..., N)
-            df = np.tensordot(grad, windowed_data, axes=[grad_axes, window_axes])
-            self.variables[index].backward(df, **kwargs)
+            return np.tensordot(grad, windowed_data, axes=[grad_axes, window_axes])
 
 
 def conv_nd(x, filter_bank, *, stride, padding=0, dilation=1, constant=False):
