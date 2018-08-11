@@ -112,7 +112,7 @@ class Operation:
 
         for var in {i for i in self.variables if not i.constant}:
             var._accum_ops.add(self)
-            var._backward(graph)
+            var._backward(graph=graph)
 
     def null_gradients(self, clear_graph=True):
         """ Back-propagates `None` to the gradients of the operation's input tensors,
@@ -156,4 +156,4 @@ class BroadcastableOp(Operation):
 
         for var in {i for i in self.variables if not i.constant}:
             var._accum_ops.add(self)
-            var._backward(graph)
+            var._backward(graph=graph)
