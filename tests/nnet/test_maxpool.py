@@ -137,13 +137,13 @@ def test_3d_case():
 def test_bad_max_shapes():
     x = Tensor(np.zeros((1, 2, 2, 2)))
     with raises(ValueError):
-        max_pool(x, 3, 1)  # large filter
+        max_pool(x, (3,)*3, (1,)*3)  # large filter
 
     with raises(AssertionError):
-        max_pool(x, 2, 0)  # bad stride
+        max_pool(x, (2,)*3, (0,)*3)  # bad stride
 
     with raises(AssertionError):
-        max_pool(x, 2, [1, 2, 3])  # bad stride
+        max_pool(x, (2,)*2, [1, 2, 3])  # bad stride
 
     with raises(ValueError):
-        max_pool(x, 1, 3)  # shape mismatch
+        max_pool(x, (1,)*3, (3,)*3)  # shape mismatch
