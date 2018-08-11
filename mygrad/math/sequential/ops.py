@@ -111,7 +111,7 @@ class MaxMin(Operation):
         if self.axis is None or len(self.axis) == 1:
             out = np.zeros_like(a.data, dtype=float)
             out[self.indices] = grad
-            a.backward(out, **kwargs)
+            return out
         else:
             tmp = [slice(None) for i in range(a.ndim)]
             for i in self.axis:
@@ -120,7 +120,7 @@ class MaxMin(Operation):
             out = np.zeros(self.tmp_grad_shape, dtype=float)
             out[self.indices] = grad
             shape = tuple(a.shape[i] for i in self.to_trans)
-            a.backward(out.reshape(shape).transpose(*self.from_trans), **kwargs)
+            return out.reshape(shape).transpose(*self.from_trans)
 
 
 class Sum(Operation):
@@ -160,7 +160,7 @@ class Mean(Sum):
         return out / self.n
 
     def backward_var(self, grad, index, **kwargs):
-        super(Mean, self).backward_var(grad / self.n, index, **kwargs)
+        return super(Mean, self).backward_var(grad / self.n, index, **kwargs)
 
 
 class Prod(Operation):
@@ -212,7 +212,7 @@ class Prod(Operation):
                     loc = np.logical_and(is_zero, has_zero == 1)
                     dldx[loc] = (np.prod(x, axis=self.axis, keepdims=True) / x)[loc]
 
-        a.backward(grad*dldx)
+        return grad*dldx
 
 
 def _reverse_cumsum(x, axis=None):
@@ -338,8 +338,7 @@ class CumProd(Operation):
 
         if axis is None:
             dldx.shape = orig_shape
-
-        self.variables[index].backward(dldx)
+        return dldx
 
 
 class CumSum(Operation):
@@ -353,7 +352,7 @@ class CumSum(Operation):
         g = _reverse_cumsum(grad, self.axis)
         if self.axis is None:
             g.shape = a.shape
-        a.backward(g)
+        return g
 
 
 class Variance(Operation):
@@ -385,5 +384,5 @@ class Variance(Operation):
                     index[i] = np.newaxis
                 grad = grad[index]
         back = (2. / N) * (a.data - a.data.mean(axis=self.kwargs["axis"], keepdims=True))
-        a.backward(back * grad)
+        return back * grad
 
