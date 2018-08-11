@@ -229,6 +229,8 @@ class Tensor:
             Exception
                 The configuration of the computational graph is such that `self` must be a 0D tensor
                 (i.e. scalar) to invoke self.backward()."""
+        if self._constant:
+            return
 
         if grad is not None:
             self.grad = np.asarray(grad.data if isinstance(grad, Tensor) else grad)
@@ -267,6 +269,9 @@ class Tensor:
             Raises if the tensor was passed a gradient and yet the tensor's _ops set is empty. This occurs
             when part of the graph involving this tensor was cleared previously.
         """
+        if self._constant:
+            return
+
         assert self.grad.shape == self.shape, "A tensor and its associated gradient must possess the same shape"
         if not terminal_node and not self._ops:
             raise Exception("Invalid Backprop: part of the computational graph containing "
