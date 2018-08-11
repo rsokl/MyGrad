@@ -23,7 +23,7 @@ class Sinh(Operation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad * np.cosh(a.data), **kwargs)
+        return grad * np.cosh(a.data)
 
 
 class Cosh(Operation):
@@ -34,7 +34,7 @@ class Cosh(Operation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad * np.sinh(a.data), **kwargs)
+        return grad * np.sinh(a.data)
 
 
 class Tanh(Operation):
@@ -45,7 +45,7 @@ class Tanh(Operation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad * (1 - np.tanh(a.data) ** 2), **kwargs)
+        return grad * (1 - np.tanh(a.data) ** 2)
 
 
 class Csch(Operation):
@@ -56,7 +56,7 @@ class Csch(Operation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad * -np.cosh(a.data) / np.sinh(a.data)**2)
+        return grad * -np.cosh(a.data) / np.sinh(a.data)**2
 
 
 class Sech(Operation):
@@ -67,7 +67,7 @@ class Sech(Operation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad * -np.sinh(a.data) / np.cosh(a.data)**2, **kwargs)
+        return grad * -np.sinh(a.data) / np.cosh(a.data)**2
 
 
 class Coth(Operation):
@@ -78,7 +78,7 @@ class Coth(Operation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad * -1 / np.sinh(a.data)**2, **kwargs)
+        return grad * -1 / np.sinh(a.data)**2
 
 
 class Arcsinh(Operation):
@@ -89,7 +89,7 @@ class Arcsinh(Operation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad / np.sqrt(1 + a.data ** 2), **kwargs)
+        return grad / np.sqrt(1 + a.data ** 2)
 
 
 class Arccosh(Operation):
@@ -100,7 +100,7 @@ class Arccosh(Operation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad / np.sqrt(a.data ** 2 - 1), **kwargs)
+        return grad / np.sqrt(a.data ** 2 - 1)
 
 
 class Arctanh(Operation):
@@ -111,7 +111,7 @@ class Arctanh(Operation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad / (1 - a.data ** 2), **kwargs)
+        return grad / (1 - a.data ** 2)
 
 
 class Arccsch(Operation):
@@ -122,7 +122,7 @@ class Arccsch(Operation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(-grad / (np.abs(a.data) * np.sqrt(1 + a.data ** 2)), **kwargs)
+        return -grad / (np.abs(a.data) * np.sqrt(1 + a.data ** 2))
 
 
 class Arccoth(Operation):
@@ -133,4 +133,4 @@ class Arccoth(Operation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad / (1 - a.data ** 2), **kwargs)
+        return grad / (1 - a.data ** 2)
