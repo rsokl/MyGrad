@@ -63,7 +63,7 @@ class Maximum(BroadcastableOp):
         else:
             raise IndexError
 
-        self.variables[index].backward(mask * grad, **kwargs)
+        return mask * grad
 
 
 class Minimum(BroadcastableOp):
@@ -82,4 +82,4 @@ class Minimum(BroadcastableOp):
         else:
             raise IndexError
 
-        self.variables[index].backward(mask * grad, **kwargs)
+        return mask * grad
