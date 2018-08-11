@@ -32,7 +32,7 @@ class Add(BroadcastableOp):
         return out
 
     def backward_var(self, grad, index, **kwargs):
-        self.variables[index].backward(grad, **kwargs)
+        return grad
 
 
 class Subtract(BroadcastableOp):
@@ -52,11 +52,10 @@ class Subtract(BroadcastableOp):
         return out
 
     def backward_var(self, grad, index, **kwargs):
-        a, b = self.variables
         if index == 0:
-            a.backward(grad, **kwargs)
+            return grad
         else:
-            b.backward(-grad, **kwargs)
+            return -grad
 
 
 class Multiply(BroadcastableOp):
@@ -72,9 +71,9 @@ class Multiply(BroadcastableOp):
     def backward_var(self, grad, index, **kwargs):
         a, b = self.variables
         if index == 0:  # backprop through a
-            a.backward(grad * b.data, **kwargs)
+            return grad * b.data
         elif index == 1:  # backprop through b
-            b.backward(grad * a.data, **kwargs)
+            return grad * a.data
 
 
 class Divide(BroadcastableOp):
@@ -87,9 +86,9 @@ class Divide(BroadcastableOp):
     def backward_var(self, grad, index, **kwargs):
         a, b = self.variables
         if index == 0:  # backprop through a
-            a.backward(grad / b.data, **kwargs)
+            return grad / b.data
         else:           # broadcast through b
-            b.backward(- grad * a.data / (b.data ** 2), **kwargs)
+            return -grad * a.data / (b.data ** 2)
 
 
 class Reciprocal(BroadcastableOp):
@@ -100,7 +99,7 @@ class Reciprocal(BroadcastableOp):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(-grad * np.reciprocal(a.data ** 2), **kwargs)
+        return -grad * np.reciprocal(a.data ** 2)
 
 
 class Power(BroadcastableOp):
@@ -119,12 +118,9 @@ class Power(BroadcastableOp):
         a, b = self.variables
         x, y = a.data, b.data
         if index == 0:
-            grad = grad * y * (x ** np.where(y, (y - 1), 1))
-            a.backward(grad, **kwargs)
-
+            return grad * y * (x ** np.where(y, (y - 1), 1))
         else:
-            grad = grad * (x ** y) * np.log(np.where(x, x, 1))
-            b.backward(grad, **kwargs)
+            return grad * (x ** y) * np.log(np.where(x, x, 1))
 
 
 class Positive(Operation):
@@ -142,7 +138,7 @@ class Positive(Operation):
         return np.positive(a.data, where=where)
 
     def backward_var(self, grad, index, **kwargs):
-        self.variables[index].backward(np.positive(grad, **self.conf), **kwargs)
+        return np.positive(grad, **self.conf)
 
 
 class Negative(Operation):
@@ -160,7 +156,7 @@ class Negative(Operation):
         return np.negative(a.data, where=where)
 
     def backward_var(self, grad, index, **kwargs):
-        self.variables[index].backward(np.negative(grad, **self.conf), **kwargs)
+        return np.negative(grad, **self.conf)
 
 
 class AddSequence(BroadcastableOp):
@@ -172,7 +168,7 @@ class AddSequence(BroadcastableOp):
         return out
 
     def backward_var(self, grad, index, **kwargs):
-        self.variables[index].backward(grad, **kwargs)
+        return grad
 
 
 class MultiplySequence(BroadcastableOp):
@@ -199,7 +195,6 @@ class MultiplySequence(BroadcastableOp):
     def backward_var(self, grad, index, **kwargs):
         var = self.variables[index]
         if not self._iszero:
-            grad = self._product / var.data
+            return self._product / var.data
         else:
-            grad = grad * reduce(lambda x, y: x*y, (var.data for n, var in enumerate(self.variables) if n != index))
-        var.backward(grad, **kwargs)
+            return grad * reduce(lambda x, y: x*y, (var.data for n, var in enumerate(self.variables) if n != index))
