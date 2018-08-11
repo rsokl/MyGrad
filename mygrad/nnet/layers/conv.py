@@ -203,4 +203,5 @@ def conv_nd(x, filter_bank, *, stride, padding=0, dilation=1, constant=False):
            this layer assumes that a scalar (i.e. a 0-dimensional tensor) will invoke
            `tensor.backward()` for the computational graph. This is standard for a
            neural network, which terminates in a scalar loss."""
-    return Tensor._op(ConvND, x, filter_bank, op_kwargs=dict(stride=stride, padding=padding, dilation=dilation), constant=constant)
+    return Tensor._op(ConvND, x, filter_bank, op_kwargs=dict(stride=stride, padding=padding, dilation=dilation),
+                      constant=constant)
