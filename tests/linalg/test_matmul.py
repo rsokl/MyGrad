@@ -40,7 +40,7 @@ def test_matmul_fwd_static():
     assert_almost_equal(actual=matmul(a, b).data, desired=np.matmul(a, b))
 
 
-@backprop_test_factory(mygrad_func=matmul, true_func=np.matmul, num_arrays=2, 
+@backprop_test_factory(mygrad_func=matmul, true_func=np.matmul, num_arrays=2,
                        index_to_arr_shapes={0: (4,), 1:(4,)}, as_decimal=False,
                        vary_each_element=True,
                        atol=1e-5, rtol=1e-5)
@@ -54,7 +54,7 @@ def test_matmul_bkwd_1d_1d():
                                             1: (4,)}, 
                        as_decimal=False,
                        vary_each_element=True,
-                       atol=1e-5, rtol=1e-5)
+                       atol=1e-4, rtol=1e-4)
 def test_matmul_bkwd_nd_1d():
     """ a is n-d, b is 1-d"""
     pass

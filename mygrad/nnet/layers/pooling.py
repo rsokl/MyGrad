@@ -46,6 +46,8 @@ class MaxPoolND(Operation):
             """
         self.variables = (x,)  # data: ((N0, ...), C0, ...)
         x = x.data
+
+        assert isinstance(pool, (tuple, list, np.ndarray)) and all(i >= 0 and isinstance(i, Integral) for i in pool)
         pool = np.asarray(pool, dtype=int)
         assert all(i > 0 for i in pool)
         assert x.ndim >= len(pool), "The number of pooled dimensions cannot exceed the dimensionality of the data."
