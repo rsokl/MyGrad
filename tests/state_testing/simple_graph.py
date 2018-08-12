@@ -53,23 +53,33 @@ class Node:
                     var._ops.append(f)
         return cls(op_out, constant=is_const, _creator=f)
 
-    def backward(self, grad=None):
+    def backward(self, grad=None, terminal_node=False):
+        if self.constant:
+            return
         grad = np.asarray(grad) if grad is not None else np.asarray(1., dtype=float)
-        self.grad = np.asarray(grad if self.grad is None else self.grad + grad)
+        if terminal_node:
+            self.grad = np.asarray(grad)
+        else:
+            self.grad = np.asarray(grad if self.grad is None else self.grad + grad)
+
+        if not terminal_node and not self._ops:
+            raise Exception("Invalid Backprop: part of the computational graph containing "
+                            "this tensor was cleared prior to backprop")
         if self.creator is not None:
             self.creator.backward(grad)
 
     def null_gradients(self, clear_graph=True):
         self.grad = None
-        if clear_graph:
-            self._ops = []
         if self.creator is not None:
-            self.creator.null_gradients(clear_graph)
+            self.creator.null_gradients(False)
+        if clear_graph:
+            self.clear_graph()
 
     def clear_graph(self):
         self._ops = []
         if self.creator is not None:
             self.creator.clear_graph()
+            self.creator = None
 
 
 class Multiply(SimpleOperation):
