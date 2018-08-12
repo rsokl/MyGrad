@@ -292,18 +292,15 @@ class Tensor:
         ----------
         clear_graph : bool, optional (default=True)
             If ``True`` clear the computational graph in addition to nulling the gradients."""
-        if self.grad is None:
-            return None
 
         self.grad = None
-        if clear_graph:
-            self._ops.clear()
-
         if self._creator is not None:
-            creator = self._creator
-            if clear_graph:
-                self._creator = None
-            creator.null_gradients(clear_graph)
+            for op in self._creator.graph:
+                for var in op.variables:
+                    var.grad = None
+
+        if clear_graph:
+            self.clear_graph()
 
     def clear_graph(self):
         """
@@ -311,9 +308,11 @@ class Tensor:
         """
         self._ops.clear()
         if self._creator is not None:
-            creator = self._creator
-            self._creator = None
-            creator.clear_graph()
+            for op in self._creator.graph:
+                for var in op.variables:
+                    var._ops.clear()
+                    var._creator = None
+        self._creator = None
 
     @property
     def scalar_only(self):
