@@ -1,7 +1,7 @@
 from mygrad.tensor_base import Tensor
-from mygrad.nnet.layers import dense, gru
+from mygrad.nnet.layers import gru
 from mygrad.nnet.activations import tanh, sigmoid
-
+from mygrad import matmul
 
 import hypothesis.strategies as st
 from hypothesis import given
@@ -9,6 +9,9 @@ import hypothesis.extra.numpy as hnp
 
 import numpy as np
 from numpy.testing import assert_allclose
+
+
+def dense(x, y): return matmul(x, y)
 
 
 @given(st.data())
