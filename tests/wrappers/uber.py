@@ -298,6 +298,7 @@ class backprop_test_factory():
             for n, (arr, d_num) in enumerate(zip(arrs, grads_numerical)):
                 assert_allclose(arr.grad, d_num, **self.tolerances,
                                 err_msg="arr-{}: numerical derivative and mygrad derivative do not match".format(n))
+                assert not np.shares_memory(arr.grad, grad), "arr-{}.grad stores a view of grad".format(n)
 
             out.null_gradients()
             assert all(i.grad is None for i in arrs), "null_gradients failed"
@@ -305,6 +306,7 @@ class backprop_test_factory():
             for n, (arr, arr_copy) in enumerate(zip(arrs, arr_copies)):
                 assert_array_equal(arr, arr_copy,
                                    err_msg="arr-{} was mutated during backward prop".format(n))
+
             assert_array_equal(grad, grad_copy,
                                err_msg="`grad` was mutated during backward prop")
         return wrapper
