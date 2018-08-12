@@ -3,6 +3,8 @@ from hypothesis.stateful import Bundle, RuleBasedStateMachine, rule, preconditio
 from numpy.testing import assert_equal
 from mygrad import Tensor, add, multiply
 
+from pytest import raises
+
 from .simple_graph import _add, _multiply, Node
 
 
@@ -43,6 +45,17 @@ class GraphCompare(RuleBasedStateMachine):
         n, t = items
         n.clear_graph()
         t.clear_graph()
+
+    @rule(items=nodes, grad=st.floats(-10, 10))
+    def backprop(self, items, grad):
+        n, t = items
+        try:
+            n.backward(grad, terminal_node=True)
+        except Exception:
+            with raises(Exception):
+                t.backward(grad)
+        else:
+            t.backward(grad)
 
     @rule(items=nodes)
     def graph_states_agree(self, items):
