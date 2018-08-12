@@ -31,6 +31,9 @@ class Add(BroadcastableOp):
         out = a.data + b.data
         return out
 
+    def backward(self, grad, *, graph, **kwargs):
+        super().backward(np.copy(grad), graph=graph, **kwargs)
+
     def backward_var(self, grad, index, **kwargs):
         return grad
 
@@ -53,7 +56,7 @@ class Subtract(BroadcastableOp):
 
     def backward_var(self, grad, index, **kwargs):
         if index == 0:
-            return grad
+            return np.copy(grad)
         else:
             return -grad
 
