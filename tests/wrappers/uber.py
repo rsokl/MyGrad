@@ -12,7 +12,7 @@ import hypothesis.extra.numpy as hnp
 import numpy as np
 from numpy.testing import assert_allclose, assert_array_equal
 from functools import wraps
-
+from itertools import combinations
 
 class fwdprop_test_factory():
     """ Decorator
@@ -299,6 +299,9 @@ class backprop_test_factory():
                 assert_allclose(arr.grad, d_num, **self.tolerances,
                                 err_msg="arr-{}: numerical derivative and mygrad derivative do not match".format(n))
                 assert not np.shares_memory(arr.grad, grad), "arr-{}.grad stores a view of grad".format(n)
+
+            for arr_i, arr_j in combinations(arrs, 2):
+                assert not np.shares_memory(arr_i.grad, arr_j.grad), "two input arrays were propagated views of the same gradient"
 
             out.null_gradients()
             assert all(i.grad is None for i in arrs), "null_gradients failed"
