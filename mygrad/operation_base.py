@@ -114,20 +114,6 @@ class Operation:
             var._accum_ops.add(self)
             var._backward(graph=graph)
 
-    def null_gradients(self, clear_graph=True):
-        """ Back-propagates `None` to the gradients of the operation's input tensors,
-            and to all preceding tensors in the computational graph."""
-        if clear_graph:
-            self.graph.clear()
-
-        for var in self.variables:
-            var.null_gradients(clear_graph)
-
-    def clear_graph(self):
-        self.graph.clear()
-        for var in self.variables:
-            var.clear_graph()
-
 
 class BroadcastableOp(Operation):
     """ Signals that an Operation's forward pass can broadcast its tensor
