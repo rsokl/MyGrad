@@ -32,6 +32,7 @@ class Add(BroadcastableOp):
         return out
 
     def backward(self, grad, *, graph, **kwargs):
+        # don't backprop view of `grad`
         super().backward(np.copy(grad), graph=graph, **kwargs)
 
     def backward_var(self, grad, index, **kwargs):
@@ -169,6 +170,10 @@ class AddSequence(BroadcastableOp):
         self.variables = input_vars
         out = sum(var.data for var in input_vars)
         return out
+
+    def backward(self, grad, *, graph, **kwargs):
+        # don't backprop view of `grad`
+        super().backward(np.copy(grad), graph=graph, **kwargs)
 
     def backward_var(self, grad, index, **kwargs):
         return grad

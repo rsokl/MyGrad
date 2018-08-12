@@ -156,7 +156,7 @@ class backprop_test_factory():
             dx = numerical_gradient_sequence(self.func, x=x.data, back_grad=grad,
                                              axis=axis, keepdims=keepdims, h=self.h,
                                              no_keepdims=self.no_keepdims, no_axis=self.no_axis)
-
+            assert not np.shares_memory(out.grad, grad), "A view of the gradient was back-propped"
             assert_array_equal(grad, grad_copy,
                                err_msg="`grad` was mutated during backprop")
             assert_array_equal(x, x_copy,
