@@ -1,6 +1,6 @@
 import hypothesis.strategies as st
-from hypothesis.stateful import Bundle, RuleBasedStateMachine, rule, precondition
-from numpy.testing import assert_equal
+from hypothesis.stateful import Bundle, RuleBasedStateMachine, rule, invariant, precondition
+from numpy.testing import assert_equal, assert_almost_equal
 from mygrad import Tensor, add, multiply
 
 from pytest import raises
@@ -14,7 +14,7 @@ class GraphCompare(RuleBasedStateMachine):
         self.node_list = []
         self.str_to_tensor_op = {"add": add, "multiply": multiply}
         self.str_to_node_op = {"add": _add, "multiply": _multiply}
-
+        self.raised = False
     nodes = Bundle('nodes')
 
     @rule(target=nodes, value=st.floats(-10, 10), constant=st.booleans())
@@ -49,31 +49,27 @@ class GraphCompare(RuleBasedStateMachine):
     @rule(items=nodes, grad=st.floats(-10, 10))
     def backprop(self, items, grad):
         n, t = items
+        n.null_gradients(clear_graph=False)
+        t.null_gradients(clear_graph=False)
         try:
             n.backward(grad, terminal_node=True)
         except Exception:
             with raises(Exception):
                 t.backward(grad)
+            self.raised = True
         else:
             t.backward(grad)
 
-    @rule(items=nodes)
-    def graph_states_agree(self, items):
-        n, t = items
-        assert bool(n._ops) is bool(t._ops)
-
-    @rule(items=nodes)
-    def values_agree(self, items):
-        n, t = items
-        assert_equal(n.data, t.data)
-
-    @rule(items=nodes)
-    def grads_agree(self, items):
-        n, t = items
-        if n.grad is None:
-            assert t.grad is None
-        else:
-            assert_equal(n.grad, t.grad)
-
+    @precondition(lambda self: not self.raised)
+    @invariant()
+    def all_agree(self):
+        for num, (n, t) in enumerate(self.node_list):
+            assert bool(n._ops) is bool(t._ops), "v{}".format(num+1)
+            assert_equal(n.data, t.data, err_msg="v{}".format(num+1))
+            if n.grad is None or t.grad is None:
+                assert n.grad is t.grad, "v{}".format(num+1)
+            else:
+                assert_almost_equal(desired=n.grad, actual=t.grad, err_msg="v{}".format(num+1))
+            assert not t._accum_ops, "v{}".format(num+1)
 
 TestDBComparison = GraphCompare.TestCase
