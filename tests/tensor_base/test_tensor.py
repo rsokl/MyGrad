@@ -235,7 +235,7 @@ def test_null_gradients(x, y, z, clear_graph):
         assert len(y._ops) == 0
         assert len(z._ops) == 0
         assert len(f._ops) == 0
-        assert len(g._ops) == 0
+        assert len(g._ops) > 0
         assert x.creator is None
         assert y.creator is None
         assert z.creator is None
