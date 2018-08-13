@@ -189,16 +189,16 @@ class Tensor:
                 var = cls(var, constant=True)
             tensor_vars.append(var)
 
+        is_const = constant or all(var.constant for var in tensor_vars)
+
         f = Op()
         f.graph = {f}
-        f.graph.update(*(var._creator.graph for var in tensor_vars if var._creator is not None))
+        f.graph.update(*(var._creator.graph for var in tensor_vars if var._creator is not None and not var.constant))
         op_out = f(*tensor_vars, *op_args, **op_kwargs)
 
         if isinstance(f, BroadcastableOp) and not f.scalar_only:
             # if broadcasting occurred: scalar-only -> True
             f.scalar_only = any(op_out.shape != i.shape for i in tensor_vars if not i.constant)
-
-        is_const = constant or all(var.constant for var in tensor_vars)
 
         if not is_const:
             # record that a variable participated in that op
@@ -242,9 +242,9 @@ class Tensor:
             self.grad = np.ones(self.shape, dtype=dtype) if self.ndim > 0 else np.asarray(1., dtype=dtype)
 
         if self.creator is not None:
-            self._backward(graph=self.creator.graph, terminal_node=True)
+            self._backward(graph=self.creator.graph)
 
-    def _backward(self, *, graph, terminal_node=False):
+    def _backward(self, *, graph):
         """
         **For dev-use only**
 
@@ -273,9 +273,6 @@ class Tensor:
             return
 
         assert self.grad.shape == self.shape, "A tensor and its associated gradient must possess the same shape"
-        if not terminal_node and not self._ops:
-            raise Exception("Invalid Backprop: part of the computational graph containing "
-                            "this tensor was cleared prior to backprop")
         if self._creator is not None and not bool(graph & (self._ops - self._accum_ops)):
             self._accum_ops.clear()
             self._creator.backward(self.grad, graph=graph)
@@ -294,24 +291,27 @@ class Tensor:
             If ``True`` clear the computational graph in addition to nulling the gradients."""
 
         self.grad = None
-        if self._creator is not None:
-            for op in self._creator.graph:
-                for var in op.variables:
-                    var.grad = None
+        if self._creator is None:
+            return
+        for var in self._creator.variables:
+            var.null_gradients(clear_graph=False)
 
         if clear_graph:
             self.clear_graph()
 
-    def clear_graph(self):
+    def clear_graph(self, *, _terminal_node=True):
         """
         Clear the computational graph for all of the nodes preceding this tensor.
         """
-        self._ops.clear()
-        if self._creator is not None:
-            for op in self._creator.graph:
-                for var in op.variables:
-                    var._ops.clear()
-                    var._creator = None
+        if not _terminal_node:
+            self._ops.clear()
+
+        if self._creator is None:
+            return
+
+        for var in self._creator.variables:
+            var.clear_graph(_terminal_node=False)
+
         self._creator = None
 
     @property
