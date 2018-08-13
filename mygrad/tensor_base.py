@@ -257,17 +257,10 @@ class Tensor:
             The set of all operations relevant to the terminal node of the computational graph,
             which triggered back-propagation
 
-        terminal_node : bool, optional (default=False)
-            If `False` check to see if the tensor is attempting to back-prop into a cleared graph.
-
         Raises
         ------
         AssertionError
             Raises if the tensor and its associated gradient possess different shapes.
-
-        Exception
-            Raises if the tensor was passed a gradient and yet the tensor's _ops set is empty. This occurs
-            when part of the graph involving this tensor was cleared previously.
         """
         if self._constant:
             return
