@@ -17,9 +17,9 @@ class SimpleOperation:
         for var in self.variables:
             var.null_gradients(clear_graph=clear_graph)
 
-    def clear_graph(self):
+    def clear_graph(self, terminal_node):
         for var in self.variables:
-            var.clear_graph()
+            var.clear_graph(terminal_node)
 
 
 class Node:
@@ -60,11 +60,11 @@ class Node:
         if terminal_node:
             self.grad = np.asarray(grad)
         else:
+            if not terminal_node and not self._ops:
+                raise Exception("Invalid Backprop: part of the computational graph containing "
+                                "this tensor was cleared prior to backprop")
             self.grad = np.asarray(grad if self.grad is None else self.grad + grad)
 
-        if not terminal_node and not self._ops:
-            raise Exception("Invalid Backprop: part of the computational graph containing "
-                            "this tensor was cleared prior to backprop")
         if self.creator is not None:
             self.creator.backward(grad)
 
@@ -75,10 +75,11 @@ class Node:
         if clear_graph:
             self.clear_graph()
 
-    def clear_graph(self):
-        self._ops = []
+    def clear_graph(self, terminal_node=True):
+        if not terminal_node:
+            self._ops = []
         if self.creator is not None:
-            self.creator.clear_graph()
+            self.creator.clear_graph(terminal_node=False)
             self.creator = None
 
 
@@ -107,7 +108,7 @@ class Add(SimpleOperation):
         return out
 
     def backward_var(self, grad, index):
-        self.variables[index].backward(grad)
+        self.variables[index].backward(np.copy(grad))
 
 
 def _add(a, b, constant=False):
