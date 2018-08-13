@@ -43,9 +43,6 @@ class Operation:
         """
     scalar_only = False
 
-    def __init__(self):
-        self.graph = set()
-
     def __call__(self, *input_vars):
         """ Performs a forward pass, f, of this Operation:
                   f(x1, ...., xn) -> out
@@ -105,12 +102,15 @@ class Operation:
                 can utilize broadcasting."""
         for index, var in enumerate(self.variables):
             if not var.constant:
+                if not var._ops:
+                    raise Exception("Invalid Backprop: part of the computational graph containing "
+                                    "this tensor was cleared prior to backprop")
                 if var.grad is None:
                     var.grad = np.asarray(self.backward_var(grad, index, **kwargs))
                 else:
                     var.grad += self.backward_var(grad, index, **kwargs)
 
-        for var in {i for i in self.variables if not i.constant}:
+        for var in {i for i in self.variables if not i.constant and i.creator is not None}:
             var._accum_ops.add(self)
             var._backward(graph=graph)
 
@@ -135,11 +135,14 @@ class BroadcastableOp(Operation):
                 can utilize broadcasting."""
         for index, var in enumerate(self.variables):
             if not var.constant:
+                if not var._ops:
+                    raise Exception("Invalid Backprop: part of the computational graph containing "
+                                    "this tensor was cleared prior to backprop")
                 if var.grad is None:
                     var.grad = reduce_broadcast(np.asarray(self.backward_var(grad, index, **kwargs)), var.shape)
                 else:
                     var.grad += reduce_broadcast(self.backward_var(grad, index, **kwargs), var.shape)
 
-        for var in {i for i in self.variables if not i.constant}:
+        for var in {i for i in self.variables if not i.constant and i.creator is not None}:
             var._accum_ops.add(self)
             var._backward(graph=graph)
