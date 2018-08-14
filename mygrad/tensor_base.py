@@ -292,18 +292,16 @@ class Tensor:
         if clear_graph:
             self.clear_graph()
 
-    def clear_graph(self, *, _terminal_node=True):
+    def clear_graph(self):
         """
         Clear the computational graph for all of the nodes preceding this tensor.
         """
-        if not _terminal_node:
-            self._ops.clear()
-
         if self._creator is None:
             return
 
         for var in self._creator.variables:
-            var.clear_graph(_terminal_node=False)
+            var._ops.clear()
+            var.clear_graph()
 
         self._creator = None
 
