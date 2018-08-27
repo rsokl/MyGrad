@@ -10,7 +10,7 @@ import numpy as np
 from mygrad.tensor_base import Tensor
 from numpy.testing import assert_allclose
 
-from hypothesis import given, assume
+from hypothesis import given, assume, settings
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
 
@@ -69,6 +69,7 @@ def test_power_bkwd(): pass
 def test_logaddexp_fwd(): pass
 
 
+@settings(deadline=400)
 @backprop_test_factory(mygrad_func=logaddexp, true_func=np.logaddexp, num_arrays=2,
                        as_decimal=False, atol=1e-4, rtol=1e-4, vary_each_element=True)
 def test_logaddexp_bkwd(): pass
@@ -87,6 +88,7 @@ def test_logaddexp2_bkwd(): pass
 def test_maximum_fwd(): pass
 
 
+@settings(deadline=2000)
 @given(x=hnp.arrays(shape=hnp.array_shapes(max_side=4, max_dims=5),
                     dtype=float,
                     elements=st.floats(-10., 10.)),
@@ -146,6 +148,7 @@ def test_maximum_minimum_bkwd_equal():
 def test_minimum_fwd(): pass
 
 
+@settings(deadline=2000)
 @given(x=hnp.arrays(shape=hnp.array_shapes(max_side=4, max_dims=5),
                     dtype=float,
                     elements=st.floats(-10., 10.)),
