@@ -1,5 +1,6 @@
 from mygrad.tensor_base import Tensor
-from mygrad.nnet.layers import simple_RNN, dense
+from mygrad import matmul
+from mygrad.nnet.layers import simple_RNN
 from mygrad.nnet.activations import tanh
 
 
@@ -50,7 +51,7 @@ def test_recurrent(data):
     s2 = s0.__copy__()
 
     s = simple_RNN(X, U, W)
-    o = dense(s[1:], V)
+    o = matmul(s[1:], V)
     ls = o.sum()
     ls.backward()
 
@@ -58,9 +59,9 @@ def test_recurrent(data):
     all_s = [s0.data]
     ls2 = 0
     for n, x in enumerate(X2):
-        stt = tanh(dense(x, U2) + dense(stt, W2))
+        stt = tanh(matmul(x, U2) + matmul(stt, W2))
         all_s.append(stt)
-        o = dense(stt, V2)
+        o = matmul(stt, V2)
         ls2 += o.sum()
     ls2.backward()
 

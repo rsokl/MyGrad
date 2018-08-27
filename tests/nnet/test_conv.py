@@ -201,7 +201,7 @@ def test_bad_conv_shapes():
         conv_nd(x, w, stride=3, padding=1)  # shape mismatch
 
 
-@settings(deadline=2000)
+@settings(deadline=None)
 @given(data=st.data(),
        x=hnp.arrays(dtype=float, shape=hnp.array_shapes(max_dims=6, min_dims=3, max_side=15),
                     elements=st.floats(-10, 10)),
@@ -248,7 +248,7 @@ def _conv_nd(x, w, stride, dilation=1):
     return conv_nd(x, w, stride=stride, dilation=dilation, constant=True).data
 
 
-settings(deadline=2000)
+settings(deadline=None)
 @given(data=st.data(),
        x=hnp.arrays(dtype=float, shape=hnp.array_shapes(max_dims=5, min_dims=3, max_side=6),
                     elements=st.floats(-10, 10)),

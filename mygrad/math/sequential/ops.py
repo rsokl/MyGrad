@@ -95,7 +95,7 @@ class MaxMin(Operation):
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
         if a.ndim == 0:
-            a.backward(np.copy(grad), **kwargs)
+            return grad
 
         # normalize shape of grad to be same as when keepdims=False
         if self.keepdims:

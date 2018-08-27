@@ -85,7 +85,7 @@ class SoftmaxCrossEntropy(Operation):
             -------
             The average softmax loss"""
         self.variables = (a,)
-        scores = np.copy(a.data)
+        scores = a.data
         log_softmax = scores - logsumexp(scores, axis=-1, keepdims=True)
         label_locs = (range(len(scores)), y)
         loss = -np.sum(log_softmax[label_locs]) / scores.shape[0]

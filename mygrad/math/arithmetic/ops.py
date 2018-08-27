@@ -53,7 +53,7 @@ class Subtract(BroadcastableOp):
 
     def backward_var(self, grad, index, **kwargs):
         if index == 0:
-            return np.copy(grad)
+            return grad
         else:
             return -grad
 
@@ -167,10 +167,6 @@ class AddSequence(BroadcastableOp):
         out = sum(var.data for var in input_vars)
         return out
 
-    def backward(self, grad, *, graph, **kwargs):
-        # don't backprop view of `grad`
-        super().backward(np.copy(grad), graph=graph, **kwargs)
-
     def backward_var(self, grad, index, **kwargs):
         return grad
 
@@ -184,17 +180,14 @@ class MultiplySequence(BroadcastableOp):
         self._iszero = np.any(out == 0)
         return out
 
-    def backward(self, grad, **kwargs):
+    def backward(self, grad, *, graph, **kwargs):
         """ Back-propagates the gradient through all of the operation's inputs. This needs to be updated
             by an operation if that operation takes more than 2 Tensor arguments."""
         if not self._iszero:
             self._product = grad * reduce(lambda x, y: x*y, (var.data for n, var in enumerate(self.variables)))
         else:
             self._product = None
-
-        for index, var in enumerate(self.variables):
-            if not var.constant:
-                self.backward_var(grad, index, **kwargs)
+        super().backward(grad, graph=graph, **kwargs)
 
     def backward_var(self, grad, index, **kwargs):
         var = self.variables[index]
