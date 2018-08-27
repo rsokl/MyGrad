@@ -40,7 +40,7 @@ class MulticlassHinge(Operation):
         return np.sum(Lij) / scores.shape[0]
 
     def backward_var(self, grad, index, **kwargs):
-        self.variables[index].backward(grad * self.back, **kwargs)
+        return grad * self.back
 
 
 def multiclass_hinge(x, y_true, hinge=1., constant=False):
@@ -96,7 +96,7 @@ class SoftmaxCrossEntropy(Operation):
         return loss
 
     def backward_var(self, grad, index, **kwargs):
-        self.variables[index].backward(grad * self.back, **kwargs)
+        return grad * self.back
 
 
 def softmax_crossentropy(x, y_true, constant=False):
@@ -157,7 +157,7 @@ class MarginRanking(Operation):
 
     def backward_var(self, grad, index, **kwargs):
         sign = -self.y if index == 0 else self.y
-        self.variables[index].backward(grad * (sign * self._grad), **kwargs)
+        return grad * (sign * self._grad)
 
 
 def margin_ranking_loss(x1, x2, y, margin, constant=False):

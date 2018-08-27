@@ -19,7 +19,7 @@ class Sigmoid(Operation):
         return self.sigmoid
 
     def backward_var(self, grad, index, **kwargs):
-        self.variables[index].backward(grad * self.sigmoid * (1. - self.sigmoid), **kwargs)
+        return grad * self.sigmoid * (1. - self.sigmoid)
 
 
 def sigmoid(x, constant=False):
@@ -46,7 +46,7 @@ class ReLu(Operation):
         return a.data * self.back
 
     def backward_var(self, grad, index, **kwargs):
-        self.variables[index].backward(grad * self.back, **kwargs)
+        return grad * self.back
 
 
 def relu(x, constant=False):
@@ -89,7 +89,7 @@ class Softmax(Operation):
         a = self.variables[index]
         soft = _softmax(a.data, self.__kw)
         sg = soft * grad
-        a.backward(sg - soft * np.sum(sg, **self.__kw), **kwargs)
+        return sg - soft * np.sum(sg, **self.__kw)
 
 
 def softmax(x, constant=False):
@@ -127,7 +127,7 @@ class LogSoftmax(Operation):
         a = self.variables[index]
         x = a.data
         soft = _softmax(x, self.__kw)
-        a.backward(grad - soft * np.sum(grad, **self.__kw), **kwargs)
+        return grad - soft * np.sum(grad, **self.__kw)
 
 
 def logsoftmax(x, constant=False):
