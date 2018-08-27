@@ -134,7 +134,7 @@ class Arctan(Operation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        grad / (1 + a.data ** 2)
+        return grad / (1 + a.data ** 2)
 
 
 class Arccsc(Operation):
@@ -148,7 +148,7 @@ class Arccsc(Operation):
     def backward_var(self, grad, index, **kwargs):
         # d arccsc / dx at x = -1, 1 returns 0, not NaN
         a = self.variables[index]
-        np.select([np.abs(a.data) != 1], [-grad / (np.abs(a.data) * np.sqrt(a.data ** 2 - 1))])
+        return np.select([np.abs(a.data) != 1], [-grad / (np.abs(a.data) * np.sqrt(a.data ** 2 - 1))])
 
 
 class Arcsec(Operation):
@@ -162,7 +162,7 @@ class Arcsec(Operation):
     def backward_var(self, grad, index, **kwargs):
         # d arcsec / dx at x = -1, 1 returns 0, not NaN
         a = self.variables[index]
-        np.select([np.abs(a.data) != 1], [grad / (np.abs(a.data) * np.sqrt(a.data ** 2 - 1))])
+        return np.select([np.abs(a.data) != 1], [grad / (np.abs(a.data) * np.sqrt(a.data ** 2 - 1))])
 
 
 class Arccot(Operation):
