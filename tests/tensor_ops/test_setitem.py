@@ -98,7 +98,7 @@ def test_no_mutate():
     y = Tensor([3., 4.])
     x + y
     y[:] = 0
-    y_old = x._ops[0].variables[-1]  # version of y that participated in x + y
+    y_old = x._ops.pop().variables[-1]  # version of y that participated in x + y
     assert_allclose(np.array([3., 4.]), y_old.data)
     assert_allclose(np.array([0., 0.]), y.data)
 
