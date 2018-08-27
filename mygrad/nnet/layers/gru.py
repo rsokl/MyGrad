@@ -290,12 +290,12 @@ class GRUnit(Operation):
             _backprop(self.Wz, dWz)  # self.Wz.backward(dWz, **kwargs)
         # backprop through bz
         if not self.bz.constant:
-            _backprop(self.bz, dz.sum(axis=(0, 1)))  # self.bz.backward(dz.sum(axis=(0, 1)), **kwargs)
+            _backprop(self.bz, dz.sum(axis=(0, 1)))
         # backprop through bz
         if not self.Uz.constant:
             if self._dropout:
                 dz *= self._dropUz  # IMPORTANT augmented update: this must come after Wz and bz backprop
-            _backprop(self.Uz, np.tensordot(self.X.data, dz, ([0, 1], [0, 1])))  #  self.Uz.backward(np.tensordot(self.X.data, dz, ([0, 1], [0, 1])), **kwargs)
+            _backprop(self.Uz, np.tensordot(self.X.data, dz, ([0, 1], [0, 1])))
 
         if any(not const for const in (self.Ur.constant, self.Wr.constant, self.br.constant)):
             dr = rgrad * const["r*(1 - r)"]
@@ -304,7 +304,7 @@ class GRUnit(Operation):
             dWr = np.tensordot(s, dr, ([0, 1], [0, 1]))
             if self._dropout:
                 dWr *= self._dropWr
-            _backprop(self.Wr, dWr)  # self.Wr.backward(dWr, **kwargs)
+            _backprop(self.Wr, dWr)
         # backprop through br
         if not self.br.constant:
             _backprop(self.br, dr.sum(axis=(0, 1)))  # self.br.backward(dr.sum(axis=(0, 1)), **kwargs)
@@ -312,7 +312,7 @@ class GRUnit(Operation):
         if not self.Ur.constant:
             if self._dropout:
                 dr *= self._dropUr  # IMPORTANT augmented update: this must come after Wr and br backprop
-            _backprop(self.Ur, np.tensordot(self.X.data, dr, ([0, 1], [0, 1]))) # self.Ur.backward(np.tensordot(self.X.data, dr, ([0, 1], [0, 1])), **kwargs)
+            _backprop(self.Ur, np.tensordot(self.X.data, dr, ([0, 1], [0, 1])))
 
         if any(not const for const in (self.Uh.constant, self.Wh.constant, self.bh.constant)):
             dh = hgrad * const["1 - h**2"]
@@ -329,7 +329,7 @@ class GRUnit(Operation):
         if not self.Uh.constant:
             if self._dropout:
                 dh *= self._dropUh  # IMPORTANT augmented update: this must come after Wh and bh backprop
-            _backprop(self.Uh, np.tensordot(self.X.data, dh, ([0, 1], [0, 1]))) # self.Uh.backward(np.tensordot(self.X.data, dh, ([0, 1], [0, 1])), **kwargs)
+            _backprop(self.Uh, np.tensordot(self.X.data, dh, ([0, 1], [0, 1])))
 
         # backprop through X
         if not self.X.constant:
@@ -446,6 +446,8 @@ def gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None, dropout=0.,
 
         .. [2] Y. Gal, Z. Ghahramani "A Theoretically Grounded Application of Dropout
                in Recurrent Neural Networks" arXiv:1512.05287v5, 2016. """
+    if s0 is not None:
+        assert isinstance(s0, np.ndarray) or (isinstance(s0, Tensor) and s0.constant is True)
     s = Tensor._op(GRUnit, X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh,
                    op_kwargs=dict(s0=s0, bp_lim=bp_lim, dropout=dropout),
                    constant=constant)
