@@ -15,6 +15,8 @@ from mygrad import Tensor, add, multiply
 
 from pytest import raises
 
+from typing import List, Tuple
+
 from .simple_graph import _add, _multiply, Node
 
 
@@ -24,7 +26,11 @@ def _node_ID_str(num): return "v{}".format(num + 1)
 class GraphCompare(RuleBasedStateMachine):
     def __init__(self):
         super(GraphCompare, self).__init__()
-        self.node_list = []
+        # stores the corresponding node/tensor v1, v2, ... as they are
+        # created via the unit test (through `create_node` or `fuse_nodes`)
+        # `Node` is the naive implementation of `Tensor` that we are checking
+        # against
+        self.node_list = []  # type: List[Tuple[Node, Tensor]]
         self.str_to_tensor_op = {"add": add, "multiply": multiply}
         self.str_to_node_op = {"add": _add, "multiply": _multiply}
         self.raised = False
@@ -39,6 +45,9 @@ class GraphCompare(RuleBasedStateMachine):
 
     @rule(target=nodes, a=nodes, b=nodes, op=st.sampled_from(["add", "multiply"]), constant=st.booleans())
     def fuse_nodes(self, a, b, op, constant):
+        """
+        Combine any pair of nodes (tensors) using either addition or multiplication, producing
+        a new node (tensor)"""
         n_a, t_a = a
         n_b, t_b = b
         n_op = self.str_to_node_op[op]
@@ -49,18 +58,31 @@ class GraphCompare(RuleBasedStateMachine):
     
     @rule(items=nodes, clear_graph=st.booleans())
     def null_gradients(self, items, clear_graph):
+        """
+        Invoke `null_gradients` on the computational graph (naive and mygrad), with
+        `clear_graph=True` specified optionally.
+        """
         n, t = items
         n.null_gradients(clear_graph=clear_graph)
         t.null_gradients(clear_graph=clear_graph)
 
     @rule(items=nodes)
     def clear_graph(self, items):
+        """
+        Invoke `clear_graph` on the computational graph (naive and mygrad)
+        """
         n, t = items
         n.clear_graph()
         t.clear_graph()
 
     @rule(items=nodes, grad=st.floats(-10, 10))
     def backprop(self, items, grad):
+        """
+        Invoke `backward(grad)` on the computational graph (naive and mygrad) from a randomly-selected
+        node in the computational graph and using a randomly-generated gradient value.
+
+        An exception should be raised if `clear_graph` is invoked anywhere prior to the invoking node.
+        """
         n, t = items
         n.null_gradients(clear_graph=False)
         t.null_gradients(clear_graph=False)
@@ -76,6 +98,10 @@ class GraphCompare(RuleBasedStateMachine):
     @precondition(lambda self: not self.raised)
     @invariant()
     def all_agree(self):
+        """
+        Ensure that all corresponding nodes/tensors have matching data and gradients
+        across the respective graphs.
+        """
         for num, (n, t) in enumerate(self.node_list):
             assert bool(n._ops) is bool(t._ops), _node_ID_str(num)
             assert_equal(n.data, t.data, err_msg=_node_ID_str(num))
