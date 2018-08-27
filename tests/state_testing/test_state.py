@@ -8,6 +8,9 @@ from pytest import raises
 from .simple_graph import _add, _multiply, Node
 
 
+def _node_ID_str(num): return "v{}".format(num + 1)
+
+
 class GraphCompare(RuleBasedStateMachine):
     def __init__(self):
         super(GraphCompare, self).__init__()
@@ -64,12 +67,14 @@ class GraphCompare(RuleBasedStateMachine):
     @invariant()
     def all_agree(self):
         for num, (n, t) in enumerate(self.node_list):
-            assert bool(n._ops) is bool(t._ops), "v{}".format(num+1)
-            assert_equal(n.data, t.data, err_msg="v{}".format(num+1))
+            assert bool(n._ops) is bool(t._ops), _node_ID_str(num)
+            assert_equal(n.data, t.data, err_msg=_node_ID_str(num))
             if n.grad is None or t.grad is None:
-                assert n.grad is t.grad, "v{}".format(num+1)
+                assert n.grad is t.grad, _node_ID_str(num)
             else:
-                assert_almost_equal(desired=n.grad, actual=t.grad, err_msg="v{}".format(num+1))
-            assert not t._accum_ops, "v{}".format(num+1)
+                assert_almost_equal(desired=n.grad, actual=t.grad, err_msg=_node_ID_str(num))
+            assert not t._accum_ops, _node_ID_str(num)
 
-TestDBComparison = GraphCompare.TestCase
+
+TestGraphComparison = GraphCompare.TestCase
+
