@@ -6,6 +6,7 @@ from ..wrappers.uber import fwdprop_test_factory, backprop_test_factory
 from ..custom_strategies import basic_index, adv_integer_index
 import hypothesis.extra.numpy as hnp
 
+from hypothesis import settings
 
 def test_getitem():
     x = Tensor([1, 2, 3])
@@ -64,6 +65,7 @@ def test_getitem_advindex_int_fwdprop():
     pass
 
 
+@settings(deadline=1000)
 @backprop_test_factory(mygrad_func=get_item, true_func=get_item, num_arrays=1,
                        index_to_arr_shapes={0: hnp.array_shapes(max_side=6, max_dims=4)},
                        kwargs=dict(index=adv_index_int_wrap), vary_each_element=True)
@@ -78,6 +80,8 @@ def test_getitem_advindex_bool_fwdprop():
     pass
 
 
+
+@settings(deadline=1000)
 @backprop_test_factory(mygrad_func=get_item, true_func=get_item, num_arrays=1,
                        index_to_arr_shapes={0: hnp.array_shapes(max_side=6, max_dims=4)},
                        kwargs=dict(index=adv_index_bool_wrap), vary_each_element=True)
