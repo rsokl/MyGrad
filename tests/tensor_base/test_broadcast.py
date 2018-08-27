@@ -18,13 +18,13 @@ def test_bad_gradient_dimensionality():
         reduce_broadcast(grad=grad, var_shape=var_shape)
 
 
-@given(grad=hnp.arrays(dtype=float, shape=hnp.array_shapes()))
+@given(grad=hnp.arrays(dtype=float, shape=hnp.array_shapes(), elements=st.floats(-100, 100)))
 def test_broadcast_scalar(grad):
     """ test when grad was broadcasted from a scalar"""
     assert_allclose(reduce_broadcast(grad, tuple()), grad.sum())
 
 
-@given(grad=hnp.arrays(dtype=float, shape=hnp.array_shapes()))
+@given(grad=hnp.arrays(dtype=float, shape=hnp.array_shapes(), elements=st.floats(-100, 100)))
 def test_reduce_broadcast_same_shape(grad):
     """ test when no broadcasting occurred"""
     var_shape=grad.shape
@@ -66,7 +66,7 @@ def test_reduce_broadcast_keepdim(var_shape, data):
     assert_allclose(actual=reduced_grad, desired=grad.sum(axis=sum_axes, keepdims=True))
 
 
-@given(grad=hnp.arrays(dtype=float, shape=(5, 3, 4, 2)))
+@given(grad=hnp.arrays(dtype=float, shape=(5, 3, 4, 2), elements=st.floats(-.01, .01)))
 def test_hybrid_broadcasting(grad):
     """ tests new-dim and keep-dim broadcasting
          (3, 1, 2) -> (5, 3, 4, 2)"""
