@@ -32,7 +32,7 @@ class Add(BroadcastableOp):
         return out
 
     def backward_var(self, grad, index, **kwargs):
-        return np.copy(grad)
+        return grad
 
 
 class Subtract(BroadcastableOp):
