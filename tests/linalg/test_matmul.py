@@ -6,9 +6,9 @@ from tests.custom_strategies import broadcastable_shape
 import numpy as np
 from numpy.testing import assert_almost_equal
 
-from hypothesis import given, assume
 import hypothesis.strategies as st
-import hypothesis.extra.numpy as hnp
+from hypothesis import settings
+
 
 @st.composite
 def special_shape(draw, static_shape, shape=tuple(), min_dim=0, max_dim=5):
@@ -71,6 +71,7 @@ def test_matmul_bkwd_1d_nd():
     pass
 
 
+@settings(deadline=400)
 @backprop_test_factory(mygrad_func=matmul, true_func=np.matmul, num_arrays=2, 
                        index_to_arr_shapes={0: special_shape((4,), min_dim=1, max_dim=2), 
                                             1: (4, 5)}, 
@@ -82,17 +83,19 @@ def test_matmul_bkwd_nd_nd():
     pass
 
 
+@settings(deadline=1500)
 @backprop_test_factory(mygrad_func=matmul, true_func=np.matmul, num_arrays=2, 
                        index_to_arr_shapes={0: (2, 4), 
                                             1: special_shape((4, 5), max_dim=2)}, 
                        as_decimal=False,
                        vary_each_element=True,
-                       atol=1e-4, rtol=1e-4)
+                       atol=1e-3, rtol=1e-3)
 def test_matmul_bkwd_nd_nd2():
     """ a is n-d, b is n-d; a can broadcast into b"""
     pass
 
 
+@settings(deadline=400)
 @backprop_test_factory(mygrad_func=matmul, true_func=np.matmul, num_arrays=2, 
                        index_to_arr_shapes={0: (2, 1, 3, 4), 
                                             1: (1, 2, 4, 2)}, 

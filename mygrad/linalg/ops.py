@@ -48,6 +48,7 @@ class MatMul(BroadcastableOp):
                 dfdx = np.matmul(grad, b.swapaxes(-1, -2))
             else:           # ([...], i, j) w/ (j,)
                 dfdx = np.expand_dims(grad, -1) * b
+            return dfdx
         
         if index == 1:  # compute grad through b
             if a.ndim > 1:  # ([...], i, j) w/ ([...], j, [k])
@@ -58,8 +59,9 @@ class MatMul(BroadcastableOp):
                     dfdx = dfdx.squeeze(-1)
             else:           # (j,) w/ ([...], j, k)
                 dfdx = a[:, np.newaxis] * np.expand_dims(grad, -2)
-            
-        return dfdx
+            return dfdx
+        else:
+            raise IndexError
 
 
 ### EinSum ###
