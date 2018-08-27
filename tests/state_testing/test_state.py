@@ -1,3 +1,13 @@
+"""
+Tests Tensor/Operation implementation that uses topological sorting against the naive implementation.
+
+Here, a rule-based state machine constructs computational graphs via 'rules' by which nodes (tensors)
+are 'fused' via addition and multiplication operations. The state machine create and fuse nodes in
+any patterns, invoke `null_gradients` and `clear_graph` arbitrarily as well.
+
+The values and gradients of the nodes in the mygrad and naive graphs must match as an invariant to
+any permutation of test states (i.e. permutations of the aforementioned rules)"""
+
 import hypothesis.strategies as st
 from hypothesis.stateful import Bundle, RuleBasedStateMachine, rule, invariant, precondition
 from numpy.testing import assert_equal, assert_almost_equal
