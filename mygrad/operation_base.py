@@ -106,7 +106,8 @@ class Operation:
                     raise Exception("Invalid Backprop: part of the computational graph containing "
                                     "this tensor was cleared prior to backprop")
                 if var.grad is None:
-                    var.grad = np.asarray(self.backward_var(grad, index, **kwargs))
+                    tmp_grad = np.asarray(self.backward_var(grad, index, **kwargs))
+                    var.grad = np.copy(tmp_grad) if np.shares_memory(tmp_grad, grad) else tmp_grad
                 else:
                     var.grad += self.backward_var(grad, index, **kwargs)
 
