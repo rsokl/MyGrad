@@ -5,6 +5,7 @@ from mygrad import Tensor
 from hypothesis import given
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
+from hypothesis import settings
 
 import numpy as np
 from numpy.testing import assert_allclose
@@ -185,6 +186,7 @@ def test_einsum_static_bkwd(optimize):
     compare_backprop(a, [0, Ellipsis], b, [2, 0], optimize=optimize)
 
 
+@settings(deadline=350)
 @given(optimize=bool_strat())
 def test_traces_bkwd(optimize):
     a = np.random.rand(5, 2, 2, 5)
@@ -316,6 +318,7 @@ def test_einsum_bkwd4(shape, optimize, data):
     assert_allclose(y.grad, dy, atol=1e-6)
 
 
+@settings(deadline=350)
 @given(optimize=bool_strat())
 def test_einsum_bkwd5(optimize):
     x = Tensor(np.random.rand(5, 3, 4, 6))
@@ -334,6 +337,7 @@ def test_einsum_bkwd5(optimize):
     assert_allclose(y.grad, dy, atol=1e-6)
 
 
+@settings(deadline=2000)
 @given(shape=hnp.array_shapes(min_dims=3, max_dims=3),
        optimize=bool_strat())
 def test_einsum_bkwd6(shape, optimize):

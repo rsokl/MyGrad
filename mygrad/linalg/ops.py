@@ -199,8 +199,7 @@ class EinSum(BroadcastableOp):
                 # if y was broadcast over x, the gradient needs to
                 # be broadcast to x's shape: dfdx-shape (i,j,1) -> (i,j,k)
                 dfdx = np.broadcast_to(dfdx, var_shape)
-            self.variables[index].backward(dfdx, _broadcastable=False)
-            return None
+            return dfdx
 
         # Accommodate trace by writing to strided view on array of zeros
         # For example:
@@ -221,4 +220,4 @@ class EinSum(BroadcastableOp):
                         for lbl in var_lbl)
         out_view = as_strided(dfdx, shape=out_view_shape, strides=strides)
         np.einsum(back_prop_lbls, *operands, out=out_view, optimize=self.optimize)
-        self.variables[index].backward(dfdx, **kwargs)
+        return dfdx
