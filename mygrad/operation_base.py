@@ -93,13 +93,7 @@ class Operation:
                 The back-propagated total derivative with respect to the present
                 operation (`f`): d(out)/df
 
-            graph : Set[Operation]
-
-            Other Parameters
-            ----------------
-            _broadcastable : bool, optional (default:False)
-                Devs-only: Indicates whether or not the up-stream operation
-                can utilize broadcasting."""
+            graph : Set[Operation]"""
         for index, var in enumerate(self.variables):
             if not var.constant:
                 if not var._ops:
@@ -127,13 +121,7 @@ class BroadcastableOp(Operation):
                 The back-propagated total derivative with respect to the present
                 operation (`f`): d(out)/df
 
-            graph : Set[Operation]
-
-            Other Parameters
-            ----------------
-            _broadcastable : bool, optional (default:False)
-                Devs-only: Indicates whether or not the up-stream operation
-                can utilize broadcasting."""
+            graph : Set[Operation]"""
         for index, var in enumerate(self.variables):
             if not var.constant:
                 if not var._ops:
