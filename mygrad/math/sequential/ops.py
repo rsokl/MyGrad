@@ -375,10 +375,10 @@ class Variance(Operation):
            grad = np.full(a.shape, grad, dtype=float)
         else:
             if not self.kwargs["keepdims"]:
-                index = [slice(None) for i in range(a.ndim)]
+                index = [slice(None)] * a.ndim
                 for i in self.kwargs["axis"]:
                     index[i] = np.newaxis
-                grad = grad[index]
+                grad = grad[tuple(index)]
         back = (2. / N) * (a.data - a.data.mean(axis=self.kwargs["axis"], keepdims=True))
         return back * grad
 
