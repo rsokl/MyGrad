@@ -146,8 +146,7 @@ class Sum(Operation):
             index = [slice(None) for i in range(a.ndim)]
             for i in self.axis:
                 index[i] = np.newaxis
-            grad = grad[index]
-
+            grad = grad[tuple(index)]
         return np.broadcast_to(grad, a.data.shape).astype(float)
 
 
@@ -177,9 +176,8 @@ class Prod(Operation):
         a = self.variables[index]
         x = a.data
         grad = np.asarray(grad)
-        axes = tuple(i if i >= 0 else a.ndim + i for i in self.axis) \
-            if self.axis is not None else tuple(range(a.ndim))
-        axes = set(axes)
+
+        axes = set(range(a.ndim)) if self.axis is None else set(i if i >= 0 else a.ndim + i for i in self.axis)
 
         # make grad broadcast-compatible against x
         grad = grad.reshape(*(1 if n in axes else i for n, i in enumerate(a.shape)))
