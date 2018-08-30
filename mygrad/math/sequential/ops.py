@@ -84,11 +84,12 @@ class MaxMin(Operation):
             return dat
 
         elif self.axis is None:
-            keep_index = [np.newaxis for i in range(a.ndim)]
+            keep_index = (np.newaxis,) * a.ndim
         else:
-            keep_index = [slice(None) for i in range(a.ndim)]
+            keep_index = [slice(None)] * a.ndim
             for i in self.axis:
                 keep_index[i] = np.newaxis
+            keep_index = tuple(keep_index)
 
         return np.asarray(dat)[keep_index]
 
@@ -100,12 +101,13 @@ class MaxMin(Operation):
         # normalize shape of grad to be same as when keepdims=False
         if self.keepdims:
             if self.axis is not None:
-                reduce = [slice(None) for i in range(a.ndim)]
+                reduce = [slice(None)] * a.ndim
                 for i in self.axis:
                     reduce[i] = 0
+                reduce = tuple(reduce)
             else:
-                reduce = (0 for i in range(a.ndim))
-            grad = grad[tuple(reduce)]
+                reduce = (0,) * a.ndim
+            grad = grad[reduce]
 
         # use argmax indices to broadcast grad to correct elements
         if self.axis is None or len(self.axis) == 1:
@@ -113,10 +115,6 @@ class MaxMin(Operation):
             out[self.indices] = grad
             return out
         else:
-            tmp = [slice(None) for i in range(a.ndim)]
-            for i in self.axis:
-                tmp[i] = np.newaxis
-
             out = np.zeros(self.tmp_grad_shape, dtype=float)
             out[self.indices] = grad
             shape = tuple(a.shape[i] for i in self.to_trans)
