@@ -248,7 +248,6 @@ class EinSum(BroadcastableOp):
             dfdx *= factor
         return dfdx
 
-
     def backward(self, grad, *, graph, **kwargs):
         """ Back-propagates the gradient through all of the operation's inputs.
             Constant tensors do not propagate a gradient.

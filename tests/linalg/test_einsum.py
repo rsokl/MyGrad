@@ -2,10 +2,13 @@ from ..utils.numerical_gradient import numerical_gradient_full
 from ..custom_strategies import broadcastable_shape
 
 from mygrad import Tensor
+
 from hypothesis import given
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
 from hypothesis import settings
+
+from copy import copy
 
 import numpy as np
 from numpy.testing import assert_allclose
@@ -50,7 +53,6 @@ def compare_backprop(*operands, atol=1e-5, rtol=1e-5, optimize=False):
             if end is not None:
                 x += (operands[-1],)
             return np.einsum(*x)
-
         x = tuple(chain.from_iterable(zip(tensors, operands[1::2])))
         if end is not None:
             x += (operands[-1],)
@@ -85,7 +87,8 @@ def test_merge_mappings():
     b = dict(a=10, b=10)
     c = dict(c=50)
     d = dict(d=70)
-    assert _merge_max_mappings(a, b, c, d) == dict(a=10, b=100, c=50, d=70)
+    e = dict()
+    assert _merge_max_mappings(a, b, c, d, e) == dict(a=10, b=100, c=50, d=70)
 
 
 @given(optimize=bool_strat())
@@ -150,7 +153,7 @@ def test_einsum_static_bkwd(optimize):
     compare_backprop(a, [0, 0], [0], optimize=optimize)
 
     compare_backprop('ij->', a, optimize=optimize)
-    compare_backprop(a, [0, 0], [0], optimize=optimize)
+    compare_backprop(a, [0, 1], optimize=optimize)
 
     compare_backprop('ij,j', a, b, optimize=optimize)
     compare_backprop(a, [0, 1], b, [1], optimize=optimize)
@@ -186,7 +189,7 @@ def test_einsum_static_bkwd(optimize):
     compare_backprop(a, [0, Ellipsis], b, [2, 0], optimize=optimize)
 
 
-@settings(deadline=350)
+@settings(deadline=1000)
 @given(optimize=bool_strat())
 def test_traces_bkwd(optimize):
     a = np.random.rand(5, 2, 2, 5)
@@ -206,6 +209,70 @@ def test_traces_bkwd(optimize):
     compare_backprop('ijji,kji,jj-> kj', a, b, c, optimize=optimize)
     compare_backprop('ijji,kji,jj-> ijk', a, b, c, optimize=optimize)
     compare_backprop('ijji,kji,jj-> jk', a, b, c, optimize=optimize)
+
+
+def test_redundant_args():
+    """
+    Test behavior for when einsum receives redundant inputs. An optimization
+    was added such that einsum will only compute the gradient for such an entry
+    once and scale it accordingly.
+    """
+    a = Tensor(np.arange(4).reshape(2, 2))
+    a_copy = copy(a)
+
+    # check standard summation
+    o = einsum("ij,ij", a, a)
+    assert len(o.creator.cache) == 1
+    o.sum().backward()
+
+    o = einsum("ij,ij", a_copy, a_copy*1)
+    assert len(o.creator.cache) == 2
+    o.sum().backward()
+    assert_allclose(a.grad, a_copy.grad)
+
+    a = Tensor(np.arange(4).reshape(2, 2))
+    a_copy = copy(a)
+
+    # check standard summation using alt signature
+    o = einsum(a, [0, 1], a, [0, 1])
+    assert len(o.creator.cache) == 1
+    o.sum().backward()
+
+    o = einsum(a_copy, [0, 1], a_copy*1, [0, 1])
+    assert len(o.creator.cache) == 2
+    o.sum().backward()
+    assert_allclose(a.grad, a_copy.grad)
+
+    a = Tensor(np.arange(4).reshape(2, 2))
+    a_copy = copy(a)
+
+    # check traces
+    o = einsum("ii,ii", a, a)
+    assert len(o.creator.cache) == 1
+    o.sum().backward()
+
+    o = einsum("ii,ii", a_copy, a_copy*1)
+    assert len(o.creator.cache) == 2
+    o.sum().backward()
+    assert_allclose(a.grad, a_copy.grad)
+
+    a = Tensor(np.arange(4).reshape(2, 2))
+    a_copy = copy(a)
+
+    b = Tensor(-1*np.arange(2).reshape(2, 1))
+    b_copy = copy(b)
+
+    # check broadcasting and multiply-redundant input tensors
+    # with distinct einsum labels
+    o = einsum("ii,ii,i...,i...,...i,...i", a, a, b, b, a, a)
+    assert len(o.creator.cache) == 3
+    o.sum().backward()
+
+    o = einsum("ii,ii,i...,i...,...i,...i", a_copy, a_copy*1, b_copy, b_copy*1, a_copy, 1*a_copy)
+    assert len(o.creator.cache) == 6
+    o.sum().backward()
+    assert_allclose(a.grad, a_copy.grad)
+    assert_allclose(b.grad, b_copy.grad)
 
 
 @given(num=st.integers(1, 10),
@@ -318,7 +385,7 @@ def test_einsum_bkwd4(shape, optimize, data):
     assert_allclose(y.grad, dy, atol=1e-6)
 
 
-@settings(deadline=350)
+@settings(deadline=2000)
 @given(optimize=bool_strat())
 def test_einsum_bkwd5(optimize):
     x = Tensor(np.random.rand(5, 3, 4, 6))
