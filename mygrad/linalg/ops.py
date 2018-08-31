@@ -164,7 +164,7 @@ class EinSum(BroadcastableOp):
 
         factor = self.cache[(var, original_var_lbl)]
         if factor == 0:
-            return np.zeros_like(var.data)
+            return None
 
         self.cache[(var, original_var_lbl)] = 0
 
@@ -247,3 +247,32 @@ class EinSum(BroadcastableOp):
         if factor > 1:
             dfdx *= factor
         return dfdx
+
+
+    def backward(self, grad, *, graph, **kwargs):
+        """ Back-propagates the gradient through all of the operation's inputs.
+            Constant tensors do not propagate a gradient.
+
+            grad : numpy.ndarray
+                The back-propagated total derivative with respect to the present
+                operation (`f`): d(out)/df
+
+            graph : Set[Operation]"""
+        for index, var in enumerate(self.variables):
+            if not var.constant:
+                if not var._ops:
+                    raise Exception("Invalid Backprop: part of the computational graph containing "
+                                    "this tensor was cleared prior to backprop")
+                if var.grad is None:
+                    o = self.backward_var(grad, index, **kwargs)
+                    if o is not None:
+                        tmp_grad = reduce_broadcast(o, var.shape)
+                        var.grad = np.copy(tmp_grad) if np.shares_memory(tmp_grad, grad) else tmp_grad
+                else:
+                    o = self.backward_var(grad, index, **kwargs)
+                    if o is not None:
+                        var.grad += reduce_broadcast(o, var.shape)
+
+        for var in {i for i in self.variables if not i.constant and i.creator is not None}:
+            var._accum_ops.add(self)
+            var._backward(graph=graph)
