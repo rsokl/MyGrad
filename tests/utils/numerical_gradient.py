@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 import numpy as np
-from itertools import zip_longest
+from typing import Tuple, List, Optional
 
 from mygrad._utils import reduce_broadcast
 
@@ -42,13 +42,14 @@ def numerical_derivative(f, x, h=1e-8):
     return dx
 
 
-def numerical_gradient(f, *args, back_grad, vary_ind=None, h=1e-8, as_decimal=True, kwargs={}):
+def numerical_gradient(f, *args, back_grad, vary_ind=None, h=1e-8, as_decimal=True, kwargs=None):
     """ Computes numerical partial derivatives of f(x0, x1, ...) in each
         of its variables, using the central difference method.
         This is a "fast" method - it varies entire arrays at once. Thus
         this is only appropriate for trivial vectorized functions that
         map accross entries of arrays (like add or multiply). E.g.
         matrix multiplication is *not* suited for this style of gradient.
+
         Parameters
         ----------
         f : Callable[[numpy.ndarray, ...], numpy.ndarray]
@@ -64,11 +65,16 @@ def numerical_gradient(f, *args, back_grad, vary_ind=None, h=1e-8, as_decimal=Tr
                0 -> w.r.t x only, 1 -> w.r.t y only, etc.
         h : float, optional, (default=1e-8)
             Approximating infinitesimal.
+        kwargs : Optional[Dict]
+
         Returns
         -------
         Tuple[Union[NoneType, numpy.ndarray], ...]
             df/dx0, df/dx1, ... - evaluated at (`x0`, `x1`, ... ).
         """
+
+    if kwargs is None:
+        kwargs = {}
 
     if not args:
         raise ValueError("At least one value must be passed to `args`")
@@ -146,7 +152,7 @@ def numerical_gradient_sequence(f, *, x, back_grad,  axis=None, keepdims=False, 
     return grad.astype(float)
 
 
-def numerical_gradient_full(f, *args, back_grad, as_decimal=True, kwargs={}, vary_ind=None):
+def numerical_gradient_full(f, *args, back_grad, as_decimal=True, kwargs=None, vary_ind=None) -> Tuple[np.ndarray, ...]:
     """ Computes numerical partial derivatives of f(x, y, ..., **kwargs), by
         varying each entry of x, y, ... independently producing a gradient
         in each variable.
@@ -176,16 +182,21 @@ def numerical_gradient_full(f, *args, back_grad, as_decimal=True, kwargs={}, var
             df/dx, df/dy, ...
             df/dvar will be None if var was excluded via `vary_ind`
         """
+    if kwargs is None:
+        kwargs = {}
 
     args = tuple(to_decimal_array(i) if as_decimal else i for i in args)
-    grads = [None] * len(args)
+    grads = [None] * len(args)  # type: List[Optional[np.ndarray]]
     if isinstance(vary_ind, int):
         vary_ind = [vary_ind]
 
     for n in range(len(args)):
         if vary_ind is not None and n not in vary_ind:
             continue
-        tmp_f = lambda var: f(*args[:n], var, *args[n+1:], **kwargs)
+
+        def tmp_f(var: np.ndarray) -> np.ndarray:
+            return f(*args[:n], var, *args[n+1:], **kwargs)
+
         grads[n] = _numerical_gradient_full(tmp_f,
                                             x=args[n],
                                             back_grad=back_grad,
