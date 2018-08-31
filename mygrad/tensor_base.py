@@ -324,12 +324,12 @@ class Tensor:
         return self._constant
 
     @property
-    def creator(self):
+    def creator(self) -> Union[Operation, BroadcastableOp]:
         """ The `Operation` instance that produced `self`.
 
             Returns
             -------
-            mygrad.Operation
+            Operation
             """
         return self._creator
 
@@ -412,7 +412,7 @@ class Tensor:
         return repr(self.data).replace("array", "Tensor").replace("\n", "\n ")
 
     def __copy__(self):
-        """ Produces a copy of self with copy.creator=None"""
+        """ Produces a copy of ``self`` with ``copy.creator=None``"""
         return Tensor(np.copy(self.data), _creator=None, constant=self.constant, _scalar_only=self._scalar_only)
 
     def item(self):
