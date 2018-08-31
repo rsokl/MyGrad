@@ -1,6 +1,3 @@
-from mygrad.operation_base import Operation, BroadcastableOp
-import numpy as np
-
 from mygrad.operation_base import BroadcastableOp
 from mygrad._utils import reduce_broadcast
 import numpy as np
@@ -8,7 +5,8 @@ from itertools import chain
 from functools import reduce
 
 from numpy.lib.stride_tricks import as_strided
-
+from copy import copy
+from collections import Counter
 
 __all__ = ["MatMul", "EinSum"]
 
@@ -125,10 +123,26 @@ class EinSum(BroadcastableOp):
     scalar_only = True
 
     def __call__(self, *variables, in_lbls, out_lbls, optimize=False):
-        self.in_lbls = in_lbls
+        """
+        einsum('{in_lbls}->{out_lbls}', *variables, optimize=optimize)
+
+        Parameters
+        ----------
+        variables : mygrad.Tensor
+        in_lbls : str
+        out_lbls : str
+        optimize : bool
+
+        Returns
+        -------
+        numpy.ndarray
+        """
+        self.in_lbls = in_lbls.split(',')
         self.out_lbls = out_lbls
         self.variables = variables
         self.optimize = optimize
+
+        self.cache = Counter(zip(variables, in_lbls))
         return np.einsum("->".join((in_lbls, out_lbls)), *(var.data for var in self.variables),
                          optimize=optimize)
 
@@ -144,8 +158,16 @@ class EinSum(BroadcastableOp):
         numpy_arrays = tuple(i.data for i in self.variables)
 
         # ijk, k
-        in_lbls = self.in_lbls.split(',')
+        in_lbls = copy(self.in_lbls)
         original_var_lbl = in_lbls.pop(index)
+        var = self.variables[index]
+
+        factor = self.cache[(var, original_var_lbl)]
+        self.cache[(var, original_var_lbl)] = 0
+
+        if factor == 0:
+            return np.zeros_like(var.data)
+
         var_lbl = _unique_from_end(original_var_lbl)
         repeat_lbls = len(var_lbl) != len(original_var_lbl)
 
@@ -155,7 +177,7 @@ class EinSum(BroadcastableOp):
             # the diagonal of an array to reinstate this axis that
             # we just removed
             mapping_gen = ({k: v for k, v in zip(lbl, arr.shape)}
-                            for lbl, arr in zip(self.in_lbls.split(','), numpy_arrays))
+                            for lbl, arr in zip(self.in_lbls, numpy_arrays))
             lbl_to_size = _merge_max_mappings(*mapping_gen)
             var_shape = tuple(lbl_to_size[lbl] for lbl in var_lbl)
         else:
@@ -199,6 +221,8 @@ class EinSum(BroadcastableOp):
                 # if y was broadcast over x, the gradient needs to
                 # be broadcast to x's shape: dfdx-shape (i,j,1) -> (i,j,k)
                 dfdx = np.broadcast_to(dfdx, var_shape)
+            if factor > 1:
+                dfdx *= factor
             return dfdx
 
         # Accommodate trace by writing to strided view on array of zeros
@@ -220,4 +244,6 @@ class EinSum(BroadcastableOp):
                         for lbl in var_lbl)
         out_view = as_strided(dfdx, shape=out_view_shape, strides=strides)
         np.einsum(back_prop_lbls, *operands, out=out_view, optimize=self.optimize)
+        if factor > 1:
+            dfdx *= factor
         return dfdx
