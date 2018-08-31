@@ -142,6 +142,9 @@ class EinSum(BroadcastableOp):
         self.variables = variables
         self.optimize = optimize
 
+        # cache counts the number of redundant tensor-label pairs
+        # fed to einsum. Only one gradient will be computed for a
+        # unique tensor-label pair
         self.cache = Counter(zip(variables, self.in_lbls))
         return np.einsum("->".join((in_lbls, out_lbls)), *(var.data for var in self.variables),
                          optimize=optimize)
@@ -155,8 +158,6 @@ class EinSum(BroadcastableOp):
         bkwd (var: 1): "ji, ijk -> k", grad, x
         """
 
-        numpy_arrays = tuple(i.data for i in self.variables)
-
         # ijk, k
         in_lbls = copy(self.in_lbls)
         original_var_lbl = in_lbls.pop(index)
@@ -164,8 +165,12 @@ class EinSum(BroadcastableOp):
 
         factor = self.cache[(var, original_var_lbl)]
         if factor == 0:
+            # the gradient for the current tensor-label pair
+            # has already been computed, scaled, and back-propped,
+            # skip gradient calculation.
             return None
 
+        numpy_arrays = tuple(i.data for i in self.variables)
         self.cache[(var, original_var_lbl)] = 0
 
         var_lbl = _unique_from_end(original_var_lbl)
@@ -222,6 +227,10 @@ class EinSum(BroadcastableOp):
                 # be broadcast to x's shape: dfdx-shape (i,j,1) -> (i,j,k)
                 dfdx = np.broadcast_to(dfdx, var_shape)
             if factor > 1:
+                # This tensor-label pair appears several times as
+                # input to einsum. Scale the gradient accordingly
+                # such that the full contribution of the tensor-label
+                # pair is accounted for.
                 dfdx *= factor
             return dfdx
 
@@ -240,11 +249,17 @@ class EinSum(BroadcastableOp):
         dfdx = np.zeros(tuple(lbl_to_size[i] for i in original_var_lbl))
         out_view_shape = tuple(lbl_to_size[i] for i in var_lbl)
 
+        # compute strides required to traverse the appropriate diagonals of
+        # the output tensor.
         strides = tuple(sum(dfdx.strides[ind] for ind in _get_indices(lbl, original_var_lbl))
                         for lbl in var_lbl)
         out_view = as_strided(dfdx, shape=out_view_shape, strides=strides)
         np.einsum(back_prop_lbls, *operands, out=out_view, optimize=self.optimize)
         if factor > 1:
+            # This tensor-label pair appears several times as
+            # input to einsum. Scale the gradient accordingly
+            # such that the full contribution of the tensor-label
+            # pair is accounted for.
             dfdx *= factor
         return dfdx
 
@@ -252,7 +267,7 @@ class EinSum(BroadcastableOp):
         """ Back-propagates the gradient through all of the operation's inputs.
             Constant tensors do not propagate a gradient.
 
-            This implementation of ``backward` is specialized such that
+            This implementation of ``backward`` is specialized such that
             `` self.backward_var`` can return ``None`` to bypass a
             gradient-accumulation step.
 
