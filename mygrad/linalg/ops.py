@@ -252,6 +252,12 @@ class EinSum(BroadcastableOp):
         """ Back-propagates the gradient through all of the operation's inputs.
             Constant tensors do not propagate a gradient.
 
+            This implementation of ``backward` is specialized such that
+            `` self.backward_var`` can return ``None`` to bypass a
+            gradient-accumulation step.
+
+            Parameters
+            ----------
             grad : numpy.ndarray
                 The back-propagated total derivative with respect to the present
                 operation (`f`): d(out)/df
