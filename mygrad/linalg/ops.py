@@ -142,7 +142,7 @@ class EinSum(BroadcastableOp):
         self.variables = variables
         self.optimize = optimize
 
-        self.cache = Counter(zip(variables, in_lbls))
+        self.cache = Counter(zip(variables, self.in_lbls))
         return np.einsum("->".join((in_lbls, out_lbls)), *(var.data for var in self.variables),
                          optimize=optimize)
 
@@ -163,10 +163,10 @@ class EinSum(BroadcastableOp):
         var = self.variables[index]
 
         factor = self.cache[(var, original_var_lbl)]
-        self.cache[(var, original_var_lbl)] = 0
-
         if factor == 0:
             return np.zeros_like(var.data)
+
+        self.cache[(var, original_var_lbl)] = 0
 
         var_lbl = _unique_from_end(original_var_lbl)
         repeat_lbls = len(var_lbl) != len(original_var_lbl)
