@@ -1,6 +1,3 @@
-from mygrad.operation_base import Operation, BroadcastableOp
-import numpy as np
-
 from mygrad.operation_base import BroadcastableOp
 from mygrad._utils import reduce_broadcast
 import numpy as np
@@ -8,7 +5,8 @@ from itertools import chain
 from functools import reduce
 
 from numpy.lib.stride_tricks import as_strided
-
+from copy import copy
+from collections import Counter
 
 __all__ = ["MatMul", "EinSum"]
 
@@ -125,10 +123,29 @@ class EinSum(BroadcastableOp):
     scalar_only = True
 
     def __call__(self, *variables, in_lbls, out_lbls, optimize=False):
-        self.in_lbls = in_lbls
+        """
+        einsum('{in_lbls}->{out_lbls}', *variables, optimize=optimize)
+
+        Parameters
+        ----------
+        variables : mygrad.Tensor
+        in_lbls : str
+        out_lbls : str
+        optimize : bool
+
+        Returns
+        -------
+        numpy.ndarray
+        """
+        self.in_lbls = in_lbls.split(',')
         self.out_lbls = out_lbls
         self.variables = variables
         self.optimize = optimize
+
+        # cache counts the number of redundant tensor-label pairs
+        # fed to einsum. Only one gradient will be computed for a
+        # unique tensor-label pair
+        self.cache = Counter(zip(variables, self.in_lbls))
         return np.einsum("->".join((in_lbls, out_lbls)), *(var.data for var in self.variables),
                          optimize=optimize)
 
@@ -141,11 +158,21 @@ class EinSum(BroadcastableOp):
         bkwd (var: 1): "ji, ijk -> k", grad, x
         """
 
-        numpy_arrays = tuple(i.data for i in self.variables)
-
         # ijk, k
-        in_lbls = self.in_lbls.split(',')
+        in_lbls = copy(self.in_lbls)
         original_var_lbl = in_lbls.pop(index)
+        var = self.variables[index]
+
+        factor = self.cache[(var, original_var_lbl)]
+        if factor == 0:
+            # the gradient for the current tensor-label pair
+            # has already been computed, scaled, and back-propped,
+            # skip gradient calculation.
+            return None
+
+        numpy_arrays = tuple(i.data for i in self.variables)
+        self.cache[(var, original_var_lbl)] = 0
+
         var_lbl = _unique_from_end(original_var_lbl)
         repeat_lbls = len(var_lbl) != len(original_var_lbl)
 
@@ -155,7 +182,7 @@ class EinSum(BroadcastableOp):
             # the diagonal of an array to reinstate this axis that
             # we just removed
             mapping_gen = ({k: v for k, v in zip(lbl, arr.shape)}
-                            for lbl, arr in zip(self.in_lbls.split(','), numpy_arrays))
+                            for lbl, arr in zip(self.in_lbls, numpy_arrays))
             lbl_to_size = _merge_max_mappings(*mapping_gen)
             var_shape = tuple(lbl_to_size[lbl] for lbl in var_lbl)
         else:
@@ -199,6 +226,12 @@ class EinSum(BroadcastableOp):
                 # if y was broadcast over x, the gradient needs to
                 # be broadcast to x's shape: dfdx-shape (i,j,1) -> (i,j,k)
                 dfdx = np.broadcast_to(dfdx, var_shape)
+            if factor > 1:
+                # This tensor-label pair appears several times as
+                # input to einsum. Scale the gradient accordingly
+                # such that the full contribution of the tensor-label
+                # pair is accounted for.
+                dfdx *= factor
             return dfdx
 
         # Accommodate trace by writing to strided view on array of zeros
@@ -216,8 +249,50 @@ class EinSum(BroadcastableOp):
         dfdx = np.zeros(tuple(lbl_to_size[i] for i in original_var_lbl))
         out_view_shape = tuple(lbl_to_size[i] for i in var_lbl)
 
+        # compute strides required to traverse the appropriate diagonals of
+        # the output tensor.
         strides = tuple(sum(dfdx.strides[ind] for ind in _get_indices(lbl, original_var_lbl))
                         for lbl in var_lbl)
         out_view = as_strided(dfdx, shape=out_view_shape, strides=strides)
         np.einsum(back_prop_lbls, *operands, out=out_view, optimize=self.optimize)
+        if factor > 1:
+            # This tensor-label pair appears several times as
+            # input to einsum. Scale the gradient accordingly
+            # such that the full contribution of the tensor-label
+            # pair is accounted for.
+            dfdx *= factor
         return dfdx
+
+    def backward(self, grad, *, graph, **kwargs):
+        """ Back-propagates the gradient through all of the operation's inputs.
+            Constant tensors do not propagate a gradient.
+
+            This implementation of ``backward`` is specialized such that
+            `` self.backward_var`` can return ``None`` to bypass a
+            gradient-accumulation step.
+
+            Parameters
+            ----------
+            grad : numpy.ndarray
+                The back-propagated total derivative with respect to the present
+                operation (`f`): d(out)/df
+
+            graph : Set[Operation]"""
+        for index, var in enumerate(self.variables):
+            if not var.constant:
+                if not var._ops:
+                    raise Exception("Invalid Backprop: part of the computational graph containing "
+                                    "this tensor was cleared prior to backprop")
+                if var.grad is None:
+                    o = self.backward_var(grad, index, **kwargs)
+                    if o is not None:
+                        tmp_grad = reduce_broadcast(o, var.shape)
+                        var.grad = np.copy(tmp_grad) if np.shares_memory(tmp_grad, grad) else tmp_grad
+                else:
+                    o = self.backward_var(grad, index, **kwargs)
+                    if o is not None:
+                        var.grad += reduce_broadcast(o, var.shape)
+
+        for var in {i for i in self.variables if not i.constant and i.creator is not None}:
+            var._accum_ops.add(self)
+            var._backward(graph=graph)
