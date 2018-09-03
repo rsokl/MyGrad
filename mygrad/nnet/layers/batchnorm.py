@@ -104,6 +104,36 @@ class BatchNorm(Operation):
 
 
 def batchnorm(x, *, gamma=None, beta=None, eps, constant=False):
+    """
+    Performs batch normalization on ``x``
+
+                 y(x) = (x - E[x]) / sqrt(Var[x] + eps)
+                 batchnorm(x) = gamma * y(x) + beta
+
+    Where E[x] and Var[x] represent the mean and variance, respectively,
+    over axis-1 of ``x``. The subsequent affine transformation on ``y``
+    is optional.
+
+    Parameters
+    ----------
+    x : array_like, shape=(N, C, ...)
+        The batch to be normalized within each entry of C
+
+    gamma : Optional[array_like], shape=(C,)
+
+    beta  : Optional[array_like], shape=(C,)
+
+    eps : Real
+       A small non-negative number.
+
+    constant    constant : bool, optional (default=False)
+        If True, the resulting Tensor is a constant.
+
+    Returns
+    -------
+    mygrad.Tensor
+        The batch-normalized data.
+    """
     # pass gamma and beta as empty arrays if they are not supplied
     if gamma is None:
         gamma = np.array([])
