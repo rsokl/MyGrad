@@ -355,9 +355,7 @@ class backprop_test_factory():
 
             # compute analytic derivatives via mygrad-backprop
             if any(out.shape != i.shape for i in arrs):
-                # Broadcasting occurred, check that the op was broadcastable
-                # and that the resulting tensor is scalar-only
-                assert isinstance(out.creator, BroadcastableOp) and (out.scalar_only or out.constant)
+                # Broadcasting occurred
                 # Must reduce `out` to scalar
                 # first multiply by `grad` to simulate non-trivial back-prop
                 (grad * out).sum().backward()
