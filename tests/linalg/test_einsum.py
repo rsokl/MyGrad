@@ -246,6 +246,18 @@ def test_redundant_args():
     a = Tensor(np.arange(4).reshape(2, 2))
     a_copy = copy(a)
 
+    # check matmul (no redundant indices)
+    o = einsum("ij,jk", a, a)
+    assert len(o.creator.cache) == 2
+    o.sum().backward()
+
+    o = a_copy @ a_copy
+    o.sum().backward()
+    assert_allclose(a.grad, a_copy.grad)
+
+    a = Tensor(np.arange(4).reshape(2, 2))
+    a_copy = copy(a)
+
     # check traces
     o = einsum("ii,ii", a, a)
     assert len(o.creator.cache) == 1
