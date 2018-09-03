@@ -4,7 +4,7 @@ from numbers import Integral
 import numpy as np
 
 try:
-    from numby import njit, vectorize
+    from numba import njit, vectorize
 except ImportError:
     raise ImportError("The package `numba` must be installed in order to access the gru.")
 
