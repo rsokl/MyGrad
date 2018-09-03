@@ -36,40 +36,51 @@ class BatchNorm(Operation):
         -------
         numpy.ndarray
         """
+        normed_dims = tuple(i for i in range(x.ndim) if i != 1)
+        keepdims_shape = tuple(1 if n != 1 else d for n, d in enumerate(x.shape))
+
         self.variables = (x, gamma, beta)
         x, gamma, beta = x.data, gamma.data, beta.data
-        self.mean = x.mean(axis=0)
-        self.var = np.einsum("i...,i...->...", x, x)
-        self.var /= x.shape[0]
+        self.mean = x.mean(axis=normed_dims)
+        self.var = np.einsum(x, range(x.ndim), x, range(x.ndim), [1])
+        self.var /= (x.size / x.shape[1])
         self.var -= self.mean ** 2
         if eps:
             self.var += eps
 
-        y = x - np.expand_dims(self.mean, axis=0)
-        y /= np.sqrt(self.var)
+        y = x - self.mean.reshape(keepdims_shape)
+        y /= np.sqrt(self.var).reshape(keepdims_shape)
         self.x_norm = y
-        y = y * gamma
-        y += beta
+        y = y * gamma.reshape(keepdims_shape)
+        y += beta.reshape(keepdims_shape)
         return y
 
     def backward_var(self, grad, index, **kwargs):
-
+        x = self.variables[0].data
         if index == 0:  # backprop through x
-            x = self.variables[0].data
+            normed_dims = tuple(i for i in range(x.ndim) if i != 1)
+            keepdims_shape = tuple(1 if n != 1 else d for n, d in enumerate(x.shape))
+            mean = self.mean.reshape(keepdims_shape)
+            var = self.var.reshape(keepdims_shape)
             gamma = self.variables[1].data
-            grad = grad - np.mean(grad, axis=0, keepdims=True)
-            x_sub_Ex = x - self.mean
-            rterm = x_sub_Ex / self.var
-            rterm /= x.shape[0]
-            rterm *= np.einsum("i...,i...->...", grad, x_sub_Ex)
+
+            grad = grad - np.mean(grad, axis=normed_dims, keepdims=True)
+            x_sub_Ex = x - mean
+            rterm = x_sub_Ex / var
+            rterm /= (x.size / x.shape[1])
+            rterm *= np.reshape(np.einsum(grad, range(x.ndim),
+                                          x_sub_Ex, range(x.ndim),
+                                          [1]),
+                                keepdims_shape)
             grad -= rterm
-            grad /= np.sqrt(self.var)
-            grad *= gamma
+            grad /= np.sqrt(var)
+            grad *= gamma.reshape(keepdims_shape)
             return grad
         elif index == 1:  # backprop through gamma
-            return np.einsum("i...,i...->...", grad, self.x_norm)
+            return np.einsum(grad, range(x.ndim), self.x_norm, range(x.ndim), [1])
         elif index == 2:
-            return grad.sum(axis=0)
+            normed_dims = tuple(i for i in range(x.ndim) if i != 1)
+            return grad.sum(axis=normed_dims)
         else:
             raise IndexError
 

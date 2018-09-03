@@ -9,8 +9,15 @@ import hypothesis.extra.numpy as hnp
 
 
 def simple_batchnorm(x, gamma, beta, eps):
-    mean = x.mean(axis=0)
-    var = x.var(axis=0)
+    axes = [i for i in range(x.ndim)]
+    axes.pop(1)  # every axis except 1
+    axes = tuple(axes)
+    keepdims_shape = tuple(1 if n != 1 else d for n, d in enumerate(x.shape))
+
+    mean = mg.mean(x, axis=axes, keepdims=True)
+    var = mg.var(x, axis=axes, keepdims=True)
+    gamma = gamma.reshape(keepdims_shape)
+    beta = beta.reshape(keepdims_shape)
     return gamma * (x - mean) / mg.sqrt(var + eps) + beta
 
 
@@ -19,8 +26,8 @@ def simple_batchnorm(x, gamma, beta, eps):
                     elements=st.floats(-100, 100)),
        data=st.data())
 def test_batchnorm(x, data):
-    gamma = data.draw(hnp.arrays(shape=x.shape[1:], dtype=float, elements=st.floats(-10, 10)), label="gamma")
-    beta = data.draw(hnp.arrays(shape=x.shape[1:], dtype=float, elements=st.floats(-10, 10)), label="beta")
+    gamma = data.draw(hnp.arrays(shape=x.shape[1:2], dtype=float, elements=st.floats(-10, 10)), label="gamma")
+    beta = data.draw(hnp.arrays(shape=x.shape[1:2], dtype=float, elements=st.floats(-10, 10)), label="beta")
     x_orig = np.copy(x)
     gamma_orig = np.copy(gamma)
     beta_orig = np.copy(beta)
@@ -52,3 +59,9 @@ def test_batchnorm(x, data):
 
     assert not np.shares_memory(g2.grad, b2.grad)
     assert not np.shares_memory(grad, t2.grad)
+
+    y2.null_gradients()
+    assert t2.grad is None
+    assert g2.grad is None
+    assert b2.grad is None
+
