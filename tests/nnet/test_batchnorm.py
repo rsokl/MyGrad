@@ -16,9 +16,16 @@ def simple_batchnorm(x, gamma, beta, eps):
 
     mean = mg.mean(x, axis=axes, keepdims=True)
     var = mg.var(x, axis=axes, keepdims=True)
-    gamma = gamma.reshape(keepdims_shape)
-    beta = beta.reshape(keepdims_shape)
-    return gamma * (x - mean) / mg.sqrt(var + eps) + beta
+    norm = (x - mean) / mg.sqrt(var + eps)
+
+    if gamma is not None:
+        gamma = gamma.reshape(keepdims_shape)
+        norm *= gamma
+
+    if beta is not None:
+        beta = beta.reshape(keepdims_shape)
+        norm += beta
+    return norm
 
 
 @given(x=hnp.arrays(shape=hnp.array_shapes(min_dims=2, max_dims=4),
@@ -26,18 +33,26 @@ def simple_batchnorm(x, gamma, beta, eps):
                     elements=st.floats(-100, 100)),
        data=st.data())
 def test_batchnorm(x, data):
-    gamma = data.draw(hnp.arrays(shape=x.shape[1:2], dtype=float, elements=st.floats(-10, 10)), label="gamma")
-    beta = data.draw(hnp.arrays(shape=x.shape[1:2], dtype=float, elements=st.floats(-10, 10)), label="beta")
+    # optionally draw affine parameters
+    gamma = data.draw(st.one_of(hnp.arrays(shape=x.shape[1:2], dtype=float, elements=st.floats(-10, 10)),
+                                st.none()),
+                      label="gamma")
+    beta = data.draw(st.one_of(hnp.arrays(shape=x.shape[1:2], dtype=float, elements=st.floats(-10, 10)),
+                               st.none()),
+                     label="beta")
     x_orig = np.copy(x)
-    gamma_orig = np.copy(gamma)
-    beta_orig = np.copy(beta)
+
+    gamma_orig = np.copy(gamma) if gamma is not None else None
+    beta_orig = np.copy(beta) if beta is not None else None
 
     t1 = Tensor(x)
     t2 = Tensor(x)
-    g1 = Tensor(gamma)
-    g2 = Tensor(gamma)
-    b1 = Tensor(beta)
-    b2 = Tensor(beta)
+
+    g1 = Tensor(gamma) if gamma is not None else None
+    g2 = Tensor(gamma) if gamma is not None else None
+
+    b1 = Tensor(beta) if beta is not None else None
+    b2 = Tensor(beta) if beta is not None else None
 
     y1 = simple_batchnorm(t1, g1, b1, eps=1e-7)
     y2 = batchnorm(t2, gamma=g2, beta=b2, eps=1e-7)
@@ -51,17 +66,33 @@ def test_batchnorm(x, data):
     y2.backward(grad)
 
     assert_allclose(actual=t2.grad, desired=t1.grad, atol=1e-4, rtol=1e-4)
-    assert_allclose(actual=b2.grad, desired=b1.grad, atol=1e-4, rtol=1e-4)
-    assert_allclose(actual=g2.grad, desired=g1.grad, atol=1e-4, rtol=1e-4)
 
-    for o, c in zip((x, gamma, beta, grad), (x_orig, gamma_orig, beta_orig, grad_orig)):
-        assert_array_equal(o, c)
+    if beta is not None:
+        assert_allclose(actual=b2.grad, desired=b1.grad, atol=1e-4, rtol=1e-4)
+    else:
+        assert b2 is None
 
-    assert not np.shares_memory(g2.grad, b2.grad)
+    if gamma is not None:
+        assert_allclose(actual=g2.grad, desired=g1.grad, atol=1e-4, rtol=1e-4)
+    else:
+        assert g2 is None
+
+    for n, (o, c) in enumerate(zip((x, gamma, beta, grad), (x_orig, gamma_orig, beta_orig, grad_orig))):
+        if o is None or c is None:
+            assert o is c, f"{('x', 'gamma', 'beta', 'grad')[n]}"
+        else:
+            assert_array_equal(o, c, err_msg=f"{('x', 'gamma', 'beta', 'grad')[n]}")
+
+    if gamma is not None and beta is not None:
+        assert not np.shares_memory(g2.grad, b2.grad)
     assert not np.shares_memory(grad, t2.grad)
 
     y2.null_gradients()
     assert t2.grad is None
-    assert g2.grad is None
-    assert b2.grad is None
+
+    if gamma is not None:
+        assert g2.grad is None
+
+    if beta is not None:
+        assert b2.grad is None
 

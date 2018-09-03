@@ -5,6 +5,7 @@ import numpy as np
 __all__ = ["batchnorm"]
 
 
+# TODO: Remove affine parameters from Operation
 class BatchNorm(Operation):
     """
     Attributes
@@ -19,7 +20,7 @@ class BatchNorm(Operation):
     """
     scalar_only = True
 
-    def __call__(self, x, gamma, beta, eps):
+    def __call__(self, x, gamma, beta, *, eps):
         """
         y(x) = (x - E[x]) / sqrt(Var[x} + eps)
         batchnorm(x) = gamma * y(x) + beta
@@ -27,8 +28,8 @@ class BatchNorm(Operation):
         Parameters
         ----------
         x : mygrad.Tensor
-        gamma : mygrad.Tensor
-        beta : mygrad.Tensor
+        gamma : Optional[mygrad.Tensor]
+        beta : Optional[mygrad.Tensor]
         eps : Real
            A small non-negative number.
 
@@ -39,8 +40,16 @@ class BatchNorm(Operation):
         normed_dims = tuple(i for i in range(x.ndim) if i != 1)
         keepdims_shape = tuple(1 if n != 1 else d for n, d in enumerate(x.shape))
 
-        self.variables = (x, gamma, beta)
-        x, gamma, beta = x.data, gamma.data, beta.data
+        if gamma.size == 0:
+            gamma = None
+        if beta.size == 0:
+            beta = None
+
+        self.variables = tuple(i for i in (x, gamma, beta) if i is not None)
+        self.gamma = gamma
+        self.beta = beta
+
+        x = x.data
         self.mean = x.mean(axis=normed_dims)
         self.var = np.einsum(x, range(x.ndim), x, range(x.ndim), [1])
         self.var /= (x.size / x.shape[1])
@@ -51,8 +60,14 @@ class BatchNorm(Operation):
         y = x - self.mean.reshape(keepdims_shape)
         y /= np.sqrt(self.var).reshape(keepdims_shape)
         self.x_norm = y
-        y = y * gamma.reshape(keepdims_shape)
-        y += beta.reshape(keepdims_shape)
+
+        # optional affine transformation
+        if gamma is not None:
+            gamma = gamma.data
+            y = y * gamma.reshape(keepdims_shape)
+        if beta is not None:
+            beta = beta.data
+            y += beta.reshape(keepdims_shape)
         return y
 
     def backward_var(self, grad, index, **kwargs):
@@ -62,7 +77,6 @@ class BatchNorm(Operation):
             keepdims_shape = tuple(1 if n != 1 else d for n, d in enumerate(x.shape))
             mean = self.mean.reshape(keepdims_shape)
             var = self.var.reshape(keepdims_shape)
-            gamma = self.variables[1].data
 
             grad = grad - np.mean(grad, axis=normed_dims, keepdims=True)
             x_sub_Ex = x - mean
@@ -74,17 +88,27 @@ class BatchNorm(Operation):
                                 keepdims_shape)
             grad -= rterm
             grad /= np.sqrt(var)
-            grad *= gamma.reshape(keepdims_shape)
+            if self.gamma is not None:  # backprop through optional affine transformation
+                gamma = self.gamma.data
+                grad *= gamma.reshape(keepdims_shape)
             return grad
-        elif index == 1:  # backprop through gamma
+
+        elif index == 1 and self.gamma is not None:  # backprop through gamma
             return np.einsum(grad, range(x.ndim), self.x_norm, range(x.ndim), [1])
-        elif index == 2:
+
+        elif (index == 1 and self.gamma is None) or index == 2:
             normed_dims = tuple(i for i in range(x.ndim) if i != 1)
             return grad.sum(axis=normed_dims)
         else:
             raise IndexError
 
-def batchnorm(x, *, gamma, beta, eps, constant=False):
+
+def batchnorm(x, *, gamma=None, beta=None, eps, constant=False):
+    # pass gamma and beta as empty arrays if they are not supplied
+    if gamma is None:
+        gamma = np.array([])
+    if beta is None:
+        beta = np.array([])
     return Tensor._op(BatchNorm, x, gamma, beta, op_kwargs=dict(eps=eps), constant=constant)
 
 
