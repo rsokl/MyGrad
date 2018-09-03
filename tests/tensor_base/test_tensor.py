@@ -8,7 +8,7 @@ import hypothesis.extra.numpy as hnp
 
 from pytest import raises
 import numpy as np
-from numpy.testing import assert_allclose, assert_equal
+from numpy.testing import assert_allclose, assert_array_equal, assert_equal
 
 
 def test_to_scalar():
@@ -196,8 +196,9 @@ def test_math_methods():
 
 @given(x=st.floats(min_value=-1E-6, max_value=1E6),
        y=st.floats(min_value=-1E-6, max_value=1E6),
-       z=st.floats(min_value=-1E-6, max_value=1E6))
-def test_null_gradients(x, y, z):
+       z=st.floats(min_value=-1E-6, max_value=1E6),
+       clear_graph=st.booleans())
+def test_null_gradients(x, y, z, clear_graph):
     x = Tensor(x)
     y = Tensor(y)
     z = Tensor(z)
@@ -222,14 +223,100 @@ def test_null_gradients(x, y, z):
     assert len(g._ops) > 0
     assert w.grad is None
 
-    g.null_gradients()
+    g.null_gradients(clear_graph=clear_graph)
     assert x.grad is None
     assert y.grad is None
     assert z.grad is None
     assert f.grad is None
     assert g.grad is None
+
+    if clear_graph:
+        assert len(x._ops) == 0
+        assert len(y._ops) == 0
+        assert len(z._ops) == 0
+        assert len(f._ops) == 0
+        assert len(g._ops) > 0
+        assert x.creator is None
+        assert y.creator is None
+        assert z.creator is None
+        assert f.creator is None
+        assert g.creator is None
+    else:
+        assert len(x._ops) > 0
+        assert len(y._ops) > 0
+        assert len(z._ops) > 0
+        assert len(f._ops) > 0
+        assert len(g._ops) > 0
+        assert x.creator is None
+        assert y.creator is None
+        assert z.creator is None
+        assert f.creator is not None
+        assert g.creator is not None
+
+
+@given(x=st.floats(min_value=-1E-6, max_value=1E6),
+       y=st.floats(min_value=-1E-6, max_value=1E6),
+       z=st.floats(min_value=-1E-6, max_value=1E6))
+def test_clear_graph(x, y, z):
+    x_orig = x
+    y_orig = y
+    z_orig = z
+
+    x = Tensor(x)
+    y = Tensor(y)
+    z = Tensor(z)
+
+    f = x*y + z
+    g = x + z*f*f
+
+    # check side effects
+    unused = 2*g - f
+    w = 1*f
+
+    g.backward()
+    assert_allclose(f.grad, 2 * z.data * f.data)
+    assert_allclose(x.grad, 1 + 2 * z.data * f.data * y.data)
+    assert_allclose(y.grad, 2 * z.data * f.data * x.data)
+    assert_allclose(z.grad, f.data**2 + z.data * 2 * f.data)
+    assert w.grad is None
+
+    assert_array_equal(x.data, x_orig, err_msg="x was mutated during the operation")
+    assert_array_equal(y.data, y_orig, err_msg="y was mutated during the operation")
+    assert_array_equal(z.data, z_orig, err_msg="z was mutated during the operation")
+
+    # null-gradients without clearing the graph, confirm that backprop still works
+    g.null_gradients(clear_graph=False)
+    g.backward()
+    assert_allclose(f.grad, 2 * z.data * f.data)
+    assert_allclose(x.grad, 1 + 2 * z.data * f.data * y.data)
+    assert_allclose(y.grad, 2 * z.data * f.data * x.data)
+    assert_allclose(z.grad, f.data**2 + z.data * 2 * f.data)
+    assert w.grad is None
+
+    assert_array_equal(x.data, x_orig, err_msg="x was mutated during the operation")
+    assert_array_equal(y.data, y_orig, err_msg="y was mutated during the operation")
+    assert_array_equal(z.data, z_orig, err_msg="z was mutated during the operation")
+
+    g.null_gradients(clear_graph=False)
+    w.backward()
+    assert_allclose(x.grad, y.data)
+    assert_allclose(y.grad, x.data)
+    assert_allclose(z.grad, np.array(1.))
+
+    w.clear_graph()
+    assert_allclose(x.grad, y.data)
+    assert_allclose(y.grad, x.data)
+    assert_allclose(z.grad, np.array(1.))
+    assert len(g._ops) > 0
+    assert g.creator is not None
     assert len(x._ops) == 0
     assert len(y._ops) == 0
     assert len(z._ops) == 0
     assert len(f._ops) == 0
-    assert len(g._ops) == 0
+    assert x.creator is None
+    assert y.creator is None
+    assert z.creator is None
+    assert f.creator is None
+
+    with raises(Exception):
+        g.backward()

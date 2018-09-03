@@ -3,7 +3,10 @@ from mygrad.tensor_base import Tensor
 from numbers import Integral
 import numpy as np
 
-from numba import njit
+try:
+    from numba import njit
+except ImportError:
+    raise ImportError("The package `numba` must be installed in order to access the simple-rnn.")
 
 
 @njit
@@ -47,6 +50,13 @@ def _rnn_bptt(X, dLt_dst, dst_dft, W, bp_lim, old_dst=None):
 
         dLt_dst[target_index] += dot(dLn_ft1, W)
 
+
+def _backprop(var, grad):
+    if not var.constant:
+        if var.grad is None:
+            var.grad = np.asarray(grad)
+        else:
+            var.grad += grad
 
 class RecurrentUnit(Operation):
     """ Defines a basic recurrent unit for a RNN.
@@ -99,6 +109,7 @@ class RecurrentUnit(Operation):
         self.X = X
         self.U = U
         self.W = W
+        self.variables = (self.X, self.U, self.W)
         self._hidden_seq = []
 
         seq = self.X.data
@@ -114,7 +125,7 @@ class RecurrentUnit(Operation):
 
         return self._hidden_seq.data
 
-    def backward(self, grad, **kwargs):
+    def backward(self, grad, *, graph, **kwargs):
         """ Performs back propagation through time (with optional truncation), using the
             following notation:
 
@@ -136,16 +147,11 @@ class RecurrentUnit(Operation):
         dLt_dft = dLt_dst[1:] * dst_dft[1:]  # dL_{t} / df_{t} + ... + dL_{T_lim} / df_{t}
 
         if not self.U.constant:
-            self.U.backward(np.einsum("ijk, ijl -> kl", self.X.data, dLt_dft), **kwargs)  # dL_{1} / dU + ... + dL_{T} / dU
+            _backprop(self.U, np.einsum("ijk, ijl -> kl", self.X.data, dLt_dft))  # dL_{1} / dU + ... + dL_{T} / dU
         if not self.W.constant:
-            self.W.backward(np.einsum("ijk, ijl -> kl", s.data[:-1], dLt_dft), **kwargs)  # dL_{1} / dW + ... + dL_{T} / dW
+            _backprop(self.W, np.einsum("ijk, ijl -> kl", s.data[:-1], dLt_dft))  # dL_{1} / dW + ... + dL_{T} / dW
         if not self.X.constant:
-            self.X.backward(dot(dLt_dft, self.U.data.T), **kwargs)  # dL_{1} / dX + ... + dL_{T} / dX
-
-    def null_gradients(self):
-        """ Back-propagates `None` to the gradients of the operation's input Tensors."""
-        for x in [self.X, self.U, self.W]:
-            x.null_gradients()
+            _backprop(self.X, dot(dLt_dft, self.U.data.T))  # dL_{1} / dX + ... + dL_{T} / dX
 
 
 def simple_RNN(X, U, W, s0=None, bp_lim=None, constant=False):

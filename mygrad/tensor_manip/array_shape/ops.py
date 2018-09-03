@@ -15,7 +15,7 @@ class Reshape(Operation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad.reshape(*a.shape), **kwargs)
+        return grad.reshape(*a.shape)
 
 
 class Squeeze(Operation):
@@ -28,4 +28,4 @@ class Squeeze(Operation):
     
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad.reshape(a.shape), **kwargs)
+        return grad.reshape(a.shape)

@@ -9,7 +9,7 @@ import mygrad
 import numpy as np
 
 from mygrad import Tensor
-from hypothesis import given, assume
+from hypothesis import given, settings
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
 
@@ -114,12 +114,14 @@ def test_int_axis_cumprod():
 def test_cumprod_fwd(): pass
 
 
+@settings(deadline=None)
 @backprop_test_factory(mygrad_func=cumprod, true_func=np.cumprod,
                        no_keepdims=True, single_axis_only=True,
                        xbnds=(-2, 2), max_dims=4, max_side=5)
 def test_cumprod_bkwd(): pass
 
 
+@settings(deadline=None)
 @backprop_test_factory(mygrad_func=cumprod, true_func=np.cumprod,
                        no_keepdims=True, single_axis_only=True,
                        xbnds=(-.5, .5), max_dims=4, max_side=5, unique=True,
@@ -144,6 +146,7 @@ def test_int_axis_cumsum():
 def test_cumsum_fwd(): pass
 
 
+@settings(deadline=None)
 @backprop_test_factory(mygrad_func=cumsum, true_func=np.cumsum,
                        no_keepdims=True, single_axis_only=True,
                        xbnds=(-2, 2), max_dims=4, max_side=5)

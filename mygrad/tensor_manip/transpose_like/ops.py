@@ -18,7 +18,7 @@ class Tensor_Transpose_Property(Operation):
         return a.data.T
 
     def backward_var(self, grad, index, **kwargs):
-        self.variables[index].backward(grad.T, **kwargs)
+        return grad.T
 
 
 class Transpose(Operation):
@@ -34,7 +34,7 @@ class Transpose(Operation):
         a = self.variables[index]
         if a.ndim > 1:
             grad = grad.transpose(np.argsort(self.axes))
-        a.backward(grad)
+        return grad
 
 
 class MoveAxis(Operation):
@@ -47,8 +47,7 @@ class MoveAxis(Operation):
     def backward_var(self, grad, index, **kwargs):
         if not index == 0:
             raise IndexError
-        self.variables[index].backward(np.moveaxis(grad, self.destination, self.source),
-                                       **kwargs)
+        return np.moveaxis(grad, self.destination, self.source)
 
 
 class SwapAxes(Operation):
@@ -61,5 +60,5 @@ class SwapAxes(Operation):
     def backward_var(self, grad, index, **kwargs):
         if not index == 0:
             raise IndexError
-        self.variables[index].backward(np.swapaxes(grad, self.axis2, self.axis1),
-                                       **kwargs)
+        return np.swapaxes(grad, self.axis2, self.axis1)
+

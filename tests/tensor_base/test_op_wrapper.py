@@ -18,11 +18,11 @@ def test_constant_arg():
     b = Tensor(1)
     o_true = dummy(a, b, constant=True)
     assert o_true.constant is True
-    assert a._ops == []
-    assert b._ops == []
+    assert a._ops == set()
+    assert b._ops == set()
 
     o_false = dummy(a, b, constant=False)
     assert o_false.constant is False
-    assert a._ops == [o_false.creator]
-    assert b._ops == [o_false.creator]
+    assert a._ops == {o_false.creator}
+    assert b._ops == {o_false.creator}
 

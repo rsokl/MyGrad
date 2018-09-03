@@ -35,12 +35,11 @@ class MatMul(BroadcastableOp):
         # handle 1D w/ 1D (dot product of vectors)
         if a.ndim == 1 and b.ndim == 1:
             if index == 0:
-                dfdx = grad * b
+                return grad * b
             elif index == 1:
-                dfdx = grad * a
-            
-            self.variables[index].backward(dfdx, **kwargs)
-            return
+                return grad * a
+            else:
+                raise IndexError
         
         if index == 0:  # compute grad through a
             if b.ndim > 1:  # ([...], j) w/ ([...], j, k)
@@ -49,6 +48,7 @@ class MatMul(BroadcastableOp):
                 dfdx = np.matmul(grad, b.swapaxes(-1, -2))
             else:           # ([...], i, j) w/ (j,)
                 dfdx = np.expand_dims(grad, -1) * b
+            return dfdx
         
         if index == 1:  # compute grad through b
             if a.ndim > 1:  # ([...], i, j) w/ ([...], j, [k])
@@ -59,8 +59,9 @@ class MatMul(BroadcastableOp):
                     dfdx = dfdx.squeeze(-1)
             else:           # (j,) w/ ([...], j, k)
                 dfdx = a[:, np.newaxis] * np.expand_dims(grad, -2)
-            
-        self.variables[index].backward(dfdx, **kwargs)
+            return dfdx
+        else:
+            raise IndexError
 
 
 ### EinSum ###
@@ -198,8 +199,7 @@ class EinSum(BroadcastableOp):
                 # if y was broadcast over x, the gradient needs to
                 # be broadcast to x's shape: dfdx-shape (i,j,1) -> (i,j,k)
                 dfdx = np.broadcast_to(dfdx, var_shape)
-            self.variables[index].backward(dfdx, _broadcastable=False)
-            return None
+            return dfdx
 
         # Accommodate trace by writing to strided view on array of zeros
         # For example:
@@ -220,4 +220,4 @@ class EinSum(BroadcastableOp):
                         for lbl in var_lbl)
         out_view = as_strided(dfdx, shape=out_view_shape, strides=strides)
         np.einsum(back_prop_lbls, *operands, out=out_view, optimize=self.optimize)
-        self.variables[index].backward(dfdx, **kwargs)
+        return dfdx

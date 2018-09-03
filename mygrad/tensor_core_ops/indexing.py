@@ -32,7 +32,7 @@ class GetItem(Operation):
         a = self.variables[index]
         out = np.zeros_like(a.data)
         np.add.at(out, self.index, grad)
-        a.backward(out, **kwargs)
+        return out
 
 
 def _arr(*shape):
@@ -115,8 +115,7 @@ class SetItem(BroadcastableOp):
         if index == 0:
             grad = np.copy(grad)
             grad[self.index] = 0
-            kwargs["_broadcastable"] = False
-            a.backward(grad, **kwargs)
+            return grad
         elif index == 1:
             grad_sel = np.asarray(grad[self.index])
 
@@ -154,7 +153,7 @@ class SetItem(BroadcastableOp):
             # x[0] = y  # this is legal since x[0] and y have the same size
             if grad_sel.ndim < b.ndim:
                 grad_sel = grad_sel.reshape(b.shape)
-            b.backward(grad_sel, **kwargs)
+            return grad_sel
         else:
             raise IndexError
 

@@ -3,7 +3,10 @@ from mygrad.tensor_base import Tensor
 from numbers import Integral
 import numpy as np
 
-from numba import njit, vectorize
+try:
+    from numba import njit, vectorize
+except ImportError:
+    raise ImportError("The package `numba` must be installed in order to access the gru.")
 
 
 @vectorize(['int32(int32)',
@@ -146,6 +149,14 @@ def _gru_bptt(X, dLds, s, z, r, Wz, Wh, Wr, dz, dh, dr, s_h, one_z, bp_lim, old_
                                         one_z[source_index])
 
 
+def _backprop(var, grad):
+    if not var.constant:
+        if var.grad is None:
+            var.grad = np.asarray(grad)
+        else:
+            var.grad += grad
+
+
 class GRUnit(Operation):
     scalar_only = True
 
@@ -170,6 +181,10 @@ class GRUnit(Operation):
         self.Wh = Wh  # type: Tensor  # shape=(D, D)
         self.bh = bh  # type: Tensor  # shape=(D,)
 
+        self.variables = (self.X,
+                          self.Uz, self.Wz, self.bz,
+                          self.Ur, self.Wr, self.br,
+                          self.Uh, self.Wh, self.bh)
         T, N, C = X.shape
         D, = bz.shape
 
@@ -221,7 +236,7 @@ class GRUnit(Operation):
 
         return self._hidden_seq
 
-    def backward(self, grad, **kwargs):
+    def backward(self, grad, *, graph, **kwargs):
         if all(i.constant for i in [self.X,
                                     self.Uz, self.Wz, self.bz,
                                     self.Ur, self.Wr, self.br,
@@ -275,15 +290,15 @@ class GRUnit(Operation):
             dWz = np.tensordot(s, dz, ([0, 1], [0, 1]))
             if self._dropout:
                 dWz *= self._dropWz
-            self.Wz.backward(dWz, **kwargs)
+            _backprop(self.Wz, dWz)  # self.Wz.backward(dWz, **kwargs)
         # backprop through bz
         if not self.bz.constant:
-            self.bz.backward(dz.sum(axis=(0, 1)), **kwargs)
+            _backprop(self.bz, dz.sum(axis=(0, 1)))
         # backprop through bz
         if not self.Uz.constant:
             if self._dropout:
                 dz *= self._dropUz  # IMPORTANT augmented update: this must come after Wz and bz backprop
-            self.Uz.backward(np.tensordot(self.X.data, dz, ([0, 1], [0, 1])), **kwargs)
+            _backprop(self.Uz, np.tensordot(self.X.data, dz, ([0, 1], [0, 1])))
 
         if any(not const for const in (self.Ur.constant, self.Wr.constant, self.br.constant)):
             dr = rgrad * const["r*(1 - r)"]
@@ -292,15 +307,15 @@ class GRUnit(Operation):
             dWr = np.tensordot(s, dr, ([0, 1], [0, 1]))
             if self._dropout:
                 dWr *= self._dropWr
-            self.Wr.backward(dWr, **kwargs)
+            _backprop(self.Wr, dWr)
         # backprop through br
         if not self.br.constant:
-            self.br.backward(dr.sum(axis=(0, 1)), **kwargs)
+            _backprop(self.br, dr.sum(axis=(0, 1)))  # self.br.backward(dr.sum(axis=(0, 1)), **kwargs)
         # backprop through Ur
         if not self.Ur.constant:
             if self._dropout:
                 dr *= self._dropUr  # IMPORTANT augmented update: this must come after Wr and br backprop
-            self.Ur.backward(np.tensordot(self.X.data, dr, ([0, 1], [0, 1])), **kwargs)
+            _backprop(self.Ur, np.tensordot(self.X.data, dr, ([0, 1], [0, 1])))
 
         if any(not const for const in (self.Uh.constant, self.Wh.constant, self.bh.constant)):
             dh = hgrad * const["1 - h**2"]
@@ -309,15 +324,15 @@ class GRUnit(Operation):
             dWh = np.tensordot((s * r), dh, ([0, 1], [0, 1]))
             if self._dropout:
                 dWh *= self._dropWh
-            self.Wh.backward(dWh, **kwargs)
+            _backprop(self.Wh, dWh) # self.Wh.backward(dWh, **kwargs)
         # backprop through bh
         if not self.bh.constant:
-            self.bh.backward(dh.sum(axis=(0, 1)), **kwargs)
+            _backprop(self.bh, dh.sum(axis=(0, 1))) # self.bh.backward(dh.sum(axis=(0, 1)), **kwargs)
         # backprop through Uh
         if not self.Uh.constant:
             if self._dropout:
                 dh *= self._dropUh  # IMPORTANT augmented update: this must come after Wh and bh backprop
-            self.Uh.backward(np.tensordot(self.X.data, dh, ([0, 1], [0, 1])), **kwargs)
+            _backprop(self.Uh, np.tensordot(self.X.data, dh, ([0, 1], [0, 1])))
 
         # backprop through X
         if not self.X.constant:
@@ -330,19 +345,19 @@ class GRUnit(Operation):
                 dLdX = dot((self._dropUz * (dLds * const["s - h"]) * const["z*(1 - z)"]), self.Uz.data.T)
                 dLdX += dot(self._dropUh * tmp, self.Uh.data.T)
                 dLdX += dot(self._dropUr * (dot(tmp, Wh.T) * s * const["r*(1 - r)"]), self.Ur.data.T)
-            self.X.backward(dLdX, **kwargs)
+            _backprop(self.X, dLdX)  # self.X.backward(dLdX, **kwargs)
 
         del self._z
         del self._r
         del self._h
 
-    def null_gradients(self):
-        """ Back-propagates `None` to the gradients of the operation's input Tensors."""
-        for x in [self.X,
+        for x in (self.X,
                   self.Uz, self.Wz, self.bz,
                   self.Ur, self.Wr, self.br,
-                  self.Uh, self.Wh, self.bh]:
-            x.null_gradients()
+                  self.Uh, self.Wh, self.bh):
+            if not x.constant:
+                x._accum_ops.add(self)
+                x._backward(graph=graph)
 
 
 def gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None, dropout=0., constant=False):
@@ -434,6 +449,8 @@ def gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None, dropout=0.,
 
         .. [2] Y. Gal, Z. Ghahramani "A Theoretically Grounded Application of Dropout
                in Recurrent Neural Networks" arXiv:1512.05287v5, 2016. """
+    if s0 is not None:
+        assert isinstance(s0, np.ndarray) or (isinstance(s0, Tensor) and s0.constant is True)
     s = Tensor._op(GRUnit, X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh,
                    op_kwargs=dict(s0=s0, bp_lim=bp_lim, dropout=dropout),
                    constant=constant)

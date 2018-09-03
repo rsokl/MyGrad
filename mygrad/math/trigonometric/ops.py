@@ -24,7 +24,7 @@ class Sin(Operation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad * np.cos(a.data), **kwargs)
+        return grad * np.cos(a.data)
 
 
 def _dsinc(x):
@@ -41,7 +41,7 @@ class Sinc(Operation):
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
         x = a.data
-        a.backward(np.pi * grad * np.piecewise(x, [x == 0, x != 0], [np.zeros_like, _dsinc]), **kwargs)
+        return np.pi * grad * np.piecewise(x, [x == 0, x != 0], [np.zeros_like, _dsinc])
 
 
 class Cos(Operation):
@@ -52,7 +52,7 @@ class Cos(Operation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad * -np.sin(a.data), **kwargs)
+        return grad * -np.sin(a.data)
 
 
 class Tan(Operation):
@@ -63,7 +63,7 @@ class Tan(Operation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad / np.cos(a.data)**2, **kwargs)
+        return grad / np.cos(a.data)**2
 
 
 class Csc(Operation):
@@ -74,7 +74,7 @@ class Csc(Operation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad * -np.cos(a.data) / np.sin(a.data)**2, **kwargs)
+        return grad * -np.cos(a.data) / np.sin(a.data)**2
 
 
 class Sec(Operation):
@@ -85,7 +85,7 @@ class Sec(Operation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad * np.sin(a.data) / np.cos(a.data)**2, **kwargs)
+        return grad * np.sin(a.data) / np.cos(a.data)**2
 
 
 class Cot(Operation):
@@ -96,7 +96,7 @@ class Cot(Operation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(-grad / np.sin(a.data)**2, **kwargs)
+        return -grad / np.sin(a.data)**2
 
 class Arcsin(Operation):
     """ f(a) -> arcsin(a)"""
@@ -109,7 +109,7 @@ class Arcsin(Operation):
     def backward_var(self, grad, index, **kwargs):
         # d arcsin / dx at x = -1, 1 returns 0, not NaN
         a = self.variables[index]
-        a.backward(np.select([np.abs(a.data) != 1], [grad / np.sqrt(1 - a.data ** 2)]), **kwargs)
+        return np.select([np.abs(a.data) != 1], [grad / np.sqrt(1 - a.data ** 2)])
 
 
 class Arccos(Operation):
@@ -123,7 +123,7 @@ class Arccos(Operation):
     def backward_var(self, grad, index, **kwargs):
         # d arccos / dx at x = -1, 1 returns 0, not NaN
         a = self.variables[index]
-        a.backward(np.select([np.abs(a.data) != 1], [-grad / np.sqrt(1 - a.data ** 2)]), **kwargs)
+        return np.select([np.abs(a.data) != 1], [-grad / np.sqrt(1 - a.data ** 2)])
 
 
 class Arctan(Operation):
@@ -134,7 +134,7 @@ class Arctan(Operation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad / (1 + a.data ** 2), **kwargs)
+        return grad / (1 + a.data ** 2)
 
 
 class Arccsc(Operation):
@@ -148,7 +148,7 @@ class Arccsc(Operation):
     def backward_var(self, grad, index, **kwargs):
         # d arccsc / dx at x = -1, 1 returns 0, not NaN
         a = self.variables[index]
-        a.backward(np.select([np.abs(a.data) != 1], [-grad / (np.abs(a.data) * np.sqrt(a.data ** 2 - 1))]), **kwargs)
+        return np.select([np.abs(a.data) != 1], [-grad / (np.abs(a.data) * np.sqrt(a.data ** 2 - 1))])
 
 
 class Arcsec(Operation):
@@ -162,7 +162,7 @@ class Arcsec(Operation):
     def backward_var(self, grad, index, **kwargs):
         # d arcsec / dx at x = -1, 1 returns 0, not NaN
         a = self.variables[index]
-        a.backward(np.select([np.abs(a.data) != 1], [grad / (np.abs(a.data) * np.sqrt(a.data ** 2 - 1))]), **kwargs)
+        return np.select([np.abs(a.data) != 1], [grad / (np.abs(a.data) * np.sqrt(a.data ** 2 - 1))])
 
 
 class Arccot(Operation):
@@ -173,4 +173,4 @@ class Arccot(Operation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(-grad / (1 + a.data ** 2), **kwargs)
+        return -grad / (1 + a.data ** 2)

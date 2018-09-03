@@ -9,11 +9,10 @@ from mygrad.math.arithmetic.ops import *
 from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property
 from mygrad.tensor_core_ops.indexing import GetItem, SetItem
 from mygrad.linalg.ops import MatMul
-from mygrad.operation_base import BroadcastableOp
-from mygrad._utils import reduce_broadcast
+from mygrad.operation_base import Operation, BroadcastableOp
 
 import numpy as np
-
+from typing import Union, Set, Type, List
 
 __all__ = ['Tensor']
 
@@ -136,11 +135,14 @@ class Tensor:
             self.data = np.asarray(x, dtype=dtype)
             self._check_valid_dtype(self.data.dtype)
 
-        self.grad = None
+        self.grad = None  # type: Union[None, np.ndarray]
         self._constant = constant
 
-        # used for setitem
-        self._ops = []  # Operation instances that utilized self an input tensor
+        # track all operations that this tensor participates in
+        self._ops = set()  # type: Set[Operation]
+
+        # track the operations that have contributed to this tensor's gradient during a back-prop
+        self._accum_ops = set()  # type: Set[Operation]
 
     @staticmethod
     def _check_valid_dtype(dtype):
@@ -148,12 +150,12 @@ class Tensor:
             raise TypeError("Tensor data must be a numeric type, received {}".format(dtype))
 
     @classmethod
-    def _op(cls, Op, *input_vars, op_args=None, op_kwargs=None, constant=False):
+    def _op(cls, Op: Type[Operation], *input_vars, op_args=None, op_kwargs=None, constant=False):
         """ Wraps operations performed between tensors: f(a, b, ...).
 
             Parameters
             ----------
-            Op : mygrad.operation_base.Operation
+            Op : Type[Operation]
                 Operation-class, used to perform forward-pass on `input_vars`.
 
             input_vars : array_like
@@ -181,26 +183,28 @@ class Tensor:
         if op_kwargs is None:
             op_kwargs = dict()
 
-        tensor_vars = []
+        tensor_vars = []  # type: List[Tensor]
         for var in input_vars:
             if not isinstance(var, cls):
                 var = cls(var, constant=True)
             tensor_vars.append(var)
 
+        is_const = constant or all(var.constant for var in tensor_vars)
+
         f = Op()
+        f.graph = {f}
+        f.graph.update(*(var._creator.graph for var in tensor_vars if var._creator is not None and not var.constant))
         op_out = f(*tensor_vars, *op_args, **op_kwargs)
 
         if isinstance(f, BroadcastableOp) and not f.scalar_only:
             # if broadcasting occurred: scalar-only -> True
             f.scalar_only = any(op_out.shape != i.shape for i in tensor_vars if not i.constant)
 
-        is_const = constant or all(var.constant for var in tensor_vars)
-
         if not is_const:
             # record that a variable participated in that op
             for var in tensor_vars:
                 if not var.constant:
-                    var._ops.append(f)
+                    var._ops.add(f)
 
         scalar_only = f.scalar_only and not is_const
         for var in tensor_vars:
@@ -208,7 +212,7 @@ class Tensor:
 
         return cls(op_out, constant=is_const, _creator=f, _scalar_only=scalar_only)
 
-    def backward(self, grad=None, *, _broadcastable=False):
+    def backward(self, grad=None):
         """ Compute set or accumulate `self.grad` with `grad`, and pass `self.creator.backward(grad)`.
             In effect, calling `self.backward()` will trigger a "back-propagation" from `self` through
             the preceding nodes in the computational graph. Thus a node, `a`, will have the attribute
@@ -220,39 +224,86 @@ class Tensor:
                 The value of the incoming derivative. If self.grad is None, it is set to `grad`,
                 otherwise its value is added with `grad`.
 
-            _broadcastable : bool, optional (default:False)
-                Devs-only: Indicates whether or not the up-stream operation
-                can utilize broadcasting.
-
             Raises
             ------
             Exception
                 The configuration of the computational graph is such that `self` must be a 0D tensor
                 (i.e. scalar) to invoke self.backward()."""
+        if self._constant:
+            return
 
         if grad is not None:
-            grad = np.asarray(grad.data if isinstance(grad, Tensor) else grad)
-
-            if _broadcastable:
-                grad = reduce_broadcast(grad, self.shape)
+            self.grad = np.asarray(grad.data if isinstance(grad, Tensor) else grad)
         else:
-            if self.ndim > 0 and self.scalar_only:
-                raise Exception("Invalid Backprop: backpropagation must be triggered by a scalar for this computational graph")
-
+            if self.ndim > 0 and self._scalar_only:
+                raise Exception("Invalid Backprop: backpropagation must be triggered by a "
+                                "scalar for this computational graph")
             dtype = float if np.issubdtype(self.dtype, np.signedinteger) else self.dtype
-            grad = np.ones(self.shape, dtype=dtype) if self.ndim > 0 else np.asarray(1., dtype=dtype)
+            self.grad = np.ones(self.shape, dtype=dtype) if self.ndim > 0 else np.asarray(1., dtype=dtype)
 
-        assert grad.shape == self.shape, "A tensor and its associated gradient must possess the same shape"
-        self.grad = np.asarray(grad if self.grad is None else self.grad + grad)
+        if self.creator is not None:
+            self._backward(graph=self.creator.graph)
 
-        if self._creator is not None:
-            self._creator.backward(grad, _broadcastable=isinstance(self._creator, BroadcastableOp))
+    def _backward(self, *, graph):
+        """
+        **For dev-use only**
 
-    def null_gradients(self):
+        If `self` has accumulated incoming gradients from all operations in the terminal node's
+        computational graph, back-propagate the accumulated gradient to the creator of `self`.
+
+        Parameters
+        ----------
+        graph : Set[Operation]
+            The set of all operations relevant to the terminal node of the computational graph,
+            which triggered back-propagation
+
+        Raises
+        ------
+        AssertionError
+            Raises if the tensor and its associated gradient possess different shapes.
+        """
+        if self._constant:
+            return
+
+        assert self.grad.shape == self.shape, "A tensor and its associated gradient must possess the same shape"
+        if self._creator is not None and not bool(graph & (self._ops - self._accum_ops)):
+            self._accum_ops.clear()
+            self._creator.backward(self.grad, graph=graph)
+
+    def null_gradients(self, clear_graph=True):
+        """
+        Sets the gradient for this tensor and for all preceding tensors in the computation graph
+        to ``None``.
+
+        Additionally, the computational graph that terminates in this tensor can also be cleared
+        during this process.
+
+        Parameters
+        ----------
+        clear_graph : bool, optional (default=True)
+            If ``True`` clear the computational graph in addition to nulling the gradients."""
+
         self.grad = None
-        self._ops = []
-        if self._creator is not None:
-            self._creator.null_gradients()
+        if self._creator is None:
+            return
+        for var in self._creator.variables:
+            var.null_gradients(clear_graph=False)
+
+        if clear_graph:
+            self.clear_graph()
+
+    def clear_graph(self):
+        """
+        Clear the computational graph for all of the nodes preceding this tensor.
+        """
+        if self._creator is None:
+            return
+
+        for var in self._creator.variables:
+            var._ops.clear()
+            var.clear_graph()
+
+        self._creator = None
 
     @property
     def scalar_only(self):
@@ -273,12 +324,12 @@ class Tensor:
         return self._constant
 
     @property
-    def creator(self):
+    def creator(self) -> Union[Operation, BroadcastableOp]:
         """ The `Operation` instance that produced `self`.
 
             Returns
             -------
-            mygrad.Operation
+            Operation
             """
         return self._creator
 
@@ -297,7 +348,7 @@ class Tensor:
             return None
 
         # old_tensor is the tensor pre-setitem
-        old_tensor = Tensor(self, constant=self.constant, _scalar_only=self.scalar_only, _creator=self.creator)
+        old_tensor = Tensor(self, constant=self.constant, _scalar_only=self._scalar_only, _creator=self.creator)
         old_tensor._ops = self._ops
 
         # point all ops involving `self` to old_tensor instead
@@ -310,7 +361,7 @@ class Tensor:
         # self becomes the tensor post-setitem
         out = self._op(SetItem, old_tensor, value, op_args=(key,))
         self._creator = out.creator
-        self._scalar_only = out.scalar_only
+        self._scalar_only = out._scalar_only
         self._ops = out._ops
         self.data = out.data
         self._constant = out.constant
@@ -361,8 +412,8 @@ class Tensor:
         return repr(self.data).replace("array", "Tensor").replace("\n", "\n ")
 
     def __copy__(self):
-        """ Produces a copy of self with copy.creator=None"""
-        return Tensor(np.copy(self.data), _creator=None, constant=self.constant, _scalar_only=self.scalar_only)
+        """ Produces a copy of ``self`` with ``copy.creator=None``"""
+        return Tensor(np.copy(self.data), _creator=None, constant=self.constant, _scalar_only=self._scalar_only)
 
     def item(self):
         """ Copy an element of a tensor to a standard Python scalar and return it.

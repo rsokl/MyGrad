@@ -84,43 +84,41 @@ class MaxMin(Operation):
             return dat
 
         elif self.axis is None:
-            keep_index = [np.newaxis for i in range(a.ndim)]
+            keep_index = (np.newaxis,) * a.ndim
         else:
-            keep_index = [slice(None) for i in range(a.ndim)]
+            keep_index = [slice(None)] * a.ndim
             for i in self.axis:
                 keep_index[i] = np.newaxis
+            keep_index = tuple(keep_index)
 
         return np.asarray(dat)[keep_index]
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
         if a.ndim == 0:
-            a.backward(grad, **kwargs)
+            return grad
 
         # normalize shape of grad to be same as when keepdims=False
         if self.keepdims:
             if self.axis is not None:
-                reduce = [slice(None) for i in range(a.ndim)]
+                reduce = [slice(None)] * a.ndim
                 for i in self.axis:
                     reduce[i] = 0
+                reduce = tuple(reduce)
             else:
-                reduce = (0 for i in range(a.ndim))
-            grad = grad[tuple(reduce)]
+                reduce = (0,) * a.ndim
+            grad = grad[reduce]
 
         # use argmax indices to broadcast grad to correct elements
         if self.axis is None or len(self.axis) == 1:
             out = np.zeros_like(a.data, dtype=float)
             out[self.indices] = grad
-            a.backward(out, **kwargs)
+            return out
         else:
-            tmp = [slice(None) for i in range(a.ndim)]
-            for i in self.axis:
-                tmp[i] = np.newaxis
-
             out = np.zeros(self.tmp_grad_shape, dtype=float)
             out[self.indices] = grad
             shape = tuple(a.shape[i] for i in self.to_trans)
-            a.backward(out.reshape(shape).transpose(*self.from_trans), **kwargs)
+            return out.reshape(shape).transpose(*self.from_trans)
 
 
 class Sum(Operation):
@@ -142,16 +140,14 @@ class Sum(Operation):
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
         if self.outshape is None:
-            a.backward(np.full(a.shape, grad, dtype=float))
-            return None
+            return np.full(a.shape, grad, dtype=float)
 
         if not self.keepdims:
             index = [slice(None) for i in range(a.ndim)]
             for i in self.axis:
                 index[i] = np.newaxis
-            grad = grad[index]
-
-        a.backward(np.broadcast_to(grad, a.data.shape).astype(float), **kwargs)
+            grad = grad[tuple(index)]
+        return np.broadcast_to(grad, a.data.shape).astype(float)
 
 
 class Mean(Sum):
@@ -161,7 +157,7 @@ class Mean(Sum):
         return out / self.n
 
     def backward_var(self, grad, index, **kwargs):
-        super(Mean, self).backward_var(grad / self.n, index, **kwargs)
+        return super(Mean, self).backward_var(grad / self.n, index, **kwargs)
 
 
 class Prod(Operation):
@@ -180,9 +176,8 @@ class Prod(Operation):
         a = self.variables[index]
         x = a.data
         grad = np.asarray(grad)
-        axes = tuple(i if i >= 0 else a.ndim + i for i in self.axis) \
-            if self.axis is not None else tuple(range(a.ndim))
-        axes = set(axes)
+
+        axes = set(range(a.ndim)) if self.axis is None else set(i if i >= 0 else a.ndim + i for i in self.axis)
 
         # make grad broadcast-compatible against x
         grad = grad.reshape(*(1 if n in axes else i for n, i in enumerate(a.shape)))
@@ -213,7 +208,7 @@ class Prod(Operation):
                     loc = np.logical_and(is_zero, has_zero == 1)
                     dldx[loc] = (np.prod(x, axis=self.axis, keepdims=True) / x)[loc]
 
-        a.backward(grad*dldx)
+        return grad*dldx
 
 
 def _reverse_cumsum(x, axis=None):
@@ -339,8 +334,7 @@ class CumProd(Operation):
 
         if axis is None:
             dldx.shape = orig_shape
-
-        self.variables[index].backward(dldx)
+        return dldx
 
 
 class CumSum(Operation):
@@ -354,7 +348,7 @@ class CumSum(Operation):
         g = _reverse_cumsum(grad, self.axis)
         if self.axis is None:
             g.shape = a.shape
-        a.backward(g)
+        return g
 
 
 class Variance(Operation):
@@ -381,10 +375,10 @@ class Variance(Operation):
            grad = np.full(a.shape, grad, dtype=float)
         else:
             if not self.kwargs["keepdims"]:
-                index = [slice(None) for i in range(a.ndim)]
+                index = [slice(None)] * a.ndim
                 for i in self.kwargs["axis"]:
                     index[i] = np.newaxis
-                grad = grad[index]
+                grad = grad[tuple(index)]
         back = (2. / N) * (a.data - a.data.mean(axis=self.kwargs["axis"], keepdims=True))
-        a.backward(back * grad)
+        return back * grad
 

@@ -21,8 +21,7 @@ class Exp(Operation):
         return np.exp(a.data)
 
     def backward_var(self, grad, index, **kwargs):
-        var = self.variables[index]
-        var.backward(grad * np.exp(var.data))
+        return grad * np.exp(self.variables[index].data)
 
 
 class Expm1(Operation):
@@ -36,8 +35,7 @@ class Expm1(Operation):
         return np.expm1(a.data)
 
     def backward_var(self, grad, index, **kwargs):
-        var = self.variables[index]
-        var.backward(grad * np.exp(var.data))
+        return grad * np.exp(self.variables[index].data)
 
 
 class Logaddexp(BroadcastableOp):
@@ -50,11 +48,11 @@ class Logaddexp(BroadcastableOp):
     def backward_var(self, grad, index, **kwargs):
         a, b = self.variables
         if index == 0:
-            dLda = grad / (1 + np.exp(b.data - a.data))
-            a.backward(dLda, **kwargs)
+            return grad / (1 + np.exp(b.data - a.data))
+        elif index == 1:
+            return grad / (1 + np.exp(a.data - b.data))
         else:
-            dLdb = grad / (1 + np.exp(a.data - b.data))
-            b.backward(dLdb, **kwargs)
+            raise IndexError
 
 
 class Logaddexp2(BroadcastableOp):
@@ -67,12 +65,11 @@ class Logaddexp2(BroadcastableOp):
     def backward_var(self, grad, index, **kwargs):
         a, b = self.variables
         if index == 0:
-            dLda = grad / (1 + 2 ** (b.data - a.data))
-            a.backward(dLda, **kwargs)
+            return grad / (1 + 2 ** (b.data - a.data))
+        elif index == 1:
+            return grad / (1 + 2 ** (a.data - b.data))
         else:
-            dLdb = grad / (1 + 2 ** (a.data - b.data))
-            b.backward(dLdb, **kwargs)
-
+            raise IndexError
 
 class Log(Operation):
     """ f(a) -> ln(a)"""
@@ -81,8 +78,7 @@ class Log(Operation):
         return np.log(a.data)
 
     def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
-        a.backward(grad / a.data, **kwargs)
+        return grad / self.variables[index].data
 
 
 class Log2(Operation):
@@ -92,8 +88,7 @@ class Log2(Operation):
         return np.log2(a.data)
 
     def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
-        a.backward(grad / (a.data * np.log(2)), **kwargs)
+        return grad / (self.variables[index].data * np.log(2))
 
 
 class Log10(Operation):
@@ -103,8 +98,7 @@ class Log10(Operation):
         return np.log10(a.data)
 
     def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
-        a.backward(grad / (a.data * np.log(10)), **kwargs)
+        return grad / (self.variables[index].data * np.log(10))
 
 
 class Log1p(Operation):
@@ -117,5 +111,4 @@ class Log1p(Operation):
         return np.log1p(a.data)
 
     def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
-        a.backward(grad / (1 + a.data), **kwargs)
+        return grad / (1 + self.variables[index].data)

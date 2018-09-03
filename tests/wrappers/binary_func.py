@@ -241,6 +241,8 @@ class backprop_test_factory():
             assert_allclose(y.grad, dy, **self.tolerances,
                             err_msg="y: numerical derivative and mygrad derivative do not match")
 
+            assert not np.shares_memory(x.grad, grad), "A view of `grad` was back-propped"
+            assert not np.shares_memory(y.grad, grad), "A view of `grad` was back-propped"
             out.null_gradients()
             assert all(i.grad is None for i in (x, y)), "null_gradients failed"
 

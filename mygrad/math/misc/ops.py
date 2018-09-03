@@ -16,10 +16,7 @@ class Abs(Operation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad * np.piecewise(a.data,
-                                       [a.data < 0, a.data == 0, a.data > 0],
-                                       [-1, np.nan, 1]),
-                   **kwargs)
+        return grad * np.piecewise(a.data, [a.data < 0, a.data == 0, a.data > 0], [-1, np.nan, 1])
 
 
 class Sqrt(Operation):
@@ -34,7 +31,7 @@ class Sqrt(Operation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad / (2 * np.sqrt(a.data)), **kwargs)
+        return grad / (2 * np.sqrt(a.data))
 
 
 class Cbrt(Operation):
@@ -44,7 +41,7 @@ class Cbrt(Operation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        a.backward(grad / (3 * np.cbrt(a.data ** 2)), **kwargs)
+        return grad / (3 * np.cbrt(a.data ** 2))
 
 
 class Maximum(BroadcastableOp):
@@ -63,7 +60,7 @@ class Maximum(BroadcastableOp):
         else:
             raise IndexError
 
-        self.variables[index].backward(mask * grad, **kwargs)
+        return mask * grad
 
 
 class Minimum(BroadcastableOp):
@@ -82,4 +79,4 @@ class Minimum(BroadcastableOp):
         else:
             raise IndexError
 
-        self.variables[index].backward(mask * grad, **kwargs)
+        return mask * grad
