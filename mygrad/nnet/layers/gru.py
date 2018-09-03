@@ -3,7 +3,10 @@ from mygrad.tensor_base import Tensor
 from numbers import Integral
 import numpy as np
 
-from numba import njit, vectorize
+try:
+    from numby import njit, vectorize
+except ImportError:
+    raise ImportError("The package `numba` must be installed in order to access the gru.")
 
 
 @vectorize(['int32(int32)',

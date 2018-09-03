@@ -3,7 +3,10 @@ from mygrad.tensor_base import Tensor
 from numbers import Integral
 import numpy as np
 
-from numba import njit
+try:
+    from numby import njit
+except ImportError:
+    raise ImportError("The package `numba` must be installed in order to access the simple-rnn.")
 
 
 @njit
