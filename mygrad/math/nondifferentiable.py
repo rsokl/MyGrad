@@ -1,4 +1,5 @@
 import numpy as np
+from mygrad.tensor_base import Tensor
 
 __all__ = ["argmin",
            "argmax"]
@@ -8,7 +9,7 @@ def argmax(a, axis=None, out=None):
 
         Parameters
         ----------
-        a: mygrad.Tensor
+        a: array_like
         
         axis: int, optional
             By default, the index is into the flattened array, otherwise along the specified axis.
@@ -19,15 +20,16 @@ def argmax(a, axis=None, out=None):
         Returns
         -------
         numpy.ndarray[int]"""
-    
-    return np.argmax(a.data, axis, out)
+        
+    a = a.data if isinstance(a, Tensor) else a
+    return np.argmax(a, axis, out)
     
 def argmin(a, axis=None, out=None):
     """ Returns the indices of the minimum values along an axis.
 
         Parameters
         ----------
-        a: mygrad.Tensor
+        a: array_like
         
         axis: int, optional
             By default, the index is into the flattened array, otherwise along the specified axis.
@@ -38,5 +40,6 @@ def argmin(a, axis=None, out=None):
         Returns
         -------
         numpy.ndarray[int]"""
-    
-    return np.argmin(a.data, axis, out)
+
+    a = a.data if isinstance(a, Tensor) else a
+    return np.argmin(a, axis, out)
