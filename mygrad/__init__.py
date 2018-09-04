@@ -5,6 +5,7 @@ from mygrad.math.trigonometric.funcs import *
 from mygrad.math.hyperbolic_trig.funcs import *
 from mygrad.math.sequential.funcs import *
 from mygrad.math.sequential.funcs import max, min
+from mygrad.math.nondifferentiable import argmax, argmin
 from mygrad.math.misc.funcs import *
 from mygrad.tensor_manip.array_shape.funcs import *
 from mygrad.tensor_manip.transpose_like.funcs import *
@@ -19,6 +20,7 @@ __version__ = "0.6"
 for attr in (sum, prod, cumprod, cumsum,
              mean, std, var,
              max, min,
+             argmax, argmin,
              swapaxes, transpose, moveaxis,
              reshape, squeeze,
              matmul):
