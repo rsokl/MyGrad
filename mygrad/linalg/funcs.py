@@ -6,31 +6,10 @@ __all__ = ["matmul", "einsum"]
 
 
 def matmul(a, b, constant=False):
-    """ 
-    ``f(a, b) -> matmul(a, b)``
-
+    """
     Matrix product of two arrays.
 
-    Parameters
-    ----------
-    a : array_like
-    
-    b : array_like
 
-    constant : bool, optional(default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient)
-
-    Returns
-    -------
-    mygrad.Tensor
-        Returns the matrix product of `a` and `b`.  If `a` and `b` are both
-        1-D arrays then a scalar is returned; otherwise an array is
-        returned.
-
-    
-    Extended Summary
-    ----------------
     This documentation was adapted from ``numpy.matmul``
 
     The behavior depends on the arguments in the following way.
@@ -55,6 +34,25 @@ def matmul(a, b, constant=False):
     - Multiplication by scalars is not allowed.
     - Stacks of matrices are broadcast together as if the matrices
       were elements.
+
+
+    Parameters
+    ----------
+    a : array_like
+    
+    b : array_like
+
+    constant : bool, optional(default=False)
+        If ``True``, the returned tensor is a constant (it
+        does not back-propagate a gradient)
+
+    Returns
+    -------
+    output : mygrad.Tensor
+        Returns the matrix product of `a` and `b`.  If `a` and `b` are both
+        1-D arrays then a scalar is returned; otherwise an array is
+        returned.
+
 
     Raises
     ------
@@ -114,9 +112,10 @@ def einsum(*operands, optimize=False, constant=False):
     """
     einsum(subscripts, *operands)
 
+    Evaluates the Einstein summation convention on the operands.
+
     The following docstring was adapted from the documentation for ``numpy.einsum``
 
-    Evaluates the Einstein summation convention on the operands.
     Using the Einstein summation convention, many common multi-dimensional
     array operations can be represented in a simple fashion.  This function
     provides a way to compute such summations. The best way to understand this
