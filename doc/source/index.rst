@@ -10,15 +10,10 @@ Welcome to MyGrad's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   intro
    tensor
    tensor_creation
    linalg
    math
    nnet
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

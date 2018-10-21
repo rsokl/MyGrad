@@ -1,16 +1,25 @@
-Tensor
-******
-A numpy-array-like object capable of serving as a node in a computational
+MyGrad's Tensor
+***************
+``mygrad.Tensor`` is the most critical piece of MyGrad. It is a
+numpy-array-like object capable of serving as a node in a computational
 graph that supports back-propagation of derivatives via the chain rule.
-See the Examples section of the docstring for more details.
 
-Like the numpy array, mygrad's tensor stores data as an N-dimensional array
-and provides an interface accessing, setting, and performing vectorized
-operations along the various dimensions of this array. Vectorized operations
-support numpy-style broadcasting semantics.
+You can effectively do a drop-in replacement of a numpy array with a ``mygrad.Tensor``
+for all basic mathematical operations. This includes basic and advanced indexing,
+broadcasting, sums over axes, etc; it will simply just work.
 
-The contents of a tensor can be accessed and written to using all variety
-of basic and advanced indexing (along with mixtures of the two).
+>>> import mygrad as mg  # note that we replace numpy with mygrad here
+>>> x = mg.arange(9).reshape(3, 3)
+>>> x
+Tensor([[0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8]])
+>>> y = x[x == 4] ** 2
+>>> y
+Tensor([16], dtype=int32)
+
+Thus MyGrad users can spend their time mastering `numpy <http://www.pythonlikeyoumeanit.com/module_3.html/>`_
+and their skills will transfer seamlessly when using this autograd library.
 
 Creating a Tensor
 -----------------
