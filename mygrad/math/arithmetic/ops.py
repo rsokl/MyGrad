@@ -8,6 +8,7 @@ __all__ = ["Add",
            "Divide",
            "Reciprocal",
            "Power",
+           "Square",
            "Positive",
            "Negative",
            "AddSequence",
@@ -122,6 +123,18 @@ class Power(BroadcastableOp):
         else:
             return grad * (x ** y) * np.log(np.where(x, x, 1))
 
+class Square(Operation):
+    def __call__(self, a):
+        """ f(a) -> a ** 2
+
+            Parameters
+            ----------
+            a : mygrad.Tensor"""
+        self.variables = (a,)
+        return np.square(a.data)
+
+    def backward_var(self, grad, index, **kwargs):
+        return grad * 2 * self.variables[index].data
 
 class Positive(Operation):
     """ f(a) = +a """

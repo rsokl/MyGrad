@@ -1,4 +1,4 @@
-from .ops import Add, Subtract, Power, Divide, Multiply, MultiplySequence, AddSequence
+from .ops import Add, Subtract, Power, Square, Divide, Multiply, MultiplySequence, AddSequence
 from .ops import Positive, Negative, Reciprocal
 from mygrad.tensor_base import Tensor
 
@@ -7,6 +7,7 @@ __all__ = ["add",
            "subtract",
            "power",
            "divide",
+           "square",
            "reciprocal",
            "multiply",
            "multiply_sequence",
@@ -71,6 +72,21 @@ def divide(a, b, constant=False):
         mygrad.Tensor"""
     return Tensor._op(Divide, a, b, constant=constant)
 
+def square(a, constant=False):
+    """ ``f(a) -> a ** 2``
+
+        Parameters
+        ----------
+        a : array_like
+
+        constant : bool, optional(default=False)
+            If ``True``, the returned tensor is a constant (it
+            does not back-propagate a gradient)
+
+        Returns
+        -------
+        mygrad.Tensor"""
+    return Tensor._op(Square, a, constant=constant)
 
 def reciprocal(a, constant=False):
     """ ``f(a) -> 1 / a``
