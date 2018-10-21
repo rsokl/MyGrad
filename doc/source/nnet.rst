@@ -1,0 +1,40 @@
+Neural network operations (:mod:`mygrad.nnet`)
+**********************************************
+
+.. currentmodule:: mygrad.nnet
+
+Layer operations
+----------------
+.. autosummary::
+   :toctree: generated/
+
+   batchnorm
+   conv_nd
+   max_pool
+   gru
+   simple_RNN
+
+
+Losses
+------
+.. autosummary::
+   :toctree: generated/
+
+   multiclass_hinge
+   softmax_crossentropy
+   margin_ranking_loss
+
+
+Activations
+-----------
+.. autosummary::
+   :toctree: generated/
+
+   tanh
+   sigmoid
+   relu
+   softmax
+   logsoftmax
+
+
+

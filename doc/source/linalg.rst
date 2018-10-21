@@ -1,7 +1,7 @@
 .. _routines.linalg:
 
 Linear algebra (:mod:`mygrad.linalg`)
-************************************
+*************************************
 
 .. currentmodule:: mygrad
 
