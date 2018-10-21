@@ -13,7 +13,8 @@ __all__ = ["sin",
            "arcsin",
            "arctan",
            "arcsec",
-           "arccot"]
+           "arccot",
+           "arctan2"]
 
 
 def sin(a, constant=False):
@@ -235,3 +236,20 @@ def arcsec(a):
         -------
         mygrad.Tensor"""
     return Tensor._op(Arcsec, a)
+
+def arctan2(a, b):
+    """ ``f(a, b) -> arctan(a/b)``
+
+        Parameters
+        ----------
+        a : array_like
+        b : array_like
+
+        constant : bool, optional(default=False)
+            If ``True``, the returned tensor is a constant (it
+            does not back-propagate a gradient)
+
+        Returns
+        -------
+        mygrad.Tensor"""
+    return Tensor._op(Arctan2, a, b)
