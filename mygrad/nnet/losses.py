@@ -19,7 +19,8 @@ class MulticlassHinge(Operation):
 
             Returns
             -------
-            The average multiclass hinge loss"""
+            loss : mygrad.Tensor
+                The average multiclass hinge loss"""
         self.variables = (a,)
         scores = a.data
         correct_labels = (range(len(y)), y)
@@ -62,7 +63,8 @@ def multiclass_hinge(x, y_true, hinge=1., constant=False):
 
         Returns
         -------
-        The average multiclass hinge loss"""
+        loss : mygrad.Tensor
+            The average multiclass hinge loss"""
     return Tensor._op(MulticlassHinge, x, op_args=(y_true, hinge), constant=constant)
 
 
@@ -83,7 +85,8 @@ class SoftmaxCrossEntropy(Operation):
                 
             Returns
             -------
-            The average softmax loss"""
+            loss : mygrad.Tensor
+                The average softmax loss"""
         self.variables = (a,)
         scores = a.data
         log_softmax = scores - logsumexp(scores, axis=-1, keepdims=True)
@@ -120,7 +123,8 @@ def softmax_crossentropy(x, y_true, constant=False):
 
         Returns
         -------
-        The average softmax loss"""
+        loss : mygrad.Tensor
+            The average softmax loss"""
     return Tensor._op(SoftmaxCrossEntropy, x, op_args=(y_true,), constant=constant)
 
 
@@ -188,7 +192,7 @@ def margin_ranking_loss(x1, x2, y, margin, constant=False):
 
     Returns
     -------
-    mygrad.Tensor, shape=()
+    loss : mygrad.Tensor
         The mean margin ranking loss.
     """
     assert 0 < x1.ndim < 3, "`x1` must have shape (N,) or (N, D)"

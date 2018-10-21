@@ -3,6 +3,7 @@ from mygrad.tensor_base import Tensor
 
 
 __all__ = ["abs",
+           "absolute",
            "cbrt",
            "sqrt",
            "maximum",
@@ -28,6 +29,9 @@ def abs(a, constant=False):
         -----
         The derivative at a == 0 returns nan"""
     return Tensor._op(Abs, a, constant=constant)
+
+
+absolute = abs
 
 
 def sqrt(a, constant=False):
