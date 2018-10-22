@@ -1,9 +1,8 @@
-from mygrad as mg
+import mygrad as mg
 from mygrad.tensor_base import Tensor
 
 import hypothesis.strategies as st
 from numpy.testing import assert_allclose
-import numpy as np
 
 from ...custom_strategies import valid_axes
 from hypothesis import given
@@ -22,7 +21,7 @@ def test_argmin(a, data):
     axis = data.draw(valid_axes(ndim=a.ndim, single_axis_only=True), label="axis")
     tensor = Tensor(a)
     # tensor input
-    assert_allclose(mg.argmin(tensor), np.argmin(a, axis=axis))
+    assert_allclose(mg.argmin(tensor, axis=axis), np.argmin(a, axis=axis))
     
     # tensor method
     assert_allclose(tensor.argmin(axis=axis), a.argmin(axis=axis))
@@ -38,7 +37,7 @@ def test_argmax(a, data):
     tensor = Tensor(a)
     
     # tensor input
-    assert_allclose(mg.argmax(tensor), np.argmax(a, axis=axis))
+    assert_allclose(mg.argmax(tensor, axis=axis), np.argmax(a, axis=axis))
     
     # tensor method
     assert_allclose(tensor.argmax(axis=axis), a.argmax(axis=axis))
