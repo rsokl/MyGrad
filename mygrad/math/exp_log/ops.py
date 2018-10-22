@@ -1,7 +1,7 @@
 from mygrad.operation_base import Operation, BroadcastableOp
 import numpy as np
 
-__all__ = ["Exp", "Expm1",
+__all__ = ["Exp", "Exp2", "Expm1",
            "Log", "Log2", "Log10", "Log1p",
            "Logaddexp", "Logaddexp2"]
 
@@ -23,6 +23,22 @@ class Exp(Operation):
     def backward_var(self, grad, index, **kwargs):
         return grad * np.exp(self.variables[index].data)
 
+class Exp2(Operation):
+    def __call__(self, a):
+        """ f(a) -> 2^a
+
+            Parameters
+            ----------
+            a : mygrad.Tensor
+
+            Returns
+            -------
+            numpy.ndarray"""
+        self.variables = (a,)
+        return np.exp2(a.data)
+    
+    def backward_var(self, grad, index, **kwargs):
+        return grad * np.exp2(self.variables[index].data) * np.log(2)
 
 class Expm1(Operation):
     """ f(a) -> exp(a) - 1

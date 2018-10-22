@@ -3,6 +3,7 @@ from .ops import *
 from mygrad.tensor_base import Tensor
 
 __all__ = ["exp",
+           "exp2",
            "expm1",
            "logaddexp",
            "logaddexp2",
@@ -28,6 +29,21 @@ def exp(a, constant=False):
         mygrad.Tensor"""
     return Tensor._op(Exp, a, constant=constant)
 
+def exp2(a, constant=False):
+    """``f(a) -> 2^a``
+
+        Parameters
+        ----------
+        a : array_like
+
+        constant : bool, optional(default=False)
+            If ``True``, the returned tensor is a constant (it
+            does not back-propagate a gradient)
+        
+        Returns
+        -------
+        mygrad.Tensor"""
+    return Tensor._op(Exp2, a, constant=constant)
 
 def expm1(a, constant=False):
     """ ``f(a) -> exp(a) - 1``
