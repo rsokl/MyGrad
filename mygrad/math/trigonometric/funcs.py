@@ -237,7 +237,7 @@ def arcsec(a):
         mygrad.Tensor"""
     return Tensor._op(Arcsec, a)
 
-def arctan2(a, b):
+def arctan2(a, b, constant=False):
     """ ``f(a, b) -> arctan(a/b)``
 
         Parameters
@@ -252,4 +252,4 @@ def arctan2(a, b):
         Returns
         -------
         mygrad.Tensor"""
-    return Tensor._op(Arctan2, a, b)
+    return Tensor._op(Arctan2, a, b, constant=constant)

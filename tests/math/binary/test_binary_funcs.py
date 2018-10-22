@@ -3,6 +3,7 @@ from ...wrappers.uber import fwdprop_test_factory, backprop_test_factory
 
 from mygrad import add, subtract, multiply, divide, power, logaddexp
 from mygrad import logaddexp2, maximum, minimum
+from mygrad import arctan2
 
 import numpy as np
 
@@ -82,6 +83,16 @@ def test_logaddexp2_fwd(): pass
 @backprop_test_factory(mygrad_func=logaddexp2, true_func=np.logaddexp2, num_arrays=2,
                        as_decimal=False, atol=1e-4, rtol=1e-4, vary_each_element=True)
 def test_logaddexp2_bkwd(): pass
+
+
+@fwdprop_test_factory(mygrad_func=arctan2, true_func=np.arctan2, num_arrays=2, index_to_bnds={1: (1, 10)})
+def test_arctan2_fwd(): pass
+
+
+@backprop_test_factory(mygrad_func=arctan2, true_func=np.arctan2, num_arrays=2,
+                       as_decimal=False, atol=1e-4, rtol=1e-4, vary_each_element=True,
+                       index_to_bnds={1: (1, 10)})
+def test_arctan2_bkwd(): pass
 
 
 @fwdprop_test_factory(mygrad_func=maximum, true_func=np.maximum, num_arrays=2)
