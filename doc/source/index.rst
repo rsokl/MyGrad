@@ -13,7 +13,8 @@ Welcome to MyGrad's documentation!
    intro
    tensor
    tensor_creation
+   tensor_manipulation
    linalg
    math
    nnet
-
+   graph_viz
