@@ -14,6 +14,7 @@ Trigonometric functions
    arcsin
    arccos
    arctan
+   arctan2
 
 
 Hyperbolic functions
@@ -46,6 +47,7 @@ Exponents and logarithms
 
    exp
    expm1
+   exp2
    log
    log10
    log2
@@ -80,6 +82,7 @@ Miscellaneous
 .. autosummary::
    :toctree: generated/
 
+   square
    sqrt
    cbrt
 
