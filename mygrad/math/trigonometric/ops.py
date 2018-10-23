@@ -1,4 +1,4 @@
-from mygrad.operation_base import Operation
+from mygrad.operation_base import Operation, BroadcastableOp
 import numpy as np
 
 __all__ = ["Sin",
@@ -13,7 +13,8 @@ __all__ = ["Sin",
            "Arctan",
            "Arccsc",
            "Arcsec",
-           "Arccot"]
+           "Arccot",
+           "Arctan2"]
 
 
 class Sin(Operation):
@@ -174,3 +175,16 @@ class Arccot(Operation):
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
         return -grad / (1 + a.data ** 2)
+
+class Arctan2(BroadcastableOp):
+    """ f(a, b) -> arctan(a/b)"""
+    def __call__(self, a, b):
+        self.variables = (a,b)
+        return np.arctan2(a.data, b.data)
+
+    def backward_var(self, grad, index, **kwargs):
+        a, b = self.variables
+        if index == 0:
+            return grad * b.data / (a.data ** 2 + b.data ** 2)
+        else:
+            return -1.0 * grad * a.data / (a.data ** 2 + b.data ** 2)
