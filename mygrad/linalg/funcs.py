@@ -1,8 +1,158 @@
 from .ops import *
 from mygrad.tensor_base import Tensor
 from numpy.core.einsumfunc import _parse_einsum_input
+import numpy as np
 
-__all__ = ["matmul", "einsum"]
+__all__ = ["multi_matmul", "matmul", "einsum"]
+
+
+def multi_matmul(arrays, constant = False):
+    """
+    Matrix product of two or more arrays calculated in the optimal ordering
+
+    Parameters
+    ----------
+    arrays: sequence or array_like
+
+    constant : bool, optional(default=False)
+        If ``True``, the returned tensor is a constant (it
+        does not back-propagate a gradient)
+
+    Returns
+    -------
+    mygrad.Tensor
+        Returns the matrix product of the arrays provided
+
+
+	Extended Summary
+    ----------------
+    This documentation was adapted from ``numpy.linalg.multi_dot``
+
+    Compute the matrix multiplication of two or more arrays in a single function 
+    call, while automatically selecting the fastest evaluation order.
+    `multi_matmul` chains `matmul` and uses optimal parenthesization (see notes).
+    Depending on the shapes of the matrices, this can speed up the multiplication a lot.
+    If the first argument is 1-D it is treated as a row vector.
+    If the last argument is 1-D it is treated as a column vector.
+    The other arguments must be 2-D or greater.
+
+    Raises
+    ------
+    ValueError
+        If arrays contains less than two array_like items.
+
+    ValueError
+    	If array other than the first or last is less than two dimmensional
+
+    
+    Notes
+    -----
+    The cost for a matrix multiplication can be calculated with the
+    following function::
+        def cost(A, B):
+            return A.shape[0] * A.shape[1] * B.shape[1]
+    Let's assume we have three matrices
+    :math:`A_{10x100}, B_{100x5}, C_{5x50}`.
+    The costs for the two different parenthesizations are as follows::
+        cost((AB)C) = 10*100*5 + 10*5*50   = 5000 + 2500   = 7500
+        cost(A(BC)) = 10*100*50 + 100*5*50 = 50000 + 25000 = 75000
+    """
+
+    n = len(arrays)
+    if n < 2:
+        raise ValueError("Expecting at least two arrays.")
+    elif n == 2:
+        return matmul(arrays[0], arrays[1], constant)
+
+    arrays = [np.asanyarray(a) for a in arrays]
+    # save original ndim to reshape the result array into the proper form later
+    ndim_first, ndim_last = arrays[0].ndim, arrays[-1].ndim
+    # Explicitly convert vectors to 2D arrays to keep the logic of this function simpler
+    if arrays[0].ndim == 1:
+        arrays[0] = arrays[0][np.newaxis,:]
+    if arrays[-1].ndim == 1:
+        arrays[-1] = arrays[-1][:,np.newaxis]
+
+    for a in arrays:
+        if a.ndim < 2:
+            raise ValueError('%d-dimensional array given. Array must be '
+                    'at least two-dimensional' % a.ndim)
+
+    if n == 3:
+        result = _multi_matmul_three(arrays[0], arrays[1], arrays[2], constant)
+    else:
+        order = _multi_matmul_chain_order(arrays)
+        result = _multi_matmul(arrays, order, 0, n - 1, constant)
+
+    # return proper shape since we possibly added dimmensions to the first
+    # and last arrays
+    #if ndim_first == 1 and ndim_last == 1:
+    #    return result[0, 0]
+    #elif ndim_first == 1 or ndim_last == 1:
+    #    return result.ravel()
+    #else:
+        return result
+
+
+def _multi_matmul_three(A, B, C, constant = False):
+    """
+    Find the best order for three arrays and do the multiplication.
+    
+    """
+    a0, a1b0 = A.shape[-2:]
+    b1c0, c1 = C.shape[-2:]
+    cost1 = a0 * b1c0 * (a1b0 + c1)
+    cost2 = a1b0 * c1 * (a0 + b1c0)
+
+    if cost1 < cost2:
+        return matmul(matmul(A, B, constant), C, constant)
+    else:
+        return matmul(A, matmul(B, C, constant), constant)
+
+
+def _multi_matmul_chain_order(arrays):
+    """
+    Return a np.array that encodes the optimal order of mutiplications.
+    The optimal order array is then used by `_multi_matmul()` to do the
+    multiplication.
+    The implementation CLOSELY follows Cormen, "Introduction to Algorithms",
+    Chapter 15.2, p. 370-378.  Note that Cormen uses 1-based indices.
+        cost[i, j] = min([
+            cost[prefix] + cost[suffix] + cost_mult(prefix, suffix)
+            for k in range(i, j)])
+    """
+    n = len(arrays)
+    # p stores the dimensions of the matrices
+    # Example for p: A_{10x100}, B_{100x5}, C_{5x50} --> p = [10, 100, 5, 50]
+    # Using -2 to generalize for shapes that are more than 2 dimmensions
+    p = [a.shape[-2] for a in arrays] + [arrays[-1].shape[-1]]
+    # m is a matrix of costs of the subproblems
+    # m[i,j]: min number of scalar multiplications needed to compute A_{i..j}
+    m = np.zeros((n, n), dtype=np.double)
+    # s is the actual ordering
+    # s[i, j] is the value of k at which we split the product A_i..A_j
+    s = np.empty((n, n), dtype=np.intp)
+
+    for l in range(1, n):
+        for i in range(n - l):
+            j = i + l
+            m[i, j] = np.inf
+            for k in range(i, j):
+                q = m[i, k] + m[k+1, j] + p[i]*p[k+1]*p[j+1]
+                if q < m[i, j]:
+                    m[i, j] = q
+                    s[i, j] = k  # Note that Cormen uses 1-based index
+
+    return s
+
+
+def _multi_matmul(arrays, order, i, j, constant = False):
+    """Actually do the multiplication with the given order."""
+    if i == j:
+        return arrays[i]
+    else:
+        return matmul(_multi_matmul(arrays, order, i, order[i, j], constant),
+                _multi_matmul(arrays, order, order[i, j] + 1, j, constant), constant)
 
 
 def matmul(a, b, constant=False):
