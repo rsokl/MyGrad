@@ -42,6 +42,42 @@ def setitem(x, y, index):
     return x_copy
 
 
+def test_setitem_multiple_input():
+    """
+    Ensures proper backprop through computational graph
+    in which variable that is set on serves as multiple
+    inputs to a single operation.
+
+    Ensures that null-gradient and clear-graph works properly.
+    """
+    from mygrad import add_sequence
+    x = Tensor([1.])
+    y = x + 0
+
+    assert_array_equal(y.data, np.array([1.]))
+
+    o = add_sequence(y, y, y)
+    y[0] = 4
+
+    assert_array_equal(y.data, np.array([4.]))
+
+    f = o * y  # 3 * 4
+    f.backward()
+
+    assert_array_equal(o.data, np.array([3.]))
+    assert_array_equal(f.data, np.array([12.]))
+
+    assert_array_equal(x.grad, np.array([12.]))
+    assert_array_equal(o.grad, np.array([4.]))
+    assert_array_equal(y.grad, np.array([3.]))
+
+    f.null_gradients()
+    assert x.grad is None and not x._ops and not x._accum_ops
+    assert y.grad is None and not y._ops and not y._accum_ops
+    assert o.grad is None and not o._ops and not o._accum_ops
+    assert f.grad is None and not f._ops and not f._accum_ops
+    
+
 @given(x_constant=st.booleans(),
        y_constant=st.booleans(),
        data=st.data())

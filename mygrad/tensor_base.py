@@ -350,19 +350,21 @@ class Tensor:
         # old_tensor is the tensor pre-setitem
         old_tensor = Tensor(self, constant=self.constant, _scalar_only=self._scalar_only, _creator=self.creator)
         old_tensor._ops = self._ops
+        old_tensor._accum_ops = self._accum_ops
 
         # point all ops involving `self` to old_tensor instead
         for op in old_tensor._ops:
             for i in range(len(op.variables)):
                 if op.variables[i] is self:
                     op.variables = op.variables[:i] + (old_tensor,) + op.variables[i+1:]
-                    break
+
 
         # self becomes the tensor post-setitem
         out = self._op(SetItem, old_tensor, value, op_args=(key,))
         self._creator = out.creator
         self._scalar_only = out._scalar_only
         self._ops = out._ops
+        self._accum_ops = out._accum_ops
         self.data = out.data
         self._constant = out.constant
 
