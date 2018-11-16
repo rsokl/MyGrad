@@ -5,8 +5,8 @@ numpy-array-like object capable of serving as a node in a computational
 graph that supports back-propagation of derivatives via the chain rule.
 
 You can effectively do a drop-in replacement of a numpy array with a ``mygrad.Tensor``
-for all basic mathematical operations. This includes basic and advanced indexing,
-broadcasting, sums over axes, etc; it will simply just work.
+for all basic mathematical operations. This includes `basic and advanced indexing <https://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/BasicIndexing.html#Introducing-Basic-and-Advanced-Indexing>`_,
+`broadcasting <https://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/Broadcasting.html>`_, sums `over axes <https://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/VectorizedOperations.html#Specifying-the-axis-Keyword-Argument-in-Sequential-NumPy-Functions>`_, etc; it will simply just work.
 
 >>> import mygrad as mg  # note that we replace numpy with mygrad here
 >>> x = mg.arange(9).reshape(3, 3)
@@ -33,7 +33,7 @@ functions (e.g. ``mygrad.arange``, ``mygrad.linspace``, etc.)
 Tensor(2.3)
 >>> mg.Tensor(np.array([1.2, 3.0]))  # casting a numpy-array to a tensor
 Tensor([1.2, 3.0])
->>> mg.Tensor([[1, 2], [3, 4]])  # creating a 2-dimensional tensor
+>>> mg.Tensor([[1, 2], [3, 4]])  # creating a 2-dimensional tensor from lists
 Tensor([[1, 2],
        [3, 4]])
 >>> mg.arange(4)    # using numpy-style tensor creation functions
@@ -79,16 +79,20 @@ True
 Accessing the Underlying NumPy Array
 ------------------------------------
 ``mygrad.Tensor`` is a thin wrapper on ``numpy.ndarray``. A tensor's
-underlying numpy-array can be accessed via ``.data``:
+underlying numpy-array can be accessed via ``.data``. This returns
+a direct reference to the numpy array.
 
 >>> x = mg.Tensor([1, 2])
 >>> x.data
 array([1, 2])
 
-**Do not modify this underlying array**. Any in-place modifications made to this
+**Do not unwittingly modify this underlying array**. Any in-place modifications made to this
 array will not be tracked by any computational graph involving that tensor, thus
 back-propagation through that tensor will likely be incorrect.
 
+
+Documentation for mygrad.Tensor
+-------------------------------
 
 .. currentmodule:: mygrad
 
