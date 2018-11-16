@@ -1,25 +1,75 @@
 from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor
 import numpy as np
-from scipy.misc import logsumexp
+from scipy.special import logsumexp
 from numbers import Real
 
 __all__ = ["multiclass_hinge", "softmax_crossentropy", "margin_ranking_loss"]
 
 
+def _check_loss_inputs(x, y_true):
+    """
+    Ensures that the inputs to scores-truth style loss functions
+    are of the correct shapes and types.
+
+    Parameters
+    ----------
+    x : mygrad.Tensor, shape=(N, C)
+        The C class scores for each of the N pieces of data.
+
+    y_true : Sequence[int]
+        The correct class-indices, in [0, C), for each datum.
+
+    Raises
+    ------
+    TypeError
+        `y_true` must be an integer-type array-like object
+
+    ValueError
+        `x` must be a 2-dimensional array-like object
+        `y_true` must be a shape-(N,) array-like object
+    """
+    if not x.ndim == 2:
+        raise ValueError('`x` must be a 2-dimensional array-like object, got {}-dim'.format(x.ndim))
+
+    if isinstance(y_true, Tensor):
+        y_true = y_true.data
+
+    y_true = np.asarray(y_true)
+    if not np.issubdtype(y_true.dtype, np.int_):
+        raise TypeError("`y_true` must be an integer-type array-like object")
+
+    if y_true.ndim != 1 or y_true.shape[0] != x.shape[0]:
+        raise ValueError('`y_true` must be a shape-(N,) array: \n'
+                         '\tExpected shape-{}\n'
+                         '\tGot shape-{}'.format((x.shape[0],), y_true.shape))
+
+
 class MulticlassHinge(Operation):
     def __call__(self, a, y, hinge=1.):
-        """ Parameters
-            ----------
-            a : mygrad.Tensor, shape=(N, C)
-                The C class scores for each of the N pieces of data.
+        """
+        Parameters
+        ----------
+        a : mygrad.Tensor, shape=(N, C)
+            The C class scores for each of the N pieces of data.
 
-            y : numpy.ndarray, shape=(N,)
-                The correct class-index, in [0, C), for each datum.
+        y : numpy.ndarray, shape=(N,)
+            The correct class-index, in [0, C), for each datum.
 
-            Returns
-            -------
-            The average multiclass hinge loss"""
+        Returns
+        -------
+        The average multiclass hinge loss
+
+        Raises
+        ------
+        TypeError
+            `y_true` must be an integer-type array-like object
+
+        ValueError
+            `x` must be a 2-dimensional array-like object
+            `y_true` must be a shape-(N,) array-like object"""
+
+        _check_loss_inputs(a, y)
         self.variables = (a,)
         scores = a.data
         correct_labels = (range(len(y)), y)
@@ -62,7 +112,17 @@ def multiclass_hinge(x, y_true, hinge=1., constant=False):
 
         Returns
         -------
-        The average multiclass hinge loss"""
+        The average multiclass hinge loss
+
+        Raises
+        ------
+        TypeError
+            `y_true` must be an integer-type array-like object
+
+        ValueError
+            `x` must be a 2-dimensional array-like object
+            `y_true` must be a shape-(N,) array-like object
+        """
     return Tensor._op(MulticlassHinge, x, op_args=(y_true, hinge), constant=constant)
 
 
@@ -72,22 +132,24 @@ class SoftmaxCrossEntropy(Operation):
         cross entropy is then computed by using the true classification labels.
         
         log-softmax is used for improved numerical stability"""
-    def __call__(self, a, y):
+    def __call__(self, x, y_true):
         """ Parameters
             ----------
-            a : mygrad.Tensor, shape=(N, C)
+            x : mygrad.Tensor, shape=(N, C)
                 The C class scores for each of the N pieces of data.
 
-            y : Sequence[int]
+            y_true : Sequence[int]
                 The correct class-indices, in [0, C), for each datum.
                 
             Returns
             -------
             The average softmax loss"""
-        self.variables = (a,)
-        scores = a.data
+
+        _check_loss_inputs(x, y_true)
+        self.variables = (x,)
+        scores = x.data
         log_softmax = scores - logsumexp(scores, axis=-1, keepdims=True)
-        label_locs = (range(len(scores)), y)
+        label_locs = (range(len(scores)), y_true)
         loss = -np.sum(log_softmax[label_locs]) / scores.shape[0]
         
         self.back = np.exp(log_softmax)
@@ -120,7 +182,17 @@ def softmax_crossentropy(x, y_true, constant=False):
 
         Returns
         -------
-        The average softmax loss"""
+        The average softmax loss
+
+        Raises
+        ------
+        TypeError
+            `y_true` must be an integer-type array-like object
+
+        ValueError
+            `x` must be a 2-dimensional array-like object
+            `y_true` must be a shape-(N,) array-like object
+        """
     return Tensor._op(SoftmaxCrossEntropy, x, op_args=(y_true,), constant=constant)
 
 
@@ -191,10 +263,14 @@ def margin_ranking_loss(x1, x2, y, margin, constant=False):
     mygrad.Tensor, shape=()
         The mean margin ranking loss.
     """
-    assert 0 < x1.ndim < 3, "`x1` must have shape (N,) or (N, D)"
-    assert x1.shape == x2.shape, "`x1` and `x2` must have the same shape"
-    assert np.issubdtype(x1.dtype, np.floating), "`x1` must contain floats"
-    assert isinstance(margin, Real) and margin >= 0, "`margin` must be a non-negative scalar"
+    if not 0 < x1.ndim < 3:
+        raise ValueError("`x1` must have shape (N,) or (N, D)")
+    if not x1.shape == x2.shape:
+        raise ValueError("`x1` and `x2` must have the same shape")
+    if not np.issubdtype(x1.dtype, np.floating):
+        raise TypeError("`x1` must contain floats")
+    if not isinstance(margin, Real) and margin >= 0:
+        raise ValueError("`margin` must be a non-negative scalar")
     if isinstance(y, Tensor):
         y = y.data
 
