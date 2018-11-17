@@ -132,30 +132,31 @@ class ConvND(Operation):
 
 def conv_nd(x, filter_bank, *, stride, padding=0, dilation=1, constant=False):
     """ Use `filter_bank` to perform strided N-dimensional neural network-style
-        convolutions (see Notes) over `x`.
-                           f(x, w) -> x ⋆ w
+        convolutions (see Notes) over `x`.::
+
+                f(x, w) -> x ⋆ w
 
                 shapes:
                 (N, C, X0, ...) ⋆ (F, C, W0, ...) -> (N, F, G0, ...)
 
-        `x` represents a batch of data over which the filters
+        ``x`` represents a batch of data over which the filters
         are convolved. Specifically, it must be a tensor of shape
-        (N, C, X0, ...), where N is the number of samples in the batch,
-        C is the channel-depth of each datum, and (X0, ...) are the
+        :math:`(N, C, X_0, ...)`, where :math:`N` is the number of samples in the batch,
+        C is the channel-depth of each datum, and :math:`(X_0, ...)` are the
         dimensions over which the filters are convolved. Accordingly,
-        each filter must have a channel depth of C.
+        each filter must have a channel depth of :math:`C`.
 
-        Thus convolving F filters, each with a shape (C, W0, ...),
+        Thus convolving :math:`F` filters, each with a shape :math:`(C, W_0, ...)`,
         over the data batch will produce a tensor of shape
-        (N, F, G0, ...), where (G0, ...) is the shape of the grid
+        :math:`(N, F, G_0, ...)`, where :math:`(G_0, ...)` is the shape of the grid
         commensurate with the filter placements
 
         Parameters
         ----------
-        x : Union[Tensor, array_like], shape=(N, C, X0, ...)
+        x : Union[Tensor, array_like], shape=(N, C, Xo, ...)
             The data batch to be convolved over.
 
-        filter_bank : Union[Tensor, array_like], shape=(F, C, W0, ...)
+        filter_bank : Union[Tensor, array_like], shape=(F, C, Wo, ...)
             The filters used to perform the convolutions.
 
         stride : Union[int, Tuple[int, ...]]
@@ -175,8 +176,8 @@ def conv_nd(x, filter_bank, *, stride, padding=0, dilation=1, constant=False):
             (keyword-only argument) The spacing used when placing kernel 
             elements along the data. E.g. for a 1D convolution the ith 
             placement of the kernel multiplied  against the dilated-window: 
-            `x[:, :, i*s:(i*s + w*d):d]`, where s is
-            the stride, w is the kernel-size, and d is the dilation factor.
+            ``x[:, :, i*s:(i*s + w*d):d]``, where ``s`` is
+            the stride, ``w`` is the kernel-size, and ``d`` is the dilation factor.
 
             If a single integer is provided, that dilation value is used for all
             of the convolved axes
@@ -200,7 +201,60 @@ def conv_nd(x, filter_bank, *, stride, padding=0, dilation=1, constant=False):
 
          - This is a "scalar-only" operation, meaning that back propagation through
            this layer assumes that a scalar (i.e. a 0-dimensional tensor) will invoke
-           `tensor.backward()` for the computational graph. This is standard for a
-           neural network, which terminates in a scalar loss."""
+           ``tensor.backward()`` for the computational graph. This is standard for a
+           neural network, which terminates in a scalar loss.
+
+        Examples
+        --------
+        Here we perform a 1D convolution of a constant-valued kernel, ``k``, with a
+        'square-wave' signal, ``x``, using stride-1. Note that because we are constrained
+        to doing deep learning-style convolutions, that we prepend the dimensions
+        :math:`(N=1, C=1)` to ``x``, and :math:`(F=1, C=1)` and to ``k``. That is,
+        we are performing a convolution on one, single-channeled signal using
+        one kernel.
+
+        See that this convolution produces the expected triangle-shaped
+        response. The shape of the resulting tensor is :math:`(N=1, F=1, G_0=12)`.
+        That is, the length-5 kernel can be placed in 12 valid positions, using a
+        stride of 1.
+
+        >>> import mygrad as mg
+        >>> from mygrad.nnet import conv_nd
+        >>> x = mg.zeros((1, 1, 16))  # a square-wave signal
+        >>> x[..., 5:11] = 1
+        >>> k = mg.ones((1, 1, 5))    # a constant-valued kernel
+        >>> conv_nd(x, k, stride=1)   # performing a stride-1, 1D convolution
+        Tensor([[[0., 1., 2., 3., 4., 5., 5., 4., 3., 2., 1., 0.]]], dtype=float32)
+
+        Back-propagating through the (summed) convolution:
+
+        >>> conv_nd(x, k, stride=1).sum().backward()  # sum to a scalar to perform back-prop
+        >>> x.grad  # d(summed_conv)/dx
+        array([[[1., 2., 3., 4., 5., 5., 5., 5., 5., 5., 5., 5., 4., 3., 2., 1.]]],
+              dtype=float32)
+        >>> k.grad  # d(summed_conv)/dk
+        array([[[6., 6., 6., 6., 6.]]])
+
+        Now, let's demonstrate a more typical usage for ``conv_nd`` in the context of
+        neural networks. ``x`` will represent 10, 32x32 RGB images, and we will use
+        5 distinct 2x2 kernels to convolve over each of these images . Note that
+        each kernel must possess 3-channel - one for each RGB channel.
+
+        That is, we will be performing NxF channel-wise 2D convolutions. Supposing
+        that we don't want the kernel placements to overlap, we can use a stride of 2. In
+        total, this will produce a shape-:math:`(N=10, F=5, G_0=16, G_1=16)` tensor as a
+        result.
+
+        >>> import numpy as np
+        >>> x = mg.Tensor(np.random.rand(10, 3, 32, 32))  # creating 10 random 32x32 RGB images
+        >>> k = mg.Tensor(np.random.rand(5, 3, 2, 2))     # creating 5 random 3-channel 2x2 kernels
+
+        Given the shapes of ``x`` and ``k``, ``conv_nd`` automatically executes a 2D convolution:
+
+        >>> conv_nd(x, k, stride=2).shape
+        (10, 5, 16, 16)
+
+        Extrapolating further, ``conv_nd`` is capable of performing ND convolutions!
+        """
     return Tensor._op(ConvND, x, filter_bank, op_kwargs=dict(stride=stride, padding=padding, dilation=dilation),
                       constant=constant)

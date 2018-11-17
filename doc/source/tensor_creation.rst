@@ -16,6 +16,8 @@ Ones and zeros
    identity
    full
    full_like
+   empty
+   empty_like
 
 
 Numerical ranges

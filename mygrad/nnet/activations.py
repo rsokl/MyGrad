@@ -23,19 +23,31 @@ class Sigmoid(Operation):
 
 
 def sigmoid(x, constant=False):
-    """ f(x) = 1 / (1 + exp(-x))
+    """ Applies the sigmoid activation function::
 
-        Parameters
-        ----------
-        x : array_like
+      f(x) = 1 / (1 + exp(-x))
 
-        constant : bool, optional(default=False)
-            If ``True``, the returned tensor is a constant (it
-            does not back-propagate a gradient)
-            
-        Returns
-        -------
-        mygrad.Tensor """
+    Parameters
+    ----------
+    x : array_like
+        sigmoid is applied element-wise on ``x``.
+
+    constant : bool, optional(default=False)
+        If ``True``, the returned tensor is a constant (it
+        does not back-propagate a gradient)
+
+    Returns
+    -------
+    mygrad.Tensor
+
+    Examples
+    --------
+    >>> import mygrad as mg
+    >>> from mygrad.nnet import sigmoid
+    >>> x = mg.linspace(-5, 5, 10)
+    >>> sigmoid(x)
+    Tensor([0.00669285, 0.02005754, 0.0585369 , 0.1588691 , 0.36457644,
+        0.63542356, 0.8411309 , 0.9414631 , 0.97994246, 0.99330715])"""
     return Tensor._op(Sigmoid, x, constant=constant)
 
 
@@ -50,20 +62,38 @@ class ReLu(Operation):
 
 
 def relu(x, constant=False):
-    """ f(x) = {x, x > 0
+    """
+    Applies the recitfied linear unit activation function::
+
+        f(x) = {x, x > 0
                 0, x <= 0 }
 
-        Parameters
-        ----------
-        x : array_like
+    Parameters
+    ----------
+    x : array_like
+        relu is applied element-wise on ``x``.
 
-        constant : bool, optional(default=False)
-            If ``True``, the returned tensor is a constant (it
-            does not back-propagate a gradient)
-            
-        Returns
-        -------
-        mygrad.Tensor """
+    constant : bool, optional(default=False)
+        If ``True``, the returned tensor is a constant (it
+        does not back-propagate a gradient)
+
+    Returns
+    -------
+    mygrad.Tensor
+
+    Examples
+    --------
+    >>> import mygrad as mg
+    >>> from mygrad.nnet import relu
+    >>> x = mg.linspace(-5, 5, 5)
+    >>> x
+    Tensor([-5. , -2.5,  0. ,  2.5,  5. ])
+    >>> relu(x)
+    Tensor([-0. , -0. ,  0. ,  2.5,  5. ])
+    >>> relu(x).backward()
+    >>> x.grad  # d(relu(x))/dx
+    array([0., 0., 0., 1., 1.])
+    """
     return Tensor._op(ReLu, x, constant=constant)
 
 
@@ -93,22 +123,44 @@ class Softmax(Operation):
 
 
 def softmax(x, constant=False):
-    """ f(x) = exp(x) / sum( exp(x) )
+    """
+    Applies the softmax activation function::
 
-        Compute the softmax over a 1D tensor of data, or over the 
-        respective rows of a 2D tensor
+        f(x) = exp(x) / sum( exp(x) )
 
-        Parameters
-        ----------
-        x : array_like
+    Compute the softmax over a 1D tensor of data, or along the
+    respective rows of a 2D tensor
 
-        constant : bool, optional(default=False)
-            If ``True``, the returned tensor is a constant (it
-            does not back-propagate a gradient)
-            
-        Returns
-        -------
-        mygrad.Tensor """
+    Parameters
+    ----------
+    x : array_like, shape=(D,) or shape=(N,D)
+        softmax is computed along the rows of ``x`` if
+        ``x`` is a 2D array. Otherwise softmax is computed
+        on the 1D ``x``.
+
+    constant : bool, optional(default=False)
+        If ``True``, the returned tensor is a constant (it
+        does not back-propagate a gradient)
+
+    Returns
+    -------
+    mygrad.Tensor
+
+    Notes
+    -----
+    This implements a numerically-stable version of softmax, however
+    log-softmax is still the more numerically stable activation function.
+
+    Examples
+    --------
+    >>> import mygrad as mg
+    >>> from mygrad.nnet import softmax
+    >>> x = mg.Tensor([[ 0.1,  0.5,  0.3],
+    ...                [2E50, 2E50,  1E50]])
+    >>> softmax(x)
+    Tensor([[0.2693075 , 0.40175958, 0.32893292],
+            [0.5       , 0.5       , 0.        ]])
+    """
     return Tensor._op(Softmax, x, constant=constant)
 
 
@@ -131,20 +183,43 @@ class LogSoftmax(Operation):
 
 
 def logsoftmax(x, constant=False):
-    """ f(x) = log ( exp(x) / sum( exp(x) ) )
+    """
+    Applies the log-softmax activation function::
 
-        Compute the log-softmax over a 1D tensor of data, or over the respective rows
-        of a 2D tensor
+        f(x) = log ( exp(x) / sum( exp(x) ) )
 
-        Parameters
-        ----------
-        x : array_like
+    Compute the softmax over a 1D tensor of data, or along the
+    respective rows of a 2D tensor
 
-        constant : bool, optional(default=False)
-            If ``True``, the returned tensor is a constant (it
-            does not back-propagate a gradient)
-            
-        Returns
-        -------
-        mygrad.Tensor """
+    Parameters
+    ----------
+    x : array_like, shape=(D,) or shape=(N,D)
+        log-softmax is computed along the rows of ``x`` if
+        ``x`` is a 2D array. Otherwise log-softmax is computed
+        on the 1D ``x``.
+
+    constant : bool, optional(default=False)
+        If ``True``, the returned tensor is a constant (it
+        does not back-propagate a gradient)
+
+    Returns
+    -------
+    mygrad.Tensor
+
+    Notes
+    -----
+    This implements a numerically-stable version of log-softmax, compared
+    to the naive implementation using ``mygrad.log``, ``mygrad.exp``, and
+    ``mygrad.sum``.
+
+    Examples
+    --------
+    >>> import mygrad as mg
+    >>> from mygrad.nnet import logsoftmax
+    >>> x = mg.Tensor([[ 0.1,  0.5,  0.3],
+    ...                [2E50, 2E50,  1E50]])
+    >>> logsoftmax(x)
+    Tensor([[-1.31190143e+00, -9.11901433e-01, -1.11190143e+00],
+            [ 0.00000000e+00,  0.00000000e+00, -1.00000000e+50]])
+    """
     return Tensor._op(LogSoftmax, x, constant=constant)

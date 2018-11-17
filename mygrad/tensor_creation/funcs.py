@@ -86,6 +86,8 @@ def empty_like(other, dtype=None, constant=False):
         Tensor
             A tensor of uninitialized data whose shape and type match `other`.
 
+        Examples
+        --------
         >>> import mygrad as mg
         >>> x = mg.arange(4).reshape
         >>> mg.empty(x, constant=True)
