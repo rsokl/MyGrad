@@ -100,4 +100,16 @@ Documentation for mygrad.Tensor
    :toctree: generated/
 
    Tensor
+   Tensor.shape
+   Tensor.ndim
+   Tensor.size
+   Tensor.dtype
+   Tensor.item
+   Tensor.T
+   Tensor.constant
+   Tensor.backward
+   Tensor.scalar_only
+   Tensor.null_gradients
+   Tensor.clear_graph
+
 
