@@ -412,17 +412,36 @@ class Tensor:
         return repr(self.data).replace("array", "Tensor").replace("\n", "\n ")
 
     def __copy__(self):
-        """ Produces a copy of ``self`` with ``copy.creator=None``"""
-        return Tensor(np.copy(self.data), _creator=None, constant=self.constant, _scalar_only=self._scalar_only)
+        """ Produces a copy of ``self`` with ``copy.creator=None``.
+
+        Copies of the underlying numpy data array and gradient array are created.
+
+        Returns
+        -------
+        Tensor """
+        copy = Tensor(np.copy(self.data), _creator=None, constant=self.constant, _scalar_only=self._scalar_only)
+        copy.grad = np.copy(self.grad) if self.grad is not None else None
+        return copy
 
     def item(self):
         """ Copy an element of a tensor to a standard Python scalar and return it.
 
-            Returns
-            -------
-            z : Standard Python scalar object
-                A copy of the specified element of the tensor as a suitable
-                Python scalar"""
+        Note that the returned object does not support back-propagation.
+
+        Returns
+        -------
+        z : Standard Python scalar object
+            A copy of the specified element of the tensor as a suitable
+            Python scalar
+
+        Examples
+        --------
+        >>> import mygrad as mg
+        >>> x = Tensor([22.2])
+        >>> x.item()
+        22.2
+        >>> type(x.item())
+        float """
         if self.size > 1:
             raise ValueError("can only convert a tensor of size 1 to a Python scalar")
         return self.data.item()
@@ -439,28 +458,115 @@ class Tensor:
 
     @property
     def size(self):
+        """
+        Number of elements in the tensor. i.e., the product of the tensor's
+        dimensions.
+
+        Returns
+        -------
+        int
+
+        Examples
+        --------
+        >>> import mygrad as mg
+        >>> x = mg.zeros((3, 5, 2))  # creates a tensor with 3x5x2 (= 30) elements
+        >>> x.size
+        30
+        """
         return self.data.size
 
     @property
     def ndim(self):
+        """ Number of tensor dimensions. I.e. the number
+        of indices that must be supplied to uniquely specify
+        an element in the tensor.
+
+        Returns
+        -------
+        int
+
+        Examples
+        --------
+        >>> import mygrad as mg
+        >>> x = mg.Tensor([1, 2, 3])
+        >>> x.ndim
+        1
+        >>> x[0]  # a single index identifies an element in `x`
+        Tensor(0)
+
+        >>> y = mg.Tensor([[1, 2, 3],
+        ...                [4, 5, 6]])
+        >>> y.ndim
+        2
+        >>> x[0, 0]  # two indices are required to identify an element in `x`
+        Tensor(0)"""
         return self.data.ndim
 
     @property
     def dtype(self):
+        """ Data-type of the tensor's elements.
+
+        Returns
+        -------
+        numpy dtype object
+
+        Examples
+        --------
+        >>> import mygrad as mg
+        >>> x = mg.Tensor([[0, 1],
+        ...                [2, 3]])
+        >>> x.dtype
+        dtype('int32')
+        >>> type(x.dtype)
+        <type 'numpy.dtype'>"""
         return self.data.dtype
 
     @property
     def shape(self):
+        """ Tuple of tensor dimension-sizes.
+
+        Sizes are reported in row-major order.
+
+        Returns
+        -------
+        Tuple[int, ...]
+
+        Examples
+        --------
+        >>> import mygrad as mg
+        >>> x = mg.Tensor([1, 2, 3, 4])  # axis-0 has size 4
+        >>> x.shape
+        (4,)
+        >>> y = mg.Tensor([[1, 2, 3],    # axis-0 has size 2, axis-1 has size 3
+        ...                [4, 5, 6]])
+        >>> y.shape
+        (2, 3)
+
+        See Also
+        --------
+        mygrad.reshape : similar function
+        Tensor.reshape : similar method"""
         return self.data.shape
 
     @property
     def T(self):
         """ Same as self.transpose(), except that self is returned if self.ndim < 2 and
-            a view of the underlying data is utilized whenever possible.
+        a view of the underlying data is utilized whenever possible.
 
-            Returns
-            -------
-            Tensor"""
+        Returns
+        -------
+        Tensor
+
+        Examples
+        --------
+        >>> import mygrad as mg
+        >>> y = mg.Tensor([[1, 2, 3],
+        ...                [4, 5, 6]])
+        >>> y.T
+        Tensor([[1, 4],
+                [2, 5],
+                [3, 6]])
+        """
         return self._op(Tensor_Transpose_Property, self)
 
 
