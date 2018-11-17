@@ -7,8 +7,9 @@ __all__ = ["matmul", "einsum"]
 
 def matmul(a, b, constant=False):
     """
-    Matrix product of two arrays.
+    Matrix product of two tensors:
 
+    ``matmul(x, y)`` is equivalent to ``x @ y``.
 
     This documentation was adapted from ``numpy.matmul``
 

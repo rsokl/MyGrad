@@ -62,6 +62,7 @@ than is suggested here.
 
    intro
    tensor
+   operation
    tensor_creation
    tensor_manipulation
    linalg

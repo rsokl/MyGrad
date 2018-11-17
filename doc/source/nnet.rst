@@ -3,6 +3,7 @@ Neural network operations (:mod:`mygrad.nnet`)
 
 .. currentmodule:: mygrad.nnet
 
+
 Layer operations
 ----------------
 .. autosummary::
@@ -38,3 +39,11 @@ Activations
 
 
 
+.. currentmodule:: mygrad
+
+Sliding Window View Utility
+---------------------------
+.. autosummary::
+   :toctree: generated/
+
+   sliding_window_view

@@ -9,18 +9,20 @@ __all__ = ["multiclass_hinge", "softmax_crossentropy", "margin_ranking_loss"]
 
 class MulticlassHinge(Operation):
     def __call__(self, a, y, hinge=1.):
-        """ Parameters
-            ----------
-            a : mygrad.Tensor, shape=(N, C)
-                The C class scores for each of the N pieces of data.
+        """ Computes the average multiclass hinge loss
 
-            y : numpy.ndarray, shape=(N,)
-                The correct class-index, in [0, C), for each datum.
+        Parameters
+        ----------
+        a : mygrad.Tensor, shape=(N, C)
+            The C class scores for each of the N pieces of data.
 
-            Returns
-            -------
-            loss : mygrad.Tensor
-                The average multiclass hinge loss"""
+        y : numpy.ndarray, shape=(N,)
+            The correct class-index, in [0, C), for each datum.
+
+        Returns
+        -------
+        loss : mygrad.Tensor
+            The average multiclass hinge loss"""
         self.variables = (a,)
         scores = a.data
         correct_labels = (range(len(y)), y)
@@ -45,26 +47,28 @@ class MulticlassHinge(Operation):
 
 
 def multiclass_hinge(x, y_true, hinge=1., constant=False):
-    """ Parameters
-        ----------
-        x : array_like, shape=(N, K)
-            The K class scores for each of the N pieces of data.
+    """ Computes the average multiclass hinge loss.
 
-        y : array_like, shape=(N,)
-            The correct class-indices, in [0, K), for each datum.
+    Parameters
+    ----------
+    x : array_like, shape=(N, K)
+        The K class scores for each of the N pieces of data.
 
-        hinge : float
-            The size of the "hinge" outside of which a nonzero loss
-            is incurred.
+    y : array_like, shape=(N,)
+        The correct class-indices, in [0, K), for each datum.
 
-        constant : bool, optional(default=False)
-            If ``True``, the returned tensor is a constant (it
-            does not back-propagate a gradient)
+    hinge : float
+        The size of the "hinge" outside of which a nonzero loss
+        is incurred.
 
-        Returns
-        -------
-        loss : mygrad.Tensor
-            The average multiclass hinge loss"""
+    constant : bool, optional(default=False)
+        If ``True``, the returned tensor is a constant (it
+        does not back-propagate a gradient)
+
+    Returns
+    -------
+    loss : mygrad.Tensor
+        The average (over N) multiclass hinge loss"""
     return Tensor._op(MulticlassHinge, x, op_args=(y_true, hinge), constant=constant)
 
 
@@ -104,33 +108,35 @@ class SoftmaxCrossEntropy(Operation):
 
 def softmax_crossentropy(x, y_true, constant=False):
     """ Given the classification scores of C classes for N pieces of data,
-        computes the NxC softmax classification probabilities. The
-        cross entropy is then computed by using the true classification labels.
-        
-        log-softmax is used for improved numerical stability.
-        
-        Parameters
-        ----------
-        x : array_like, shape=(N, C)
-            The C class scores for each of the N pieces of data.
+    computes the NxC softmax classification probabilities. The
+    cross entropy is then computed by using the true classification labels.
 
-        y_true : array_like, shape=(N,)
-            The correct class-indices, in [0, C), for each datum.
+    log-softmax is used for improved numerical stability.
 
-        constant : bool, optional(default=False)
-            If ``True``, the returned tensor is a constant (it
-            does not back-propagate a gradient)
+    Parameters
+    ----------
+    x : array_like, shape=(N, C)
+        The C class scores for each of the N pieces of data.
 
-        Returns
-        -------
-        loss : mygrad.Tensor
-            The average softmax loss"""
+    y_true : array_like, shape=(N,)
+        The correct class-indices, in [0, C), for each datum.
+
+    constant : bool, optional(default=False)
+        If ``True``, the returned tensor is a constant (it
+        does not back-propagate a gradient)
+
+    Returns
+    -------
+    loss : mygrad.Tensor
+        The average softmax loss"""
     return Tensor._op(SoftmaxCrossEntropy, x, op_args=(y_true,), constant=constant)
 
 
 class MarginRanking(Operation):
     def __call__(self, x1, x2, y, margin):
         """
+        Computes the margin ranking loss between ``x1``
+        and ``x2``.
 
         Parameters
         ----------
@@ -168,8 +174,10 @@ def margin_ranking_loss(x1, x2, y, margin, constant=False):
     """
     Computes the margin average margin ranking loss.
 
-    Equivalent to:
-             mg.mean(mg.maximum(0, margin - y * (x1 - x2)))
+    Equivalent to::
+
+    >>> import mygrad as mg
+    >>> mg.mean(mg.maximum(0, margin - y * (x1 - x2)))
 
     Parameters
     ----------
