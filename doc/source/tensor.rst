@@ -111,5 +111,7 @@ Documentation for mygrad.Tensor
    Tensor.scalar_only
    Tensor.null_gradients
    Tensor.clear_graph
+   Tensor.creator
+
 
 

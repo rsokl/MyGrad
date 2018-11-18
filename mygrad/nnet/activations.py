@@ -151,14 +151,21 @@ def softmax(x, constant=False):
     This implements a numerically-stable version of softmax, however
     log-softmax is still the more numerically stable activation function.
 
+    Given the shape-:math:`(N, C)` tensor of scores, ``x``, the softmax classification
+    probabilities are computed. That is, the score for class-:math:`k` of a given datum
+    (:math:`s_{k}`) is normalized using the 'softmax' transformation:
+
+    .. math::
+        p_{k} = \\frac{e^{s_k}}{\sum_{i=1}^{C}{e^{s_i}}}
+
     Examples
     --------
     >>> import mygrad as mg
     >>> from mygrad.nnet import softmax
-    >>> x = mg.Tensor([[ 0.1,  0.5,  0.3],
+    >>> x = mg.Tensor([[ 2.,  2.,  2.],
     ...                [2E50, 2E50,  1E50]])
     >>> softmax(x)
-    Tensor([[0.2693075 , 0.40175958, 0.32893292],
+    Tensor([[0.33333333, 0.33333333, 0.33333333],
             [0.5       , 0.5       , 0.        ]])
     """
     return Tensor._op(Softmax, x, constant=constant)
@@ -212,14 +219,21 @@ def logsoftmax(x, constant=False):
     to the naive implementation using ``mygrad.log``, ``mygrad.exp``, and
     ``mygrad.sum``.
 
+    Given the shape-:math:`(N, C)` tensor of scores, ``x``, the softmax classification
+    probabilities are computed. That is, the score for class-:math:`k` of a given datum
+    (:math:`s_{k}`) is normalized using the 'softmax' transformation:
+
+    .. math::
+        p_{k} = \\log{\\frac{e^{s_k}}{\sum_{i=1}^{C}{e^{s_i}}}}
+
     Examples
     --------
     >>> import mygrad as mg
     >>> from mygrad.nnet import logsoftmax
-    >>> x = mg.Tensor([[ 0.1,  0.5,  0.3],
+    >>> x = mg.Tensor([[  2.,   2.,    2.],
     ...                [2E50, 2E50,  1E50]])
     >>> logsoftmax(x)
-    Tensor([[-1.31190143e+00, -9.11901433e-01, -1.11190143e+00],
+    Tensor([[-1.09861229e+00, -1.09861229e+00, -1.09861229e+00],
             [ 0.00000000e+00,  0.00000000e+00, -1.00000000e+50]])
     """
     return Tensor._op(LogSoftmax, x, constant=constant)

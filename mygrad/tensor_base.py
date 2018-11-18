@@ -423,7 +423,7 @@ class Tensor:
 
     @property
     def creator(self) -> Union[Operation, BroadcastableOp]:
-        """ The `Operation` instance that produced `self`.
+        """ The ``Operation`` instance that produced ``self``.
 
         Returns
         -------

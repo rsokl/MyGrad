@@ -95,14 +95,10 @@ def matmul(a, b, constant=False):
     >>> b = mg.arange(6*4).reshape((6,4))
     >>> mg.matmul(a,b).shape
     (3, 5, 4)
-    >>> mg.matmul(a,b)[0,1,1]
-    Tensor(98)
-    >>> mg.sum(a[0,1,:] * b[0,:,1])
-    Tensor(98)
 
     Scalar multiplication raises an error.
 
-    >>> mg.matmul([1,2], 3)
+    >>> mg.matmul(a, 3)
     Traceback (most recent call last):
     ...
     ValueError: Scalar operands are not allowed, use '*' instead"""

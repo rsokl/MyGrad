@@ -8,24 +8,32 @@ __all__ = ["multiclass_hinge", "softmax_crossentropy", "margin_ranking_loss"]
 
 
 class MulticlassHinge(Operation):
-    def __call__(self, a, y, hinge=1.):
+    def __call__(self, x, y_true, hinge=1.):
         """ Computes the average multiclass hinge loss
 
         Parameters
         ----------
-        a : mygrad.Tensor, shape=(N, C)
+        x : mygrad.Tensor, shape=(N, C)
             The C class scores for each of the N pieces of data.
 
-        y : numpy.ndarray, shape=(N,)
+        y_true : numpy.ndarray, shape=(N,)
             The correct class-index, in [0, C), for each datum.
 
         Returns
         -------
         loss : mygrad.Tensor
             The average multiclass hinge loss"""
-        self.variables = (a,)
-        scores = a.data
-        correct_labels = (range(len(y)), y)
+        if x.ndim != 2:
+            raise ValueError("`x` must be a 2D tensor, got {}D".format(x.ndim))
+        if y_true.ndim != 1:
+            raise ValueError("`y_true` must be a 1D tensor of integers, got {}D".format(y_true.ndim))
+
+        self.variables = (x,)
+        if isinstance(y_true, Tensor):
+            y_true = y_true.data
+
+        scores = x.data
+        correct_labels = (range(len(y_true)), y_true)
         correct_class_scores = scores[correct_labels]  # Nx1
 
         M = scores - correct_class_scores[:, np.newaxis] + hinge  # NxC margins
@@ -68,7 +76,13 @@ def multiclass_hinge(x, y_true, hinge=1., constant=False):
     Returns
     -------
     loss : mygrad.Tensor
-        The average (over N) multiclass hinge loss"""
+        The average (over N) multiclass hinge loss
+
+    Raises
+    ------
+    ValueError
+        Bad dimensionalities for ``x`` or ``y_true``
+    """
     return Tensor._op(MulticlassHinge, x, op_args=(y_true, hinge), constant=constant)
 
 
@@ -78,23 +92,38 @@ class SoftmaxCrossEntropy(Operation):
         cross entropy is then computed by using the true classification labels.
         
         log-softmax is used for improved numerical stability"""
-    def __call__(self, a, y):
-        """ Parameters
-            ----------
-            a : mygrad.Tensor, shape=(N, C)
-                The C class scores for each of the N pieces of data.
+    def __call__(self, x, y_true):
+        """
+        Parameters
+        ----------
+        x : mygrad.Tensor, shape=(N, C)
+            The C class scores for each of the N pieces of data.
 
-            y : Sequence[int]
-                The correct class-indices, in [0, C), for each datum.
-                
-            Returns
-            -------
-            loss : mygrad.Tensor
-                The average softmax loss"""
-        self.variables = (a,)
-        scores = a.data
+        y_true : Sequence[int]
+            The correct class-indices, in [0, C), for each datum.
+
+        Returns
+        -------
+        loss : mygrad.Tensor
+            The average softmax loss
+
+        Raises
+        ------
+        ValueError
+            Bad dimensionalities for ``x`` or ``y_true``
+        """
+        if x.ndim != 2:
+            raise ValueError("`x` must be a 2D tensor, got {}D".format(x.ndim))
+        if y_true.ndim != 1:
+            raise ValueError("`y_true` must be a 1D tensor of integers, got {}D".format(y_true.ndim))
+
+        self.variables = (x,)
+        if isinstance(y_true, Tensor):
+            y_true = y_true.data
+
+        scores = x.data
         log_softmax = scores - logsumexp(scores, axis=-1, keepdims=True)
-        label_locs = (range(len(scores)), y)
+        label_locs = (range(len(scores)), y_true)
         loss = -np.sum(log_softmax[label_locs]) / scores.shape[0]
         
         self.back = np.exp(log_softmax)
@@ -109,7 +138,8 @@ class SoftmaxCrossEntropy(Operation):
 def softmax_crossentropy(x, y_true, constant=False):
     """ Given the classification scores of C classes for N pieces of data,
     computes the NxC softmax classification probabilities. The
-    cross entropy is then computed by using the true classification labels.
+    cross entropy is then computed by using the true classification labels
+    and is averaged over the N pieces of data.
 
     log-softmax is used for improved numerical stability.
 
@@ -128,7 +158,87 @@ def softmax_crossentropy(x, y_true, constant=False):
     Returns
     -------
     loss : mygrad.Tensor
-        The average softmax loss"""
+        The average softmax loss
+
+    Raises
+    ------
+    ValueError
+        Bad dimensionalities for ``x`` or ``y_true``
+
+    Notes
+    -----
+    - :math:`N` is the number of samples in the batch.
+    - :math:`C` is the number of possible classes for which scores are provided.
+
+    Given the shape-:math:`(N, C)` tensor of scores, ``x``, the softmax classification
+    probabilities are computed. That is, the score for class-:math:`k` of a given datum
+    (:math:`s_{k}`) is normalized using the 'softmax' transformation:
+
+    .. math::
+        p_{k} = \\frac{e^{s_k}}{\sum_{i=1}^{C}{e^{s_i}}}
+
+    This produces the "prediction probability distribution", :math:`p`, for each datum.
+    The cross-entropy loss for that datum is then computed according to the true class-index
+    for that datum, as reported in ``y_true``. That is the "true probability distribution",
+    :math:`t`, for the datum is :math:`1` for the correct class-index and :math:`0` elsewhere.
+    The cross-entropy loss for that datum is thus:
+
+    .. math::
+       l = - \sum_{k=1}^{C}{t_{k} \\log{p_{k}}}
+
+    Having computed each per-datum cross entropy loss, this function then returns the loss
+    averaged over all :math:`N` pieces of data:
+
+    .. math::
+       L = \\frac{1}{N}\sum_{i=1}^{N}{l_{i}}
+
+    Examples
+    --------
+    >>> import mygrad as mg
+    >>> from mygrad.nnet import softmax_crossentropy
+
+    Let's take a simple case where N=1, and C=3. We'll thus make up classification
+    scores for a single datum. Suppose the scores are identical for the three classes
+    and that the true class is class-0:
+
+    >>> x = mg.Tensor([[2., 2., 2.]])  # a shape-(1, 3) tensor of scores
+    >>> y_true = mg.Tensor([0])  # the correct class for this datum is class-0
+
+    Because the scores are identical for all three classes, the softmax normalization
+    will simply produce :math:`p = [\\frac{1}{3}, \\frac{1}{3}, \\frac{1}{3}]`. Because
+    class-0 is the "true" class, :math:`t = [1., 0., 0.]`. Thus our softmax cross-entropy
+    loss should be:
+
+    .. math::
+      -(1 \\times \\log{\\frac{1}{3}} + 0 \\times \\log{\\frac{1}{3}} + 0 \\times \\log{\\frac{1}{3}})
+      = \\log(3) \\approx 1.099
+
+    Let's see that this is what ``softmax_crossentropy`` returns:
+
+    >>> softmax_crossentropy(x, y_true)
+    Tensor(1.09861229)
+
+    Similarly, suppose a datum's scores are :math:`[0, 0, 10^6]`, then the softmax normalization
+    will return :math:`p \\approx [0., 0., 1.]`. If the true class for this datum is class-2, then
+    the loss should be nearly 0, since :math:`p` and :math:`t` are essentially identical:
+
+    .. math::
+      -(0 \\times \\log{0} + 0 \\times \\log{0} + 1 \\times \\log{1})
+      = -\\log(1) = 0
+
+    Now, let's construct ``x`` and ``y_true`` so that they incorporate the scores/labels for
+    both of the data that we have considered:
+
+    >>> x = mg.Tensor([[2., 2.,  2.],  # a shape-(2, 3) tensor of scores
+    ...                [0., 0., 1E6]])
+    >>> y_true = mg.Tensor([0, 2])     # the class IDs for the two data
+
+    ``softmax_crossentropy(x, y_true)`` will return the average loss of these two data,
+    :math:`\\frac{1}{2}(1.099 + 0) \\approx 0.55`:
+
+    >>> softmax_crossentropy(x, y_true)
+    Tensor(0.54930614)
+    """
     return Tensor._op(SoftmaxCrossEntropy, x, op_args=(y_true,), constant=constant)
 
 
