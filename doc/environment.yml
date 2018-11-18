@@ -1,4 +1,4 @@
-name: xarray-docs
+name: mygrad-docs
 channels:
   - conda-forge
 dependencies:
