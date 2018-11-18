@@ -1,15 +1,55 @@
-from setuptools import setup, find_packages
+import versioneer
+from setuptools import find_packages, setup
+
+DISTNAME = 'mygrad'
+LICENSE = 'MIT'
+AUTHOR = 'Ryan Soklaski'
+AUTHOR_EMAIL = 'rsoklaski<at>gmail<dot>com'
+URL = 'https://github.com/rsokl/MyGrad'
+CLASSIFIERS = [
+    'Development Status :: 4 - Beta',
+    'License :: OSI Approved :: MIT License',
+    'Operating System :: OS Independent',
+    'Intended Audience :: Science/Research',
+    'Intended Audience :: Education',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.5',
+    'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
+    'Topic :: Scientific/Engineering',
+]
+
+INSTALL_REQUIRES = ['numpy >= 1.12']
+TESTS_REQUIRE = ['pytest >= 3.8', 'hypothesis >= 3.50']
+
+DESCRIPTION = "A sleek auto-differentiation library that wraps numpy."
+LONG_DESCRIPTION = """
+mygrad is a simple, NumPy-centric autograd library. An autograd library enables 
+you to automatically compute derivatives of mathematical functions. This library is 
+designed to serve primarily as an education tool for learning about gradient-based 
+machine learning; it is easy to install, has a readable and easily customizable code base, 
+and provides a sleek interface that mimics NumPy. Furthermore, it leverages NumPy's 
+vectorization to achieve good performance despite the library's simplicity.
+
+This is not meant to be a competitor to libraries like PyTorch (which mygrad most 
+closely resembles) or TensorFlow. Rather, it is meant to serve as a useful tool for 
+students who are learning about training neural networks using back propagation.
+"""
 
 
-def do_setup():
-    setup(name='MyGrad',
-          version="0.0",
-          author='YOUR NAME HERE',
-          description='A pure-python autograd/tensor library',
-          license='MIT',
-          platforms=['Windows', 'Linux', 'Mac OS-X', 'Unix'],
-          packages=find_packages(),
-          install_requires=['numpy>=1.12'])
-
-if __name__ == "__main__":
-    do_setup()
+setup(name=DISTNAME,
+      version=versioneer.get_version(),
+      cmdclass=versioneer.get_cmdclass(),
+      license=LICENSE,
+      author=AUTHOR,
+      author_email=AUTHOR_EMAIL,
+      classifiers=CLASSIFIERS,
+      description=DESCRIPTION,
+      long_description=LONG_DESCRIPTION,
+      install_requires=INSTALL_REQUIRES,
+      tests_require=TESTS_REQUIRE,
+      url=URL,
+      python_requires='!=2.*,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*',
+      packages=find_packages(),
+      )

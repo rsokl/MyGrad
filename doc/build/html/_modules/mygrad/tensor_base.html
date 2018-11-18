@@ -1,0 +1,900 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>mygrad.tensor_base &mdash; MyGrad 0+unknown documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/my_theme.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> MyGrad
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0+unknown
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installing MyGrad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro.html">Introducing MyGrad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tensor.html">MyGrad’s Tensor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../operation.html">MyGrad’s Operation Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tensor_creation.html">Tensor creation routines (<code class="docutils literal notranslate"><span class="pre">mygrad.tensor_creation</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tensor_manipulation.html">Tensor manipulation routines (<code class="docutils literal notranslate"><span class="pre">mygrad.tensor_manip</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../linalg.html">Linear algebra (<code class="docutils literal notranslate"><span class="pre">mygrad.linalg</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../math.html">Mathematical functions (<code class="docutils literal notranslate"><span class="pre">mygrad.math</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nnet.html">Neural network operations (<code class="docutils literal notranslate"><span class="pre">mygrad.nnet</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../graph_viz.html">Computational graph visualization(<code class="docutils literal notranslate"><span class="pre">mygrad.computational_graph</span></code>)</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">MyGrad</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>mygrad.tensor_base</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mygrad.tensor_base</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module defines the base tensor class along with all of its essential</span>
+<span class="sd">attributes and special methods. Public math methods, e.g. ``sum``, ``mean``,</span>
+<span class="sd">etc., are bound to the Tensor class in ``mygrad.__init__.py``.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">wraps</span>
+
+<span class="kn">from</span> <span class="nn">mygrad.math.arithmetic.ops</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">mygrad.tensor_manip.transpose_like.ops</span> <span class="k">import</span> <span class="n">Tensor_Transpose_Property</span>
+<span class="kn">from</span> <span class="nn">mygrad.tensor_core_ops.indexing</span> <span class="k">import</span> <span class="n">GetItem</span><span class="p">,</span> <span class="n">SetItem</span>
+<span class="kn">from</span> <span class="nn">mygrad.linalg.ops</span> <span class="k">import</span> <span class="n">MatMul</span>
+<span class="kn">from</span> <span class="nn">mygrad.operation_base</span> <span class="k">import</span> <span class="n">Operation</span><span class="p">,</span> <span class="n">BroadcastableOp</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">List</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Tensor&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="Tensor"><a class="viewcode-back" href="../../generated/mygrad.Tensor.html#mygrad.Tensor">[docs]</a><span class="k">class</span> <span class="nc">Tensor</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; A numpy-array-like object capable of serving as a node in a computational</span>
+<span class="sd">    graph that supports back-propagation of derivatives via the chain rule.</span>
+<span class="sd">    See the Examples section of the docstring for more details.</span>
+
+<span class="sd">    Like the numpy array, mygrad&#39;s tensor stores data as an N-dimensional array</span>
+<span class="sd">    and provides an interface accessing, setting, and performing vectorized</span>
+<span class="sd">    operations along the various dimensions of this array. Vectorized operations</span>
+<span class="sd">    support numpy-style broadcasting semantics.</span>
+
+<span class="sd">    The contents of a tensor can be accessed and written to using all variety</span>
+<span class="sd">    of basic and advanced indexing (along with mixtures of the two).</span>
+
+<span class="sd">    Creating a Tensor</span>
+<span class="sd">    -----------------</span>
+<span class="sd">    ``mygrad.Tensor`` can be passed any &quot;array-like&quot; object of numerical data.</span>
+<span class="sd">    This includes numbers, sequences (e.g. lists), nested sequences, numpy-ndarrays,</span>
+<span class="sd">    and other mygrad-tensors. mygrad also provides familiar numpy-style tensor-creation</span>
+<span class="sd">    functions (e.g. ``mygrad.arange``, ``mygrad.linspace``, etc.)</span>
+
+<span class="sd">    &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">    &gt;&gt;&gt; mg.Tensor(2.3)  # creating a 0-dimensional tensor</span>
+<span class="sd">    Tensor(2.3)</span>
+<span class="sd">    &gt;&gt;&gt; mg.Tensor(np.array([1.2, 3.0]))  # casting a numpy-array to a tensor</span>
+<span class="sd">    Tensor([1.2, 3.0])</span>
+<span class="sd">    &gt;&gt;&gt; mg.Tensor([[1, 2], [3, 4]])  # creating a 2-dimensional tensor</span>
+<span class="sd">    Tensor([[1, 2],</span>
+<span class="sd">            [3, 4]])</span>
+<span class="sd">    &gt;&gt;&gt; mg.arange(4)    # using numpy-style tensor creation functions</span>
+<span class="sd">    Tensor([0, 1, 2, 3])</span>
+
+
+<span class="sd">    Forward and Back-Propagation</span>
+<span class="sd">    ----------------------------</span>
+<span class="sd">    Let&#39;s construct a computational graph consisting of two zero-dimensional</span>
+<span class="sd">    tensors, ``x`` and ``y``, which are used to compute an output tensor,</span>
+<span class="sd">    ``f``. This is a &quot;forward pass imperative&quot; style for creating a computational</span>
+<span class="sd">    graph - the graph is constructed as we carry out the forward-pass computation.</span>
+
+<span class="sd">    &gt;&gt;&gt; x = Tensor(3.0)</span>
+<span class="sd">    &gt;&gt;&gt; y = Tensor(2.0)</span>
+<span class="sd">    &gt;&gt;&gt; f = 2 * x + y ** 2</span>
+
+<span class="sd">    Invoking ``f.backward()`` signals the computational graph to</span>
+<span class="sd">    compute the total-derivative of ``f`` with respect to each one of its dependent</span>
+<span class="sd">    variables. I.e. ``x.grad`` will store ``df/dx`` and ``y.grad`` will store</span>
+<span class="sd">    ``df/dy``. Thus we have back-propagated a gradient from ``f`` through our graph.</span>
+
+<span class="sd">    Each tensor of derivatives is computed elementwise. That is, if `x = Tensor(x0, x1, x2)`,</span>
+<span class="sd">    then df/dx represents `[df/d(x0), df/d(x1), df/d(x2)]`</span>
+
+<span class="sd">    &gt;&gt;&gt; f.backward()  # computes df/dx and df/dy</span>
+<span class="sd">    &gt;&gt;&gt; x.grad  # df/dx</span>
+<span class="sd">    array(6.0)</span>
+<span class="sd">    &gt;&gt;&gt; y.grad  # df/dy</span>
+<span class="sd">    array(4.0)</span>
+<span class="sd">    &gt;&gt;&gt; f.grad</span>
+<span class="sd">    array(1.0)  # df/df</span>
+
+<span class="sd">    Before utilizing ``x`` and ``y`` in a new computational graph, you must</span>
+<span class="sd">    &#39;clear&#39; their stored derivative values. ``f.null_gradients()`` signals</span>
+<span class="sd">    ``f`` and all preceding tensors in its computational graph to clear their</span>
+<span class="sd">    derivatives.</span>
+
+<span class="sd">    &gt;&gt;&gt; f.null_gradients()</span>
+<span class="sd">    &gt;&gt;&gt; x.grad is None and y.grad is None and f.grad is Nonw</span>
+<span class="sd">    True</span>
+
+<span class="sd">    Accessing the Underlying NumPy Array</span>
+<span class="sd">    ------------------------------------</span>
+<span class="sd">    ``mygrad.Tensor`` is a thin wrapper on ``numpy.ndarray``. A tensor&#39;s</span>
+<span class="sd">    underlying numpy-array can be accessed via ``.data``:</span>
+
+<span class="sd">    &gt;&gt;&gt; x = mg.Tensor([1, 2])</span>
+<span class="sd">    &gt;&gt;&gt; x.data</span>
+<span class="sd">    array([1, 2])</span>
+
+<span class="sd">    **Do not modify this underlying array**. Any in-place modifications made to this</span>
+<span class="sd">    array will not be tracked by any computational graph involving that tensor, thus</span>
+<span class="sd">    back-propagation through that tensor will likely be incorrect.&quot;&quot;&quot;</span>
+    <span class="n">__array_priority__</span> <span class="o">=</span> <span class="mf">15.0</span>
+
+<div class="viewcode-block" id="Tensor.__init__"><a class="viewcode-back" href="../../generated/mygrad.Tensor.html#mygrad.Tensor.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">_scalar_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">_creator</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : array_like</span>
+<span class="sd">            Input data, in any form that can be converted to an array.  This</span>
+<span class="sd">            includes numbers, sequences, nested sequences, numpy-ndarrays,</span>
+<span class="sd">            and mygrad-tensors.</span>
+
+<span class="sd">        dtype : Optional[type]</span>
+<span class="sd">            `int`, `float`, or a real-valued numpy data type. By default the</span>
+<span class="sd">            data type is inferred from ``x`` via ``numpy.asarray(x)``.</span>
+
+<span class="sd">        constant : bool, optional (default=False)</span>
+<span class="sd">            If True, this node is treated as a constant, and thus does not facilitate</span>
+<span class="sd">            back propagation; `self.grad` will always return `None`.</span>
+
+<span class="sd">        _scalar_only : bool, optional (default=False)</span>
+<span class="sd">            Signals that self.backward() can only be invoked if self.ndim == 0.</span>
+<span class="sd">            Should not be set manually by users.</span>
+
+<span class="sd">        _creator: Optional[mygrad.Operation]</span>
+<span class="sd">            The operation-instance whose forward pass produced `self`. Should not</span>
+<span class="sd">            be set manually by users.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">constant</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scalar_only</span> <span class="o">=</span> <span class="n">_scalar_only</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_creator</span> <span class="o">=</span> <span class="n">_creator</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_check_valid_dtype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">grad</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Union[None, np.ndarray]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_constant</span> <span class="o">=</span> <span class="n">constant</span>
+
+        <span class="c1"># track all operations that this tensor participates in</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ops</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>  <span class="c1"># type: Set[Operation]</span>
+
+        <span class="c1"># track the operations that have contributed to this tensor&#39;s gradient during a back-prop</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_accum_ops</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>  <span class="c1"># type: Set[Operation]</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_check_valid_dtype</span><span class="p">(</span><span class="n">dtype</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Tensor data must be a numeric type, received </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dtype</span><span class="p">))</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_op</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">Op</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Operation</span><span class="p">],</span> <span class="o">*</span><span class="n">input_vars</span><span class="p">,</span> <span class="n">op_args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">op_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Wraps operations performed between tensors: f(a, b, ...).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        Op : Type[Operation]</span>
+<span class="sd">            Operation-class, used to perform forward-pass on `input_vars`.</span>
+
+<span class="sd">        input_vars : array_like</span>
+<span class="sd">            An arbitrary number of input-tensors. These can take any form that</span>
+<span class="sd">            can be converted to an array.  This includes numbers, sequences, nested</span>
+<span class="sd">            numerical sequences, numpy-ndarrays, and mygrad-tensors.</span>
+
+<span class="sd">        op_args : Optional[Tuple[Any]]</span>
+<span class="sd">            Arbitrary positional arguments passed to the operation&#39;s forward pass.</span>
+
+<span class="sd">        op_kwargs : Optional[Dict[str, Any]]</span>
+<span class="sd">            Arbitrary keyword arguments passed to the operation&#39;s forward pass.</span>
+
+<span class="sd">        constant : bool, optional (default=False)</span>
+<span class="sd">            If True, the resulting Tensor is a constant.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        mygrad.Tensor</span>
+<span class="sd">            The tensor-result of the operation&#39;s forward-pass.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">op_args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">op_args</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">op_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">op_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+        <span class="n">tensor_vars</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: List[Tensor]</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">input_vars</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="bp">cls</span><span class="p">):</span>
+                <span class="n">var</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">tensor_vars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+
+        <span class="n">is_const</span> <span class="o">=</span> <span class="n">constant</span> <span class="ow">or</span> <span class="nb">all</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">constant</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">tensor_vars</span><span class="p">)</span>
+
+        <span class="n">f</span> <span class="o">=</span> <span class="n">Op</span><span class="p">()</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">graph</span> <span class="o">=</span> <span class="p">{</span><span class="n">f</span><span class="p">}</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">_creator</span><span class="o">.</span><span class="n">graph</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">tensor_vars</span> <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">_creator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">var</span><span class="o">.</span><span class="n">constant</span><span class="p">))</span>
+        <span class="n">op_out</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">tensor_vars</span><span class="p">,</span> <span class="o">*</span><span class="n">op_args</span><span class="p">,</span> <span class="o">**</span><span class="n">op_kwargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">BroadcastableOp</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">f</span><span class="o">.</span><span class="n">scalar_only</span><span class="p">:</span>
+            <span class="c1"># if broadcasting occurred: scalar-only -&gt; True</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">scalar_only</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">op_out</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">i</span><span class="o">.</span><span class="n">shape</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tensor_vars</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">i</span><span class="o">.</span><span class="n">constant</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_const</span><span class="p">:</span>
+            <span class="c1"># record that a variable participated in that op</span>
+            <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">tensor_vars</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">var</span><span class="o">.</span><span class="n">constant</span><span class="p">:</span>
+                    <span class="n">var</span><span class="o">.</span><span class="n">_ops</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+        <span class="n">scalar_only</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">scalar_only</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_const</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">tensor_vars</span><span class="p">:</span>
+            <span class="n">scalar_only</span> <span class="o">=</span> <span class="n">scalar_only</span> <span class="ow">or</span> <span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">scalar_only</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">var</span><span class="o">.</span><span class="n">constant</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">op_out</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">is_const</span><span class="p">,</span> <span class="n">_creator</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">_scalar_only</span><span class="o">=</span><span class="n">scalar_only</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Tensor.backward"><a class="viewcode-back" href="../../generated/mygrad.Tensor.backward.html#mygrad.Tensor.backward">[docs]</a>    <span class="k">def</span> <span class="nf">backward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grad</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Compute set or accumulate `self.grad` with `grad`, and pass `self.creator.backward(grad)`.</span>
+<span class="sd">        In effect, calling `self.backward()` will trigger a &quot;back-propagation&quot; from `self` through</span>
+<span class="sd">        the preceding nodes in the computational graph. Thus a node, `a`, will have the attribute</span>
+<span class="sd">        `self.grad` return the total derivative d(self)/da.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        grad : Optional[array_like]</span>
+<span class="sd">            The value of the incoming derivative. If self.grad is None, it is set to `grad`,</span>
+<span class="sd">            otherwise its value is added with `grad`.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        Exception</span>
+<span class="sd">            The configuration of the computational graph is such that `self` must be a 0D tensor</span>
+<span class="sd">            (i.e. scalar) to invoke self.backward().</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">        &gt;&gt;&gt; x = mg.Tensor(2)</span>
+<span class="sd">        &gt;&gt;&gt; y = mg.Tensor(3)</span>
+<span class="sd">        &gt;&gt;&gt; w = x * y</span>
+<span class="sd">        &gt;&gt;&gt; f = 2 * w</span>
+<span class="sd">        &gt;&gt;&gt; f.backward()  # computes df/df, df/dw, df/dy, and df/dx</span>
+
+<span class="sd">        &gt;&gt;&gt; f.grad  # df/df == 1 by identity</span>
+<span class="sd">        array(1.)</span>
+<span class="sd">        &gt;&gt;&gt; w.grad  # df/dw</span>
+<span class="sd">        array(2.)</span>
+<span class="sd">        &gt;&gt;&gt; y.grad # df/dy = df/dw * dw/dy</span>
+<span class="sd">        array(4.)</span>
+<span class="sd">        &gt;&gt;&gt; x.grad # df/dx = df/dw * dw/dx</span>
+<span class="sd">        array(6.)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_constant</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">grad</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">grad</span><span class="o">.</span><span class="n">data</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">grad</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">)</span> <span class="k">else</span> <span class="n">grad</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scalar_only</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid Backprop: backpropagation must be triggered by a &quot;</span>
+                                <span class="s2">&quot;scalar for this computational graph&quot;</span><span class="p">)</span>
+            <span class="n">dtype</span> <span class="o">=</span> <span class="nb">float</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">signedinteger</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">creator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_backward</span><span class="p">(</span><span class="n">graph</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">creator</span><span class="o">.</span><span class="n">graph</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_backward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">graph</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        **For dev-use only**</span>
+
+<span class="sd">        If `self` has accumulated incoming gradients from all operations in the terminal node&#39;s</span>
+<span class="sd">        computational graph, back-propagate the accumulated gradient to the creator of `self`.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        graph : Set[Operation]</span>
+<span class="sd">            The set of all operations relevant to the terminal node of the computational graph,</span>
+<span class="sd">            which triggered back-propagation</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        AssertionError</span>
+<span class="sd">            Raises if the tensor and its associated gradient possess different shapes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_constant</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s2">&quot;A tensor and its associated gradient must possess the same shape&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_creator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span><span class="n">graph</span> <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ops</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accum_ops</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_accum_ops</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_creator</span><span class="o">.</span><span class="n">backward</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Tensor.null_gradients"><a class="viewcode-back" href="../../generated/mygrad.Tensor.null_gradients.html#mygrad.Tensor.null_gradients">[docs]</a>    <span class="k">def</span> <span class="nf">null_gradients</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clear_graph</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the gradient for this tensor and for all preceding tensors in the computation graph</span>
+<span class="sd">        to ``None``.</span>
+
+<span class="sd">        Additionally, the computational graph that terminates in this tensor can also be cleared</span>
+<span class="sd">        during this process.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        clear_graph : bool, optional (default=True)</span>
+<span class="sd">            If ``True`` clear the computational graph in addition to nulling the gradients.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        It is advised to clear the computational graph when nulling gradients, i.e. invoke</span>
+<span class="sd">        ``null_gradients(clear_graph=True)`` (or simply ``null_gradients()``). This de-references</span>
+<span class="sd">        all intermediate operations and tensors in the computational graph and thus permits</span>
+<span class="sd">        garbage collection - freeing the memory that was used by the computational graph.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">        &gt;&gt;&gt; x = mg.Tensor(2)</span>
+<span class="sd">        &gt;&gt;&gt; y = mg.Tensor(3)</span>
+<span class="sd">        &gt;&gt;&gt; w = x * y</span>
+<span class="sd">        &gt;&gt;&gt; f = 2 * w</span>
+<span class="sd">        &gt;&gt;&gt; f.backward()  # computes df/df, df/dw, df/dy, and df/dx</span>
+<span class="sd">        &gt;&gt;&gt; any(tensor.grad is None for tensor in (f, w , x, y))</span>
+<span class="sd">        False</span>
+
+<span class="sd">        &gt;&gt;&gt; f.null_gradients()  # set tensor.grad to None for all tensors in the graph</span>
+<span class="sd">        &gt;&gt;&gt; all(tensor.grad is None for tensor in (f, w , x, y))</span>
+<span class="sd">        True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">grad</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_creator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_creator</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">null_gradients</span><span class="p">(</span><span class="n">clear_graph</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">clear_graph</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clear_graph</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Tensor.clear_graph"><a class="viewcode-back" href="../../generated/mygrad.Tensor.clear_graph.html#mygrad.Tensor.clear_graph">[docs]</a>    <span class="k">def</span> <span class="nf">clear_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Clear the computational graph for all of the nodes preceding this tensor.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_creator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_creator</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">_ops</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">clear_graph</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_creator</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">scalar_only</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Indicates whether or not `self.ndim` must be 0 in order to invoke `self.backward()`.</span>
+
+<span class="sd">        E.g. a computational graph that involves a broadcast-multiplication of a non-constant</span>
+<span class="sd">        tensor can only support back-propagation from a scalar. Otherwise the gradient associated</span>
+<span class="sd">        with each element of a given tensor would, itself, have to be represented by a high-dimensional</span>
+<span class="sd">        tensor. MyGrad only supports computational graphs in which a tensor&#39;s gradient has the same</span>
+<span class="sd">        shape as the tensor itself.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        In the following example, see that, because ``x`` was broadcasted to a</span>
+<span class="sd">        shape-(2, 3) tensor, the derivative :math:`df/dx` could not be a shape-(3,) tensor.</span>
+<span class="sd">        Each element of ``x`` affects two entries of ``z``, thus :math:`df/dx`</span>
+<span class="sd">        would have to be a shape-(2, 3) array. Therefore ``z.scalar_only`` returns ``True``.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">        &gt;&gt;&gt; x = mg.Tensor([1., 2., 3.])  # shape-(3,)</span>
+<span class="sd">        &gt;&gt;&gt; y = mg.Tensor([[4., 1., 9.], # shape-(2, 3)</span>
+<span class="sd">        ...                [0., 2., 8.]])</span>
+<span class="sd">        &gt;&gt;&gt; z = x * y  # uses numpy-style broadcasting</span>
+<span class="sd">        &gt;&gt;&gt; z.scalar_only</span>
+<span class="sd">        True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scalar_only</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">constant</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; If `True`, this tensor is a constant; it will not propagate any gradient.</span>
+
+<span class="sd">        Additionally, any tensor that is a descendant of constant tensors will also</span>
+<span class="sd">        be a constant.</span>
+
+<span class="sd">        Python scalars and NumPy arrays are treated as constant tensors when included</span>
+<span class="sd">        in MyGrad computational graphs.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        Constant-tensors do not back-propagate gradients:</span>
+
+<span class="sd">        &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">        &gt;&gt;&gt; x = mg.Tensor([1., 2.], constant=True)</span>
+<span class="sd">        &gt;&gt;&gt; y = mg.Tensor([0., 3.], constant=False)</span>
+<span class="sd">        &gt;&gt;&gt; f = x * y</span>
+<span class="sd">        &gt;&gt;&gt; f.backward()</span>
+
+<span class="sd">        &gt;&gt;&gt; x.grad is None  # x has no gradient</span>
+<span class="sd">        True</span>
+<span class="sd">        &gt;&gt;&gt; y.grad</span>
+<span class="sd">        array([1., 2.])</span>
+
+<span class="sd">        A tensor that is derived solely from constant tensors is also</span>
+<span class="sd">        a constant:</span>
+
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; x = mg.Tensor([1., 2.], constant=True)</span>
+<span class="sd">        &gt;&gt;&gt; y = mg.Tensor([0., 3.], constant=True)</span>
+<span class="sd">        &gt;&gt;&gt; z = (x + y) ** 2 - np.array([8., 7.])</span>
+<span class="sd">        &gt;&gt;&gt; z.constant</span>
+<span class="sd">        True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_constant</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">creator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Operation</span><span class="p">,</span> <span class="n">BroadcastableOp</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot; The ``Operation`` instance that produced ``self``.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Operation</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">        &gt;&gt;&gt; x = mg.Tensor(3)</span>
+<span class="sd">        &gt;&gt;&gt; y = mg.Tensor(2)</span>
+<span class="sd">        &gt;&gt;&gt; z = x * y  # Multiply(x, y) -&gt; z</span>
+<span class="sd">        &gt;&gt;&gt; z.creator</span>
+<span class="sd">         &lt;mygrad.math.arithmetic.ops.Multiply at 0x2df5a130438&gt;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_creator</span>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="fm">__contains__</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">GetItem</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">op_args</span><span class="o">=</span><span class="p">(</span><span class="n">item</span><span class="p">,))</span>
+
+    <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">)</span> <span class="ow">or</span> <span class="n">value</span><span class="o">.</span><span class="n">constant</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">data</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">)</span> <span class="k">else</span> <span class="n">value</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1"># old_tensor is the tensor pre-setitem</span>
+        <span class="n">old_tensor</span> <span class="o">=</span> <span class="n">Tensor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">constant</span><span class="p">,</span> <span class="n">_scalar_only</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_scalar_only</span><span class="p">,</span> <span class="n">_creator</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">creator</span><span class="p">)</span>
+        <span class="n">old_tensor</span><span class="o">.</span><span class="n">_ops</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ops</span>
+
+        <span class="c1"># point all ops involving `self` to old_tensor instead</span>
+        <span class="k">for</span> <span class="n">op</span> <span class="ow">in</span> <span class="n">old_tensor</span><span class="o">.</span><span class="n">_ops</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">variables</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">op</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">:</span>
+                    <span class="n">op</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">variables</span><span class="p">[:</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">old_tensor</span><span class="p">,)</span> <span class="o">+</span> <span class="n">op</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+                    <span class="k">break</span>
+
+        <span class="c1"># self becomes the tensor post-setitem</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">SetItem</span><span class="p">,</span> <span class="n">old_tensor</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">op_args</span><span class="o">=</span><span class="p">(</span><span class="n">key</span><span class="p">,))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_creator</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">creator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scalar_only</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">_scalar_only</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ops</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">_ops</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_constant</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">constant</span>
+
+    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Add</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Add</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Subtract</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__rsub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Subtract</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__truediv__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Divide</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__rtruediv__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Divide</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Multiply</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__rmul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Multiply</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__matmul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">MatMul</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__rmatmul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">MatMul</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__pow__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Power</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__rpow__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Power</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__neg__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Negative</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__pos__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;array&quot;</span><span class="p">,</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> &quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__copy__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Produces a copy of ``self`` with ``copy.creator=None``.</span>
+
+<span class="sd">        Copies of the underlying numpy data array and gradient array are created.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tensor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">copy</span> <span class="o">=</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">),</span> <span class="n">_creator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">constant</span><span class="p">,</span> <span class="n">_scalar_only</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_scalar_only</span><span class="p">)</span>
+        <span class="n">copy</span><span class="o">.</span><span class="n">grad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">copy</span>
+
+<div class="viewcode-block" id="Tensor.item"><a class="viewcode-back" href="../../generated/mygrad.Tensor.item.html#mygrad.Tensor.item">[docs]</a>    <span class="k">def</span> <span class="nf">item</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Copy an element of a tensor to a standard Python scalar and return it.</span>
+
+<span class="sd">        Note that the returned object does not support back-propagation.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        z : Standard Python scalar object</span>
+<span class="sd">            A copy of the specified element of the tensor as a suitable</span>
+<span class="sd">            Python scalar</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">        &gt;&gt;&gt; x = Tensor([22.2])</span>
+<span class="sd">        &gt;&gt;&gt; x.item()</span>
+<span class="sd">        22.2</span>
+<span class="sd">        &gt;&gt;&gt; type(x.item())</span>
+<span class="sd">        float &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;can only convert a tensor of size 1 to a Python scalar&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">item</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">__float__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;can only convert a tensor of size 1 to a Python scalar&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__int__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;can only convert a tensor of size 1 to a Python scalar&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Number of elements in the tensor. i.e., the product of the tensor&#39;s</span>
+<span class="sd">        dimensions.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">        &gt;&gt;&gt; x = mg.zeros((3, 5, 2))  # creates a tensor with 3x5x2 (= 30) elements</span>
+<span class="sd">        &gt;&gt;&gt; x.size</span>
+<span class="sd">        30</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">size</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ndim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Number of tensor dimensions. I.e. the number</span>
+<span class="sd">        of indices that must be supplied to uniquely specify</span>
+<span class="sd">        an element in the tensor.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">        &gt;&gt;&gt; x = mg.Tensor([1, 2, 3])</span>
+<span class="sd">        &gt;&gt;&gt; x.ndim</span>
+<span class="sd">        1</span>
+<span class="sd">        &gt;&gt;&gt; x[0]  # a single index identifies an element in `x`</span>
+<span class="sd">        Tensor(0)</span>
+
+<span class="sd">        &gt;&gt;&gt; y = mg.Tensor([[1, 2, 3],</span>
+<span class="sd">        ...                [4, 5, 6]])</span>
+<span class="sd">        &gt;&gt;&gt; y.ndim</span>
+<span class="sd">        2</span>
+<span class="sd">        &gt;&gt;&gt; x[0, 0]  # two indices are required to identify an element in `x`</span>
+<span class="sd">        Tensor(0)&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">ndim</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Data-type of the tensor&#39;s elements.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        numpy dtype object</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">        &gt;&gt;&gt; x = mg.Tensor([[0, 1],</span>
+<span class="sd">        ...                [2, 3]])</span>
+<span class="sd">        &gt;&gt;&gt; x.dtype</span>
+<span class="sd">        dtype(&#39;int32&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; type(x.dtype)</span>
+<span class="sd">        &lt;type &#39;numpy.dtype&#39;&gt;&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dtype</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Tuple of tensor dimension-sizes.</span>
+
+<span class="sd">        Sizes are reported in row-major order.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tuple[int, ...]</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">        &gt;&gt;&gt; x = mg.Tensor([1, 2, 3, 4])  # axis-0 has size 4</span>
+<span class="sd">        &gt;&gt;&gt; x.shape</span>
+<span class="sd">        (4,)</span>
+<span class="sd">        &gt;&gt;&gt; y = mg.Tensor([[1, 2, 3],    # axis-0 has size 2, axis-1 has size 3</span>
+<span class="sd">        ...                [4, 5, 6]])</span>
+<span class="sd">        &gt;&gt;&gt; y.shape</span>
+<span class="sd">        (2, 3)</span>
+
+<span class="sd">        See Also</span>
+<span class="sd">        --------</span>
+<span class="sd">        mygrad.reshape : similar function</span>
+<span class="sd">        Tensor.reshape : similar method&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">T</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Same as self.transpose(), except that self is returned if self.ndim &lt; 2 and</span>
+<span class="sd">        a view of the underlying data is utilized whenever possible.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tensor</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">        &gt;&gt;&gt; y = mg.Tensor([[1, 2, 3],</span>
+<span class="sd">        ...                [4, 5, 6]])</span>
+<span class="sd">        &gt;&gt;&gt; y.T</span>
+<span class="sd">        Tensor([[1, 4],</span>
+<span class="sd">                [2, 5],</span>
+<span class="sd">                [3, 6]])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Tensor_Transpose_Property</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span></div>
+
+
+<span class="c1"># set all comparison operators - mirrors ndarray methods</span>
+<span class="k">def</span> <span class="nf">tensor_to_array_wrapper</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">wrapped</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">data</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">)</span> <span class="k">else</span> <span class="n">y</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">wrapped</span>
+
+
+<span class="k">for</span> <span class="n">op</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;__lt__&quot;</span><span class="p">,</span> <span class="s2">&quot;__le__&quot;</span><span class="p">,</span> <span class="s2">&quot;__gt__&quot;</span><span class="p">,</span> <span class="s2">&quot;__ge__&quot;</span><span class="p">,</span> <span class="s2">&quot;__eq__&quot;</span><span class="p">,</span> <span class="s2">&quot;__ne__&quot;</span><span class="p">):</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">tensor_to_array_wrapper</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">op</span><span class="p">)))</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Ryan Soklaski
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

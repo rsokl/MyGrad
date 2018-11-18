@@ -35,8 +35,6 @@ def build_graph(fin, names=None, *, render=True, save=False, dims=False, dtypes=
             A scalar will always be used as the label for a 0-dimensional
             Tensor's Node.
 
-        Keyword-Only Arguments
-        ----------------------
         render : bool, optional (default=True)
             If True, build_graph will return a graphviz Digraph object that,
             when called, will render the computational graph in a Jupyter

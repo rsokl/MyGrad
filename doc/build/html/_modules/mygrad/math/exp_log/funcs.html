@@ -1,0 +1,425 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>mygrad.math.exp_log.funcs &mdash; MyGrad 0+unknown documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/my_theme.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+
+  
+  <script src="../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> MyGrad
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0+unknown
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../install.html">Installing MyGrad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro.html">Introducing MyGrad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tensor.html">MyGrad’s Tensor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../operation.html">MyGrad’s Operation Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tensor_creation.html">Tensor creation routines (<code class="docutils literal notranslate"><span class="pre">mygrad.tensor_creation</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tensor_manipulation.html">Tensor manipulation routines (<code class="docutils literal notranslate"><span class="pre">mygrad.tensor_manip</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../linalg.html">Linear algebra (<code class="docutils literal notranslate"><span class="pre">mygrad.linalg</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../math.html">Mathematical functions (<code class="docutils literal notranslate"><span class="pre">mygrad.math</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../nnet.html">Neural network operations (<code class="docutils literal notranslate"><span class="pre">mygrad.nnet</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../graph_viz.html">Computational graph visualization(<code class="docutils literal notranslate"><span class="pre">mygrad.computational_graph</span></code>)</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MyGrad</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mygrad.math.exp_log.funcs</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mygrad.math.exp_log.funcs</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.ops</span> <span class="k">import</span> <span class="o">*</span>
+
+<span class="kn">from</span> <span class="nn">mygrad.tensor_base</span> <span class="k">import</span> <span class="n">Tensor</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;exp&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;exp2&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;expm1&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;logaddexp&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;logaddexp2&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;log&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;log2&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;log10&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;log1p&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="exp"><a class="viewcode-back" href="../../../../generated/mygrad.exp.html#mygrad.exp">[docs]</a><span class="k">def</span> <span class="nf">exp</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; ``f(a) -&gt; exp(a)``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        a : array_like</span>
+
+<span class="sd">        constant : bool, optional(default=False)</span>
+<span class="sd">            If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">            does not back-propagate a gradient)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        mygrad.Tensor&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Exp</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="exp2"><a class="viewcode-back" href="../../../../generated/mygrad.exp2.html#mygrad.exp2">[docs]</a><span class="k">def</span> <span class="nf">exp2</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;``f(a) -&gt; 2^a``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        a : array_like</span>
+
+<span class="sd">        constant : bool, optional(default=False)</span>
+<span class="sd">            If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">            does not back-propagate a gradient)</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        mygrad.Tensor&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Exp2</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="expm1"><a class="viewcode-back" href="../../../../generated/mygrad.expm1.html#mygrad.expm1">[docs]</a><span class="k">def</span> <span class="nf">expm1</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; ``f(a) -&gt; exp(a) - 1``</span>
+
+<span class="sd">        The inverse of ``logp1``.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        a : array_like</span>
+
+<span class="sd">        constant : bool, optional(default=True)</span>
+<span class="sd">            If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">            does not back-propagate a gradient)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        mygrad.Tensor</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This function provides greater precision than ``exp(x) - 1`` for</span>
+<span class="sd">        small values of ``x``.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Expm1</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="logaddexp"><a class="viewcode-back" href="../../../../generated/mygrad.logaddexp.html#mygrad.logaddexp">[docs]</a><span class="k">def</span> <span class="nf">logaddexp</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; ``f(a, b) -&gt; log(exp(a) + exp(b))``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        a : array_like</span>
+
+<span class="sd">        b : array_like</span>
+
+<span class="sd">        constant : bool, optional(default=False)</span>
+<span class="sd">            If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">            does not back-propagate a gradient)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        mygrad.Tensor</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This function is useful</span>
+<span class="sd">        in statistics where the calculated probabilities of events may</span>
+<span class="sd">        be so small as to exceed the range of normal floating point</span>
+<span class="sd">        numbers. In such cases the logarithm of the calculated</span>
+<span class="sd">        probability is stored. This function allows adding probabilities</span>
+<span class="sd">        stored in such a fashion. &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Logaddexp</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="logaddexp2"><a class="viewcode-back" href="../../../../generated/mygrad.logaddexp2.html#mygrad.logaddexp2">[docs]</a><span class="k">def</span> <span class="nf">logaddexp2</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; ``f(a, b) -&gt; log_2(2 ** a + 2 ** b)``</span>
+
+<span class="sd">        Utilizes base-2 log.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        a : array_like</span>
+
+<span class="sd">        b : array_like</span>
+
+<span class="sd">        constant : bool, optional(default=False)</span>
+<span class="sd">            If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">            does not back-propagate a gradient)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        mygrad.Tensor</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This function is useful</span>
+<span class="sd">        in statistics where the calculated probabilities of events may</span>
+<span class="sd">        be so small as to exceed the range of normal floating point</span>
+<span class="sd">        numbers. In such cases the logarithm of the calculated</span>
+<span class="sd">        probability is stored. This function allows adding probabilities</span>
+<span class="sd">        stored in such a fashion. &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Logaddexp2</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="log"><a class="viewcode-back" href="../../../../generated/mygrad.log.html#mygrad.log">[docs]</a><span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; ``f(a) -&gt; log(a)``</span>
+
+<span class="sd">        Natural logarithm</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        a : array_like</span>
+
+<span class="sd">        constant : bool, optional(default=True)</span>
+<span class="sd">            If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">            does not back-propagate a gradient)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        mygrad.Tensor</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This function provides greater precision than ``exp(x) - 1`` for</span>
+<span class="sd">        small values of ``x``.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Log</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="log2"><a class="viewcode-back" href="../../../../generated/mygrad.log2.html#mygrad.log2">[docs]</a><span class="k">def</span> <span class="nf">log2</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; ``f(a) -&gt; log(a)``</span>
+
+<span class="sd">        Base-2 logarithm</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        a : array_like</span>
+
+<span class="sd">        constant : bool, optional(default=True)</span>
+<span class="sd">            If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">            does not back-propagate a gradient)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        mygrad.Tensor&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Log2</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="log10"><a class="viewcode-back" href="../../../../generated/mygrad.log10.html#mygrad.log10">[docs]</a><span class="k">def</span> <span class="nf">log10</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; ``f(a) -&gt; log(a)``</span>
+
+<span class="sd">        Base-10 logarithm</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        a : array_like</span>
+
+<span class="sd">        constant : bool, optional(default=True)</span>
+<span class="sd">            If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">            does not back-propagate a gradient)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        mygrad.Tensor&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Log10</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="log1p"><a class="viewcode-back" href="../../../../generated/mygrad.log1p.html#mygrad.log1p">[docs]</a><span class="k">def</span> <span class="nf">log1p</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; f(a) -&gt; log(1 + a)</span>
+
+<span class="sd">        The inverse of ``expm1``.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        a : array_like</span>
+
+<span class="sd">        constant : bool, optional(default=True)</span>
+<span class="sd">            If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">            does not back-propagate a gradient)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        mygrad.Tensor</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        For real-valued input, log1p is accurate also</span>
+<span class="sd">        for ``x`` so small that ``1 + x == 1`` in floating-point</span>
+<span class="sd">        accuracy.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Log1p</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Ryan Soklaski
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

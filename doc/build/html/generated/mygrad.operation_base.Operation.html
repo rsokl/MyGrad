@@ -1,0 +1,334 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>mygrad.operation_base.Operation &mdash; MyGrad 0+unknown documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="MyGrad’s Operation Class" href="../operation.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> MyGrad
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0+unknown
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installing MyGrad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introducing MyGrad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tensor.html">MyGrad’s Tensor</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../operation.html">MyGrad’s Operation Class</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../operation.html#explaining-scalar-only-operations">Explaining Scalar-Only Operations</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../operation.html#documentation-for-mygrad-operation">Documentation for mygrad.Operation</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">mygrad.operation_base.Operation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mygrad.operation_base.Operation.backward.html">mygrad.operation_base.Operation.backward</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mygrad.operation_base.Operation.backward_var.html">mygrad.operation_base.Operation.backward_var</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mygrad.operation_base.Operation.backward.html">mygrad.operation_base.Operation.backward</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mygrad.operation_base.Operation.backward_var.html">mygrad.operation_base.Operation.backward_var</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mygrad.operation_base.BroadcastableOp.html">mygrad.operation_base.BroadcastableOp</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../tensor_creation.html">Tensor creation routines (<code class="docutils literal notranslate"><span class="pre">mygrad.tensor_creation</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tensor_manipulation.html">Tensor manipulation routines (<code class="docutils literal notranslate"><span class="pre">mygrad.tensor_manip</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../linalg.html">Linear algebra (<code class="docutils literal notranslate"><span class="pre">mygrad.linalg</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../math.html">Mathematical functions (<code class="docutils literal notranslate"><span class="pre">mygrad.math</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nnet.html">Neural network operations (<code class="docutils literal notranslate"><span class="pre">mygrad.nnet</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../graph_viz.html">Computational graph visualization(<code class="docutils literal notranslate"><span class="pre">mygrad.computational_graph</span></code>)</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MyGrad</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../operation.html">MyGrad’s Operation Class</a> &raquo;</li>
+        
+      <li>mygrad.operation_base.Operation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/generated/mygrad.operation_base.Operation.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="mygrad-operation-base-operation">
+<h1>mygrad.operation_base.Operation<a class="headerlink" href="#mygrad-operation-base-operation" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="mygrad.operation_base.Operation">
+<em class="property">class </em><code class="descclassname">mygrad.operation_base.</code><code class="descname">Operation</code><a class="reference internal" href="../_modules/mygrad/operation_base.html#Operation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mygrad.operation_base.Operation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for all tensor operations that support back-propagation
+of gradients.</p>
+<p>Consider the Operation-instance <code class="docutils literal notranslate"><span class="pre">f</span></code>. A forward-pass through <code class="docutils literal notranslate"><span class="pre">f</span></code> is defined
+via <code class="docutils literal notranslate"><span class="pre">f.__call__</span></code>. Thus, given tensors <code class="docutils literal notranslate"><span class="pre">a</span></code> and <code class="docutils literal notranslate"><span class="pre">b</span></code>, a computational
+graph is defined <code class="docutils literal notranslate"><span class="pre">f.__call__(a,</span> <span class="pre">b)</span> <span class="pre">-&gt;</span> <span class="pre">c</span></code>, where the “creator” of tensor <code class="docutils literal notranslate"><span class="pre">c</span></code>
+is recorded as <code class="docutils literal notranslate"><span class="pre">f</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">a</span><span class="p">)</span> <span class="o">--+</span>
+             <span class="o">-&gt;</span> <span class="p">[</span><span class="n">operation</span><span class="p">:</span> <span class="n">f</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)]</span> <span class="o">--&gt;</span> <span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">c</span><span class="p">)</span>
+<span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">b</span><span class="p">)</span> <span class="o">--+</span>
+</pre></div>
+</div>
+<p>Thus back-propagating through <code class="docutils literal notranslate"><span class="pre">c</span></code> will instruct <code class="docutils literal notranslate"><span class="pre">f</span></code> to back-propagate
+the gradient to its inputs, which are recorded as <code class="docutils literal notranslate"><span class="pre">a</span></code> and <code class="docutils literal notranslate"><span class="pre">b</span></code>. Each
+node then back-propagates to any Operation-instance that is recorded
+as its creator, and so on.</p>
+<p>If an operation class has <cite>scalar_only=True</cite>, then the terminal node of a
+computational graph involving that operation can only trigger back-propagation
+from a 0-dimensional tensor (i.e. a scalar). This is <cite>False</cite> for operations that
+manifest as trivial element-wise operations over tensors. In such cases, the
+gradient of the operation can also be treated element-wise, and thus be computed
+unambiguously.</p>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">__call__</span></code>(*input_vars)</td>
+<td>Performs a forward pass, f, of this Operation:</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="mygrad.operation_base.Operation.backward.html#mygrad.operation_base.Operation.backward" title="mygrad.operation_base.Operation.backward"><code class="xref py py-obj docutils literal notranslate"><span class="pre">backward</span></code></a>(grad,&nbsp;*,&nbsp;graph,&nbsp;**kwargs)</td>
+<td>Back-propagates the gradient through all of the operation’s inputs.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="mygrad.operation_base.Operation.backward_var.html#mygrad.operation_base.Operation.backward_var" title="mygrad.operation_base.Operation.backward_var"><code class="xref py py-obj docutils literal notranslate"><span class="pre">backward_var</span></code></a>(grad,&nbsp;index,&nbsp;**kwargs)</td>
+<td>Given <code class="docutils literal notranslate"><span class="pre">grad</span> <span class="pre">=</span> <span class="pre">d(out)/d(f)</span></code>, computes <code class="docutils literal notranslate"><span class="pre">d(out)/d(var)</span></code>, and passes this result to <code class="docutils literal notranslate"><span class="pre">var.backward()</span></code>, where var is the tensor-argument at position <code class="docutils literal notranslate"><span class="pre">index</span></code>.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="mygrad.operation_base.Operation.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>$self</em>, <em>/</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#mygrad.operation_base.Operation.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="mygrad.operation_base.Operation.backward.html#mygrad.operation_base.Operation.backward" title="mygrad.operation_base.Operation.backward"><code class="xref py py-obj docutils literal notranslate"><span class="pre">backward</span></code></a>(grad,&nbsp;*,&nbsp;graph,&nbsp;**kwargs)</td>
+<td>Back-propagates the gradient through all of the operation’s inputs.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="mygrad.operation_base.Operation.backward_var.html#mygrad.operation_base.Operation.backward_var" title="mygrad.operation_base.Operation.backward_var"><code class="xref py py-obj docutils literal notranslate"><span class="pre">backward_var</span></code></a>(grad,&nbsp;index,&nbsp;**kwargs)</td>
+<td>Given <code class="docutils literal notranslate"><span class="pre">grad</span> <span class="pre">=</span> <span class="pre">d(out)/d(f)</span></code>, computes <code class="docutils literal notranslate"><span class="pre">d(out)/d(var)</span></code>, and passes this result to <code class="docutils literal notranslate"><span class="pre">var.backward()</span></code>, where var is the tensor-argument at position <code class="docutils literal notranslate"><span class="pre">index</span></code>.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">scalar_only</span></code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="../operation.html" class="btn btn-neutral" title="MyGrad’s Operation Class" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Ryan Soklaski
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

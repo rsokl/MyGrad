@@ -156,7 +156,7 @@ class RecurrentUnit(Operation):
 
 def simple_RNN(X, U, W, s0=None, bp_lim=None, constant=False):
     """ Performs a forward pass of sequential data through a simple RNN layer, returning
-        the 'hidden-descriptors' arrived at by utilizing the trainable parameters U and V:
+        the 'hidden-descriptors' arrived at by utilizing the trainable parameters U and V::
 
                             S_{t} = tanh(U X_{t-1} + W S_{t-1})
 
@@ -192,10 +192,15 @@ def simple_RNN(X, U, W, s0=None, bp_lim=None, constant=False):
 
         Notes
         -----
-        T : Sequence length
-        N : Batch size
-        C : Length of single datum
-        D : Length of 'hidden' descriptor"""
+        This simple RNN implements the recursive system of equations:
+
+        .. math::
+          S_{t} = tanh(U X_{t-1} + W S_{t-1})
+
+        - :math:`T` : Sequence length
+        - :math:`N` : Batch size
+        - :math:`C` : Length of single datum
+        - :math:`D` : Length of 'hidden' descriptor"""
     s = Tensor._op(RecurrentUnit, X, U, W, op_kwargs=dict(s0=s0, bp_lim=bp_lim),
                    constant=constant)
     s.creator._hidden_seq = s

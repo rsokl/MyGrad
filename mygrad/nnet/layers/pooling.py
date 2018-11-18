@@ -11,39 +11,39 @@ class MaxPoolND(Operation):
     def __call__(self, x, pool, stride):
         """ Perform max-pooling over the last N dimensions of a data batch.
 
-            Extended Summary
-            ----------------
-            The data consists of N trailing axes to be pooled over, denoted by `C0, ...`. These
-            can be preceded, optionally, by un-pooled axes, denoted by `(N0, ...)`. The dimensions
-            of the window over which pooling is performed is denoted by `P0, ...`. The window
-            is placed with stride values `S0, ...`.
+        Extended Summary
+        ----------------
+        The data consists of N trailing axes to be pooled over, denoted by ``C0, ...``. These
+        can be preceded, optionally, by un-pooled axes, denoted by ``(N0, ...)``. The dimensions
+        of the window over which pooling is performed is denoted by ``P0, ...``. The window
+        is placed with stride values ``S0, ...``.
 
-            Ultimately the pooled channels have a shape `C0', ...`.
+        Ultimately the pooled channels have a shape ``G0, ...``.
 
-            Parameters
-            ----------
-            x : mygrad.Tensor, shape=([(N0, ...), C0, ...])
-                The data batch; to be pooled along the H and W axes
+        Parameters
+        ----------
+        x : mygrad.Tensor, shape=([...], C0, ...)
+            The data batch; to be pooled along the trailing axes denoted by ``C0, ...``.
 
-            pool : Tuple[Integral, ...], (P0, ...)
-                The extent of the pooling window along the (C0, ...) axes, respectively. The
-                length of `pool` determines N - the number of trailing dimensions to pool over.
+        pool : Tuple[Integral, ...], (P0, ...)
+            The extent of the pooling window along the ``(C0, ...)`` axes, respectively. The
+            length of `pool` determines ``N`` - the number of trailing dimensions to pool over.
 
-            stride : Union[Integral, Tuple[Integral, ...]], (S0, ...)
-                The spacing used to place the pooling window, along (P0, ...) axes, respectively.
-                If a single value is provided, it is used for all N pooling axes.
+        stride : Union[Integral, Tuple[Integral, ...]], (S0, ...)
+            The spacing used to place the pooling window, along ``(P0, ...)`` axes, respectively.
+            If a single value is provided, it is used for all N pooling axes.
 
-            Returns
-            -------
-            numpy.ndarray, shape=((N0, ...), C0', ...)
-                The pooled data batch.
+        Returns
+        -------
+        numpy.ndarray, shape=([...], G0, ...)
+            The pooled data batch.
 
-            Notes
-            -----
-            Only 'valid' placements of the pooling window are permitted - the pooling
-            window cannot extend passed the "boundaries" of the data
-            dimensions.
-            """
+        Notes
+        -----
+        Only 'valid' placements of the pooling window are permitted - the pooling
+        window cannot extend passed the "boundaries" of the data
+        dimensions.
+        """
         self.variables = (x,)  # data: ((N0, ...), C0, ...)
         x = x.data
 
@@ -132,46 +132,87 @@ class MaxPoolND(Operation):
 def max_pool(x, pool, stride, constant=False):
     """ Perform max-pooling over the last N dimensions of a data batch.
 
-        Parameters
-        ----------
-        x : array_like, shape=([(N0, ...), C0, ...])
-            The data batch; to be pooled along the H and W axes
+    Extended Summary
+    ----------------
+    The data consists of N trailing axes to be pooled over, denoted by ``C0, ...``. These
+    can be preceded, optionally, by un-pooled axes, denoted by ``(N0, ...)``. The dimensions
+    of the window over which pooling is performed is denoted by ``P0, ...``. The window
+    is placed with stride values ``S0, ...``.
 
-        pool : Tuple[Integral, ...]
-            (P0, ...)
+    Ultimately the pooled channels have a shape ``G0, ...``.
 
-            The extent of the pooling window along the (C0, ...) axes, respectively. The
-            length of `pool` determines N - the number of trailing dimensions to pool over.
+    Parameters
+    ----------
+    x : mygrad.Tensor, shape=([...], C0, ...)
+        The data batch; to be pooled along the trailing axes denoted by ``C0, ...``.
 
-        stride : Union[Integral, Tuple[Integral, ...]]
-            The spacing used to place the pooling window, along (P0, ...) axes, respectively.
-            If a single value is provided, it is used for all N pooling axes.
+    pool : Tuple[Integral, ...], (P0, ...)
+        The extent of the pooling window along the ``(C0, ...)`` axes, respectively. The
+        length of `pool` determines ``N`` - the number of trailing dimensions to pool over.
 
-        constant : bool, optional (default=False)
-            If True, the resulting Tensor is a constant.
+    stride : Union[Integral, Tuple[Integral, ...]], (S0, ...)
+        The spacing used to place the pooling window, along ``(P0, ...)`` axes, respectively.
+        If a single value is provided, it is used for all ``N`` pooling axes.
 
-        Returns
-        -------
-        mygrad.Tensor, shape=((N0, ...), C0', ...)
-            The pooled data batch.
+    Returns
+    -------
+    numpy.ndarray, shape=([...], G0, ...)
+        The pooled data batch.
 
-        Examples
-        --------
+    Notes
+    -----
+    Only "valid" placements of the pooling window are permitted - the pooling
+    window cannot extend passed the "boundaries" of the data
+    dimensions.
 
-        >>> import numpy as np
-        >>> from mygrad.nnet.layers import max_pool
-        >>> from mygrad import Tensor
-        >>> x = Tensor(np.random.rand(10, 3, 12, 12))
-        >>> pool = (2, 2)   # 2x2 pooling over the last axes
-        >>> stride = (2, 1) # Apply 2x1 stride
-        >>> out = max_pool(x, pool, stride)  # max-pooled Tensor
-        >>> out.shape
-        (10, 3, 6, 11)
+    Examples
+    --------
+    Simple 2D pooling on a 2D tensor. Tiling a 2x2 max-pool window with
+    stride-1 over a shape-(3, 3) tensor ``x``:
 
-        Notes
-        -----
-        Only 'valid' placements of the pooling window are permitted - the pooling
-        window cannot extend passed the "boundaries" of the data
-        dimensions.
-        """
+    >>> import  mygrad as mg
+    >>> from mygrad.nnet import max_pool
+    >>> x = mg.Tensor([[0., 10.,  8.],
+    ...                [2.,  7.,  3.],
+    ...                [5.,  7., 20.]])
+    >>> out = max_pool(x, pool=(2, 2), stride=1)
+    >>> out
+    Tensor([[ 10., 10.],
+            [  7., 20.]])
+    >>> out.sum().backward()  # sum to reduce to scalar for back-prop
+    >>> x.grad  # dout/dx
+    array([[0., 2., 0.],
+           [0., 1., 0.],
+           [0., 0., 1.]])
+
+    Let's perform 1D pooling on a 2D tensor. Each row of the tensor
+    will be pooled over independently. Let's apply a size-2 max-pool
+    window to each row of ``x``, using a stride of 1:
+
+    >>> x = mg.Tensor([[0., 10., 8.],
+    ...                [9., 7.,  3.],
+    ...                [5., 0., 20.]])
+    >>> max_pool(x, pool=(2,), stride=1)
+    Tensor([[10., 10.],
+            [ 9.,  7.],
+            [ 5., 20.]])
+
+    Here we perform pooling over the trailing two dimensions of a
+    4D tensor, ``x``. By specifying ``pool = (2, 2)``, we instruct
+    ``max_pool`` to tile a 2x2 pooling window along these last two
+    axes. Let's apply the window every two rows, and for each column;
+    i.e. we specify ``stride = (2, 1)``:
+
+    >>> import numpy as np
+    >>> x = mg.Tensor(np.random.rand(10, 3, 12, 12))
+    >>> pool = (2, 2)   # 2x2 pooling over the last axes
+    >>> stride = (2, 1) # Apply 2x1 stride
+    >>> out = max_pool(x, pool, stride)  # max-pooled Tensor
+    >>> out.shape
+    (10, 3, 6, 11)
+
+    Had we specified, say, ``pool = (3, 2, 2)``, then a 3x2x2
+    pooling window would have been tiled along the last *three* axes
+    of ``x``.
+    """
     return Tensor._op(MaxPoolND, x, op_args=(pool, stride), constant=constant)

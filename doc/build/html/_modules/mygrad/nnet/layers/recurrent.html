@@ -1,0 +1,417 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>mygrad.nnet.layers.recurrent &mdash; MyGrad 0+unknown documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/my_theme.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+
+  
+  <script src="../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> MyGrad
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0+unknown
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../install.html">Installing MyGrad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro.html">Introducing MyGrad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tensor.html">MyGrad’s Tensor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../operation.html">MyGrad’s Operation Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tensor_creation.html">Tensor creation routines (<code class="docutils literal notranslate"><span class="pre">mygrad.tensor_creation</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tensor_manipulation.html">Tensor manipulation routines (<code class="docutils literal notranslate"><span class="pre">mygrad.tensor_manip</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../linalg.html">Linear algebra (<code class="docutils literal notranslate"><span class="pre">mygrad.linalg</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../math.html">Mathematical functions (<code class="docutils literal notranslate"><span class="pre">mygrad.math</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../nnet.html">Neural network operations (<code class="docutils literal notranslate"><span class="pre">mygrad.nnet</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../graph_viz.html">Computational graph visualization(<code class="docutils literal notranslate"><span class="pre">mygrad.computational_graph</span></code>)</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MyGrad</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mygrad.nnet.layers.recurrent</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mygrad.nnet.layers.recurrent</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">mygrad.operation_base</span> <span class="k">import</span> <span class="n">Operation</span>
+<span class="kn">from</span> <span class="nn">mygrad.tensor_base</span> <span class="k">import</span> <span class="n">Tensor</span>
+<span class="kn">from</span> <span class="nn">numbers</span> <span class="k">import</span> <span class="n">Integral</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">numba</span> <span class="k">import</span> <span class="n">njit</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;The package `numba` must be installed in order to access the simple-rnn.&quot;</span><span class="p">)</span>
+
+
+<span class="nd">@njit</span>
+<span class="k">def</span> <span class="nf">dot</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the dot product between 2 arrays</span>
+<span class="sd">    of shapes (W,X,Y) and (Y,Z), respectively</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">a</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">a</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">b</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)):</span>
+        <span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">b</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+
+<span class="nd">@njit</span>
+<span class="k">def</span> <span class="nf">_dot_tanh_accum</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">W</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">x</span><span class="p">[</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="n">W</span><span class="p">)</span>
+        <span class="n">x</span><span class="p">[</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+
+
+<span class="nd">@njit</span>
+<span class="k">def</span> <span class="nf">_rnn_bptt</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">dLt_dst</span><span class="p">,</span> <span class="n">dst_dft</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">bp_lim</span><span class="p">,</span> <span class="n">old_dst</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">W</span> <span class="o">=</span> <span class="n">W</span><span class="o">.</span><span class="n">T</span>
+    <span class="k">if</span> <span class="n">bp_lim</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">old_dst</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">dLt_dst</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">bp_lim</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">bp_lim</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">source_index</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">dLt_dst</span><span class="p">)</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span>
+            <span class="n">target_index</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">dLt_dst</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+
+            <span class="c1"># dL_{n} / ds_{t+1} -&gt; dL_{n} / df_{t+1}  | ( n &gt; t )</span>
+            <span class="n">dLn_ft1</span> <span class="o">=</span> <span class="n">dst_dft</span><span class="p">[</span><span class="n">source_index</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">dLt_dst</span><span class="p">[</span><span class="n">source_index</span><span class="p">]</span> <span class="o">-</span> <span class="n">old_dst</span><span class="p">[</span><span class="n">source_index</span><span class="p">])</span>
+            <span class="n">old_dst</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">dLt_dst</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># no backprop truncation</span>
+            <span class="n">source_index</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dLt_dst</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">dLt_dst</span><span class="p">)</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span>
+            <span class="n">target_index</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dLt_dst</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">dLt_dst</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">dLn_ft1</span> <span class="o">=</span> <span class="n">dst_dft</span><span class="p">[</span><span class="n">source_index</span><span class="p">]</span> <span class="o">*</span> <span class="n">dLt_dst</span><span class="p">[</span><span class="n">source_index</span><span class="p">]</span>
+
+        <span class="n">dLt_dst</span><span class="p">[</span><span class="n">target_index</span><span class="p">]</span> <span class="o">+=</span> <span class="n">dot</span><span class="p">(</span><span class="n">dLn_ft1</span><span class="p">,</span> <span class="n">W</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_backprop</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">grad</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">var</span><span class="o">.</span><span class="n">constant</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">grad</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">grad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">grad</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">grad</span> <span class="o">+=</span> <span class="n">grad</span>
+
+<span class="k">class</span> <span class="nc">RecurrentUnit</span><span class="p">(</span><span class="n">Operation</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Defines a basic recurrent unit for a RNN.</span>
+
+<span class="sd">        This unit operates on a sequence of data {X_j | (0 &lt;= j &lt;= T - 1)}, producing</span>
+<span class="sd">        a sequence of &quot;hidden descriptors&quot;: {S_i | (0 &lt;= i &lt;= T}}, via the trainable parameters</span>
+<span class="sd">        U and W</span>
+
+<span class="sd">                                S_{t} = tanh(U X_{t-1} + W S_{t-1})</span>
+
+<span class="sd">        For a language model, S_{t} is traditionally mapped to a prediction of X_t via: softmax(V S_t),</span>
+<span class="sd">        where V is yet another trainable parameter (not built into the recurrent unit).&quot;&quot;&quot;</span>
+
+    <span class="n">scalar_only</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">s0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bp_lim</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Performs a forward pass of sequential data through a simple RNN layer, returning</span>
+<span class="sd">            the &#39;hidden-descriptors&#39; arrived at by utilizing the trainable parameters U and V:</span>
+
+<span class="sd">                                S_{t} = tanh(U X_{t-1} + W S_{t-1})</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            X : mygrad.Tensor, shape=(T, N, C)</span>
+<span class="sd">               The sequential data to be passed forward.</span>
+
+<span class="sd">            U : mygrad.Tensor, shape=(D, C)</span>
+<span class="sd">               The weights used to map sequential data to its hidden-descriptor representation</span>
+
+<span class="sd">            W : mygrad.Tensor, shape=(D, D)</span>
+<span class="sd">                The weights used to map a hidden-descriptor to a hidden-descriptor.</span>
+
+<span class="sd">            s0 : Optional[mygrad.Tensor, numpy.ndarray], shape=(N, D)</span>
+<span class="sd">                The &#39;seed&#39; hidden descriptors to feed into the RNN. If None, a Tensor</span>
+<span class="sd">                of zeros of shape (N, D) is created.</span>
+
+<span class="sd">            bp_lim : Optional[int]</span>
+<span class="sd">                The (non-zero) limit of the number of back propagations through time are</span>
+<span class="sd">                performed</span>
+
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            mygrad.Tensor</span>
+<span class="sd">                The sequence of &#39;hidden-descriptors&#39; produced by the forward pass of the RNN.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">bp_lim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bp_lim</span><span class="p">,</span> <span class="n">Integral</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">bp_lim</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bp_lim</span> <span class="o">=</span> <span class="n">bp_lim</span> <span class="k">if</span> <span class="n">bp_lim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">X</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">U</span> <span class="o">=</span> <span class="n">U</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">W</span> <span class="o">=</span> <span class="n">W</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">U</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_seq</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">seq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">seq</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">seq</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">U</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+
+        <span class="k">if</span> <span class="n">s0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">s0</span><span class="o">.</span><span class="n">data</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s0</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">)</span> <span class="k">else</span> <span class="n">s0</span>
+
+        <span class="n">out</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">dot</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">U</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">_dot_tanh_accum</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_seq</span> <span class="o">=</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">_creator</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_seq</span><span class="o">.</span><span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">backward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grad</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Performs back propagation through time (with optional truncation), using the</span>
+<span class="sd">            following notation:</span>
+
+<span class="sd">                f_t = U x_{t-1} + W s_{t-1}</span>
+<span class="sd">                s_t = tanh(f_t)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">U</span><span class="o">.</span><span class="n">constant</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="o">.</span><span class="n">constant</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">constant</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_seq</span>
+
+        <span class="n">dst_dft</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">s</span><span class="o">.</span><span class="n">data</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># ds_{t} / d_f{t}</span>
+        <span class="n">dLt_dst</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">grad</span><span class="p">)</span>  <span class="c1"># dL_{t} / ds_{t}</span>
+
+        <span class="n">_rnn_bptt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">dLt_dst</span><span class="p">,</span> <span class="n">dst_dft</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bp_lim</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_seq</span><span class="o">.</span><span class="n">grad</span> <span class="o">=</span> <span class="n">dLt_dst</span>  <span class="c1"># element t: dL_{t} / ds_{t} + ... + dL_{T_lim} / ds_{t}</span>
+
+        <span class="n">dLt_dft</span> <span class="o">=</span> <span class="n">dLt_dst</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">*</span> <span class="n">dst_dft</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>  <span class="c1"># dL_{t} / df_{t} + ... + dL_{T_lim} / df_{t}</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">U</span><span class="o">.</span><span class="n">constant</span><span class="p">:</span>
+            <span class="n">_backprop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">U</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ijk, ijl -&gt; kl&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">dLt_dft</span><span class="p">))</span>  <span class="c1"># dL_{1} / dU + ... + dL_{T} / dU</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="o">.</span><span class="n">constant</span><span class="p">:</span>
+            <span class="n">_backprop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ijk, ijl -&gt; kl&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">data</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">dLt_dft</span><span class="p">))</span>  <span class="c1"># dL_{1} / dW + ... + dL_{T} / dW</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">constant</span><span class="p">:</span>
+            <span class="n">_backprop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="n">dot</span><span class="p">(</span><span class="n">dLt_dft</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">U</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>  <span class="c1"># dL_{1} / dX + ... + dL_{T} / dX</span>
+
+
+<div class="viewcode-block" id="simple_RNN"><a class="viewcode-back" href="../../../../generated/mygrad.nnet.simple_RNN.html#mygrad.nnet.simple_RNN">[docs]</a><span class="k">def</span> <span class="nf">simple_RNN</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">s0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bp_lim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Performs a forward pass of sequential data through a simple RNN layer, returning</span>
+<span class="sd">        the &#39;hidden-descriptors&#39; arrived at by utilizing the trainable parameters U and V::</span>
+
+<span class="sd">                            S_{t} = tanh(U X_{t-1} + W S_{t-1})</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : mygrad.Tensor, shape=(T, N, C)</span>
+<span class="sd">           The sequential data to be passed forward.</span>
+
+<span class="sd">        U : mygrad.Tensor, shape=(D, C)</span>
+<span class="sd">           The weights used to map sequential data to its hidden-descriptor representation</span>
+
+<span class="sd">        W : mygrad.Tensor, shape=(D, D)</span>
+<span class="sd">            The weights used to map a hidden-descriptor to a hidden-descriptor.</span>
+
+<span class="sd">        s0 : Optional[mygrad.Tensor, numpy.ndarray], shape=(N, D)</span>
+<span class="sd">            The &#39;seed&#39; hidden descriptors to feed into the RNN. If None, a Tensor</span>
+<span class="sd">            of zeros of shape (N, D) is created.</span>
+
+<span class="sd">        bp_lim : Optional[int]</span>
+<span class="sd">            The (non-zero) limit of the depth of back propagation through time to be</span>
+<span class="sd">            performed. If `None` back propagation is passed back through the entire sequence.</span>
+
+<span class="sd">            E.g. `bp_lim=3` will propagate gradients only up to 3 steps backward through the</span>
+<span class="sd">            recursive sequence.</span>
+
+<span class="sd">        constant : bool, optional (default=False)</span>
+<span class="sd">            If True, the resulting Tensor is a constant.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        mygrad.Tensor</span>
+<span class="sd">            The sequence of &#39;hidden-descriptors&#39; produced by the forward pass of the RNN.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This simple RNN implements the recursive system of equations:</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">          S_{t} = tanh(U X_{t-1} + W S_{t-1})</span>
+
+<span class="sd">        - :math:`T` : Sequence length</span>
+<span class="sd">        - :math:`N` : Batch size</span>
+<span class="sd">        - :math:`C` : Length of single datum</span>
+<span class="sd">        - :math:`D` : Length of &#39;hidden&#39; descriptor&quot;&quot;&quot;</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">RecurrentUnit</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">op_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">s0</span><span class="o">=</span><span class="n">s0</span><span class="p">,</span> <span class="n">bp_lim</span><span class="o">=</span><span class="n">bp_lim</span><span class="p">),</span>
+                   <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">creator</span><span class="o">.</span><span class="n">_hidden_seq</span> <span class="o">=</span> <span class="n">s</span>
+    <span class="k">return</span> <span class="n">s</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Ryan Soklaski
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

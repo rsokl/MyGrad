@@ -1,8 +1,8 @@
-""" Defines the base class for mathematical operations capable of back-propagating
-    gradients to their input tensors."""
+"""
+Defines the base class for mathematical operations capable of back-propagating
+gradients to their input tensors."""
 
 from mygrad._utils import reduce_broadcast
-
 
 import numpy as np
 
@@ -17,11 +17,11 @@ class Operation:
         Consider the Operation-instance ``f``. A forward-pass through ``f`` is defined
         via ``f.__call__``. Thus, given tensors ``a`` and ``b``, a computational
         graph is defined ``f.__call__(a, b) -> c``, where the "creator" of tensor ``c``
-        is recorded as ``f``.
+        is recorded as ``f``::
 
-        (node: a) --+
-                     -> [operation: f(a, b)] --> (node: c)
-        (node: b) --+
+              (node: a) --+
+                           -> [operation: f(a, b)] --> (node: c)
+              (node: b) --+
 
         Thus back-propagating through ``c`` will instruct ``f`` to back-propagate
         the gradient to its inputs, which are recorded as ``a`` and ``b``. Each
@@ -34,12 +34,6 @@ class Operation:
         manifest as trivial element-wise operations over tensors. In such cases, the
         gradient of the operation can also be treated element-wise, and thus be computed
         unambiguously.
-
-        The matrix-multiplication operation, for example, is a scalar-only operation because
-        computing the derivative of A_{ij} B_{jk} (summed over j)) with respect to A_{pq}
-        produces a 4-tensor. This is the case unless the terminal node of this graph is a
-        scalar, in which  case the elements of the 2-tensor d(scalar)/ d(A_{pq}) has a trivial
-        correspondence to the elements of A_{pq}.
         """
     scalar_only = False
 
@@ -87,13 +81,16 @@ class Operation:
 
     def backward(self, grad, *, graph, **kwargs):
         """ Back-propagates the gradient through all of the operation's inputs.
-            Constant tensors do not propagate a gradient.
+        Constant tensors do not propagate a gradient.
 
-            grad : numpy.ndarray
-                The back-propagated total derivative with respect to the present
-                operation (`f`): d(out)/df
+        grad : numpy.ndarray
+            The back-propagated total derivative with respect to the present
+            operation (`f`): d(out)/df
 
-            graph : Set[Operation]"""
+        graph : Set[Operation]
+            The set of all operations relevant to the terminal node of the computational graph,
+            which triggered back-propagation.
+        """
         for index, var in enumerate(self.variables):
             if not var.constant:
                 if not var._ops:
@@ -115,13 +112,16 @@ class BroadcastableOp(Operation):
         arguments."""
     def backward(self, grad, *, graph, **kwargs):
         """ Back-propagates the gradient through all of the operation's inputs.
-            Constant tensors do not propagate a gradient.
+        Constant tensors do not propagate a gradient.
 
-            grad : numpy.ndarray
-                The back-propagated total derivative with respect to the present
-                operation (`f`): d(out)/df
+        grad : numpy.ndarray
+            The back-propagated total derivative with respect to the present
+            operation (`f`): d(out)/df
 
-            graph : Set[Operation]"""
+        graph : Set[Operation]
+            The set of all operations relevant to the terminal node of the computational graph,
+            which triggered back-propagation.
+        """
         for index, var in enumerate(self.variables):
             if not var.constant:
                 if not var._ops:

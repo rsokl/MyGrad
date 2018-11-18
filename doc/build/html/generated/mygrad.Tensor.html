@@ -1,0 +1,542 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>mygrad.Tensor &mdash; MyGrad 0+unknown documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="MyGrad’s Tensor" href="../tensor.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> MyGrad
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0+unknown
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installing MyGrad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introducing MyGrad</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../tensor.html">MyGrad’s Tensor</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../tensor.html#creating-a-tensor">Creating a Tensor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tensor.html#forward-and-back-propagation">Forward and Back-Propagation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tensor.html#accessing-the-underlying-numpy-array">Accessing the Underlying NumPy Array</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../tensor.html#documentation-for-mygrad-tensor">Documentation for mygrad.Tensor</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">mygrad.Tensor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mygrad.Tensor.backward.html">mygrad.Tensor.backward</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mygrad.Tensor.clear_graph.html">mygrad.Tensor.clear_graph</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mygrad.Tensor.item.html">mygrad.Tensor.item</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mygrad.Tensor.null_gradients.html">mygrad.Tensor.null_gradients</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mygrad.Tensor.shape.html">mygrad.Tensor.shape</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mygrad.Tensor.ndim.html">mygrad.Tensor.ndim</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mygrad.Tensor.size.html">mygrad.Tensor.size</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mygrad.Tensor.dtype.html">mygrad.Tensor.dtype</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mygrad.Tensor.item.html">mygrad.Tensor.item</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mygrad.Tensor.T.html">mygrad.Tensor.T</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mygrad.Tensor.constant.html">mygrad.Tensor.constant</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mygrad.Tensor.backward.html">mygrad.Tensor.backward</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mygrad.Tensor.scalar_only.html">mygrad.Tensor.scalar_only</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mygrad.Tensor.null_gradients.html">mygrad.Tensor.null_gradients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mygrad.Tensor.clear_graph.html">mygrad.Tensor.clear_graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mygrad.Tensor.creator.html">mygrad.Tensor.creator</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../operation.html">MyGrad’s Operation Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tensor_creation.html">Tensor creation routines (<code class="docutils literal notranslate"><span class="pre">mygrad.tensor_creation</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tensor_manipulation.html">Tensor manipulation routines (<code class="docutils literal notranslate"><span class="pre">mygrad.tensor_manip</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../linalg.html">Linear algebra (<code class="docutils literal notranslate"><span class="pre">mygrad.linalg</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../math.html">Mathematical functions (<code class="docutils literal notranslate"><span class="pre">mygrad.math</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nnet.html">Neural network operations (<code class="docutils literal notranslate"><span class="pre">mygrad.nnet</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../graph_viz.html">Computational graph visualization(<code class="docutils literal notranslate"><span class="pre">mygrad.computational_graph</span></code>)</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MyGrad</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../tensor.html">MyGrad’s Tensor</a> &raquo;</li>
+        
+      <li>mygrad.Tensor</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/generated/mygrad.Tensor.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="mygrad-tensor">
+<h1>mygrad.Tensor<a class="headerlink" href="#mygrad-tensor" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="mygrad.Tensor">
+<em class="property">class </em><code class="descclassname">mygrad.</code><code class="descname">Tensor</code><span class="sig-paren">(</span><em>x</em>, <em>*</em>, <em>dtype=None</em>, <em>constant=False</em>, <em>_scalar_only=False</em>, <em>_creator=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mygrad/tensor_base.html#Tensor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mygrad.Tensor" title="Permalink to this definition">¶</a></dt>
+<dd><p>A numpy-array-like object capable of serving as a node in a computational
+graph that supports back-propagation of derivatives via the chain rule.
+See the Examples section of the docstring for more details.</p>
+<p>Like the numpy array, mygrad’s tensor stores data as an N-dimensional array
+and provides an interface accessing, setting, and performing vectorized
+operations along the various dimensions of this array. Vectorized operations
+support numpy-style broadcasting semantics.</p>
+<p>The contents of a tensor can be accessed and written to using all variety
+of basic and advanced indexing (along with mixtures of the two).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Attributes:</th><td class="field-body"><dl class="first last docutils">
+<dt><a class="reference internal" href="mygrad.Tensor.T.html#mygrad.Tensor.T" title="mygrad.Tensor.T"><code class="xref py py-obj docutils literal notranslate"><span class="pre">T</span></code></a></dt>
+<dd><p class="first last">Same as self.transpose(), except that self is returned if self.ndim &lt; 2 and a view of the underlying data is utilized whenever possible.</p>
+</dd>
+<dt><a class="reference internal" href="mygrad.Tensor.constant.html#mygrad.Tensor.constant" title="mygrad.Tensor.constant"><code class="xref py py-obj docutils literal notranslate"><span class="pre">constant</span></code></a></dt>
+<dd><p class="first last">If <cite>True</cite>, this tensor is a constant; it will not propagate any gradient.</p>
+</dd>
+<dt><a class="reference internal" href="mygrad.Tensor.creator.html#mygrad.Tensor.creator" title="mygrad.Tensor.creator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">creator</span></code></a></dt>
+<dd><p class="first last">The <code class="docutils literal notranslate"><span class="pre">Operation</span></code> instance that produced <code class="docutils literal notranslate"><span class="pre">self</span></code>.</p>
+</dd>
+<dt><a class="reference internal" href="mygrad.Tensor.dtype.html#mygrad.Tensor.dtype" title="mygrad.Tensor.dtype"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dtype</span></code></a></dt>
+<dd><p class="first last">Data-type of the tensor’s elements.</p>
+</dd>
+<dt><a class="reference internal" href="mygrad.Tensor.ndim.html#mygrad.Tensor.ndim" title="mygrad.Tensor.ndim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndim</span></code></a></dt>
+<dd><p class="first last">Number of tensor dimensions.</p>
+</dd>
+<dt><a class="reference internal" href="mygrad.Tensor.scalar_only.html#mygrad.Tensor.scalar_only" title="mygrad.Tensor.scalar_only"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scalar_only</span></code></a></dt>
+<dd><p class="first last">Indicates whether or not <cite>self.ndim</cite> must be 0 in order to invoke <cite>self.backward()</cite>.</p>
+</dd>
+<dt><a class="reference internal" href="mygrad.Tensor.shape.html#mygrad.Tensor.shape" title="mygrad.Tensor.shape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code></a></dt>
+<dd><p class="first last">Tuple of tensor dimension-sizes.</p>
+</dd>
+<dt><a class="reference internal" href="mygrad.Tensor.size.html#mygrad.Tensor.size" title="mygrad.Tensor.size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">size</span></code></a></dt>
+<dd><p class="first last">Number of elements in the tensor.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">argmax</span></code>([axis,&nbsp;out])</td>
+<td>Returns the indices of the maximum values along an axis.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">argmin</span></code>([axis,&nbsp;out])</td>
+<td>Returns the indices of the minimum values along an axis.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="mygrad.Tensor.backward.html#mygrad.Tensor.backward" title="mygrad.Tensor.backward"><code class="xref py py-obj docutils literal notranslate"><span class="pre">backward</span></code></a>([grad])</td>
+<td>Compute set or accumulate <cite>self.grad</cite> with <cite>grad</cite>, and pass <cite>self.creator.backward(grad)</cite>.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="mygrad.Tensor.clear_graph.html#mygrad.Tensor.clear_graph" title="mygrad.Tensor.clear_graph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_graph</span></code></a>()</td>
+<td>Clear the computational graph for all of the nodes preceding this tensor.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">cumprod</span></code>([axis,&nbsp;constant])</td>
+<td>Return the cumulative product of elements along a given axis.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">cumsum</span></code>([axis,&nbsp;constant])</td>
+<td>Return the cumulative sum of the elements along a given axis.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="mygrad.Tensor.item.html#mygrad.Tensor.item" title="mygrad.Tensor.item"><code class="xref py py-obj docutils literal notranslate"><span class="pre">item</span></code></a>()</td>
+<td>Copy an element of a tensor to a standard Python scalar and return it.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">matmul</span></code>(b[,&nbsp;constant])</td>
+<td>Matrix product of two tensors:</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">max</span></code>([axis,&nbsp;keepdims,&nbsp;constant])</td>
+<td>Return the maximum of a tensor or maximum along its axes.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean</span></code>([axis,&nbsp;keepdims,&nbsp;constant])</td>
+<td>Mean of tensor elements over a given axis.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">min</span></code>([axis,&nbsp;keepdims,&nbsp;constant])</td>
+<td>Return the minimum of a tensor or minimum along its axes.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">moveaxis</span></code>(source,&nbsp;destination[,&nbsp;constant])</td>
+<td>Move axes of a tensor to new positions.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="mygrad.Tensor.null_gradients.html#mygrad.Tensor.null_gradients" title="mygrad.Tensor.null_gradients"><code class="xref py py-obj docutils literal notranslate"><span class="pre">null_gradients</span></code></a>([clear_graph])</td>
+<td>Sets the gradient for this tensor and for all preceding tensors in the computation graph to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">prod</span></code>([axis,&nbsp;keepdims,&nbsp;constant])</td>
+<td>Return the product of array elements over given axes.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">reshape</span></code>(*newshape[,&nbsp;constant])</td>
+<td>Returns a tensor with a new shape, without changing its data.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">squeeze</span></code>([axis,&nbsp;constant])</td>
+<td>Remove single-dimensional entries from the shape of a tensor.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">std</span></code>([axis,&nbsp;ddof,&nbsp;keepdims,&nbsp;constant])</td>
+<td>Compute the standard deviation along the specified axis.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">sum</span></code>([axis,&nbsp;keepdims,&nbsp;constant])</td>
+<td>Sum of tensor elements over a given axis.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">swapaxes</span></code>(axis1,&nbsp;axis2[,&nbsp;constant])</td>
+<td>Interchange two axes of a tensor.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">transpose</span></code>(*axes[,&nbsp;constant])</td>
+<td>Permute the dimensions of a tensor.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">var</span></code>([axis,&nbsp;ddof,&nbsp;keepdims,&nbsp;constant])</td>
+<td>Compute the variance along the specified axis.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="mygrad.Tensor.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>x</em>, <em>*</em>, <em>dtype=None</em>, <em>constant=False</em>, <em>_scalar_only=False</em>, <em>_creator=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mygrad/tensor_base.html#Tensor.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mygrad.Tensor.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array_like</span></dt>
+<dd><p class="first last">Input data, in any form that can be converted to an array.  This
+includes numbers, sequences, nested sequences, numpy-ndarrays,
+and mygrad-tensors.</p>
+</dd>
+<dt><strong>dtype</strong> <span class="classifier-delimiter">:</span> <span class="classifier">Optional[type]</span></dt>
+<dd><p class="first last"><cite>int</cite>, <cite>float</cite>, or a real-valued numpy data type. By default the
+data type is inferred from <code class="docutils literal notranslate"><span class="pre">x</span></code> via <code class="docutils literal notranslate"><span class="pre">numpy.asarray(x)</span></code>.</p>
+</dd>
+<dt><strong>constant</strong> <span class="classifier-delimiter">:</span> <span class="classifier">bool, optional (default=False)</span></dt>
+<dd><p class="first last">If True, this node is treated as a constant, and thus does not facilitate
+back propagation; <cite>self.grad</cite> will always return <cite>None</cite>.</p>
+</dd>
+<dt><strong>_scalar_only</strong> <span class="classifier-delimiter">:</span> <span class="classifier">bool, optional (default=False)</span></dt>
+<dd><p class="first last">Signals that self.backward() can only be invoked if self.ndim == 0.
+Should not be set manually by users.</p>
+</dd>
+<dt><strong>_creator: Optional[mygrad.Operation]</strong></dt>
+<dd><p class="first last">The operation-instance whose forward pass produced <cite>self</cite>. Should not
+be set manually by users.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#mygrad.Tensor.__init__" title="mygrad.Tensor.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(x,&nbsp;*[,&nbsp;dtype,&nbsp;constant,&nbsp;…])</td>
+<td><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">argmax</span></code>([axis,&nbsp;out])</td>
+<td>Returns the indices of the maximum values along an axis.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">argmin</span></code>([axis,&nbsp;out])</td>
+<td>Returns the indices of the minimum values along an axis.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="mygrad.Tensor.backward.html#mygrad.Tensor.backward" title="mygrad.Tensor.backward"><code class="xref py py-obj docutils literal notranslate"><span class="pre">backward</span></code></a>([grad])</td>
+<td>Compute set or accumulate <cite>self.grad</cite> with <cite>grad</cite>, and pass <cite>self.creator.backward(grad)</cite>.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="mygrad.Tensor.clear_graph.html#mygrad.Tensor.clear_graph" title="mygrad.Tensor.clear_graph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_graph</span></code></a>()</td>
+<td>Clear the computational graph for all of the nodes preceding this tensor.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">cumprod</span></code>([axis,&nbsp;constant])</td>
+<td>Return the cumulative product of elements along a given axis.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">cumsum</span></code>([axis,&nbsp;constant])</td>
+<td>Return the cumulative sum of the elements along a given axis.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="mygrad.Tensor.item.html#mygrad.Tensor.item" title="mygrad.Tensor.item"><code class="xref py py-obj docutils literal notranslate"><span class="pre">item</span></code></a>()</td>
+<td>Copy an element of a tensor to a standard Python scalar and return it.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">matmul</span></code>(b[,&nbsp;constant])</td>
+<td>Matrix product of two tensors:</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">max</span></code>([axis,&nbsp;keepdims,&nbsp;constant])</td>
+<td>Return the maximum of a tensor or maximum along its axes.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean</span></code>([axis,&nbsp;keepdims,&nbsp;constant])</td>
+<td>Mean of tensor elements over a given axis.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">min</span></code>([axis,&nbsp;keepdims,&nbsp;constant])</td>
+<td>Return the minimum of a tensor or minimum along its axes.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">moveaxis</span></code>(source,&nbsp;destination[,&nbsp;constant])</td>
+<td>Move axes of a tensor to new positions.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="mygrad.Tensor.null_gradients.html#mygrad.Tensor.null_gradients" title="mygrad.Tensor.null_gradients"><code class="xref py py-obj docutils literal notranslate"><span class="pre">null_gradients</span></code></a>([clear_graph])</td>
+<td>Sets the gradient for this tensor and for all preceding tensors in the computation graph to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">prod</span></code>([axis,&nbsp;keepdims,&nbsp;constant])</td>
+<td>Return the product of array elements over given axes.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">reshape</span></code>(*newshape[,&nbsp;constant])</td>
+<td>Returns a tensor with a new shape, without changing its data.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">squeeze</span></code>([axis,&nbsp;constant])</td>
+<td>Remove single-dimensional entries from the shape of a tensor.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">std</span></code>([axis,&nbsp;ddof,&nbsp;keepdims,&nbsp;constant])</td>
+<td>Compute the standard deviation along the specified axis.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">sum</span></code>([axis,&nbsp;keepdims,&nbsp;constant])</td>
+<td>Sum of tensor elements over a given axis.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">swapaxes</span></code>(axis1,&nbsp;axis2[,&nbsp;constant])</td>
+<td>Interchange two axes of a tensor.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">transpose</span></code>(*axes[,&nbsp;constant])</td>
+<td>Permute the dimensions of a tensor.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">var</span></code>([axis,&nbsp;ddof,&nbsp;keepdims,&nbsp;constant])</td>
+<td>Compute the variance along the specified axis.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="mygrad.Tensor.T.html#mygrad.Tensor.T" title="mygrad.Tensor.T"><code class="xref py py-obj docutils literal notranslate"><span class="pre">T</span></code></a></td>
+<td>Same as self.transpose(), except that self is returned if self.ndim &lt; 2 and a view of the underlying data is utilized whenever possible.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="mygrad.Tensor.constant.html#mygrad.Tensor.constant" title="mygrad.Tensor.constant"><code class="xref py py-obj docutils literal notranslate"><span class="pre">constant</span></code></a></td>
+<td>If <cite>True</cite>, this tensor is a constant; it will not propagate any gradient.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="mygrad.Tensor.creator.html#mygrad.Tensor.creator" title="mygrad.Tensor.creator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">creator</span></code></a></td>
+<td>The <code class="docutils literal notranslate"><span class="pre">Operation</span></code> instance that produced <code class="docutils literal notranslate"><span class="pre">self</span></code>.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="mygrad.Tensor.dtype.html#mygrad.Tensor.dtype" title="mygrad.Tensor.dtype"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dtype</span></code></a></td>
+<td>Data-type of the tensor’s elements.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="mygrad.Tensor.ndim.html#mygrad.Tensor.ndim" title="mygrad.Tensor.ndim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndim</span></code></a></td>
+<td>Number of tensor dimensions.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="mygrad.Tensor.scalar_only.html#mygrad.Tensor.scalar_only" title="mygrad.Tensor.scalar_only"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scalar_only</span></code></a></td>
+<td>Indicates whether or not <cite>self.ndim</cite> must be 0 in order to invoke <cite>self.backward()</cite>.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="mygrad.Tensor.shape.html#mygrad.Tensor.shape" title="mygrad.Tensor.shape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code></a></td>
+<td>Tuple of tensor dimension-sizes.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="mygrad.Tensor.size.html#mygrad.Tensor.size" title="mygrad.Tensor.size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">size</span></code></a></td>
+<td>Number of elements in the tensor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="../tensor.html" class="btn btn-neutral" title="MyGrad’s Tensor" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Ryan Soklaski
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

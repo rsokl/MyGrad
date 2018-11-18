@@ -1,0 +1,891 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>mygrad.tensor_creation.funcs &mdash; MyGrad 0+unknown documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/my_theme.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> MyGrad
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0+unknown
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installing MyGrad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introducing MyGrad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tensor.html">MyGrad’s Tensor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../operation.html">MyGrad’s Operation Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tensor_creation.html">Tensor creation routines (<code class="docutils literal notranslate"><span class="pre">mygrad.tensor_creation</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tensor_manipulation.html">Tensor manipulation routines (<code class="docutils literal notranslate"><span class="pre">mygrad.tensor_manip</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../linalg.html">Linear algebra (<code class="docutils literal notranslate"><span class="pre">mygrad.linalg</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../math.html">Mathematical functions (<code class="docutils literal notranslate"><span class="pre">mygrad.math</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../nnet.html">Neural network operations (<code class="docutils literal notranslate"><span class="pre">mygrad.nnet</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../graph_viz.html">Computational graph visualization(<code class="docutils literal notranslate"><span class="pre">mygrad.computational_graph</span></code>)</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MyGrad</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mygrad.tensor_creation.funcs</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mygrad.tensor_creation.funcs</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">mygrad.tensor_base</span> <span class="k">import</span> <span class="n">Tensor</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;empty&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;empty_like&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;eye&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;identity&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;ones&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;ones_like&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;zeros&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;zeros_like&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;full&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;full_like&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;arange&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;linspace&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;logspace&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;geomspace&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="empty"><a class="viewcode-back" href="../../../generated/mygrad.empty.html#mygrad.empty">[docs]</a><span class="k">def</span> <span class="nf">empty</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Return a new Tensor of the given shape and type, without initializing entries.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        shape : Union[int, Tuple[int]]</span>
+<span class="sd">            The shape of the empty array.</span>
+
+<span class="sd">        dtype : data-type, optional (default=numpy.float32)</span>
+<span class="sd">            The data type of the output Tensor.</span>
+
+<span class="sd">        constant : bool, optional (default=False)</span>
+<span class="sd">            If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">            does not back-propagate a gradient)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tensor</span>
+<span class="sd">            A tensor of uninitialized data of the given shape and dtype.</span>
+
+<span class="sd">        See Also</span>
+<span class="sd">        --------</span>
+<span class="sd">        empty_like : Return an empty tensor with shape and type of input.</span>
+<span class="sd">        ones : Return a new tensor setting values to one.</span>
+<span class="sd">        zeros : Return a new tensor setting values to zero.</span>
+<span class="sd">        full : Return a new tensor of given shape filled with value.</span>
+<span class="sd">    </span>
+<span class="sd">    </span>
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        `empty`, unlike `zeros`, does not set the array values to zero,</span>
+<span class="sd">        and may therefore be marginally faster.  On the other hand, it requires</span>
+<span class="sd">        the user to manually set all the values in the array, and should be</span>
+<span class="sd">        used with caution.</span>
+<span class="sd">    </span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">        &gt;&gt;&gt; mg.empty([2, 2], constant=True)</span>
+<span class="sd">        Tensor([[ -9.74499359e+001,   6.69583040e-309],</span>
+<span class="sd">                [  2.13182611e-314,   3.06959433e-309]])         #random</span>
+<span class="sd">    </span>
+<span class="sd">        &gt;&gt;&gt; mg.empty([2, 2], dtype=int)</span>
+<span class="sd">        Tensor([[-1073741821, -1067949133],</span>
+<span class="sd">                [  496041986,    19249760]])                     #random</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="empty_like"><a class="viewcode-back" href="../../../generated/mygrad.empty_like.html#mygrad.empty_like">[docs]</a><span class="k">def</span> <span class="nf">empty_like</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Return a new Tensor of the same shape and type as the given array.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        other : Union[Tensor, ArrayLike]</span>
+<span class="sd">            The Tensor or array whose shape and datatype should be mirrored.</span>
+
+<span class="sd">        dtype : data-type, optional (default=None)</span>
+<span class="sd">            Override the data type of the returned Tensor with this value, or None to not override.</span>
+
+<span class="sd">        constant : bool, optional (default=False)</span>
+<span class="sd">            If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">            does not back-propagate a gradient)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tensor</span>
+<span class="sd">            A tensor of uninitialized data whose shape and type match `other`.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">        &gt;&gt;&gt; x = mg.arange(4).reshape</span>
+<span class="sd">        &gt;&gt;&gt; mg.empty(x, constant=True)</span>
+<span class="sd">        Tensor([[ -9.74499359e+001,   6.69583040e-309],</span>
+<span class="sd">                [  2.13182611e-314,   3.06959433e-309]])         #random</span>
+
+<span class="sd">        &gt;&gt;&gt; mg.empty(x, dtype=int)</span>
+<span class="sd">        Tensor([[-1073741821, -1067949133],</span>
+<span class="sd">                [  496041986,    19249760]])                     #random</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">):</span>
+        <span class="n">other</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">data</span>
+        
+    <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">dtype</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="eye"><a class="viewcode-back" href="../../../generated/mygrad.eye.html#mygrad.eye">[docs]</a><span class="k">def</span> <span class="nf">eye</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">diag_idx</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Return a 2D Tensor with ones on the diagonal and zeros elsewhere.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        rows : int</span>
+<span class="sd">            The number of rows in the output Tensor.</span>
+
+<span class="sd">        cols : int, optional (default=None)</span>
+<span class="sd">            The number of columns in the output, or None to match `rows`.</span>
+
+<span class="sd">        diag_idx : int, optional (default=0)</span>
+<span class="sd">            The index of the diagonal. 0 is the main diagonal; a positive value is the upper</span>
+<span class="sd">            diagonal, while a negative value refers to the lower diagonal.</span>
+
+<span class="sd">        dtype : data-type, optional (default=numpy.float32)</span>
+<span class="sd">            The data type of the output Tensor.</span>
+
+<span class="sd">        constant : bool, optional (default=False)</span>
+<span class="sd">            If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">            does not back-propagate a gradient)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tensor</span>
+<span class="sd">            A tensor whose elements are 0, except for the :math:`k`-th diagonal, whose values are 1.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">        &gt;&gt;&gt; mg.eye(2, dtype=int)</span>
+<span class="sd">        Tensor([[1, 0],</span>
+<span class="sd">                [0, 1]])</span>
+<span class="sd">        &gt;&gt;&gt; mg.eye(3, k=1)</span>
+<span class="sd">        Tensor([[ 0.,  1.,  0.],</span>
+<span class="sd">                [ 0.,  0.,  1.],</span>
+<span class="sd">                [ 0.,  0.,  0.]])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">,</span> <span class="n">diag_idx</span><span class="p">,</span> <span class="n">dtype</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="identity"><a class="viewcode-back" href="../../../generated/mygrad.identity.html#mygrad.identity">[docs]</a><span class="k">def</span> <span class="nf">identity</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Return the identity Tensor; a square Tensor with 1s on the main diagonal and 0s elsewhere.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        n : int</span>
+<span class="sd">            The number of rows and columns in the output Tensor.</span>
+
+<span class="sd">        dtype : data-type, optional (default=numpy.float32)</span>
+<span class="sd">            The data type of the output Tensor.</span>
+
+<span class="sd">        constant : bool, optional (default=False)</span>
+<span class="sd">            If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">            does not back-propagate a gradient)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tensor</span>
+<span class="sd">            A square Tensor whose main diagonal is 1 and all other elements are 0.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; importy mygrad as mg</span>
+<span class="sd">        &gt;&gt;&gt; mg.identity(3)</span>
+<span class="sd">        Tensor([[ 1.,  0.,  0.],</span>
+<span class="sd">                [ 0.,  1.,  0.],</span>
+<span class="sd">                [ 0.,  0.,  1.]])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dtype</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+    
+
+<div class="viewcode-block" id="ones"><a class="viewcode-back" href="../../../generated/mygrad.ones.html#mygrad.ones">[docs]</a><span class="k">def</span> <span class="nf">ones</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">    Return a Tensor of the given shape and type, filled with ones.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    shape : Union[int, Tuple[int]]</span>
+<span class="sd">        The shape of the output Tensor.</span>
+
+<span class="sd">    dtype : data-type, optional (default=numpy.float32)</span>
+<span class="sd">        The data type of the output Tensor.</span>
+
+<span class="sd">    constant : bool, optional (default=False)</span>
+<span class="sd">        If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">            does not back-propagate a gradient)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Tensor</span>
+<span class="sd">        A Tensor of ones with the given shape and data type.</span>
+
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    ones_like : Return an tensor of ones with shape and type of input.</span>
+<span class="sd">    empty : Return a new uninitialized tensor.</span>
+<span class="sd">    zeros : Return a new tensor setting values to zero.</span>
+<span class="sd">    full : Return a new tensor of given shape filled with value.</span>
+<span class="sd">    </span>
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">    &gt;&gt;&gt; mg.ones(5)</span>
+<span class="sd">    Tensor([ 1.,  1.,  1.,  1.,  1.])</span>
+
+<span class="sd">    &gt;&gt;&gt; mg.ones((5,), dtype=int)</span>
+<span class="sd">    Tensor([1, 1, 1, 1, 1])</span>
+
+<span class="sd">    &gt;&gt;&gt; mg.ones((2, 1))</span>
+<span class="sd">    Tensor([[ 1.],</span>
+<span class="sd">           [ 1.]])</span>
+
+<span class="sd">    &gt;&gt;&gt; mg.ones((2, 2))</span>
+<span class="sd">    Tensor([[ 1.,  1.],</span>
+<span class="sd">            [ 1.,  1.]])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ones_like"><a class="viewcode-back" href="../../../generated/mygrad.ones_like.html#mygrad.ones_like">[docs]</a><span class="k">def</span> <span class="nf">ones_like</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a Tensor of the same shape and type as the given, filled with ones.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    other : array_like</span>
+<span class="sd">        The Tensor or array whose shape and datatype should be mirrored.</span>
+
+<span class="sd">    dtype : data-type, optional (default=None)</span>
+<span class="sd">        Override the data type of the returned Tensor with this value, or None to not override.</span>
+
+<span class="sd">    constant : bool, optional (default=False)</span>
+<span class="sd">        If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">            does not back-propagate a gradient)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Tensor</span>
+<span class="sd">        A Tensor of ones whose shape and data type match `other`.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">    &gt;&gt;&gt; x = mg.arange(6).reshape((2, 3))</span>
+<span class="sd">    &gt;&gt;&gt; x</span>
+<span class="sd">    Tensor([[0, 1, 2],</span>
+<span class="sd">            [3, 4, 5]])</span>
+
+<span class="sd">    &gt;&gt;&gt; mg.ones_like(x)</span>
+<span class="sd">    Tensor([[1, 1, 1],</span>
+<span class="sd">            [1, 1, 1]])</span>
+
+<span class="sd">    &gt;&gt;&gt; y = mg.arange(3, dtype=float)</span>
+<span class="sd">    &gt;&gt;&gt; y</span>
+<span class="sd">    Tensor([ 0.,  1.,  2.])</span>
+
+<span class="sd">    &gt;&gt;&gt; mg.ones_like(y)</span>
+<span class="sd">    Tensor([ 1.,  1.,  1.])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">):</span>
+        <span class="n">other</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">data</span>
+
+    <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">dtype</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="zeros"><a class="viewcode-back" href="../../../generated/mygrad.zeros.html#mygrad.zeros">[docs]</a><span class="k">def</span> <span class="nf">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">    Return a Tensor of the given shape and type, filled with zeros.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    shape : Union[int, Tuple[int]]</span>
+<span class="sd">        The shape of the output Tensor.</span>
+
+<span class="sd">    dtype : data-type, optional (default=numpy.float32)</span>
+<span class="sd">        The data type of the output Tensor.</span>
+
+<span class="sd">    constant : bool, optional (default=False)</span>
+<span class="sd">        If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">            does not back-propagate a gradient)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Tensor</span>
+<span class="sd">        A Tensor of zeros with the given shape and data type.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    ones_like : Return an tensor of ones with shape and type of input.</span>
+<span class="sd">    empty : Return a new uninitialized tensor.</span>
+<span class="sd">    ones : Return a new tensor setting values to one.</span>
+<span class="sd">    full : Return a new tensor of given shape filled with value.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">    &gt;&gt;&gt; mg.zeros(5)</span>
+<span class="sd">    Tensor([ 0.,  0.,  0.,  0.,  0.])</span>
+
+<span class="sd">    &gt;&gt;&gt; mg.zeros((5,), dtype=int, constant=True) # tensor will not back-propagate a gradient</span>
+<span class="sd">    Tensor([0, 0, 0, 0, 0])</span>
+
+<span class="sd">    &gt;&gt;&gt; mg.zeros((2, 1))</span>
+<span class="sd">    Tensor([[ 0.],</span>
+<span class="sd">            [ 0.]])</span>
+
+<span class="sd">    &gt;&gt;&gt; mg.zeros((2, 2))</span>
+<span class="sd">    Tensor([[ 0.,  0.],</span>
+<span class="sd">            [ 0.,  0.]])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="zeros_like"><a class="viewcode-back" href="../../../generated/mygrad.zeros_like.html#mygrad.zeros_like">[docs]</a><span class="k">def</span> <span class="nf">zeros_like</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">    Return a Tensor of the same shape and type as the given, filled with zeros.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    other : Union[Tensor, ArrayLike]</span>
+<span class="sd">        The Tensor or array whose shape and datatype should be mirrored.</span>
+
+<span class="sd">    dtype : data-type, optional (default=None)</span>
+<span class="sd">        Override the data type of the returned Tensor with this value, or None to not override.</span>
+
+<span class="sd">    constant : bool, optional (default=False)</span>
+<span class="sd">        If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">            does not back-propagate a gradient)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Tensor</span>
+<span class="sd">        A Tensor of zeros whose shape and data type match `other`.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    empty_like : Return an empty tensor with shape and type of input.</span>
+<span class="sd">    ones_like : Return an tensor of ones with shape and type of input.</span>
+<span class="sd">    full_like : Return a new tensor with shape of input filled with value.</span>
+<span class="sd">    zeros : Return a new tensor setting values to zero.</span>
+<span class="sd">    </span>
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">    &gt;&gt;&gt; x = mg.arange(6).reshape((2, 3))</span>
+<span class="sd">    &gt;&gt;&gt; x</span>
+<span class="sd">    Tensor([[0, 1, 2],</span>
+<span class="sd">            [3, 4, 5]])</span>
+
+<span class="sd">    &gt;&gt;&gt; mg.zeros_like(x, constant=True)  # tensor will not back-propagate a gradient</span>
+<span class="sd">    Tensor([[0, 0, 0],</span>
+<span class="sd">            [0, 0, 0]])</span>
+
+<span class="sd">    &gt;&gt;&gt; y = mg.arange(3, dtype=float)</span>
+<span class="sd">    &gt;&gt;&gt; y</span>
+<span class="sd">    Tensor([ 0.,  1.,  2.])</span>
+
+<span class="sd">    &gt;&gt;&gt; mg.zeros_like(y)</span>
+<span class="sd">    Tensor([ 0.,  0.,  0.])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">):</span>
+        <span class="n">other</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">data</span>
+
+    <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">dtype</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="full"><a class="viewcode-back" href="../../../generated/mygrad.full.html#mygrad.full">[docs]</a><span class="k">def</span> <span class="nf">full</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">fill_value</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">    Return a Tensor of the given shape and type, filled with `fill_value`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    shape : Union[int, Tuple[int]]</span>
+<span class="sd">        The shape of the output Tensor.</span>
+
+<span class="sd">    fill_value : Real</span>
+<span class="sd">        The value with which to fill the output Tensor.</span>
+
+<span class="sd">    dtype : data-type, optional (default=None)</span>
+<span class="sd">        The data type of the output Tensor, or None to match `fill_value`..</span>
+
+<span class="sd">    constant : bool, optional (default=False)</span>
+<span class="sd">        If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">            does not back-propagate a gradient)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Tensor</span>
+<span class="sd">        A Tensor of `fill_value` with the given shape and dtype.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">    &gt;&gt;&gt; mg.full((2, 2), 33)</span>
+<span class="sd">    Tensor([[ 33,  33],</span>
+<span class="sd">            [ 33,  33]])</span>
+
+<span class="sd">    &gt;&gt;&gt; mg.full((2, 2), 10)</span>
+<span class="sd">    Tensor([[10, 10],</span>
+<span class="sd">            [10, 10]])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">fill_value</span><span class="p">,</span> <span class="n">dtype</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="full_like"><a class="viewcode-back" href="../../../generated/mygrad.full_like.html#mygrad.full_like">[docs]</a><span class="k">def</span> <span class="nf">full_like</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">fill_value</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Return a Tensor of the same shape and type as the given, filled with `fill_value`.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        other : Union[Tensor, ArrayLike]</span>
+<span class="sd">            The Tensor or array whose shape and datatype should be mirrored.</span>
+
+<span class="sd">        dtype : data-type, optional (default=None)</span>
+<span class="sd">            Override the data type of the returned Tensor with this value, or None to not override.</span>
+
+<span class="sd">        constant : bool, optional (default=False)</span>
+<span class="sd">            If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">            does not back-propagate a gradient)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tensor</span>
+<span class="sd">            A Tensor of `fill_value` whose shape and data type match `other`.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">        &gt;&gt;&gt; x = mg.arange(6, dtype=int)</span>
+<span class="sd">        &gt;&gt;&gt; mg.full_like(x, 1)</span>
+<span class="sd">        Tensor([1, 1, 1, 1, 1, 1])</span>
+<span class="sd">        &gt;&gt;&gt; mg.full_like(x, 0.1)</span>
+<span class="sd">        Tensor([0, 0, 0, 0, 0, 0])</span>
+<span class="sd">        &gt;&gt;&gt; mg.full_like(x, 0.1, dtype=np.double)</span>
+<span class="sd">        Tensor([ 0.1,  0.1,  0.1,  0.1,  0.1,  0.1])</span>
+<span class="sd">        &gt;&gt;&gt; mg.full_like(x, np.nan, dtype=np.double)</span>
+<span class="sd">        Tensor([ nan,  nan,  nan,  nan,  nan,  nan])</span>
+<span class="sd">    </span>
+<span class="sd">        &gt;&gt;&gt; y = mg.arange(6, dtype=np.double)</span>
+<span class="sd">        &gt;&gt;&gt; mg.full_like(y, 0.1)</span>
+<span class="sd">        Tensor([ 0.1,  0.1,  0.1,  0.1,  0.1,  0.1])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">):</span>
+        <span class="n">other</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">data</span>
+
+    <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">fill_value</span><span class="p">,</span> <span class="n">dtype</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="arange"><a class="viewcode-back" href="../../../generated/mygrad.arange.html#mygrad.arange">[docs]</a><span class="k">def</span> <span class="nf">arange</span><span class="p">(</span><span class="n">stop</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Return a Tensor with evenly-spaced values within a given interval.</span>
+
+<span class="sd">        Values are generated within [start, stop). Note that for non-integer steps, results may be</span>
+<span class="sd">        inconsistent; you are better off using `linspace` instead.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        start : Real, optional, default=0</span>
+<span class="sd">            The start of the interval, inclusive.</span>
+
+<span class="sd">        stop : Real</span>
+<span class="sd">            The end of the interval, exclusive.</span>
+
+<span class="sd">        step : Real, optional (default=1)</span>
+<span class="sd">            The spacing between successive values.</span>
+
+<span class="sd">        dtype : data-type, optional (default=None)</span>
+<span class="sd">            The data type of the output Tensor, or None to infer from the inputs.</span>
+
+<span class="sd">        constant : bool, optional (default=False)</span>
+<span class="sd">            If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">            does not back-propagate a gradient)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tensor</span>
+<span class="sd">            A Tensor of evenly-spaced values in [start, end).</span>
+<span class="sd">        </span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">        &gt;&gt;&gt; mg.arange(3)</span>
+<span class="sd">        Tensor([0, 1, 2])</span>
+<span class="sd">        &gt;&gt;&gt; mg.arange(3.0, constant=True)</span>
+<span class="sd">        Tensor([ 0.,  1.,  2.])  # resulting tensor will not back-propagate a gradient</span>
+<span class="sd">        &gt;&gt;&gt; mg.arange(3,7)</span>
+<span class="sd">        Tensor([3, 4, 5, 6])</span>
+<span class="sd">        &gt;&gt;&gt; mg.arange(3,7,2)</span>
+<span class="sd">        Tensor([3, 5])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">start</span> <span class="o">&gt;</span> <span class="n">stop</span><span class="p">:</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="n">start</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">stop</span>
+        <span class="n">stop</span> <span class="o">=</span> <span class="n">tmp</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">dtype</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="linspace"><a class="viewcode-back" href="../../../generated/mygrad.linspace.html#mygrad.linspace">[docs]</a><span class="k">def</span> <span class="nf">linspace</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">include_endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Return a Tensor with evenly-spaced numbers over a specified interval.</span>
+
+<span class="sd">        Values are generated within [start, stop], with the endpoint optionally excluded.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        start : Real</span>
+<span class="sd">            The starting value of the sequence, inclusive.</span>
+
+<span class="sd">        stop : Real</span>
+<span class="sd">            The ending value of the sequence, inclusive unless `include_endpoint` is False.</span>
+
+<span class="sd">        num : int, optional (default=50)</span>
+<span class="sd">            The number of values to generate. Must be non-negative.</span>
+
+<span class="sd">        include_endpoint : bool, optional (default=True)</span>
+<span class="sd">            Whether to include the endpoint in the Tensor. Note that if False, the step size changes</span>
+<span class="sd">            to accommodate the sequence excluding the endpoint.</span>
+
+<span class="sd">        dtype : data-type, optional (default=None)</span>
+<span class="sd">            The data type of the output Tensor, or None to infer from the inputs.</span>
+
+<span class="sd">        constant : bool, optional (default=False)</span>
+<span class="sd">            If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">            does not back-propagate a gradient)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tensor</span>
+<span class="sd">            A Tensor of `num` evenly-spaced values in [start, stop] or [start, stop), depending on</span>
+<span class="sd">            `include_endpoint`.</span>
+
+<span class="sd">        See Also</span>
+<span class="sd">        --------</span>
+<span class="sd">        arange : Similar to `linspace`, but uses a step size (instead of the</span>
+<span class="sd">                 number of samples).</span>
+<span class="sd">        logspace : Samples uniformly distributed in log space.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">        &gt;&gt;&gt; mg.linspace(2.0, 3.0, num=5)</span>
+<span class="sd">        Tensor([ 2.  ,  2.25,  2.5 ,  2.75,  3.  ])</span>
+<span class="sd">        &gt;&gt;&gt; mg.linspace(2.0, 3.0, num=5, endpoint=False)</span>
+<span class="sd">        Tensor([ 2. ,  2.2,  2.4,  2.6,  2.8])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">include_endpoint</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="logspace"><a class="viewcode-back" href="../../../generated/mygrad.logspace.html#mygrad.logspace">[docs]</a><span class="k">def</span> <span class="nf">logspace</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">include_endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Return a Tensor with evenly-spaced numbers over a specified interval on a log scale.</span>
+
+<span class="sd">        In linear space, values are generated within [base**start, base**stop], with the endpoint</span>
+<span class="sd">        optionally excluded.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        start : Real</span>
+<span class="sd">            The starting value of the sequence, inclusive; start at `base ** start`.</span>
+
+<span class="sd">        stop : Real</span>
+<span class="sd">            The ending value of the sequence, inclusive unless `include_endpoint` is False; end at</span>
+<span class="sd">            `base ** stop`.</span>
+
+<span class="sd">        num : int, optional (default=50)</span>
+<span class="sd">            The number of values to generate. Must be non-negative.</span>
+
+<span class="sd">        include_endpoint : bool, optional (default=True)</span>
+<span class="sd">            Whether to include the endpoint in the Tensor. Note that if False, the step size changes</span>
+<span class="sd">            to accommodate the sequence excluding the endpoint.</span>
+
+<span class="sd">        base : Real, optional (default=10)</span>
+<span class="sd">            The base of the log space.</span>
+
+<span class="sd">        dtype : data-type, optional (default=None)</span>
+<span class="sd">            The data type of the output Tensor, or None to infer from the inputs.</span>
+
+<span class="sd">        constant : bool, optional (default=False)</span>
+<span class="sd">            If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">            does not back-propagate a gradient)</span>
+<span class="sd">    </span>
+<span class="sd">        See Also</span>
+<span class="sd">        --------</span>
+<span class="sd">        arange : Similar to linspace, with the step size specified instead of the</span>
+<span class="sd">                 number of samples. Note that, when used with a float endpoint, the</span>
+<span class="sd">                 endpoint may or may not be included.</span>
+<span class="sd">        linspace : Similar to logspace, but with the samples uniformly distributed</span>
+<span class="sd">                   in linear space, instead of log space.</span>
+<span class="sd">        geomspace : Similar to logspace, but with endpoints specified directly.</span>
+<span class="sd">    </span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">        &gt;&gt;&gt; mg.logspace(2.0, 3.0, num=4)</span>
+<span class="sd">        Tensor([  100.        ,   215.443469  ,   464.15888336,  1000.        ])</span>
+<span class="sd">        &gt;&gt;&gt; mg.logspace(2.0, 3.0, num=4, endpoint=False)</span>
+<span class="sd">        Tensor([ 100.        ,  177.827941  ,  316.22776602,  562.34132519])</span>
+<span class="sd">        &gt;&gt;&gt; mg.logspace(2.0, 3.0, num=4, base=2.0)</span>
+<span class="sd">        Tensor([ 4.        ,  5.0396842 ,  6.34960421,  8.        ])</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tensor</span>
+<span class="sd">            A Tensor of `num` evenly-spaced values in the log interval [base**start, base**stop].</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">include_endpoint</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="n">dtype</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="geomspace"><a class="viewcode-back" href="../../../generated/mygrad.geomspace.html#mygrad.geomspace">[docs]</a><span class="k">def</span> <span class="nf">geomspace</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">include_endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Return a Tensor with evenly-spaced values in a geometric progression.</span>
+
+<span class="sd">        Each output sample is a constant multiple of the previous output.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        start : Real</span>
+<span class="sd">            The starting value of the output.</span>
+
+<span class="sd">        stop : Real</span>
+<span class="sd">            The ending value of the sequence, inclusive unless `include_endpoint` is false.</span>
+
+<span class="sd">        num : int, optional (default=50)</span>
+<span class="sd">            The number of values to generate. Must be non-negative.</span>
+
+<span class="sd">        include_endpoint : bool, optional (default=True)</span>
+<span class="sd">            Whether to include the endpoint in the Tensor. Note that if False, the step size changes</span>
+<span class="sd">            to accommodate the sequence excluding the endpoint.</span>
+
+<span class="sd">        dtype : data-type, optional (default=None)</span>
+<span class="sd">            The data type of the output Tensor, or None to infer from the inputs.</span>
+
+<span class="sd">        constant : bool, optional (default=False)</span>
+<span class="sd">            If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">            does not back-propagate a gradient)</span>
+<span class="sd">            </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tensor</span>
+<span class="sd">            A Tensor of `num` samples, evenly-spaced in a geometric progression.</span>
+
+<span class="sd">        See Also</span>
+<span class="sd">        --------</span>
+<span class="sd">        logspace : Similar to geomspace, but with endpoints specified using log</span>
+<span class="sd">                   and base.</span>
+<span class="sd">        linspace : Similar to geomspace, but with arithmetic instead of geometric</span>
+<span class="sd">                   progression.</span>
+<span class="sd">        arange : Similar to linspace, with the step size specified instead of the</span>
+<span class="sd">                 number of samples.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; mg.geomspace(1, 1000, num=4)</span>
+<span class="sd">        Tensor([    1.,    10.,   100.,  1000.])</span>
+<span class="sd">        &gt;&gt;&gt; mg.geomspace(1, 1000, num=3, endpoint=False)</span>
+<span class="sd">        Tensor([   1.,   10.,  100.])</span>
+<span class="sd">        &gt;&gt;&gt; mg.geomspace(1, 1000, num=4, endpoint=False)</span>
+<span class="sd">        Tensor([   1.        ,    5.62341325,   31.6227766 ,  177.827941  ])</span>
+<span class="sd">        &gt;&gt;&gt; mg.geomspace(1, 256, num=9)</span>
+<span class="sd">        Tensor([   1.,    2.,    4.,    8.,   16.,   32.,   64.,  128.,  256.])</span>
+
+<span class="sd">        Note that the above may not produce exact integers:</span>
+
+<span class="sd">        &gt;&gt;&gt; mg.geomspace(1, 256, num=9, dtype=int)</span>
+<span class="sd">        Tensor([  1,   2,   4,   7,  16,  32,  63, 127, 256])</span>
+<span class="sd">        &gt;&gt;&gt; np.around(mg.geomspace(1, 256, num=9).data).astype(int)</span>
+<span class="sd">        array([  1,   2,   4,   8,  16,  32,  64, 128, 256])</span>
+
+<span class="sd">        Negative, decreasing, and complex inputs are allowed:</span>
+
+<span class="sd">        &gt;&gt;&gt; mg.geomspace(1000, 1, num=4)</span>
+<span class="sd">        Tensor([ 1000.,   100.,    10.,     1.])</span>
+<span class="sd">        &gt;&gt;&gt; mg.geomspace(-1000, -1, num=4)</span>
+<span class="sd">        Tensor([-1000.,  -100.,   -10.,    -1.])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">geomspace</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">include_endpoint</span><span class="p">,</span> <span class="n">dtype</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Ryan Soklaski
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

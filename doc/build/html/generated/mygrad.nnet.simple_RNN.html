@@ -1,0 +1,318 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>mygrad.nnet.simple_RNN &mdash; MyGrad 0+unknown documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="mygrad.nnet.multiclass_hinge" href="mygrad.nnet.multiclass_hinge.html" />
+    <link rel="prev" title="mygrad.nnet.gru" href="mygrad.nnet.gru.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> MyGrad
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0+unknown
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installing MyGrad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introducing MyGrad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tensor.html">MyGrad’s Tensor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../operation.html">MyGrad’s Operation Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tensor_creation.html">Tensor creation routines (<code class="docutils literal notranslate"><span class="pre">mygrad.tensor_creation</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tensor_manipulation.html">Tensor manipulation routines (<code class="docutils literal notranslate"><span class="pre">mygrad.tensor_manip</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../linalg.html">Linear algebra (<code class="docutils literal notranslate"><span class="pre">mygrad.linalg</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../math.html">Mathematical functions (<code class="docutils literal notranslate"><span class="pre">mygrad.math</span></code>)</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../nnet.html">Neural network operations (<code class="docutils literal notranslate"><span class="pre">mygrad.nnet</span></code>)</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../nnet.html#layer-operations">Layer operations</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="mygrad.nnet.batchnorm.html">mygrad.nnet.batchnorm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mygrad.nnet.conv_nd.html">mygrad.nnet.conv_nd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mygrad.nnet.max_pool.html">mygrad.nnet.max_pool</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mygrad.nnet.gru.html">mygrad.nnet.gru</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">mygrad.nnet.simple_RNN</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../nnet.html#losses">Losses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../nnet.html#activations">Activations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../nnet.html#sliding-window-view-utility">Sliding Window View Utility</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../graph_viz.html">Computational graph visualization(<code class="docutils literal notranslate"><span class="pre">mygrad.computational_graph</span></code>)</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MyGrad</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../nnet.html">Neural network operations (<code class="docutils literal notranslate"><span class="pre">mygrad.nnet</span></code>)</a> &raquo;</li>
+        
+      <li>mygrad.nnet.simple_RNN</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/generated/mygrad.nnet.simple_RNN.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="mygrad-nnet-simple-rnn">
+<h1>mygrad.nnet.simple_RNN<a class="headerlink" href="#mygrad-nnet-simple-rnn" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="mygrad.nnet.simple_RNN">
+<code class="descclassname">mygrad.nnet.</code><code class="descname">simple_RNN</code><span class="sig-paren">(</span><em>X</em>, <em>U</em>, <em>W</em>, <em>s0=None</em>, <em>bp_lim=None</em>, <em>constant=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mygrad/nnet/layers/recurrent.html#simple_RNN"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mygrad.nnet.simple_RNN" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a forward pass of sequential data through a simple RNN layer, returning
+the ‘hidden-descriptors’ arrived at by utilizing the trainable parameters U and V:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">S_</span><span class="p">{</span><span class="n">t</span><span class="p">}</span> <span class="o">=</span> <span class="n">tanh</span><span class="p">(</span><span class="n">U</span> <span class="n">X_</span><span class="p">{</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">}</span> <span class="o">+</span> <span class="n">W</span> <span class="n">S_</span><span class="p">{</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">})</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>X</strong> <span class="classifier-delimiter">:</span> <span class="classifier">mygrad.Tensor, shape=(T, N, C)</span></dt>
+<dd><p class="first last">The sequential data to be passed forward.</p>
+</dd>
+<dt><strong>U</strong> <span class="classifier-delimiter">:</span> <span class="classifier">mygrad.Tensor, shape=(D, C)</span></dt>
+<dd><p class="first last">The weights used to map sequential data to its hidden-descriptor representation</p>
+</dd>
+<dt><strong>W</strong> <span class="classifier-delimiter">:</span> <span class="classifier">mygrad.Tensor, shape=(D, D)</span></dt>
+<dd><p class="first last">The weights used to map a hidden-descriptor to a hidden-descriptor.</p>
+</dd>
+<dt><strong>s0</strong> <span class="classifier-delimiter">:</span> <span class="classifier">Optional[mygrad.Tensor, numpy.ndarray], shape=(N, D)</span></dt>
+<dd><p class="first last">The ‘seed’ hidden descriptors to feed into the RNN. If None, a Tensor
+of zeros of shape (N, D) is created.</p>
+</dd>
+<dt><strong>bp_lim</strong> <span class="classifier-delimiter">:</span> <span class="classifier">Optional[int]</span></dt>
+<dd><p class="first">The (non-zero) limit of the depth of back propagation through time to be
+performed. If <cite>None</cite> back propagation is passed back through the entire sequence.</p>
+<p class="last">E.g. <cite>bp_lim=3</cite> will propagate gradients only up to 3 steps backward through the
+recursive sequence.</p>
+</dd>
+<dt><strong>constant</strong> <span class="classifier-delimiter">:</span> <span class="classifier">bool, optional (default=False)</span></dt>
+<dd><p class="first last">If True, the resulting Tensor is a constant.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>mygrad.Tensor</strong></dt>
+<dd><p class="first last">The sequence of ‘hidden-descriptors’ produced by the forward pass of the RNN.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>This simple RNN implements the recursive system of equations:</p>
+<div class="math notranslate nohighlight">
+\[S_{t} = tanh(U X_{t-1} + W S_{t-1})\]</div>
+<ul class="simple">
+<li><span class="math notranslate nohighlight">\(T\)</span> : Sequence length</li>
+<li><span class="math notranslate nohighlight">\(N\)</span> : Batch size</li>
+<li><span class="math notranslate nohighlight">\(C\)</span> : Length of single datum</li>
+<li><span class="math notranslate nohighlight">\(D\)</span> : Length of ‘hidden’ descriptor</li>
+</ul>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="mygrad.nnet.multiclass_hinge.html" class="btn btn-neutral float-right" title="mygrad.nnet.multiclass_hinge" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="mygrad.nnet.gru.html" class="btn btn-neutral" title="mygrad.nnet.gru" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Ryan Soklaski
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
