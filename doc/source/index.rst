@@ -60,6 +60,7 @@ than is suggested here.
    :maxdepth: 2
    :caption: Contents:
 
+   install
    intro
    tensor
    operation

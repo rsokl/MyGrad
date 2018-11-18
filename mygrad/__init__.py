@@ -14,7 +14,10 @@ from mygrad.linalg.funcs import *
 
 from mygrad.nnet.layers.utils import sliding_window_view
 
-__version__ = "0.6"
+from ._version import get_versions
+
+__version__ = get_versions()['version']
+del get_versions
 
 
 for attr in (sum, prod, cumprod, cumsum,

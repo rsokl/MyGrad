@@ -26,9 +26,9 @@ copyright = '2018, Ryan Soklaski'
 author = 'Ryan Soklaski'
 
 # The short X.Y version
-version = ''
+version = '.'.join(mygrad.__version__.split('.')[:2])
 # The full version, including alpha/beta/rc tags
-release = '0.6'
+release = mygrad.__version__
 
 
 # -- General configuration ---------------------------------------------------
