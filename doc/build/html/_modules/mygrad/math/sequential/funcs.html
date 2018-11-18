@@ -1,0 +1,566 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>mygrad.math.sequential.funcs &mdash; MyGrad 0+unknown documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/my_theme.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+
+  
+  <script src="../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> MyGrad
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0+unknown
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../install.html">Installing MyGrad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro.html">Introducing MyGrad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tensor.html">MyGrad’s Tensor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../operation.html">MyGrad’s Operation Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tensor_creation.html">Tensor creation routines (<code class="docutils literal notranslate"><span class="pre">mygrad.tensor_creation</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tensor_manipulation.html">Tensor manipulation routines (<code class="docutils literal notranslate"><span class="pre">mygrad.tensor_manip</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../linalg.html">Linear algebra (<code class="docutils literal notranslate"><span class="pre">mygrad.linalg</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../math.html">Mathematical functions (<code class="docutils literal notranslate"><span class="pre">mygrad.math</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../nnet.html">Neural network operations (<code class="docutils literal notranslate"><span class="pre">mygrad.nnet</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../graph_viz.html">Computational graph visualization(<code class="docutils literal notranslate"><span class="pre">mygrad.computational_graph</span></code>)</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MyGrad</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mygrad.math.sequential.funcs</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mygrad.math.sequential.funcs</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.ops</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">mygrad.tensor_base</span> <span class="k">import</span> <span class="n">Tensor</span>
+<span class="kn">from</span> <span class="nn">mygrad.math.misc.funcs</span> <span class="k">import</span> <span class="n">sqrt</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;sum&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;mean&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;var&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;std&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;amax&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;amin&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;max&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;min&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;prod&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;cumprod&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;cumsum&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="sum"><a class="viewcode-back" href="../../../../generated/mygrad.sum.html#mygrad.sum">[docs]</a><span class="k">def</span> <span class="nf">sum</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Sum of tensor elements over a given axis.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : array_like</span>
+
+<span class="sd">        axis : Optional[int, Tuple[ints, ...]]</span>
+<span class="sd">            Axis or axes along which a sum is performed.  The default,</span>
+<span class="sd">            axis=None, will sum all of the elements of the input tensor.  If</span>
+<span class="sd">            axis is negative it counts from the last to the first axis.</span>
+<span class="sd">            If axis is a tuple of ints, a sum is performed on all of the axes</span>
+<span class="sd">            specified in the tuple instead of a single axis or all the axes as</span>
+<span class="sd">            before.</span>
+
+<span class="sd">        keepdims : bool, optional</span>
+<span class="sd">            If this is set to True, the axes which are reduced are left</span>
+<span class="sd">            in the result as dimensions with size one. With this option,</span>
+<span class="sd">            the result will broadcast correctly against the input tensor.</span>
+
+<span class="sd">        constant : bool, optional(default=False)</span>
+<span class="sd">            If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">            does not back-propagate a gradient)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        sum_along_axis : mygrad.Tensor</span>
+<span class="sd">            A Tensor with the same shape as `self`, with the specified</span>
+<span class="sd">            axis/axes removed. If `self` is a 0-d tensor, or if `axis` is None,</span>
+<span class="sd">            a 0-dim Tensor is returned.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Sum</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">op_args</span><span class="o">=</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="n">keepdims</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Mean of tensor elements over a given axis.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : array_like</span>
+
+<span class="sd">        axis : Optional[int, Tuple[ints, ...]</span>
+<span class="sd">            Axis or axes along which a mean is performed.  The default,</span>
+<span class="sd">            axis=None, will mean all of the elements of the input tensor.  If</span>
+<span class="sd">            axis is negative it counts from the last to the first axis.</span>
+
+<span class="sd">            If axis is a tuple of ints, a mean is performed on all of the axes</span>
+<span class="sd">            specified in the tuple instead of a single axis or all the axes as</span>
+<span class="sd">            before.</span>
+
+<span class="sd">        keepdims : bool, optional</span>
+<span class="sd">            If this is set to True, the axes which are reduced are left</span>
+<span class="sd">            in the result as dimensions with size one. With this option,</span>
+<span class="sd">            the result will broadcast correctly against the input tensor.</span>
+
+<span class="sd">        constant : bool, optional(default=False)</span>
+<span class="sd">            If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">            does not back-propagate a gradient)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        mean_along_axis : Tensor</span>
+<span class="sd">            A Tensor with the same shape as `self`, with the specified</span>
+<span class="sd">            axis/axes removed. If `self` is a 0-d tensor, or if `axis` is None,</span>
+<span class="sd">            a 0-dim Tensor is returned.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Mean</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">op_args</span><span class="o">=</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="n">keepdims</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">var</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the variance along the specified axis.</span>
+
+<span class="sd">    Returns the variance of the array elements, a measure of the spread of a</span>
+<span class="sd">    distribution.  The variance is computed for the flattened array by</span>
+<span class="sd">    default, otherwise over the specified axis.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : array_like</span>
+<span class="sd">        Array containing numbers whose variance is desired.</span>
+
+<span class="sd">    axis : Optional[int, Tuple[int, ...]]</span>
+<span class="sd">        Axis or axes along which the variance is computed.  The default is to</span>
+<span class="sd">        compute the variance of the flattened array.</span>
+
+<span class="sd">    ddof : int, optional (default=0)</span>
+<span class="sd">        &quot;Delta Degrees of Freedom&quot;: the divisor used in the calculation is</span>
+<span class="sd">        ``N - ddof``, where ``N`` represents the number of elements. By</span>
+<span class="sd">        default `ddof` is zero.</span>
+
+<span class="sd">    keepdims : bool, optional (default=False)</span>
+<span class="sd">        If this is set to True, the axes which are reduced are left</span>
+<span class="sd">        in the result as dimensions with size one. With this option,</span>
+<span class="sd">        the result will broadcast correctly against the input array..</span>
+
+<span class="sd">    constant : bool, optional(default=False)</span>
+<span class="sd">        If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">        does not back-propagate a gradient)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    variance : mygrad.Tensor</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The variance is the average of the squared deviations from the mean,</span>
+<span class="sd">    i.e.,  ``var = mean(abs(x - x.mean())**2)``.</span>
+
+<span class="sd">    The mean is normally calculated as ``x.sum() / N``, where ``N = len(x)``.</span>
+<span class="sd">    If, however, `ddof` is specified, the divisor ``N - ddof`` is used</span>
+<span class="sd">    instead.  In standard statistical practice, ``ddof=1`` provides an</span>
+<span class="sd">    unbiased estimator of the variance of a hypothetical infinite population.</span>
+<span class="sd">    ``ddof=0`` provides a maximum likelihood estimate of the variance for</span>
+<span class="sd">    normally distributed variables.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Variance</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">op_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span>
+                                                  <span class="n">keepdims</span><span class="o">=</span><span class="n">keepdims</span><span class="p">,</span>
+                                                  <span class="n">ddof</span><span class="o">=</span><span class="n">ddof</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">std</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the standard deviation along the specified axis.</span>
+
+<span class="sd">    Returns the variance of the array elements, a measure of the spread of a</span>
+<span class="sd">    distribution.  The variance is computed for the flattened array by</span>
+<span class="sd">    default, otherwise over the specified axis.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : array_like</span>
+<span class="sd">        Array containing numbers whose standard deviation is desired.</span>
+
+<span class="sd">    axis : Optional[int, Tuple[int, ...]]</span>
+<span class="sd">        Axis or axes along which the variance is computed.  The default is to</span>
+<span class="sd">        compute the variance of the flattened array.</span>
+
+<span class="sd">    ddof : int, optional (default=0)</span>
+<span class="sd">        &quot;Delta Degrees of Freedom&quot;: the divisor used in the calculation is</span>
+<span class="sd">        ``N - ddof``, where ``N`` represents the number of elements. By</span>
+<span class="sd">        default `ddof` is zero.</span>
+
+<span class="sd">    keepdims : bool, optional (default=False)</span>
+<span class="sd">        If this is set to True, the axes which are reduced are left</span>
+<span class="sd">        in the result as dimensions with size one. With this option,</span>
+<span class="sd">        the result will broadcast correctly against the input array.</span>
+
+<span class="sd">    constant : bool, optional(default=False)</span>
+<span class="sd">        If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">        does not back-propagate a gradient)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    std : mygrad.Tensor</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The variance is the average of the squared deviations from the mean,</span>
+<span class="sd">    i.e.,  ``var = mean(abs(x - x.mean())**2)``.</span>
+
+<span class="sd">    The mean is normally calculated as ``x.sum() / N``, where ``N = len(x)``.</span>
+<span class="sd">    If, however, `ddof` is specified, the divisor ``N - ddof`` is used</span>
+<span class="sd">    instead.  In standard statistical practice, ``ddof=1`` provides an</span>
+<span class="sd">    unbiased estimator of the variance of a hypothetical infinite population.</span>
+<span class="sd">    ``ddof=0`` provides a maximum likelihood estimate of the variance for</span>
+<span class="sd">    normally distributed variables.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">var</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="n">keepdims</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="n">ddof</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">max</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Return the maximum of a tensor or maximum along its axes.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : array_like</span>
+
+<span class="sd">        axis : Optional[int, Tuple[int, ...]]</span>
+<span class="sd">            Axis or axes along which to operate. By default, flattened input is used.</span>
+
+<span class="sd">        keepdims : bool, optional</span>
+<span class="sd">            If this is set to True, the axes which are reduced are left</span>
+<span class="sd">            in the result as dimensions with size one. With this option,</span>
+<span class="sd">            the result will broadcast correctly against the original `arr`.</span>
+
+<span class="sd">        constant : bool, optional(default=False)</span>
+<span class="sd">            If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">            does not back-propagate a gradient)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        max : mygrad.Tensor</span>
+<span class="sd">            Maximum of `a`. If `axis` is None, the result is a 0-D tensor.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">MaxMin</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">op_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="n">keepdims</span><span class="p">,</span> <span class="n">maxmin</span><span class="o">=</span><span class="s1">&#39;max&#39;</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">min</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Return the minimum of a tensor or minimum along its axes.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        axis : Optional[int, Tuple[int, ...]]</span>
+<span class="sd">            Axis or axes along which to operate. By default, flattened input is used.</span>
+
+<span class="sd">        keepdims : bool, optional</span>
+<span class="sd">            If this is set to True, the axes which are reduced are left</span>
+<span class="sd">            in the result as dimensions with size one. With this option,</span>
+<span class="sd">            the result will broadcast correctly against the original `arr`.</span>
+
+<span class="sd">        constant : bool, optional(default=False)</span>
+<span class="sd">            If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">            does not back-propagate a gradient)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        min : mygrad.Tensor</span>
+<span class="sd">            Minimum of `a`. If `axis` is None, the result is a 0-D tensor.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">MaxMin</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">op_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="n">keepdims</span><span class="p">,</span> <span class="n">maxmin</span><span class="o">=</span><span class="s1">&#39;min&#39;</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
+
+<span class="c1"># aliases</span>
+<span class="n">amin</span> <span class="o">=</span> <span class="nb">min</span>
+<span class="n">amax</span> <span class="o">=</span> <span class="nb">max</span>
+
+
+<div class="viewcode-block" id="prod"><a class="viewcode-back" href="../../../../generated/mygrad.prod.html#mygrad.prod">[docs]</a><span class="k">def</span> <span class="nf">prod</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the product of array elements over given axes.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a : array_like</span>
+<span class="sd">        Input data.</span>
+
+<span class="sd">    axis : Optional[int, Tuple[int, ...]]</span>
+<span class="sd">        Axis or axes along which to operate. By default, flattened input is used.</span>
+
+<span class="sd">    keepdims : bool, optional (default=False)</span>
+<span class="sd">        If this is set to True, the axes which are reduced are left in the</span>
+<span class="sd">        result as dimensions with size one. With this option, the result</span>
+<span class="sd">        will broadcast correctly against the input array.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    product_along_axis : mygrad.Tensor</span>
+<span class="sd">        A tensor shaped as `a` but with the specified axis removed.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Prod</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">op_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="n">keepdims</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="cumprod"><a class="viewcode-back" href="../../../../generated/mygrad.cumprod.html#mygrad.cumprod">[docs]</a><span class="k">def</span> <span class="nf">cumprod</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the cumulative product of elements along a given axis.</span>
+
+<span class="sd">    This docstring was adapted from the official numpy documentation</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a : array_like</span>
+<span class="sd">        Input array.</span>
+
+<span class="sd">    axis : Optional[int]</span>
+<span class="sd">        Axis along which the cumulative product is computed.  By default</span>
+<span class="sd">        the input is flattened.</span>
+
+<span class="sd">    constant : bool, optional(default=False)</span>
+<span class="sd">        If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">        does not back-propagate a gradient)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    mygrad.Tensor</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Arithmetic is modular when using integer types, and no error is</span>
+<span class="sd">    raised on overflow.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from mygrad import cumprod, Tensor</span>
+<span class="sd">    &gt;&gt;&gt; a = Tensor([[1, 2, 3],</span>
+<span class="sd">    ...             [4, 5, 6]])</span>
+
+<span class="sd">    &gt;&gt;&gt; cumprod(a)</span>
+<span class="sd">    Tensor([  1   2   6  24 120 720])</span>
+
+<span class="sd">    The cumulative product for each column (i.e., over the rows) of `a`:</span>
+
+<span class="sd">    &gt;&gt;&gt; cumprod(a, axis=0)</span>
+<span class="sd">    Tensor([[ 1,  2,  3],</span>
+<span class="sd">           [ 4, 10, 18]])</span>
+
+<span class="sd">    The cumulative product for each row (i.e. over the columns) of `a`:</span>
+
+<span class="sd">    &gt;&gt;&gt; cumprod(a,axis=1)</span>
+<span class="sd">    Tensor([[  1,   2,   6],</span>
+<span class="sd">            [  4,  20, 120]])&quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">CumProd</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">op_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="cumsum"><a class="viewcode-back" href="../../../../generated/mygrad.cumsum.html#mygrad.cumsum">[docs]</a><span class="k">def</span> <span class="nf">cumsum</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the cumulative sum of the elements along a given axis.</span>
+
+<span class="sd">    This docstring was adapted from the official numpy documentation</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a : array_like</span>
+<span class="sd">        Input array.</span>
+
+<span class="sd">    axis : int, optional</span>
+<span class="sd">        Axis along which the cumulative sum is computed. The default</span>
+<span class="sd">        (None) is to compute the cumsum over the flattened array.</span>
+
+<span class="sd">    constant : bool, optional(default=False)</span>
+<span class="sd">        If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">        does not back-propagate a gradient)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    mygrad.Tensor</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from mygrad import cumsum, Tensor</span>
+<span class="sd">    &gt;&gt;&gt; a = Tensor([[1, 2, 3],</span>
+<span class="sd">    ...             [4, 5, 6]])</span>
+<span class="sd">    &gt;&gt;&gt; cumsum(a)</span>
+<span class="sd">    Tensor([ 1,  3,  6, 10, 15, 21])</span>
+
+<span class="sd">    &gt;&gt;&gt; cumsum(a,axis=0)      # sum over rows for each of the 3 columns</span>
+<span class="sd">    Tensor([[1, 2, 3],</span>
+<span class="sd">            [5, 7, 9]])</span>
+<span class="sd">    &gt;&gt;&gt; cumsum(a,axis=1)      # sum over columns for each of the 2 rows</span>
+<span class="sd">    Tensor([[ 1,  3,  6],</span>
+<span class="sd">            [ 4,  9, 15]])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">CumSum</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">op_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Ryan Soklaski
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

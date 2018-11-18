@@ -1,0 +1,358 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Neural network operations (mygrad.nnet) &mdash; MyGrad 0+unknown documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/my_theme.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="mygrad.nnet.batchnorm" href="generated/mygrad.nnet.batchnorm.html" />
+    <link rel="prev" title="mygrad.minimum" href="generated/mygrad.minimum.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> MyGrad
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0+unknown
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installing MyGrad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introducing MyGrad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tensor.html">MyGrad’s Tensor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="operation.html">MyGrad’s Operation Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tensor_creation.html">Tensor creation routines (<code class="docutils literal notranslate"><span class="pre">mygrad.tensor_creation</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tensor_manipulation.html">Tensor manipulation routines (<code class="docutils literal notranslate"><span class="pre">mygrad.tensor_manip</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="linalg.html">Linear algebra (<code class="docutils literal notranslate"><span class="pre">mygrad.linalg</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="math.html">Mathematical functions (<code class="docutils literal notranslate"><span class="pre">mygrad.math</span></code>)</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Neural network operations (<code class="docutils literal notranslate"><span class="pre">mygrad.nnet</span></code>)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#layer-operations">Layer operations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/mygrad.nnet.batchnorm.html">mygrad.nnet.batchnorm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/mygrad.nnet.conv_nd.html">mygrad.nnet.conv_nd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/mygrad.nnet.max_pool.html">mygrad.nnet.max_pool</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/mygrad.nnet.gru.html">mygrad.nnet.gru</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/mygrad.nnet.simple_RNN.html">mygrad.nnet.simple_RNN</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#losses">Losses</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/mygrad.nnet.multiclass_hinge.html">mygrad.nnet.multiclass_hinge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/mygrad.nnet.softmax_crossentropy.html">mygrad.nnet.softmax_crossentropy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/mygrad.nnet.margin_ranking_loss.html">mygrad.nnet.margin_ranking_loss</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#activations">Activations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/mygrad.nnet.tanh.html">mygrad.nnet.tanh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/mygrad.nnet.sigmoid.html">mygrad.nnet.sigmoid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/mygrad.nnet.relu.html">mygrad.nnet.relu</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/mygrad.nnet.softmax.html">mygrad.nnet.softmax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/mygrad.nnet.logsoftmax.html">mygrad.nnet.logsoftmax</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#sliding-window-view-utility">Sliding Window View Utility</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/mygrad.sliding_window_view.html">mygrad.sliding_window_view</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="graph_viz.html">Computational graph visualization(<code class="docutils literal notranslate"><span class="pre">mygrad.computational_graph</span></code>)</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">MyGrad</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Neural network operations (<code class="docutils literal notranslate"><span class="pre">mygrad.nnet</span></code>)</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/nnet.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="neural-network-operations-mygrad-nnet">
+<h1>Neural network operations (<code class="xref py py-mod docutils literal notranslate"><span class="pre">mygrad.nnet</span></code>)<a class="headerlink" href="#neural-network-operations-mygrad-nnet" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="layer-operations">
+<h2>Layer operations<a class="headerlink" href="#layer-operations" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="generated/mygrad.nnet.batchnorm.html#mygrad.nnet.batchnorm" title="mygrad.nnet.batchnorm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">batchnorm</span></code></a>(x,&nbsp;*[,&nbsp;gamma,&nbsp;beta,&nbsp;constant])</td>
+<td>Performs batch normalization on <code class="docutils literal notranslate"><span class="pre">x</span></code>.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/mygrad.nnet.conv_nd.html#mygrad.nnet.conv_nd" title="mygrad.nnet.conv_nd"><code class="xref py py-obj docutils literal notranslate"><span class="pre">conv_nd</span></code></a>(x,&nbsp;filter_bank,&nbsp;*,&nbsp;stride[,&nbsp;…])</td>
+<td>Use <cite>filter_bank</cite> to perform strided N-dimensional neural network-style convolutions (see Notes) over <cite>x</cite>..</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/mygrad.nnet.max_pool.html#mygrad.nnet.max_pool" title="mygrad.nnet.max_pool"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_pool</span></code></a>(x,&nbsp;pool,&nbsp;stride[,&nbsp;constant])</td>
+<td>Perform max-pooling over the last N dimensions of a data batch.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/mygrad.nnet.gru.html#mygrad.nnet.gru" title="mygrad.nnet.gru"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gru</span></code></a>(X,&nbsp;Uz,&nbsp;Wz,&nbsp;bz,&nbsp;Ur,&nbsp;Wr,&nbsp;br,&nbsp;Uh,&nbsp;Wh,&nbsp;bh[,&nbsp;…])</td>
+<td>Performs a forward pass of sequential data through a Gated Recurrent Unit layer, returning the ‘hidden-descriptors’ arrived at by utilizing the trainable parameters as follows.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/mygrad.nnet.simple_RNN.html#mygrad.nnet.simple_RNN" title="mygrad.nnet.simple_RNN"><code class="xref py py-obj docutils literal notranslate"><span class="pre">simple_RNN</span></code></a>(X,&nbsp;U,&nbsp;W[,&nbsp;s0,&nbsp;bp_lim,&nbsp;constant])</td>
+<td>Performs a forward pass of sequential data through a simple RNN layer, returning the ‘hidden-descriptors’ arrived at by utilizing the trainable parameters U and V.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="losses">
+<h2>Losses<a class="headerlink" href="#losses" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="generated/mygrad.nnet.multiclass_hinge.html#mygrad.nnet.multiclass_hinge" title="mygrad.nnet.multiclass_hinge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multiclass_hinge</span></code></a>(x,&nbsp;y_true[,&nbsp;hinge,&nbsp;constant])</td>
+<td>Computes the average multiclass hinge loss.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/mygrad.nnet.softmax_crossentropy.html#mygrad.nnet.softmax_crossentropy" title="mygrad.nnet.softmax_crossentropy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">softmax_crossentropy</span></code></a>(x,&nbsp;y_true[,&nbsp;constant])</td>
+<td>Given the classification scores of C classes for N pieces of data, computes the NxC softmax classification probabilities.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/mygrad.nnet.margin_ranking_loss.html#mygrad.nnet.margin_ranking_loss" title="mygrad.nnet.margin_ranking_loss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">margin_ranking_loss</span></code></a>(x1,&nbsp;x2,&nbsp;y,&nbsp;margin[,&nbsp;…])</td>
+<td>Computes the margin average margin ranking loss.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="activations">
+<h2>Activations<a class="headerlink" href="#activations" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="generated/mygrad.nnet.tanh.html#mygrad.nnet.tanh" title="mygrad.nnet.tanh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tanh</span></code></a>(x[,&nbsp;constant])</td>
+<td><code class="docutils literal notranslate"><span class="pre">f(x)</span> <span class="pre">-&gt;</span> <span class="pre">tanh(x)</span></code></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/mygrad.nnet.sigmoid.html#mygrad.nnet.sigmoid" title="mygrad.nnet.sigmoid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sigmoid</span></code></a>(x[,&nbsp;constant])</td>
+<td>Applies the sigmoid activation function.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/mygrad.nnet.relu.html#mygrad.nnet.relu" title="mygrad.nnet.relu"><code class="xref py py-obj docutils literal notranslate"><span class="pre">relu</span></code></a>(x[,&nbsp;constant])</td>
+<td>Applies the recitfied linear unit activation function.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/mygrad.nnet.softmax.html#mygrad.nnet.softmax" title="mygrad.nnet.softmax"><code class="xref py py-obj docutils literal notranslate"><span class="pre">softmax</span></code></a>(x[,&nbsp;constant])</td>
+<td>Applies the softmax activation function.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/mygrad.nnet.logsoftmax.html#mygrad.nnet.logsoftmax" title="mygrad.nnet.logsoftmax"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logsoftmax</span></code></a>(x[,&nbsp;constant])</td>
+<td>Applies the log-softmax activation function.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="sliding-window-view-utility">
+<h2>Sliding Window View Utility<a class="headerlink" href="#sliding-window-view-utility" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="generated/mygrad.sliding_window_view.html#mygrad.sliding_window_view" title="mygrad.sliding_window_view"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sliding_window_view</span></code></a>(arr,&nbsp;window_shape,&nbsp;step)</td>
+<td>Create a sliding window view over the trailing dimensions of an array.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="generated/mygrad.nnet.batchnorm.html" class="btn btn-neutral float-right" title="mygrad.nnet.batchnorm" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="generated/mygrad.minimum.html" class="btn btn-neutral" title="mygrad.minimum" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Ryan Soklaski
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

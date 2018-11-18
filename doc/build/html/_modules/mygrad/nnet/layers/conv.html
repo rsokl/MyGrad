@@ -1,0 +1,470 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>mygrad.nnet.layers.conv &mdash; MyGrad 0+unknown documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/my_theme.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+
+  
+  <script src="../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> MyGrad
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0+unknown
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../install.html">Installing MyGrad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro.html">Introducing MyGrad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tensor.html">MyGrad’s Tensor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../operation.html">MyGrad’s Operation Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tensor_creation.html">Tensor creation routines (<code class="docutils literal notranslate"><span class="pre">mygrad.tensor_creation</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tensor_manipulation.html">Tensor manipulation routines (<code class="docutils literal notranslate"><span class="pre">mygrad.tensor_manip</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../linalg.html">Linear algebra (<code class="docutils literal notranslate"><span class="pre">mygrad.linalg</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../math.html">Mathematical functions (<code class="docutils literal notranslate"><span class="pre">mygrad.math</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../nnet.html">Neural network operations (<code class="docutils literal notranslate"><span class="pre">mygrad.nnet</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../graph_viz.html">Computational graph visualization(<code class="docutils literal notranslate"><span class="pre">mygrad.computational_graph</span></code>)</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MyGrad</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mygrad.nnet.layers.conv</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mygrad.nnet.layers.conv</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">mygrad.operation_base</span> <span class="k">import</span> <span class="n">Operation</span>
+<span class="kn">from</span> <span class="nn">mygrad.tensor_base</span> <span class="k">import</span> <span class="n">Tensor</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numbers</span> <span class="k">import</span> <span class="n">Integral</span>
+<span class="kn">from</span> <span class="nn">mygrad.nnet.layers.utils</span> <span class="k">import</span> <span class="n">sliding_window_view</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;conv_nd&quot;</span><span class="p">]</span>
+
+
+<span class="k">class</span> <span class="nc">ConvND</span><span class="p">(</span><span class="n">Operation</span><span class="p">):</span>
+    <span class="n">scalar_only</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">stride</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dilation</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+        <span class="c1"># x ... data:    (N, C, X0, X1, ...)</span>
+        <span class="c1"># w ... filters: (F, C, W0, W1, ...)</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="k">assert</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">2</span>
+        <span class="k">assert</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="n">w</span><span class="o">.</span><span class="n">ndim</span>
+        <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;The channel-depth of the batch and filters must agree&quot;</span>
+
+        <span class="n">num_conv_channels</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">2</span>
+        <span class="n">x_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>  <span class="c1"># (X0, ...): shape of the channels being convolved over</span>
+        <span class="n">w_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>  <span class="c1"># (W0, ...): shape of each conv filter</span>
+
+        <span class="n">dilation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">dilation</span><span class="p">,)</span> <span class="o">*</span> <span class="n">num_conv_channels</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dilation</span><span class="p">,</span> <span class="n">Integral</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dilation</span><span class="p">,</span>
+                                                                                                             <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dilation</span><span class="p">)</span> <span class="o">==</span> <span class="n">num_conv_channels</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">d</span> <span class="o">&gt;=</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">Integral</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dilation</span><span class="p">)</span>
+
+        <span class="n">padding</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">padding</span><span class="p">,)</span> <span class="o">*</span> <span class="n">num_conv_channels</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">padding</span><span class="p">,</span> <span class="n">Integral</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">padding</span><span class="p">,</span>
+                                                                                                          <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">padding</span><span class="p">)</span> <span class="o">==</span> <span class="n">num_conv_channels</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">p</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">Integral</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">padding</span><span class="p">)</span>
+
+        <span class="n">stride</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">stride</span><span class="p">,)</span> <span class="o">*</span> <span class="n">num_conv_channels</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stride</span><span class="p">,</span> <span class="n">Integral</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">stride</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">stride</span><span class="p">)</span> <span class="o">==</span> <span class="n">num_conv_channels</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">s</span> <span class="o">&gt;=</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">Integral</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">stride</span><span class="p">)</span>
+
+        <span class="n">out_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">x_shape</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">padding</span> <span class="o">-</span> <span class="p">((</span><span class="n">w_shape</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">dilation</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span> <span class="o">/</span> <span class="n">stride</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">is_integer</span><span class="p">()</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">out_shape</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Stride and kernel dimensions are incompatible: </span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Input dimensions: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">x_shape</span><span class="p">))</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Stride dimensions: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">stride</span><span class="p">))</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Kernel dimensions: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">w_shape</span><span class="p">))</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Padding dimensions: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">padding</span><span class="p">))</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Dilation dimensions: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">dilation</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">padding</span> <span class="o">=</span> <span class="n">padding</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stride</span> <span class="o">=</span> <span class="n">stride</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dilation</span> <span class="o">=</span> <span class="n">dilation</span>
+
+        <span class="c1"># symmetric 0-padding for X0, X1, ... dimensions</span>
+        <span class="n">axis_pad</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">*</span><span class="n">padding</span><span class="p">))</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis_pad</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;constant&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">padding</span><span class="p">)</span> <span class="k">else</span> <span class="n">x</span>
+
+        <span class="c1"># (G0, ...) is the tuple of grid-positions for placing each window (not including stride)</span>
+        <span class="c1"># (N, C, X0, ...) -&gt; (G0, ..., N, C, W0, ...)</span>
+        <span class="n">windowed_data</span> <span class="o">=</span> <span class="n">sliding_window_view</span><span class="p">(</span><span class="n">x</span><span class="p">,</span>
+                                            <span class="n">window_shape</span><span class="o">=</span><span class="n">w_shape</span><span class="p">,</span>
+                                            <span class="n">step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stride</span><span class="p">,</span>
+                                            <span class="n">dilation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dilation</span><span class="p">)</span>
+
+        <span class="n">w_conv_channels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_conv_channels</span> <span class="o">+</span> <span class="mi">2</span><span class="p">))</span>  <span class="c1"># C, W0, ...</span>
+        <span class="n">window_conv_channels</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">num_conv_channels</span>        <span class="c1"># C, W0, ...</span>
+                                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_conv_channels</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+
+        <span class="c1"># (F, C, W0, ...) ⋆ (G0, ..., N, C, W0, ...) -&gt; (F, G0, ..., N)</span>
+        <span class="n">conv_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">w</span><span class="p">,</span>
+                                <span class="n">windowed_data</span><span class="p">,</span>
+                                <span class="n">axes</span><span class="o">=</span><span class="p">[</span><span class="n">w_conv_channels</span><span class="p">,</span> <span class="n">window_conv_channels</span><span class="p">])</span>
+
+        <span class="c1"># (F, G0, ..., N) -&gt; (N, F, G0, ...)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">conv_out</span><span class="p">,</span> <span class="n">source</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span> <span class="k">if</span> <span class="n">out</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">&#39;C_CONTIGUOUS&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">backward_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grad</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Computes dX, where X is the data batch</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            grad : numpy.ndarray, shape=(N, F, G0, ...)&quot;&quot;&quot;</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">w</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">data</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">)</span>
+        <span class="n">num_conv_channels</span> <span class="o">=</span> <span class="n">grad</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">2</span>
+
+        <span class="k">if</span> <span class="n">index</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># backprop through x</span>
+            <span class="n">x_shape</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="n">p</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="n">num_conv_channels</span><span class="p">:],</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">))</span>
+            <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">x_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>  <span class="c1"># (N, C, X0, ...)</span>
+
+            <span class="c1"># `gp` stores all of the various broadcast multiplications of each grad</span>
+            <span class="c1"># element against the conv filter.</span>
+            <span class="c1"># (N, F, G0, ...) -tdot- (F, C, W0, ...) --&gt; (N, G0, ..., C, W0, ...)</span>
+            <span class="n">gp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">grad</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">[[</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+            <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">ndindex</span><span class="p">(</span><span class="n">grad</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="n">num_conv_channels</span><span class="p">:]):</span>
+                <span class="c1"># ind: (g0, ...) - grid-position of filter placement</span>
+                <span class="n">slices</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">s</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="n">s</span> <span class="o">+</span> <span class="n">w</span> <span class="o">*</span> <span class="n">d</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> 
+                                                                                    <span class="n">w</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">:],</span>
+                                                                                    <span class="bp">self</span><span class="o">.</span><span class="n">stride</span><span class="p">,</span> 
+                                                                                    <span class="bp">self</span><span class="o">.</span><span class="n">dilation</span><span class="p">))</span>
+                <span class="c1"># Add (grad-element * filter) to each appropriate window position in `dx`</span>
+                <span class="c1"># dx[N, C, g0*s0 : g0*s0 + w0*d0 : d0, (...)] += gp[N, g0, (...), C, W0, (...)]</span>
+                <span class="n">dx</span><span class="p">[(</span><span class="o">...</span><span class="p">,</span> <span class="o">*</span><span class="n">slices</span><span class="p">)]</span> <span class="o">+=</span> <span class="n">gp</span><span class="p">[(</span><span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span> <span class="o">*</span><span class="n">ind</span><span class="p">,</span> <span class="o">...</span><span class="p">)]</span>
+
+            <span class="c1"># remove padding from dx</span>
+            <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">):</span>
+                <span class="n">no_pads</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="o">-</span><span class="n">p</span> <span class="k">if</span> <span class="n">p</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">)</span>
+                <span class="n">dx</span> <span class="o">=</span> <span class="n">dx</span><span class="p">[(</span><span class="o">...</span><span class="p">,</span> <span class="o">*</span><span class="n">no_pads</span><span class="p">)]</span>
+            <span class="k">return</span> <span class="n">dx</span>
+
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># backprop through w</span>
+            <span class="c1"># backprop into f</span>
+            <span class="c1"># symmetric 0-padding for H, W dimensions</span>
+            <span class="n">axis_pad</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">))</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis_pad</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;constant&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">)</span> <span class="k">else</span> <span class="n">x</span>
+
+            <span class="c1"># (G0, ...) is the tuple of grid-indices for placing each window (not including stride)</span>
+            <span class="c1"># (N, C, X0, ...) -&gt; (G0, ..., N, C, W0, ...)</span>
+            <span class="n">windowed_data</span> <span class="o">=</span> <span class="n">sliding_window_view</span><span class="p">(</span><span class="n">x</span><span class="p">,</span>
+                                                <span class="n">window_shape</span><span class="o">=</span><span class="n">w</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">:],</span>
+                                                <span class="n">step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stride</span><span class="p">,</span>
+                                                <span class="n">dilation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dilation</span><span class="p">)</span>
+
+            <span class="c1"># (N, F, G0, ...) -tdot- (G0, ..., N, C, W0, ...) --&gt; (F, C, W0, ...)</span>
+            <span class="n">grad_axes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">num_conv_channels</span> <span class="o">+</span> <span class="mi">2</span><span class="p">))</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># (G0, ..., N)</span>
+            <span class="n">window_axes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">num_conv_channels</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>         <span class="c1"># (G0, ..., N)</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">grad</span><span class="p">,</span> <span class="n">windowed_data</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">[</span><span class="n">grad_axes</span><span class="p">,</span> <span class="n">window_axes</span><span class="p">])</span>
+
+
+<div class="viewcode-block" id="conv_nd"><a class="viewcode-back" href="../../../../generated/mygrad.nnet.conv_nd.html#mygrad.nnet.conv_nd">[docs]</a><span class="k">def</span> <span class="nf">conv_nd</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">filter_bank</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">stride</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dilation</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Use `filter_bank` to perform strided N-dimensional neural network-style</span>
+<span class="sd">        convolutions (see Notes) over `x`.::</span>
+
+<span class="sd">                f(x, w) -&gt; x ⋆ w</span>
+
+<span class="sd">                shapes:</span>
+<span class="sd">                (N, C, X0, ...) ⋆ (F, C, W0, ...) -&gt; (N, F, G0, ...)</span>
+
+<span class="sd">        ``x`` represents a batch of data over which the filters</span>
+<span class="sd">        are convolved. Specifically, it must be a tensor of shape</span>
+<span class="sd">        :math:`(N, C, X_0, ...)`, where :math:`N` is the number of samples in the batch,</span>
+<span class="sd">        C is the channel-depth of each datum, and :math:`(X_0, ...)` are the</span>
+<span class="sd">        dimensions over which the filters are convolved. Accordingly,</span>
+<span class="sd">        each filter must have a channel depth of :math:`C`.</span>
+
+<span class="sd">        Thus convolving :math:`F` filters, each with a shape :math:`(C, W_0, ...)`,</span>
+<span class="sd">        over the data batch will produce a tensor of shape</span>
+<span class="sd">        :math:`(N, F, G_0, ...)`, where :math:`(G_0, ...)` is the shape of the grid</span>
+<span class="sd">        commensurate with the filter placements</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : Union[Tensor, array_like], shape=(N, C, Xo, ...)</span>
+<span class="sd">            The data batch to be convolved over.</span>
+
+<span class="sd">        filter_bank : Union[Tensor, array_like], shape=(F, C, Wo, ...)</span>
+<span class="sd">            The filters used to perform the convolutions.</span>
+
+<span class="sd">        stride : Union[int, Tuple[int, ...]]</span>
+<span class="sd">            (keyword-only argument) The step-size with which each </span>
+<span class="sd">            filter is placed along the H and W axes during the </span>
+<span class="sd">            convolution. The tuple indicates (stride-0, ...). If a </span>
+<span class="sd">            single integer is provided, this stride is used for all </span>
+<span class="sd">            convolved dimensions</span>
+
+<span class="sd">        padding : Union[int, Tuple[int, ...]]</span>
+<span class="sd">            (keyword-only argument) The number of zeros to be padded </span>
+<span class="sd">            to both ends of each convolved dimension, respectively. </span>
+<span class="sd">            If a single integer is provided, this padding is used for </span>
+<span class="sd">            all of the convolved axes</span>
+
+<span class="sd">        dilation : Union[int, Tuple[int, ...]], optional (default=1)</span>
+<span class="sd">            (keyword-only argument) The spacing used when placing kernel </span>
+<span class="sd">            elements along the data. E.g. for a 1D convolution the ith </span>
+<span class="sd">            placement of the kernel multiplied  against the dilated-window: </span>
+<span class="sd">            ``x[:, :, i*s:(i*s + w*d):d]``, where ``s`` is</span>
+<span class="sd">            the stride, ``w`` is the kernel-size, and ``d`` is the dilation factor.</span>
+
+<span class="sd">            If a single integer is provided, that dilation value is used for all</span>
+<span class="sd">            of the convolved axes</span>
+
+<span class="sd">        constant : bool, optional (default=False)</span>
+<span class="sd">            If True, the resulting Tensor is a constant.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tensor, shape=(N, F, G0, ...)</span>
+<span class="sd">            The result of each filter being convolved over each datum in</span>
+<span class="sd">            the batch.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">         - The filters are *not* flipped by this operation, meaning that</span>
+<span class="sd">           an auto-correlation is being performed rather than a true convolution.</span>
+
+<span class="sd">         - Only &#39;valid&#39; filter placements are permitted - where the filters overlap</span>
+<span class="sd">           completely with the (padded) data.</span>
+
+<span class="sd">         - This is a &quot;scalar-only&quot; operation, meaning that back propagation through</span>
+<span class="sd">           this layer assumes that a scalar (i.e. a 0-dimensional tensor) will invoke</span>
+<span class="sd">           ``tensor.backward()`` for the computational graph. This is standard for a</span>
+<span class="sd">           neural network, which terminates in a scalar loss.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        Here we perform a 1D convolution of a constant-valued kernel, ``k``, with a</span>
+<span class="sd">        &#39;square-wave&#39; signal, ``x``, using stride-1. Note that because we are constrained</span>
+<span class="sd">        to doing deep learning-style convolutions, that we prepend the dimensions</span>
+<span class="sd">        :math:`(N=1, C=1)` to ``x``, and :math:`(F=1, C=1)` and to ``k``. That is,</span>
+<span class="sd">        we are performing a convolution on one, single-channeled signal using</span>
+<span class="sd">        one kernel.</span>
+
+<span class="sd">        See that this convolution produces the expected triangle-shaped</span>
+<span class="sd">        response. The shape of the resulting tensor is :math:`(N=1, F=1, G_0=12)`.</span>
+<span class="sd">        That is, the length-5 kernel can be placed in 12 valid positions, using a</span>
+<span class="sd">        stride of 1.</span>
+
+<span class="sd">        &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">        &gt;&gt;&gt; from mygrad.nnet import conv_nd</span>
+<span class="sd">        &gt;&gt;&gt; x = mg.zeros((1, 1, 16))  # a square-wave signal</span>
+<span class="sd">        &gt;&gt;&gt; x[..., 5:11] = 1</span>
+<span class="sd">        &gt;&gt;&gt; k = mg.ones((1, 1, 5))    # a constant-valued kernel</span>
+<span class="sd">        &gt;&gt;&gt; conv_nd(x, k, stride=1)   # performing a stride-1, 1D convolution</span>
+<span class="sd">        Tensor([[[0., 1., 2., 3., 4., 5., 5., 4., 3., 2., 1., 0.]]], dtype=float32)</span>
+
+<span class="sd">        Back-propagating through the (summed) convolution:</span>
+
+<span class="sd">        &gt;&gt;&gt; conv_nd(x, k, stride=1).sum().backward()  # sum to a scalar to perform back-prop</span>
+<span class="sd">        &gt;&gt;&gt; x.grad  # d(summed_conv)/dx</span>
+<span class="sd">        array([[[1., 2., 3., 4., 5., 5., 5., 5., 5., 5., 5., 5., 4., 3., 2., 1.]]],</span>
+<span class="sd">              dtype=float32)</span>
+<span class="sd">        &gt;&gt;&gt; k.grad  # d(summed_conv)/dk</span>
+<span class="sd">        array([[[6., 6., 6., 6., 6.]]])</span>
+
+<span class="sd">        Now, let&#39;s demonstrate a more typical usage for ``conv_nd`` in the context of</span>
+<span class="sd">        neural networks. ``x`` will represent 10, 32x32 RGB images, and we will use</span>
+<span class="sd">        5 distinct 2x2 kernels to convolve over each of these images . Note that</span>
+<span class="sd">        each kernel must possess 3-channel - one for each RGB channel.</span>
+
+<span class="sd">        That is, we will be performing NxF channel-wise 2D convolutions. Supposing</span>
+<span class="sd">        that we don&#39;t want the kernel placements to overlap, we can use a stride of 2. In</span>
+<span class="sd">        total, this will produce a shape-:math:`(N=10, F=5, G_0=16, G_1=16)` tensor as a</span>
+<span class="sd">        result.</span>
+
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; x = mg.Tensor(np.random.rand(10, 3, 32, 32))  # creating 10 random 32x32 RGB images</span>
+<span class="sd">        &gt;&gt;&gt; k = mg.Tensor(np.random.rand(5, 3, 2, 2))     # creating 5 random 3-channel 2x2 kernels</span>
+
+<span class="sd">        Given the shapes of ``x`` and ``k``, ``conv_nd`` automatically executes a 2D convolution:</span>
+
+<span class="sd">        &gt;&gt;&gt; conv_nd(x, k, stride=2).shape</span>
+<span class="sd">        (10, 5, 16, 16)</span>
+
+<span class="sd">        Extrapolating further, ``conv_nd`` is capable of performing ND convolutions!</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">ConvND</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">filter_bank</span><span class="p">,</span> <span class="n">op_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">stride</span><span class="o">=</span><span class="n">stride</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="n">padding</span><span class="p">,</span> <span class="n">dilation</span><span class="o">=</span><span class="n">dilation</span><span class="p">),</span>
+                      <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Ryan Soklaski
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

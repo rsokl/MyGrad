@@ -1,0 +1,300 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>mygrad.nnet.sigmoid &mdash; MyGrad 0+unknown documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="mygrad.nnet.relu" href="mygrad.nnet.relu.html" />
+    <link rel="prev" title="mygrad.nnet.tanh" href="mygrad.nnet.tanh.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> MyGrad
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0+unknown
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installing MyGrad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introducing MyGrad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tensor.html">MyGrad’s Tensor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../operation.html">MyGrad’s Operation Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tensor_creation.html">Tensor creation routines (<code class="docutils literal notranslate"><span class="pre">mygrad.tensor_creation</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tensor_manipulation.html">Tensor manipulation routines (<code class="docutils literal notranslate"><span class="pre">mygrad.tensor_manip</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../linalg.html">Linear algebra (<code class="docutils literal notranslate"><span class="pre">mygrad.linalg</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../math.html">Mathematical functions (<code class="docutils literal notranslate"><span class="pre">mygrad.math</span></code>)</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../nnet.html">Neural network operations (<code class="docutils literal notranslate"><span class="pre">mygrad.nnet</span></code>)</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../nnet.html#layer-operations">Layer operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../nnet.html#losses">Losses</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../nnet.html#activations">Activations</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="mygrad.nnet.tanh.html">mygrad.nnet.tanh</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">mygrad.nnet.sigmoid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mygrad.nnet.relu.html">mygrad.nnet.relu</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mygrad.nnet.softmax.html">mygrad.nnet.softmax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mygrad.nnet.logsoftmax.html">mygrad.nnet.logsoftmax</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../nnet.html#sliding-window-view-utility">Sliding Window View Utility</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../graph_viz.html">Computational graph visualization(<code class="docutils literal notranslate"><span class="pre">mygrad.computational_graph</span></code>)</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MyGrad</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../nnet.html">Neural network operations (<code class="docutils literal notranslate"><span class="pre">mygrad.nnet</span></code>)</a> &raquo;</li>
+        
+      <li>mygrad.nnet.sigmoid</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/generated/mygrad.nnet.sigmoid.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="mygrad-nnet-sigmoid">
+<h1>mygrad.nnet.sigmoid<a class="headerlink" href="#mygrad-nnet-sigmoid" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="mygrad.nnet.sigmoid">
+<code class="descclassname">mygrad.nnet.</code><code class="descname">sigmoid</code><span class="sig-paren">(</span><em>x</em>, <em>constant=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mygrad/nnet/activations.html#sigmoid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mygrad.nnet.sigmoid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies the sigmoid activation function:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">))</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array_like</span></dt>
+<dd><p class="first last">sigmoid is applied element-wise on <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p>
+</dd>
+<dt><strong>constant</strong> <span class="classifier-delimiter">:</span> <span class="classifier">bool, optional(default=False)</span></dt>
+<dd><p class="first last">If <code class="docutils literal notranslate"><span class="pre">True</span></code>, the returned tensor is a constant (it
+does not back-propagate a gradient)</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>mygrad.Tensor</strong></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">mygrad</span> <span class="k">as</span> <span class="nn">mg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mygrad.nnet</span> <span class="k">import</span> <span class="n">sigmoid</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="go">Tensor([0.00669285, 0.02005754, 0.0585369 , 0.1588691 , 0.36457644,</span>
+<span class="go">    0.63542356, 0.8411309 , 0.9414631 , 0.97994246, 0.99330715])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="mygrad.nnet.relu.html" class="btn btn-neutral float-right" title="mygrad.nnet.relu" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="mygrad.nnet.tanh.html" class="btn btn-neutral" title="mygrad.nnet.tanh" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Ryan Soklaski
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,539 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>mygrad.nnet.losses &mdash; MyGrad 0+unknown documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/my_theme.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> MyGrad
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0+unknown
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installing MyGrad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introducing MyGrad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tensor.html">MyGrad’s Tensor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../operation.html">MyGrad’s Operation Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tensor_creation.html">Tensor creation routines (<code class="docutils literal notranslate"><span class="pre">mygrad.tensor_creation</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tensor_manipulation.html">Tensor manipulation routines (<code class="docutils literal notranslate"><span class="pre">mygrad.tensor_manip</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../linalg.html">Linear algebra (<code class="docutils literal notranslate"><span class="pre">mygrad.linalg</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../math.html">Mathematical functions (<code class="docutils literal notranslate"><span class="pre">mygrad.math</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../nnet.html">Neural network operations (<code class="docutils literal notranslate"><span class="pre">mygrad.nnet</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../graph_viz.html">Computational graph visualization(<code class="docutils literal notranslate"><span class="pre">mygrad.computational_graph</span></code>)</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MyGrad</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mygrad.nnet.losses</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mygrad.nnet.losses</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">mygrad.operation_base</span> <span class="k">import</span> <span class="n">Operation</span>
+<span class="kn">from</span> <span class="nn">mygrad.tensor_base</span> <span class="k">import</span> <span class="n">Tensor</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.misc</span> <span class="k">import</span> <span class="n">logsumexp</span>
+<span class="kn">from</span> <span class="nn">numbers</span> <span class="k">import</span> <span class="n">Real</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;multiclass_hinge&quot;</span><span class="p">,</span> <span class="s2">&quot;softmax_crossentropy&quot;</span><span class="p">,</span> <span class="s2">&quot;margin_ranking_loss&quot;</span><span class="p">]</span>
+
+
+<span class="k">class</span> <span class="nc">MulticlassHinge</span><span class="p">(</span><span class="n">Operation</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y_true</span><span class="p">,</span> <span class="n">hinge</span><span class="o">=</span><span class="mf">1.</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Computes the average multiclass hinge loss</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : mygrad.Tensor, shape=(N, C)</span>
+<span class="sd">            The C class scores for each of the N pieces of data.</span>
+
+<span class="sd">        y_true : numpy.ndarray, shape=(N,)</span>
+<span class="sd">            The correct class-index, in [0, C), for each datum.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        loss : mygrad.Tensor</span>
+<span class="sd">            The average multiclass hinge loss&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;`x` must be a 2D tensor, got </span><span class="si">{}</span><span class="s2">D&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">ndim</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">y_true</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;`y_true` must be a 1D tensor of integers, got </span><span class="si">{}</span><span class="s2">D&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">y_true</span><span class="o">.</span><span class="n">ndim</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="p">,)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">):</span>
+            <span class="n">y_true</span> <span class="o">=</span> <span class="n">y_true</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="n">scores</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">correct_labels</span> <span class="o">=</span> <span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y_true</span><span class="p">)),</span> <span class="n">y_true</span><span class="p">)</span>
+        <span class="n">correct_class_scores</span> <span class="o">=</span> <span class="n">scores</span><span class="p">[</span><span class="n">correct_labels</span><span class="p">]</span>  <span class="c1"># Nx1</span>
+
+        <span class="n">M</span> <span class="o">=</span> <span class="n">scores</span> <span class="o">-</span> <span class="n">correct_class_scores</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">+</span> <span class="n">hinge</span>  <span class="c1"># NxC margins</span>
+        <span class="n">not_thresh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">M</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">Lij</span> <span class="o">=</span> <span class="n">M</span>
+        <span class="n">Lij</span><span class="p">[</span><span class="n">not_thresh</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">Lij</span><span class="p">[</span><span class="n">correct_labels</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">TMP</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">TMP</span><span class="p">[</span><span class="n">not_thresh</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">TMP</span><span class="p">[</span><span class="n">correct_labels</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># NxC; 1 where margin &gt; 0</span>
+        <span class="n">TMP</span><span class="p">[</span><span class="n">correct_labels</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">TMP</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">back</span> <span class="o">=</span> <span class="n">TMP</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">back</span> <span class="o">/=</span> <span class="n">scores</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Lij</span><span class="p">)</span> <span class="o">/</span> <span class="n">scores</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">backward_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grad</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">grad</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">back</span>
+
+
+<div class="viewcode-block" id="multiclass_hinge"><a class="viewcode-back" href="../../../generated/mygrad.nnet.multiclass_hinge.html#mygrad.nnet.multiclass_hinge">[docs]</a><span class="k">def</span> <span class="nf">multiclass_hinge</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y_true</span><span class="p">,</span> <span class="n">hinge</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Computes the average multiclass hinge loss.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : array_like, shape=(N, K)</span>
+<span class="sd">        The K class scores for each of the N pieces of data.</span>
+
+<span class="sd">    y : array_like, shape=(N,)</span>
+<span class="sd">        The correct class-indices, in [0, K), for each datum.</span>
+
+<span class="sd">    hinge : float</span>
+<span class="sd">        The size of the &quot;hinge&quot; outside of which a nonzero loss</span>
+<span class="sd">        is incurred.</span>
+
+<span class="sd">    constant : bool, optional(default=False)</span>
+<span class="sd">        If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">        does not back-propagate a gradient)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    loss : mygrad.Tensor</span>
+<span class="sd">        The average (over N) multiclass hinge loss</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        Bad dimensionalities for ``x`` or ``y_true``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">MulticlassHinge</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">op_args</span><span class="o">=</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">hinge</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+
+
+<span class="k">class</span> <span class="nc">SoftmaxCrossEntropy</span><span class="p">(</span><span class="n">Operation</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Given the classification scores of C classes for N pieces of data,</span>
+<span class="sd">        computes the NxC softmax classification probabilities. The</span>
+<span class="sd">        cross entropy is then computed by using the true classification labels.</span>
+<span class="sd">        </span>
+<span class="sd">        log-softmax is used for improved numerical stability&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y_true</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : mygrad.Tensor, shape=(N, C)</span>
+<span class="sd">            The C class scores for each of the N pieces of data.</span>
+
+<span class="sd">        y_true : Sequence[int]</span>
+<span class="sd">            The correct class-indices, in [0, C), for each datum.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        loss : mygrad.Tensor</span>
+<span class="sd">            The average softmax loss</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            Bad dimensionalities for ``x`` or ``y_true``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;`x` must be a 2D tensor, got </span><span class="si">{}</span><span class="s2">D&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">ndim</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">y_true</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;`y_true` must be a 1D tensor of integers, got </span><span class="si">{}</span><span class="s2">D&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">y_true</span><span class="o">.</span><span class="n">ndim</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="p">,)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">):</span>
+            <span class="n">y_true</span> <span class="o">=</span> <span class="n">y_true</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="n">scores</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">log_softmax</span> <span class="o">=</span> <span class="n">scores</span> <span class="o">-</span> <span class="n">logsumexp</span><span class="p">(</span><span class="n">scores</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">label_locs</span> <span class="o">=</span> <span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">scores</span><span class="p">)),</span> <span class="n">y_true</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">log_softmax</span><span class="p">[</span><span class="n">label_locs</span><span class="p">])</span> <span class="o">/</span> <span class="n">scores</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">back</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_softmax</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">back</span><span class="p">[</span><span class="n">label_locs</span><span class="p">]</span> <span class="o">-=</span> <span class="mf">1.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">back</span> <span class="o">/=</span> <span class="n">scores</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">loss</span>
+
+    <span class="k">def</span> <span class="nf">backward_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grad</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">grad</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">back</span>
+
+
+<div class="viewcode-block" id="softmax_crossentropy"><a class="viewcode-back" href="../../../generated/mygrad.nnet.softmax_crossentropy.html#mygrad.nnet.softmax_crossentropy">[docs]</a><span class="k">def</span> <span class="nf">softmax_crossentropy</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y_true</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Given the classification scores of C classes for N pieces of data,</span>
+<span class="sd">    computes the NxC softmax classification probabilities. The</span>
+<span class="sd">    cross entropy is then computed by using the true classification labels</span>
+<span class="sd">    and is averaged over the N pieces of data.</span>
+
+<span class="sd">    log-softmax is used for improved numerical stability.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : array_like, shape=(N, C)</span>
+<span class="sd">        The C class scores for each of the N pieces of data.</span>
+
+<span class="sd">    y_true : array_like, shape=(N,)</span>
+<span class="sd">        The correct class-indices, in [0, C), for each datum.</span>
+
+<span class="sd">    constant : bool, optional(default=False)</span>
+<span class="sd">        If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">        does not back-propagate a gradient)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    loss : mygrad.Tensor</span>
+<span class="sd">        The average softmax loss</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        Bad dimensionalities for ``x`` or ``y_true``</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    - :math:`N` is the number of samples in the batch.</span>
+<span class="sd">    - :math:`C` is the number of possible classes for which scores are provided.</span>
+
+<span class="sd">    Given the shape-:math:`(N, C)` tensor of scores, ``x``, the softmax classification</span>
+<span class="sd">    probabilities are computed. That is, the score for class-:math:`k` of a given datum</span>
+<span class="sd">    (:math:`s_{k}`) is normalized using the &#39;softmax&#39; transformation:</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        p_{k} = \\frac{e^{s_k}}{\sum_{i=1}^{C}{e^{s_i}}}</span>
+
+<span class="sd">    This produces the &quot;prediction probability distribution&quot;, :math:`p`, for each datum.</span>
+<span class="sd">    The cross-entropy loss for that datum is then computed according to the true class-index</span>
+<span class="sd">    for that datum, as reported in ``y_true``. That is the &quot;true probability distribution&quot;,</span>
+<span class="sd">    :math:`t`, for the datum is :math:`1` for the correct class-index and :math:`0` elsewhere.</span>
+<span class="sd">    The cross-entropy loss for that datum is thus:</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">       l = - \sum_{k=1}^{C}{t_{k} \\log{p_{k}}}</span>
+
+<span class="sd">    Having computed each per-datum cross entropy loss, this function then returns the loss</span>
+<span class="sd">    averaged over all :math:`N` pieces of data:</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">       L = \\frac{1}{N}\sum_{i=1}^{N}{l_{i}}</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">    &gt;&gt;&gt; from mygrad.nnet import softmax_crossentropy</span>
+
+<span class="sd">    Let&#39;s take a simple case where N=1, and C=3. We&#39;ll thus make up classification</span>
+<span class="sd">    scores for a single datum. Suppose the scores are identical for the three classes</span>
+<span class="sd">    and that the true class is class-0:</span>
+
+<span class="sd">    &gt;&gt;&gt; x = mg.Tensor([[2., 2., 2.]])  # a shape-(1, 3) tensor of scores</span>
+<span class="sd">    &gt;&gt;&gt; y_true = mg.Tensor([0])  # the correct class for this datum is class-0</span>
+
+<span class="sd">    Because the scores are identical for all three classes, the softmax normalization</span>
+<span class="sd">    will simply produce :math:`p = [\\frac{1}{3}, \\frac{1}{3}, \\frac{1}{3}]`. Because</span>
+<span class="sd">    class-0 is the &quot;true&quot; class, :math:`t = [1., 0., 0.]`. Thus our softmax cross-entropy</span>
+<span class="sd">    loss should be:</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">      -(1 \\times \\log{\\frac{1}{3}} + 0 \\times \\log{\\frac{1}{3}} + 0 \\times \\log{\\frac{1}{3}})</span>
+<span class="sd">      = \\log(3) \\approx 1.099</span>
+
+<span class="sd">    Let&#39;s see that this is what ``softmax_crossentropy`` returns:</span>
+
+<span class="sd">    &gt;&gt;&gt; softmax_crossentropy(x, y_true)</span>
+<span class="sd">    Tensor(1.09861229)</span>
+
+<span class="sd">    Similarly, suppose a datum&#39;s scores are :math:`[0, 0, 10^6]`, then the softmax normalization</span>
+<span class="sd">    will return :math:`p \\approx [0., 0., 1.]`. If the true class for this datum is class-2, then</span>
+<span class="sd">    the loss should be nearly 0, since :math:`p` and :math:`t` are essentially identical:</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">      -(0 \\times \\log{0} + 0 \\times \\log{0} + 1 \\times \\log{1})</span>
+<span class="sd">      = -\\log(1) = 0</span>
+
+<span class="sd">    Now, let&#39;s construct ``x`` and ``y_true`` so that they incorporate the scores/labels for</span>
+<span class="sd">    both of the data that we have considered:</span>
+
+<span class="sd">    &gt;&gt;&gt; x = mg.Tensor([[2., 2.,  2.],  # a shape-(2, 3) tensor of scores</span>
+<span class="sd">    ...                [0., 0., 1E6]])</span>
+<span class="sd">    &gt;&gt;&gt; y_true = mg.Tensor([0, 2])     # the class IDs for the two data</span>
+
+<span class="sd">    ``softmax_crossentropy(x, y_true)`` will return the average loss of these two data,</span>
+<span class="sd">    :math:`\\frac{1}{2}(1.099 + 0) \\approx 0.55`:</span>
+
+<span class="sd">    &gt;&gt;&gt; softmax_crossentropy(x, y_true)</span>
+<span class="sd">    Tensor(0.54930614)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">SoftmaxCrossEntropy</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">op_args</span><span class="o">=</span><span class="p">(</span><span class="n">y_true</span><span class="p">,),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+
+
+<span class="k">class</span> <span class="nc">MarginRanking</span><span class="p">(</span><span class="n">Operation</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">margin</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes the margin ranking loss between ``x1``</span>
+<span class="sd">        and ``x2``.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x1 : mygrad.Tensor, shape=(N,) or (N, D)</span>
+<span class="sd">        x2 : mygrad.Tensor, shape=(N,) or (N, D)</span>
+<span class="sd">        y : numpy.ndarray</span>
+<span class="sd">        margin : float</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        numpy.ndarray, shape=()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">)</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="n">x1</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">x2</span> <span class="o">=</span> <span class="n">x2</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span>
+
+        <span class="n">M</span> <span class="o">=</span> <span class="n">margin</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">*</span> <span class="p">(</span><span class="n">x1</span> <span class="o">-</span> <span class="n">x2</span><span class="p">)</span>
+        <span class="n">not_thresh</span> <span class="o">=</span> <span class="n">M</span> <span class="o">&lt;=</span> <span class="mi">0</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">M</span>
+        <span class="n">loss</span><span class="p">[</span><span class="n">not_thresh</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_grad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_grad</span><span class="p">[</span><span class="n">not_thresh</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_grad</span> <span class="o">/=</span> <span class="n">M</span><span class="o">.</span><span class="n">size</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">backward_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grad</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">sign</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="k">if</span> <span class="n">index</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span>
+        <span class="k">return</span> <span class="n">grad</span> <span class="o">*</span> <span class="p">(</span><span class="n">sign</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grad</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="margin_ranking_loss"><a class="viewcode-back" href="../../../generated/mygrad.nnet.margin_ranking_loss.html#mygrad.nnet.margin_ranking_loss">[docs]</a><span class="k">def</span> <span class="nf">margin_ranking_loss</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">margin</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes the margin average margin ranking loss.</span>
+
+<span class="sd">    Equivalent to::</span>
+
+<span class="sd">    &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">    &gt;&gt;&gt; mg.mean(mg.maximum(0, margin - y * (x1 - x2)))</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x1 : array_like, shape=(N,) or (N, D)</span>
+<span class="sd">        A batch of scores or descriptors to compare against those in `x2`</span>
+
+<span class="sd">    x2 : array_like, shape=(N,) or (N, D)</span>
+<span class="sd">        A batch of scores or descriptors to compare against those in `x1`</span>
+
+<span class="sd">    y  : Union[int, array_like], scalar or shape=(N,)</span>
+<span class="sd">        1 or -1. Specifies whether the margin is compared against `(x1 - x2)`</span>
+<span class="sd">        or `(x2 - x1)`, for each of the N comparisons.</span>
+
+<span class="sd">    margin : float</span>
+<span class="sd">        A non-negative value to be used as the margin for the loss.</span>
+
+<span class="sd">    constant : bool, optional(default=False)</span>
+<span class="sd">        If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">        does not back-propagate a gradient)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    loss : mygrad.Tensor</span>
+<span class="sd">        The mean margin ranking loss.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">x1</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;`x1` must have shape (N,) or (N, D)&quot;</span>
+    <span class="k">assert</span> <span class="n">x1</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">x2</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s2">&quot;`x1` and `x2` must have the same shape&quot;</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">x1</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">),</span> <span class="s2">&quot;`x1` must contain floats&quot;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">margin</span><span class="p">,</span> <span class="n">Real</span><span class="p">)</span> <span class="ow">and</span> <span class="n">margin</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;`margin` must be a non-negative scalar&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">):</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">data</span>
+
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">y</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">x1</span><span class="p">)),</span> <span class="s2">&quot;`y` must be a scalar or shape-(N,) array of ones&quot;</span>
+    <span class="k">if</span> <span class="n">y</span><span class="o">.</span><span class="n">ndim</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">y</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">x1</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">MarginRanking</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">op_args</span><span class="o">=</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">margin</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Ryan Soklaski
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

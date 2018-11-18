@@ -1,0 +1,684 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>mygrad.nnet.layers.gru &mdash; MyGrad 0+unknown documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/my_theme.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+
+  
+  <script src="../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> MyGrad
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0+unknown
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../install.html">Installing MyGrad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro.html">Introducing MyGrad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tensor.html">MyGrad’s Tensor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../operation.html">MyGrad’s Operation Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tensor_creation.html">Tensor creation routines (<code class="docutils literal notranslate"><span class="pre">mygrad.tensor_creation</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tensor_manipulation.html">Tensor manipulation routines (<code class="docutils literal notranslate"><span class="pre">mygrad.tensor_manip</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../linalg.html">Linear algebra (<code class="docutils literal notranslate"><span class="pre">mygrad.linalg</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../math.html">Mathematical functions (<code class="docutils literal notranslate"><span class="pre">mygrad.math</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../nnet.html">Neural network operations (<code class="docutils literal notranslate"><span class="pre">mygrad.nnet</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../graph_viz.html">Computational graph visualization(<code class="docutils literal notranslate"><span class="pre">mygrad.computational_graph</span></code>)</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MyGrad</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mygrad.nnet.layers.gru</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mygrad.nnet.layers.gru</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">mygrad.operation_base</span> <span class="k">import</span> <span class="n">Operation</span>
+<span class="kn">from</span> <span class="nn">mygrad.tensor_base</span> <span class="k">import</span> <span class="n">Tensor</span>
+<span class="kn">from</span> <span class="nn">numbers</span> <span class="k">import</span> <span class="n">Integral</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">numba</span> <span class="k">import</span> <span class="n">njit</span><span class="p">,</span> <span class="n">vectorize</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;The package `numba` must be installed in order to access the gru.&quot;</span><span class="p">)</span>
+
+
+<span class="nd">@vectorize</span><span class="p">([</span><span class="s1">&#39;int32(int32)&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;int64(int64)&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;float32(float32)&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;float64(float64)&#39;</span><span class="p">],</span> <span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">sig</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates a sigmoid function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">f</span><span class="p">))</span>
+
+
+<span class="nd">@vectorize</span><span class="p">([</span><span class="s1">&#39;int32(int32)&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;int64(int64)&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;float32(float32)&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;float64(float64)&#39;</span><span class="p">],</span> <span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">d_sig</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the derivative of a sigmoid function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">f</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">f</span><span class="p">)</span>
+
+
+<span class="nd">@vectorize</span><span class="p">([</span><span class="s1">&#39;int32(int32)&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;int64(int64)&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;float32(float32)&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;float64(float64)&#39;</span><span class="p">],</span> <span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">d_tanh</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the derivative of a tanh function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">f</span> <span class="o">**</span> <span class="mi">2</span>
+
+
+<span class="nd">@njit</span>
+<span class="k">def</span> <span class="nf">dot</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the dot product between 2 arrays</span>
+<span class="sd">    of shapes (W,X,Y) and (Y,Z), respectively</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">a</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">a</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">b</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)):</span>
+        <span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">b</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+
+<span class="nd">@njit</span>
+<span class="k">def</span> <span class="nf">_gru_layer</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">Wz</span><span class="p">,</span> <span class="n">Wr</span><span class="p">,</span> <span class="n">Wh</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Given:</span>
+<span class="sd">            S(t=0)</span>
+<span class="sd">            z = X(t) Uz + bz</span>
+<span class="sd">            r = X(t) Ur + br</span>
+<span class="sd">            h = X(t) Uh + bh</span>
+
+<span class="sd">        Compute Z(t), R(t), H(t), S(t) for all 1 &lt;= t &lt;= T</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        s : numpy.ndarray, shape=(T+1, N, D)</span>
+<span class="sd">            Modified in-place</span>
+<span class="sd">        z : numpy.ndarray, shape=(T, N, D)</span>
+<span class="sd">            Modified in-place</span>
+<span class="sd">        r : numpy.ndarray, shape=(T, N, D)</span>
+<span class="sd">            Modified in-place</span>
+<span class="sd">        h : numpy.ndarray, shape=(T, N, D)</span>
+<span class="sd">            Modified in-place</span>
+<span class="sd">        Wz : numpy.ndarray, shape=(D, D)</span>
+<span class="sd">        Wr : numpy.ndarray, shape=(D, D)</span>
+<span class="sd">        Wh : numpy.ndarray, shape=(D, D) &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">z</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="n">Wz</span><span class="p">)</span>
+        <span class="n">z</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">sig</span><span class="p">(</span><span class="n">z</span><span class="p">[</span><span class="n">n</span><span class="p">])</span>
+
+        <span class="n">r</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="n">Wr</span><span class="p">)</span>
+        <span class="n">r</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">sig</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">n</span><span class="p">])</span>
+
+        <span class="n">h</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">*</span> <span class="n">s</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="n">Wh</span><span class="p">)</span>
+        <span class="n">h</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="n">h</span><span class="p">[</span><span class="n">n</span><span class="p">])</span>
+
+        <span class="n">s</span><span class="p">[</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">z</span><span class="p">[</span><span class="n">n</span><span class="p">])</span> <span class="o">*</span> <span class="n">h</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">+</span> <span class="n">z</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">*</span> <span class="n">s</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+
+
+<span class="nd">@njit</span>
+<span class="k">def</span> <span class="nf">_gru_dLds</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">dLds</span><span class="p">,</span> <span class="n">Wz</span><span class="p">,</span> <span class="n">Wh</span><span class="p">,</span> <span class="n">Wr</span><span class="p">,</span> <span class="n">dz</span><span class="p">,</span> <span class="n">dh</span><span class="p">,</span> <span class="n">dr</span><span class="p">,</span> <span class="n">s_h</span><span class="p">,</span> <span class="n">one_z</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                        Z_{t} = sigmoid(Uz X_{t} + Wz S_{t-1} + bz)</span>
+<span class="sd">                        R_{t} = sigmoid(Ur X_{t} + Wr S_{t-1} + br)</span>
+<span class="sd">                        H_{t} = tanh(Uh X_{t} + Wh (R{t} * S_{t-1}) + bh)</span>
+<span class="sd">                        S_{t} = (1 - Z{t}) * H{t} + Z{t} * S_{t-1}</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+
+<span class="sd">        dL / ds(t) =   partial dL / ds(t+1) * ds(t+1) / ds(t)</span>
+<span class="sd">                     + partial dL / ds(t+1) * ds(t+1) / dz(t) * dz(t) / ds(t)</span>
+<span class="sd">                     + partial dL / ds(t+1) * ds(t+1) / dh(t) * dh(t) / ds(t)</span>
+<span class="sd">                     + partial dL / ds(t+1) * ds(t+1) / dh(t) * dh(t) / dr(t) * dr(t) / ds(t)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dLdh</span> <span class="o">=</span> <span class="n">dot</span><span class="p">(</span><span class="n">dLds</span> <span class="o">*</span> <span class="n">one_z</span> <span class="o">*</span> <span class="n">dh</span><span class="p">,</span> <span class="n">Wh</span><span class="p">)</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="n">z</span> <span class="o">*</span> <span class="n">dLds</span>
+    <span class="n">out</span> <span class="o">+=</span> <span class="n">dot</span><span class="p">(</span><span class="n">dLds</span> <span class="o">*</span> <span class="n">s_h</span> <span class="o">*</span> <span class="n">dz</span><span class="p">,</span> <span class="n">Wz</span><span class="p">)</span>
+    <span class="n">out</span> <span class="o">+=</span> <span class="n">dLdh</span> <span class="o">*</span> <span class="n">r</span>
+    <span class="n">out</span> <span class="o">+=</span> <span class="n">dot</span><span class="p">(</span><span class="n">dLdh</span> <span class="o">*</span> <span class="n">s</span> <span class="o">*</span> <span class="n">dr</span><span class="p">,</span> <span class="n">Wr</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">out</span>
+
+
+<span class="nd">@njit</span>
+<span class="k">def</span> <span class="nf">_gru_bptt</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">dLds</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">Wz</span><span class="p">,</span> <span class="n">Wh</span><span class="p">,</span> <span class="n">Wr</span><span class="p">,</span> <span class="n">dz</span><span class="p">,</span> <span class="n">dh</span><span class="p">,</span> <span class="n">dr</span><span class="p">,</span> <span class="n">s_h</span><span class="p">,</span> <span class="n">one_z</span><span class="p">,</span> <span class="n">bp_lim</span><span class="p">,</span> <span class="n">old_dLds</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">Wz</span><span class="p">,</span> <span class="n">Wh</span><span class="p">,</span> <span class="n">Wr</span> <span class="o">=</span> <span class="n">Wz</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">Wh</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">Wr</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">bptt</span> <span class="o">=</span> <span class="n">bp_lim</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">bptt</span><span class="p">:</span>
+        <span class="n">old_dLds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">dLds</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">bp_lim</span><span class="p">):</span>
+        <span class="c1">#  dL(t) / ds(t) + dL(t+1) / ds(t)</span>
+        <span class="k">if</span> <span class="n">bptt</span><span class="p">:</span>
+            <span class="n">source_index</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">dLds</span><span class="p">)</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span>
+            <span class="n">target_index</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">dLds</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">dt</span> <span class="o">=</span> <span class="n">dLds</span><span class="p">[</span><span class="n">source_index</span><span class="p">]</span> <span class="o">-</span> <span class="n">old_dLds</span><span class="p">[</span><span class="n">source_index</span><span class="p">]</span>
+            <span class="n">old_dLds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">dLds</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># no backprop truncation</span>
+            <span class="n">source_index</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dLds</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">dLds</span><span class="p">)</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span>
+            <span class="n">target_index</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dLds</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">dLds</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">dt</span> <span class="o">=</span> <span class="n">dLds</span><span class="p">[</span><span class="n">source_index</span><span class="p">]</span>
+
+        <span class="n">dLds</span><span class="p">[</span><span class="n">target_index</span><span class="p">]</span> <span class="o">+=</span> <span class="n">_gru_dLds</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">source_index</span><span class="p">],</span>
+                                        <span class="n">z</span><span class="p">[</span><span class="n">source_index</span><span class="p">],</span>
+                                        <span class="n">r</span><span class="p">[</span><span class="n">source_index</span><span class="p">],</span>
+                                        <span class="n">dt</span><span class="p">,</span>
+                                        <span class="n">Wz</span><span class="p">,</span>
+                                        <span class="n">Wh</span><span class="p">,</span>
+                                        <span class="n">Wr</span><span class="p">,</span>
+                                        <span class="n">dz</span><span class="p">[</span><span class="n">source_index</span><span class="p">],</span>
+                                        <span class="n">dh</span><span class="p">[</span><span class="n">source_index</span><span class="p">],</span>
+                                        <span class="n">dr</span><span class="p">[</span><span class="n">source_index</span><span class="p">],</span>
+                                        <span class="n">s_h</span><span class="p">[</span><span class="n">source_index</span><span class="p">],</span>
+                                        <span class="n">one_z</span><span class="p">[</span><span class="n">source_index</span><span class="p">])</span>
+
+
+<span class="k">def</span> <span class="nf">_backprop</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">grad</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">var</span><span class="o">.</span><span class="n">constant</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">grad</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">grad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">grad</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">grad</span> <span class="o">+=</span> <span class="n">grad</span>
+
+
+<span class="k">class</span> <span class="nc">GRUnit</span><span class="p">(</span><span class="n">Operation</span><span class="p">):</span>
+    <span class="n">scalar_only</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Uz</span><span class="p">,</span> <span class="n">Wz</span><span class="p">,</span> <span class="n">bz</span><span class="p">,</span> <span class="n">Ur</span><span class="p">,</span> <span class="n">Wr</span><span class="p">,</span> <span class="n">br</span><span class="p">,</span> <span class="n">Uh</span><span class="p">,</span> <span class="n">Wh</span><span class="p">,</span> <span class="n">bh</span><span class="p">,</span> <span class="n">s0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bp_lim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="mf">0.</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">bp_lim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bp_lim</span><span class="p">,</span> <span class="n">Integral</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">bp_lim</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="mf">0.</span> <span class="o">&lt;=</span> <span class="n">dropout</span> <span class="o">&lt;</span> <span class="mf">1.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dropout</span> <span class="o">=</span> <span class="n">dropout</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bp_lim</span> <span class="o">=</span> <span class="n">bp_lim</span> <span class="k">if</span> <span class="n">bp_lim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">X</span>    <span class="c1"># type: Tensor  # shape=(T, N, C)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">Uz</span> <span class="o">=</span> <span class="n">Uz</span>  <span class="c1"># type: Tensor  # shape=(C, D)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Wz</span> <span class="o">=</span> <span class="n">Wz</span>  <span class="c1"># type: Tensor  # shape=(D, D)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bz</span> <span class="o">=</span> <span class="n">bz</span>  <span class="c1"># type: Tensor  # shape=(D,)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">Ur</span> <span class="o">=</span> <span class="n">Ur</span>  <span class="c1"># type: Tensor  # shape=(C, D)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Wr</span> <span class="o">=</span> <span class="n">Wr</span>  <span class="c1"># type: Tensor  # shape=(D, D)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">br</span> <span class="o">=</span> <span class="n">br</span>  <span class="c1"># type: Tensor  # shape=(D,)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">Uh</span> <span class="o">=</span> <span class="n">Uh</span>  <span class="c1"># type: Tensor  # shape=(C, D)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Wh</span> <span class="o">=</span> <span class="n">Wh</span>  <span class="c1"># type: Tensor  # shape=(D, D)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bh</span> <span class="o">=</span> <span class="n">bh</span>  <span class="c1"># type: Tensor  # shape=(D,)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span>
+                          <span class="bp">self</span><span class="o">.</span><span class="n">Uz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bz</span><span class="p">,</span>
+                          <span class="bp">self</span><span class="o">.</span><span class="n">Ur</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">br</span><span class="p">,</span>
+                          <span class="bp">self</span><span class="o">.</span><span class="n">Uh</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wh</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bh</span><span class="p">)</span>
+        <span class="n">T</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">C</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">D</span><span class="p">,</span> <span class="o">=</span> <span class="n">bz</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="n">seq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="c1"># t starts at 0 for S; all other sequences begin at t = 1</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">T</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">D</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">s0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">s0</span><span class="o">.</span><span class="n">data</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s0</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">)</span> <span class="k">else</span> <span class="n">s0</span>
+
+        <span class="c1"># compute all contributions to Z, R, H from the input sequence</span>
+        <span class="c1"># shape: T, N, D</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Uz</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="p">[[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ur</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="p">[[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Uh</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="p">[[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+
+        <span class="k">if</span> <span class="n">dropout</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">dropout</span>
+            <span class="c1"># For Uz/Ur/Uh: a dropout mask is generated for each datum and is applied uniformly across T</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dropUz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropUr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropUh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">binomial</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">D</span><span class="p">))</span> <span class="o">/</span> <span class="n">p</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dropWz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropWr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropWh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">binomial</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">D</span><span class="p">))</span> <span class="o">/</span> <span class="n">p</span>
+
+            <span class="n">z</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropUz</span>
+            <span class="n">r</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropUr</span>
+            <span class="n">h</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropUh</span>
+
+            <span class="n">Wz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropWz</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wz</span><span class="o">.</span><span class="n">data</span>
+            <span class="n">Wr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropWr</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wr</span><span class="o">.</span><span class="n">data</span>
+            <span class="n">Wh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropWh</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wh</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dropUz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropUr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropUh</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dropWz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropWr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropWh</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+            <span class="n">Wz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wz</span><span class="o">.</span><span class="n">data</span>
+            <span class="n">Wr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wr</span><span class="o">.</span><span class="n">data</span>
+            <span class="n">Wh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wh</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="n">z</span> <span class="o">+=</span> <span class="n">bz</span><span class="o">.</span><span class="n">data</span>  <span class="c1"># X Uz + bz</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="n">br</span><span class="o">.</span><span class="n">data</span>  <span class="c1"># X Ur + br</span>
+        <span class="n">h</span> <span class="o">+=</span> <span class="n">bh</span><span class="o">.</span><span class="n">data</span>  <span class="c1"># X Uh + bh</span>
+
+        <span class="n">_gru_layer</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">Wz</span><span class="p">,</span> <span class="n">Wr</span><span class="p">,</span> <span class="n">Wh</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_seq</span> <span class="o">=</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">_creator</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_z</span> <span class="o">=</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">_creator</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_r</span> <span class="o">=</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">_creator</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_h</span> <span class="o">=</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">_creator</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_seq</span>
+
+    <span class="k">def</span> <span class="nf">backward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grad</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">constant</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">Uz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bz</span><span class="p">,</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">Ur</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">br</span><span class="p">,</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">Uh</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wh</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bh</span><span class="p">]):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_seq</span><span class="o">.</span><span class="n">data</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_z</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_h</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="n">dLds</span> <span class="o">=</span> <span class="n">grad</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+        <span class="n">const</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;1 - h**2&quot;</span><span class="p">:</span> <span class="n">d_tanh</span><span class="p">(</span><span class="n">h</span><span class="p">),</span>
+                 <span class="s2">&quot;z*(1 - z)&quot;</span><span class="p">:</span> <span class="n">d_sig</span><span class="p">(</span><span class="n">z</span><span class="p">),</span>
+                 <span class="s2">&quot;r*(1 - r)&quot;</span><span class="p">:</span> <span class="n">d_sig</span><span class="p">(</span><span class="n">r</span><span class="p">)}</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropout</span><span class="p">:</span>
+            <span class="n">Wz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropWz</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wz</span><span class="o">.</span><span class="n">data</span>
+            <span class="n">Wr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropWr</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wr</span><span class="o">.</span><span class="n">data</span>
+            <span class="n">Wh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropWh</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wh</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">Wz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wz</span><span class="o">.</span><span class="n">data</span>
+            <span class="n">Wr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wr</span><span class="o">.</span><span class="n">data</span>
+            <span class="n">Wh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wh</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="n">const</span><span class="p">[</span><span class="s2">&quot;s - h&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span> <span class="o">-</span> <span class="n">h</span>
+        <span class="n">const</span><span class="p">[</span><span class="s2">&quot;1 - z&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">z</span>
+
+        <span class="n">_gru_bptt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">dLds</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span>
+                  <span class="n">Wz</span><span class="p">,</span>
+                  <span class="n">Wh</span><span class="p">,</span>
+                  <span class="n">Wr</span><span class="p">,</span>
+                  <span class="n">const</span><span class="p">[</span><span class="s2">&quot;z*(1 - z)&quot;</span><span class="p">],</span>
+                  <span class="n">const</span><span class="p">[</span><span class="s2">&quot;1 - h**2&quot;</span><span class="p">],</span>
+                  <span class="n">const</span><span class="p">[</span><span class="s2">&quot;r*(1 - r)&quot;</span><span class="p">],</span>
+                  <span class="n">const</span><span class="p">[</span><span class="s2">&quot;s - h&quot;</span><span class="p">],</span>
+                  <span class="n">const</span><span class="p">[</span><span class="s2">&quot;1 - z&quot;</span><span class="p">],</span>
+                  <span class="bp">self</span><span class="o">.</span><span class="n">bp_lim</span><span class="p">)</span>
+
+        <span class="n">zgrad</span> <span class="o">=</span> <span class="n">dLds</span> <span class="o">*</span> <span class="n">const</span><span class="p">[</span><span class="s2">&quot;s - h&quot;</span><span class="p">]</span>   <span class="c1"># dL / dz</span>
+        <span class="n">hgrad</span> <span class="o">=</span> <span class="n">dLds</span> <span class="o">*</span> <span class="n">const</span><span class="p">[</span><span class="s2">&quot;1 - z&quot;</span><span class="p">]</span>   <span class="c1"># dL / dh</span>
+        <span class="n">rgrad</span> <span class="o">=</span> <span class="n">dot</span><span class="p">(</span><span class="n">const</span><span class="p">[</span><span class="s2">&quot;1 - h**2&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">hgrad</span><span class="p">,</span> <span class="n">Wh</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="o">*</span> <span class="n">s</span>  <span class="c1"># dL / dr</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_seq</span><span class="o">.</span><span class="n">grad</span> <span class="o">=</span> <span class="n">dLds</span>
+
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="ow">not</span> <span class="n">const</span> <span class="k">for</span> <span class="n">const</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Uz</span><span class="o">.</span><span class="n">constant</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wz</span><span class="o">.</span><span class="n">constant</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bz</span><span class="o">.</span><span class="n">constant</span><span class="p">)):</span>
+            <span class="n">dz</span> <span class="o">=</span> <span class="n">zgrad</span> <span class="o">*</span> <span class="n">const</span><span class="p">[</span><span class="s2">&quot;z*(1 - z)&quot;</span><span class="p">]</span>
+        <span class="c1"># backprop through Wz</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wz</span><span class="o">.</span><span class="n">constant</span><span class="p">:</span>
+            <span class="n">dWz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">dz</span><span class="p">,</span> <span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropout</span><span class="p">:</span>
+                <span class="n">dWz</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropWz</span>
+            <span class="n">_backprop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Wz</span><span class="p">,</span> <span class="n">dWz</span><span class="p">)</span>  <span class="c1"># self.Wz.backward(dWz, **kwargs)</span>
+        <span class="c1"># backprop through bz</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">bz</span><span class="o">.</span><span class="n">constant</span><span class="p">:</span>
+            <span class="n">_backprop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bz</span><span class="p">,</span> <span class="n">dz</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="c1"># backprop through bz</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">Uz</span><span class="o">.</span><span class="n">constant</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropout</span><span class="p">:</span>
+                <span class="n">dz</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropUz</span>  <span class="c1"># IMPORTANT augmented update: this must come after Wz and bz backprop</span>
+            <span class="n">_backprop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Uz</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">dz</span><span class="p">,</span> <span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])))</span>
+
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="ow">not</span> <span class="n">const</span> <span class="k">for</span> <span class="n">const</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Ur</span><span class="o">.</span><span class="n">constant</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wr</span><span class="o">.</span><span class="n">constant</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">br</span><span class="o">.</span><span class="n">constant</span><span class="p">)):</span>
+            <span class="n">dr</span> <span class="o">=</span> <span class="n">rgrad</span> <span class="o">*</span> <span class="n">const</span><span class="p">[</span><span class="s2">&quot;r*(1 - r)&quot;</span><span class="p">]</span>
+        <span class="c1"># backprop through Wr</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wr</span><span class="o">.</span><span class="n">constant</span><span class="p">:</span>
+            <span class="n">dWr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">dr</span><span class="p">,</span> <span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropout</span><span class="p">:</span>
+                <span class="n">dWr</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropWr</span>
+            <span class="n">_backprop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Wr</span><span class="p">,</span> <span class="n">dWr</span><span class="p">)</span>
+        <span class="c1"># backprop through br</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">br</span><span class="o">.</span><span class="n">constant</span><span class="p">:</span>
+            <span class="n">_backprop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">br</span><span class="p">,</span> <span class="n">dr</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>  <span class="c1"># self.br.backward(dr.sum(axis=(0, 1)), **kwargs)</span>
+        <span class="c1"># backprop through Ur</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ur</span><span class="o">.</span><span class="n">constant</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropout</span><span class="p">:</span>
+                <span class="n">dr</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropUr</span>  <span class="c1"># IMPORTANT augmented update: this must come after Wr and br backprop</span>
+            <span class="n">_backprop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Ur</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">dr</span><span class="p">,</span> <span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])))</span>
+
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="ow">not</span> <span class="n">const</span> <span class="k">for</span> <span class="n">const</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Uh</span><span class="o">.</span><span class="n">constant</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wh</span><span class="o">.</span><span class="n">constant</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bh</span><span class="o">.</span><span class="n">constant</span><span class="p">)):</span>
+            <span class="n">dh</span> <span class="o">=</span> <span class="n">hgrad</span> <span class="o">*</span> <span class="n">const</span><span class="p">[</span><span class="s2">&quot;1 - h**2&quot;</span><span class="p">]</span>
+        <span class="c1"># backprop through Wh</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wh</span><span class="o">.</span><span class="n">constant</span><span class="p">:</span>
+            <span class="n">dWh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">((</span><span class="n">s</span> <span class="o">*</span> <span class="n">r</span><span class="p">),</span> <span class="n">dh</span><span class="p">,</span> <span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropout</span><span class="p">:</span>
+                <span class="n">dWh</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropWh</span>
+            <span class="n">_backprop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Wh</span><span class="p">,</span> <span class="n">dWh</span><span class="p">)</span> <span class="c1"># self.Wh.backward(dWh, **kwargs)</span>
+        <span class="c1"># backprop through bh</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">bh</span><span class="o">.</span><span class="n">constant</span><span class="p">:</span>
+            <span class="n">_backprop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bh</span><span class="p">,</span> <span class="n">dh</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span> <span class="c1"># self.bh.backward(dh.sum(axis=(0, 1)), **kwargs)</span>
+        <span class="c1"># backprop through Uh</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">Uh</span><span class="o">.</span><span class="n">constant</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropout</span><span class="p">:</span>
+                <span class="n">dh</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropUh</span>  <span class="c1"># IMPORTANT augmented update: this must come after Wh and bh backprop</span>
+            <span class="n">_backprop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Uh</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">dh</span><span class="p">,</span> <span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])))</span>
+
+        <span class="c1"># backprop through X</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">constant</span><span class="p">:</span>
+            <span class="n">tmp</span> <span class="o">=</span> <span class="n">dLds</span> <span class="o">*</span> <span class="n">const</span><span class="p">[</span><span class="s2">&quot;1 - z&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">const</span><span class="p">[</span><span class="s2">&quot;1 - h**2&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropout</span><span class="p">:</span>
+                <span class="n">dLdX</span> <span class="o">=</span> <span class="n">dot</span><span class="p">((</span><span class="n">dLds</span> <span class="o">*</span> <span class="n">const</span><span class="p">[</span><span class="s2">&quot;s - h&quot;</span><span class="p">])</span> <span class="o">*</span> <span class="n">const</span><span class="p">[</span><span class="s2">&quot;z*(1 - z)&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">Uz</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+                <span class="n">dLdX</span> <span class="o">+=</span> <span class="n">dot</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Uh</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+                <span class="n">dLdX</span> <span class="o">+=</span> <span class="n">dot</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="n">Wh</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="o">*</span> <span class="n">s</span> <span class="o">*</span> <span class="n">const</span><span class="p">[</span><span class="s2">&quot;r*(1 - r)&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ur</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dLdX</span> <span class="o">=</span> <span class="n">dot</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_dropUz</span> <span class="o">*</span> <span class="p">(</span><span class="n">dLds</span> <span class="o">*</span> <span class="n">const</span><span class="p">[</span><span class="s2">&quot;s - h&quot;</span><span class="p">])</span> <span class="o">*</span> <span class="n">const</span><span class="p">[</span><span class="s2">&quot;z*(1 - z)&quot;</span><span class="p">]),</span> <span class="bp">self</span><span class="o">.</span><span class="n">Uz</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+                <span class="n">dLdX</span> <span class="o">+=</span> <span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dropUh</span> <span class="o">*</span> <span class="n">tmp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Uh</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+                <span class="n">dLdX</span> <span class="o">+=</span> <span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dropUr</span> <span class="o">*</span> <span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="n">Wh</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="o">*</span> <span class="n">s</span> <span class="o">*</span> <span class="n">const</span><span class="p">[</span><span class="s2">&quot;r*(1 - r)&quot;</span><span class="p">]),</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ur</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+            <span class="n">_backprop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="n">dLdX</span><span class="p">)</span>  <span class="c1"># self.X.backward(dLdX, **kwargs)</span>
+
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_z</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_h</span>
+
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span>
+                  <span class="bp">self</span><span class="o">.</span><span class="n">Uz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bz</span><span class="p">,</span>
+                  <span class="bp">self</span><span class="o">.</span><span class="n">Ur</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">br</span><span class="p">,</span>
+                  <span class="bp">self</span><span class="o">.</span><span class="n">Uh</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wh</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bh</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">x</span><span class="o">.</span><span class="n">constant</span><span class="p">:</span>
+                <span class="n">x</span><span class="o">.</span><span class="n">_accum_ops</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+                <span class="n">x</span><span class="o">.</span><span class="n">_backward</span><span class="p">(</span><span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="gru"><a class="viewcode-back" href="../../../../generated/mygrad.nnet.gru.html#mygrad.nnet.gru">[docs]</a><span class="k">def</span> <span class="nf">gru</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Uz</span><span class="p">,</span> <span class="n">Wz</span><span class="p">,</span> <span class="n">bz</span><span class="p">,</span> <span class="n">Ur</span><span class="p">,</span> <span class="n">Wr</span><span class="p">,</span> <span class="n">br</span><span class="p">,</span> <span class="n">Uh</span><span class="p">,</span> <span class="n">Wh</span><span class="p">,</span> <span class="n">bh</span><span class="p">,</span> <span class="n">s0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bp_lim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; Performs a forward pass of sequential data through a Gated Recurrent Unit layer, returning</span>
+<span class="sd">        the &#39;hidden-descriptors&#39; arrived at by utilizing the trainable parameters as follows::</span>
+
+<span class="sd">                    Z_{t} = sigmoid(X_{t} Uz + S_{t-1} Wz + bz)</span>
+<span class="sd">                    R_{t} = sigmoid(X_{t} Ur + S_{t-1} Wr + br)</span>
+<span class="sd">                    H_{t} =    tanh(X_{t} Uh + (R{t} * S_{t-1}) Wh + bh)</span>
+<span class="sd">                    S_{t} = (1 - Z{t}) * H{t} + Z{t} * S_{t-1}</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : array_like, shape=(T, N, C)</span>
+<span class="sd">           The sequential data to be passed forward.</span>
+
+<span class="sd">        Uz : array_like, shape=(C, D)</span>
+<span class="sd">           The weights used to map sequential data to its hidden-descriptor representation</span>
+
+<span class="sd">        Wz : array_like, shape=(D, D)</span>
+<span class="sd">            The weights used to map a hidden-descriptor to a hidden-descriptor.</span>
+
+<span class="sd">        bz : array_like, shape=(D,)</span>
+<span class="sd">           The biases used to scale a hidden-descriptor.</span>
+
+<span class="sd">        Ur : array_like, shape=(C, D)</span>
+<span class="sd">           The weights used to map sequential data to its hidden-descriptor representation</span>
+
+<span class="sd">        Wr : array_like, shape=(D, D)</span>
+<span class="sd">            The weights used to map a hidden-descriptor to a hidden-descriptor.</span>
+
+<span class="sd">        br : array_like, shape=(D,)</span>
+<span class="sd">           The biases used to scale a hidden-descriptor.</span>
+
+<span class="sd">        Uh : array_like, shape=(C, D)</span>
+<span class="sd">           The weights used to map sequential data to its hidden-descriptor representation</span>
+
+<span class="sd">        Wh : array_like, shape=(D, D)</span>
+<span class="sd">            The weights used to map a hidden-descriptor to a hidden-descriptor.</span>
+
+<span class="sd">        bh : array_like, shape=(D,)</span>
+<span class="sd">           The biases used to scale a hidden-descriptor.</span>
+
+<span class="sd">        s0 : Optional[array_like], shape=(N, D)</span>
+<span class="sd">            The &#39;seed&#39; hidden descriptors to feed into the RNN. If None, a Tensor</span>
+<span class="sd">            of zeros of shape (N, D) is created.</span>
+
+<span class="sd">        bp_lim : Optional[int]</span>
+<span class="sd">            The (non-zero) limit of the depth of back propagation through time to be</span>
+<span class="sd">            performed. If `None` back propagation is passed back through the entire sequence.</span>
+
+<span class="sd">            E.g. `bp_lim=3` will propagate gradients only up to 3 steps backward through the</span>
+<span class="sd">            recursive sequence.</span>
+
+<span class="sd">        dropout : float (default=0.), 0 &lt;= dropout &lt; 1</span>
+<span class="sd">            If non-zero, the dropout scheme described in [1]_ is applied. See Notes</span>
+<span class="sd">            for more details.</span>
+
+<span class="sd">        constant : bool, optional (default=False)</span>
+<span class="sd">            If True, the resulting Tensor is a constant.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        mygrad.Tensor, shape=(T+1, N, D)</span>
+<span class="sd">            The sequence of &#39;hidden-descriptors&#39; produced by the forward pass of the RNN.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        - :math:`T` : Sequence length</span>
+<span class="sd">        - :math:`N` : Batch size</span>
+<span class="sd">        - :math:`C` : Length of single datum</span>
+<span class="sd">        - :math:`D` : Length of &#39;hidden&#39; descriptor</span>
+
+<span class="sd">        The GRU system of equations is given by:</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">                    Z_{t} = \sigma (X_{t} U_z + S_{t-1} Wz + bz)</span>
+
+<span class="sd">                    R_{t} = \sigma (X_{t} U_r + S_{t-1} Wr + br)</span>
+
+<span class="sd">                    H_{t} =  tanh(X_{t} U_h + (R_{t} * S_{t-1}) W_h + b_h)</span>
+
+<span class="sd">                    S_{t} = (1 - Z_{t}) * H_{t} + Z_{t} * S_{t-1}</span>
+
+<span class="sd">        Following the dropout scheme specified in [1]_, the hidden-hidden weights (Wz/Wr/Wh)</span>
+<span class="sd">        randomly have their weights dropped prior to forward/back-prop. The input connections</span>
+<span class="sd">        (via Uz/Ur/Uh) have variational dropout ([2]_) applied to them with a common dropout</span>
+<span class="sd">        mask across all t. That is three static dropout masks, each with shape-(N,D), are</span>
+<span class="sd">        applied to</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">                                              X_{t} U_z</span>
+
+<span class="sd">                                              X_{t} U_r</span>
+
+<span class="sd">                                              X_{t} U_h</span>
+<span class="sd">        respectively, for all :math:`t`.</span>
+
+<span class="sd">        References</span>
+<span class="sd">        ----------</span>
+<span class="sd">        .. [1] S. Merity, et. al. &quot;Regularizing and Optimizing LSTM Language Models&quot;,</span>
+<span class="sd">               arXiv:1708.02182v1, 2017.</span>
+
+<span class="sd">        .. [2] Y. Gal, Z. Ghahramani &quot;A Theoretically Grounded Application of Dropout</span>
+<span class="sd">               in Recurrent Neural Networks&quot; arXiv:1512.05287v5, 2016. &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">s0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">s0</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">)</span> <span class="ow">and</span> <span class="n">s0</span><span class="o">.</span><span class="n">constant</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">GRUnit</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Uz</span><span class="p">,</span> <span class="n">Wz</span><span class="p">,</span> <span class="n">bz</span><span class="p">,</span> <span class="n">Ur</span><span class="p">,</span> <span class="n">Wr</span><span class="p">,</span> <span class="n">br</span><span class="p">,</span> <span class="n">Uh</span><span class="p">,</span> <span class="n">Wh</span><span class="p">,</span> <span class="n">bh</span><span class="p">,</span>
+                   <span class="n">op_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">s0</span><span class="o">=</span><span class="n">s0</span><span class="p">,</span> <span class="n">bp_lim</span><span class="o">=</span><span class="n">bp_lim</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">dropout</span><span class="p">),</span>
+                   <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">creator</span><span class="o">.</span><span class="n">_hidden_seq</span> <span class="o">=</span> <span class="n">s</span>
+    <span class="k">return</span> <span class="n">s</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Ryan Soklaski
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

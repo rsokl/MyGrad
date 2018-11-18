@@ -1,0 +1,569 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>mygrad.linalg.funcs &mdash; MyGrad 0+unknown documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/my_theme.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> MyGrad
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0+unknown
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installing MyGrad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introducing MyGrad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tensor.html">MyGrad’s Tensor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../operation.html">MyGrad’s Operation Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tensor_creation.html">Tensor creation routines (<code class="docutils literal notranslate"><span class="pre">mygrad.tensor_creation</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tensor_manipulation.html">Tensor manipulation routines (<code class="docutils literal notranslate"><span class="pre">mygrad.tensor_manip</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../linalg.html">Linear algebra (<code class="docutils literal notranslate"><span class="pre">mygrad.linalg</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../math.html">Mathematical functions (<code class="docutils literal notranslate"><span class="pre">mygrad.math</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../nnet.html">Neural network operations (<code class="docutils literal notranslate"><span class="pre">mygrad.nnet</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../graph_viz.html">Computational graph visualization(<code class="docutils literal notranslate"><span class="pre">mygrad.computational_graph</span></code>)</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MyGrad</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mygrad.linalg.funcs</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mygrad.linalg.funcs</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.ops</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">mygrad.tensor_base</span> <span class="k">import</span> <span class="n">Tensor</span>
+<span class="kn">from</span> <span class="nn">numpy.core.einsumfunc</span> <span class="k">import</span> <span class="n">_parse_einsum_input</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;matmul&quot;</span><span class="p">,</span> <span class="s2">&quot;einsum&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="matmul"><a class="viewcode-back" href="../../../generated/mygrad.matmul.html#mygrad.matmul">[docs]</a><span class="k">def</span> <span class="nf">matmul</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Matrix product of two tensors:</span>
+
+<span class="sd">    ``matmul(x, y)`` is equivalent to ``x @ y``.</span>
+
+<span class="sd">    This documentation was adapted from ``numpy.matmul``</span>
+
+<span class="sd">    The behavior depends on the arguments in the following way.</span>
+
+<span class="sd">    - If both arguments are 2-D they are multiplied like conventional</span>
+<span class="sd">      matrices.</span>
+<span class="sd">    - If either argument is N-D, N &gt; 2, it is treated as a stack of</span>
+<span class="sd">      matrices residing in the last two indexes and broadcast accordingly.</span>
+<span class="sd">    - If the first argument is 1-D, it is promoted to a matrix by</span>
+<span class="sd">      prepending a 1 to its dimensions. After matrix multiplication</span>
+<span class="sd">      the prepended 1 is removed.</span>
+<span class="sd">    - If the second argument is 1-D, it is promoted to a matrix by</span>
+<span class="sd">      appending a 1 to its dimensions. After matrix multiplication</span>
+<span class="sd">      the appended 1 is removed.</span>
+
+<span class="sd">    Multiplication by a scalar is not allowed, use ``*`` instead. Note that</span>
+<span class="sd">    multiplying a stack of matrices with a vector will result in a stack of</span>
+<span class="sd">    vectors, but matmul will not recognize it as such.</span>
+
+<span class="sd">    ``matmul`` differs from ``numpy.dot`` in two important ways.</span>
+
+<span class="sd">    - Multiplication by scalars is not allowed.</span>
+<span class="sd">    - Stacks of matrices are broadcast together as if the matrices</span>
+<span class="sd">      were elements.</span>
+
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a : array_like</span>
+<span class="sd">    </span>
+<span class="sd">    b : array_like</span>
+
+<span class="sd">    constant : bool, optional(default=False)</span>
+<span class="sd">        If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">        does not back-propagate a gradient)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    output : mygrad.Tensor</span>
+<span class="sd">        Returns the matrix product of `a` and `b`.  If `a` and `b` are both</span>
+<span class="sd">        1-D arrays then a scalar is returned; otherwise an array is</span>
+<span class="sd">        returned.</span>
+
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If the last dimension of `a` is not the same size as</span>
+<span class="sd">        the second-to-last dimension of `b`.</span>
+
+<span class="sd">        If scalar value is passed.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The matmul function implements the semantics of the `@` operator introduced</span>
+<span class="sd">    in Python 3.5 following PEP465.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    For two 2D tensors, ``matmul(a, b)`` is the matrix product :math:`\sum_{j}{A_{ij} B_{jk}} = F_{ik}`:</span>
+
+<span class="sd">    &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">    &gt;&gt;&gt; a = [[1, 0], [0, 1]]</span>
+<span class="sd">    &gt;&gt;&gt; b = [[4, 1], [2, 2]]</span>
+<span class="sd">    &gt;&gt;&gt; mg.matmul(a, b)</span>
+<span class="sd">    Tensor([[4, 1],</span>
+<span class="sd">            [2, 2]])</span>
+
+<span class="sd">    For 2-D mixed with 1-D, the result is the matrix-vector product, :math:`\sum_{j}{A_{ij} B_{j}} = F_{i}`:</span>
+
+<span class="sd">    &gt;&gt;&gt; a = [[1, 0], [0, 1]]</span>
+<span class="sd">    &gt;&gt;&gt; b = [1, 2]</span>
+<span class="sd">    &gt;&gt;&gt; mg.matmul(a, b)</span>
+<span class="sd">    Tensor([1, 2])</span>
+
+<span class="sd">    Broadcasting is conventional for stacks of arrays. Here ``a`` is treated</span>
+<span class="sd">    like a stack of three 5x6 matrices, and the 6x4 matrix ``b`` is broadcast</span>
+<span class="sd">    matrix-multiplied against each one. This produces a shape-(3, 5, 4) tensor</span>
+<span class="sd">    as a result.</span>
+
+<span class="sd">    &gt;&gt;&gt; a = mg.arange(3*5*6).reshape((3,5,6))</span>
+<span class="sd">    &gt;&gt;&gt; b = mg.arange(6*4).reshape((6,4))</span>
+<span class="sd">    &gt;&gt;&gt; mg.matmul(a,b).shape</span>
+<span class="sd">    (3, 5, 4)</span>
+
+<span class="sd">    Scalar multiplication raises an error.</span>
+
+<span class="sd">    &gt;&gt;&gt; mg.matmul(a, 3)</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">    ...</span>
+<span class="sd">    ValueError: Scalar operands are not allowed, use &#39;*&#39; instead&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">MatMul</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="einsum"><a class="viewcode-back" href="../../../generated/mygrad.einsum.html#mygrad.einsum">[docs]</a><span class="k">def</span> <span class="nf">einsum</span><span class="p">(</span><span class="o">*</span><span class="n">operands</span><span class="p">,</span> <span class="n">optimize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    einsum(subscripts, *operands)</span>
+
+<span class="sd">    Evaluates the Einstein summation convention on the operands. This implementation</span>
+<span class="sd">    exactly mirrors that of ``numpy.einsum`` and supports back-propagation through</span>
+<span class="sd">    all variety of tensor-products, sums, traces, and views that it can perform.</span>
+
+<span class="sd">    The following docstring was adapted from the documentation for ``numpy.einsum``</span>
+
+<span class="sd">    Using the Einstein summation convention, many common multi-dimensional</span>
+<span class="sd">    array operations can be represented in a simple fashion.  This function</span>
+<span class="sd">    provides a way to compute such summations. The best way to understand this</span>
+<span class="sd">    function is to try the examples below, which show how many common NumPy/MyGrad</span>
+<span class="sd">    functions can be implemented as calls to ``einsum``.</span>
+
+<span class="sd">    Back-propagation via ``einsum`` is optimized such that any tensor that occurs</span>
+<span class="sd">    redundantly within the summation will only have its gradient computed once.</span>
+<span class="sd">    This optimization accommodates all number and combination of redundancies that can</span>
+<span class="sd">    be encountered.</span>
+
+<span class="sd">    E.g. back-propping through ``einsum(&#39;...,...-&gt;&#39;, x, x)`` will only incur a single</span>
+<span class="sd">    computation/accumulation for ``x.grad`` rather than two. This permits users to</span>
+<span class="sd">    leverage the efficiency of sum-reduction, where ``(x ** 2).sum()`` is sub-optimal,</span>
+<span class="sd">    without being penalized during back-propagation.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    subscripts : str</span>
+<span class="sd">        Specifies the subscripts for summation.</span>
+
+<span class="sd">    operands : array_like</span>
+<span class="sd">        The tensors used in the summation.</span>
+
+<span class="sd">    optimize : {False, True, &#39;greedy&#39;, &#39;optimal&#39;}, optional (default=False)</span>
+<span class="sd">        Controls if intermediate optimization should occur; also enables</span>
+<span class="sd">        the use of BLAS where possible. This can produce significant speedups</span>
+<span class="sd">        for computations like matrix multiplication.</span>
+
+<span class="sd">        No optimization will occur if False and True will default to the &#39;greedy&#39;</span>
+<span class="sd">        algorithm. Also accepts an explicit contraction list from the</span>
+<span class="sd">        ``np.einsum_path`` function. See ``np.einsum_path`` for more details.</span>
+
+<span class="sd">    constant : bool, optional (default=False)</span>
+<span class="sd">        If True, the resulting Tensor is a constant.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    output : mygrad.Tensor</span>
+<span class="sd">        The calculation based on the Einstein summation convention.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The subscripts string is a comma-separated list of subscript labels,</span>
+<span class="sd">    where each label refers to a dimension of the corresponding operand.</span>
+<span class="sd">    Repeated subscripts labels in one operand take the diagonal.  For example,</span>
+<span class="sd">    ``einsum(&#39;ii&#39;, a)`` is equivalent to ``np.trace(a)`` (however, the former</span>
+<span class="sd">    supports back-propagation).</span>
+
+<span class="sd">    Whenever a label is repeated, it is summed, so ``einsum(&#39;i, i&#39;, a, b)``</span>
+<span class="sd">    is equivalent to ``np.inner(a, b)``.  If a label appears only once,</span>
+<span class="sd">    it is not summed, so ``einsum(&#39;i&#39;, a)`` produces a view of ``a``</span>
+<span class="sd">    with no changes.</span>
+
+<span class="sd">    The order of labels in the output is by default alphabetical.  This</span>
+<span class="sd">    means that ``np.einsum(&#39;ij&#39;, a)`` doesn&#39;t affect a 2D tensor, while</span>
+<span class="sd">    ``einsum(&#39;ji&#39;, a)`` takes its transpose.</span>
+
+<span class="sd">    The output can be controlled by specifying output subscript labels</span>
+<span class="sd">    as well.  This specifies the label order, and allows summing to</span>
+<span class="sd">    be disallowed or forced when desired.  The call ``einsum(&#39;i-&gt;&#39;, a)``</span>
+<span class="sd">    is like ``np.sum(a, axis=-1)``, and ``einsum(&#39;ii-&gt;i&#39;, a)``</span>
+<span class="sd">    is like ``np.diag(a)``.  The difference is that `einsum` does not</span>
+<span class="sd">    allow broadcasting by default.</span>
+
+<span class="sd">    To enable and control broadcasting, use an ellipsis.  Default</span>
+<span class="sd">    NumPy-style broadcasting is done by adding an ellipsis</span>
+<span class="sd">    to the left of each term, like ``einsum(&#39;...ii-&gt;...i&#39;, a)``.</span>
+<span class="sd">    To take the trace along the first and last axes,</span>
+<span class="sd">    you can do ``einsum(&#39;i...i&#39;, a)``, or to do a matrix-matrix</span>
+<span class="sd">    product with the left-most indices instead of rightmost, you can do</span>
+<span class="sd">    ``einsum(&#39;ij...,jk...-&gt;ik...&#39;, a, b)``.</span>
+
+<span class="sd">    When there is only one operand, no axes are summed, and no output</span>
+<span class="sd">    parameter is provided, a view into the operand is returned instead</span>
+<span class="sd">    of a new tensor.  Thus, taking the diagonal as ``einsum(&#39;ii-&gt;i&#39;, a)``</span>
+<span class="sd">    produces a view.</span>
+
+<span class="sd">    An alternative way to provide the subscripts and operands is as</span>
+<span class="sd">    ``einsum(op0, sublist0, op1, sublist1, ..., [sublistout])``. The examples</span>
+<span class="sd">    below have corresponding `einsum` calls with the two parameter methods.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; a = mg.arange(25).reshape(5,5)</span>
+<span class="sd">    &gt;&gt;&gt; b = mg.arange(5)</span>
+<span class="sd">    &gt;&gt;&gt; c = mg.arange(6).reshape(2,3)</span>
+
+<span class="sd">    Compute the trace of ``a``, :math:`\sum_{i}{A_{ii}} = f`:</span>
+
+<span class="sd">    &gt;&gt;&gt; einsum(&#39;ii&#39;, a)</span>
+<span class="sd">    Tensor(60)</span>
+<span class="sd">    &gt;&gt;&gt; einsum(a, [0, 0])</span>
+<span class="sd">    Tensor(60)</span>
+<span class="sd">    &gt;&gt;&gt; np.trace(a.data)</span>
+<span class="sd">    array(60)</span>
+
+<span class="sd">    Return a view along the diagonal of ``a``, :math:`A_{ii} = F_{i}`:</span>
+
+<span class="sd">    &gt;&gt;&gt; einsum(&#39;ii-&gt;i&#39;, a)</span>
+<span class="sd">    Tensor([ 0,  6, 12, 18, 24])</span>
+<span class="sd">    &gt;&gt;&gt; einsum(a, [0,0], [0])</span>
+<span class="sd">    Tensor([ 0,  6, 12, 18, 24])</span>
+<span class="sd">    &gt;&gt;&gt; np.diag(a.data)</span>
+<span class="sd">    array([ 0,  6, 12, 18, 24])</span>
+
+<span class="sd">    Compute the matrix-vector product of ``a`` with ``b``, :math:`\sum_{j}{A_{ij} B_{j}} = F_{i}`:</span>
+
+<span class="sd">    &gt;&gt;&gt; einsum(&#39;ij,j&#39;, a, b)</span>
+<span class="sd">    Tensor([ 30,  80, 130, 180, 230])</span>
+<span class="sd">    &gt;&gt;&gt; einsum(a, [0,1], b, [1])</span>
+<span class="sd">    Tensor([ 30,  80, 130, 180, 230])</span>
+<span class="sd">    &gt;&gt;&gt; mg.matmul(a, b)</span>
+<span class="sd">    Tensor([ 30,  80, 130, 180, 230])</span>
+<span class="sd">    &gt;&gt;&gt; einsum(&#39;...j,j&#39;, a, b)</span>
+<span class="sd">    Tensor([ 30,  80, 130, 180, 230])</span>
+
+<span class="sd">    Take the transpose of ``c``, :math:`C_{ji} = F_{ij}`:</span>
+
+<span class="sd">    &gt;&gt;&gt; einsum(&#39;ji&#39;, c)</span>
+<span class="sd">    Tensor([[0, 3],</span>
+<span class="sd">            [1, 4],</span>
+<span class="sd">            [2, 5]])</span>
+<span class="sd">    &gt;&gt;&gt; einsum(c, [1, 0])</span>
+<span class="sd">    Tensor([[0, 3],</span>
+<span class="sd">            [1, 4],</span>
+<span class="sd">            [2, 5]])</span>
+<span class="sd">    &gt;&gt;&gt; c.T</span>
+<span class="sd">    Tensor([[0, 3],</span>
+<span class="sd">            [1, 4],</span>
+<span class="sd">            [2, 5]])</span>
+
+<span class="sd">    Compute ``3 * c``:</span>
+
+<span class="sd">    &gt;&gt;&gt; einsum(&#39;..., ...&#39;, 3, c)</span>
+<span class="sd">    Tensor([[ 0,  3,  6],</span>
+<span class="sd">            [ 9, 12, 15]])</span>
+<span class="sd">    &gt;&gt;&gt; einsum(&#39;,ij&#39;, 3, c)</span>
+<span class="sd">    Tensor([[ 0,  3,  6],</span>
+<span class="sd">            [ 9, 12, 15]])</span>
+<span class="sd">    &gt;&gt;&gt; einsum(3, [Ellipsis], c, [Ellipsis])</span>
+<span class="sd">    Tensor([[ 0,  3,  6],</span>
+<span class="sd">            [ 9, 12, 15]])</span>
+<span class="sd">    &gt;&gt;&gt; 3 * c</span>
+<span class="sd">    Tensor([[ 0,  3,  6],</span>
+<span class="sd">            [ 9, 12, 15]])</span>
+
+<span class="sd">    Compute the inner product of ``b`` with itself, :math:`\sum_{i}{B_{i} B_{i}} = f`:</span>
+
+<span class="sd">    &gt;&gt;&gt; einsum(&#39;i,i&#39;, b, b)</span>
+<span class="sd">    Tensor(30)</span>
+<span class="sd">    &gt;&gt;&gt; einsum(b, [0], b, [0])</span>
+<span class="sd">    Tensor(30)</span>
+<span class="sd">    &gt;&gt;&gt; np.inner(b.data, b.data)</span>
+<span class="sd">    30</span>
+
+<span class="sd">    Compute the outer product of ``array([1, 2])`` with ``b``, :math:`A_{i}B_{j} = F_{ij}`:</span>
+
+<span class="sd">    &gt;&gt;&gt; einsum(&#39;i,j&#39;, np.arange(2)+1, b)</span>
+<span class="sd">    Tensor([[0, 1, 2, 3, 4],</span>
+<span class="sd">           [0, 2, 4, 6, 8]])</span>
+<span class="sd">    &gt;&gt;&gt; einsum(np.arange(2)+1, [0], b, [1])</span>
+<span class="sd">    Tensor([[0, 1, 2, 3, 4],</span>
+<span class="sd">           [0, 2, 4, 6, 8]])</span>
+<span class="sd">    &gt;&gt;&gt; np.outer(np.arange(2)+1, b)</span>
+<span class="sd">    array([[0, 1, 2, 3, 4],</span>
+<span class="sd">           [0, 2, 4, 6, 8]])</span>
+<span class="sd">    &gt;&gt;&gt; einsum(&#39;i...-&gt;...&#39;, a)</span>
+<span class="sd">    Tensor([50, 55, 60, 65, 70])</span>
+<span class="sd">    &gt;&gt;&gt; einsum(a, [0,Ellipsis], [Ellipsis])</span>
+<span class="sd">    Tensor([50, 55, 60, 65, 70])</span>
+<span class="sd">    &gt;&gt;&gt; np.sum(a, axis=0)</span>
+<span class="sd">    array([50, 55, 60, 65, 70])</span>
+
+<span class="sd">    Compute the tensor product :math:`\sum_{ij}{A_{ijk} B_{jil}} = F_{kl}`</span>
+
+<span class="sd">    &gt;&gt;&gt; a = mg.arange(60.).reshape(3,4,5)</span>
+<span class="sd">    &gt;&gt;&gt; b = mg.arange(24.).reshape(4,3,2)</span>
+<span class="sd">    &gt;&gt;&gt; einsum(&#39;ijk,jil-&gt;kl&#39;, a, b)</span>
+<span class="sd">    Tensor([[ 4400.,  4730.],</span>
+<span class="sd">            [ 4532.,  4874.],</span>
+<span class="sd">            [ 4664.,  5018.],</span>
+<span class="sd">            [ 4796.,  5162.],</span>
+<span class="sd">            [ 4928.,  5306.]])</span>
+<span class="sd">    &gt;&gt;&gt; einsum(a, [0,1,2], b, [1,0,3], [2,3])</span>
+<span class="sd">    Tensor([[ 4400.,  4730.],</span>
+<span class="sd">            [ 4532.,  4874.],</span>
+<span class="sd">            [ 4664.,  5018.],</span>
+<span class="sd">            [ 4796.,  5162.],</span>
+<span class="sd">            [ 4928.,  5306.]])</span>
+<span class="sd">    &gt;&gt;&gt; np.tensordot(a,b, axes=([1,0],[0,1]))</span>
+<span class="sd">    array([[ 4400.,  4730.],</span>
+<span class="sd">            [ 4532.,  4874.],</span>
+<span class="sd">            [ 4664.,  5018.],</span>
+<span class="sd">            [ 4796.,  5162.],</span>
+<span class="sd">            [ 4928.,  5306.]])</span>
+
+<span class="sd">    Matrix multiply ``a.T`` with ``b.T``, :math:`\sum_{k}{A_{ki} B_{jk}} = F_{ij}`</span>
+
+<span class="sd">    &gt;&gt;&gt; a = mg.arange(6).reshape((3,2))</span>
+<span class="sd">    &gt;&gt;&gt; b = mg.arange(12).reshape((4,3))</span>
+<span class="sd">    &gt;&gt;&gt; einsum(&#39;ki,jk-&gt;ij&#39;, a, b)</span>
+<span class="sd">    Tensor([[10, 28, 46, 64],</span>
+<span class="sd">            [13, 40, 67, 94]])</span>
+<span class="sd">    &gt;&gt;&gt; einsum(&#39;ki,...k-&gt;i...&#39;, a, b)</span>
+<span class="sd">    Tensor([[10, 28, 46, 64],</span>
+<span class="sd">            [13, 40, 67, 94]])</span>
+<span class="sd">    &gt;&gt;&gt; einsum(&#39;k...,jk&#39;, a, b)</span>
+<span class="sd">    Tensor([[10, 28, 46, 64],</span>
+<span class="sd">            [13, 40, 67, 94]])</span>
+
+<span class="sd">    Make an assignment to a view along the diagonal of ``a``:</span>
+
+<span class="sd">    &gt;&gt;&gt; a = mg.zeros((3, 3))</span>
+<span class="sd">    &gt;&gt;&gt; einsum(&#39;ii-&gt;i&#39;, a).data[:] = 1</span>
+<span class="sd">    &gt;&gt;&gt; a</span>
+<span class="sd">    Tensor([[ 1.,  0.,  0.],</span>
+<span class="sd">            [ 0.,  1.,  0.],</span>
+<span class="sd">            [ 0.,  0.,  1.]])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># TODO: normalize error handling for invalid inputs</span>
+    <span class="n">operands</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">operands</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">operands</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="c1"># operands form: &quot;ijk, ijk&quot;, x, y</span>
+        <span class="n">variables</span> <span class="o">=</span> <span class="n">operands</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">operands</span><span class="p">):</span>
+            <span class="n">operands</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">data</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">)</span> <span class="k">else</span> <span class="n">var</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">operands</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># operands form: op0, sublist0, op1, sublist1, ..., [sublistout]</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">operands</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span> <span class="k">else</span> <span class="kc">None</span>  <span class="c1"># -1 if sublistout is included</span>
+        <span class="n">variables</span> <span class="o">=</span> <span class="n">operands</span><span class="p">[:</span><span class="n">end</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">operands</span><span class="p">):</span>
+            <span class="n">operands</span><span class="p">[:</span><span class="n">end</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">data</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">)</span> <span class="k">else</span> <span class="n">var</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">operands</span><span class="p">[:</span><span class="n">end</span><span class="p">:</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="n">in_lbls</span><span class="p">,</span> <span class="n">out_lbls</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_parse_einsum_input</span><span class="p">(</span><span class="n">operands</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">EinSum</span><span class="p">,</span> <span class="o">*</span><span class="n">variables</span><span class="p">,</span> <span class="n">op_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">in_lbls</span><span class="o">=</span><span class="n">in_lbls</span><span class="p">,</span>
+                                                         <span class="n">out_lbls</span><span class="o">=</span><span class="n">out_lbls</span><span class="p">,</span>
+                                                         <span class="n">optimize</span><span class="o">=</span><span class="n">optimize</span><span class="p">),</span>
+                      <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Ryan Soklaski
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

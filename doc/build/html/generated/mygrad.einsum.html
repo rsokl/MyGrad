@@ -1,0 +1,482 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>mygrad.einsum &mdash; MyGrad 0+unknown documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Mathematical functions (mygrad.math)" href="../math.html" />
+    <link rel="prev" title="mygrad.matmul" href="mygrad.matmul.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> MyGrad
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0+unknown
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installing MyGrad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introducing MyGrad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tensor.html">MyGrad’s Tensor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../operation.html">MyGrad’s Operation Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tensor_creation.html">Tensor creation routines (<code class="docutils literal notranslate"><span class="pre">mygrad.tensor_creation</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tensor_manipulation.html">Tensor manipulation routines (<code class="docutils literal notranslate"><span class="pre">mygrad.tensor_manip</span></code>)</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../linalg.html">Linear algebra (<code class="docutils literal notranslate"><span class="pre">mygrad.linalg</span></code>)</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../linalg.html#matrix-and-vector-products">Matrix and vector products</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="mygrad.matmul.html">mygrad.matmul</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">mygrad.einsum</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../math.html">Mathematical functions (<code class="docutils literal notranslate"><span class="pre">mygrad.math</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nnet.html">Neural network operations (<code class="docutils literal notranslate"><span class="pre">mygrad.nnet</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../graph_viz.html">Computational graph visualization(<code class="docutils literal notranslate"><span class="pre">mygrad.computational_graph</span></code>)</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MyGrad</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../linalg.html">Linear algebra (<code class="docutils literal notranslate"><span class="pre">mygrad.linalg</span></code>)</a> &raquo;</li>
+        
+      <li>mygrad.einsum</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/generated/mygrad.einsum.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="mygrad-einsum">
+<h1>mygrad.einsum<a class="headerlink" href="#mygrad-einsum" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="mygrad.einsum">
+<code class="descclassname">mygrad.</code><code class="descname">einsum</code><span class="sig-paren">(</span><em>subscripts</em>, <em>*operands</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mygrad/linalg/funcs.html#einsum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mygrad.einsum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluates the Einstein summation convention on the operands. This implementation
+exactly mirrors that of <code class="docutils literal notranslate"><span class="pre">numpy.einsum</span></code> and supports back-propagation through
+all variety of tensor-products, sums, traces, and views that it can perform.</p>
+<p>The following docstring was adapted from the documentation for <code class="docutils literal notranslate"><span class="pre">numpy.einsum</span></code></p>
+<p>Using the Einstein summation convention, many common multi-dimensional
+array operations can be represented in a simple fashion.  This function
+provides a way to compute such summations. The best way to understand this
+function is to try the examples below, which show how many common NumPy/MyGrad
+functions can be implemented as calls to <code class="docutils literal notranslate"><span class="pre">einsum</span></code>.</p>
+<p>Back-propagation via <code class="docutils literal notranslate"><span class="pre">einsum</span></code> is optimized such that any tensor that occurs
+redundantly within the summation will only have its gradient computed once.
+This optimization accommodates all number and combination of redundancies that can
+be encountered.</p>
+<p>E.g. back-propping through <code class="docutils literal notranslate"><span class="pre">einsum('...,...-&gt;',</span> <span class="pre">x,</span> <span class="pre">x)</span></code> will only incur a single
+computation/accumulation for <code class="docutils literal notranslate"><span class="pre">x.grad</span></code> rather than two. This permits users to
+leverage the efficiency of sum-reduction, where <code class="docutils literal notranslate"><span class="pre">(x</span> <span class="pre">**</span> <span class="pre">2).sum()</span></code> is sub-optimal,
+without being penalized during back-propagation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>subscripts</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first last">Specifies the subscripts for summation.</p>
+</dd>
+<dt><strong>operands</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array_like</span></dt>
+<dd><p class="first last">The tensors used in the summation.</p>
+</dd>
+<dt><strong>optimize</strong> <span class="classifier-delimiter">:</span> <span class="classifier">{False, True, ‘greedy’, ‘optimal’}, optional (default=False)</span></dt>
+<dd><p class="first">Controls if intermediate optimization should occur; also enables
+the use of BLAS where possible. This can produce significant speedups
+for computations like matrix multiplication.</p>
+<p class="last">No optimization will occur if False and True will default to the ‘greedy’
+algorithm. Also accepts an explicit contraction list from the
+<code class="docutils literal notranslate"><span class="pre">np.einsum_path</span></code> function. See <code class="docutils literal notranslate"><span class="pre">np.einsum_path</span></code> for more details.</p>
+</dd>
+<dt><strong>constant</strong> <span class="classifier-delimiter">:</span> <span class="classifier">bool, optional (default=False)</span></dt>
+<dd><p class="first last">If True, the resulting Tensor is a constant.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>output</strong> <span class="classifier-delimiter">:</span> <span class="classifier">mygrad.Tensor</span></dt>
+<dd><p class="first last">The calculation based on the Einstein summation convention.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>The subscripts string is a comma-separated list of subscript labels,
+where each label refers to a dimension of the corresponding operand.
+Repeated subscripts labels in one operand take the diagonal.  For example,
+<code class="docutils literal notranslate"><span class="pre">einsum('ii',</span> <span class="pre">a)</span></code> is equivalent to <code class="docutils literal notranslate"><span class="pre">np.trace(a)</span></code> (however, the former
+supports back-propagation).</p>
+<p>Whenever a label is repeated, it is summed, so <code class="docutils literal notranslate"><span class="pre">einsum('i,</span> <span class="pre">i',</span> <span class="pre">a,</span> <span class="pre">b)</span></code>
+is equivalent to <code class="docutils literal notranslate"><span class="pre">np.inner(a,</span> <span class="pre">b)</span></code>.  If a label appears only once,
+it is not summed, so <code class="docutils literal notranslate"><span class="pre">einsum('i',</span> <span class="pre">a)</span></code> produces a view of <code class="docutils literal notranslate"><span class="pre">a</span></code>
+with no changes.</p>
+<p>The order of labels in the output is by default alphabetical.  This
+means that <code class="docutils literal notranslate"><span class="pre">np.einsum('ij',</span> <span class="pre">a)</span></code> doesn’t affect a 2D tensor, while
+<code class="docutils literal notranslate"><span class="pre">einsum('ji',</span> <span class="pre">a)</span></code> takes its transpose.</p>
+<p>The output can be controlled by specifying output subscript labels
+as well.  This specifies the label order, and allows summing to
+be disallowed or forced when desired.  The call <code class="docutils literal notranslate"><span class="pre">einsum('i-&gt;',</span> <span class="pre">a)</span></code>
+is like <code class="docutils literal notranslate"><span class="pre">np.sum(a,</span> <span class="pre">axis=-1)</span></code>, and <code class="docutils literal notranslate"><span class="pre">einsum('ii-&gt;i',</span> <span class="pre">a)</span></code>
+is like <code class="docutils literal notranslate"><span class="pre">np.diag(a)</span></code>.  The difference is that <cite>einsum</cite> does not
+allow broadcasting by default.</p>
+<p>To enable and control broadcasting, use an ellipsis.  Default
+NumPy-style broadcasting is done by adding an ellipsis
+to the left of each term, like <code class="docutils literal notranslate"><span class="pre">einsum('...ii-&gt;...i',</span> <span class="pre">a)</span></code>.
+To take the trace along the first and last axes,
+you can do <code class="docutils literal notranslate"><span class="pre">einsum('i...i',</span> <span class="pre">a)</span></code>, or to do a matrix-matrix
+product with the left-most indices instead of rightmost, you can do
+<code class="docutils literal notranslate"><span class="pre">einsum('ij...,jk...-&gt;ik...',</span> <span class="pre">a,</span> <span class="pre">b)</span></code>.</p>
+<p>When there is only one operand, no axes are summed, and no output
+parameter is provided, a view into the operand is returned instead
+of a new tensor.  Thus, taking the diagonal as <code class="docutils literal notranslate"><span class="pre">einsum('ii-&gt;i',</span> <span class="pre">a)</span></code>
+produces a view.</p>
+<p>An alternative way to provide the subscripts and operands is as
+<code class="docutils literal notranslate"><span class="pre">einsum(op0,</span> <span class="pre">sublist0,</span> <span class="pre">op1,</span> <span class="pre">sublist1,</span> <span class="pre">...,</span> <span class="pre">[sublistout])</span></code>. The examples
+below have corresponding <cite>einsum</cite> calls with the two parameter methods.</p>
+<p class="rubric">Examples</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">mygrad</span> <span class="k">as</span> <span class="nn">mg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Compute the trace of <code class="docutils literal notranslate"><span class="pre">a</span></code>, <span class="math notranslate nohighlight">\(\sum_{i}{A_{ii}} = f\)</span>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;ii&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+<span class="go">Tensor(60)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="go">Tensor(60)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+<span class="go">array(60)</span>
+</pre></div>
+</div>
+<p>Return a view along the diagonal of <code class="docutils literal notranslate"><span class="pre">a</span></code>, <span class="math notranslate nohighlight">\(A_{ii} = F_{i}\)</span>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;ii-&gt;i&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+<span class="go">Tensor([ 0,  6, 12, 18, 24])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="go">Tensor([ 0,  6, 12, 18, 24])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+<span class="go">array([ 0,  6, 12, 18, 24])</span>
+</pre></div>
+</div>
+<p>Compute the matrix-vector product of <code class="docutils literal notranslate"><span class="pre">a</span></code> with <code class="docutils literal notranslate"><span class="pre">b</span></code>, <span class="math notranslate nohighlight">\(\sum_{j}{A_{ij} B_{j}} = F_{i}\)</span>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;ij,j&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="go">Tensor([ 30,  80, 130, 180, 230])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="n">b</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="go">Tensor([ 30,  80, 130, 180, 230])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mg</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="go">Tensor([ 30,  80, 130, 180, 230])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...j,j&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="go">Tensor([ 30,  80, 130, 180, 230])</span>
+</pre></div>
+</div>
+<p>Take the transpose of <code class="docutils literal notranslate"><span class="pre">c</span></code>, <span class="math notranslate nohighlight">\(C_{ji} = F_{ij}\)</span>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;ji&#39;</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+<span class="go">Tensor([[0, 3],</span>
+<span class="go">        [1, 4],</span>
+<span class="go">        [2, 5]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="go">Tensor([[0, 3],</span>
+<span class="go">        [1, 4],</span>
+<span class="go">        [2, 5]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">T</span>
+<span class="go">Tensor([[0, 3],</span>
+<span class="go">        [1, 4],</span>
+<span class="go">        [2, 5]])</span>
+</pre></div>
+</div>
+<p>Compute <code class="docutils literal notranslate"><span class="pre">3</span> <span class="pre">*</span> <span class="pre">c</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;..., ...&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+<span class="go">Tensor([[ 0,  3,  6],</span>
+<span class="go">        [ 9, 12, 15]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;,ij&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+<span class="go">Tensor([[ 0,  3,  6],</span>
+<span class="go">        [ 9, 12, 15]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="p">[</span><span class="bp">Ellipsis</span><span class="p">],</span> <span class="n">c</span><span class="p">,</span> <span class="p">[</span><span class="bp">Ellipsis</span><span class="p">])</span>
+<span class="go">Tensor([[ 0,  3,  6],</span>
+<span class="go">        [ 9, 12, 15]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="mi">3</span> <span class="o">*</span> <span class="n">c</span>
+<span class="go">Tensor([[ 0,  3,  6],</span>
+<span class="go">        [ 9, 12, 15]])</span>
+</pre></div>
+</div>
+<p>Compute the inner product of <code class="docutils literal notranslate"><span class="pre">b</span></code> with itself, <span class="math notranslate nohighlight">\(\sum_{i}{B_{i} B_{i}} = f\)</span>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;i,i&#39;</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="go">Tensor(30)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">b</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="go">Tensor(30)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">b</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+<span class="go">30</span>
+</pre></div>
+</div>
+<p>Compute the outer product of <code class="docutils literal notranslate"><span class="pre">array([1,</span> <span class="pre">2])</span></code> with <code class="docutils literal notranslate"><span class="pre">b</span></code>, <span class="math notranslate nohighlight">\(A_{i}B_{j} = F_{ij}\)</span>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;i,j&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="go">Tensor([[0, 1, 2, 3, 4],</span>
+<span class="go">       [0, 2, 4, 6, 8]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">b</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="go">Tensor([[0, 1, 2, 3, 4],</span>
+<span class="go">       [0, 2, 4, 6, 8]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="go">array([[0, 1, 2, 3, 4],</span>
+<span class="go">       [0, 2, 4, 6, 8]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;i...-&gt;...&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+<span class="go">Tensor([50, 55, 60, 65, 70])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="bp">Ellipsis</span><span class="p">],</span> <span class="p">[</span><span class="bp">Ellipsis</span><span class="p">])</span>
+<span class="go">Tensor([50, 55, 60, 65, 70])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="go">array([50, 55, 60, 65, 70])</span>
+</pre></div>
+</div>
+<p>Compute the tensor product <span class="math notranslate nohighlight">\(\sum_{ij}{A_{ijk} B_{jil}} = F_{kl}\)</span></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">60.</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">24.</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;ijk,jil-&gt;kl&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="go">Tensor([[ 4400.,  4730.],</span>
+<span class="go">        [ 4532.,  4874.],</span>
+<span class="go">        [ 4664.,  5018.],</span>
+<span class="go">        [ 4796.,  5162.],</span>
+<span class="go">        [ 4928.,  5306.]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span> <span class="n">b</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+<span class="go">Tensor([[ 4400.,  4730.],</span>
+<span class="go">        [ 4532.,  4874.],</span>
+<span class="go">        [ 4664.,  5018.],</span>
+<span class="go">        [ 4796.,  5162.],</span>
+<span class="go">        [ 4928.,  5306.]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]))</span>
+<span class="go">array([[ 4400.,  4730.],</span>
+<span class="go">        [ 4532.,  4874.],</span>
+<span class="go">        [ 4664.,  5018.],</span>
+<span class="go">        [ 4796.,  5162.],</span>
+<span class="go">        [ 4928.,  5306.]])</span>
+</pre></div>
+</div>
+<p>Matrix multiply <code class="docutils literal notranslate"><span class="pre">a.T</span></code> with <code class="docutils literal notranslate"><span class="pre">b.T</span></code>, <span class="math notranslate nohighlight">\(\sum_{k}{A_{ki} B_{jk}} = F_{ij}\)</span></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;ki,jk-&gt;ij&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="go">Tensor([[10, 28, 46, 64],</span>
+<span class="go">        [13, 40, 67, 94]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;ki,...k-&gt;i...&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="go">Tensor([[10, 28, 46, 64],</span>
+<span class="go">        [13, 40, 67, 94]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;k...,jk&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="go">Tensor([[10, 28, 46, 64],</span>
+<span class="go">        [13, 40, 67, 94]])</span>
+</pre></div>
+</div>
+<p>Make an assignment to a view along the diagonal of <code class="docutils literal notranslate"><span class="pre">a</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;ii-&gt;i&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">[:]</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span>
+<span class="go">Tensor([[ 1.,  0.,  0.],</span>
+<span class="go">        [ 0.,  1.,  0.],</span>
+<span class="go">        [ 0.,  0.,  1.]])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../math.html" class="btn btn-neutral float-right" title="Mathematical functions (mygrad.math)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="mygrad.matmul.html" class="btn btn-neutral" title="mygrad.matmul" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Ryan Soklaski
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
