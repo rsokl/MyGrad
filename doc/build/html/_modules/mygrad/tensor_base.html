@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mygrad.tensor_base &mdash; MyGrad 0+unknown documentation</title>
+  <title>mygrad.tensor_base &mdash; MyGrad 0.9.0+0.g66b220c.dirty documentation</title>
   
 
   
@@ -57,7 +57,7 @@
             
             
               <div class="version">
-                0+unknown
+                0.9
               </div>
             
           
@@ -615,19 +615,21 @@
         <span class="c1"># old_tensor is the tensor pre-setitem</span>
         <span class="n">old_tensor</span> <span class="o">=</span> <span class="n">Tensor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">constant</span><span class="p">,</span> <span class="n">_scalar_only</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_scalar_only</span><span class="p">,</span> <span class="n">_creator</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">creator</span><span class="p">)</span>
         <span class="n">old_tensor</span><span class="o">.</span><span class="n">_ops</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ops</span>
+        <span class="n">old_tensor</span><span class="o">.</span><span class="n">_accum_ops</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accum_ops</span>
 
         <span class="c1"># point all ops involving `self` to old_tensor instead</span>
         <span class="k">for</span> <span class="n">op</span> <span class="ow">in</span> <span class="n">old_tensor</span><span class="o">.</span><span class="n">_ops</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">variables</span><span class="p">)):</span>
                 <span class="k">if</span> <span class="n">op</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">:</span>
                     <span class="n">op</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">variables</span><span class="p">[:</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">old_tensor</span><span class="p">,)</span> <span class="o">+</span> <span class="n">op</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
-                    <span class="k">break</span>
+
 
         <span class="c1"># self becomes the tensor post-setitem</span>
         <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">SetItem</span><span class="p">,</span> <span class="n">old_tensor</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">op_args</span><span class="o">=</span><span class="p">(</span><span class="n">key</span><span class="p">,))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_creator</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">creator</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_scalar_only</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">_scalar_only</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ops</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">_ops</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_accum_ops</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">_accum_ops</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_constant</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">constant</span>
 
