@@ -7,7 +7,7 @@ __all__ = ["transpose",
 
 
 def transpose(a, *axes, constant=False):
-    """ Permute the dimensions of an array.
+    """ Permute the dimensions of a tensor.
 
         Parameters
         ----------
@@ -49,7 +49,7 @@ def transpose(a, *axes, constant=False):
 
 
 def moveaxis(a, source, destination, constant=False):
-    """ Move axes of an array to new positions. Other axes remain in their
+    """ Move axes of a tensor to new positions. Other axes remain in their
         original order.
 
 

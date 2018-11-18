@@ -49,7 +49,7 @@ way of simply coding the functions using the auto-differentiation software. This
 neural networks and objective functions, and to tune the parameters of our neural networks using derivative-based (or 
 gradient-based) optimization schemes.
 
-It should be noted that description of training neural networks , as presented here, only provides a narrow view of deep learning.
+It should be noted that description of training neural networks, as presented here, only provides a narrow view of deep learning.
 Specifically, it describes the supervised learning of an image classification problem. While this is sufficient for conveying 
 the utility of auto-differentiation software as a means for training neural networks, there is more nuiance to deep learning 
 than is suggested here.
