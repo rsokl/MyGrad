@@ -31,7 +31,7 @@ The way that we train this neural network is by "tuning" the values of its many 
 predictions reliably agree with what we know to be true. It turns out that having access to the derivative of the
 neural network's output with respect to its parameters grants us the ability to quite reliably optimize its parameters -
 through a process known as gradient-based optimization we can update the values of these parameters to steer the neural 
-network towards making more faithful predictions (note: a gradient it just a collection of derivatives of a
+network towards making more faithful predictions (note: a gradient is just a collection of derivatives of a
 multivariate function).
 
 More specifically, we can hook our neural network up to an "objective" function that measures how well its predictions
