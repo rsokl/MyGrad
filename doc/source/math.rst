@@ -38,6 +38,13 @@ Sums, products, differences
    sum
    cumprod
    cumsum
+   mean
+   var
+   std
+   amax
+   amin
+   max
+   min
 
 
 Exponents and logarithms

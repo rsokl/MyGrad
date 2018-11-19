@@ -18,7 +18,7 @@ Tensor([[0, 1, 2],
 >>> y
 Tensor([16], dtype=int32)
 
-Thus MyGrad users can spend their time mastering `numpy <http://www.pythonlikeyoumeanit.com/module_3.html/>`_
+Thus MyGrad users can spend their time mastering `numpy <https://www.pythonlikeyoumeanit.com/module_3.html>`_
 and their skills will transfer seamlessly when using this autograd library.
 
 Creating a Tensor
