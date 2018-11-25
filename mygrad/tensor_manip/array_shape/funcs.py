@@ -2,7 +2,7 @@ from .ops import *
 from mygrad.tensor_base import Tensor
 
 
-__all__ = ["reshape", "squeeze", "ravel", "expand_dims"]
+__all__ = ["reshape", "squeeze", "ravel", "expand_dims", "broadcast_to"]
 
 
 def reshape(a, *newshape, constant=False):
@@ -167,3 +167,54 @@ def expand_dims(a, axis, constant=False):
     (1, 2, 1)
     """
     return Tensor._op(ExpandDims, a, op_args=(axis,), constant=constant)
+
+
+def broadcast_to(a, *newshape, constant=False):
+    """
+    Broadcast a tensor to a new shape.
+
+    Parameters
+    ----------
+    a : array_like
+        The tensor to be broadcasted
+
+    *newshape: Union[int, Tuple[int, ...]]
+        The shape of the broadcasted tensor. This shape
+        should be broadcast-compatible with the original
+        shape.
+
+    constant : bool, optional(default=False)
+        If ``True``, the returned tensor is a constant (it
+        does not back-propagate a gradient)
+
+    Returns
+    -------
+    mygrad.Tensor
+
+    Raises
+    ------
+    ValueError
+        If the array is not compatible with the new shape
+        according to Numpy's broadcasting rules.
+
+    Examples
+    --------
+    >>> import mygrad as mg
+    >>> x = mg.Tensor([1, 2, 3])
+    >>> mg.broadcast_to(x, (3,3))
+    Tensor([[1, 2, 3],
+            [1, 2, 3],
+            [1, 2, 3]])
+    >>> mg.broadcast_to(x, (4,4))
+    Traceback (most recent call last):
+    ...
+    ValueError: operands could not be broadcast together with remapped
+    shapes [original->remapped]: (3,) and requested shape (4,4)
+    """
+    if not newshape:
+        raise TypeError("reshape() takes at least 1 argument (0 given)")
+    if hasattr(newshape[0], "__iter__"):
+        if len(newshape) > 1:
+            raise TypeError("an integer is required")
+        newshape = newshape[0]
+    return Tensor._op(BroadcastTo, a, op_args=(newshape,), constant=constant)
