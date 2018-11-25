@@ -11,7 +11,7 @@ from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property
 from mygrad.tensor_core_ops.indexing import GetItem, SetItem
 from mygrad.linalg.ops import MatMul
 from mygrad.operation_base import Operation, BroadcastableOp
-from mygrad.tensor_manip.array_shape.ops import Ravel
+from mygrad.tensor_manip.array_shape.ops import Flatten
 
 import numpy as np
 from typing import Union, Set, Type, List
@@ -567,21 +567,33 @@ class Tensor:
             raise TypeError("can only convert a tensor of size 1 to a Python scalar")
         return int(self.data)
 
-    def flatten(self):
-        """ Flattens contents of the tensor into a contiguous 1-D array.
+    def flatten(self, constant=False):
+        """ Return a copy of the tensor collapsed into one dimension.
+
+        This docstring was adapted from ``numpy.ndarray.flatten``.
 
         Returns
         -------
         mygrad.Tensor
+            A copy of the input tensor, flattened to one dimension.
+
+        constant : bool, optional(default=False)
+            If ``True``, the returned tensor is a constant (it
+            does not back-propagate a gradient)
+
+        Notes
+        -----
+        To return a flattened view of the tensor, use ``x.reshape(-1)``.
 
         Examples
         --------
         >>> import mygrad as mg
-        >>> x = mg.Tensor([[1, 2], [3, 4]])
-        >>> mg.ravel(x)
+        >>> x = mg.Tensor([[1, 2],
+        ...                [3, 4]])
+        >>> x.flatten()
         Tensor([1, 2, 3, 4])
         """
-        return Tensor._op(Ravel, self, constant=self.constant)
+        return Tensor._op(Flatten, self, constant=constant)
 
     @property
     def size(self):

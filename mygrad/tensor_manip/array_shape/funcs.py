@@ -8,6 +8,8 @@ __all__ = ["reshape", "squeeze", "ravel", "expand_dims", "broadcast_to"]
 def reshape(a, *newshape, constant=False):
     """ Returns a tensor with a new shape, without changing its data.
 
+        This docstring was adapted from ``numpy.reshape``
+
         Parameters
         ----------
         a : array_like
@@ -58,6 +60,8 @@ def squeeze(a, axis=None, constant=False):
     """
     Remove single-dimensional entries from the shape of a tensor.
 
+    This docstring was adapted from ``numpy.squeeze``
+
     Parameters
     ----------
     a : array_like
@@ -102,7 +106,9 @@ def squeeze(a, axis=None, constant=False):
 
 def ravel(a, constant=False):
     """
-    Flattens contents of a tensor into a contiguous 1-D array.
+    Flattens contents of a tensor into a contiguous 1-D array.  A copy is made only if needed.
+
+    This docstring was adapted from ``numpy.ravel``.
 
     Parameters
     ----------
@@ -126,7 +132,8 @@ def ravel(a, constant=False):
     Examples
     --------
     >>> import mygrad as mg
-    >>> x = mg.Tensor([[1, 2], [3, 4]])
+    >>> x = mg.Tensor([[1, 2],
+    ...                [3, 4]])
     >>> mg.ravel(x)
     Tensor([1, 2, 3, 4])
     """
@@ -136,6 +143,8 @@ def ravel(a, constant=False):
 def expand_dims(a, axis, constant=False):
     """
     Expand the dimensions of a tensor by adding a new axis.
+
+    This docstring was adapted from ``numpy.expand_dims``.
 
     Parameters
     ----------
@@ -169,16 +178,18 @@ def expand_dims(a, axis, constant=False):
     return Tensor._op(ExpandDims, a, op_args=(axis,), constant=constant)
 
 
-def broadcast_to(a, *newshape, constant=False):
+def broadcast_to(a, shape, constant=False):
     """
     Broadcast a tensor to a new shape.
+
+    This docstring was adapted from ``numpy.broadcast_to``.
 
     Parameters
     ----------
     a : array_like
         The tensor to be broadcasted
 
-    *newshape: Union[int, Tuple[int, ...]]
+    shape: Tuple[int, ...]
         The shape of the broadcasted tensor. This shape
         should be broadcast-compatible with the original
         shape.
@@ -211,10 +222,6 @@ def broadcast_to(a, *newshape, constant=False):
     ValueError: operands could not be broadcast together with remapped
     shapes [original->remapped]: (3,) and requested shape (4,4)
     """
-    if not newshape:
+    if not shape:
         raise TypeError("reshape() takes at least 1 argument (0 given)")
-    if hasattr(newshape[0], "__iter__"):
-        if len(newshape) > 1:
-            raise TypeError("an integer is required")
-        newshape = newshape[0]
-    return Tensor._op(BroadcastTo, a, op_args=(newshape,), constant=constant)
+    return Tensor._op(BroadcastTo, a, op_args=(shape,), constant=constant)

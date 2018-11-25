@@ -1,8 +1,8 @@
-from mygrad.operation_base import Operation
+from mygrad.operation_base import Operation, BroadcastableOp
 from mygrad._utils import reduce_broadcast
 import numpy as np
 
-__all__ = ["Reshape", "Squeeze", "Ravel", "ExpandDims", "BroadcastTo"]
+__all__ = ["Reshape", "Flatten", "Squeeze", "Ravel", "ExpandDims", "BroadcastTo"]
 
 
 class Reshape(Operation):
@@ -27,6 +27,19 @@ class Squeeze(Operation):
         self.variables = (a,)
         return np.squeeze(a.data, axis=axis)
     
+    def backward_var(self, grad, index, **kwargs):
+        a = self.variables[index]
+        return grad.reshape(a.shape)
+
+
+class Flatten(Operation):
+    def __call__(self, a):
+        """ Parameters
+            ----------
+            a : mygrad.Tensor"""
+        self.variables = (a,)
+        return a.data.flatten(order='C')
+
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
         return grad.reshape(a.shape)
@@ -59,7 +72,7 @@ class ExpandDims(Operation):
         return grad.reshape(a.shape)
 
 
-class BroadcastTo(Operation):
+class BroadcastTo(BroadcastableOp):
     def __call__(self, a, shape):
         """ Parameters
             ----------
@@ -69,5 +82,8 @@ class BroadcastTo(Operation):
         return np.broadcast_to(a.data, shape=shape)
 
     def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
-        return reduce_broadcast(grad, a.shape)
+        if index != 0:
+            raise IndexError("`broadcast_to` is a unary operation. "
+                             "`backward_var` was called for index {}".format(index))
+        return grad
+

@@ -48,13 +48,14 @@ class fwdprop_test_factory():
         ...     pass
         """
     def __init__(self, *,
-                 mygrad_func,
-                 true_func,
-                 num_arrays,
-                 index_to_bnds={},
-                 index_to_no_go={},
-                 kwargs={},
-                 index_to_arr_shapes={}):
+                 mygrad_func: Callable[[Tensor], Tensor],
+                 true_func: Callable[[np.ndarray], np.ndarray],
+                 num_arrays: int,
+                 index_to_bnds: Optional[Dict[int, Tuple[int, int]]] = {},
+                 index_to_no_go: Optional[Dict[int, Sequence[int]]] = {},
+                 kwargs: Optional[Dict[str, Union[Any, Callable[[Any], SearchStrategy]]]] = {},
+                 index_to_arr_shapes: Optional[Dict[int, Union[Sequence[int], SearchStrategy]]] = {},
+                 assumptions: Optional[Callable[..., bool]] = None):
         """
         Parameters
         ----------
@@ -87,6 +88,11 @@ class fwdprop_test_factory():
             Note that any search strategy must be "wrapped" in a function, which
             will be called, passing it the list of arrays as an input argument, such
             that the strategy can draw based on those particular arrays.
+
+        assumptions : Optional[Callable[[arrs, **kwargs], bool]]
+            A callable that is fed the generated arrays and keyword arguments that will
+            be fed to ``mygrad_func``. If ``assumptions`` returns ``False``, that test
+            case will be marked as skipped by hypothesis.
         """
         assert num_arrays > 0
         self.op = mygrad_func
@@ -97,6 +103,7 @@ class fwdprop_test_factory():
         self.index_to_arr_shapes = index_to_arr_shapes
         self.kwargs = kwargs
         self.num_arrays = num_arrays
+        self.assumptions = assumptions
 
     def gen_first_array(self) -> st.SearchStrategy:
         """
@@ -144,6 +151,9 @@ class fwdprop_test_factory():
             # set or draw keyword args to be passed to functions
             kwargs = {k: (data.draw(v(*arrs), label="kwarg: {}".format(k)) if callable(v) else v)
                       for k, v in self.kwargs.items()}
+
+            if self.assumptions is not None:
+                assume(self.assumptions(*arrs, **kwargs))
 
             for i, arr in enumerate(arrs):  # assure arrays don't contain forbidden values
                 for value in self.index_to_no_go.get(i, ()):
@@ -200,7 +210,8 @@ class backprop_test_factory():
                  rtol: float=1e-05,
                  atol: float=1e-08,
                  vary_each_element: bool=False,
-                 as_decimal: bool=True):
+                 as_decimal: bool=True,
+                 assumptions: Optional[Callable[..., bool]] = None):
         """
         Parameters
         ----------
@@ -251,6 +262,11 @@ class backprop_test_factory():
         as_decimal : bool, optional (default=True)
             If True, x is passed to f as a Decimal-type array. This
             improves numerical precision, but is not permitted by some functions.
+
+        assumptions : Optional[Callable[[arrs, **kwargs], bool]]
+            A callable that is fed the generated arrays and keyword arguments that will
+            be fed to ``mygrad_func``. If ``assumptions`` returns ``False``, that test
+            case will be marked as skipped by hypothesis.
         """
 
         index_to_bnds = index_to_bnds if index_to_bnds is not None else {}
@@ -286,6 +302,7 @@ class backprop_test_factory():
         self.tolerances = dict(rtol=rtol, atol=atol)
         self.vary_each_element = vary_each_element
         self.as_decimal = as_decimal
+        self.assumptions = assumptions
 
     def gen_first_array(self) -> st.SearchStrategy:
         """
@@ -338,6 +355,9 @@ class backprop_test_factory():
             kwargs = {k: (data.draw(v(*arrs), label="kwarg: {}".format(k)) if callable(v) else v)
                       for k, v in self.kwargs.items()}
 
+            if self.assumptions is not None:
+                assume(self.assumptions(*arrs, **kwargs))
+
             for i, arr in enumerate(arrs):  # assure arrays don't contain forbidden values
                 for value in self.index_to_no_go.get(i, ()):
                     assume(np.all(arr != value))
@@ -371,14 +391,15 @@ class backprop_test_factory():
             # check that the analytic and numeric derivatives match
             for n, (arr, d_num) in enumerate(zip(arrs, grads_numerical)):
                 assert_allclose(arr.grad, d_num, **self.tolerances,
-                                err_msg="arr-{}: numerical derivative and mygrad derivative do not match".format(n))
+                                err_msg="arr-{}: mygrad derivative and numerical derivative do not match".format(n))
 
                 # check that none of the set derivatives is a view of `grad`
                 assert not np.shares_memory(arr.grad, grad), "arr-{}.grad stores a view of grad".format(n)
 
             # check that none of the set derivatives are views of one another
             for arr_i, arr_j in combinations(arrs, 2):
-                assert not np.shares_memory(arr_i.grad, arr_j.grad), "two input arrays were propagated views of the same gradient"
+                assert not np.shares_memory(arr_i.grad, arr_j.grad), \
+                    "two input arrays were propagated views of the same gradient"
 
             # verify that null_gradients works
             out.null_gradients()
