@@ -370,15 +370,16 @@ def multi_matmul(tensors, constant=False):
     Parameters
     ----------
     tensors: Sequence[array_like]
+        The sequence of tensors to be matrix-multiplied.
 
     constant : bool, optional(default=False)
         If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient)
+        does not back-propagate a gradient).
 
     Returns
     -------
     mygrad.Tensor
-        Returns the matrix product of the arrays provided
+        Returns the matrix product of the tensors provided
 
 
     Extended Summary
@@ -396,17 +397,17 @@ def multi_matmul(tensors, constant=False):
 
     The other arguments must be 2-D or greater.
 
-    Think of `multi_dot` as::
+    Think of `multi_dot` as an optimized version of::
 
-        def multi_dot(arrays): return functools.reduce(mg.matmul, arrays)
+        def multi_dot(tensors): return functools.reduce(mg.matmul, tensors)
 
     Raises
     ------
     ValueError
-        If tensors contains less than two array_like items.
+        If ``tensors`` contains less than two array_like items.
 
     ValueError
-        If tensor other than the first or last is less than two dimensional
+        If ``tensor`` other than the first or last is less than two dimensional
 
     See Also
     --------
@@ -437,14 +438,14 @@ def multi_matmul(tensors, constant=False):
     --------
     ``multi_matmul`` allows you to write:
 
-    >>> from mygrad import multi_matmul, matmul
+    >>> from mygrad import multi_matmul, matmul, Tensor
     >>> import numpy as np
-    >>> # Prepare some data
-    >>> A = np.random.random((10000, 100))
-    >>> B = np.random.random((100, 1000))
-    >>> C = np.random.random((1000, 5))
-    >>> D = np.random.random((5, 333))
-    >>> # the actual dot multiplication
+    >>> # Prepare some random tensors
+    >>> A = Tensor(np.random.random((10000, 100)))
+    >>> B = Tensor(np.random.random((100, 1000)))
+    >>> C = Tensor(np.random.random((1000, 5)))
+    >>> D = Tensor(np.random.random((5, 333)))
+    >>> # the actual matrix multiplication
     >>> multi_matmul([A, B, C, D]) # computes (A @ (B @ C)) @ D
 
     instead of:
