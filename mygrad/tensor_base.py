@@ -11,6 +11,7 @@ from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property
 from mygrad.tensor_core_ops.indexing import GetItem, SetItem
 from mygrad.linalg.ops import MatMul
 from mygrad.operation_base import Operation, BroadcastableOp
+from mygrad.tensor_manip.array_shape.ops import Ravel
 
 import numpy as np
 from typing import Union, Set, Type, List
@@ -565,6 +566,22 @@ class Tensor:
         if self.size > 1:
             raise TypeError("can only convert a tensor of size 1 to a Python scalar")
         return int(self.data)
+
+    def flatten(self):
+        """ Flattens contents of the tensor into a contiguous 1-D array.
+
+        Returns
+        -------
+        mygrad.Tensor
+
+        Examples
+        --------
+        >>> import mygrad as mg
+        >>> x = mg.Tensor([[1, 2], [3, 4]])
+        >>> mg.ravel(x)
+        Tensor([1, 2, 3, 4])
+        """
+        return Tensor._op(Ravel, self, constant=self.constant)
 
     @property
     def size(self):
