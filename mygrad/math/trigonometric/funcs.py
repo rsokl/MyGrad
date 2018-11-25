@@ -35,7 +35,7 @@ def sin(a, constant=False):
 
 
 def sinc(a, constant=False):
-    """ ``f(a) -> sinc(a)``
+    """ ``f(a) -> sin(a) / a``
 
         Parameters
         ----------
