@@ -156,7 +156,7 @@ def softmax(x, constant=False):
     (:math:`s_{k}`) is normalized using the 'softmax' transformation:
 
     .. math::
-        p_{k} = \\frac{e^{s_k}}{\sum_{i=1}^{C}{e^{s_i}}}
+        p_{k} = \frac{e^{s_k}}{\sum_{i=1}^{C}{e^{s_i}}}
 
     Examples
     --------
@@ -224,7 +224,7 @@ def logsoftmax(x, constant=False):
     (:math:`s_{k}`) is normalized using the 'softmax' transformation:
 
     .. math::
-        p_{k} = \\log{\\frac{e^{s_k}}{\sum_{i=1}^{C}{e^{s_i}}}}
+        p_{k} = \log{\frac{e^{s_k}}{\sum_{i=1}^{C}{e^{s_i}}}}
 
     Examples
     --------

@@ -175,7 +175,7 @@ def softmax_crossentropy(x, y_true, constant=False):
     (:math:`s_{k}`) is normalized using the 'softmax' transformation:
 
     .. math::
-        p_{k} = \\frac{e^{s_k}}{\sum_{i=1}^{C}{e^{s_i}}}
+        p_{k} = \frac{e^{s_k}}{\sum_{i=1}^{C}{e^{s_i}}}
 
     This produces the "prediction probability distribution", :math:`p`, for each datum.
     The cross-entropy loss for that datum is then computed according to the true class-index
@@ -184,13 +184,13 @@ def softmax_crossentropy(x, y_true, constant=False):
     The cross-entropy loss for that datum is thus:
 
     .. math::
-       l = - \sum_{k=1}^{C}{t_{k} \\log{p_{k}}}
+       l = - \sum_{k=1}^{C}{t_{k} \log{p_{k}}}
 
     Having computed each per-datum cross entropy loss, this function then returns the loss
     averaged over all :math:`N` pieces of data:
 
     .. math::
-       L = \\frac{1}{N}\sum_{i=1}^{N}{l_{i}}
+       L = \frac{1}{N}\sum_{i=1}^{N}{l_{i}}
 
     Examples
     --------
@@ -205,13 +205,13 @@ def softmax_crossentropy(x, y_true, constant=False):
     >>> y_true = mg.Tensor([0])  # the correct class for this datum is class-0
 
     Because the scores are identical for all three classes, the softmax normalization
-    will simply produce :math:`p = [\\frac{1}{3}, \\frac{1}{3}, \\frac{1}{3}]`. Because
+    will simply produce :math:`p = [\frac{1}{3}, \frac{1}{3}, \frac{1}{3}]`. Because
     class-0 is the "true" class, :math:`t = [1., 0., 0.]`. Thus our softmax cross-entropy
     loss should be:
 
     .. math::
-      -(1 \\times \\log{\\frac{1}{3}} + 0 \\times \\log{\\frac{1}{3}} + 0 \\times \\log{\\frac{1}{3}})
-      = \\log(3) \\approx 1.099
+      -(1 \times \log{\frac{1}{3}} + 0 \times \log{\frac{1}{3}} + 0 \times \log{\frac{1}{3}})
+      = \log(3) \approx 1.099
 
     Let's see that this is what ``softmax_crossentropy`` returns:
 
@@ -219,12 +219,12 @@ def softmax_crossentropy(x, y_true, constant=False):
     Tensor(1.09861229)
 
     Similarly, suppose a datum's scores are :math:`[0, 0, 10^6]`, then the softmax normalization
-    will return :math:`p \\approx [0., 0., 1.]`. If the true class for this datum is class-2, then
+    will return :math:`p \approx [0., 0., 1.]`. If the true class for this datum is class-2, then
     the loss should be nearly 0, since :math:`p` and :math:`t` are essentially identical:
 
     .. math::
-      -(0 \\times \\log{0} + 0 \\times \\log{0} + 1 \\times \\log{1})
-      = -\\log(1) = 0
+      -(0 \times \log{0} + 0 \times \log{0} + 1 \times \log{1})
+      = -\log(1) = 0
 
     Now, let's construct ``x`` and ``y_true`` so that they incorporate the scores/labels for
     both of the data that we have considered:
@@ -234,7 +234,7 @@ def softmax_crossentropy(x, y_true, constant=False):
     >>> y_true = mg.Tensor([0, 2])     # the class IDs for the two data
 
     ``softmax_crossentropy(x, y_true)`` will return the average loss of these two data,
-    :math:`\\frac{1}{2}(1.099 + 0) \\approx 0.55`:
+    :math:`\frac{1}{2}(1.099 + 0) \approx 0.55`:
 
     >>> softmax_crossentropy(x, y_true)
     Tensor(0.54930614)
