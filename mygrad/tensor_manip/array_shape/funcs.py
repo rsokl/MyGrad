@@ -1,8 +1,8 @@
-from .ops import Reshape, Squeeze, Ravel
+from .ops import *
 from mygrad.tensor_base import Tensor
 
 
-__all__ = ["reshape", "squeeze", "ravel"]
+__all__ = ["reshape", "squeeze", "ravel", "expand_dims"]
 
 
 def reshape(a, *newshape, constant=False):
@@ -131,3 +131,39 @@ def ravel(a, constant=False):
     Tensor([1, 2, 3, 4])
     """
     return Tensor._op(Ravel, a, constant=constant)
+
+
+def expand_dims(a, axis, constant=False):
+    """
+    Expand the dimensions of a tensor by adding a new axis.
+
+    Parameters
+    ----------
+    a : array_like
+        The tensor to be expanded
+
+    axis : int
+        The position of the new axis in the expanded array shape.
+
+    constant : bool, optional(default=False)
+        If ``True``, the returned tensor is a constant (it
+        does not back-propagate a gradient)
+
+    Returns
+    -------
+    mygrad.Tensor
+
+    Examples
+    --------
+    >>> import mygrad as mg
+    >>> x = mg.Tensor([1, 2])
+    >>> x.shape
+    (2,)
+    >>> y = mg.expand_dims(x, 1)
+    >>> y.shape
+    (2, 1)
+    >>> z = mg.expand_dims(y, 0)
+    >>> z.shape
+    (1, 2, 1)
+    """
+    return Tensor._op(ExpandDims, a, op_args=(axis,), constant=constant)
