@@ -1,8 +1,8 @@
-from .ops import Reshape, Squeeze
+from .ops import Reshape, Squeeze, Ravel
 from mygrad.tensor_base import Tensor
 
 
-__all__ = ["reshape", "squeeze"]
+__all__ = ["reshape", "squeeze", "ravel"]
 
 
 def reshape(a, *newshape, constant=False):
@@ -98,3 +98,36 @@ def squeeze(a, axis=None, constant=False):
     >>> mg.squeeze(x, axis=2).shape
     (1, 3)"""
     return Tensor._op(Squeeze, a, op_args=(axis,), constant=constant)
+
+
+def ravel(a, constant=False):
+    """
+    Flattens contents of a tensor into a contiguous 1-D array.
+
+    Parameters
+    ----------
+    a : array_like
+        The tensor to be flattened
+
+    constant : bool, optional(default=False)
+        If ``True``, the returned tensor is a constant (it
+        does not back-propagate a gradient)
+
+    Returns
+    -------
+    mygrad.Tensor
+
+    Notes
+    -----
+    ``ravel`` utilizes C-ordering, meaning that it reads & writes elements using
+    C-like index ordering; the last axis index changing fastest, and, proceeding
+    in reverse order, the first axis index changing slowest.
+
+    Examples
+    --------
+    >>> import mygrad as mg
+    >>> x = mg.Tensor([[1, 2], [3, 4]])
+    >>> mg.ravel(x)
+    Tensor([1, 2, 3, 4])
+    """
+    return Tensor._op(Ravel, a, constant=constant)
