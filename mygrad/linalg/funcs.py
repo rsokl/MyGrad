@@ -1,5 +1,6 @@
 from .ops import *
 from mygrad import Tensor
+import mygrad as mg
 from numpy.core.einsumfunc import _parse_einsum_input
 import numpy as np
 
@@ -8,7 +9,7 @@ __all__ = ["multi_matmul", "matmul", "einsum"]
 
 
 def matmul(a, b, constant=False):
-    """
+    r"""
     Matrix product of two tensors:
 
     ``matmul(x, y)`` is equivalent to ``x @ y``.
@@ -108,7 +109,7 @@ def matmul(a, b, constant=False):
 
 
 def einsum(*operands, optimize=False, constant=False):
-    """
+    r"""
     einsum(subscripts, *operands)
 
     Evaluates the Einstein summation convention on the operands. This implementation
@@ -466,15 +467,16 @@ def multi_matmul(tensors, constant=False):
 
     # Explicitly convert vectors to 2D arrays to keep the logic of this function simpler
     if tensors[0].ndim == 1:
-        tensors[0] = tensors[0][np.newaxis, :]
-
+        tensors[0] = mg.expand_dims(tensors[0], axis=0,
+                                    constant=tensors[0].constant if isinstance(tensors[0], Tensor) else True)
     if tensors[-1].ndim == 1:
-        tensors[-1] = tensors[-1][:, np.newaxis]
-
+        tensors[-1] = mg.expand_dims(tensors[-1], axis=1,
+                                     constant=tensors[-1].constant if isinstance(tensors[-1], Tensor) else True)
+        
     for a in tensors:
-        if a.ndim != 2:
+        if a.ndim < 1 or a.ndim > 2:
             raise ValueError('%d-dimensional array given. Tensor must be '
-                             'at least two-dimensional' % a.ndim)
+                             'two-dimensional' % a.ndim)
 
     if n == 3:
         result = _multi_matmul_three(tensors[0], tensors[1], tensors[2], constant)

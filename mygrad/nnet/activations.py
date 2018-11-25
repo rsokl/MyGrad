@@ -123,7 +123,7 @@ class Softmax(Operation):
 
 
 def softmax(x, constant=False):
-    """
+    r"""
     Applies the softmax activation function::
 
         f(x) = exp(x) / sum( exp(x) )
@@ -190,7 +190,7 @@ class LogSoftmax(Operation):
 
 
 def logsoftmax(x, constant=False):
-    """
+    r"""
     Applies the log-softmax activation function::
 
         f(x) = log ( exp(x) / sum( exp(x) ) )
