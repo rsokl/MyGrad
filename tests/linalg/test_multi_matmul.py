@@ -13,14 +13,16 @@ e34 = np.random.randint(5, size=(2,1,20,500))
 
 arrays_4D = [x4,y4,z4,e14,e24,e34]
 
-def test4s(a = arrays_4D):
-	multi_matmul_slow(a)
-
-def test4(a = arrays_4D):
-	mg.multi_matmul(a)
 
 
 
 #print(timeit.timeit("test4s()", number=100, setup="from __main__ import test4s") , timeit.timeit("test4()", number=100, setup="from __main__ import test4"))
 
-assert timeit.timeit("test4s()", number=100, setup="from __main__ import test4s") < timeit.timeit("test4()", number=100, setup="from __main__ import test4")
+def test_speed():
+	def _test4s(a=arrays_4D):
+		multi_matmul_slow(a)
+
+	def _test4(a=arrays_4D):
+		mg.multi_matmul(a)
+
+	assert timeit.timeit("_test4s()", number=100, setup="from __main__ import _test4s") < timeit.timeit("_test4()", number=100, setup="from __main__ import _test4")
