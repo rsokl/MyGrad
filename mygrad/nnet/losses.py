@@ -136,7 +136,7 @@ class SoftmaxCrossEntropy(Operation):
 
 
 def softmax_crossentropy(x, y_true, constant=False):
-    """ Given the classification scores of C classes for N pieces of data,
+    r""" Given the classification scores of C classes for N pieces of data,
     computes the NxC softmax classification probabilities. The
     cross entropy is then computed by using the true classification labels
     and is averaged over the N pieces of data.

@@ -361,8 +361,7 @@ class GRUnit(Operation):
 
 
 def gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None, dropout=0., constant=False):
-
-    """ Performs a forward pass of sequential data through a Gated Recurrent Unit layer, returning
+    r""" Performs a forward pass of sequential data through a Gated Recurrent Unit layer, returning
         the 'hidden-descriptors' arrived at by utilizing the trainable parameters as follows::
 
                     Z_{t} = sigmoid(X_{t} Uz + S_{t-1} Wz + bz)

@@ -11,4 +11,5 @@ Matrix and vector products
    :toctree: generated/
 
    matmul
+   multi_matmul
    einsum
