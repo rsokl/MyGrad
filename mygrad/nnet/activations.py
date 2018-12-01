@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.misc import logsumexp
+from scipy.misc import logsumexp as _logsumexp
 
 from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor
@@ -148,6 +148,9 @@ def softmax(x, constant=False):
 
     Notes
     -----
+    - :math:`N` is the number of samples in the batch.
+    - :math:`C` is the number of possible classes for which scores are provided.
+    
     This implements a numerically-stable version of softmax, however
     log-softmax is still the more numerically stable activation function.
 
@@ -180,7 +183,7 @@ class LogSoftmax(Operation):
         assert 0 < a.ndim < 3
 
         self.__kw = dict(axis=1, keepdims=True) if x.ndim == 2 else dict(axis=None, keepdims=False)
-        return x - logsumexp(x, **self.__kw)
+        return x - _logsumexp(x, **self.__kw)
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
@@ -215,6 +218,9 @@ def logsoftmax(x, constant=False):
 
     Notes
     -----
+    - :math:`N` is the number of samples in the batch.
+    - :math:`C` is the number of possible classes for which scores are provided.
+
     This implements a numerically-stable version of log-softmax, compared
     to the naive implementation using ``mygrad.log``, ``mygrad.exp``, and
     ``mygrad.sum``.
