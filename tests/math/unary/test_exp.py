@@ -15,7 +15,7 @@ def test_exp_backward(): pass
 def test_expm1_fwd(): pass
 
 
-@backprop_test_factory(mygrad_func=exp, true_func=lambda x: np.exp(x) - 1, xbnds=(-100, 100))
+@backprop_test_factory(mygrad_func=expm1, true_func=lambda x: np.exp(x) - 1, xbnds=(-100, 100))
 def test_expm1_backward(): pass
 
 
