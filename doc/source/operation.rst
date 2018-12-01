@@ -44,9 +44,9 @@ unambiguously.
 
 The matrix-multiplication operation, for example, is a scalar-only operation because
 computing the derivative of :math:`F_{ik} = \sum_{j}{A_{ij} B_{jk}}` with respect
-to each element of :math:`A` produces a 4-tensor: :math:`\frac{d F_{ik}}{d A_{pq}}`, since each element
-of :math:`F` depends on *every* element of :math:`A`.
-This is the case unless the terminal node of this graph is a
+to each element of :math:`A` produces a 3-tensor: :math:`\frac{d F_{ik}}{d A_{iq}}`, since each element 
+of :math:`F` depends on *every* element in the corresponding row of :math:`A`.
+This is the case unless the terminal node of this graph is eventually reduced (via summation, for instance) to a
 scalar, :math:`l`, in which  case the elements of the 2-tensor :math:`\frac{dl}{dA_{pq}}` has a trivial one-to-one
 correspondence to the elements of :math:`A_{pq}`.
 
