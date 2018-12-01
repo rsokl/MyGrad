@@ -637,7 +637,7 @@ class Tensor:
         ...                [4, 5, 6]])
         >>> y.ndim
         2
-        >>> x[0, 0]  # two indices are required to identify an element in `x`
+        >>> y[0, 0]  # two indices are required to identify an element in `x`
         Tensor(0)"""
         return self.data.ndim
 
