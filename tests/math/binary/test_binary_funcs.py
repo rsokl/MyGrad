@@ -11,12 +11,7 @@ import numpy as np
 from mygrad.tensor_base import Tensor
 from numpy.testing import assert_allclose
 
-from hypothesis import given, assume, settings
-import hypothesis.strategies as st
-import hypothesis.extra.numpy as hnp
-
-from ...utils.numerical_gradient import numerical_gradient_full
-from ...custom_strategies import broadcastable_shape
+from hypothesis import settings
 
 
 @fwdprop_test_factory(mygrad_func=add, true_func=np.add, num_arrays=2)
