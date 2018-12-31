@@ -187,7 +187,7 @@ def arccot(a, constant=False):
     return Tensor._op(Arccot, a, constant=constant)
 
 
-def arcsin(a):
+def arcsin(a, constant=False):
     """ ``f(a) -> arctanh(a)``
 
         Parameters
@@ -201,10 +201,10 @@ def arcsin(a):
         Returns
         -------
         mygrad.Tensor"""
-    return Tensor._op(Arcsin, a)
+    return Tensor._op(Arcsin, a, constant=constant)
 
 
-def arctan(a):
+def arctan(a, constant=False):
     """ ``f(a) -> arctan(a)``
 
         Parameters
@@ -218,10 +218,10 @@ def arctan(a):
         Returns
         -------
         mygrad.Tensor"""
-    return Tensor._op(Arctan, a)
+    return Tensor._op(Arctan, a, constant=constant)
 
 
-def arcsec(a):
+def arcsec(a, constant=False):
     """ ``f(a) -> arcsec(a)``
 
         Parameters
@@ -235,7 +235,8 @@ def arcsec(a):
         Returns
         -------
         mygrad.Tensor"""
-    return Tensor._op(Arcsec, a)
+    return Tensor._op(Arcsec, a, constant=constant)
+
 
 def arctan2(a, b, constant=False):
     """ ``f(a, b) -> arctan(a/b)``
