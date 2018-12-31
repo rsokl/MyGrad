@@ -29,6 +29,7 @@ def test_argmin(a, data):
     # array input
     assert_allclose(mg.argmin(a, axis=axis), np.argmin(a, axis=axis))
 
+
 @given(a=hnp.arrays(shape=hnp.array_shapes(max_side=4, max_dims=5),
                     dtype=dtype_strat_numpy),
        data=st.data())
