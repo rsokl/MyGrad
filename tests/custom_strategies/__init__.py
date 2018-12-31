@@ -61,7 +61,8 @@ def valid_axes(draw, ndim, pos_only=False, single_axis_only=False, permit_none=T
         raise ValueError("`ndim` must be an integer 0 or greater.")
     if single_axis_only:
         num_axes = draw(st.integers(min_value=0, max_value=1))
-    else:num_axes = draw(st.integers(min_value=0, max_value=ndim))
+    else:
+        num_axes = draw(st.integers(min_value=0, max_value=ndim))
 
     axes = draw(choices(range(ndim), num_axes, replace=False))
 

@@ -296,6 +296,7 @@ def test_conv_ND_bkwd(data, x, num_filters):
                        num_arrays=2,
                        index_to_arr_shapes={0: (2, 1, 7), 1: (2, 1, 3)},
                        kwargs={"stride": (1,)},
+                       index_to_bnds={0: (-10, 10), 1: (-10, 10)},
                        vary_each_element=True, as_decimal=False, atol=1e-4, rtol=1e-4)
 def test_conv_1d_bkwd():
     """ (N=2, C=1, W=7) x (F=2, C=1, Wf=3); stride=1, dilation=1
