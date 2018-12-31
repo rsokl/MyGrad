@@ -25,7 +25,8 @@ def test_sinc_backward(): pass
 def test_cos_fwd(): pass
 
 
-@backprop_test_factory(num_arrays=1, mygrad_func=cos, true_func=np.cos, as_decimal=False)
+@backprop_test_factory(num_arrays=1, mygrad_func=cos, true_func=np.cos, as_decimal=False,
+                       atol=1e-5)
 def test_cos_backward(): pass
 
 
