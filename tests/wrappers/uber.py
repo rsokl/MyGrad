@@ -176,6 +176,7 @@ class fwdprop_test_factory():
                                    err_msg="arr-{} was mutated during forward prop".format(n))
         return wrapper
 
+
 class backprop_test_factory():
     """ Decorator
 
