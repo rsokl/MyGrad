@@ -8,20 +8,24 @@ def _is_non_zero(x):
 
 
 @fwdprop_test_factory(mygrad_func=abs, true_func=np.abs, num_arrays=1)
-def test_abs_fwd(): pass
+def test_abs_fwd():
+    pass
 
 
 @backprop_test_factory(mygrad_func=abs, true_func=np.abs, num_arrays=1,
                        index_to_bnds={0: (-10, 10)}, assumptions=_is_non_zero,
                        atol=1e-5)
-def test_abs_backward(): pass
+def test_abs_backward():
+    pass
 
 
 @fwdprop_test_factory(mygrad_func=absolute, true_func=np.absolute, num_arrays=1)
-def test_absolute_fwd(): pass
+def test_absolute_fwd():
+    pass
 
 
 @backprop_test_factory(mygrad_func=absolute, true_func=np.absolute, num_arrays=1,
                        index_to_bnds={0: (-100, 100)}, index_to_no_go={0: (0,)},
                        atol=1e-5, assumptions=_is_non_zero)
-def test_absolute_backward(): pass
+def test_absolute_backward():
+    pass

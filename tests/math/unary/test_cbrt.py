@@ -8,11 +8,13 @@ def _is_non_zero(x):
 
 
 @fwdprop_test_factory(mygrad_func=cbrt, true_func=np.cbrt, num_arrays=1)
-def test_cbrt_fwd(): pass
+def test_cbrt_fwd():
+    pass
 
 
 @backprop_test_factory(mygrad_func=cbrt, true_func=np.cbrt,
                        index_to_bnds={0: (-100, 100)}, num_arrays=1,
                        assumptions=_is_non_zero,
                        as_decimal=False, atol=1e-5)
-def test_cbrt_backward(): pass
+def test_cbrt_backward():
+    pass

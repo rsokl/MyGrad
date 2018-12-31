@@ -37,26 +37,30 @@ def ddof_arg(*arrs):
 
 @fwdprop_test_factory(mygrad_func=amax, true_func=np.amax, num_arrays=1,
                       kwargs=dict(axis=axis_arg, keepdims=keepdims_arg))
-def test_max_fwd(): pass
+def test_max_fwd():
+    pass
 
 
 @backprop_test_factory(mygrad_func=amax, true_func=np.amax, num_arrays=1,
                        kwargs=dict(axis=axis_arg, keepdims=keepdims_arg),
                        vary_each_element=True, index_to_unique={0: True},
                        elements_strategy=st.integers)
-def test_max_bkwd(): pass
+def test_max_bkwd():
+    pass
 
 
 @fwdprop_test_factory(mygrad_func=amin, true_func=np.amin, num_arrays=1,
                       kwargs=dict(axis=axis_arg, keepdims=keepdims_arg))
-def test_min_fwd(): pass
+def test_min_fwd():
+    pass
 
 
 @backprop_test_factory(mygrad_func=amin, true_func=np.amin, num_arrays=1,
                        kwargs=dict(axis=axis_arg, keepdims=keepdims_arg),
                        vary_each_element=True, index_to_unique={0: True},
                        elements_strategy=st.integers)
-def test_min_bkwd(): pass
+def test_min_bkwd():
+    pass
 
 
 def test_min_max_aliases():
@@ -66,31 +70,36 @@ def test_min_max_aliases():
 
 @fwdprop_test_factory(mygrad_func=sum, true_func=np.sum, num_arrays=1,
                       kwargs=dict(axis=axis_arg, keepdims=keepdims_arg))
-def test_sum_fwd(): pass
+def test_sum_fwd():
+    pass
 
 
 @backprop_test_factory(mygrad_func=sum, true_func=np.sum, num_arrays=1,
                        kwargs=dict(axis=axis_arg, keepdims=keepdims_arg),
                        vary_each_element=True, atol=1e-5)
-def test_sum_bkwd(): pass
+def test_sum_bkwd():
+    pass
 
 
 @fwdprop_test_factory(mygrad_func=mean, true_func=np.mean, num_arrays=1,
                       kwargs=dict(axis=axis_arg, keepdims=keepdims_arg))
-def test_mean_fwd(): pass
+def test_mean_fwd():
+    pass
 
 
 @backprop_test_factory(mygrad_func=mean, true_func=np.mean, num_arrays=1,
                        kwargs=dict(axis=axis_arg, keepdims=keepdims_arg),
                        index_to_bnds={0: (-10, 10)},
                        vary_each_element=True)
-def test_mean_bkwd(): pass
+def test_mean_bkwd():
+    pass
 
 
 @fwdprop_test_factory(mygrad_func=var, true_func=np.var, num_arrays=1,
                       kwargs=dict(axis=axis_arg, keepdims=keepdims_arg,
                                   ddof=ddof_arg))
-def test_var_fwd(): pass
+def test_var_fwd():
+    pass
 
 
 @backprop_test_factory(mygrad_func=var, true_func=np.var, num_arrays=1,
@@ -98,14 +107,16 @@ def test_var_fwd(): pass
                                    ddof=ddof_arg),
                        vary_each_element=True, index_to_bnds={0: (-10, 10)},
                        atol=1e-5, rtol=1e-5)
-def test_var_bkwd(): pass
+def test_var_bkwd():
+    pass
 
 
 # std composes mygrad's sqrt and var, backprop need not be tested
 @fwdprop_test_factory(mygrad_func=std, true_func=np.std, num_arrays=1,
                       kwargs=dict(axis=axis_arg, keepdims=keepdims_arg,
                                   ddof=ddof_arg))
-def test_std_fwd(): pass
+def test_std_fwd():
+    pass
 
 
 def _assume(*arrs, **kwargs):
@@ -120,18 +131,21 @@ def _assume(*arrs, **kwargs):
                        index_to_unique={0: True},
                        assumptions=_assume,
                        atol=1e-5, rtol=1e-5)
-def test_std_bkwd(): pass
+def test_std_bkwd():
+    pass
 
 
 @fwdprop_test_factory(mygrad_func=prod, true_func=np.prod, num_arrays=1,
                       kwargs=dict(axis=axis_arg, keepdims=keepdims_arg))
-def test_prod_fwd(): pass
+def test_prod_fwd():
+    pass
 
 
 @backprop_test_factory(mygrad_func=prod, true_func=np.prod, num_arrays=1,
                        kwargs=dict(axis=axis_arg, keepdims=keepdims_arg),
                        vary_each_element=True, index_to_bnds={0: (-2, 2)})
-def test_prod_bkwd(): pass
+def test_prod_bkwd():
+    pass
 
 
 def test_int_axis_cumprod():
@@ -158,7 +172,8 @@ def test_cumprod_fwd(): pass
 @backprop_test_factory(mygrad_func=cumprod, true_func=np.cumprod, num_arrays=1,
                        kwargs=dict(axis=single_axis_arg),
                        vary_each_element=True, index_to_bnds={0: (-2, 2)})
-def test_cumprod_bkwd(): pass
+def test_cumprod_bkwd():
+    pass
 
 
 @settings(deadline=None)
@@ -167,7 +182,8 @@ def test_cumprod_bkwd(): pass
                        vary_each_element=True, index_to_bnds={0: (-.5, .5)},
                        index_to_unique={0: True},
                        index_to_arr_shapes={0: hnp.array_shapes(max_side=5, max_dims=4)})
-def test_cumprod_bkwd2(): pass
+def test_cumprod_bkwd2():
+    pass
 
 
 def test_int_axis_cumsum():
@@ -187,7 +203,8 @@ def test_int_axis_cumsum():
 
 @fwdprop_test_factory(mygrad_func=cumsum, true_func=np.cumsum, num_arrays=1,
                       kwargs=dict(axis=single_axis_arg))
-def test_cumsum_fwd(): pass
+def test_cumsum_fwd():
+    pass
 
 
 @settings(deadline=None)
@@ -195,5 +212,6 @@ def test_cumsum_fwd(): pass
                        kwargs=dict(axis=single_axis_arg),
                        vary_each_element=True, index_to_bnds={0: (-2, 2)},
                        atol=1e-5)
-def test_cumsum_bkwd(): pass
+def test_cumsum_bkwd():
+    pass
 
