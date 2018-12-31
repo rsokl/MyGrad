@@ -79,7 +79,9 @@ def numerical_gradient(f, *args, back_grad, vary_ind=None, h=1e-8, as_decimal=Tr
     if not args:
         raise ValueError("At least one value must be passed to `args`")
 
-    h = Decimal(h)
+    h = Decimal(h) if as_decimal else h
+    two_h = Decimal(2)*h if as_decimal else 2*h
+
     args = tuple(to_decimal_array(i) if as_decimal else i for i in args)
 
     grads = [None]*len(args)
@@ -96,7 +98,7 @@ def numerical_gradient(f, *args, back_grad, vary_ind=None, h=1e-8, as_decimal=Tr
         if vary_ind is not None and n not in vary_ind:
             continue
         # central difference in variable n
-        dvar = (f(*gen_fwd_diff(n), **kwargs) - f(*gen_bkwd_diff(n), **kwargs)) / (Decimal(2) * h)
+        dvar = (f(*gen_fwd_diff(n), **kwargs) - f(*gen_bkwd_diff(n), **kwargs)) / (two_h)
         grads[n] = reduce_broadcast(back_grad * dvar.astype(float), args[n].shape)
 
     return grads
