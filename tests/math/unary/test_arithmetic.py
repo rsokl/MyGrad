@@ -4,7 +4,7 @@ import numpy as np
 
 
 def _is_non_zero(x):
-    return np.all(np.abs(x.data) > 1e-6)
+    return np.all(np.abs(x.data) > 1e-3)
 
 
 @fwdprop_test_factory(mygrad_func=positive, true_func=np.positive, num_arrays=1)
