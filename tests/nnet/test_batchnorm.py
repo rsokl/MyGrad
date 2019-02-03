@@ -34,11 +34,11 @@ def simple_batchnorm(x, gamma, beta, eps):
        data=st.data())
 def test_batchnorm(x, data):
     # optionally draw affine parameters
-    gamma = data.draw(st.one_of(hnp.arrays(shape=x.shape[1:2], dtype=float, elements=st.floats(-10, 10)),
-                                st.none()),
+    gamma = data.draw(st.one_of(st.none(),
+                                hnp.arrays(shape=x.shape[1:2], dtype=float, elements=st.floats(-10, 10))),
                       label="gamma")
-    beta = data.draw(st.one_of(hnp.arrays(shape=x.shape[1:2], dtype=float, elements=st.floats(-10, 10)),
-                               st.none()),
+    beta = data.draw(st.one_of(st.none(),
+                               hnp.arrays(shape=x.shape[1:2], dtype=float, elements=st.floats(-10, 10))),
                      label="beta")
     x_orig = np.copy(x)
 
@@ -54,10 +54,10 @@ def test_batchnorm(x, data):
     b1 = Tensor(beta) if beta is not None else None
     b2 = Tensor(beta) if beta is not None else None
 
-    y1 = simple_batchnorm(t1, g1, b1, eps=1e-7)
-    y2 = batchnorm(t2, gamma=g2, beta=b2, eps=1e-7)
+    y1 = simple_batchnorm(t1, g1, b1, eps=1e-6)
+    y2 = batchnorm(t2, gamma=g2, beta=b2, eps=1e-6)
 
-    assert_allclose(actual=y2.data, desired=y1.data, atol=1e-7, rtol=1e-7)
+    assert_allclose(actual=y2.data, desired=y1.data, atol=1e-6, rtol=1e-6)
     grad = data.draw(hnp.arrays(shape=y2.shape, dtype=t2.dtype, elements=st.floats(-10, 10)),
                      label='grad')
     grad_orig = np.copy(grad)

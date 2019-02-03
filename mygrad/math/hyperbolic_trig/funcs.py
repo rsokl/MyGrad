@@ -184,18 +184,29 @@ def sinh(a, constant=False):
     return Tensor._op(Sinh, a, constant=constant)
 
 
-def tanh(a, constant=False):
-    """ ``f(a) -> tanh(a)``
+def tanh(x, constant=False):
+    """ ``f(x) -> tanh(x)``
 
-        Parameters
-        ----------
-        a : array_like
+    Parameters
+    ----------
+    x : array_like
+        tanh is applied element-wise to ``x``
 
-        constant : bool, optional(default=False)
-            If ``True``, the returned tensor is a constant (it
-            does not backpropagate a gradient)
+    constant : bool, optional(default=False)
+        If ``True``, the returned tensor is a constant (it
+        does not backpropagate a gradient)
 
-        Returns
-        -------
-        mygrad.Tensor"""
-    return Tensor._op(Tanh, a, constant=constant)
+    Returns
+    -------
+    mygrad.Tensor
+
+    Examples
+    --------
+    >>> import mygrad as mg
+    >>> from mygrad.nnet import softmax, sigmoid, tanh
+    >>> x = mg.linspace(-5, 5, 10)
+    >>> tanh(x)
+    Tensor([-0.9999092 , -0.99916247, -0.99229794, -0.93110961, -0.5046724 ,
+             0.5046724 ,  0.93110961,  0.99229794,  0.99916247,  0.9999092 ])
+    """
+    return Tensor._op(Tanh, x, constant=constant)

@@ -7,7 +7,7 @@ def sliding_window_view(arr, window_shape, step, dilation=None):
     """ Create a sliding window view over the trailing dimensions of an array.
         No copy is made.
 
-        The window is applied only to valid regions of `arr`, but is applied geedily.
+        The window is applied only to valid regions of ``arr``, but is applied geedily.
 
         See Notes section for details.
 
@@ -15,52 +15,55 @@ def sliding_window_view(arr, window_shape, step, dilation=None):
         ----------
         arr : numpy.ndarray, shape=(..., [x, (...), z])
             C-contiguous array over which sliding view-window is applied along the trailing
-            dimensions [x, ..., z], as determined by the length of `window_shape`.
+            dimensions ``[x, ..., z]``, as determined by the length of ``window_shape``.
 
-            If `arr` is not C-contiguous, it will be replaced by `numpy.ascontiguousarray(arr)`
+            If ``arr`` is not C-contiguous, it will be replaced by ``numpy.ascontiguousarray(arr)``
 
         window_shape : Sequence[int]
-            Specifies the shape of the view-window: [Wx, (...), Wz].
-            The length of `window_shape` determines the length of [x, (...) , z]
+            Specifies the shape of the view-window: ``[Wx, (...), Wz]``.
+            The length of `window_shape` determines the length of ``[x, (...) , z]``.
 
         step : Union[int, Sequence[int]]
-            The step sized used along the [x, (...), z] dimensions: [Sx, (...), Sz].
+            The step sized used along the ``[x, (...), z]`` dimensions: ``[Sx, (...), Sz]``.
             If a single integer is specified, a uniform step size is used.
 
         dilation : Optional[Sequence[int]]
-            The dilation factor used along the [x, (...), z] directions: [Dx, (...), Dz].
+            The dilation factor used along the ``[x, (...), z]`` directions: ``[Dx, (...), Dz]``.
             If no value is specified, a dilation factor of 1 is used along each direction.
             Dilation specifies the step size used when filling the window's elements
 
         Returns
         -------
-        A contiguous view of `arr`, of shape ([X, (...), Z], ..., [Wx, (...), Wz]), where
-        [X, ..., Z] is the shape of the grid on which the window was applied. See Notes
-        sections for more details.
+        numpy.ndarray
+            A contiguous view of ``arr``, of shape ``([X, (...), Z], ..., [Wx, (...), Wz])``, where
+            ``[X, ..., Z]`` is the shape of the grid on which the window was applied. See Notes
+            sections for more details.
 
         Notes
         -----
         Window placement:
             Given a dimension of size x, with a window of size W along this dimension, applied
-            with stride S and dilation D, the window will be applied
+            with stride S and dilation D, the window will be applied::
                                       X = (x - (W - 1) * D + 1) // S + 1
             number of times along that dimension.
 
         Interpreting output:
-            In general, given an array `arr` of shape (..., x, (...), z), and
-                `out = sliding_window_view(arr, window_shape=[Wx, (...), Wz], step=[Sx, (...), Sz])`
-            the indexing `out` with [ix, (...), iz] produces the following view of x:
+            In general, given an array ``arr`` of shape (..., x, (...), z), and::
 
-                `out[ix, (...), iz] ==
-                    x[..., ix*Sx:(ix*Sx + Wx*Dx):Dx, (...), iz*Sz:(iz*Sz + Wz*Dz):Dz]`
+                out = sliding_window_view(arr, window_shape=[Wx, (...), Wz], step=[Sx, (...), Sz])
 
-            For example, suppose `arr` is an array of shape (10, 12, 6). Specifying sliding
-            window of shape (3, 3) with step size (2, 2), dilation (2, 1) will create the view:
+            then indexing ``out`` with ``[ix, (...), iz]`` produces the following view of ``x``::
+
+                out[ix, (...), iz] ==
+                    x[..., ix*Sx:(ix*Sx + Wx*Dx):Dx, (...), iz*Sz:(iz*Sz + Wz*Dz):Dz]
+
+            For example, suppose ``arr`` is an array of shape-(10, 12, 6). Specifying sliding
+            window of shape ``(3, 3)`` with step size ``(2, 2)``, dilation ``(2, 1)`` will create the view::
 
                             [[arr[:,  0:6:2, 0:3], arr[:,   0:6:3, 3:6]]
                              [arr[:, 6:12:2, 0:3], arr[:, 6:12:12, 3:6]]]
 
-            producing a view of shape (2, 2, 10, 3, 3) in total.
+            producing a view of shape ``(2, 2, 10, 3, 3)`` in total.
 
         Examples
         --------

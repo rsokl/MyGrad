@@ -361,9 +361,8 @@ class GRUnit(Operation):
 
 
 def gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None, dropout=0., constant=False):
-
-    """ Performs a forward pass of sequential data through a Gated Recurrent Unit layer, returning
-        the 'hidden-descriptors' arrived at by utilizing the trainable parameters as follows:
+    r""" Performs a forward pass of sequential data through a Gated Recurrent Unit layer, returning
+        the 'hidden-descriptors' arrived at by utilizing the trainable parameters as follows::
 
                     Z_{t} = sigmoid(X_{t} Uz + S_{t-1} Wz + bz)
                     R_{t} = sigmoid(X_{t} Ur + S_{t-1} Wr + br)
@@ -427,20 +426,36 @@ def gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None, dropout=0.,
 
         Notes
         -----
-        T : Sequence length
-        N : Batch size
-        C : Length of single datum
-        D : Length of 'hidden' descriptor
+        - :math:`T` : Sequence length
+        - :math:`N` : Batch size
+        - :math:`C` : Length of single datum
+        - :math:`D` : Length of 'hidden' descriptor
+
+        The GRU system of equations is given by:
+
+        .. math::
+
+                    Z_{t} = \sigma (X_{t} U_z + S_{t-1} Wz + bz)
+
+                    R_{t} = \sigma (X_{t} U_r + S_{t-1} Wr + br)
+
+                    H_{t} =  tanh(X_{t} U_h + (R_{t} * S_{t-1}) W_h + b_h)
+
+                    S_{t} = (1 - Z_{t}) * H_{t} + Z_{t} * S_{t-1}
 
         Following the dropout scheme specified in [1]_, the hidden-hidden weights (Wz/Wr/Wh)
         randomly have their weights dropped prior to forward/back-prop. The input connections
         (via Uz/Ur/Uh) have variational dropout ([2]_) applied to them with a common dropout
         mask across all t. That is three static dropout masks, each with shape-(N,D), are
         applied to
-                                              X_{t} Uz
-                                              X_{t} Ur
-                                              X_{t} Uh
-        respectively, for all t.
+
+        .. math::
+                                              X_{t} U_z
+
+                                              X_{t} U_r
+
+                                              X_{t} U_h
+        respectively, for all :math:`t`.
 
         References
         ----------

@@ -24,9 +24,7 @@ class GetItem(Operation):
                 supported."""
         self.variables = (a,)
         self.index = index
-        out = a.data[index]
-        self.shape = out.shape if isinstance(out, np.ndarray) else None
-        return out
+        return a.data[index]
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]

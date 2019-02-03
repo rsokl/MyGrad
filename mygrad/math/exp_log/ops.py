@@ -87,6 +87,7 @@ class Logaddexp2(BroadcastableOp):
         else:
             raise IndexError
 
+
 class Log(Operation):
     """ f(a) -> ln(a)"""
     def __call__(self, a):

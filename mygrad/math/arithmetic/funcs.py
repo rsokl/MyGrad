@@ -31,7 +31,19 @@ def add(a, b, constant=False):
 
         Returns
         -------
-        mygrad.Tensor"""
+        mygrad.Tensor
+        
+        Examples
+        --------
+        >>> import mygrad as mg
+        >>> mg.add(1.0, 4.0)
+        Tensor(5.0)
+        >>> x1 = mg.arange(9.0).reshape((3, 3))
+        >>> x2 = mg.arange(3.0)
+        >>> mg.add(x1, x2)  # equivalent to `x1 + x2`
+        Tensor([[  0.,   2.,   4.],
+                [  3.,   5.,   7.],
+                [  6.,   8.,  10.]])"""
     return Tensor._op(Add, a, b, constant=constant)
 
 
@@ -50,7 +62,20 @@ def subtract(a, b, constant=False):
 
         Returns
         -------
-        mygrad.Tensor"""
+        mygrad.Tensor
+
+        Examples
+        --------
+        >>> import mygrad as mg
+        >>> mg.subtract(1.0, 4.0, constant=True)  # resulting tensor will not back-propagate a gradient
+        Tensor(5.0)
+        >>> x1 = mg.arange(9.0).reshape((3, 3))
+        >>> x2 = mg.arange(3.0)
+        >>> mg.subtract(x2, x1)  # equivalent to `x2 - x1`
+        Tensor([[  0.,   0.,   0.],
+                [  3.,   3.,   3.],
+                [  6.,   6.,  6.]])
+    """
     return Tensor._op(Subtract, a, b, constant=constant)
 
 
@@ -87,6 +112,7 @@ def square(a, constant=False):
         -------
         mygrad.Tensor"""
     return Tensor._op(Square, a, constant=constant)
+
 
 def reciprocal(a, constant=False):
     """ ``f(a) -> 1 / a``
@@ -144,9 +170,9 @@ def multiply(a, b, constant=False):
 
 
 def multiply_sequence(*variables, constant=False):
-    """ Add a sequence of N tensors.
+    """  ``f(a, b, ...) -> a + b + ...``
 
-        ``f(a, b, ...) -> a + b + ...``
+        Add a sequence of N tensors.
 
         Parameters
         ----------
@@ -169,9 +195,9 @@ def multiply_sequence(*variables, constant=False):
 
 
 def add_sequence(*variables, constant=False):
-    """ Multiply a sequence of N tensors.
+    """ ``f(a, b, ...) -> a * b * ...``
 
-        ``f(a, b, ...) -> a * b * ...``
+        Multiply a sequence of N tensors.
 
         Parameters
         ----------

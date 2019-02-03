@@ -1,13 +1,13 @@
 """ Test `numerical_gradient`, `numerical_derivative`, and `broadcast_check`"""
 
-from tests.utils.numerical_gradient import numerical_gradient, numerical_derivative, numerical_gradient_full
+from tests.utils.numerical_gradient import numerical_gradient, numerical_gradient_full
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
-from hypothesis import given
+from hypothesis import given, settings
 
-import numpy as np
 from numpy.testing import assert_allclose
+
 
 def unary_func(x): return x ** 2
 
@@ -16,13 +16,6 @@ def binary_func(x, y): return x * y ** 2
 
 
 def ternary_func(x, y, z): return z * x * y ** 2
-
-
-
-@given(x=st.decimals(-100, 100))
-def test_numerical_derivative(x):
-    num_der = numerical_derivative(unary_func, x)
-    assert np.isclose(float(num_der), float(x) * 2.)
 
 
 @given(st.data())
@@ -124,8 +117,8 @@ def test_numerical_gradient_xy_broadcast(data):
     dx, dy = numerical_gradient(binary_func, x, y, back_grad=grad)
     x_grad = (grad * y ** 2).sum(axis=1, keepdims=True)
     y_grad = (grad * 2 * x * y).sum(axis=0, keepdims=True)
-    assert_allclose(dx, x_grad)
-    assert_allclose(dy, y_grad)
+    assert_allclose(dx, x_grad, atol=1e-5, rtol=1e-5)
+    assert_allclose(dy, y_grad, atol=1e-5, rtol=1e-5)
 
 
 @given(st.data())
@@ -147,5 +140,5 @@ def test_numerical_gradient_full_xy_broadcast(data):
     dx, dy = numerical_gradient_full(binary_func, x, y, back_grad=grad)
     x_grad = (grad * y ** 2).sum(axis=1, keepdims=True)
     y_grad = (grad * 2 * x * y).sum(axis=0, keepdims=True)
-    assert_allclose(dx, x_grad, atol=1e-4, rtol=1e-4)
-    assert_allclose(dy, y_grad, atol=1e-4, rtol=1e-4)
+    assert_allclose(dx, x_grad, atol=1e-3, rtol=1e-3)
+    assert_allclose(dy, y_grad, atol=1e-3, rtol=1e-3)
