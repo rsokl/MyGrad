@@ -1,3 +1,4 @@
+import mygrad as mg
 from mygrad.tensor_base import Tensor
 from mygrad.nnet.losses import multiclass_hinge
 
@@ -7,6 +8,7 @@ import hypothesis.strategies as st
 from hypothesis import given
 import hypothesis.extra.numpy as hnp
 
+from pytest import raises
 
 @given(st.data())
 def test_multiclass_hinge(data):
@@ -33,3 +35,25 @@ def test_multiclass_hinge(data):
     pygrad_loss.backward()
     assert_allclose(hinge_loss.data, pygrad_loss.data)
     assert_allclose(pygrad_scores.grad, hinge_scores.grad)
+
+
+@given(shape=st.sampled_from([(3, 1), (3, 4), tuple()]))
+def test_bad_label_shape(shape):
+    """
+    Ensures that `multiclass_hinge` checks for shape-(N,) `y_true`
+    """
+    scores = mg.arange(12).reshape(3, 4)
+    labels = mg.zeros(shape, dtype=int)
+    with raises(ValueError):
+        multiclass_hinge(scores, labels)
+
+
+@given(type=st.sampled_from([bool, float, np.float32]))
+def test_bad_label_type(type):
+    """
+    Ensures that `multiclass_hinge` checks integer-type `y_true`
+    """
+    scores = mg.arange(12).reshape(3, 4)
+    labels = np.zeros((3,), dtype=type)
+    with raises(TypeError):
+        multiclass_hinge(scores, labels)

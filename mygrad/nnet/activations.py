@@ -1,4 +1,5 @@
 import numpy as np
+
 from mygrad.math._special import logsumexp as _logsumexp
 
 from mygrad.operation_base import Operation
