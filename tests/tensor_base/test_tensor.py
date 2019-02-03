@@ -103,11 +103,13 @@ dtype_strat_numpy = st.sampled_from((np.int8, np.int16, np.int32, np.int64,
        creator=st.sampled_from((None, op)),
        constant=st.booleans(),
        scalar_only=st.booleans(),
-       dtype=dtype_strat)
-def test_init_params(data, creator, constant, scalar_only, dtype):
+       dtype=dtype_strat,
+       numpy_dtype=dtype_strat_numpy)
+def test_init_params(data, creator, constant, scalar_only, dtype, numpy_dtype):
+    elements = st.floats if np.issubdtype(numpy_dtype, np.floating) else st.integers
     a = data.draw(hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=5),
-                             dtype=dtype_strat_numpy,
-                             elements=st.floats(-100, 100)),
+                             dtype=numpy_dtype,
+                             elements=elements(-100, 100)),
                   label="a")
     if dtype is not None:
         a = a.astype(dtype)

@@ -79,9 +79,12 @@ def test_batchnorm(x, data):
 
     for n, (o, c) in enumerate(zip((x, gamma, beta, grad), (x_orig, gamma_orig, beta_orig, grad_orig))):
         if o is None or c is None:
-            assert o is c, f"{('x', 'gamma', 'beta', 'grad')[n]}"
+            assert o is c, "('{x}', '{gamma}', '{beta}', '{grad}')[{n}]".format(x=x, gamma=gamma,
+                                                                                  beta=beta, grad=grad, n=n)
         else:
-            assert_array_equal(o, c, err_msg=f"{('x', 'gamma', 'beta', 'grad')[n]}")
+            assert_array_equal(o, c, err_msg="('{x}', '{gamma}', '{beta}', '{grad}')[{n}]".format(x=x, gamma=gamma,
+                                                                                                  beta=beta, grad=grad,
+                                                                                                  n=n))
 
     if gamma is not None and beta is not None:
         assert not np.shares_memory(g2.grad, b2.grad)

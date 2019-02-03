@@ -203,7 +203,7 @@ def test_bad_conv_shapes():
 
 @settings(deadline=None)
 @given(data=st.data(),
-       x=hnp.arrays(dtype=float, shape=hnp.array_shapes(max_dims=6, min_dims=3, max_side=15),
+       x=hnp.arrays(dtype=float, shape=hnp.array_shapes(max_dims=6, min_dims=3, max_side=6),
                     elements=st.floats(-10, 10)),
        num_filters=st.integers(1, 3))
 def test_conv_ND_fwd(data, x, num_filters):

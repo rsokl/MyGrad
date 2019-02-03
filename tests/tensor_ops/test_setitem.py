@@ -256,6 +256,7 @@ def test_setitem_adv_bool_index(x, data):
     assert_allclose(y_arr.grad, dy)
 
 
+@settings(deadline=None)
 @given(x=hnp.arrays(shape=(4, 3),
                     dtype=float,
                     elements=st.floats(-10., 10.)),
@@ -297,6 +298,7 @@ def test_setitem_broadcast_index(x, data):
     assert_allclose(y_arr.grad, dy)
 
 
+@settings(deadline=None)
 @given(x=hnp.arrays(shape=(4, 3),
                     dtype=float,
                     elements=st.floats(-10., 10.)),
@@ -335,6 +337,7 @@ def test_setitem_mixed_index(x, data):
     assert_allclose(y_arr.grad, dy)
 
 
+@settings(deadline=None)
 @given(x=hnp.arrays(shape=(4, 3),
                     dtype=float,
                     elements=st.floats(-10., 10.)),
@@ -375,6 +378,7 @@ def test_setitem_broadcast_bool_index(x, data):
     assert_allclose(y_arr.grad, dy)
 
 
+@settings(deadline=None)
 @given(x=hnp.arrays(shape=(4, 3),
                     dtype=float,
                     elements=st.floats(-10., 10.)),
@@ -413,6 +417,7 @@ def test_setitem_bool_basic_index(x, data):
     assert_allclose(y_arr.grad, dy)
 
 
+@settings(deadline=None)
 @given(x=hnp.arrays(shape=(3, 3),
                     dtype=float,
                     elements=st.floats(-10., 10.)),
