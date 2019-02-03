@@ -9,7 +9,8 @@ def test_sin_fwd():
     pass
 
 
-@backprop_test_factory(num_arrays=1, mygrad_func=sin, true_func=np.sin, as_decimal=False)
+@backprop_test_factory(num_arrays=1, mygrad_func=sin, true_func=np.sin, as_decimal=False,
+                       atol=1e-6, rtol=1e-6)
 def test_sin_backward():
     pass
 

@@ -9,12 +9,13 @@ from .utils.numerical_gradient import numerical_gradient_full
 from .wrappers.uber import fwdprop_test_factory, backprop_test_factory
 
 import hypothesis.extra.numpy as hnp
-from hypothesis import given, assume
+from hypothesis import given, assume, settings
 import hypothesis.strategies as st
 
 from pytest import raises
     
-    
+
+@settings(deadline=None)
 @given(x=hnp.arrays(shape=hnp.array_shapes(max_side=4, max_dims=5),
                     dtype=float,
                     elements=st.floats(-10., 10.)),
@@ -165,6 +166,7 @@ def test_moveaxis_fwd():
     pass
 
 
+@settings(deadline=None)
 @backprop_test_factory(mygrad_func=moveaxis, true_func=np.moveaxis,
                        num_arrays=1, kwargs=dict(source=lambda x: valid_axes(x.ndim, permit_none=False),
                                                  destination=lambda x: valid_axes(x.ndim, permit_none=False)),

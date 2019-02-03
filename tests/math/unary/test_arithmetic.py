@@ -4,7 +4,7 @@ import numpy as np
 
 
 def _is_non_zero(x):
-    return np.all(np.abs(x.data) > 1e-8)
+    return np.all(np.abs(x.data) > 1e-6)
 
 
 @fwdprop_test_factory(mygrad_func=positive, true_func=np.positive, num_arrays=1)
@@ -34,7 +34,7 @@ def test_reciprocal_fwd():
 
 
 @backprop_test_factory(mygrad_func=reciprocal, true_func=np.reciprocal, num_arrays=1,
-                       assumptions=_is_non_zero)
+                       assumptions=_is_non_zero, atol=1e-5, rtol=1e-5)
 def test_reciprocal_backward():
     pass
 
