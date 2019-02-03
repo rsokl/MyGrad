@@ -4,7 +4,7 @@ from tests.utils.numerical_gradient import numerical_gradient, numerical_gradien
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
-from hypothesis import given
+from hypothesis import given, settings
 
 from numpy.testing import assert_allclose
 
@@ -117,8 +117,8 @@ def test_numerical_gradient_xy_broadcast(data):
     dx, dy = numerical_gradient(binary_func, x, y, back_grad=grad)
     x_grad = (grad * y ** 2).sum(axis=1, keepdims=True)
     y_grad = (grad * 2 * x * y).sum(axis=0, keepdims=True)
-    assert_allclose(dx, x_grad)
-    assert_allclose(dy, y_grad)
+    assert_allclose(dx, x_grad, atol=1e-5, rtol=1e-5)
+    assert_allclose(dy, y_grad, atol=1e-5, rtol=1e-5)
 
 
 @given(st.data())
@@ -140,5 +140,5 @@ def test_numerical_gradient_full_xy_broadcast(data):
     dx, dy = numerical_gradient_full(binary_func, x, y, back_grad=grad)
     x_grad = (grad * y ** 2).sum(axis=1, keepdims=True)
     y_grad = (grad * 2 * x * y).sum(axis=0, keepdims=True)
-    assert_allclose(dx, x_grad, atol=1e-4, rtol=1e-4)
-    assert_allclose(dy, y_grad, atol=1e-4, rtol=1e-4)
+    assert_allclose(dx, x_grad, atol=1e-3, rtol=1e-3)
+    assert_allclose(dy, y_grad, atol=1e-3, rtol=1e-3)

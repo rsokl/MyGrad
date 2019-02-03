@@ -5,12 +5,14 @@ from mygrad.nnet.activations import tanh
 
 
 import hypothesis.strategies as st
-from hypothesis import given
+from hypothesis import given, settings
 import hypothesis.extra.numpy as hnp
 
 import numpy as np
 from numpy.testing import assert_allclose
 
+
+@settings(deadline=None)
 @given(st.data())
 def test_recurrent(data):
     X = data.draw(hnp.arrays(shape=hnp.array_shapes(max_side=5, min_dims=3, max_dims=3),

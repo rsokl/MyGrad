@@ -4,7 +4,7 @@ from mygrad.nnet.activations import tanh, sigmoid
 from mygrad import matmul
 
 import hypothesis.strategies as st
-from hypothesis import given
+from hypothesis import given, settings
 import hypothesis.extra.numpy as hnp
 
 import numpy as np
@@ -14,6 +14,7 @@ from numpy.testing import assert_allclose
 def dense(x, y): return matmul(x, y)
 
 
+@settings(deadline=None)
 @given(st.data())
 def test_gru_fwd(data):
     X = data.draw(hnp.arrays(shape=hnp.array_shapes(max_side=5, min_dims=3, max_dims=3),
@@ -179,6 +180,7 @@ def test_gru_fwd(data):
         assert x.grad is None
 
 
+@settings(deadline=None)
 @given(st.data())
 def test_gru_backward(data):
     tolerances = dict(atol=1e-5, rtol=1e-5)
