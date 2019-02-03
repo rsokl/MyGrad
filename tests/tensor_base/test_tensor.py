@@ -97,6 +97,8 @@ dtype_strat = st.sampled_from((None, int, float,
                                np.float16, np.float32, np.float64))
 dtype_strat_numpy = st.sampled_from((np.int8, np.int16, np.int32, np.int64,
                                      np.float16, np.float32, np.float64))
+
+
 @given(data=st.data(),
        creator=st.sampled_from((None, op)),
        constant=st.booleans(),
@@ -120,83 +122,115 @@ def test_init_params(data, creator, constant, scalar_only, dtype):
     assert tensor.grad is None
 
 
-def test_special_methods():
+@given(constant_x=st.booleans(), constant_y=st.booleans())
+def test_special_methods(constant_x: bool, constant_y: bool):
     from mygrad.math.arithmetic.ops import Add, Subtract, Multiply, Divide, Power
     from mygrad.math.arithmetic.ops import Negative
     from mygrad.linalg.ops import MatMul
 
-    x = Tensor([2, 8, 5])
-    y = Tensor([1, 3, 2])
+    x = Tensor([2., 8., 5.], constant=constant_x)
+    y = Tensor([1., 3., 2.], constant=constant_y)
+
+    constant = constant_x and constant_y
 
     for op_name, op in zip(("__add__", "__sub__", "__mul__", "__truediv__", "__pow__", "__matmul__"),
                            (Add, Subtract, Multiply, Divide, Power, MatMul)):
+        assert hasattr(Tensor, op_name), "`Tensor` is missing the attribute {}".format(op_name)
         tensor_out = getattr(Tensor, op_name)(x, y)
         numpy_out = getattr(np.ndarray, op_name)(x.data, y.data)
-        assert isinstance(tensor_out, Tensor)
-        assert not tensor_out.constant
-        assert_equal(tensor_out.data, numpy_out)
-        assert isinstance(tensor_out.creator, op)
-        assert tensor_out.creator.variables[0] is x
-        assert tensor_out.creator.variables[1] is y
+        assert isinstance(tensor_out, Tensor), "`Tensor.{}` did not return a Tensor-instance".format(op_name)
+
+        assert tensor_out.constant is constant, "`Tensor.{}` did not propagate constant properly".format(op_name)
+
+        assert_equal(tensor_out.data, numpy_out, err_msg="`Tensor.{}` did not produce the correct "
+                                                         "numerical result.".format(op_name))
+
+        assert isinstance(tensor_out.creator, op), "`Tensor.{}` does not have the expected " \
+                                                   "creator-instance".format(op_name)
+
+        assert tensor_out.creator.variables[0] is x, "`Tensor.{}`'s creator did not record the " \
+                                                     "correct variable x".format(op_name)
+
+        assert tensor_out.creator.variables[1] is y, "`Tensor.{}`'s creator did not record the " \
+                                                     "correct variable y".format(op_name)
 
     for op_name, op in zip(("__radd__", "__rsub__", "__rmul__", "__rtruediv__", "__rpow__", "__rmatmul__"),
                            (Add, Subtract, Multiply, Divide, Power, MatMul)):
+        assert hasattr(Tensor, op_name), "`Tensor` is missing the attribute {}".format(op_name)
         tensor_out = getattr(Tensor, op_name)(x, y)
         numpy_out = getattr(np.ndarray, op_name)(x.data, y.data)
-        assert isinstance(tensor_out, Tensor)
-        assert not tensor_out.constant
-        assert_equal(tensor_out.data, numpy_out)
-        assert isinstance(tensor_out.creator, op)
-        assert tensor_out.creator.variables[0] is y
-        assert tensor_out.creator.variables[1] is x
+        assert isinstance(tensor_out, Tensor), "`Tensor.{}` did not return a Tensor-instance".format(op_name)
+        assert tensor_out.constant is constant, "`Tensor.{}` did not propagate constant properly".format(op_name)
+        assert_equal(tensor_out.data, numpy_out, err_msg="`Tensor.{}` did not produce the correct "
+                                                         "numerical result.".format(op_name))
+        assert isinstance(tensor_out.creator, op), "`Tensor.{}` does not have the expected " \
+                                                   "creator-instance".format(op_name)
 
+        assert tensor_out.creator.variables[0] is y, "`Tensor.{}`'s creator did not record the " \
+                                                     "correct variable x".format(op_name)
+
+        assert tensor_out.creator.variables[1] is x, "`Tensor.{}`'s creator did not record the " \
+                                                     "correct variable y".format(op_name)
+
+    op_name = "__neg__"
+    assert hasattr(Tensor, op_name), "`Tensor` is missing the attribute {}".format(op_name)
     tensor_out = getattr(Tensor, "__neg__")(x)
     numpy_out = getattr(np.ndarray, "__neg__")(x.data)
-    assert isinstance(tensor_out, Tensor)
-    assert not tensor_out.constant
-    assert_equal(tensor_out.data, numpy_out)
-    assert isinstance(tensor_out.creator, Negative)
-    assert tensor_out.creator.variables[0] is x
+    assert isinstance(tensor_out, Tensor), "`Tensor.{}` did not return a Tensor-instance".format(op_name)
+
+    assert_equal(tensor_out.data, numpy_out, err_msg="`Tensor.{}` did not produce the correct "
+                                                     "numerical result.".format(op_name))
+
+    assert isinstance(tensor_out.creator, Negative), "`Tensor.{}` does not have the expected " \
+                                                     "creator-instance".format(op_name)
+
+    assert tensor_out.creator.variables[0] is x, "`Tensor.{}`'s creator did not record the " \
+                                                 "correct variable x".format(op_name)
 
 
 def test_comparison_ops():
     x = Tensor([1, 3, 5])
     y = Tensor([1, 4, 2])
     for op in ("__lt__", "__le__", "__gt__", "__ge__", "__eq__", "__ne__"):
+        assert hasattr(Tensor, op), "`Tensor` is missing the attribute {}".format(op)
         tensor_out = getattr(Tensor, op)(x, y)
         array_out = getattr(np.ndarray, op)(x.data, y.data)
-        assert_equal(actual=tensor_out, desired=array_out)
+        assert_equal(actual=tensor_out, desired=array_out, err_msg="The comparison operation `Tensor.{}` "
+                                                                   "does not match the expected behavior "
+                                                                   "by comparison to numpy.ndarray".format(op))
 
 
-def test_math_methods():
-    x = Tensor([[1, 2, 3],
-                [4, 5, 6]])
+@given(constant=st.booleans())
+def test_math_methods(constant: bool):
+    x = Tensor([[1., 2., 3.],
+                [4., 5., 6.]], constant=constant)
     for attr in ("sum", "prod", "cumprod", "cumsum",
                  "mean", "std", "var",
                  "max", "min",
-                 "transpose", "squeeze"):
+                 "transpose", "squeeze", "ravel"):
+        assert hasattr(x, attr), "`Tensor` is missing the attribute: {attr}".format(attr=attr)
         method_out = getattr(x, attr).__call__()
         function_out = getattr(mg, attr).__call__(x)
         assert_equal(method_out.data, function_out.data)
-        assert not method_out.constant
+        assert method_out.constant is constant, "`Tensor.{}` did not propagate constant properly".format(attr)
         assert type(method_out.creator) is type(function_out.creator)
 
     method_out = x.moveaxis(0, -1)
     function_out = mg.moveaxis(x, 0, -1)
     assert_equal(method_out.data, function_out.data)
-    assert not method_out.constant
+    assert method_out.constant is constant, "`Tensor.moveaxis` did not propagate constant properly".format(attr)
     assert type(method_out.creator) is type(function_out.creator)
 
     method_out = x.swapaxes(0, -1)
     function_out = mg.swapaxes(x, 0, -1)
     assert_equal(method_out.data, function_out.data)
-    assert not method_out.constant
+    assert method_out.constant is constant, "`Tensor.swapaxes` did not propagate constant properly".format(attr)
     assert type(method_out.creator) is type(function_out.creator)
 
 
-@given(x=st.floats(min_value=-1E-6, max_value=1E6),
-       y=st.floats(min_value=-1E-6, max_value=1E6),
-       z=st.floats(min_value=-1E-6, max_value=1E6),
+@given(x=st.floats(min_value=-1E6, max_value=1E6),
+       y=st.floats(min_value=-1E6, max_value=1E6),
+       z=st.floats(min_value=-1E6, max_value=1E6),
        clear_graph=st.booleans())
 def test_null_gradients(x, y, z, clear_graph):
     x = Tensor(x)
