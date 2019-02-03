@@ -209,7 +209,7 @@ class backprop_test_factory():
                  kwargs: Optional[Dict[str, Union[Any, Callable[[Any], SearchStrategy]]]]=None,
                  h: float=1e-8,
                  rtol: float=1e-05,
-                 atol: float=1e-08,
+                 atol: float=1e-05,
                  vary_each_element: bool=False,
                  as_decimal: bool=True,
                  assumptions: Optional[Callable[..., bool]] = None):
