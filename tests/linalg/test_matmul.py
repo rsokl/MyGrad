@@ -67,7 +67,7 @@ def test_matmul_bkwd_nd_1d():
                                             0: (4,)}, 
                        as_decimal=False,
                        vary_each_element=True,
-                       atol=1e-5, rtol=1e-5,
+                       atol=1e-3, rtol=1e-3,
                        index_to_bnds={0: (-10, 10), 1: (-10, 10)})
 def test_matmul_bkwd_1d_nd():
     """ a is 1-d, b is n-d"""

@@ -140,5 +140,5 @@ def test_numerical_gradient_full_xy_broadcast(data):
     dx, dy = numerical_gradient_full(binary_func, x, y, back_grad=grad)
     x_grad = (grad * y ** 2).sum(axis=1, keepdims=True)
     y_grad = (grad * 2 * x * y).sum(axis=0, keepdims=True)
-    assert_allclose(dx, x_grad, atol=1e-3, rtol=1e-3)
-    assert_allclose(dy, y_grad, atol=1e-3, rtol=1e-3)
+    assert_allclose(dx, x_grad, atol=1e-2, rtol=1e-2)
+    assert_allclose(dy, y_grad, atol=1e-2, rtol=1e-2)

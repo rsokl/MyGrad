@@ -154,12 +154,14 @@ def test_int_axis_cumprod():
     x = np.array([[1, 1, 0],
                   [1, 1, 0],
                   [1, 1, 0]])
-    with raises(TypeError, message="`np.cumprod` is expected to raise a TypeError "
-                                   "when it is provided a tuple of axes."):
+    "`np.cumprod` is expected to raise a TypeError "
+    "when it is provided a tuple of axes."
+    with raises(TypeError):
         np.cumprod(x, axis=(0, 1))
 
-    with raises(TypeError, message="`mygrad.cumprod` is expected to raise a TypeError "
-                                   "when it is provided a tuple of axes."):
+    "`mygrad.cumprod` is expected to raise a TypeError "
+    "when it is provided a tuple of axes."
+    with raises(TypeError):
         cumprod(x, axis=(0, 1))
 
 
@@ -192,12 +194,14 @@ def test_int_axis_cumsum():
     x = np.array([[1, 1, 0],
                   [1, 1, 0],
                   [1, 1, 0]])
-    with raises(TypeError, message="`np.cumsum` is expected to raise a TypeError "
-                                   "when it is provided a tuple of axes."):
+    "`np.cumsum` is expected to raise a TypeError "
+    "when it is provided a tuple of axes."
+    with raises(TypeError):
         np.cumsum(x, axis=(0, 1))
 
-    with raises(TypeError, message="`mygrad.cumsum` is expected to raise a TypeError "
-                                   "when it is provided a tuple of axes."):
+    "`mygrad.cumsum` is expected to raise a TypeError "
+    "when it is provided a tuple of axes."
+    with raises(TypeError):
         cumsum(x, axis=(0, 1))
 
 
