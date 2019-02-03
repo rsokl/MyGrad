@@ -4,7 +4,7 @@ from tests.utils.numerical_gradient import numerical_gradient, numerical_gradien
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
-from hypothesis import given, settings
+from hypothesis import given
 
 from numpy.testing import assert_allclose
 
@@ -44,16 +44,16 @@ def test_numerical_gradient_no_broadcast(data):
     # no broadcast
     dx, = numerical_gradient(unary_func, x, back_grad=grad)
 
-    assert_allclose(dx, grad * 2 * x)
+    assert_allclose(dx, grad * 2 * x, atol=1e-5, rtol=1e-5)
 
     dx, dy = numerical_gradient(binary_func, x, y, back_grad=grad)
-    assert_allclose(dx, grad * y ** 2)
-    assert_allclose(dy, grad * 2 * x * y)
+    assert_allclose(dx, grad * y ** 2, atol=1e-5, rtol=1e-5)
+    assert_allclose(dy, grad * 2 * x * y, atol=1e-5, rtol=1e-5)
 
     dx, dy, dz = numerical_gradient(ternary_func, x, y, z, back_grad=grad)
-    assert_allclose(dx, grad * z * y ** 2)
-    assert_allclose(dy, grad * z * 2 * x * y)
-    assert_allclose(dz, grad * x * y ** 2)
+    assert_allclose(dx, grad * z * y ** 2, atol=1e-5, rtol=1e-5)
+    assert_allclose(dy, grad * z * 2 * x * y, atol=1e-5, rtol=1e-5)
+    assert_allclose(dz, grad * x * y ** 2, atol=1e-5, rtol=1e-5)
 
 
 @given(st.data())
@@ -73,8 +73,8 @@ def test_numerical_gradient_x_broadcast(data):
 
     # broadcast x
     dx, dy = numerical_gradient(binary_func, x, y, back_grad=grad)
-    assert_allclose(dx, (grad * y ** 2).sum(axis=0))
-    assert_allclose(dy, grad * 2 * x * y)
+    assert_allclose(dx, (grad * y ** 2).sum(axis=0), atol=1e-5, rtol=1e-5)
+    assert_allclose(dy, grad * 2 * x * y, atol=1e-5, rtol=1e-5)
 
 
 @given(st.data())
@@ -94,8 +94,8 @@ def test_numerical_gradient_y_broadcast(data):
 
     # broadcast x
     dx, dy = numerical_gradient(binary_func, x, y, back_grad=grad)
-    assert_allclose(dx, grad * y ** 2)
-    assert_allclose(dy, (grad * 2 * x * y).sum(axis=0))
+    assert_allclose(dx, grad * y ** 2, atol=1e-5, rtol=1e-5)
+    assert_allclose(dy, (grad * 2 * x * y).sum(axis=0), atol=1e-5, rtol=1e-5)
 
 
 @given(st.data())
