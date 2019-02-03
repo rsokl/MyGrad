@@ -209,7 +209,7 @@ class EinSum(BroadcastableOp):
                     exp_dims.insert(n, np.newaxis)
                     grad_shape.insert(n, var_shape[n])
 
-            grad = np.broadcast_to(grad if not grad.ndim else grad[exp_dims], grad_shape)
+            grad = np.broadcast_to(grad if not grad.ndim else grad[tuple(exp_dims)], grad_shape)
 
         # "ji, k -> ijk"
         back_prop_lbls = ",".join([grad_lbl] + in_lbls) + "->" + var_lbl

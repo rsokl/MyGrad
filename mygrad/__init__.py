@@ -25,6 +25,6 @@ for attr in (sum, prod, cumprod, cumsum,
              max, min,
              argmax, argmin,
              swapaxes, transpose, moveaxis,
-             reshape, squeeze,
+             reshape, squeeze, ravel,
              matmul):
     setattr(Tensor, attr.__name__, attr)

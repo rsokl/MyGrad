@@ -113,6 +113,7 @@ def square(a, constant=False):
         mygrad.Tensor"""
     return Tensor._op(Square, a, constant=constant)
 
+
 def reciprocal(a, constant=False):
     """ ``f(a) -> 1 / a``
 

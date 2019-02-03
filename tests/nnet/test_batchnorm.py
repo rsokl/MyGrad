@@ -34,11 +34,11 @@ def simple_batchnorm(x, gamma, beta, eps):
        data=st.data())
 def test_batchnorm(x, data):
     # optionally draw affine parameters
-    gamma = data.draw(st.one_of(hnp.arrays(shape=x.shape[1:2], dtype=float, elements=st.floats(-10, 10)),
-                                st.none()),
+    gamma = data.draw(st.one_of(st.none(),
+                                hnp.arrays(shape=x.shape[1:2], dtype=float, elements=st.floats(-10, 10))),
                       label="gamma")
-    beta = data.draw(st.one_of(hnp.arrays(shape=x.shape[1:2], dtype=float, elements=st.floats(-10, 10)),
-                               st.none()),
+    beta = data.draw(st.one_of(st.none(),
+                               hnp.arrays(shape=x.shape[1:2], dtype=float, elements=st.floats(-10, 10))),
                      label="beta")
     x_orig = np.copy(x)
 
@@ -54,10 +54,10 @@ def test_batchnorm(x, data):
     b1 = Tensor(beta) if beta is not None else None
     b2 = Tensor(beta) if beta is not None else None
 
-    y1 = simple_batchnorm(t1, g1, b1, eps=1e-7)
-    y2 = batchnorm(t2, gamma=g2, beta=b2, eps=1e-7)
+    y1 = simple_batchnorm(t1, g1, b1, eps=1e-6)
+    y2 = batchnorm(t2, gamma=g2, beta=b2, eps=1e-6)
 
-    assert_allclose(actual=y2.data, desired=y1.data, atol=1e-7, rtol=1e-7)
+    assert_allclose(actual=y2.data, desired=y1.data, atol=1e-6, rtol=1e-6)
     grad = data.draw(hnp.arrays(shape=y2.shape, dtype=t2.dtype, elements=st.floats(-10, 10)),
                      label='grad')
     grad_orig = np.copy(grad)
@@ -79,9 +79,12 @@ def test_batchnorm(x, data):
 
     for n, (o, c) in enumerate(zip((x, gamma, beta, grad), (x_orig, gamma_orig, beta_orig, grad_orig))):
         if o is None or c is None:
-            assert o is c, f"{('x', 'gamma', 'beta', 'grad')[n]}"
+            assert o is c, "('{x}', '{gamma}', '{beta}', '{grad}')[{n}]".format(x=x, gamma=gamma,
+                                                                                  beta=beta, grad=grad, n=n)
         else:
-            assert_array_equal(o, c, err_msg=f"{('x', 'gamma', 'beta', 'grad')[n]}")
+            assert_array_equal(o, c, err_msg="('{x}', '{gamma}', '{beta}', '{grad}')[{n}]".format(x=x, gamma=gamma,
+                                                                                                  beta=beta, grad=grad,
+                                                                                                  n=n))
 
     if gamma is not None and beta is not None:
         assert not np.shares_memory(g2.grad, b2.grad)

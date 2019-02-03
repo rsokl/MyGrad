@@ -39,6 +39,11 @@ def sliding_window_view(arr, window_shape, step, dilation=None):
             ``[X, ..., Z]`` is the shape of the grid on which the window was applied. See Notes
             sections for more details.
 
+        Raises
+        ------
+        ValueError
+            Invalid window shape or dilation
+
         Notes
         -----
         Window placement:
@@ -120,15 +125,15 @@ def sliding_window_view(arr, window_shape, step, dilation=None):
     window_shape = tuple(window_shape)
     if not all(isinstance(i, Integral) and i > 0 for i in window_shape):
         msg = "`window_shape` be a sequence of positive integers"
-        raise AssertionError(msg)
+        raise ValueError(msg)
 
     if len(window_shape) > arr.ndim:
         msg = """ `window_shape` cannot specify more values than `arr.ndim`."""
-        raise AssertionError(msg)
+        raise ValueError(msg)
 
     if any(i > j for i, j in zip(window_shape[::-1], arr.shape[::-1])):
         msg = """ The window must fit within the trailing dimensions of `arr`."""
-        raise AssertionError(msg)
+        raise ValueError(msg)
 
     if dilation is None:
         dilation = np.ones((len(window_shape),), dtype=int)
@@ -140,7 +145,7 @@ def sliding_window_view(arr, window_shape, step, dilation=None):
             assert all(isinstance(i, Integral) for i in dilation)
             if any(w * d > s for w, d, s in zip(window_shape[::-1], dilation[::-1], arr.shape[::-1])):
                 msg = """ The dilated window must fit within the trailing dimensions of `arr`."""
-                raise AssertionError(msg)
+                raise ValueError(msg)
 
     if not arr.flags['C_CONTIGUOUS']:
         arr = np.ascontiguousarray(arr)
