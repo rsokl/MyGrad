@@ -100,7 +100,7 @@ def multiclass_hinge(x, y_true, hinge=1., constant=False):
         x : array_like, shape=(N, K)
             The K class scores for each of the N pieces of data.
 
-        y : array_like, shape=(N,)
+        y_true : array_like, shape=(N,)
             The correct class-indices, in [0, K), for each datum.
 
         hinge : float
@@ -164,7 +164,7 @@ class SoftmaxCrossEntropy(Operation):
 
 
 def softmax_crossentropy(x, y_true, constant=False):
-    """ Given the classification scores of C classes for N pieces of data,
+    r""" Given the classification scores of C classes for N pieces of data,
 
     computes the NxC softmax classification probabilities. The
     cross entropy is then computed by using the true classification labels.
@@ -309,8 +309,7 @@ class MarginRanking(Operation):
 
 
 def margin_ranking_loss(x1, x2, y, margin, constant=False):
-    """
-    Computes the margin average margin ranking loss.
+    r"""Computes the margin average margin ranking loss.
     Equivalent to::
 
     >>> import mygrad as mg
