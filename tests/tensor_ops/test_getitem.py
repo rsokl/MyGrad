@@ -51,6 +51,7 @@ def test_getitem_basicindex_fwdprop():
     pass
 
 
+@settings(deadline=None)
 @backprop_test_factory(mygrad_func=get_item, true_func=get_item, num_arrays=1,
                        index_to_arr_shapes={0: hnp.array_shapes(max_side=6, max_dims=4)},
                        kwargs=dict(index=basic_index_wrap), vary_each_element=True)
@@ -65,7 +66,7 @@ def test_getitem_advindex_int_fwdprop():
     pass
 
 
-@settings(deadline=1000)
+@settings(deadline=None)
 @backprop_test_factory(mygrad_func=get_item, true_func=get_item, num_arrays=1,
                        index_to_arr_shapes={0: hnp.array_shapes(max_side=6, max_dims=4)},
                        kwargs=dict(index=adv_index_int_wrap), vary_each_element=True)
@@ -80,8 +81,7 @@ def test_getitem_advindex_bool_fwdprop():
     pass
 
 
-
-@settings(deadline=1000)
+@settings(deadline=None)
 @backprop_test_factory(mygrad_func=get_item, true_func=get_item, num_arrays=1,
                        index_to_arr_shapes={0: hnp.array_shapes(max_side=6, max_dims=4)},
                        kwargs=dict(index=adv_index_bool_wrap), vary_each_element=True)
@@ -101,6 +101,7 @@ def test_getitem_broadcast_index_fwdprop():
     pass
 
 
+@settings(deadline=None)
 @backprop_test_factory(mygrad_func=get_item, true_func=get_item, num_arrays=1,
                        index_to_arr_shapes={0: (4, 3)},
                        kwargs=dict(index=np.ix_(rows, columns)), vary_each_element=True)
@@ -115,6 +116,7 @@ def test_getitem_ellipsis_index_fwdprop():
     pass
 
 
+@settings(deadline=None)
 @backprop_test_factory(mygrad_func=get_item, true_func=get_item, num_arrays=1,
                        index_to_arr_shapes={0: (3, 2, 4, 3)},
                        kwargs=dict(index=(Ellipsis, 2, 0)), vary_each_element=True)
@@ -133,6 +135,7 @@ def test_getitem_bool_int_fwdprop():
     pass
 
 
+@settings(deadline=None)
 @backprop_test_factory(mygrad_func=get_item, true_func=get_item, num_arrays=1,
                        index_to_arr_shapes={0: (4, 3)},
                        kwargs=dict(index=np.ix_(rows1, columns1)), vary_each_element=True)
@@ -147,6 +150,7 @@ def test_getitem_basic_w_adv_fwdprop():
     pass
 
 
+@settings(deadline=None)
 @backprop_test_factory(mygrad_func=get_item, true_func=get_item, num_arrays=1,
                        index_to_arr_shapes={0: (4, 3)},
                        kwargs=dict(index=(slice(1, 2), [1, 2])), vary_each_element=True)

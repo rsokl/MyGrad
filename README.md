@@ -1,4 +1,4 @@
-[![Documentation Status](https://readthedocs.org/projects/mygrad/badge/?version=latest)](https://mygrad.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/mygrad/badge/?version=latest)](https://mygrad.readthedocs.io/en/latest/?badge=latest) ![Build Status](https://travis-ci.com/rsokl/MyGrad.svg?branch=master) ![Python version support](https://img.shields.io/badge/python-3.5%20%203.6%20%203.7-blue.svg)
 
 # Introducing mygrad
 `mygrad` is a simple, NumPy-centric autograd library. An autograd library enables you to automatically compute derivatives of mathematical functions. This library

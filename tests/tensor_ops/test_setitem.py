@@ -2,7 +2,7 @@ from mygrad.tensor_base import Tensor
 import numpy as np
 from numpy.testing import assert_allclose, assert_array_equal
 
-from hypothesis import given
+from hypothesis import given, settings
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
 
@@ -139,6 +139,7 @@ def test_no_mutate():
     assert_allclose(np.array([0., 0.]), y.data)
 
 
+@settings(deadline=None)
 @given(x=hnp.arrays(shape=hnp.array_shapes(max_side=4, max_dims=5),
                     dtype=float,
                     elements=st.floats(-10., 10.)),
@@ -177,6 +178,7 @@ def test_setitem_basic_index(x, data):
     assert_allclose(y_arr.grad, dy)
 
 
+@settings(deadline=None)
 @given(x=hnp.arrays(shape=hnp.array_shapes(max_side=4, max_dims=5),
                     dtype=float,
                     elements=st.floats(-10., 10.)),
@@ -215,6 +217,7 @@ def test_setitem_adv_int_index(x, data):
     assert_allclose(y_arr.grad, dy)
 
 
+@settings(deadline=None)
 @given(x=hnp.arrays(shape=hnp.array_shapes(max_side=4, max_dims=5),
                     dtype=float,
                     elements=st.floats(-10., 10.)),
@@ -253,6 +256,7 @@ def test_setitem_adv_bool_index(x, data):
     assert_allclose(y_arr.grad, dy)
 
 
+@settings(deadline=None)
 @given(x=hnp.arrays(shape=(4, 3),
                     dtype=float,
                     elements=st.floats(-10., 10.)),
@@ -294,6 +298,7 @@ def test_setitem_broadcast_index(x, data):
     assert_allclose(y_arr.grad, dy)
 
 
+@settings(deadline=None)
 @given(x=hnp.arrays(shape=(4, 3),
                     dtype=float,
                     elements=st.floats(-10., 10.)),
@@ -332,6 +337,7 @@ def test_setitem_mixed_index(x, data):
     assert_allclose(y_arr.grad, dy)
 
 
+@settings(deadline=None)
 @given(x=hnp.arrays(shape=(4, 3),
                     dtype=float,
                     elements=st.floats(-10., 10.)),
@@ -372,6 +378,7 @@ def test_setitem_broadcast_bool_index(x, data):
     assert_allclose(y_arr.grad, dy)
 
 
+@settings(deadline=None)
 @given(x=hnp.arrays(shape=(4, 3),
                     dtype=float,
                     elements=st.floats(-10., 10.)),
@@ -410,6 +417,7 @@ def test_setitem_bool_basic_index(x, data):
     assert_allclose(y_arr.grad, dy)
 
 
+@settings(deadline=None)
 @given(x=hnp.arrays(shape=(3, 3),
                     dtype=float,
                     elements=st.floats(-10., 10.)),

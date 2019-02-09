@@ -1,5 +1,6 @@
 import numpy as np
-from scipy.misc import logsumexp as _logsumexp
+
+from mygrad.math._special import logsumexp as _logsumexp
 
 from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor

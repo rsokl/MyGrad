@@ -1,35 +1,49 @@
-from tests.wrappers.unary_func import fwdprop_test_factory, backprop_test_factory
+from tests.wrappers.uber import fwdprop_test_factory, backprop_test_factory
 from mygrad import positive, negative, reciprocal, square
 import numpy as np
 
 
-@fwdprop_test_factory(mygrad_func=positive, true_func=np.positive)
-def test_positive_fwd(): pass
+def _is_non_zero(x):
+    return np.all(np.abs(x.data) > 1e-3)
 
 
-@backprop_test_factory(mygrad_func=positive)
-def test_positive_backward(): pass
+@fwdprop_test_factory(mygrad_func=positive, true_func=np.positive, num_arrays=1)
+def test_positive_fwd():
+    pass
 
 
-@fwdprop_test_factory(mygrad_func=negative, true_func=np.negative)
-def test_negative_fwd(): pass
+@backprop_test_factory(mygrad_func=positive, true_func=np.positive, num_arrays=1)
+def test_positive_backward():
+    pass
 
 
-@backprop_test_factory(mygrad_func=negative)
-def test_negative_backward(): pass
+@fwdprop_test_factory(mygrad_func=negative, true_func=np.negative, num_arrays=1)
+def test_negative_fwd():
+    pass
 
 
-@fwdprop_test_factory(mygrad_func=reciprocal, true_func=np.reciprocal)
-def test_reciprocal_fwd(): pass
+@backprop_test_factory(mygrad_func=negative, true_func=np.negative, num_arrays=1)
+def test_negative_backward():
+    pass
 
 
-@backprop_test_factory(mygrad_func=reciprocal, no_go=(0,))
-def test_reciprocal_backward(): pass
+@fwdprop_test_factory(mygrad_func=reciprocal, true_func=np.reciprocal, num_arrays=1,
+                      assumptions=_is_non_zero)
+def test_reciprocal_fwd():
+    pass
 
 
-@fwdprop_test_factory(mygrad_func=square, true_func=np.square)
-def test_square_fwd(): pass
+@backprop_test_factory(mygrad_func=reciprocal, true_func=np.reciprocal, num_arrays=1,
+                       assumptions=_is_non_zero, atol=1e-5, rtol=1e-5)
+def test_reciprocal_backward():
+    pass
 
 
-@backprop_test_factory(mygrad_func=square)
-def test_square_backward(): pass
+@fwdprop_test_factory(mygrad_func=square, true_func=np.square, num_arrays=1)
+def test_square_fwd():
+    pass
+
+
+@backprop_test_factory(mygrad_func=square, true_func=np.square, num_arrays=1)
+def test_square_backward():
+    pass

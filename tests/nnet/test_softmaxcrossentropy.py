@@ -1,3 +1,4 @@
+import mygrad as mg
 from mygrad.tensor_base import Tensor
 from mygrad.nnet.losses import softmax_crossentropy
 from mygrad.nnet.activations import softmax
@@ -9,6 +10,7 @@ import hypothesis.strategies as st
 from hypothesis import given
 import hypothesis.extra.numpy as hnp
 
+from pytest import raises
 
 @given(st.data())
 def test_softmax_crossentropy(data):
@@ -34,3 +36,25 @@ def test_softmax_crossentropy(data):
     pygrad_cross.backward()
     assert_allclose(softmax_cross.data, pygrad_cross.data, atol=1e-5, rtol=1e-5)
     assert_allclose(scores.grad, pygrad_scores.grad, atol=1e-5, rtol=1e-5)
+
+
+@given(shape=st.sampled_from([(3, 1), (3, 4), tuple()]))
+def test_bad_label_shape(shape):
+    """
+    Ensures that softmax_crossentropy checks for shape-(N,) `y_true`
+    """
+    scores = mg.arange(12).reshape(3, 4)
+    labels = mg.zeros(shape, dtype=int)
+    with raises(ValueError):
+        softmax_crossentropy(scores, labels)
+
+
+@given(type=st.sampled_from([bool, float, np.float32]))
+def test_bad_label_type(type):
+    """
+    Ensures that softmax_crossentropy checks integer-type `y_true`
+    """
+    scores = mg.arange(12).reshape(3, 4)
+    labels = np.zeros((3,), dtype=type)
+    with raises(TypeError):
+        softmax_crossentropy(scores, labels)
