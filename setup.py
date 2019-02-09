@@ -51,5 +51,5 @@ setup(name=DISTNAME,
       tests_require=TESTS_REQUIRE,
       url=URL,
       python_requires='!=2.*,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*',
-      packages=find_packages(),
+      packages=find_packages(exclude="tests/*"),
       )
