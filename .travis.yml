@@ -11,3 +11,7 @@ matrix:
     - python: 3.7
       dist: xenial
       sudo: true
+branches:
+  only:
+  - master
+  - develop
