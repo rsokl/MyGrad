@@ -17,10 +17,15 @@ def to_decimal_array(arr):
         numpy.ndarray
         Decimal-type object array"""
     arr = np.asarray(arr)
+    print(arr.dtype)
+    if arr.dtype.kind == "O":
+        return arr
     return np.array(tuple(Decimal(float(i)) for i in arr.flat), dtype=Decimal).reshape(arr.shape)
 
 
-def numerical_gradient(f, *args, back_grad, vary_ind=None, h=1e-8, as_decimal=True, kwargs=None):
+def numerical_gradient(f, *args, back_grad, vary_ind=None,
+                       h=Decimal(1)/Decimal(int(1e8)),
+                       as_decimal=True, kwargs=None):
     """ Computes numerical partial derivatives of f(x0, x1, ...) in each
         of its variables, using the central difference method.
         This is a "fast" method - it varies entire arrays at once. Thus
@@ -43,6 +48,9 @@ def numerical_gradient(f, *args, back_grad, vary_ind=None, h=1e-8, as_decimal=Tr
                0 -> w.r.t x only, 1 -> w.r.t y only, etc.
         h : float, optional, (default=1e-8)
             Approximating infinitesimal.
+        as_decimal : bool, optional (default=True)
+            If True, f's arguments are passed as Decimal-type arrays. This
+            improves numerical precision, but is not permitted by some functions.
         kwargs : Optional[Dict]
 
         Returns
@@ -57,7 +65,7 @@ def numerical_gradient(f, *args, back_grad, vary_ind=None, h=1e-8, as_decimal=Tr
     if not args:
         raise ValueError("At least one value must be passed to `args`")
 
-    h = Decimal(h) if as_decimal else h
+    h = Decimal(h) if as_decimal else float(h)
     two_h = Decimal(2)*h if as_decimal else 2*h
 
     args = tuple(to_decimal_array(i) if as_decimal else i for i in args)
@@ -134,7 +142,7 @@ def numerical_gradient_full(f, *args, back_grad, as_decimal=True, kwargs=None, v
     return tuple(grads)
 
 
-def _numerical_gradient_full(f, *, x, back_grad, h=1e-8, as_decimal=True):
+def _numerical_gradient_full(f, *, x, back_grad, h=Decimal(1)/Decimal(int(1e8)), as_decimal=True):
     """ Computes numerical partial derivatives of f(x), by
         varying each entry of `x` independently.
         Parameters
@@ -160,16 +168,23 @@ def _numerical_gradient_full(f, *, x, back_grad, h=1e-8, as_decimal=True):
     grad = np.empty_like(x)
     x = to_decimal_array(x)
     h = Decimal(h)
+    back_grad = to_decimal_array(back_grad)
 
+    x_orig = np.copy(x)
     for ind, val in np.ndenumerate(x):
-        x_fwd = np.copy(x)
-        x_fwd[ind] += h
-        f_fwd = to_decimal_array(f(x_fwd) if as_decimal else f(x_fwd.astype(float)))
+        x_fwd = x
+        x_fwd[ind] = x_orig[ind] + h
+        f_fwd = to_decimal_array(f(x_fwd) if as_decimal else f(x_fwd.astype(np.float64)))
 
         x_bkwd = x_fwd
-        x_bkwd[ind] -= Decimal(2) * h
+        x_bkwd[ind] = x_orig[ind] - h
         f_bkwd = to_decimal_array(f(x_bkwd) if as_decimal else f(x_bkwd.astype(float)))
 
         df_dxi = to_decimal_array((f_fwd - f_bkwd) / (Decimal(2) * h))
-        grad[ind] = (df_dxi.astype('float') * back_grad).sum()
-    return grad.astype(float)
+
+        dl_dxi = (df_dxi * back_grad)
+        grad[ind] = np.float64(dl_dxi.sum() if isinstance(dl_dxi, np.ndarray) else dl_dxi)
+
+        # reset x
+        x[ind] = x_orig[ind]
+    return grad.astype(np.float64)
