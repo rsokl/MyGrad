@@ -126,16 +126,14 @@ def test_numerical_gradient_xy_broadcast(data, x, y, grad, as_decimal):
 
 @given(x=hnp.arrays(dtype=float,
                     elements=st.floats(-1, 1),
-                    shape=hnp.array_shapes(max_side=3)),
-       grad=st.floats(-1, 1),
-       keepdims=st.booleans(),
-       as_decimal=st.booleans(),
-       data=st.data())
-def test_numerical_gradient_vary_each(x, grad, keepdims, as_decimal, data):
+                    shape=(2,)),
+       grad=hnp.arrays(dtype=float,
+                       elements=st.floats(-1, 1),
+                       shape=(2,)),
+       as_decimal=st.booleans(),)
+def test_numerical_gradient_vary_each(x, grad, as_decimal):
     atol, rtol = (1e-7, 1e-7) if as_decimal else (1e-2, 1e-2)
-    axes = data.draw(valid_axes(ndim=x.ndim), label="axes")
-    kwargs = dict(axis=axes, keepdims=keepdims)
-    dx, = numerical_gradient_full(np.sum, x, back_grad=np.array(grad), kwargs=kwargs,
+    dx, = numerical_gradient_full(lambda y: y[::-1], x, back_grad=np.array(grad),
                                   as_decimal=as_decimal)
-    x_grad = np.full_like(x, fill_value=grad)
+    x_grad = grad[::-1]
     assert_allclose(actual=dx, desired=x_grad, atol=atol, rtol=rtol)
