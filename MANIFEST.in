@@ -1,5 +1,6 @@
 global-exclude */tests/*.py
 global-exclude */tests
+global-exclude tests/*
 prune tests
 global-exclude *.py[cod] __pycache__ *.so
 include versioneer.py
