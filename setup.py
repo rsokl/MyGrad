@@ -20,7 +20,7 @@ CLASSIFIERS = [
     'Topic :: Scientific/Engineering',
 ]
 
-INSTALL_REQUIRES = ['numpy >= 1.12', "numba>=0.34.0"]
+INSTALL_REQUIRES = ['numpy >= 1.12']
 TESTS_REQUIRE = ['pytest >= 3.8', 'hypothesis >= 4.0', 'scipy']
 
 DESCRIPTION = "A sleek auto-differentiation library that wraps numpy."
@@ -53,6 +53,7 @@ setup(name=DISTNAME,
           'rnn': ["numba>=0.34.0"],  # GRU and vanilla RNN require numba-acceleration
       },
       url=URL,
+      download_url="https://github.com/rsokl/mygrad/tarball/"+versioneer.get_version(),
       python_requires='!=2.*,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*',
-      packages=find_packages(exclude="tests/*"),
+      packages=find_packages(exclude="tests"),
       )
