@@ -1,5 +1,3 @@
-global-exclude */tests/*.py
-global-exclude */tests
 prune dir tests
 global-exclude *.py[cod] __pycache__ *.so
 include versioneer.py
