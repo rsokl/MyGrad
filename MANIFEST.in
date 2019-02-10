@@ -1,4 +1,4 @@
-prune dir tests
+prune tests
 global-exclude *.py[cod] __pycache__ *.so
 include versioneer.py
 include mygrad/_version.py
