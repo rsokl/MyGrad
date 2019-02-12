@@ -79,7 +79,7 @@ def valid_axes(draw, ndim, pos_only=False, single_axis_only=False, permit_none=T
 
 
 @st.composite
-def broadcastable_shape(draw, shape, min_dim=0, max_dim=5):
+def broadcastable_shape(draw, shape, min_dim=0, max_dim=5, allow_singleton=True):
     """ Hypothesis search strategy: given an array shape, generate a
         broadcast-compatible shape, specifying the minimum/maximum permissable
         number of dimensions in the resulting shape (both values are inclusive).
@@ -92,6 +92,10 @@ def broadcastable_shape(draw, shape, min_dim=0, max_dim=5):
         shape : Tuple[int, ...]
         min_dim : int
         max_dim : int
+        allow_singleton : bool, optional (default=True)
+            If `False` the aligned dimensions of the broadcastable
+            shape cannot contain singleton dimensions (i.e. size-1
+            dimensions aligned with larger dimensions)
 
         Returns
         -------
@@ -112,7 +116,8 @@ def broadcastable_shape(draw, shape, min_dim=0, max_dim=5):
     ndim = draw(st.integers(min_dim, max_dim))
     n_aligned = min(len(shape), ndim)
     n_leading = ndim - n_aligned
-    aligned_dims = draw(st.tuples(*(st.sampled_from([1, size]) for size in shape[::-1][:n_aligned])))[::-1]
+    aligned_dims = draw(st.tuples(*(st.sampled_from([1, size]) if allow_singleton else st.just(size)
+                                    for size in shape[::-1][:n_aligned])))[::-1]
     leading_dims = draw(st.tuples(*(st.integers(1, 5) for i in range(n_leading))))
     return leading_dims + aligned_dims
 

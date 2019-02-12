@@ -38,9 +38,9 @@ def test_reduce_broadcast_nokeepdim(var_shape, data):
     """ example broadcasting: (2, 3) -> (5, 2, 3)"""
     grad_shape = data.draw(broadcastable_shape(shape=var_shape,
                                                min_dim=len(var_shape) + 1,
-                                               max_dim=len(var_shape) + 3),
+                                               max_dim=len(var_shape) + 3,
+                                               allow_singleton=False),
                            label="grad_shape")
-    assume(1 not in grad_shape[-len(var_shape):])
     grad = np.ones(grad_shape, dtype=float)
 
     reduced_grad = reduce_broadcast(grad=grad, var_shape=var_shape)
