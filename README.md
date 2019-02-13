@@ -13,7 +13,13 @@ TensorFlow. Rather, it is meant to serve as a useful tool for students who are l
 using back propagation.
 
 ## Installing mygrad (this project)
-To install MyGrad clone this repository and navigate to the MyGrad directory, then run: 
+To install MyGrad, you can pip-install it:
+
+```shell
+pip install mygrad
+```
+
+or clone this repository and navigate to the MyGrad directory, then run: 
 ```shell
 python setup.py install
 ```
