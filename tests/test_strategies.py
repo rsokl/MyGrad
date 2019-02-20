@@ -1,4 +1,5 @@
 from tests.custom_strategies import broadcastable_shape, choices, integer_index
+from tests.custom_strategies import slice_index
 
 from hypothesis import given
 import hypothesis.strategies as st
@@ -38,6 +39,18 @@ def test_integer_index(size: int, data: st.SearchStrategy):
     x = np.empty((size,))
     o = x[index]  # raises if invalid index
     assert isinstance(o, Real), "An integer index should produce a number from a 1D array"
+
+
+@given(size=st.integers(1, 10),
+       data=st.data())
+def test_slice_index(size: int, data: st.SearchStrategy):
+    index = data.draw(slice_index(size), label="index")
+    x = np.empty((size,))
+    o = x[index]  # raises if invalid index
+    assert isinstance(o, np.ndarray) and o.ndim == 1, "A slice index should produce " \
+                                                      "a 1D array from a 1D array"
+    if o.size:
+        assert np.shares_memory(o, x), "A slice should produce a view of `x`"
 
 
 @given(shape=hnp.array_shapes(), allow_singleton=st.booleans(),

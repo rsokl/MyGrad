@@ -203,14 +203,18 @@ def slice_index(draw, size):
         -------
         hypothesis.searchstrategy.SearchStrategy
             -> slice"""
-    step = draw(st.sampled_from(list(range(1, max(2, size // 2))) + [-1]))
-    start = draw(st.sampled_from(range(size + 1)))
-    if step > 0:
-        stop = draw(st.sampled_from(range(start, size)))
-    else:
-        stop = draw(st.sampled_from(range(0, start)))
+    if not size:
+        return slice(None)
 
-    return slice(start, stop, step)
+    pos_start, pos_stop, pos_step = draw(st.tuples(*[st.booleans()]*3))
+
+    step = draw(st.integers(1, max(2, size // 2)))
+    if not pos_start:
+        step *= -1
+    start = draw(st.integers(0, size - 1) if pos_start else st.integers(-size, -1))
+    _abs_start = start if start >= 0 else start + size
+    stop = draw(st.integers(_abs_start, size) if pos_stop else st.integers(_abs_start - size, -1))
+    return slice(start, stop, step) if pos_step else slice(stop, start, step)
 
 
 @st.composite
