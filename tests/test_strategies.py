@@ -1,4 +1,4 @@
-from tests.custom_strategies import broadcastable_shape
+from tests.custom_strategies import broadcastable_shape, choices
 
 from hypothesis import given
 import hypothesis.strategies as st
@@ -6,7 +6,27 @@ import hypothesis.extra.numpy as hnp
 
 import numpy as np
 
-from typing import Tuple
+from typing import Tuple, List
+
+
+@given(seq=st.lists(elements=st.integers()),
+       replace=st.booleans(),
+       data=st.data())
+def test_choices(seq: List[int], replace: bool, data: st.SearchStrategy):
+    """ Ensures that the `choices` strategy:
+        - draws from the provided sequence
+        - respects input parameters"""
+    upper = len(seq) + 10 if replace and seq else len(seq)
+    size = data.draw(st.integers(0, upper), label="size")
+    chosen = data.draw(choices(seq, size=size, replace=replace), label="choices")
+    assert set(chosen) <= set(seq), "choices contains elements that do not " \
+                                    "belong to `seq`"
+    assert len(chosen) == size, "the number of choices does not match `size`"
+
+    if not replace and len((set(seq))) == len(seq):
+        unique_choices = sorted(set(chosen))
+        assert unique_choices == sorted(chosen) , "`choices` with `replace=False` draws " \
+                                                  "elements with replacement"
 
 
 @given(shape=hnp.array_shapes(), allow_singleton=st.booleans(),
@@ -18,6 +38,9 @@ def test_broadcast_compat_shape(shape: Tuple[int, ...],
                                 min_dim: int,
                                 min_side: int,
                                 data: st.SearchStrategy):
+    """ Ensures that the `broadcastable_shape` strategy:
+        - produces broadcastable shapes
+        - respects input parameters"""
     max_side = data.draw(st.integers(min_side, min_side + 5), label="max side")
     max_dim = data.draw(st.integers(min_dim, max(min_dim, len(shape)+3)), label="max dim")
     compat_shape = data.draw(broadcastable_shape(shape=shape, allow_singleton=allow_singleton,

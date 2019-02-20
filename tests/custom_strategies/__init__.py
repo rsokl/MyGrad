@@ -15,12 +15,14 @@ __all__ = ["adv_integer_index",
 
 def choices(seq, size, replace=True):
     """Randomly choose elements from `seq`, producing a tuple of length `size`."""
+    if not isinstance(size, Integral) or size < 0:
+        raise ValueError("`size` must be a non-negative integer. Got {}".format(size))
     if size > len(seq) and not replace:
         raise ValueError("`size` must not exceed the length of `seq` when `replace` is `False`")
     if size > len(seq) and not seq:
         raise ValueError("`size` must be 0, given an empty `seq`")
     inds = list(range(len(seq)))
-    if replace:
+    if replace or size == 0:
         strat = st.tuples(*[st.sampled_from(inds)]*size)
     else:
         strat = st.permutations(inds)
