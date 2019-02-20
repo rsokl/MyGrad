@@ -1,8 +1,10 @@
-from tests.custom_strategies import broadcastable_shape, choices
+from tests.custom_strategies import broadcastable_shape, choices, integer_index
 
 from hypothesis import given
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
+
+from numbers import Real
 
 import numpy as np
 
@@ -27,6 +29,15 @@ def test_choices(seq: List[int], replace: bool, data: st.SearchStrategy):
         unique_choices = sorted(set(chosen))
         assert unique_choices == sorted(chosen) , "`choices` with `replace=False` draws " \
                                                   "elements with replacement"
+
+
+@given(size=st.integers(1, 10),
+       data=st.data())
+def test_integer_index(size: int, data: st.SearchStrategy):
+    index = data.draw(integer_index(size), label="index")
+    x = np.empty((size,))
+    o = x[index]  # raises if invalid index
+    assert isinstance(o, Real), "An integer index should produce a number from a 1D array"
 
 
 @given(shape=hnp.array_shapes(), allow_singleton=st.booleans(),

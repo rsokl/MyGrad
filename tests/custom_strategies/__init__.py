@@ -35,7 +35,8 @@ def _rand_neg_axis(draw, axes, ndim):
     size = draw(st.integers(0, len(axes)))
     neg_inds = draw(choices(range(len(axes)), size, replace=False))
     axes = st.just(axes)
-    return draw(axes.map(lambda x: tuple(i - ndim if n in neg_inds else i for n, i in enumerate(x))))
+    return draw(axes.map(lambda x: tuple(i - ndim if n in neg_inds else i
+                                         for n, i in enumerate(x))))
 
 
 @st.composite
@@ -181,7 +182,7 @@ def integer_index(size):
         -------
         hypothesis.searchstrategy.SearchStrategy
             -> int"""
-    return st.sampled_from(list(range(size)) + list(range(-1, -size, -1)))
+    return st.integers(-size, size - 1)
 
 
 @st.composite
@@ -270,6 +271,6 @@ def adv_integer_index(draw, shape, max_dim=3):
         """
     index_shape = draw(hnp.array_shapes(max_dims=max_dim))
     index = draw(st.tuples(*(hnp.arrays(dtype=int,
-                                        shape=index_shape, elements=st.integers(0, size - 1))
+                                        shape=index_shape, elements=integer_index(size))
                              for size in shape)))
     return index
