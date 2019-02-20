@@ -8,3 +8,5 @@
 .pytest_cache
 **.DS_Store
 /doc/build/
+build/
+dist/
