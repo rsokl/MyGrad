@@ -1,6 +1,9 @@
 """ Custom hypothesis search strategies """
+from numbers import Integral
+
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
+
 import numpy as np
 
 __all__ = ["adv_integer_index",
@@ -79,7 +82,8 @@ def valid_axes(draw, ndim, pos_only=False, single_axis_only=False, permit_none=T
 
 
 @st.composite
-def broadcastable_shape(draw, shape, min_dim=0, max_dim=5, allow_singleton=True):
+def broadcastable_shape(draw, shape, min_dim=0, max_dim=5,
+                        min_side=1, max_side=5, allow_singleton=True):
     """ Hypothesis search strategy: given an array shape, generate a
         broadcast-compatible shape, specifying the minimum/maximum permissable
         number of dimensions in the resulting shape (both values are inclusive).
@@ -90,8 +94,24 @@ def broadcastable_shape(draw, shape, min_dim=0, max_dim=5, allow_singleton=True)
         Parameters
         ----------
         shape : Tuple[int, ...]
-        min_dim : int
-        max_dim : int
+            The shape with which
+
+        min_dim : int, optional (default=0)
+            The smallest number of dimensions that the broadcast-compatible
+            shape can possess.
+
+        max_dim : int, optional (default=5)
+            The largest number of dimensions that the broadcast-compatible
+            shape can possess.
+
+        min_side : int, optional (default=1)
+            The smallest size that a new, leading dimensions can
+            possess
+
+        max_side : int, optional (default=5)
+            The largest size that a new, leading dimension can
+            possess.
+
         allow_singleton : bool, optional (default=True)
             If `False` the aligned dimensions of the broadcastable
             shape cannot contain singleton dimensions (i.e. size-1
@@ -99,7 +119,7 @@ def broadcastable_shape(draw, shape, min_dim=0, max_dim=5, allow_singleton=True)
 
         Returns
         -------
-        hypothesis.searchstrategy.SearchStrategy
+        hypothesis.searchstrategy.SearchStrategy[Tuple[int, ...]]
             -> Tuple[int, ...]
 
         Examples
@@ -113,12 +133,36 @@ def broadcastable_shape(draw, shape, min_dim=0, max_dim=5, allow_singleton=True)
         (8, 5, 1, 3)
         (3, )
         """
+    if not isinstance(min_dim, Integral) or min_dim < 0:
+        raise ValueError("`min_dim` must be a non-negative integer. "
+                         "Got {}".format(min_dim))
+
+    if not isinstance(max_dim, Integral) or max_dim < min_dim:
+        raise ValueError("`max_dim` must be an integer that is "
+                         "not smaller than `min_dim`. Got {}".format(max_dim))
+
+    if not isinstance(min_side, Integral) or min_side < 1:
+        raise ValueError("`min_side` must be a integer that is at least 1."
+                         "Got {}".format(min_side))
+
+    if not isinstance(max_side, Integral) or max_side < min_side:
+        raise ValueError("`max_dim` must be an integer that is "
+                         "not smaller than `min_side`. Got {}".format(max_side))
+
     ndim = draw(st.integers(min_dim, max_dim))
     n_aligned = min(len(shape), ndim)
     n_leading = ndim - n_aligned
-    aligned_dims = draw(st.tuples(*(st.sampled_from([1, size]) if allow_singleton else st.just(size)
-                                    for size in shape[::-1][:n_aligned])))[::-1]
-    leading_dims = draw(st.tuples(*(st.integers(1, 5) for i in range(n_leading))))
+    if n_aligned > 0:
+        if allow_singleton:
+            aligned_dims = draw(st.tuples(*(st.sampled_from([1, size])
+                                            for size in shape[-n_aligned:])))
+        else:
+            aligned_dims = shape[-n_aligned:]
+    else:
+        aligned_dims = tuple()
+
+    leading_dims = draw(st.tuples(*(st.integers(min_side, max_side)
+                                    for i in range(n_leading))))
     return leading_dims + aligned_dims
 
 
@@ -200,7 +244,6 @@ def basic_index(draw, shape, max_dim=5):
     return tuple(index)
 
 
-
 @st.composite
 def adv_integer_index(draw, shape, max_dim=3):
     """ Hypothesis search strategy: given an array shape, generate a
@@ -227,5 +270,4 @@ def adv_integer_index(draw, shape, max_dim=3):
     index = draw(st.tuples(*(hnp.arrays(dtype=int,
                                         shape=index_shape, elements=st.integers(0, size - 1))
                              for size in shape)))
-
     return index
