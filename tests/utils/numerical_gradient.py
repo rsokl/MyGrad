@@ -7,8 +7,8 @@ from mygrad._utils import reduce_broadcast
 
 
 def finite_difference(f, *args, back_grad, vary_ind=None,
-                     h=Decimal(1)/Decimal(int(1e8)),
-                     as_decimal=True, kwargs=None):
+                      h=Decimal(1)/Decimal(int(1e8)),
+                      as_decimal=True, kwargs=None):
     """ Computes numerical partial derivatives of f(x0, x1, ...) in each
         of its variables, using the central difference method.
         This is a "fast" method - it varies entire arrays at once. Thus
@@ -172,9 +172,6 @@ def numerical_gradient_full(f, *args, back_grad, kwargs=None, vary_ind=None) -> 
         back_grad : numpy.ndarray
             The gradient being back-propagated to {x}, via f
 
-        as_decimal : bool, optional (default=True)
-            If True, f's arguments are passed as Decimal-type arrays. This
-            improves numerical precision, but is not permitted by some functions.
 
         kwargs : Dict[str, Any], optional (default=dict())
             The keyword arguments to be passed to f.
@@ -230,10 +227,6 @@ def _numerical_gradient_full(f, *, x, back_grad, h=1e-20):
 
         h : float, optional, (default=Decimal(1E-8))
             Approximating infinitesimal.
-
-        as_decimal : bool, optional (default=True)
-            If True, x is passed to f as a Decimal-type array. This
-            improves numerical precision, but is not permitted by some functions.
 
         Returns
         -------
