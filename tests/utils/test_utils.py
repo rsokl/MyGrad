@@ -6,7 +6,6 @@ import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 from hypothesis import given
 
-from tests.custom_strategies import valid_axes
 import numpy as np
 from numpy.testing import assert_allclose
 
@@ -23,10 +22,9 @@ def ternary_func(x, y, z): return z * x * y ** 2
 @given(data=st.data(),
        x=hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=3),
                     dtype=float,
-                    elements=st.floats(-100, 100)),
-       as_decimal=st.booleans())
-def test_numerical_gradient_no_broadcast(data, x, as_decimal):
-    atol, rtol = (1e-7, 1e-7) if as_decimal else (1e-2, 1e-2)
+                    elements=st.floats(-100, 100)))
+def test_numerical_gradient_no_broadcast(data, x):
+    atol, rtol = (1e-7, 1e-7)
     y = data.draw(hnp.arrays(shape=x.shape,
                              dtype=float,
                              elements=st.floats(-100, 100)),
@@ -42,13 +40,12 @@ def test_numerical_gradient_no_broadcast(data, x, as_decimal):
                                 elements=st.floats(-100, 100)),
                      label="grad")
 
-
     # check variable-selection
     assert numerical_gradient(unary_func, x, back_grad=grad,
-                              vary_ind=[], as_decimal=as_decimal)[0] is None
+                              vary_ind=[])[0] is None
 
     # no broadcast
-    dx, = numerical_gradient(unary_func, x, back_grad=grad, as_decimal=as_decimal)
+    dx, = numerical_gradient(unary_func, x, back_grad=grad)
 
     assert_allclose(dx, grad * 2 * x, atol=atol, rtol=rtol)
 
@@ -129,11 +126,9 @@ def test_numerical_gradient_xy_broadcast(data, x, y, grad, as_decimal):
                     shape=(2,)),
        grad=hnp.arrays(dtype=float,
                        elements=st.floats(-1, 1),
-                       shape=(2,)),
-       as_decimal=st.booleans(),)
-def test_numerical_gradient_vary_each(x, grad, as_decimal):
-    atol, rtol = (1e-7, 1e-7) if as_decimal else (1e-2, 1e-2)
-    dx, = numerical_gradient_full(lambda y: y[::-1], x, back_grad=np.array(grad),
-                                  as_decimal=as_decimal)
+                       shape=(2,)))
+def test_numerical_gradient_vary_each(x, grad):
+    atol, rtol = (1e-7, 1e-7)
+    dx, = numerical_gradient_full(lambda y: y[::-1], x, back_grad=np.array(grad))
     x_grad = grad[::-1]
     assert_allclose(actual=dx, desired=x_grad, atol=atol, rtol=rtol)

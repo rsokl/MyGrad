@@ -12,7 +12,7 @@ def test_arcsin_fwd():
 
 @backprop_test_factory(mygrad_func=arcsin, true_func=np.arcsin,
                        index_to_bnds={0: (-.9, .9)}, num_arrays=1,
-                       as_decimal=False)
+                       )
 def test_arcsin_backward(data):
     pass
 
@@ -25,7 +25,7 @@ def test_arccos_fwd():
 
 @backprop_test_factory(mygrad_func=arccos, true_func=np.arccos,
                        index_to_bnds={0: (-.9, .9)}, num_arrays=1,
-                       as_decimal=False)
+                       )
 def test_arccos_backward(data):
     pass
 
@@ -38,7 +38,7 @@ def test_arctan_fwd():
 
 @backprop_test_factory(mygrad_func=arctan, true_func=np.arctan,
                        index_to_bnds={0: (.1, 10.)}, num_arrays=1,
-                       as_decimal=False)
+                       )
 def test_arctan_backward(data):
     pass
 
@@ -51,7 +51,7 @@ def test_arccsc_fwd():
 
 @backprop_test_factory(mygrad_func=arccsc, true_func=lambda x: np.arcsin(1 / x),
                        index_to_bnds={0: (1.1, 100.)}, num_arrays=1,
-                       as_decimal=False)
+                       )
 def test_arccsc_backward(data):
     pass
 
@@ -63,8 +63,7 @@ def test_arcsec_fwd():
 
 
 @backprop_test_factory(mygrad_func=arcsec, true_func=lambda x: np.arccos(1 / x),
-                       index_to_bnds={0: (1.1, 100.)}, num_arrays=1,
-                       as_decimal=False, atol=1e-5)
+                       index_to_bnds={0: (1.1, 100.)}, num_arrays=1)
 def test_arcsec_backward(data):
     pass
 
@@ -76,7 +75,6 @@ def test_arccot_fwd():
 
 
 @backprop_test_factory(mygrad_func=arccot, true_func=lambda x: np.arctan(1 / x),
-                       index_to_bnds={0: (0.1, 10)}, num_arrays=1,
-                       as_decimal=False, atol=1e-5)
+                       index_to_bnds={0: (0.1, 10)}, num_arrays=1)
 def test_arccot_backward(data):
     pass
