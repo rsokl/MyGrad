@@ -102,11 +102,28 @@ def test_var_fwd():
     pass
 
 
-@backprop_test_factory(mygrad_func=var, true_func=np.var, num_arrays=1,
+def _var(x, keepdims=False, axis=None, ddof=0):
+    """Defines variance without using abs. Permits use of
+    complex-step numerical derivative."""
+    def mean(y, keepdims=False, axis=None, ddof=0):
+        N = y.size if axis is None else np.prod([y.shape[i] for i in axis])
+        return y.sum(keepdims=keepdims, axis=axis) / (N - ddof)
+
+    return mean((x - x.mean(axis=axis, keepdims=True))**2,
+                keepdims=keepdims, axis=axis, ddof=ddof)
+
+
+@fwdprop_test_factory(mygrad_func=var, true_func=_var, num_arrays=1,
+                      kwargs=dict(axis=axis_arg, keepdims=keepdims_arg,
+                                  ddof=ddof_arg))
+def test_custom_var_fwd():
+    pass
+
+
+@backprop_test_factory(mygrad_func=var, true_func=_var, num_arrays=1,
                        kwargs=dict(axis=axis_arg, keepdims=keepdims_arg,
                                    ddof=ddof_arg),
-                       vary_each_element=True, index_to_bnds={0: (-10, 10)},
-                       atol=1e-5, rtol=1e-5)
+                       vary_each_element=True, index_to_bnds={0: (-10, 10)})
 def test_var_bkwd():
     pass
 
@@ -119,18 +136,36 @@ def test_std_fwd():
     pass
 
 
+def _std(x, keepdims=False, axis=None, ddof=0):
+    """Defines standard dev without using abs. Permits use of
+    complex-step numerical derivative."""
+    def mean(y, keepdims=False, axis=None, ddof=0):
+        N = y.size if axis is None else np.prod([y.shape[i] for i in axis])
+        return y.sum(keepdims=keepdims, axis=axis) / (N - ddof)
+
+    return np.sqrt(mean((x - x.mean(axis=axis, keepdims=True))**2,
+                        keepdims=keepdims, axis=axis, ddof=ddof))
+
+
+# std composes mygrad's sqrt and var, backprop need not be tested
+@fwdprop_test_factory(mygrad_func=std, true_func=_std, num_arrays=1,
+                      kwargs=dict(axis=axis_arg, keepdims=keepdims_arg,
+                                  ddof=ddof_arg))
+def test_custom_std_fwd():
+    pass
+
+
 def _assume(*arrs, **kwargs):
     return all(i > 1 for i in arrs[0].shape)
 
 
-@backprop_test_factory(mygrad_func=std, true_func=np.std, num_arrays=1,
+@backprop_test_factory(mygrad_func=std, true_func=_std, num_arrays=1,
                        kwargs=dict(axis=axis_arg, keepdims=keepdims_arg,
                                    ddof=ddof_arg),
                        vary_each_element=True, index_to_bnds={0: (-10, 10)},
                        elements_strategy=st.integers,
                        index_to_unique={0: True},
-                       assumptions=_assume,
-                       atol=1e-5, rtol=1e-5)
+                       assumptions=_assume)
 def test_std_bkwd():
     pass
 

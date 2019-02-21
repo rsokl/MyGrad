@@ -207,11 +207,10 @@ class backprop_test_factory():
                  index_to_unique: Optional[Union[Dict[int, bool], bool]]=None,
                  elements_strategy: Optional[SearchStrategy]=None,
                  kwargs: Optional[Dict[str, Union[Any, Callable[[Any], SearchStrategy]]]]=None,
-                 h: float=1e-8,
-                 rtol: float=1e-05,
-                 atol: float=1e-05,
+                 h: float=1e-20,
+                 rtol: float=1e-8,
+                 atol: float=1e-8,
                  vary_each_element: bool=False,
-                 as_decimal: bool=True,
                  assumptions: Optional[Callable[..., bool]] = None):
         """
         Parameters
@@ -307,7 +306,6 @@ class backprop_test_factory():
         self.h = h
         self.tolerances = dict(rtol=rtol, atol=atol)
         self.vary_each_element = vary_each_element
-        self.as_decimal = as_decimal
         self.assumptions = assumptions
 
     def gen_first_array(self) -> st.SearchStrategy:
@@ -391,8 +389,7 @@ class backprop_test_factory():
             # compute derivatives via numerical approximation of derivative
             numerical_grad = numerical_gradient_full if self.vary_each_element else numerical_gradient
             grads_numerical = numerical_grad(self.true_func, *(i.data for i in arrs),
-                                             back_grad=grad, kwargs=kwargs,
-                                             as_decimal=self.as_decimal)
+                                             back_grad=grad, kwargs=kwargs)
 
             # check that the analytic and numeric derivatives match
             for n, (arr, d_num) in enumerate(zip(arrs, grads_numerical)):
