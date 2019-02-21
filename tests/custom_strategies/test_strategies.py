@@ -93,7 +93,9 @@ def test_broadcast_compat_shape(shape: Tuple[int, ...],
 
 @given(shape=hnp.array_shapes(min_dims=3), data=st.data())
 def test_basic_index(shape: Tuple[int, ...], data: st.SearchStrategy):
-    index = data.draw(basic_index(shape=shape, min_dim=1, max_dim=len(shape)), label="index")
+    min_dim = data.draw(st.integers(0, len(shape) + 2), label="min_dim")
+    max_dim = data.draw(st.integers(min_dim, min_dim + len(shape)), label="max_dim")
+    index = data.draw(basic_index(shape=shape, min_dim=min_dim, max_dim=max_dim), label="index")
     x = np.zeros(shape, dtype=int)
     o = x[index]  # raises if invalid index
 
@@ -101,4 +103,6 @@ def test_basic_index(shape: Tuple[int, ...], data: st.SearchStrategy):
     if o.size and o.ndim > 0:
         assert np.shares_memory(x, o), "The basic index should produce a " \
                                        "view of the original array."
-    #assert False
+    assert min_dim <= o.ndim <= max_dim, "The dimensionality input constraints " \
+                                         "were not obeyed"
+

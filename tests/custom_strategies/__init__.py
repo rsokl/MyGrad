@@ -13,6 +13,7 @@ __all__ = ["adv_integer_index",
            "valid_axes",
            "basic_index"]
 
+
 def _check_min_max(min_val, min_dim, max_dim, param_name):
     if not isinstance(min_dim, Integral) or min_dim < min_val:
         raise ValueError("`min_{name}` must be larger than {min_val}. "
@@ -23,6 +24,7 @@ def _check_min_max(min_val, min_dim, max_dim, param_name):
         raise ValueError("`max_{name}` must be an integer that is "
                          "not smaller than `min_{name}`. Got {val}".format(name=param_name,
                                                                            val=max_dim))
+
 
 def choices(seq, size, replace=True):
     """Randomly choose elements from `seq`, producing a tuple of length `size`."""
@@ -224,13 +226,22 @@ def basic_index(draw, shape, min_dim=0, max_dim=5):
         `draw` is a parameter reserved by hypothesis, and should not be specified
         by the user.
 
+        Examples from this strategy shrink towards indices that will produce arrays
+        with the lowest dimensionality. This shrinks indices containing new-axes, to
+        those with slices, to integer-indexing.
+
         Parameters
         ----------
         shape : Tuple[int, ...]
             The shape of the array whose indices are being generated
 
-        max_dim : int
-            The max dimensionality permitted, given the addition of new-axes.
+        min_dim: int, optional (default=0)
+            The minimum of dimensionality of the resulting that will be
+            produced by the index.
+
+        max_dim : int, optional (default=5)
+            The maximum of dimensionality of the resulting that will be
+            produced by the index.
 
         Returns
         -------
@@ -245,17 +256,12 @@ def basic_index(draw, shape, min_dim=0, max_dim=5):
     if not ndim_out:
         return draw(st.tuples(*(integer_index(size) for size in shape)))
 
-    num_slice_axes = draw(st.sampled_from(range(0, min(ndim, ndim_out))))
+    num_slice_axes = draw(st.sampled_from(range(1, min(ndim, ndim_out) + 1)[::-1]))
     num_newaxis = max(0, ndim_out - num_slice_axes)
     num_int_axes = max(0, ndim - num_slice_axes)
     int_axes = draw(choices(range(ndim), size=num_int_axes, replace=False))
     slice_axes = draw(choices(sorted(set(range(ndim)) - set(int_axes)),
                               size=num_slice_axes, replace=False))
-    note(f"shape: {shape}"
-         f"\nndim_out: {ndim_out}"
-         f"\nint_axes: {int_axes}"
-         f"\nslice_axes: {slice_axes}"
-         f"\nnum_newaxis: {num_newaxis}")
 
     index = [np.newaxis]*ndim
     for i in int_axes:
