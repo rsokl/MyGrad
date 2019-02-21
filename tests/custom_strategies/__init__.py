@@ -3,6 +3,7 @@ from numbers import Integral
 
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
+from hypothesis import note
 
 import numpy as np
 
@@ -12,6 +13,16 @@ __all__ = ["adv_integer_index",
            "valid_axes",
            "basic_index"]
 
+def _check_min_max(min_val, min_dim, max_dim, param_name):
+    if not isinstance(min_dim, Integral) or min_dim < min_val:
+        raise ValueError("`min_{name}` must be larger than {min_val}. "
+                         "Got {val}".format(min_val=min_val, name=param_name,
+                                            val=min_dim))
+
+    if not isinstance(max_dim, Integral) or max_dim < min_dim:
+        raise ValueError("`max_{name}` must be an integer that is "
+                         "not smaller than `min_{name}`. Got {val}".format(name=param_name,
+                                                                           val=max_dim))
 
 def choices(seq, size, replace=True):
     """Randomly choose elements from `seq`, producing a tuple of length `size`."""
@@ -136,21 +147,8 @@ def broadcastable_shape(draw, shape, min_dim=0, max_dim=5,
         (8, 5, 1, 3)
         (3, )
         """
-    if not isinstance(min_dim, Integral) or min_dim < 0:
-        raise ValueError("`min_dim` must be a non-negative integer. "
-                         "Got {}".format(min_dim))
-
-    if not isinstance(max_dim, Integral) or max_dim < min_dim:
-        raise ValueError("`max_dim` must be an integer that is "
-                         "not smaller than `min_dim`. Got {}".format(max_dim))
-
-    if not isinstance(min_side, Integral) or min_side < 1:
-        raise ValueError("`min_side` must be a integer that is at least 1."
-                         "Got {}".format(min_side))
-
-    if not isinstance(max_side, Integral) or max_side < min_side:
-        raise ValueError("`max_dim` must be an integer that is "
-                         "not smaller than `min_side`. Got {}".format(max_side))
+    _check_min_max(0, min_dim, max_dim, "dim")
+    _check_min_max(1, min_side, max_side, "side")
 
     ndim = draw(st.integers(min_dim, max_dim))
     n_aligned = min(len(shape), ndim)
@@ -218,7 +216,7 @@ def slice_index(draw, size):
 
 
 @st.composite
-def basic_index(draw, shape, max_dim=5):
+def basic_index(draw, shape, min_dim=0, max_dim=5):
     """ Hypothesis search strategy: given an array shape, generate a
         a valid index for specifying an element/subarray of that array,
         using basic indexing.
@@ -239,15 +237,35 @@ def basic_index(draw, shape, max_dim=5):
         hypothesis.searchstrategy.SearchStrategy
             -> Tuple[int, ...]
         """
-    min_dim = len(shape)
-    max_dim = max(min_dim, max_dim)
+    _check_min_max(0, min_dim, max_dim, "dim")
 
-    index = list(draw(st.tuples(*(st.one_of(integer_index(size), slice_index(size)) for size in shape))))
-    if min_dim != max_dim:
-        num_newaxis = draw(st.integers(min_dim, max_dim)) - len(index)
-        if num_newaxis:
-            for ind in draw(choices(range(min_dim + 1), num_newaxis)):
-                index.insert(ind, np.newaxis)
+    ndim = len(shape)
+    ndim_out = draw(st.integers(min_dim, max_dim))
+
+    if not ndim_out:
+        return draw(st.tuples(*(integer_index(size) for size in shape)))
+
+    num_slice_axes = draw(st.sampled_from(range(0, min(ndim, ndim_out))))
+    num_newaxis = max(0, ndim_out - num_slice_axes)
+    num_int_axes = max(0, ndim - num_slice_axes)
+    int_axes = draw(choices(range(ndim), size=num_int_axes, replace=False))
+    slice_axes = draw(choices(sorted(set(range(ndim)) - set(int_axes)),
+                              size=num_slice_axes, replace=False))
+    note(f"shape: {shape}"
+         f"\nndim_out: {ndim_out}"
+         f"\nint_axes: {int_axes}"
+         f"\nslice_axes: {slice_axes}"
+         f"\nnum_newaxis: {num_newaxis}")
+
+    index = [np.newaxis]*ndim
+    for i in int_axes:
+        index[i] = draw(integer_index(shape[i]))
+
+    for i in slice_axes:
+        index[i] = draw(slice_index(shape[i]))
+
+    for i in draw(choices(range(len(index)+1), size=num_newaxis)):
+        index.insert(i, np.newaxis)
     return tuple(index)
 
 
