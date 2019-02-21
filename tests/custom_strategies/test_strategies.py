@@ -1,5 +1,5 @@
 from tests.custom_strategies import broadcastable_shape, choices, integer_index
-from tests.custom_strategies import slice_index, basic_index
+from tests.custom_strategies import slice_index, basic_index, adv_integer_index
 
 from hypothesis import given, note
 import hypothesis.strategies as st
@@ -9,7 +9,6 @@ from numbers import Real
 
 import numpy as np
 from typing import Tuple, List
-
 
 
 @given(seq=st.lists(elements=st.integers()),
@@ -106,3 +105,13 @@ def test_basic_index(shape: Tuple[int, ...], data: st.SearchStrategy):
     assert min_dim <= o.ndim <= max_dim, "The dimensionality input constraints " \
                                          "were not obeyed"
 
+
+@given(shape=hnp.array_shapes(min_dims=1), min_dims=st.integers(1, 3), data=st.data())
+def test_advanced_integer_index(shape: Tuple[int, ...], min_dims: int, data: st.SearchStrategy):
+    max_dims = data.draw(st.integers(min_dims, min_dims+3), label="max_dims")
+    index = data.draw(adv_integer_index(shape, min_dims=min_dims, max_dims=max_dims))
+    x = np.zeros(shape)
+    out = x[index]  # raises if the index is invalid
+    note(f"x[index]: {out}")
+    assert min_dims <= out.ndim <= max_dims, "The input parameters were not respected"
+    assert not np.shares_memory(x, out), "An advanced index should create a copy upon indexing"

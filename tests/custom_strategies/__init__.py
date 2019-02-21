@@ -1,10 +1,10 @@
 """ Custom hypothesis search strategies """
+from collections.abc import Sequence
 from numbers import Integral
 import math
 
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
-from hypothesis import note
 
 import numpy as np
 
@@ -119,8 +119,7 @@ def broadcastable_shape(draw, shape, min_dim=0, max_dim=5,
         broadcast-compatible shape, specifying the minimum/maximum permissable
         number of dimensions in the resulting shape (both values are inclusive).
 
-        `draw` is a parameter reserved by hypothesis, and should not be specified
-        by the user.
+        Examples from this strategy shrink towards the input shape.
 
         Parameters
         ----------
@@ -151,7 +150,11 @@ def broadcastable_shape(draw, shape, min_dim=0, max_dim=5,
         Returns
         -------
         hypothesis.searchstrategy.SearchStrategy[Tuple[int, ...]]
-            -> Tuple[int, ...]
+
+        Notes
+        -----
+        `draw` is a parameter reserved by hypothesis, and should not be specified
+        by the user.
 
         Examples
         --------
@@ -167,12 +170,15 @@ def broadcastable_shape(draw, shape, min_dim=0, max_dim=5,
     _check_min_max(0, min_dim, max_dim, "dim")
     _check_min_max(1, min_side, max_side, "side")
 
-    ndim = draw(st.integers(min_dim, max_dim))
+    if not isinstance(shape, Sequence) or any(i < 0 or not isinstance(i, Integral) for i in shape):
+        raise ValueError("`shape` must be a sequence of non-negative integers. Got: {}".format(shape))
+
+    ndim = draw(st.integers(min_dim - len(shape), max_dim - len(shape))) + len(shape)
     n_aligned = min(len(shape), ndim)
     n_leading = ndim - n_aligned
     if n_aligned > 0:
         if allow_singleton:
-            aligned_dims = draw(st.tuples(*(st.sampled_from([1, size])
+            aligned_dims = draw(st.tuples(*(st.sampled_from((size, 1))
                                             for size in shape[-n_aligned:])))
         else:
             aligned_dims = shape[-n_aligned:]
@@ -321,28 +327,42 @@ def basic_index(draw, shape, min_dim=0, max_dim=5):
 
 
 @st.composite
-def adv_integer_index(draw, shape, max_dim=3):
+def adv_integer_index(draw, shape, min_dims=1, max_dims=3, min_side=1, max_side=3):
     """ Hypothesis search strategy: given an array shape, generate a
         a valid index for specifying an element/subarray of that array,
         using advanced indexing with integer-valued arrays.
 
-        `draw` is a parameter reserved by hypothesis, and should not be specified
-        by the user.
+        Examples from this strategy shrink towards the index
+        `len(shape) * (np.array([0]), )`.
 
         Parameters
         ----------
         shape : Tuple[int, ...]
             The shape of the array whose indices are being generated
 
-        max_dim : int
-            The max dimensionality permitted for the index-arrays.
+        min_dims : int, optional (default=1)
+            The minimum dimensionality permitted for the index-arrays.
+
+        max_dims : int, optional (default=3)
+            The maximum dimensionality permitted for the index-arrays.
+
+        min_side : int, optional (default=1)
+            The minimum side permitted for the index-arrays.
+
+        max_side : int, optional (default=3)
+            The maximum side permitted for the index-arrays.
 
         Returns
         -------
-        hypothesis.searchstrategy.SearchStrategy
-            -> Tuple[numpy.ndarray, ...]
+        hypothesis.searchstrategy.SearchStrategy[Tuple[numpy.ndarray, ...]]
+
+        Notes
+        -----
+        `draw` is a parameter reserved by hypothesis, and should not be specified
+        by the user.
         """
-    index_shape = draw(hnp.array_shapes(max_dims=max_dim))
+    index_shape = draw(hnp.array_shapes(min_dims=min_dims, max_dims=max_dims,
+                                        min_side=min_side, max_side=max_side))
     index = draw(st.tuples(*(hnp.arrays(dtype=int,
                                         shape=index_shape, elements=integer_index(size))
                              for size in shape)))
