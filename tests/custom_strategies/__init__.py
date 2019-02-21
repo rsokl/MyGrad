@@ -30,8 +30,8 @@ def _check_min_max(min_val, min_dim, max_dim, param_name):
 def choices(seq, size, replace=True):
     """Randomly choose elements from `seq`, producing a tuple of length `size`.
 
-    Examples from this strategy shrink towards `seq[:size]` when `replace=False.
-    Examples from this strategy shrink towards `[seq[0]] * size` when `replace=True.
+    Examples from this strategy shrink towards `tuple(seq[:size])` when `replace=False.
+    Examples from this strategy shrink towards `(seq[0], ) * size` when `replace=True.
 
     Parameters
     ----------
@@ -70,24 +70,24 @@ def _rand_neg_axis(draw, axes, ndim):
 @st.composite
 def valid_axes(draw, ndim, pos_only=False, single_axis_only=False, permit_none=True):
     """ Hypothesis search strategy: Given array dimensionality, generate valid
-        `axis` arguments (including `None`).
+    `axis` arguments (including `None`).
 
 
-        Parameters
-        ----------
-        ndim : int
-            The dimensionality of the array.
+    Parameters
+    ----------
+    ndim : int
+        The dimensionality of the array.
 
-        Returns
-        -------
-        hypothesis.searchstrategy.SearchStrategy
-         -> [Union[NoneType, Tuple[int...]]
+    Returns
+    -------
+    hypothesis.searchstrategy.SearchStrategy
+     -> [Union[NoneType, Tuple[int...]]
 
-        Examples
-        --------
-        >>> valid_axes(4).example()
-        (0, 1)
-        """
+    Examples
+    --------
+    >>> valid_axes(4).example()
+    (0, 1)
+    """
     if isinstance(ndim, (tuple, list)):
         ndim = len(ndim)
 
@@ -116,57 +116,57 @@ def valid_axes(draw, ndim, pos_only=False, single_axis_only=False, permit_none=T
 def broadcastable_shape(draw, shape, min_dim=0, max_dim=5,
                         min_side=1, max_side=5, allow_singleton=True):
     """ Hypothesis search strategy: given an array shape, generate a
-        broadcast-compatible shape, specifying the minimum/maximum permissable
-        number of dimensions in the resulting shape (both values are inclusive).
+    broadcast-compatible shape, specifying the minimum/maximum permissable
+    number of dimensions in the resulting shape (both values are inclusive).
 
-        Examples from this strategy shrink towards the input shape.
+    Examples from this strategy shrink towards the input shape.
 
-        Parameters
-        ----------
-        shape : Tuple[int, ...]
-            The shape with which
+    Parameters
+    ----------
+    shape : Tuple[int, ...]
+        The shape with which
 
-        min_dim : int, optional (default=0)
-            The smallest number of dimensions that the broadcast-compatible
-            shape can possess.
+    min_dim : int, optional (default=0)
+        The smallest number of dimensions that the broadcast-compatible
+        shape can possess.
 
-        max_dim : int, optional (default=5)
-            The largest number of dimensions that the broadcast-compatible
-            shape can possess.
+    max_dim : int, optional (default=5)
+        The largest number of dimensions that the broadcast-compatible
+        shape can possess.
 
-        min_side : int, optional (default=1)
-            The smallest size that a new, leading dimensions can
-            possess
+    min_side : int, optional (default=1)
+        The smallest size that a new, leading dimensions can
+        possess
 
-        max_side : int, optional (default=5)
-            The largest size that a new, leading dimension can
-            possess.
+    max_side : int, optional (default=5)
+        The largest size that a new, leading dimension can
+        possess.
 
-        allow_singleton : bool, optional (default=True)
-            If `False` the aligned dimensions of the broadcastable
-            shape cannot contain singleton dimensions (i.e. size-1
-            dimensions aligned with larger dimensions)
+    allow_singleton : bool, optional (default=True)
+        If `False` the aligned dimensions of the broadcastable
+        shape cannot contain singleton dimensions (i.e. size-1
+        dimensions aligned with larger dimensions)
 
-        Returns
-        -------
-        hypothesis.searchstrategy.SearchStrategy[Tuple[int, ...]]
+    Returns
+    -------
+    hypothesis.searchstrategy.SearchStrategy[Tuple[int, ...]]
 
-        Notes
-        -----
-        `draw` is a parameter reserved by hypothesis, and should not be specified
-        by the user.
+    Notes
+    -----
+    `draw` is a parameter reserved by hypothesis, and should not be specified
+    by the user.
 
-        Examples
-        --------
-        >>> for i in range(5):
-        ...    print(broadcastable_shape(shape=(2, 3)).example())
-        (1, 3)
-        ()
-        (2, 3)
-        (5, 2, 3)
-        (8, 5, 1, 3)
-        (3, )
-        """
+    Examples
+    --------
+    >>> for i in range(5):
+    ...    print(broadcastable_shape(shape=(2, 3)).example())
+    (1, 3)
+    ()
+    (2, 3)
+    (5, 2, 3)
+    (8, 5, 1, 3)
+    (3, )
+    """
     _check_min_max(0, min_dim, max_dim, "dim")
     _check_min_max(1, min_side, max_side, "side")
 
@@ -271,34 +271,33 @@ def slice_index(draw, size,
 @st.composite
 def basic_index(draw, shape, min_dim=0, max_dim=5):
     """ Hypothesis search strategy: given an array shape, generate a
-        a valid index for specifying an element/subarray of that array,
-        using basic indexing.
+    a valid index for specifying an element/subarray of that array,
+    using basic indexing.
 
-        `draw` is a parameter reserved by hypothesis, and should not be specified
-        by the user.
+    `draw` is a parameter reserved by hypothesis, and should not be specified
+    by the user.
 
-        Examples from this strategy shrink towards indices that will produce arrays
-        with the lowest dimensionality. This shrinks indices containing new-axes, to
-        those with slices, to integer-indexing.
+    Examples from this strategy shrink towards indices that will produce arrays
+    with the lowest dimensionality. This shrinks indices containing new-axes, to
+    those with slices, to integer-indexing.
 
-        Parameters
-        ----------
-        shape : Tuple[int, ...]
-            The shape of the array whose indices are being generated
+    Parameters
+    ----------
+    shape : Tuple[int, ...]
+        The shape of the array whose indices are being generated
 
-        min_dim: int, optional (default=0)
-            The minimum of dimensionality of the resulting that will be
-            produced by the index.
+    min_dim: int, optional (default=0)
+        The minimum of dimensionality of the resulting that will be
+        produced by the index.
 
-        max_dim : int, optional (default=5)
-            The maximum of dimensionality of the resulting that will be
-            produced by the index.
+    max_dim : int, optional (default=5)
+        The maximum of dimensionality of the resulting that will be
+        produced by the index.
 
-        Returns
-        -------
-        hypothesis.searchstrategy.SearchStrategy
-            -> Tuple[int, ...]
-        """
+    Returns
+    -------
+    hypothesis.searchstrategy.SearchStrategy[Tuple[int, ...]]
+    """
     _check_min_max(0, min_dim, max_dim, "dim")
 
     ndim = len(shape)
@@ -329,38 +328,37 @@ def basic_index(draw, shape, min_dim=0, max_dim=5):
 @st.composite
 def adv_integer_index(draw, shape, min_dims=1, max_dims=3, min_side=1, max_side=3):
     """ Hypothesis search strategy: given an array shape, generate a
-        a valid index for specifying an element/subarray of that array,
-        using advanced indexing with integer-valued arrays.
+    a valid index for specifying an element/subarray of that array,
+    using advanced indexing with integer-valued arrays.
 
-        Examples from this strategy shrink towards the index
-        `len(shape) * (np.array([0]), )`.
+    Examples from this strategy shrink towards the index
+    `len(shape) * (np.array([0]), )`.
 
-        Parameters
-        ----------
-        shape : Tuple[int, ...]
-            The shape of the array whose indices are being generated
+    Parameters
+    ----------
+    shape : Tuple[int, ...]
+        The shape of the array whose indices are being generated
 
-        min_dims : int, optional (default=1)
-            The minimum dimensionality permitted for the index-arrays.
+    min_dims : int, optional (default=1)
+        The minimum dimensionality permitted for the index-arrays.
 
-        max_dims : int, optional (default=3)
-            The maximum dimensionality permitted for the index-arrays.
+    max_dims : int, optional (default=3)
+        The maximum dimensionality permitted for the index-arrays.
 
-        min_side : int, optional (default=1)
-            The minimum side permitted for the index-arrays.
+    min_side : int, optional (default=1)
+        The minimum side permitted for the index-arrays.
 
-        max_side : int, optional (default=3)
-            The maximum side permitted for the index-arrays.
+    max_side : int, optional (default=3)
+        The maximum side permitted for the index-arrays.
 
-        Returns
-        -------
-        hypothesis.searchstrategy.SearchStrategy[Tuple[numpy.ndarray, ...]]
+    Returns
+    -------
+    hypothesis.searchstrategy.SearchStrategy[Tuple[numpy.ndarray, ...]]
 
-        Notes
-        -----
-        `draw` is a parameter reserved by hypothesis, and should not be specified
-        by the user.
-        """
+    Notes
+    -----
+    `draw` is a parameter reserved by hypothesis, and should not be specified
+    by the user."""
     index_shape = draw(hnp.array_shapes(min_dims=min_dims, max_dims=max_dims,
                                         min_side=min_side, max_side=max_side))
     index = draw(st.tuples(*(hnp.arrays(dtype=int,
