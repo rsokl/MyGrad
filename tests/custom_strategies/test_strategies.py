@@ -8,8 +8,8 @@ import hypothesis.extra.numpy as hnp
 from numbers import Real
 
 import numpy as np
-
 from typing import Tuple, List
+
 
 
 @given(seq=st.lists(elements=st.integers()),

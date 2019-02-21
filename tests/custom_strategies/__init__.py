@@ -1,5 +1,6 @@
 """ Custom hypothesis search strategies """
 from numbers import Integral
+import math
 
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
@@ -27,7 +28,21 @@ def _check_min_max(min_val, min_dim, max_dim, param_name):
 
 
 def choices(seq, size, replace=True):
-    """Randomly choose elements from `seq`, producing a tuple of length `size`."""
+    """Randomly choose elements from `seq`, producing a tuple of length `size`.
+
+    Examples from this strategy shrink towards `seq[:size]` when `replace=False.
+    Examples from this strategy shrink towards `[seq[0]] * size` when `replace=True.
+
+    Parameters
+    ----------
+    seq : Sequence[Any]
+    size : int
+    replace : bool
+
+    Returns
+    -------
+    hypothesis.strategiesSearchStrategy[Tuple[Any, ...]]
+        A tuple of length `size` containing elements of `seq`"""
     if not isinstance(size, Integral) or size < 0:
         raise ValueError("`size` must be a non-negative integer. Got {}".format(size))
     if size > len(seq) and not replace:
@@ -171,50 +186,80 @@ def broadcastable_shape(draw, shape, min_dim=0, max_dim=5,
 
 def integer_index(size):
     """ Generate a valid integer-index for an axis of a given size,
-        either a positive or negative value.
+    either a positive or negative value: [-size, size).
 
-        Parameters
-        ----------
-        size : int
-            Size of the axis for which the index is drawn
+    Examples from this strategy shrink towards 0.
 
-        Returns
-        -------
-        hypothesis.searchstrategy.SearchStrategy
-            -> int"""
+    Parameters
+    ----------
+    size : int
+        Size of the axis for which the index is drawn
+
+    Returns
+    -------
+    hypothesis.searchstrategy.SearchStrategy[int]
+    """
     return st.integers(-size, size - 1)
 
 
 @st.composite
-def slice_index(draw, size):
+def slice_index(draw, size, 
+                min_start=None, max_start=None,
+                min_stop=None, max_stop=None,
+                min_step=1, max_step=2, negative_step=True):
     """ Hypothesis search strategy: Generate a valid slice-index
-        for an axis of a given size. Slices are chosen such that
-        most slices will not be empty.
+    for an axis of a given size. Slices are chosen such that
+    most slices will not be empty.
 
-        `draw` is a parameter reserved by hypothesis, and should not be specified
-        by the user.
+    Examples from this strategy shrink towards `slice(0, 0, 1)`. In the
+    case that a negative step size is drawn, start and stop will be flipped
+    so that it is less likely to have an empty slice
 
-        Parameters
-        ----------
-        size : int
-            Size of the axis for which the index is drawn
+    Parameters
+    ----------
+    size : int
+        Size of the axis for which the index is drawn
+    min_start : int
+    max_start : int
+    min_stop : int
+    max_stop : int
+    min_step : int, optional (default=1)
+    max_step : int
+    negative_step : bool
 
-        Returns
-        -------
-        hypothesis.searchstrategy.SearchStrategy
-            -> slice"""
+    Notes
+    -----
+    `draw` is a parameter reserved by hypothesis, and should not be specified
+    by the user.
+
+    Returns
+    -------
+    hypothesis.searchstrategy.SearchStrategy[slice]
+    """
     if not size:
         return slice(None)
 
-    pos_start, pos_stop, pos_step = draw(st.tuples(*[st.booleans()]*3))
+    min_start = -size if min_start is None else min_start
+    max_start = size - 1 if max_start is None else max_start
+    _check_min_max(-math.inf, min_start, max_start, "start")
 
-    step = draw(st.integers(1, max(2, size // 2)))
-    if not pos_start:
-        step *= -1
-    start = draw(st.integers(0, size - 1) if pos_start else st.integers(-size, -1))
-    _abs_start = start if start >= 0 else start + size
-    stop = draw(st.integers(_abs_start, size) if pos_stop else st.integers(_abs_start - size, -1))
-    return slice(start, stop, step) if pos_step else slice(stop, start, step)
+    min_stop = -size if min_stop is None else min_stop
+    max_stop = -size if max_stop is None else max_stop
+    _check_min_max(min_start, min_stop, max_stop, "stop")
+
+    _check_min_max(0, min_step, max_step, "step")
+
+    start = draw(st.integers(min_start, max_start - 1))
+    stop = draw(st.integers(start, size))
+
+    step = draw(st.integers(min_step, max_step))
+
+    if negative_step:
+        neg_step = draw(st.booleans())
+
+        if neg_step:
+            step *= 1
+    return slice(start, stop, step) if step > 0 else slice(stop, start, step)
 
 
 @st.composite
