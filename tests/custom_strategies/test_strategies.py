@@ -51,6 +51,12 @@ def test_slice_index(size: int, data: st.SearchStrategy):
     if o.size:
         assert np.shares_memory(o, x), "A slice should produce a view of `x`"
 
+    if index.start is not None:
+        assert -size <= index.start <= size
+
+    if index.stop is not None:
+        assert -size <= index.stop <= size
+
 
 @given(shape=hnp.array_shapes(), allow_singleton=st.booleans(),
        min_dim=st.integers(0, 6),

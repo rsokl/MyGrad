@@ -255,8 +255,8 @@ def slice_index(draw, size,
 
     _check_min_max(0, min_step, max_step, "step")
 
-    start = draw(st.integers(min_start, max_start - 1))
-    stop = draw(st.integers(start, size))
+    start = draw(st.one_of(st.integers(min_start, max_start - 1), st.none()))
+    stop = draw(st.one_of(st.integers(start if start is not None else 0, size), st.none()))
 
     step = draw(st.integers(min_step, max_step))
 
@@ -264,7 +264,7 @@ def slice_index(draw, size,
         neg_step = draw(st.booleans())
 
         if neg_step:
-            step *= 1
+            step *= -1
     return slice(start, stop, step) if step > 0 else slice(stop, start, step)
 
 
