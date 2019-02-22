@@ -76,8 +76,8 @@ def test_logaddexp_fwd():
 
 @settings(deadline=None)
 @backprop_test_factory(mygrad_func=logaddexp, true_func=np.logaddexp, num_arrays=2,
-                       vary_each_element=True,
-                       index_to_bnds={0: (-2, 2), 1: (-2, 2)})
+                       index_to_bnds={0: (-2, 2), 1: (-2, 2)}, finite_difference=True, h=1e-8,
+                       atol=1e-4, rtol=1e-4)
 def test_logaddexp_bkwd():
     pass
 
@@ -89,7 +89,7 @@ def test_logaddexp2_fwd():
 
 @settings(deadline=None)
 @backprop_test_factory(mygrad_func=logaddexp2, true_func=np.logaddexp2, num_arrays=2,
-                       atol=1e-4, rtol=1e-4, vary_each_element=True)
+                       atol=1e-4, rtol=1e-4, finite_difference=True, h=1e-8)
 def test_logaddexp2_bkwd():
     pass
 
@@ -101,8 +101,8 @@ def test_arctan2_fwd():
 
 @settings(deadline=None)
 @backprop_test_factory(mygrad_func=arctan2, true_func=np.arctan2, num_arrays=2,
-                       atol=1e-4, rtol=1e-4, vary_each_element=True,
-                       index_to_bnds={1: (1, 10)})
+                       atol=1e-4, rtol=1e-4,
+                       index_to_bnds={1: (1, 10)}, finite_difference=True, h=1e-8)
 def test_arctan2_bkwd():
     pass
 

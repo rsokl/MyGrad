@@ -8,7 +8,7 @@ from mygrad._utils import reduce_broadcast
 
 def finite_difference(f, *args, back_grad, vary_ind=None,
                       h=Decimal(1)/Decimal(int(1e8)),
-                      as_decimal=True, kwargs=None):
+                      as_decimal=False, kwargs=None):
     """ Computes numerical partial derivatives of f(x0, x1, ...) in each
         of its variables, using the central difference method.
         This is a "fast" method - it varies entire arrays at once. Thus

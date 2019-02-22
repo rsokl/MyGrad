@@ -1,6 +1,6 @@
 """ Test `numerical_gradient`, `numerical_derivative`, and `broadcast_check`"""
 
-from tests.utils.numerical_gradient import numerical_gradient, numerical_gradient_full
+from tests.utils.numerical_gradient import numerical_gradient, numerical_gradient_full, finite_difference
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
@@ -17,6 +17,46 @@ def binary_func(x, y): return x * y ** 2
 
 
 def ternary_func(x, y, z): return z * x * y ** 2
+
+
+@given(data=st.data(),
+       x=hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=3),
+                    dtype=float,
+                    elements=st.floats(-10, 10)))
+def test_finite_difference_no_broadcast(data, x):
+    atol, rtol = (1e-2, 1e-2)
+    y = data.draw(hnp.arrays(shape=x.shape,
+                             dtype=float,
+                             elements=st.floats(-100, 100)),
+                  label="y")
+
+    z = data.draw(hnp.arrays(shape=x.shape,
+                             dtype=float,
+                             elements=st.floats(-100, 100)),
+                  label="z")
+
+    grad = data.draw(hnp.arrays(shape=x.shape,
+                                dtype=float,
+                                elements=st.floats(-100, 100)),
+                     label="grad")
+
+    # check variable-selection
+    assert finite_difference(unary_func, x, back_grad=grad,
+                            vary_ind=[])[0] is None
+
+    # no broadcast
+    dx, = finite_difference(unary_func, x, back_grad=grad)
+
+    assert_allclose(dx, grad * 2 * x, atol=atol, rtol=rtol)
+
+    dx, dy = numerical_gradient(binary_func, x, y, back_grad=grad)
+    assert_allclose(dx, grad * y ** 2, atol=atol, rtol=rtol)
+    assert_allclose(dy, grad * 2 * x * y, atol=atol, rtol=rtol)
+
+    dx, dy, dz = numerical_gradient(ternary_func, x, y, z, back_grad=grad)
+    assert_allclose(dx, grad * z * y ** 2, atol=atol, rtol=rtol)
+    assert_allclose(dy, grad * z * 2 * x * y, atol=atol, rtol=rtol)
+    assert_allclose(dz, grad * x * y ** 2, atol=atol, rtol=rtol)
 
 
 @given(data=st.data(),
