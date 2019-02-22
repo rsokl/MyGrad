@@ -1,6 +1,7 @@
 from mygrad.operation_base import Operation
 import numpy as np
 from functools import reduce
+from collections.abc import Sequence
 
 __all__ = ["MaxMin", "Sum", "Mean", "Prod", "CumProd", "CumSum",
            "Variance"]
@@ -153,7 +154,7 @@ class Sum(Operation):
 class Mean(Sum):
     def __call__(self, a, axis=None, keepdims=False):
         out = super(Mean, self).__call__(a, axis, keepdims)
-        self.n = a.data.size if not self.axis else np.prod([a.shape[i] for i in self.axis])
+        self.n = a.data.size if self.axis is None else np.prod([a.shape[i] for i in self.axis])
         return out / self.n
 
     def backward_var(self, grad, index, **kwargs):
