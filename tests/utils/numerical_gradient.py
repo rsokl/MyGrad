@@ -234,7 +234,7 @@ def _numerical_gradient_full(f, *, x, back_grad, h=1e-20):
             df/dx
         """
 
-    grad = np.empty_like(x.astype(np.float64))
+    grad = np.empty(x.shape, dtype=np.float64)
     x_orig = np.copy(x)
     back_grad = back_grad
 
