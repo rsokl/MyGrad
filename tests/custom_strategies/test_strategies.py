@@ -139,9 +139,14 @@ def test_valid_single_axis(shape, data, permit_none):
 @given(shape=hnp.array_shapes(min_dims=1, max_dims=5), data=st.data(),
        permit_none=st.booleans(), pos_only=st.booleans())
 def test_valid_axes(shape, data, permit_none, pos_only):
+    min_dim = data.draw(st.integers(0, len(shape)),
+                        label="min_dim")
+    max_dim = data.draw(st.one_of(st.none(), st.integers(min_dim, len(shape))),
+                        label="max_dim")
     axis = data.draw(valid_axes(ndim=len(shape),
                                 permit_none=permit_none,
-                                pos_only=pos_only),
+                                pos_only=pos_only,
+                                min_dim=min_dim, max_dim=max_dim),
                      label="axis")
     x = np.empty(shape)
     np.sum(x, axis=axis)
@@ -150,4 +155,10 @@ def test_valid_axes(shape, data, permit_none, pos_only):
 
     if pos_only and axis is not None:
         assert all(i >= 0 for i in axis)
+
+    if axis is not None:
+        assert min_dim <= len(axis)
+
+        if max_dim is not None:
+            assert len(axis) <= max_dim
 

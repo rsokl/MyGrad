@@ -15,7 +15,7 @@ __all__ = ["adv_integer_index",
            "basic_index"]
 
 
-def _check_min_max(min_val, min_dim, max_dim, param_name):
+def _check_min_max(min_val, min_dim, max_dim, param_name, max_val=None):
     if not isinstance(min_dim, Integral) or min_dim < min_val:
         raise ValueError("`min_{name}` must be larger than {min_val}. "
                          "Got {val}".format(min_val=min_val, name=param_name,
@@ -25,6 +25,10 @@ def _check_min_max(min_val, min_dim, max_dim, param_name):
         raise ValueError("`max_{name}` must be an integer that is "
                          "not smaller than `min_{name}`. Got {val}".format(name=param_name,
                                                                            val=max_dim))
+    if max_val is not None and max_dim > max_val:
+        raise ValueError("`min_{name}` cannot be larger than {max_val}. "
+                         "Got {val}".format(max_val=max_val, name=param_name,
+                                            val=max_dim))
 
 
 def choices(seq, size, replace=True):
@@ -68,7 +72,8 @@ def _rand_neg_axis(draw, axes, ndim):
 
 
 @st.composite
-def valid_axes(draw, ndim, pos_only=False, single_axis_only=False, permit_none=True):
+def valid_axes(draw, ndim, pos_only=False, single_axis_only=False, permit_none=True,
+               min_dim=0, max_dim=None):
     """ Hypothesis search strategy: Given array dimensionality, generate valid
     `axis` arguments (including `None`) for numpy's sequential functions.
 
@@ -102,15 +107,18 @@ def valid_axes(draw, ndim, pos_only=False, single_axis_only=False, permit_none=T
     """
     if isinstance(ndim, (tuple, list)):
         ndim = len(ndim)
-    if 0 > ndim:
-        raise ValueError("`ndim` must be an integer 0 or greater.")
+
+    max_dim = ndim if max_dim is None else max_dim
+    _check_min_max(min_val=0, max_val=ndim,
+                   min_dim=min_dim, max_dim=max_dim,
+                   param_name="dim")
 
     if single_axis_only:
-        return draw(st.one_of(st.none(), st.integers(min_value=-ndim, max_value=ndim - 1))
-                    if permit_none else st.integers(min_value=-ndim, max_value=ndim - 1))
+        axis_strat = st.integers(min_value=-ndim, max_value=ndim - 1)
+        return draw(st.one_of(st.none(), axis_strat) if permit_none else axis_strat)
 
-    num_axes = draw(st.one_of(st.integers(min_value=0, max_value=ndim), st.none())
-                    if permit_none else st.integers(min_value=0, max_value=ndim))
+    dim_strat = st.integers(min_value=min_dim, max_value=max_dim)
+    num_axes = draw(st.one_of(dim_strat, st.none()) if permit_none else dim_strat)
 
     if num_axes is None:
         return None

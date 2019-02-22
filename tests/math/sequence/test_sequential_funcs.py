@@ -6,6 +6,8 @@ from pytest import raises
 from mygrad import amax, amin, sum, mean, cumprod, cumsum, prod, var, std
 import mygrad
 
+from functools import partial
+
 import numpy as np
 
 from hypothesis import settings
@@ -13,9 +15,9 @@ import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
 
 
-def axis_arg(*arrs):
+def axis_arg(*arrs, min_dim=0):
     """ Wrapper for passing valid-axis search strategy to test factory"""
-    return valid_axes(arrs[0].ndim)
+    return valid_axes(arrs[0].ndim, min_dim=min_dim)
 
 
 def single_axis_arg(*arrs):
@@ -114,21 +116,34 @@ def _var(x, keepdims=False, axis=None, ddof=0):
 
 
 @fwdprop_test_factory(mygrad_func=var, true_func=_var, num_arrays=1,
-                      kwargs=dict(axis=axis_arg, keepdims=keepdims_arg,
+                      kwargs=dict(axis=partial(axis_arg, min_dim=1), keepdims=keepdims_arg,
                                   ddof=ddof_arg))
 def test_custom_var_fwd():
     pass
 
 
 @backprop_test_factory(mygrad_func=var, true_func=_var, num_arrays=1,
-                       kwargs=dict(axis=axis_arg, keepdims=keepdims_arg,
+                       kwargs=dict(axis=partial(axis_arg, min_dim=1), keepdims=keepdims_arg,
                                    ddof=ddof_arg),
                        vary_each_element=True, index_to_bnds={0: (-10, 10)})
 def test_var_bkwd():
     pass
 
 
-# std composes mygrad's sqrt and var, backprop need not be tested
+def test_var_no_axis_fwd():
+    import mygrad as mg
+    x = mg.empty((3, 2, 4), constant=False)
+    o = mg.var(x, axis=())
+    assert np.all(o.data == np.zeros_like(x.data))
+
+
+def test_var_no_axis_bkwrd():
+    import mygrad as mg
+    x = mg.empty((3, 2, 4), constant=False)
+    mg.var(x, axis=()).backward()
+    assert np.all(x.grad == np.zeros_like(x.data))
+
+
 @fwdprop_test_factory(mygrad_func=std, true_func=np.std, num_arrays=1,
                       kwargs=dict(axis=axis_arg, keepdims=keepdims_arg,
                                   ddof=ddof_arg))
@@ -147,9 +162,8 @@ def _std(x, keepdims=False, axis=None, ddof=0):
                         keepdims=keepdims, axis=axis, ddof=ddof))
 
 
-# std composes mygrad's sqrt and var, backprop need not be tested
 @fwdprop_test_factory(mygrad_func=std, true_func=_std, num_arrays=1,
-                      kwargs=dict(axis=axis_arg, keepdims=keepdims_arg,
+                      kwargs=dict(axis=partial(axis_arg, min_dim=1), keepdims=keepdims_arg,
                                   ddof=ddof_arg))
 def test_custom_std_fwd():
     pass
@@ -160,7 +174,7 @@ def _assume(*arrs, **kwargs):
 
 
 @backprop_test_factory(mygrad_func=std, true_func=_std, num_arrays=1,
-                       kwargs=dict(axis=axis_arg, keepdims=keepdims_arg,
+                       kwargs=dict(axis=partial(axis_arg, min_dim=1), keepdims=keepdims_arg,
                                    ddof=ddof_arg),
                        vary_each_element=True, index_to_bnds={0: (-10, 10)},
                        elements_strategy=st.integers,
@@ -168,6 +182,20 @@ def _assume(*arrs, **kwargs):
                        assumptions=_assume)
 def test_std_bkwd():
     pass
+
+
+def test_std_no_axis_fwd():
+    import mygrad as mg
+    x = mg.empty((3, 2, 4), constant=False)
+    o = mg.std(x, axis=())
+    assert np.all(o.data == np.zeros_like(x.data))
+
+
+def test_std_no_axis_bkwrd():
+    import mygrad as mg
+    x = mg.empty((3, 2, 4), constant=False)
+    mg.std(x, axis=()).backward()
+    assert np.all(x.grad == np.zeros_like(x.data))
 
 
 @fwdprop_test_factory(mygrad_func=prod, true_func=np.prod, num_arrays=1,
