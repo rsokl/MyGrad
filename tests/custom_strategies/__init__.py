@@ -70,18 +70,30 @@ def _rand_neg_axis(draw, axes, ndim):
 @st.composite
 def valid_axes(draw, ndim, pos_only=False, single_axis_only=False, permit_none=True):
     """ Hypothesis search strategy: Given array dimensionality, generate valid
-    `axis` arguments (including `None`).
+    `axis` arguments (including `None`) for numpy's sequential functions.
 
+    Examples from this strategy shrink towards an empty tuple of axes.
+    If `single_axis_only=True`, then it shrinks towards 0.
 
     Parameters
     ----------
     ndim : int
         The dimensionality of the array.
 
+    pos_only : bool, optional (default=False)
+        If True, the returned value(s) will be positive.
+
+    single_axis_only : bool, optional (default=False)
+        If True, a single integer axis or `None` (assuming `permit_none=True`)
+        will be returned.
+
+    permit_none : bool, optional (default=True)
+        If True, `None` may be returned instead of a tuple of all of the
+        available axes.
+
     Returns
     -------
-    hypothesis.searchstrategy.SearchStrategy
-     -> [Union[NoneType, Tuple[int...]]
+    hypothesis.searchstrategy.SearchStrategy[Union[NoneType, int, Tuple[int...]]
 
     Examples
     --------
@@ -90,26 +102,21 @@ def valid_axes(draw, ndim, pos_only=False, single_axis_only=False, permit_none=T
     """
     if isinstance(ndim, (tuple, list)):
         ndim = len(ndim)
-
     if 0 > ndim:
         raise ValueError("`ndim` must be an integer 0 or greater.")
+
     if single_axis_only:
-        num_axes = draw(st.integers(min_value=0, max_value=1))
-    else:
-        num_axes = draw(st.integers(min_value=0, max_value=ndim))
+        return draw(st.one_of(st.none(), st.integers(min_value=-ndim, max_value=ndim - 1))
+                    if permit_none else st.integers(min_value=-ndim, max_value=ndim - 1))
+
+    num_axes = draw(st.one_of(st.integers(min_value=0, max_value=ndim), st.none())
+                    if permit_none else st.integers(min_value=0, max_value=ndim))
+
+    if num_axes is None:
+        return None
 
     axes = draw(choices(range(ndim), num_axes, replace=False))
-
-    if not pos_only:
-        axes = draw(_rand_neg_axis(axes, ndim))
-
-    if single_axis_only and axes:
-        axes = axes[0]
-
-    if permit_none:
-        return draw(st.none()) if axes == () else axes
-    else:
-        return axes if axes else tuple(range(ndim))
+    return axes if pos_only else draw(_rand_neg_axis(axes, ndim))
 
 
 @st.composite

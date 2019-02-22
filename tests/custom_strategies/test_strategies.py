@@ -1,5 +1,5 @@
 from tests.custom_strategies import broadcastable_shape, choices, integer_index
-from tests.custom_strategies import slice_index, basic_index, adv_integer_index
+from tests.custom_strategies import slice_index, basic_index, adv_integer_index, valid_axes
 
 from hypothesis import given, note
 import hypothesis.strategies as st
@@ -121,3 +121,33 @@ def test_advanced_integer_index(shape: Tuple[int, ...], min_dims: int, data: st.
     note(f"x[index]: {out}")
     assert min_dims <= out.ndim <= max_dims, "The input parameters were not respected"
     assert not np.shares_memory(x, out), "An advanced index should create a copy upon indexing"
+
+
+@given(shape=hnp.array_shapes(min_dims=1, max_dims=5), data=st.data(), permit_none=st.booleans())
+def test_valid_single_axis(shape, data, permit_none):
+    axis = data.draw(valid_axes(ndim=len(shape),
+                                single_axis_only=True,
+                                permit_none=permit_none),
+                     label="axis")
+    x = np.empty(shape)
+    np.argmin(x, axis=axis)  # raises if `axis` is invalid
+
+    if not permit_none:
+        assert axis is not None
+
+
+@given(shape=hnp.array_shapes(min_dims=1, max_dims=5), data=st.data(),
+       permit_none=st.booleans(), pos_only=st.booleans())
+def test_valid_axes(shape, data, permit_none, pos_only):
+    axis = data.draw(valid_axes(ndim=len(shape),
+                                permit_none=permit_none,
+                                pos_only=pos_only),
+                     label="axis")
+    x = np.empty(shape)
+    np.sum(x, axis=axis)
+    if not permit_none:
+        assert axis is not None
+
+    if pos_only and axis is not None:
+        assert all(i >= 0 for i in axis)
+
