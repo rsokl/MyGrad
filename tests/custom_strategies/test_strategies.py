@@ -118,7 +118,7 @@ def test_advanced_integer_index(shape: Tuple[int, ...], min_dims: int, data: st.
     index = data.draw(adv_integer_index(shape, min_dims=min_dims, max_dims=max_dims))
     x = np.zeros(shape)
     out = x[index]  # raises if the index is invalid
-    note(f"x[index]: {out}")
+    note("x[index]: {}".format(out))
     assert min_dims <= out.ndim <= max_dims, "The input parameters were not respected"
     assert not np.shares_memory(x, out), "An advanced index should create a copy upon indexing"
 
