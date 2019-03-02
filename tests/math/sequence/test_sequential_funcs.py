@@ -10,7 +10,7 @@ from functools import partial
 
 import numpy as np
 
-from hypothesis import settings
+from hypothesis import settings, given
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
 
@@ -130,16 +130,24 @@ def test_var_bkwd():
     pass
 
 
-def test_var_no_axis_fwd():
+@given(x=hnp.arrays(dtype=np.float,
+                    shape=hnp.array_shapes(),
+                    elements=st.floats(allow_infinity=False,
+                                       allow_nan=False)))
+def test_var_no_axis_fwd(x):
     import mygrad as mg
-    x = mg.empty((3, 2, 4), constant=False)
+    x = mg.Tensor(x, constant=False)
     o = mg.var(x, axis=())
     assert np.all(o.data == np.zeros_like(x.data))
 
 
-def test_var_no_axis_bkwrd():
+@given(x=hnp.arrays(dtype=np.float,
+                    shape=hnp.array_shapes(),
+                    elements=st.floats(allow_infinity=False,
+                                       allow_nan=False)))
+def test_var_no_axis_bkwrd(x):
     import mygrad as mg
-    x = mg.empty((3, 2, 4), constant=False)
+    x = mg.Tensor(x, constant=False)
     mg.var(x, axis=()).backward()
     assert np.all(x.grad == np.zeros_like(x.data))
 
@@ -184,16 +192,24 @@ def test_std_bkwd():
     pass
 
 
-def test_std_no_axis_fwd():
+@given(x=hnp.arrays(dtype=np.float,
+                    shape=hnp.array_shapes(),
+                    elements=st.floats(allow_infinity=False,
+                                       allow_nan=False)))
+def test_std_no_axis_fwd(x):
     import mygrad as mg
-    x = mg.empty((3, 2, 4), constant=False)
+    x = mg.Tensor(x, constant=False)
     o = mg.std(x, axis=())
     assert np.all(o.data == np.zeros_like(x.data))
 
 
-def test_std_no_axis_bkwrd():
+@given(x=hnp.arrays(dtype=np.float,
+                    shape=hnp.array_shapes(),
+                    elements=st.floats(allow_infinity=False,
+                                       allow_nan=False)))
+def test_std_no_axis_bkwrd(x):
     import mygrad as mg
-    x = mg.empty((3, 2, 4), constant=False)
+    x = mg.Tensor(x, constant=False)
     mg.std(x, axis=()).backward()
     assert np.all(x.grad == np.zeros_like(x.data))
 
