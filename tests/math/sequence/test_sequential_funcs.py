@@ -6,16 +6,18 @@ from pytest import raises
 from mygrad import amax, amin, sum, mean, cumprod, cumsum, prod, var, std
 import mygrad
 
+from functools import partial
+
 import numpy as np
 
-from hypothesis import settings
+from hypothesis import settings, given
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
 
 
-def axis_arg(*arrs):
+def axis_arg(*arrs, min_dim=0):
     """ Wrapper for passing valid-axis search strategy to test factory"""
-    return valid_axes(arrs[0].ndim)
+    return valid_axes(arrs[0].ndim, min_dim=min_dim)
 
 
 def single_axis_arg(*arrs):
@@ -102,16 +104,54 @@ def test_var_fwd():
     pass
 
 
-@backprop_test_factory(mygrad_func=var, true_func=np.var, num_arrays=1,
-                       kwargs=dict(axis=axis_arg, keepdims=keepdims_arg,
+def _var(x, keepdims=False, axis=None, ddof=0):
+    """Defines variance without using abs. Permits use of
+    complex-step numerical derivative."""
+    def mean(y, keepdims=False, axis=None, ddof=0):
+        N = y.size if axis is None else np.prod([y.shape[i] for i in axis])
+        return y.sum(keepdims=keepdims, axis=axis) / (N - ddof)
+
+    return mean((x - x.mean(axis=axis, keepdims=True))**2,
+                keepdims=keepdims, axis=axis, ddof=ddof)
+
+
+@fwdprop_test_factory(mygrad_func=var, true_func=_var, num_arrays=1,
+                      kwargs=dict(axis=partial(axis_arg, min_dim=1), keepdims=keepdims_arg,
+                                  ddof=ddof_arg))
+def test_custom_var_fwd():
+    pass
+
+
+@backprop_test_factory(mygrad_func=var, true_func=_var, num_arrays=1,
+                       kwargs=dict(axis=partial(axis_arg, min_dim=1), keepdims=keepdims_arg,
                                    ddof=ddof_arg),
-                       vary_each_element=True, index_to_bnds={0: (-10, 10)},
-                       atol=1e-5, rtol=1e-5)
+                       vary_each_element=True, index_to_bnds={0: (-10, 10)})
 def test_var_bkwd():
     pass
 
 
-# std composes mygrad's sqrt and var, backprop need not be tested
+@given(x=hnp.arrays(dtype=np.float,
+                    shape=hnp.array_shapes(),
+                    elements=st.floats(allow_infinity=False,
+                                       allow_nan=False)))
+def test_var_no_axis_fwd(x):
+    import mygrad as mg
+    x = mg.Tensor(x, constant=False)
+    o = mg.var(x, axis=())
+    assert np.all(o.data == np.zeros_like(x.data))
+
+
+@given(x=hnp.arrays(dtype=np.float,
+                    shape=hnp.array_shapes(),
+                    elements=st.floats(allow_infinity=False,
+                                       allow_nan=False)))
+def test_var_no_axis_bkwrd(x):
+    import mygrad as mg
+    x = mg.Tensor(x, constant=False)
+    mg.var(x, axis=()).backward()
+    assert np.all(x.grad == np.zeros_like(x.data))
+
+
 @fwdprop_test_factory(mygrad_func=std, true_func=np.std, num_arrays=1,
                       kwargs=dict(axis=axis_arg, keepdims=keepdims_arg,
                                   ddof=ddof_arg))
@@ -119,20 +159,59 @@ def test_std_fwd():
     pass
 
 
+def _std(x, keepdims=False, axis=None, ddof=0):
+    """Defines standard dev without using abs. Permits use of
+    complex-step numerical derivative."""
+    def mean(y, keepdims=False, axis=None, ddof=0):
+        N = y.size if axis is None else np.prod([y.shape[i] for i in axis])
+        return y.sum(keepdims=keepdims, axis=axis) / (N - ddof)
+
+    return np.sqrt(mean((x - x.mean(axis=axis, keepdims=True))**2,
+                        keepdims=keepdims, axis=axis, ddof=ddof))
+
+
+@fwdprop_test_factory(mygrad_func=std, true_func=_std, num_arrays=1,
+                      kwargs=dict(axis=partial(axis_arg, min_dim=1), keepdims=keepdims_arg,
+                                  ddof=ddof_arg))
+def test_custom_std_fwd():
+    pass
+
+
 def _assume(*arrs, **kwargs):
     return all(i > 1 for i in arrs[0].shape)
 
 
-@backprop_test_factory(mygrad_func=std, true_func=np.std, num_arrays=1,
-                       kwargs=dict(axis=axis_arg, keepdims=keepdims_arg,
+@backprop_test_factory(mygrad_func=std, true_func=_std, num_arrays=1,
+                       kwargs=dict(axis=partial(axis_arg, min_dim=1), keepdims=keepdims_arg,
                                    ddof=ddof_arg),
                        vary_each_element=True, index_to_bnds={0: (-10, 10)},
                        elements_strategy=st.integers,
                        index_to_unique={0: True},
-                       assumptions=_assume,
-                       atol=1e-5, rtol=1e-5)
+                       assumptions=_assume)
 def test_std_bkwd():
     pass
+
+
+@given(x=hnp.arrays(dtype=np.float,
+                    shape=hnp.array_shapes(),
+                    elements=st.floats(allow_infinity=False,
+                                       allow_nan=False)))
+def test_std_no_axis_fwd(x):
+    import mygrad as mg
+    x = mg.Tensor(x, constant=False)
+    o = mg.std(x, axis=())
+    assert np.all(o.data == np.zeros_like(x.data))
+
+
+@given(x=hnp.arrays(dtype=np.float,
+                    shape=hnp.array_shapes(),
+                    elements=st.floats(allow_infinity=False,
+                                       allow_nan=False)))
+def test_std_no_axis_bkwrd(x):
+    import mygrad as mg
+    x = mg.Tensor(x, constant=False)
+    mg.std(x, axis=()).backward()
+    assert np.all(x.grad == np.zeros_like(x.data))
 
 
 @fwdprop_test_factory(mygrad_func=prod, true_func=np.prod, num_arrays=1,

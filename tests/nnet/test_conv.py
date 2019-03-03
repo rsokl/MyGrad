@@ -283,8 +283,7 @@ def test_conv_ND_bkwd(data, x, num_filters):
 
     out.backward(grad)
     grads_numerical = numerical_gradient_full(_conv_nd, *(i.data for i in (x, kernels)),
-                                              back_grad=grad, kwargs=conf,
-                                              as_decimal=False)
+                                              back_grad=grad, kwargs=conf)
 
     for n, (arr, d_num) in enumerate(zip((x, kernels), grads_numerical)):
         assert_allclose(arr.grad, d_num, atol=1e-4, rtol=1e-4,
@@ -297,7 +296,7 @@ def test_conv_ND_bkwd(data, x, num_filters):
                        index_to_arr_shapes={0: (2, 1, 7), 1: (2, 1, 3)},
                        kwargs={"stride": (1,)},
                        index_to_bnds={0: (-10, 10), 1: (-10, 10)},
-                       vary_each_element=True, as_decimal=False, atol=1e-4, rtol=1e-4)
+                       vary_each_element=True)
 def test_conv_1d_bkwd():
     """ (N=2, C=1, W=7) x (F=2, C=1, Wf=3); stride=1, dilation=1
 

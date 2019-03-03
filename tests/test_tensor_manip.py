@@ -40,7 +40,7 @@ def test_transpose(x, data):
 
     assert_allclose(o.data, f(x))
 
-    dx, = numerical_gradient_full(f, x, back_grad=grad, as_decimal=True)
+    dx, = numerical_gradient_full(f, x, back_grad=grad)
 
     assert_allclose(x_arr.grad, dx)
 
@@ -126,7 +126,7 @@ def test_squeeze(x, data):
     o.backward(grad)
     o_method.backward(grad)
 
-    dx, = numerical_gradient_full(f, x, back_grad=grad, as_decimal=True)
+    dx, = numerical_gradient_full(f, x, back_grad=grad)
 
     assert_allclose(x_arr.grad, dx)
     assert_allclose(x_arr2.grad, dx)

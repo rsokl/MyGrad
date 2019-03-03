@@ -15,6 +15,6 @@ def test_cbrt_fwd():
 @backprop_test_factory(mygrad_func=cbrt, true_func=np.cbrt,
                        index_to_bnds={0: (-100, 100)}, num_arrays=1,
                        assumptions=_is_non_zero,
-                       as_decimal=False, atol=1e-5)
+                       atol=1e-5, rtol=1e-5, finite_difference=True, h=1e-8)
 def test_cbrt_backward():
     pass

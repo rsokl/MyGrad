@@ -172,7 +172,7 @@ def test_setitem_basic_index(x, data):
     assert_allclose(y_arr.data, y0)
 
     dx, dy = numerical_gradient_full(setitem, x, y, back_grad=grad,
-                                     as_decimal=True, kwargs=dict(index=index))
+                                     kwargs=dict(index=index))
 
     assert_allclose(x_arr.grad, dx)
     assert_allclose(y_arr.grad, dy)
@@ -211,7 +211,7 @@ def test_setitem_adv_int_index(x, data):
     assert_allclose(y_arr.data, y0)
 
     dx, dy = numerical_gradient_full(setitem, x, y, back_grad=grad,
-                                     as_decimal=True, kwargs=dict(index=index))
+                                     kwargs=dict(index=index))
 
     assert_allclose(x_arr.grad, dx)
     assert_allclose(y_arr.grad, dy)
@@ -250,7 +250,7 @@ def test_setitem_adv_bool_index(x, data):
     assert_allclose(y_arr.data, y0)
 
     dx, dy = numerical_gradient_full(setitem, x, y, back_grad=grad,
-                                     as_decimal=True, kwargs=dict(index=index))
+                                     kwargs=dict(index=index))
 
     assert_allclose(x_arr.grad, dx)
     assert_allclose(y_arr.grad, dy)
@@ -292,7 +292,7 @@ def test_setitem_broadcast_index(x, data):
     assert_allclose(y_arr.data, y0)
 
     dx, dy = numerical_gradient_full(setitem, x, y, back_grad=grad,
-                                     as_decimal=True, kwargs=dict(index=index))
+                                     kwargs=dict(index=index))
 
     assert_allclose(x_arr.grad, dx)
     assert_allclose(y_arr.grad, dy)
@@ -331,7 +331,7 @@ def test_setitem_mixed_index(x, data):
     assert_allclose(y_arr.data, y0)
 
     dx, dy = numerical_gradient_full(setitem, x, y, back_grad=grad,
-                                     as_decimal=True, kwargs=dict(index=index))
+                                     kwargs=dict(index=index))
 
     assert_allclose(x_arr.grad, dx)
     assert_allclose(y_arr.grad, dy)
@@ -372,7 +372,7 @@ def test_setitem_broadcast_bool_index(x, data):
     assert_allclose(y_arr.data, y0)
 
     dx, dy = numerical_gradient_full(setitem, x, y, back_grad=grad,
-                                     as_decimal=True, kwargs=dict(index=index))
+                                     kwargs=dict(index=index))
 
     assert_allclose(x_arr.grad, dx)
     assert_allclose(y_arr.grad, dy)
@@ -411,7 +411,7 @@ def test_setitem_bool_basic_index(x, data):
     assert_allclose(y_arr.data, y0)
 
     dx, dy = numerical_gradient_full(setitem, x, y, back_grad=grad,
-                                     as_decimal=True, kwargs=dict(index=index))
+                                     kwargs=dict(index=index))
 
     assert_allclose(x_arr.grad, dx)
     assert_allclose(y_arr.grad, dy)
@@ -453,7 +453,7 @@ def test_setitem_bool_axes_index(x, data):
     assert_allclose(y_arr.data, y0)
 
     dx, dy = numerical_gradient_full(setitem, x, y, back_grad=grad,
-                                     as_decimal=True, kwargs=dict(index=index))
+                                     kwargs=dict(index=index))
 
     assert_allclose(x_arr.grad, dx)
     assert_allclose(y_arr.grad, dy)

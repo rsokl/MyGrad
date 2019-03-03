@@ -1,9 +1,10 @@
 from mygrad.operation_base import Operation
 import numpy as np
 from functools import reduce
+from collections.abc import Sequence
 
 __all__ = ["MaxMin", "Sum", "Mean", "Prod", "CumProd", "CumSum",
-           "Variance"]
+           "Variance", "StdDev"]
 
 
 class MaxMin(Operation):
@@ -153,7 +154,7 @@ class Sum(Operation):
 class Mean(Sum):
     def __call__(self, a, axis=None, keepdims=False):
         out = super(Mean, self).__call__(a, axis, keepdims)
-        self.n = a.data.size if not self.axis else np.prod([a.shape[i] for i in self.axis])
+        self.n = a.data.size if self.axis is None else np.prod([a.shape[i] for i in self.axis])
         return out / self.n
 
     def backward_var(self, grad, index, **kwargs):
@@ -382,3 +383,36 @@ class Variance(Operation):
         back = (2. / N) * (a.data - a.data.mean(axis=self.kwargs["axis"], keepdims=True))
         return back * grad
 
+
+class StdDev(Operation):
+    def __call__(self, a, axis=None, keepdims=False, ddof=0):
+        """ Parameters
+            ----------
+            a : mygrad.Tensor"""
+        self.variables = (a,)
+
+        if axis is not None and not hasattr(axis, "__iter__"):
+            axis = (axis,)
+
+        self.kwargs = dict(axis=axis, keepdims=keepdims, ddof=ddof)
+        return a.data.std(**self.kwargs)
+
+    def backward_var(self, grad, index, **kwargs):
+        a = self.variables[index]
+        if isinstance(self.kwargs["axis"], Sequence) and not self.kwargs["axis"]:
+            return np.zeros(a.shape, dtype=float)
+
+        N = a.size if self.kwargs["axis"] is None else np.prod([a.shape[i] for i in self.kwargs["axis"]])
+        N -= self.kwargs["ddof"]
+
+        grad = np.asarray(grad) / (2 * np.sqrt(a.data.var(**self.kwargs)))
+        if grad.ndim == 0:
+           grad = np.full(a.shape, grad, dtype=float)
+        else:
+            if not self.kwargs["keepdims"]:
+                index = [slice(None)] * a.ndim
+                for i in self.kwargs["axis"]:
+                    index[i] = np.newaxis
+                grad = grad[tuple(index)]
+        back = (2. / N) * (a.data - a.data.mean(axis=self.kwargs["axis"], keepdims=True))
+        return back * grad

@@ -19,8 +19,7 @@ def test_add_fwd():
     pass
 
 
-@backprop_test_factory(mygrad_func=add, true_func=np.add, num_arrays=2,
-                       atol=1e-4, rtol=1e-4)
+@backprop_test_factory(mygrad_func=add, true_func=np.add, num_arrays=2)
 def test_add_bkwd():
     pass
 
@@ -30,8 +29,7 @@ def test_subtract_fwd():
     pass
 
 
-@backprop_test_factory(mygrad_func=subtract, true_func=np.subtract, num_arrays=2,
-                       atol=1e-4, rtol=1e-4)
+@backprop_test_factory(mygrad_func=subtract, true_func=np.subtract, num_arrays=2)
 def test_subtract_bkwd():
     pass
 
@@ -51,8 +49,7 @@ def test_divide_fwd():
     pass
 
 
-@backprop_test_factory(mygrad_func=divide, true_func=np.divide, index_to_bnds={1: (1, 10)}, num_arrays=2,
-                       atol=1e-4, rtol=1e-4)
+@backprop_test_factory(mygrad_func=divide, true_func=np.divide, index_to_bnds={1: (1, 10)}, num_arrays=2)
 def test_divide_bkwd():
     pass
 
@@ -67,7 +64,7 @@ def test_power_fwd():
 @settings(deadline=None)
 @backprop_test_factory(mygrad_func=power, true_func=np.power,
                        index_to_bnds={0: (1, 10), 1: (-3, 3)},
-                       num_arrays=2, atol=1e-4, rtol=1e-4)
+                       num_arrays=2)
 def test_power_bkwd():
     pass
 
@@ -79,8 +76,8 @@ def test_logaddexp_fwd():
 
 @settings(deadline=None)
 @backprop_test_factory(mygrad_func=logaddexp, true_func=np.logaddexp, num_arrays=2,
-                       as_decimal=False, atol=1e-4, rtol=1e-4, vary_each_element=True,
-                       index_to_bnds={0: (-2, 2), 1: (-2, 2)})
+                       index_to_bnds={0: (-2, 2), 1: (-2, 2)}, finite_difference=True, h=1e-8,
+                       atol=1e-4, rtol=1e-4)
 def test_logaddexp_bkwd():
     pass
 
@@ -92,7 +89,7 @@ def test_logaddexp2_fwd():
 
 @settings(deadline=None)
 @backprop_test_factory(mygrad_func=logaddexp2, true_func=np.logaddexp2, num_arrays=2,
-                       as_decimal=False, atol=1e-4, rtol=1e-4, vary_each_element=True)
+                       atol=1e-4, rtol=1e-4, finite_difference=True, h=1e-8)
 def test_logaddexp2_bkwd():
     pass
 
@@ -104,8 +101,8 @@ def test_arctan2_fwd():
 
 @settings(deadline=None)
 @backprop_test_factory(mygrad_func=arctan2, true_func=np.arctan2, num_arrays=2,
-                       as_decimal=False, atol=1e-4, rtol=1e-4, vary_each_element=True,
-                       index_to_bnds={1: (1, 10)})
+                       atol=1e-4, rtol=1e-4,
+                       index_to_bnds={1: (1, 10)}, finite_difference=True, h=1e-8)
 def test_arctan2_bkwd():
     pass
 

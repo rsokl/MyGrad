@@ -1,9 +1,10 @@
-from ..utils.numerical_gradient import numerical_gradient_full, numerical_gradient
+from ..utils.numerical_gradient import numerical_gradient_full, numerical_gradient, finite_difference
 from ..custom_strategies import broadcastable_shape
 
 from mygrad import Tensor
 
 from copy import copy
+from numbers import Real
 
 from hypothesis import given, assume
 import hypothesis.strategies as st
@@ -189,6 +190,12 @@ class backprop_test_factory():
         never executed. The function definition is effectively there to name
         the test being constructed. This constructs the entire test
 
+        Notes
+        -----
+        By default this wrapper dispatches a numerical derivative that utilizes the complex
+        step methodology. This requires that the function being tested be analytic and have
+        a complex value implementation. See `tests.utils.numerical_gradient` for more details.
+
         Examples
         --------
         >>> from mygrad import add
@@ -207,11 +214,11 @@ class backprop_test_factory():
                  index_to_unique: Optional[Union[Dict[int, bool], bool]]=None,
                  elements_strategy: Optional[SearchStrategy]=None,
                  kwargs: Optional[Dict[str, Union[Any, Callable[[Any], SearchStrategy]]]]=None,
-                 h: float=1e-8,
-                 rtol: float=1e-05,
-                 atol: float=1e-05,
+                 h: float=1e-20,
+                 rtol: float=1e-8,
+                 atol: float=1e-8,
                  vary_each_element: bool=False,
-                 as_decimal: bool=True,
+                 finite_difference=False,
                  assumptions: Optional[Callable[..., bool]] = None):
         """
         Parameters
@@ -264,9 +271,11 @@ class backprop_test_factory():
             entries, like 'add' and 'sum'. Otherwise, the gradient is constructed
             by varying each element of each array independently.
 
-        as_decimal : bool, optional (default=True)
-            If True, x is passed to f as a Decimal-type array. This
-            improves numerical precision, but is not permitted by some functions.
+        finite_difference : bool, optional (default=False)
+            If True, the finite-difference method will be used to compute the numerical
+            derivative instead of the complex step method (default). This is necessary
+            if the function being tested is not analytic or does not have a complex-value
+            implementation.
 
         assumptions : Optional[Callable[[arrs, **kwargs], bool]]
             A callable that is fed the generated arrays and keyword arguments that will
@@ -304,11 +313,29 @@ class backprop_test_factory():
         self.kwargs = kwargs
         self.num_arrays = num_arrays
 
+        assert isinstance(h, Real) and h > 0
         self.h = h
+
         self.tolerances = dict(rtol=rtol, atol=atol)
+
+        assert isinstance(vary_each_element, bool)
         self.vary_each_element = vary_each_element
-        self.as_decimal = as_decimal
+
+        assert assumptions is None or callable(assumptions)
         self.assumptions = assumptions
+
+        assert isinstance(finite_difference, bool)
+        self.finite_difference = finite_difference
+
+        if finite_difference and vary_each_element:
+            raise NotImplementedError("`finite_difference` does not have an implementation supporting "
+                                      "\n`vary_each_element=True`")
+
+        if finite_difference and h < 1e-8:
+            from warnings import warn
+            warn("The `finite_difference` method is being used with an h-value of {}."
+                 "\nThis is likely too small, and was intended for use with the complex-step "
+                 "\nmethod. Please update `h` in this call to `backprop_test_factory`".format(h))
 
     def gen_first_array(self) -> st.SearchStrategy:
         """
@@ -388,11 +415,15 @@ class backprop_test_factory():
             else:
                 out.backward(grad)
 
-            # compute derivatives via numerical approximation of derivative
-            numerical_grad = numerical_gradient_full if self.vary_each_element else numerical_gradient
+            if not self.finite_difference:
+                # compute derivatives via numerical approximation of derivative
+                # using the complex-step method
+                numerical_grad = numerical_gradient_full if self.vary_each_element else numerical_gradient
+
+            else:
+                numerical_grad = finite_difference
             grads_numerical = numerical_grad(self.true_func, *(i.data for i in arrs),
-                                             back_grad=grad, kwargs=kwargs,
-                                             as_decimal=self.as_decimal)
+                                             back_grad=grad, kwargs=kwargs)
 
             # check that the analytic and numeric derivatives match
             for n, (arr, d_num) in enumerate(zip(arrs, grads_numerical)):

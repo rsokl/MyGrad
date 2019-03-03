@@ -1,6 +1,11 @@
 *.pyc
 *.idea
 *.egg-info
+.tox/*
+.cache/*
+.coverage
+dev_notebooks/*
+venv/*
 .hypothesis/*
 **/.hypothesis/*
 *.ipynb

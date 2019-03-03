@@ -1,6 +1,8 @@
 from .ops import *
 from mygrad.tensor_base import Tensor
 from mygrad.math.misc.funcs import sqrt
+from mygrad.math.arithmetic.funcs import multiply
+from collections.abc import Sequence
 
 __all__ = ["sum",
            "mean",
@@ -308,7 +310,9 @@ def std(x, axis=None, ddof=0, keepdims=False, constant=False):
     >>> mg.std(a, dtype=np.float64)
     Tensor(0.44999999925494177)
     """
-    return sqrt(var(x, axis=axis, keepdims=keepdims, ddof=ddof, constant=constant))
+    return Tensor._op(StdDev, x, op_kwargs=dict(axis=axis,
+                                                keepdims=keepdims,
+                                                ddof=ddof), constant=constant)
 
 
 def max(x, axis=None, keepdims=False, constant=False):

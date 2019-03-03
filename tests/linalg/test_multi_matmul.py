@@ -66,7 +66,8 @@ def test_multi_matmul(num_arrays, left_1d, right_1d, output_is_constant, data):
         if const:
             assert arr2.grad is None, "tensor-{} is a constant, but its gradient is not `None`".format(n)
         else:
-            assert_allclose(arr1.grad, arr2.grad, atol=1e-6, rtol=1e-6, err_msg="The gradients for tensor-{} for not match".format(n))
+            assert_allclose(arr1.grad, arr2.grad, atol=1e-6, rtol=1e-6,
+                            err_msg="The gradients for tensor-{} for not match".format(n))
 
     actual.null_gradients()
     for n, arr1 in enumerate(arrs1):

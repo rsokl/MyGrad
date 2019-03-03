@@ -12,7 +12,7 @@ def test_arcsinh_fwd():
     pass
 
 
-@backprop_test_factory(mygrad_func=arcsinh, true_func=np.arcsinh, num_arrays=1, as_decimal=False)
+@backprop_test_factory(mygrad_func=arcsinh, true_func=np.arcsinh, num_arrays=1)
 def test_arcsinh_backward():
     pass
 
@@ -24,7 +24,7 @@ def test_arccosh_fwd():
 
 
 @backprop_test_factory(mygrad_func=arccosh, true_func=np.arccosh, num_arrays=1,
-                       index_to_bnds={0: (1.001, 10)}, as_decimal=False)
+                       index_to_bnds={0: (1.001, 10)})
 def test_arccosh_backward():
     pass
 
@@ -37,7 +37,7 @@ def test_arctanh_fwd():
 
 @backprop_test_factory(mygrad_func=arctanh, true_func=np.arctanh, num_arrays=1,
                        index_to_bnds={0: (-0.5, 0.5)},
-                       assumptions=_is_non_zero, as_decimal=False)
+                       assumptions=_is_non_zero)
 def test_arctanh_backward():
     pass
 
@@ -49,7 +49,7 @@ def test_arccsch_fwd():
 
 
 @backprop_test_factory(mygrad_func=arccsch, true_func=lambda x: np.arcsinh(1 / x),
-                       num_arrays=1,  index_to_bnds={0: (1, 10)}, as_decimal=False)
+                       num_arrays=1,  index_to_bnds={0: (1, 10)})
 def test_arccsch_backward():
     pass
 
@@ -61,6 +61,6 @@ def test_arccoth_fwd():
 
 
 @backprop_test_factory(mygrad_func=arccoth, true_func=lambda x: np.arctanh(1 / x),
-                       num_arrays=1,  index_to_bnds={0: (5, 10)}, as_decimal=False)
+                       num_arrays=1,  index_to_bnds={0: (5, 10)})
 def test_arccoth_backward():
     pass
