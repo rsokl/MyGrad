@@ -103,7 +103,7 @@ def numerical_gradient(f, *args, back_grad, vary_ind=None,
         of its variables, using the central difference method.
         This is a "fast" method - it varies entire arrays at once. Thus
         this is only appropriate for trivial vectorized functions that
-        map accross entries of arrays (like add or multiply). E.g.
+        map across entries of arrays (like add or multiply). E.g.
         matrix multiplication is *not* suited for this style of gradient.
 
         Parameters
@@ -158,36 +158,67 @@ def numerical_gradient(f, *args, back_grad, vary_ind=None,
 
 def numerical_gradient_full(f, *args, back_grad, kwargs=None, vary_ind=None) -> Tuple[np.ndarray, ...]:
     """ Computes numerical partial derivatives of f(x, y, ..., **kwargs), by
-        varying each entry of x, y, ... independently producing a gradient
-        in each variable.
+    varying each entry of x, y, ... independently producing a gradient
+    in each variable.
 
-        Parameters
-        ----------
-        f : Callable[[numpy.ndarray, ...], numpy.ndarray]
-            f(x, ...) -> numpy.ndarray
+    Parameters
+    ----------
+    f : Callable[[numpy.ndarray, ...], numpy.ndarray]
+        f(x, ...) -> numpy.ndarray
 
-        *args : numpy.ndarray
-            The array(s) to be passed to f
+    *args : numpy.ndarray
+        The array(s) to be passed to f
 
-        back_grad : numpy.ndarray
-            The gradient being back-propagated to {x}, via f
+    back_grad : numpy.ndarray
+        The gradient being back-propagated to {x}, via f
 
 
-        kwargs : Dict[str, Any], optional (default=dict())
-            The keyword arguments to be passed to f.
+    kwargs : Dict[str, Any], optional (default=dict())
+        The keyword arguments to be passed to f.
 
-        vary_ind : Optional[Tuple[int, ...]]
-            If `None`, the partials of f with respect to all the inputs are.
-            computed. Otherwise you can specify a sequence of the indices
-            of the variables whose partials are to be computed
-               0 -> w.r.t x only, 1 -> w.r.t y only, etc.
+    vary_ind : Optional[Tuple[int, ...]]
+        If `None`, the partials of f with respect to all the inputs are.
+        computed. Otherwise you can specify a sequence of the indices
+        of the variables whose partials are to be computed
+           0 -> w.r.t x only, 1 -> w.r.t y only, etc.
 
-        Returns
-        -------
-        Tuple[numpy.ndarray, ...]
-            df/dx, df/dy, ...
-            df/dvar will be None if var was excluded via `vary_ind`
-        """
+    Returns
+    -------
+    Tuple[numpy.ndarray, ...]
+        df/dx, df/dy, ...
+        df/dvar will be None if var was excluded via `vary_ind`
+
+    Notes
+    -----
+    The numerical derivative is computed using the so-called complex-step method [1]_:
+
+    .. math::
+               F'(x_0) = Im(F(x_0+ih))/h + O(h^2)
+
+    Critically, this permits us to compute the numerical difference without subtracting
+    two similar numbers; thus we avoid incurring the typical loss of floating point
+    precision. Accordingly, we need not concern ourselves with selecting a balanced
+    value for :math:`h` to accommodate the trade off of floating point precision with
+    that of the numerical method. The smaller the value of :math:`h`, the better.
+
+    The relationship stated above can be derived trivially via Taylor-series expansion
+    of :math:`F` along the imaginary axis:
+
+
+    .. math::
+                F(x_0+ih) = F(x_0)+ihF'(x_0)-h^2F''(x_0)/2!-ih^3F^{(3)}/3!+...
+
+                Im(F(x_0+ih)) = hF'(x_0) + O(h^2)
+
+    This is basically the coolest thing in the world.
+
+    References
+    ----------
+
+    .. [1] Squire, William, and Trapp, George, "Using complex variables to estimate
+           derivatives of real functions", SIAM Review 40, 1998, pp. 110-112.
+           epubs.siam.org/doi/abs/10.1137/S003614459631241X
+    """
     if kwargs is None:
         kwargs = {}
 
