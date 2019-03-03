@@ -161,6 +161,8 @@ def numerical_gradient_full(f, *args, back_grad, kwargs=None, vary_ind=None) -> 
     varying each entry of x, y, ... independently producing a gradient
     in each variable.
 
+    This method requires that `f` be able to operate on complex-valued arrays.
+
     Parameters
     ----------
     f : Callable[[numpy.ndarray, ...], numpy.ndarray]
