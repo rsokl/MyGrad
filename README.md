@@ -1,5 +1,6 @@
 [![Documentation Status](https://readthedocs.org/projects/mygrad/badge/?version=latest)](https://mygrad.readthedocs.io/en/latest/?badge=latest)
 [![Build Status](https://travis-ci.com/rsokl/MyGrad.svg?branch=master)](https://travis-ci.com/rsokl/MyGrad)
+[![Tested with Hypothesis](https://img.shields.io/badge/hypothesis-tested-brightgreen.svg)](https://hypothesis.readthedocs.io/)
 [![PyPi version](https://img.shields.io/pypi/v/mygrad.svg)](https://pypi.python.org/pypi/mygrad)
 ![Python version support](https://img.shields.io/badge/python-3.5%20%203.6%20%203.7-blue.svg)
 
