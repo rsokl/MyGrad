@@ -19,7 +19,7 @@ def test_softmax_crossentropy(data):
                              dtype=float,
                              elements=st.floats(-100, 100)))
     l = data.draw(hnp.arrays(shape=(s.shape[0],),
-                             dtype=int,
+                             dtype=hnp.integer_dtypes(),
                              elements=st.integers(min_value=0, max_value=s.shape[1] - 1)))
     scores = Tensor(s)
     softmax_cross = softmax_crossentropy(scores, l, constant=False)
