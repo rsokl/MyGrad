@@ -36,7 +36,7 @@ def test_ranked_margin(shape, margin, data):
     x2 = data.draw(hnp.arrays(shape=shape, dtype=float, elements=st.floats(-1000, 1000)), label="x2")
     y = data.draw(st.one_of(st.sampled_from((-1, 1)),
                             hnp.arrays(shape=shape[:1],
-                                       dtype=int,
+                                       dtype=hnp.integer_dtypes(),
                                        elements=st.sampled_from((-1, 1)))),
                   label="y")
 

@@ -36,8 +36,9 @@ def _check_loss_inputs(x, y_true):
         y_true = y_true.data
 
     y_true = np.asarray(y_true)
-    if not np.issubdtype(y_true.dtype, np.int_):
-        raise TypeError("`y_true` must be an integer-type array-like object")
+    if not np.issubdtype(y_true.dtype, np.integer):
+        raise TypeError("`y_true` must be an integer-type "
+                        "array-like object, got {}".format(y_true.dtype))
 
     if y_true.ndim != 1 or y_true.shape[0] != x.shape[0]:
         raise ValueError('`y_true` must be a shape-(N,) array: \n'
