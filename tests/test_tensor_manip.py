@@ -220,7 +220,9 @@ def _is_broadcastable(*arrs, **kwargs):
 
 
 @fwdprop_test_factory(mygrad_func=broadcast_to, true_func=np.broadcast_to,
-                      num_arrays=1, kwargs=dict(shape=lambda arr: broadcastable_shape(arr.shape, min_dim=arr.ndim+1)),
+                      num_arrays=1,
+                      index_to_arr_shapes={0: hnp.array_shapes(min_dims=0)},
+                      kwargs=dict(shape=lambda arr: broadcastable_shape(arr.shape, min_dim=arr.ndim)),
                       assumptions=_is_broadcastable)
 def test_broadcast_to_fwd():
     pass
@@ -228,7 +230,8 @@ def test_broadcast_to_fwd():
 
 @backprop_test_factory(mygrad_func=broadcast_to, true_func=np.broadcast_to,
                        num_arrays=1, vary_each_element=True,
-                       kwargs=dict(shape=lambda arr: broadcastable_shape(arr.shape, min_dim=arr.ndim+1)),
+                       index_to_arr_shapes={0: hnp.array_shapes(min_dims=0)},
+                       kwargs=dict(shape=lambda arr: broadcastable_shape(arr.shape, min_dim=arr.ndim)),
                        assumptions=_is_broadcastable)
 def test_broadcast_to_bkwd():
     pass
