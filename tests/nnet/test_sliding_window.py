@@ -4,7 +4,7 @@ import numpy as np
 from numpy.testing import assert_allclose
 
 import hypothesis.strategies as st
-from hypothesis import given
+from hypothesis import given, settings
 import hypothesis.extra.numpy as hnp
 
 
@@ -12,6 +12,7 @@ dtype_strat_numpy = st.sampled_from((np.int8, np.int16, np.int32, np.int64,
                                      np.float16, np.float32, np.float64))
 
 
+@settings(deadline=None)
 @given(data=st.data(),
        x=hnp.arrays(dtype=dtype_strat_numpy, shape=hnp.array_shapes(max_dims=5, min_dims=1, max_side=20)))
 def test_sliding_window(data, x):

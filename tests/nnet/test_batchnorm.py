@@ -57,7 +57,7 @@ def test_batchnorm(x, data):
     y1 = simple_batchnorm(t1, g1, b1, eps=1e-6)
     y2 = batchnorm(t2, gamma=g2, beta=b2, eps=1e-6)
 
-    assert_allclose(actual=y2.data, desired=y1.data, atol=1e-6, rtol=1e-6)
+    assert_allclose(actual=y2.data, desired=y1.data, atol=1e-4, rtol=1e-4)
     grad = data.draw(hnp.arrays(shape=y2.shape, dtype=t2.dtype, elements=st.floats(-10, 10)),
                      label='grad')
     grad_orig = np.copy(grad)
@@ -82,9 +82,14 @@ def test_batchnorm(x, data):
             assert o is c, "('{x}', '{gamma}', '{beta}', '{grad}')[{n}]".format(x=x, gamma=gamma,
                                                                                 beta=beta, grad=grad, n=n)
         else:
-            assert_array_equal(o, c, err_msg="('{x}', '{gamma}', '{beta}', '{grad}')[{n}]".format(x=x, gamma=gamma,
-                                                                                                  beta=beta, grad=grad,
-                                                                                                  n=n))
+            assert_array_equal(
+                o, c,
+                err_msg="('{x}', '{gamma}', '{beta}', '{grad}')[{n}]".format(x=x,
+                                                                             gamma=gamma,
+                                                                             beta=beta,
+                                                                             grad=grad,
+                                                                             n=n)
+            )
 
     if gamma is not None and beta is not None:
         assert not np.shares_memory(g2.grad, b2.grad)
