@@ -222,6 +222,5 @@ def broadcast_to(a, shape, constant=False):
     ValueError: operands could not be broadcast together with remapped
     shapes [original->remapped]: (3,) and requested shape (4,4)
     """
-    if not shape:
-        raise TypeError("reshape() takes at least 1 argument (0 given)")
+    print(shape)
     return Tensor._op(BroadcastTo, a, op_args=(shape,), constant=constant)
