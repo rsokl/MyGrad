@@ -9,7 +9,7 @@ dependencies:
   - matplotlib=2.2.2
   - nbsphinx=0.3.5
   - sphinx=1.8.1
-  - numpydoc=0.9.1
+  - numpydoc=0.8.0
   - pandoc
   - nbconvert!=5.4
   - ipykernel
