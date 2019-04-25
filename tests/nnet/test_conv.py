@@ -221,6 +221,7 @@ def _conv_nd(x, w, stride, dilation=1):
     return conv_nd(x, w, stride=stride, dilation=dilation, constant=True).data
 
 
+@settings(deadline=None)
 @backprop_test_factory(mygrad_func=conv_nd,
                        true_func=_conv_nd,
                        num_arrays=2,
