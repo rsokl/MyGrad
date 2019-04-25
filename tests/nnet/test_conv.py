@@ -201,33 +201,6 @@ def test_bad_conv_shapes():
         conv_nd(x, w, stride=3, padding=1)  # shape mismatch
 
 
-@settings(deadline=None)
-@given(data=st.data(),
-       x=hnp.arrays(dtype=float, shape=hnp.array_shapes(max_dims=6, min_dims=3, max_side=6),
-                    elements=st.floats(-10, 10)),
-       num_filters=st.integers(1, 3))
-def test_conv_ND_fwd(data, x, num_filters):
-    """ Test convs 1D-4D with various strides and dilations."""
-    x = x[0:min(x.shape[0], 3), 0:min(x.shape[1], 3)]
-    win_dim = x.ndim - 2
-    win_shape = data.draw(st.tuples(*(st.integers(1, s) for s in x.shape[-win_dim:])), label="win_shape")
-    kernels = data.draw(hnp.arrays(dtype=float, shape=(num_filters, x.shape[1], *win_shape),
-                                   elements=st.floats(-10, 10)),
-                        label="kernels")
-
-    stride = data.draw(st.tuples(*(st.integers(1, s) for s in x.shape[-win_dim:])), label="stride")
-
-    max_dilation = np.array(x.shape[-win_dim:]) // win_shape
-    dilation = data.draw(st.tuples(*(st.integers(1, s) for s in max_dilation)), label="dilation")
-    conf = dict(stride=stride, dilation=dilation)
-
-    # skip invalid data/kernel/stride/dilation combinations
-    assume(get_outshape(x.shape[2:], kernels.shape[2:], stride, dilation) is not None)
-    numpy_conv = conv_bank(x, kernels, **conf)
-    mygrad_conv = conv_nd(x, kernels, **conf).data
-    assert_allclose(actual=mygrad_conv, desired=numpy_conv, atol=1e-6, rtol=1e-6)
-
-
 @fwdprop_test_factory(mygrad_func=conv_nd, true_func=conv_bank, num_arrays=2,
                       index_to_arr_shapes={0: (4, 5, 7), 1: (2, 5, 3)},
                       kwargs=dict(stride=(1,), dilation=(1,)))
@@ -248,29 +221,79 @@ def _conv_nd(x, w, stride, dilation=1):
     return conv_nd(x, w, stride=stride, dilation=dilation, constant=True).data
 
 
-settings(deadline=None)
+@settings(deadline=None)
+@backprop_test_factory(mygrad_func=conv_nd,
+                       true_func=_conv_nd,
+                       num_arrays=2,
+                       index_to_arr_shapes={0: (2, 1, 7), 1: (2, 1, 3)},
+                       kwargs={"stride": (1,)},
+                       index_to_bnds={0: (-10, 10), 1: (-10, 10)},
+                       vary_each_element=True)
+def test_conv_1d_bkwd():
+    """ (N=2, C=1, W=7) x (F=2, C=1, Wf=3); stride=1, dilation=1
+
+    Also tests meta properties of conv-backprop - appropriate return type,
+    behavior with `constant` arg, good behavior of null_gradients, etc."""
+    pass
+
+
+@settings(deadline=None)
 @given(data=st.data(),
-       x=hnp.arrays(dtype=float, shape=hnp.array_shapes(max_dims=5, min_dims=3, max_side=6),
-                    elements=st.floats(-10, 10)),
-       num_filters=st.integers(1, 3))
-def test_conv_ND_bkwd(data, x, num_filters):
-    """ Test conv-backprop 1D-3D with various strides and dilations."""
-    x = x[0:min(x.shape[0], 1), 0:min(x.shape[1], 1)]
-    win_dim = x.ndim - 2
-    win_shape = data.draw(st.tuples(*(st.integers(1, s) for s in x.shape[-win_dim:])), label="win_shape")
-    kernels = data.draw(hnp.arrays(dtype=float, shape=(num_filters, x.shape[1], *win_shape),
-                                   elements=st.floats(-10, 10)),
-                        label="kernels")
-
-    stride = data.draw(st.tuples(*(st.integers(1, s) for s in x.shape[-win_dim:])), label="stride")
-
-    max_dilation = np.array(x.shape[-win_dim:]) // win_shape
+       shape=hnp.array_shapes(min_dims=1, max_dims=3, max_side=12),
+       num_filters=st.integers(1, 3),
+       num_batch=st.integers(1, 3),
+       num_channel=st.integers(1, 3))
+def test_conv_ND_fwd(data, shape, num_filters, num_batch, num_channel):
+    win_dim = len(shape)
+    shape = (num_batch, num_channel) + shape
+    win_shape = data.draw(st.tuples(*(st.integers(1, s) for s in shape[-win_dim:])), label="win_shape")
+    kernel_shape = (num_filters, shape[1], *win_shape)
+    stride = data.draw(st.tuples(*(st.integers(1, s) for s in shape[-win_dim:])), label="stride")
+    max_dilation = np.array(shape[-win_dim:]) // win_shape
     dilation = data.draw(st.tuples(*(st.integers(1, s) for s in max_dilation)), label="dilation")
     conf = dict(stride=stride, dilation=dilation)
 
     # skip invalid data/kernel/stride/dilation combinations
-    assume(get_outshape(x.shape[2:], kernels.shape[2:], stride, dilation) is not None)
+    assume(get_outshape(shape[2:], kernel_shape[2:], stride, dilation) is not None)
 
+    kernels = data.draw(hnp.arrays(dtype=float, shape=kernel_shape,
+                                   elements=st.floats(-10, 10)),
+                        label="kernels")
+    x = data.draw(hnp.arrays(dtype=float, shape=shape,
+                             elements=st.floats(-10, 10)), label="x")
+
+    mygrad_conv = conv_nd(x, kernels, **conf).data
+    numpy_conv = conv_bank(x, kernels, **conf)
+    assert_allclose(actual=mygrad_conv, desired=numpy_conv, atol=1e-6, rtol=1e-6)
+
+
+@settings(deadline=None)
+@given(data=st.data(),
+       shape=hnp.array_shapes(min_dims=1, max_dims=3, max_side=6),
+       num_filters=st.integers(1, 3),
+       num_batch=st.integers(1, 3),
+       num_channel=st.integers(1, 3))
+def test_conv_ND_bkwd(data, shape, num_filters, num_batch, num_channel):
+    """ Test conv-backprop 1D-3D with various strides and dilations."""
+    win_dim = len(shape)
+    shape = (num_batch, num_channel) + shape
+    win_shape = data.draw(st.tuples(*(st.integers(1, s) for s in shape[-win_dim:])), label="win_shape")
+    kernel_shape = (num_filters, shape[1], *win_shape)
+
+    stride = data.draw(st.tuples(*(st.integers(1, s) for s in shape[-win_dim:])), label="stride")
+
+    max_dilation = np.array(shape[-win_dim:]) // win_shape
+    dilation = data.draw(st.tuples(*(st.integers(1, s) for s in max_dilation)), label="dilation")
+    conf = dict(stride=stride, dilation=dilation)
+
+    # skip invalid data/kernel/stride/dilation combinations
+    assume(get_outshape(shape[2:], kernel_shape[2:], stride, dilation) is not None)
+
+    kernels = data.draw(hnp.arrays(dtype=float, shape=kernel_shape,
+                                   elements=st.floats(-10, 10)),
+                        label="kernels")
+    x = data.draw(hnp.arrays(dtype=float, shape=shape,
+                             elements=st.floats(-10, 10)), label="x")
     x = Tensor(x)
     kernels = Tensor(kernels)
 
@@ -290,17 +313,4 @@ def test_conv_ND_bkwd(data, x, num_filters):
                         err_msg="arr-{}: numerical derivative and mygrad derivative do not match".format(n))
 
 
-@backprop_test_factory(mygrad_func=conv_nd,
-                       true_func=_conv_nd,
-                       num_arrays=2,
-                       index_to_arr_shapes={0: (2, 1, 7), 1: (2, 1, 3)},
-                       kwargs={"stride": (1,)},
-                       index_to_bnds={0: (-10, 10), 1: (-10, 10)},
-                       vary_each_element=True)
-def test_conv_1d_bkwd():
-    """ (N=2, C=1, W=7) x (F=2, C=1, Wf=3); stride=1, dilation=1
-
-    Also tests meta properties of conv-backprop - appropriate return type,
-    behavior with `constant` arg, good behavior of null_gradients, etc."""
-    pass
 
