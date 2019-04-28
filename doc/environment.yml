@@ -16,4 +16,4 @@ dependencies:
   - python-graphviz
   - pip
   - pip:
-      - numpydoc=0.9.1
+      - numpydoc
