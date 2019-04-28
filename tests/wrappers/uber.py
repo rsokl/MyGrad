@@ -170,7 +170,8 @@ class fwdprop_test_factory():
                 "`mygrad_func` returned tensor.constant={}, should be constant={}".format(o.constant, constant)
 
             assert_allclose(actual=tensor_out, desired=true_out,
-                            err_msg="`mygrad_func(x)` and `true_func(x)` produce different results")
+                            err_msg="`mygrad_func(x)` and `true_func(x)` produce different results",
+                            atol=1e-7)
 
             for n, (arr, arr_copy) in enumerate(zip(arrs, arr_copies)):
                 assert_array_equal(arr, arr_copy,
