@@ -1,17 +1,20 @@
 [![Documentation Status](https://readthedocs.org/projects/mygrad/badge/?version=latest)](https://mygrad.readthedocs.io/en/latest/?badge=latest)
 [![Build Status](https://travis-ci.com/rsokl/MyGrad.svg?branch=master)](https://travis-ci.com/rsokl/MyGrad)
+[![Tested with Hypothesis](https://img.shields.io/badge/hypothesis-tested-brightgreen.svg)](https://hypothesis.readthedocs.io/)
 [![PyPi version](https://img.shields.io/pypi/v/mygrad.svg)](https://pypi.python.org/pypi/mygrad)
 ![Python version support](https://img.shields.io/badge/python-3.5%20%203.6%20%203.7-blue.svg)
 
 # Introducing mygrad
 `mygrad` is a simple, NumPy-centric autograd library. An autograd library enables you to automatically compute derivatives of mathematical functions. This library
-is designed to serve primarily as an education tool for learning about gradient-based machine learning; it is easy to install, has a readable and easily customizable code
+is designed to serve both as a tool for prototyping/testing and as an education tool for learning about gradient-based machine learning; it is easy to install, has a readable and easily customizable code
 base, and provides a sleek interface that mimics NumPy. Furthermore, it leverages NumPy's vectorization
 to achieve good performance despite the library's simplicity. 
 
 This is not meant to be a competitor to libraries like PyTorch (which `mygrad` most closely resembles) or
 TensorFlow. Rather, it is meant to serve as a useful tool for students who are learning about training neural networks
 using back propagation.
+
+A more in-depth discussion of MyGrad and documentation for its internals can be found [here](https://mygrad.readthedocs.io/en/latest/).
 
 ## Installing mygrad (this project)
 To install MyGrad, you can pip-install it:

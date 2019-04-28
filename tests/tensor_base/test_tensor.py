@@ -1,12 +1,17 @@
 from mygrad import Tensor
 from mygrad.operation_base import Operation
 import mygrad as mg
+from mygrad.math.arithmetic.ops import Add, Subtract, Multiply, Divide, Power
+from mygrad.math.arithmetic.ops import Negative
+from mygrad.linalg.ops import MatMul
 
 from hypothesis import given
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
 
 from pytest import raises
+import pytest
+
 import numpy as np
 from numpy.testing import assert_allclose, assert_array_equal, assert_equal
 
@@ -28,19 +33,26 @@ def test_to_scalar():
         assert size1_tensor.item() == 1.
 
 
-def test_repr():
-    assert repr(Tensor(1)) == 'Tensor(1)'
-    assert repr(Tensor([1])) == 'Tensor([1])'
-    assert repr(Tensor([1, 2])) == 'Tensor([1, 2])'
-    tmp_rep = 'Tensor([[0, 1, 2],\n        [3, 4, 5],\n        [6, 7, 8]])'
-    assert repr(mg.arange(9).reshape((3, 3))) == tmp_rep
+@pytest.mark.parametrize(
+    ("tensor", "repr_"),
+    [(Tensor(1), 'Tensor(1)'),
+     (Tensor([1]), 'Tensor([1])'),
+     (Tensor([1, 2]), 'Tensor([1, 2])'),
+     (mg.arange(9).reshape((3, 3)),
+      'Tensor([[0, 1, 2],\n'
+      '        [3, 4, 5],\n'
+      '        [6, 7, 8]])')
+     ]
+)
+def test_repr(tensor, repr_):
+    assert repr(tensor) == repr_
 
 
-def test_contains():
+@pytest.mark.parametrize("element", (0, [0, 1, 2]))
+def test_contains(element):
     t = Tensor([[0, 1, 2], [3, 4, 5]])
-    assert 0 in t and 0 in t.data
-    assert [0, 1, 2] in t and [0, 1, 2] in t.data
-    assert -1 not in t and -1 not in t.data
+    assert element in t
+    assert element in t.data
 
 
 @given(a=hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=5),
@@ -124,109 +136,111 @@ def test_init_params(data, creator, constant, scalar_only, dtype, numpy_dtype):
     assert tensor.grad is None
 
 
+@pytest.mark.parametrize(
+    ("op_name", "op"),
+    [("add", Add),
+     ("sub", Subtract),
+     ("mul", Multiply),
+     ("truediv", Divide),
+     ("pow", Power),
+     ("matmul", MatMul),
+     ])
+@pytest.mark.parametrize("right_op", [True, False])
 @given(constant_x=st.booleans(), constant_y=st.booleans())
-def test_special_methods(constant_x: bool, constant_y: bool):
-    from mygrad.math.arithmetic.ops import Add, Subtract, Multiply, Divide, Power
-    from mygrad.math.arithmetic.ops import Negative
-    from mygrad.linalg.ops import MatMul
-
+def test_special_methods(op_name: str, op: Operation,
+                         constant_x: bool, constant_y: bool, right_op: bool):
+    if right_op:
+        op_name = "r" + op_name
+    op_name = "__" + op_name + "__"
     x = Tensor([2., 8., 5.], constant=constant_x)
     y = Tensor([1., 3., 2.], constant=constant_y)
 
     constant = constant_x and constant_y
+    assert hasattr(Tensor, op_name)
+    tensor_out = getattr(Tensor, op_name)(x, y)
+    numpy_out = getattr(np.ndarray, op_name)(x.data, y.data)
+    assert isinstance(tensor_out, Tensor)
+    assert tensor_out.constant is constant
+    assert_equal(tensor_out.data, numpy_out)
+    assert isinstance(tensor_out.creator, op)
 
-    for op_name, op in zip(("__add__", "__sub__", "__mul__", "__truediv__", "__pow__", "__matmul__"),
-                           (Add, Subtract, Multiply, Divide, Power, MatMul)):
-        assert hasattr(Tensor, op_name), "`Tensor` is missing the attribute {}".format(op_name)
-        tensor_out = getattr(Tensor, op_name)(x, y)
-        numpy_out = getattr(np.ndarray, op_name)(x.data, y.data)
-        assert isinstance(tensor_out, Tensor), "`Tensor.{}` did not return a Tensor-instance".format(op_name)
+    if not right_op:
+        assert tensor_out.creator.variables[0] is x
+        assert tensor_out.creator.variables[1] is y
+    else:
+        assert tensor_out.creator.variables[0] is y
+        assert tensor_out.creator.variables[1] is x
 
-        assert tensor_out.constant is constant, "`Tensor.{}` did not propagate constant properly".format(op_name)
 
-        assert_equal(tensor_out.data, numpy_out, err_msg="`Tensor.{}` did not produce the correct "
-                                                         "numerical result.".format(op_name))
-
-        assert isinstance(tensor_out.creator, op), "`Tensor.{}` does not have the expected " \
-                                                   "creator-instance".format(op_name)
-
-        assert tensor_out.creator.variables[0] is x, "`Tensor.{}`'s creator did not record the " \
-                                                     "correct variable x".format(op_name)
-
-        assert tensor_out.creator.variables[1] is y, "`Tensor.{}`'s creator did not record the " \
-                                                     "correct variable y".format(op_name)
-
-    for op_name, op in zip(("__radd__", "__rsub__", "__rmul__", "__rtruediv__", "__rpow__", "__rmatmul__"),
-                           (Add, Subtract, Multiply, Divide, Power, MatMul)):
-        assert hasattr(Tensor, op_name), "`Tensor` is missing the attribute {}".format(op_name)
-        tensor_out = getattr(Tensor, op_name)(x, y)
-        numpy_out = getattr(np.ndarray, op_name)(x.data, y.data)
-        assert isinstance(tensor_out, Tensor), "`Tensor.{}` did not return a Tensor-instance".format(op_name)
-        assert tensor_out.constant is constant, "`Tensor.{}` did not propagate constant properly".format(op_name)
-        assert_equal(tensor_out.data, numpy_out, err_msg="`Tensor.{}` did not produce the correct "
-                                                         "numerical result.".format(op_name))
-        assert isinstance(tensor_out.creator, op), "`Tensor.{}` does not have the expected " \
-                                                   "creator-instance".format(op_name)
-
-        assert tensor_out.creator.variables[0] is y, "`Tensor.{}`'s creator did not record the " \
-                                                     "correct variable x".format(op_name)
-
-        assert tensor_out.creator.variables[1] is x, "`Tensor.{}`'s creator did not record the " \
-                                                     "correct variable y".format(op_name)
-
+@given(x=hnp.arrays(shape=hnp.array_shapes(), dtype=hnp.floating_dtypes()))
+def test_neg(x):
+    x = Tensor(x)
     op_name = "__neg__"
-    assert hasattr(Tensor, op_name), "`Tensor` is missing the attribute {}".format(op_name)
+    assert hasattr(Tensor, op_name)
     tensor_out = getattr(Tensor, "__neg__")(x)
     numpy_out = getattr(np.ndarray, "__neg__")(x.data)
-    assert isinstance(tensor_out, Tensor), "`Tensor.{}` did not return a Tensor-instance".format(op_name)
-
-    assert_equal(tensor_out.data, numpy_out, err_msg="`Tensor.{}` did not produce the correct "
-                                                     "numerical result.".format(op_name))
-
-    assert isinstance(tensor_out.creator, Negative), "`Tensor.{}` does not have the expected " \
-                                                     "creator-instance".format(op_name)
-
-    assert tensor_out.creator.variables[0] is x, "`Tensor.{}`'s creator did not record the " \
-                                                 "correct variable x".format(op_name)
+    assert isinstance(tensor_out, Tensor)
+    assert_equal(tensor_out.data, numpy_out)
+    assert isinstance(tensor_out.creator, Negative)
+    assert tensor_out.creator.variables[0] is x
 
 
-def test_comparison_ops():
-    x = Tensor([1, 3, 5])
-    y = Tensor([1, 4, 2])
-    for op in ("__lt__", "__le__", "__gt__", "__ge__", "__eq__", "__ne__"):
-        assert hasattr(Tensor, op), "`Tensor` is missing the attribute {}".format(op)
-        tensor_out = getattr(Tensor, op)(x, y)
-        array_out = getattr(np.ndarray, op)(x.data, y.data)
-        assert_equal(actual=tensor_out, desired=array_out, err_msg="The comparison operation `Tensor.{}` "
-                                                                   "does not match the expected behavior "
-                                                                   "by comparison to numpy.ndarray".format(op))
+@pytest.mark.parametrize("op", ("__lt__", "__le__", "__gt__", "__ge__", "__eq__", "__ne__"))
+@given(x=hnp.arrays(shape=hnp.array_shapes(),
+                    dtype=hnp.floating_dtypes(),
+                    elements=st.floats(-10, 10)),
+       x_constant=st.booleans(),
+       y_constant=st.booleans(),
+       data=st.data())
+def test_comparison_ops(op: str, x: np.ndarray,
+                        x_constant: bool,
+                        y_constant: bool,
+                        data: st.SearchStrategy):
+    y = data.draw(hnp.arrays(shape=x.shape, dtype=x.dtype, elements=st.floats(-10, 10)))
+    x = Tensor(x, constant=x_constant)
+    y = Tensor(y, constant=y_constant)
+    assert hasattr(Tensor, op), "`Tensor` is missing the attribute {}".format(op)
+    tensor_out = getattr(Tensor, op)(x, y)
+    array_out = getattr(np.ndarray, op)(x.data, y.data)
+    assert_equal(actual=tensor_out, desired=array_out)
 
 
+@pytest.mark.parametrize(
+    "attr",
+    ("sum",
+     "prod",
+     "cumprod",
+     "cumsum",
+     "mean",
+     "std",
+     "var",
+     "max",
+     "min",
+     "transpose",
+     "squeeze",
+     "ravel"))
 @given(constant=st.booleans())
-def test_math_methods(constant: bool):
+def test_math_methods(attr: str, constant: bool):
     x = Tensor([[1., 2., 3.],
                 [4., 5., 6.]], constant=constant)
-    for attr in ("sum", "prod", "cumprod", "cumsum",
-                 "mean", "std", "var",
-                 "max", "min",
-                 "transpose", "squeeze", "ravel"):
-        assert hasattr(x, attr), "`Tensor` is missing the attribute: {attr}".format(attr=attr)
-        method_out = getattr(x, attr).__call__()
-        function_out = getattr(mg, attr).__call__(x)
-        assert_equal(method_out.data, function_out.data)
-        assert method_out.constant is constant, "`Tensor.{}` did not propagate constant properly".format(attr)
-        assert type(method_out.creator) is type(function_out.creator)
 
-    method_out = x.moveaxis(0, -1)
-    function_out = mg.moveaxis(x, 0, -1)
+    assert hasattr(x, attr)
+    method_out = getattr(x, attr).__call__()
+    function_out = getattr(mg, attr).__call__(x)
     assert_equal(method_out.data, function_out.data)
-    assert method_out.constant is constant, "`Tensor.moveaxis` did not propagate constant properly".format(attr)
+    assert method_out.constant is constant
     assert type(method_out.creator) is type(function_out.creator)
 
-    method_out = x.swapaxes(0, -1)
-    function_out = mg.swapaxes(x, 0, -1)
+
+@pytest.mark.parametrize("op", ("moveaxis", "swapaxes"))
+@given(constant=st.booleans())
+def test_axis_interchange_methods(op: str, constant: bool):
+    x = Tensor([[1., 2., 3.],
+                [4., 5., 6.]], constant=constant)
+    method_out = getattr(x, op)(0, -1)
+    function_out = getattr(mg, op)(x, 0, -1)
     assert_equal(method_out.data, function_out.data)
-    assert method_out.constant is constant, "`Tensor.swapaxes` did not propagate constant properly".format(attr)
+    assert method_out.constant is constant
     assert type(method_out.creator) is type(function_out.creator)
 
 

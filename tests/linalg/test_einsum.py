@@ -1,19 +1,21 @@
-from ..utils.numerical_gradient import numerical_gradient_full
-from ..custom_strategies import broadcastable_shape
+from copy import copy
+from itertools import chain
 
-from mygrad import Tensor
+import pytest
 
 from hypothesis import given
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
 from hypothesis import settings
 
-from copy import copy
-
 import numpy as np
 from numpy.testing import assert_allclose
-from itertools import chain
+
 from mygrad.linalg.funcs import einsum
+from mygrad import Tensor
+
+from ..utils.numerical_gradient import numerical_gradient_full
+from ..custom_strategies import broadcastable_shape
 
 
 def bool_strat():
@@ -71,13 +73,18 @@ def compare_backprop(*operands, atol=1e-5, rtol=1e-5, optimize=False):
                                 "variable index {}".format(n))
 
 
-def test_unique_from_end():
+@pytest.mark.parametrize(
+    ("full_string", "end"),
+    [("", ""),
+     ("a", "a"),
+     ("aaaa", "a"),
+     ("aba", "ba"),
+     ("abccbac", "bac"),
+     ]
+)
+def test_unique_from_end(full_string, end):
     from mygrad.linalg.ops import _unique_from_end
-    assert _unique_from_end("") == ""
-    assert _unique_from_end("a") == "a"
-    assert _unique_from_end("aaaa") == "a"
-    assert _unique_from_end("aba") == "ba"
-    assert _unique_from_end("abccbac") == "bac"
+    assert _unique_from_end(full_string) == end
 
 
 def test_merge_mappings():

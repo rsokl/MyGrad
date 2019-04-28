@@ -6,6 +6,8 @@ from hypothesis import given, settings
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
 
+import pytest
+
 from ..utils.numerical_gradient import numerical_gradient_full
 from ..custom_strategies import basic_index, adv_integer_index, broadcastable_shape
 
@@ -18,22 +20,33 @@ def test_arr_util():
     assert_array_equal(_arr(4, 3), np.arange(12).reshape(4, 3))
 
 
-def test_int_array_test():
-    assert _is_int_array_index((0, 0)) is False
-    assert _is_int_array_index((np.array([True]), )) is False
-    assert _is_int_array_index((np.array([True]), [1])) is True
-    assert _is_int_array_index((np.array([1]), [1])) is True
-    assert _is_int_array_index((np.array([True]), 1)) is False
-    assert _is_int_array_index((np.array([True]), slice(None))) is False
+@pytest.mark.parametrize(
+    ("arr", "truth"),
+    [((0, 0), False),
+     ((np.array([True]),), False),
+     ((np.array([True]), [1]), True),
+     ((np.array([True]), [1]), True),
+     ((np.array([1]), [1]), True),
+     ((np.array([True]), 1), False),
+     ((np.array([True]), slice(None)), False),
+     ]
+)
+def test_int_array_test(arr, truth):
+    assert _is_int_array_index(arr) is truth
 
 
-def test_bool_array_test():
-    assert _is_bool_array_index((0, 0)) is False
-    assert _is_bool_array_index((np.array([True]),)) is True
-    assert _is_bool_array_index((np.array([True]), np.array([False]))) is False
-    assert _is_bool_array_index((np.array([1]), [1])) is False
-    assert _is_bool_array_index((np.array([True]), 1)) is False
-    assert _is_bool_array_index((np.array([True]), slice(None))) is False
+@pytest.mark.parametrize(
+    ("arr", "truth"),
+    [((0, 0), False),
+     ((np.array([True]),), True),
+     ((np.array([True]), np.array([False])), False),
+     ((np.array([1]), [1]), False),
+     ((np.array([True]), 1), False),
+     ((np.array([True]), slice(None)), False),
+     ]
+)
+def test_bool_array_test(arr, truth):
+    assert _is_bool_array_index(arr) is truth
 
 
 def setitem(x, y, index):

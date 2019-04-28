@@ -17,7 +17,7 @@ def test_multiclass_hinge(data):
                              dtype=float,
                              elements=st.floats(-100, 100)))
     l = data.draw(hnp.arrays(shape=(s.shape[0],),
-                             dtype=int,
+                             dtype=hnp.integer_dtypes(),
                              elements=st.integers(min_value=0, max_value=s.shape[1] - 1)))
     hinge_scores = Tensor(s)
     hinge_loss = multiclass_hinge(hinge_scores, l, constant=False)

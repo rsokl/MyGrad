@@ -1,11 +1,13 @@
 import hypothesis.strategies as st
 from hypothesis import given
+
 from pytest import raises
+import pytest
+
+import numpy as np
 
 from mygrad.tensor_base import Tensor
 from mygrad.operation_base import Operation, BroadcastableOp
-
-import numpy as np
 
 
 class ScalarOnlyOp(BroadcastableOp):
@@ -70,47 +72,15 @@ def test_standard_op(a_const, a_scalar_only, b_const, b_scalar_only):
                 out.backward()
 
 
-def test_practical_scalar_only():
-    a = np.array([1, 2, 3])
-    b = Tensor(3)
-    out = a + b
-    with raises(Exception):
+@pytest.mark.parametrize("constant", [True, False])
+@pytest.mark.parametrize("operation", ["add", "sub", "mul", "truediv", "pow"])
+def test_practical_scalar_only(constant, operation):
+    a = Tensor([1, 2, 3], constant=constant)
+    b = Tensor(3, constant=constant)
+    out = getattr(a, "__" + operation + "__")(b)
+
+    if constant:
         out.backward()
-
-    out = a * b
-    with raises(Exception):
-        out.backward()
-
-    out = a - b
-    with raises(Exception):
-        out.backward()
-
-    out = a / b
-    with raises(Exception):
-        out.backward()
-
-    out = a ** b
-    with raises(Exception):
-        out.backward()
-
-    a = Tensor([1, 2, 3], constant=True)
-    b = Tensor(3, constant=True)
-    out = a + b
-    out.backward()
-
-    a = Tensor([1, 2, 3])
-    b = 3
-    out = a + b
-    out.backward()
-
-    out = a * b
-    out.backward()
-
-    out = a - b
-    out.backward()
-
-    out = a / b
-    out.backward()
-
-    out = a ** b
-    out.backward()
+    else:
+        with raises(Exception):
+            out.backward()

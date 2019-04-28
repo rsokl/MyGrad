@@ -152,7 +152,7 @@ def log(a, constant=False):
 
 
 def log2(a, constant=False):
-    """ ``f(a) -> log(a)``
+    """ ``f(a) -> log2(a)``
 
         Base-2 logarithm
 
@@ -171,7 +171,7 @@ def log2(a, constant=False):
 
 
 def log10(a, constant=False):
-    """ ``f(a) -> log(a)``
+    """ ``f(a) -> log10(a)``
 
         Base-10 logarithm
 
