@@ -6,7 +6,7 @@ from mygrad import Tensor
 from copy import copy
 from numbers import Real
 
-from hypothesis import given, assume
+from hypothesis import given, assume, note
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
 
@@ -51,10 +51,10 @@ class fwdprop_test_factory():
                  mygrad_func: Callable[[Tensor], Tensor],
                  true_func: Callable[[np.ndarray], np.ndarray],
                  num_arrays: int,
-                 index_to_bnds: Optional[Dict[int, Tuple[int, int]]] = {},
-                 index_to_no_go: Optional[Dict[int, Sequence[int]]] = {},
-                 kwargs: Optional[Dict[str, Union[Any, Callable[[Any], SearchStrategy]]]] = {},
-                 index_to_arr_shapes: Optional[Dict[int, Union[Sequence[int], SearchStrategy]]] = {},
+                 index_to_bnds: Dict[int, Tuple[int, int]] = {},
+                 index_to_no_go: Dict[int, Sequence[int]] = {},
+                 kwargs: Union[Callable, Dict[str, Union[Any, Callable[[Any], SearchStrategy]]]] = {},
+                 index_to_arr_shapes: Dict[int, Union[Sequence[int], SearchStrategy]] = {},
                  assumptions: Optional[Callable[..., bool]] = None):
         """
         Parameters
@@ -79,7 +79,7 @@ class fwdprop_test_factory():
                 Default for array-0: `hnp.array_shapes(max_side=3, max_dims=3)`
                 Default for array-i: `broadcastable_shape(arr-0.shape)`
 
-        kwargs : Dict[str, Union[Any, Callable[[Any], hypothesis.searchstrategy.SearchStrategy]]]
+        kwargs : Union[Callable, Dict[str, Union[Any, Callable[[Any], SearchStrategy]]]]
             Keyword arguments and their values to be passed to the functions.
             The values can be hypothesis search-strategies, in which case
             a value when be drawn at test time for that argument using the provided
@@ -148,9 +148,15 @@ class fwdprop_test_factory():
 
             arr_copies = [copy(arr) for arr in arrs]  # list of array-copies to check for mutation
 
-            # set or draw keyword args to be passed to functions
-            kwargs = {k: (data.draw(v(*arrs), label="kwarg: {}".format(k)) if callable(v) else v)
-                      for k, v in self.kwargs.items()}
+            if callable(self.kwargs):
+                kwargs = data.draw(self.kwargs(*arrs))
+                if not isinstance(kwargs, dict):
+                    raise TypeError("`kwargs` was a search strategy. This needs to draw dictionaries,"
+                                    "instead drew: {}".format(kwargs))
+            else:
+                # set or draw keyword args to be passed to functions
+                kwargs = {k: (data.draw(v(*arrs), label="kwarg: {}".format(k)) if callable(v) else v)
+                          for k, v in self.kwargs.items()}
 
             if self.assumptions is not None:
                 assume(self.assumptions(*arrs, **kwargs))
@@ -209,12 +215,12 @@ class backprop_test_factory():
                  mygrad_func: Callable[[Tensor], Tensor],
                  true_func:  Callable[[np.ndarray], np.ndarray],
                  num_arrays: int,
-                 index_to_bnds: Optional[Dict[int, Tuple[int, int]]]=None,
-                 index_to_no_go: Optional[Dict[int, Sequence[int]]]=None,
-                 index_to_arr_shapes: Optional[Dict[int, Union[Sequence[int], SearchStrategy]]]=None,
-                 index_to_unique: Optional[Union[Dict[int, bool], bool]]=None,
-                 elements_strategy: Optional[SearchStrategy]=None,
-                 kwargs: Optional[Dict[str, Union[Any, Callable[[Any], SearchStrategy]]]]=None,
+                 index_to_bnds: Optional[Dict[int, Tuple[int, int]]] = None,
+                 index_to_no_go: Optional[Dict[int, Sequence[int]]] = None,
+                 index_to_arr_shapes: Optional[Dict[int, Union[Sequence[int], SearchStrategy]]] = None,
+                 index_to_unique: Optional[Union[Dict[int, bool], bool]] = None,
+                 elements_strategy: Optional[SearchStrategy] = None,
+                 kwargs: Optional[Union[Callable, Dict[str, Union[Any, Callable[[Any], SearchStrategy]]]]] = None,
                  h: float=1e-20,
                  rtol: float=1e-8,
                  atol: float=1e-8,
@@ -382,12 +388,18 @@ class backprop_test_factory():
             arrs = tuple(Tensor(arr) for arr in arrs)
             arr_copies = tuple(copy(arr) for arr in arrs)
 
-            # The keyword args to be passed to `self.op`. If any provided argument is callable
-            # it is assumed to by a hypothesis search strategy, and all of the drawn arrays will
-            # be passed to the strategy, in order to draw a value for that keyword argument.
-            # Otherwise the provided value is used as-is.
-            kwargs = {k: (data.draw(v(*arrs), label="kwarg: {}".format(k)) if callable(v) else v)
-                      for k, v in self.kwargs.items()}
+            if callable(self.kwargs):
+                kwargs = data.draw(self.kwargs(*arrs), label='kwargs')
+                if not isinstance(kwargs, dict):
+                    raise TypeError("`kwargs` was a search strategy. This needs to draw dictionaries,"
+                                    "instead drew: {}".format(kwargs))
+            else:
+                # The keyword args to be passed to `self.op`. If any provided argument is callable
+                # it is assumed to by a hypothesis search strategy, and all of the drawn arrays will
+                # be passed to the strategy, in order to draw a value for that keyword argument.
+                # Otherwise the provided value is used as-is.
+                kwargs = {k: (data.draw(v(*arrs), label="kwarg: {}".format(k)) if callable(v) else v)
+                          for k, v in self.kwargs.items()}
 
             if self.assumptions is not None:
                 assume(self.assumptions(*arrs, **kwargs))

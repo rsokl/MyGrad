@@ -3,7 +3,9 @@ import numpy as np
 
 __all__ = ["Tensor_Transpose_Property",
            "Transpose",
-           "MoveAxis"]
+           "MoveAxis",
+           "Roll",
+           "SwapAxes"]
 
 
 class Tensor_Transpose_Property(Operation):
@@ -62,3 +64,16 @@ class SwapAxes(Operation):
             raise IndexError
         return np.swapaxes(grad, self.axis2, self.axis1)
 
+
+class Roll(Operation):
+    def __call__(self, a, shift, axis):
+        self.variables = (a,)
+        self.shift = shift
+        self.axis = axis
+        return np.roll(a.data, shift=shift, axis=axis)
+
+    def backward_var(self, grad, index, **kwargs):
+        if not index == 0:
+            raise IndexError
+        rev_shift = -self.shift if not hasattr(self.shift, '__iter__') else tuple(-i for i in self.shift)
+        return np.roll(grad, axis=self.axis, shift=rev_shift)

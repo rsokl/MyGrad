@@ -19,6 +19,7 @@ Transpose-like operations
    :toctree: generated/
 
    moveaxis
+   roll
    swapaxes
    Tensor.T
    transpose
