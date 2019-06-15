@@ -1,19 +1,19 @@
 from itertools import permutations
-from mygrad.tensor_base import Tensor
-from mygrad import transpose, moveaxis, swapaxes, squeeze, expand_dims, ravel, broadcast_to
-from numpy.testing import assert_allclose
-import numpy as np
-
-from .custom_strategies import valid_axes, broadcastable_shape
-from .utils.numerical_gradient import numerical_gradient_full
-from .wrappers.uber import fwdprop_test_factory, backprop_test_factory
 
 import hypothesis.extra.numpy as hnp
-from hypothesis import given, assume, settings
 import hypothesis.strategies as st
-
+import numpy as np
+from hypothesis import assume, given, settings
+from mygrad import (broadcast_to, expand_dims, moveaxis, ravel, roll, squeeze,
+                    swapaxes, transpose)
+from mygrad.tensor_base import Tensor
+from numpy.testing import assert_allclose
 from pytest import raises
-    
+
+from .custom_strategies import broadcastable_shape, valid_axes
+from .utils.numerical_gradient import numerical_gradient_full
+from .wrappers.uber import backprop_test_factory, fwdprop_test_factory
+
 
 @settings(deadline=None)
 @given(x=hnp.arrays(shape=hnp.array_shapes(max_side=4, max_dims=5),
@@ -234,4 +234,32 @@ def test_broadcast_to_fwd():
                        kwargs=dict(shape=lambda arr: broadcastable_shape(arr.shape, min_dim=arr.ndim)),
                        assumptions=_is_broadcastable)
 def test_broadcast_to_bkwd():
+    pass
+
+
+@st.composite
+def gen_roll_args(draw, arr):
+    shift = draw(st.integers() | st.tuples(*(st.integers() for i in arr.shape)))
+
+    ax_strat = hnp.valid_tuple_axes(
+        arr.ndim,
+        **(
+            dict(min_size=len(shift), max_size=len(shift))
+            if isinstance(shift, tuple)
+            else {}
+        )
+    )
+    axis = draw(st.none() | st.integers(-arr.ndim, arr.ndim - 1) | ax_strat)
+    return dict(shift=shift, axis=axis)
+
+
+@fwdprop_test_factory(mygrad_func=roll, true_func=np.roll, num_arrays=1,
+                      kwargs=gen_roll_args)
+def test_roll_fwd():
+    pass
+
+
+@backprop_test_factory(mygrad_func=roll, true_func=np.roll, num_arrays=1,
+                       kwargs=gen_roll_args, vary_each_element=True)
+def test_roll_bkwd():
     pass

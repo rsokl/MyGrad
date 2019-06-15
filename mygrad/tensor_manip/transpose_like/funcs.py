@@ -1,9 +1,10 @@
-from .ops import Transpose, MoveAxis, SwapAxes
+from .ops import Transpose, MoveAxis, SwapAxes, Roll
 from mygrad.tensor_base import Tensor
 
 __all__ = ["transpose",
            "moveaxis",
-           "swapaxes"]
+           "swapaxes",
+           "roll"]
 
 
 def transpose(a, *axes, constant=False):
@@ -21,7 +22,7 @@ def transpose(a, *axes, constant=False):
         Returns
         -------
         mygrad.Tensor
-            `a` with its axes permuted.  A new tensor is returned. 
+            `a` with its axes permuted.  A new tensor is returned.
 
         Examples
         --------
@@ -130,3 +131,57 @@ def swapaxes(a, axis1, axis2, constant=False):
                 [3, 7]]])
     """
     return Tensor._op(SwapAxes, a, op_args=(axis1, axis2), constant=constant)
+
+
+def roll(a, shift, axis=None, constant=False):
+    """
+    Roll tensor elements along a given axis.
+
+    Elements that roll beyond the end of an axis "wrap back around" to the beginning.
+
+    This docstring was adapted from ``numpy.roll``
+
+    Parameters
+    ----------
+    a : array_like
+        Input tensor.
+
+    shift : Union[int, Tuple[int, ...]]
+        The number of places by which elements are shifted.  If a tuple,
+        then `axis` must be a tuple of the same size, and each of the
+        given axes is shifted by the corresponding number.  If an int
+        while `axis` is a tuple of ints, then the same value is used for
+        all given axes.
+
+    axis : Optional[Union[int, Tuple[int, ...]]]
+        Axis or axes along which elements are shifted.  By default, the
+        array is flattened before shifting, after which the original
+        shape is restored.
+
+    Returns
+    -------
+    res : Tensor
+        Output array, with the same shape as `a`.
+
+
+    Examples
+    --------
+    >>> import mygrad as mg
+    >>> x = mg.arange(10)
+    >>> mg.roll(x, 2)
+    Tensor([8, 9, 0, 1, 2, 3, 4, 5, 6, 7])
+    >>> x2 = mg.reshape(x, (2,5))
+    >>> x2
+    Tensor([[0, 1, 2, 3, 4],
+           [5, 6, 7, 8, 9]])
+    >>> mg.roll(x2, 1)
+    Tensor([[9, 0, 1, 2, 3],
+           [4, 5, 6, 7, 8]])
+    >>> mg.roll(x2, 1, axis=0)
+    Tensor([[5, 6, 7, 8, 9],
+           [0, 1, 2, 3, 4]])
+    >>> mg.roll(x2, 1, axis=1)
+    Tensor([[4, 0, 1, 2, 3],
+           [9, 5, 6, 7, 8]])
+    """
+    return Tensor._op(Roll, a, op_kwargs=dict(shift=shift, axis=axis), constant=constant)
