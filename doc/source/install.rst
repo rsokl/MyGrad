@@ -18,5 +18,5 @@ navigate to the MyGrad directory, then run:
 
 .. code-block:: shell
 
-  python setup.py install
+  pip install .
 

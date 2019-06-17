@@ -24,6 +24,7 @@ def test_chainrule_scalar(x, y, z, side_effects):
     else:
         unused = Tensor(0)
         w = Tensor(0)
+    assert unused is not None
 
     g.backward()
     assert_allclose(f.grad, 2 * z.data * f.data)

@@ -259,6 +259,7 @@ def test_null_gradients(x, y, z, clear_graph):
     # check side effects
     unused = 2*g - f
     w = 1*f
+    assert unused is not None
 
     g.backward()
     assert x.grad is not None
@@ -322,6 +323,7 @@ def test_clear_graph(x, y, z):
     # check side effects
     unused = 2*g - f
     w = 1*f
+    assert unused is not None
 
     g.backward()
     assert_allclose(f.grad, 2 * z.data * f.data)
