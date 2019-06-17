@@ -209,7 +209,6 @@ def test_conv_1d_fwd():
 
     Also tests meta properties of conv function - appropriate return type,
     behavior with `constant` arg, etc."""
-    pass
 
 
 def _conv_nd(x, w, stride, dilation=1):
@@ -234,7 +233,6 @@ def test_conv_1d_bkwd():
 
     Also tests meta properties of conv-backprop - appropriate return type,
     behavior with `constant` arg, good behavior of null_gradients, etc."""
-    pass
 
 
 @settings(deadline=None)

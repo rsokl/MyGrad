@@ -28,7 +28,6 @@ def special_shape(draw, static_shape, shape=tuple(), min_dim=0, max_dim=5):
                                                          1: special_shape((3, 4))})
 def test_matmul_fwd():
     """ a is n-d, b is n-d, a can broadcast into b"""
-    pass
 
 def test_matmul_fwd_static():
     a = [4., 3.]
@@ -46,7 +45,6 @@ def test_matmul_fwd_static():
                        index_to_bnds={0: (-10, 10), 1: (-10, 10)})
 def test_matmul_bkwd_1d_1d():
     """ a is 1-d, b is 1-d"""
-    pass
 
 
 @backprop_test_factory(mygrad_func=matmul, true_func=np.matmul, num_arrays=2, 
@@ -56,7 +54,6 @@ def test_matmul_bkwd_1d_1d():
                        index_to_bnds={0: (-10, 10), 1: (-10, 10)})
 def test_matmul_bkwd_nd_1d():
     """ a is n-d, b is 1-d"""
-    pass
 
 
 @backprop_test_factory(mygrad_func=matmul, true_func=np.matmul, num_arrays=2, 
@@ -66,7 +63,6 @@ def test_matmul_bkwd_nd_1d():
                        index_to_bnds={0: (-10, 10), 1: (-10, 10)})
 def test_matmul_bkwd_1d_nd():
     """ a is 1-d, b is n-d"""
-    pass
 
 
 @settings(deadline=None)
@@ -77,7 +73,6 @@ def test_matmul_bkwd_1d_nd():
                        index_to_bnds={0: (-10, 10), 1: (-10, 10)})
 def test_matmul_bkwd_nd_nd():
     """ a is n-d, b is n-d; b can broadcast into a"""
-    pass
 
 
 @settings(deadline=None)
@@ -88,7 +83,6 @@ def test_matmul_bkwd_nd_nd():
                        index_to_bnds={0: (-10, 10), 1: (-10, 10)})
 def test_matmul_bkwd_nd_nd2():
     """ a is n-d, b is n-d; a can broadcast into b"""
-    pass
 
 
 @settings(deadline=None)
@@ -99,4 +93,3 @@ def test_matmul_bkwd_nd_nd2():
                        index_to_bnds={0: (-10, 10), 1: (-10, 10)})
 def test_matmul_bkwd_nd_nd3():
     """ a is n-d, b is n-d; a and b broadcast mutually via singleton dimensions"""
-    pass
