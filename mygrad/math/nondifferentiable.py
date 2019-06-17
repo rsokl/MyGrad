@@ -2,8 +2,8 @@ import numpy as np
 
 from mygrad.tensor_base import Tensor
 
-__all__ = ["argmin",
-           "argmax"]
+__all__ = ["argmin", "argmax"]
+
 
 def argmax(a, axis=None, out=None):
     """ Returns the indices of the maximum values along an axis.
@@ -21,10 +21,11 @@ def argmax(a, axis=None, out=None):
         Returns
         -------
         numpy.ndarray[int]"""
-        
+
     a = a.data if isinstance(a, Tensor) else a
     return np.argmax(a, axis, out)
-    
+
+
 def argmin(a, axis=None, out=None):
     """ Returns the indices of the minimum values along an axis.
 

@@ -25,15 +25,15 @@ def test_seq_add():
 
 
 def test_seq_mult():
-    a = Tensor(3.)
-    b = Tensor([1., 2., 3.])
-    c = Tensor([[1., 2., 3.], [2., 3., 4.]])
+    a = Tensor(3.0)
+    b = Tensor([1.0, 2.0, 3.0])
+    c = Tensor([[1.0, 2.0, 3.0], [2.0, 3.0, 4.0]])
     f = multiply_sequence(a, b, c, constant=False)
     f.sum().backward()
 
-    a1 = Tensor(3.)
-    b1 = Tensor([1., 2., 3.])
-    c1 = Tensor([[1., 2., 3.], [2., 3., 4.]])
+    a1 = Tensor(3.0)
+    b1 = Tensor([1.0, 2.0, 3.0])
+    c1 = Tensor([[1.0, 2.0, 3.0], [2.0, 3.0, 4.0]])
     f1 = a1 * b1 * c1
     f1.sum().backward()
 

@@ -16,7 +16,7 @@ from mygrad.tensor_core_ops.indexing import GetItem, SetItem
 from mygrad.tensor_manip.array_shape.ops import Flatten
 from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property
 
-__all__ = ['Tensor']
+__all__ = ["Tensor"]
 
 
 class Tensor:
@@ -99,9 +99,12 @@ class Tensor:
     **Do not modify this underlying array**. Any in-place modifications made to this
     array will not be tracked by any computational graph involving that tensor, thus
     back-propagation through that tensor will likely be incorrect."""
+
     __array_priority__ = 15.0
 
-    def __init__(self, x, *, dtype=None, constant=False, _scalar_only=False, _creator=None):
+    def __init__(
+        self, x, *, dtype=None, constant=False, _scalar_only=False, _creator=None
+    ):
         """
         Parameters
         ----------
@@ -148,10 +151,19 @@ class Tensor:
     @staticmethod
     def _check_valid_dtype(dtype):
         if not np.issubdtype(dtype, np.number):
-            raise TypeError("Tensor data must be a numeric type, received {}".format(dtype))
+            raise TypeError(
+                "Tensor data must be a numeric type, received {}".format(dtype)
+            )
 
     @classmethod
-    def _op(cls, Op: Type[Operation], *input_vars, op_args=None, op_kwargs=None, constant=False):
+    def _op(
+        cls,
+        Op: Type[Operation],
+        *input_vars,
+        op_args=None,
+        op_kwargs=None,
+        constant=False
+    ):
         """ Wraps operations performed between tensors: f(a, b, ...).
 
         Parameters
@@ -194,12 +206,20 @@ class Tensor:
 
         f = Op()
         f.graph = {f}
-        f.graph.update(*(var._creator.graph for var in tensor_vars if var._creator is not None and not var.constant))
+        f.graph.update(
+            *(
+                var._creator.graph
+                for var in tensor_vars
+                if var._creator is not None and not var.constant
+            )
+        )
         op_out = f(*tensor_vars, *op_args, **op_kwargs)
 
         if isinstance(f, BroadcastableOp) and not f.scalar_only:
             # if broadcasting occurred: scalar-only -> True
-            f.scalar_only = any(op_out.shape != i.shape for i in tensor_vars if not i.constant)
+            f.scalar_only = any(
+                op_out.shape != i.shape for i in tensor_vars if not i.constant
+            )
 
         if not is_const:
             # record that a variable participated in that op
@@ -256,10 +276,16 @@ class Tensor:
             self.grad = np.asarray(grad.data if isinstance(grad, Tensor) else grad)
         else:
             if self.ndim > 0 and self._scalar_only:
-                raise Exception("Invalid Backprop: backpropagation must be triggered by a "
-                                "scalar for this computational graph")
+                raise Exception(
+                    "Invalid Backprop: backpropagation must be triggered by a "
+                    "scalar for this computational graph"
+                )
             dtype = float if np.issubdtype(self.dtype, np.signedinteger) else self.dtype
-            self.grad = np.ones(self.shape, dtype=dtype) if self.ndim > 0 else np.asarray(1., dtype=dtype)
+            self.grad = (
+                np.ones(self.shape, dtype=dtype)
+                if self.ndim > 0
+                else np.asarray(1.0, dtype=dtype)
+            )
 
         if self.creator is not None:
             self._backward(graph=self.creator.graph)
@@ -285,8 +311,12 @@ class Tensor:
         if self._constant:
             return
 
-        assert self.grad.shape == self.shape, "A tensor and its associated gradient must possess the same shape"
-        if self._creator is not None and not bool(graph & (self._ops - self._accum_ops)):
+        assert (
+            self.grad.shape == self.shape
+        ), "A tensor and its associated gradient must possess the same shape"
+        if self._creator is not None and not bool(
+            graph & (self._ops - self._accum_ops)
+        ):
             self._accum_ops.clear()
             self._creator.backward(self.grad, graph=graph)
 
@@ -443,7 +473,7 @@ class Tensor:
 
     def __len__(self):
         return len(self.data)
-    
+
     def __contains__(self, item):
         return self.data.__contains__(item)
 
@@ -456,7 +486,12 @@ class Tensor:
             return None
 
         # old_tensor is the tensor pre-setitem
-        old_tensor = Tensor(self, constant=self.constant, _scalar_only=self._scalar_only, _creator=self.creator)
+        old_tensor = Tensor(
+            self,
+            constant=self.constant,
+            _scalar_only=self._scalar_only,
+            _creator=self.creator,
+        )
         old_tensor._ops = self._ops
         old_tensor._accum_ops = self._accum_ops
 
@@ -464,8 +499,9 @@ class Tensor:
         for op in old_tensor._ops:
             for i in range(len(op.variables)):
                 if op.variables[i] is self:
-                    op.variables = op.variables[:i] + (old_tensor,) + op.variables[i+1:]
-
+                    op.variables = (
+                        op.variables[:i] + (old_tensor,) + op.variables[i + 1 :]
+                    )
 
         # self becomes the tensor post-setitem
         out = self._op(SetItem, old_tensor, value, op_args=(key,))
@@ -499,7 +535,7 @@ class Tensor:
 
     def __rmul__(self, other):
         return self._op(Multiply, other, self)
-    
+
     def __matmul__(self, other):
         return self._op(MatMul, self, other)
 
@@ -530,7 +566,12 @@ class Tensor:
         -------
         Tensor
         """
-        copy = Tensor(np.copy(self.data), _creator=None, constant=self.constant, _scalar_only=self._scalar_only)
+        copy = Tensor(
+            np.copy(self.data),
+            _creator=None,
+            constant=self.constant,
+            _scalar_only=self._scalar_only,
+        )
         copy.grad = np.copy(self.grad) if self.grad is not None else None
         return copy
 
@@ -714,6 +755,7 @@ def tensor_to_array_wrapper(func):
     @wraps(func)
     def wrapped(x, y):
         return func(x.data, y.data if isinstance(y, Tensor) else y)
+
     return wrapped
 
 

@@ -2,10 +2,7 @@ from mygrad.tensor_base import Tensor
 
 from .ops import MoveAxis, Roll, SwapAxes, Transpose
 
-__all__ = ["transpose",
-           "moveaxis",
-           "swapaxes",
-           "roll"]
+__all__ = ["transpose", "moveaxis", "swapaxes", "roll"]
 
 
 def transpose(a, *axes, constant=False):
@@ -45,7 +42,9 @@ def transpose(a, *axes, constant=False):
         axes = None
     elif hasattr(axes[0], "__iter__") or axes[0] is None:
         if len(axes) > 1:
-            raise TypeError("'{}' object cannot be interpreted as an integer".format(type(axes[0])))
+            raise TypeError(
+                "'{}' object cannot be interpreted as an integer".format(type(axes[0]))
+            )
         axes = axes[0]
     return Tensor._op(Transpose, a, op_args=(axes,), constant=constant)
 
@@ -185,4 +184,6 @@ def roll(a, shift, axis=None, constant=False):
     Tensor([[4, 0, 1, 2, 3],
            [9, 5, 6, 7, 8]])
     """
-    return Tensor._op(Roll, a, op_kwargs=dict(shift=shift, axis=axis), constant=constant)
+    return Tensor._op(
+        Roll, a, op_kwargs=dict(shift=shift, axis=axis), constant=constant
+    )

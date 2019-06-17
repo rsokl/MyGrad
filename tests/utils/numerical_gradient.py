@@ -6,9 +6,15 @@ import numpy as np
 from mygrad._utils import reduce_broadcast
 
 
-def finite_difference(f, *args, back_grad, vary_ind=None,
-                      h=Decimal(1)/Decimal(int(1e8)),
-                      as_decimal=False, kwargs=None):
+def finite_difference(
+    f,
+    *args,
+    back_grad,
+    vary_ind=None,
+    h=Decimal(1) / Decimal(int(1e8)),
+    as_decimal=False,
+    kwargs=None
+):
     """ Computes numerical partial derivatives of f(x0, x1, ...) in each
         of its variables, using the central difference method.
         This is a "fast" method - it varies entire arrays at once. Thus
@@ -63,7 +69,9 @@ def finite_difference(f, *args, back_grad, vary_ind=None,
 
         if arr.dtype.kind == "O":
             return arr
-        return np.array(tuple(Decimal(float(i)) for i in arr.flat), dtype=Decimal).reshape(arr.shape)
+        return np.array(
+            tuple(Decimal(float(i)) for i in arr.flat), dtype=Decimal
+        ).reshape(arr.shape)
 
     if kwargs is None:
         kwargs = {}
@@ -72,11 +80,11 @@ def finite_difference(f, *args, back_grad, vary_ind=None,
         raise ValueError("At least one value must be passed to `args`")
 
     h = Decimal(h) if as_decimal else float(h)
-    two_h = Decimal(2)*h if as_decimal else 2*h
+    two_h = Decimal(2) * h if as_decimal else 2 * h
 
     args = tuple(to_decimal_array(i) if as_decimal else i for i in args)
 
-    grads = [None]*len(args)
+    grads = [None] * len(args)
 
     def gen_fwd_diff(i):
         # x1, ..., x_i + h, ..., xn
@@ -90,15 +98,15 @@ def finite_difference(f, *args, back_grad, vary_ind=None,
         if vary_ind is not None and n not in vary_ind:
             continue
         # central difference in variable n
-        dvar = (f(*gen_fwd_diff(n), **kwargs) - f(*gen_bkwd_diff(n), **kwargs)) / (two_h)
+        dvar = (f(*gen_fwd_diff(n), **kwargs) - f(*gen_bkwd_diff(n), **kwargs)) / (
+            two_h
+        )
         grads[n] = reduce_broadcast(back_grad * dvar.astype(float), args[n].shape)
 
     return grads
 
 
-def numerical_gradient(f, *args, back_grad, vary_ind=None,
-                       h=1e-20,
-                       kwargs=None):
+def numerical_gradient(f, *args, back_grad, vary_ind=None, h=1e-20, kwargs=None):
     """ Computes numerical partial derivatives of f(x0, x1, ...) in each
         of its variables, using the central difference method.
         This is a "fast" method - it varies entire arrays at once. Thus
@@ -140,11 +148,11 @@ def numerical_gradient(f, *args, back_grad, vary_ind=None,
         raise ValueError("At least one value must be passed to `args`")
 
     args = tuple(i.astype(np.complex128) for i in args)
-    grads = [None]*len(args)
+    grads = [None] * len(args)
 
     def gen_fwd_diff(i):
         # x1, ..., x_i + h, ..., xn
-        return ((var if j != i else var + h*1j) for j, var in enumerate(args))
+        return ((var if j != i else var + h * 1j) for j, var in enumerate(args))
 
     for n in range(len(args)):
         if vary_ind is not None and n not in vary_ind:
@@ -156,7 +164,9 @@ def numerical_gradient(f, *args, back_grad, vary_ind=None,
     return grads
 
 
-def numerical_gradient_full(f, *args, back_grad, kwargs=None, vary_ind=None) -> Tuple[np.ndarray, ...]:
+def numerical_gradient_full(
+    f, *args, back_grad, kwargs=None, vary_ind=None
+) -> Tuple[np.ndarray, ...]:
     """ Computes numerical partial derivatives of f(x, y, ..., **kwargs), by
     varying each entry of x, y, ... independently producing a gradient
     in each variable.
@@ -234,11 +244,9 @@ def numerical_gradient_full(f, *args, back_grad, kwargs=None, vary_ind=None) -> 
             continue
 
         def tmp_f(var: np.ndarray) -> np.ndarray:
-            return f(*args[:n], var, *args[n+1:], **kwargs)
+            return f(*args[:n], var, *args[n + 1 :], **kwargs)
 
-        grads[n] = _numerical_gradient_full(tmp_f,
-                                            x=args[n],
-                                            back_grad=back_grad)
+        grads[n] = _numerical_gradient_full(tmp_f, x=args[n], back_grad=back_grad)
     return tuple(grads)
 
 
@@ -278,8 +286,10 @@ def _numerical_gradient_full(f, *, x, back_grad, h=1e-20):
 
         df_dxi = f_fwd.imag / h
 
-        dl_dxi = (df_dxi * back_grad)
-        grad[ind] = np.float64(dl_dxi.sum() if isinstance(dl_dxi, np.ndarray) else dl_dxi)
+        dl_dxi = df_dxi * back_grad
+        grad[ind] = np.float64(
+            dl_dxi.sum() if isinstance(dl_dxi, np.ndarray) else dl_dxi
+        )
 
         # reset x
         x[ind] = x_orig[ind]

@@ -25,8 +25,13 @@ def gen_shape(size):
             >>> _factors(4)
             {1, 2, 4}"""
         from functools import reduce
-        return set(reduce(list.__add__,
-                          ([i, n // i] for i in range(1, int(n ** 0.5) + 1) if n % i == 0)))
+
+        return set(
+            reduce(
+                list.__add__,
+                ([i, n // i] for i in range(1, int(n ** 0.5) + 1) if n % i == 0),
+            )
+        )
 
     assert size > 0
     if size == 1:
@@ -45,10 +50,13 @@ def gen_shape(size):
     return tuple(int(i) for i in shape)
 
 
-@given(a=hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=5),
-                    dtype=float,
-                    elements=st.floats(-100, 100))
-       )
+@given(
+    a=hnp.arrays(
+        shape=hnp.array_shapes(max_side=3, max_dims=5),
+        dtype=float,
+        elements=st.floats(-100, 100),
+    )
+)
 def test_reshape_method_fwd(a):
     new_shape = gen_shape(a.size)
 
@@ -59,10 +67,13 @@ def test_reshape_method_fwd(a):
     assert_allclose(a, x.data), "Tensor.reshape failed"
 
 
-@given(a=hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=5),
-                    dtype=float,
-                    elements=st.floats(-100, 100))
-       )
+@given(
+    a=hnp.arrays(
+        shape=hnp.array_shapes(max_side=3, max_dims=5),
+        dtype=float,
+        elements=st.floats(-100, 100),
+    )
+)
 def test_reshape_method_backward(a):
     new_shape = gen_shape(a.size)
     grad = np.arange(a.size).reshape(a.shape)
@@ -75,10 +86,13 @@ def test_reshape_method_backward(a):
     assert_allclose(x.grad, grad)
 
 
-@given(a=hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=5),
-                    dtype=float,
-                    elements=st.floats(-100, 100))
-       )
+@given(
+    a=hnp.arrays(
+        shape=hnp.array_shapes(max_side=3, max_dims=5),
+        dtype=float,
+        elements=st.floats(-100, 100),
+    )
+)
 def test_reshape_fwd(a):
     new_shape = gen_shape(a.size)
 
@@ -90,10 +104,13 @@ def test_reshape_fwd(a):
     assert_allclose(a, x.data), "Tensor.reshape failed"
 
 
-@given(a=hnp.arrays(shape=hnp.array_shapes(max_side=3, max_dims=5),
-                    dtype=float,
-                    elements=st.floats(-100, 100))
-       )
+@given(
+    a=hnp.arrays(
+        shape=hnp.array_shapes(max_side=3, max_dims=5),
+        dtype=float,
+        elements=st.floats(-100, 100),
+    )
+)
 def test_reshape_backward(a):
     new_shape = gen_shape(a.size)
     grad = np.arange(a.size).reshape(a.shape)

@@ -2,27 +2,27 @@ from setuptools import find_packages, setup
 
 import versioneer
 
-DISTNAME = 'mygrad'
-LICENSE = 'MIT'
-AUTHOR = 'Ryan Soklaski'
-AUTHOR_EMAIL = 'rsoklaski@gmail.com'
-URL = 'https://github.com/rsokl/MyGrad'
+DISTNAME = "mygrad"
+LICENSE = "MIT"
+AUTHOR = "Ryan Soklaski"
+AUTHOR_EMAIL = "rsoklaski@gmail.com"
+URL = "https://github.com/rsokl/MyGrad"
 CLASSIFIERS = [
-    'Development Status :: 4 - Beta',
-    'License :: OSI Approved :: MIT License',
-    'Operating System :: OS Independent',
-    'Intended Audience :: Science/Research',
-    'Intended Audience :: Education',
-    'Programming Language :: Python',
-    'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.5',
-    'Programming Language :: Python :: 3.6',
-    'Programming Language :: Python :: 3.7',
-    'Topic :: Scientific/Engineering',
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Education",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.5",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Topic :: Scientific/Engineering",
 ]
 
-INSTALL_REQUIRES = ['numpy >= 1.12']
-TESTS_REQUIRE = ['pytest >= 3.8', 'hypothesis >= 4.6', 'scipy']
+INSTALL_REQUIRES = ["numpy >= 1.12"]
+TESTS_REQUIRE = ["pytest >= 3.8", "hypothesis >= 4.6", "scipy"]
 
 DESCRIPTION = "A sleek auto-differentiation library that wraps numpy."
 LONG_DESCRIPTION = """
@@ -39,22 +39,23 @@ students who are learning about training neural networks using back propagation.
 """
 
 
-setup(name=DISTNAME,
-      version=versioneer.get_version(),
-      cmdclass=versioneer.get_cmdclass(),
-      license=LICENSE,
-      author=AUTHOR,
-      author_email=AUTHOR_EMAIL,
-      classifiers=CLASSIFIERS,
-      description=DESCRIPTION,
-      long_description=LONG_DESCRIPTION,
-      install_requires=INSTALL_REQUIRES,
-      tests_require=TESTS_REQUIRE,
-      extras_require={
-          'rnn': ["numba>=0.34.0"],  # GRU and vanilla RNN require numba-acceleration
-      },
-      url=URL,
-      download_url="https://github.com/rsokl/mygrad/tarball/"+versioneer.get_version(),
-      python_requires='!=2.*,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*',
-      packages=find_packages(exclude=["tests", "tests.*"]),
-      )
+setup(
+    name=DISTNAME,
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
+    license=LICENSE,
+    author=AUTHOR,
+    author_email=AUTHOR_EMAIL,
+    classifiers=CLASSIFIERS,
+    description=DESCRIPTION,
+    long_description=LONG_DESCRIPTION,
+    install_requires=INSTALL_REQUIRES,
+    tests_require=TESTS_REQUIRE,
+    extras_require={
+        "rnn": ["numba>=0.34.0"]  # GRU and vanilla RNN require numba-acceleration
+    },
+    url=URL,
+    download_url="https://github.com/rsokl/mygrad/tarball/" + versioneer.get_version(),
+    python_requires="!=2.*,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*",
+    packages=find_packages(exclude=["tests", "tests.*"]),
+)

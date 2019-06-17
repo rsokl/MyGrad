@@ -6,8 +6,7 @@ import numpy as np
 
 from mygrad._utils import reduce_broadcast
 
-__all__ = ["Operation",
-           "BroadcastableOp"]
+__all__ = ["Operation", "BroadcastableOp"]
 
 
 class Operation:
@@ -35,6 +34,7 @@ class Operation:
         gradient of the operation can also be treated element-wise, and thus be computed
         unambiguously.
         """
+
     scalar_only = False
 
     def __call__(self, *input_vars):
@@ -94,15 +94,23 @@ class Operation:
         for index, var in enumerate(self.variables):
             if not var.constant:
                 if not var._ops:
-                    raise Exception("Invalid Backprop: part of the computational graph containing "
-                                    "this tensor was cleared prior to backprop")
+                    raise Exception(
+                        "Invalid Backprop: part of the computational graph containing "
+                        "this tensor was cleared prior to backprop"
+                    )
                 if var.grad is None:
                     tmp_grad = np.asarray(self.backward_var(grad, index, **kwargs))
-                    var.grad = np.copy(tmp_grad) if np.shares_memory(tmp_grad, grad) else tmp_grad
+                    var.grad = (
+                        np.copy(tmp_grad)
+                        if np.shares_memory(tmp_grad, grad)
+                        else tmp_grad
+                    )
                 else:
                     var.grad += self.backward_var(grad, index, **kwargs)
 
-        for var in {i for i in self.variables if not i.constant and i.creator is not None}:
+        for var in {
+            i for i in self.variables if not i.constant and i.creator is not None
+        }:
             var._accum_ops.add(self)
             var._backward(graph=graph)
 
@@ -110,6 +118,7 @@ class Operation:
 class BroadcastableOp(Operation):
     """ Signals that an Operation's forward pass can broadcast its tensor
         arguments."""
+
     def backward(self, grad, *, graph, **kwargs):
         """ Back-propagates the gradient through all of the operation's inputs.
         Constant tensors do not propagate a gradient.
@@ -125,14 +134,26 @@ class BroadcastableOp(Operation):
         for index, var in enumerate(self.variables):
             if not var.constant:
                 if not var._ops:
-                    raise Exception("Invalid Backprop: part of the computational graph containing "
-                                    "this tensor was cleared prior to backprop")
+                    raise Exception(
+                        "Invalid Backprop: part of the computational graph containing "
+                        "this tensor was cleared prior to backprop"
+                    )
                 if var.grad is None:
-                    tmp_grad = reduce_broadcast(self.backward_var(grad, index, **kwargs), var.shape)
-                    var.grad = np.copy(tmp_grad) if np.shares_memory(tmp_grad, grad) else tmp_grad
+                    tmp_grad = reduce_broadcast(
+                        self.backward_var(grad, index, **kwargs), var.shape
+                    )
+                    var.grad = (
+                        np.copy(tmp_grad)
+                        if np.shares_memory(tmp_grad, grad)
+                        else tmp_grad
+                    )
                 else:
-                    var.grad += reduce_broadcast(self.backward_var(grad, index, **kwargs), var.shape)
+                    var.grad += reduce_broadcast(
+                        self.backward_var(grad, index, **kwargs), var.shape
+                    )
 
-        for var in {i for i in self.variables if not i.constant and i.creator is not None}:
+        for var in {
+            i for i in self.variables if not i.constant and i.creator is not None
+        }:
             var._accum_ops.add(self)
             var._backward(graph=graph)

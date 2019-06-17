@@ -26,7 +26,8 @@ from mygrad import Tensor, add, multiply
 from .simple_graph import Node, _add, _multiply
 
 
-def _node_ID_str(num): return "v{}".format(num + 1)
+def _node_ID_str(num):
+    return "v{}".format(num + 1)
 
 
 class GraphCompare(RuleBasedStateMachine):
@@ -40,7 +41,8 @@ class GraphCompare(RuleBasedStateMachine):
         self.str_to_tensor_op = {"add": add, "multiply": multiply}
         self.str_to_node_op = {"add": _add, "multiply": _multiply}
         self.raised = False
-    nodes = Bundle('nodes')
+
+    nodes = Bundle("nodes")
 
     @rule(target=nodes, value=st.floats(-10, 10), constant=st.booleans())
     def create_node(self, value, constant):
@@ -49,7 +51,13 @@ class GraphCompare(RuleBasedStateMachine):
         self.node_list.append((n, t))
         return n, t
 
-    @rule(target=nodes, a=nodes, b=nodes, op=st.sampled_from(["add", "multiply"]), constant=st.booleans())
+    @rule(
+        target=nodes,
+        a=nodes,
+        b=nodes,
+        op=st.sampled_from(["add", "multiply"]),
+        constant=st.booleans(),
+    )
     def fuse_nodes(self, a, b, op, constant):
         """
         Combine any pair of nodes (tensors) using either addition or multiplication, producing
@@ -61,7 +69,7 @@ class GraphCompare(RuleBasedStateMachine):
         out = (n_op(n_a, n_b, constant=constant), t_op(t_a, t_b, constant=constant))
         self.node_list.append(out)
         return out
-    
+
     @rule(items=nodes, clear_graph=st.booleans())
     def null_gradients(self, items, clear_graph):
         """
@@ -114,7 +122,9 @@ class GraphCompare(RuleBasedStateMachine):
             if n.grad is None or t.grad is None:
                 assert n.grad is t.grad, _node_ID_str(num)
             else:
-                assert_almost_equal(desired=n.grad, actual=t.grad, err_msg=_node_ID_str(num))
+                assert_almost_equal(
+                    desired=n.grad, actual=t.grad, err_msg=_node_ID_str(num)
+                )
             assert not t._accum_ops, _node_ID_str(num)
 
 

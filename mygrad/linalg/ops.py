@@ -14,6 +14,7 @@ __all__ = ["MatMul", "EinSum"]
 
 class MatMul(BroadcastableOp):
     scalar_only = True
+
     def __call__(self, a, b):
         """ f(a) -> matmul(a, b)
 
@@ -39,16 +40,16 @@ class MatMul(BroadcastableOp):
                 return grad * a
             else:
                 raise IndexError
-        
+
         if index == 0:  # compute grad through a
             if b.ndim > 1:  # ([...], j) w/ ([...], j, k)
                 if a.ndim == 1:
                     grad = np.expand_dims(grad, -2)
                 dfdx = np.matmul(grad, b.swapaxes(-1, -2))
-            else:           # ([...], i, j) w/ (j,)
+            else:  # ([...], i, j) w/ (j,)
                 dfdx = np.expand_dims(grad, -1) * b
             return dfdx
-        
+
         if index == 1:  # compute grad through b
             if a.ndim > 1:  # ([...], i, j) w/ ([...], j, [k])
                 if b.ndim == 1:
@@ -56,7 +57,7 @@ class MatMul(BroadcastableOp):
                 dfdx = np.matmul(a.swapaxes(-1, -2), grad)
                 if b.ndim == 1:
                     dfdx = dfdx.squeeze(-1)
-            else:           # (j,) w/ ([...], j, k)
+            else:  # (j,) w/ ([...], j, k)
                 dfdx = a[:, np.newaxis] * np.expand_dims(grad, -2)
             return dfdx
         else:
@@ -64,6 +65,7 @@ class MatMul(BroadcastableOp):
 
 
 ### EinSum ###
+
 
 def _unique_from_end(in_str):
     """ Return a string with all redundant characters removed,
@@ -85,7 +87,9 @@ def _unique_from_end(in_str):
         "jik"
     """
 
-    return reduce(lambda acc, x: acc + x if x not in acc else acc, in_str[::-1], '')[::-1]
+    return reduce(lambda acc, x: acc + x if x not in acc else acc, in_str[::-1], "")[
+        ::-1
+    ]
 
 
 def _merge_max_mappings(*mappings):
@@ -108,6 +112,7 @@ def _merge_max_mappings(*mappings):
     def _merge_max(d1, d2):
         d1.update((k, v) for k, v in d2.items() if d1.get(k, 0) < v)
         return d1
+
     return reduce(_merge_max, mappings, {})
 
 
@@ -138,7 +143,7 @@ class EinSum(BroadcastableOp):
         -------
         numpy.ndarray
         """
-        self.in_lbls = in_lbls.split(',')
+        self.in_lbls = in_lbls.split(",")
         self.out_lbls = out_lbls
         self.variables = variables
         self.optimize = optimize
@@ -147,8 +152,11 @@ class EinSum(BroadcastableOp):
         # fed to einsum. Only one gradient will be computed for a
         # unique tensor-label pair
         self.cache = Counter(zip(variables, self.in_lbls))
-        return np.einsum("->".join((in_lbls, out_lbls)), *(var.data for var in self.variables),
-                         optimize=optimize)
+        return np.einsum(
+            "->".join((in_lbls, out_lbls)),
+            *(var.data for var in self.variables),
+            optimize=optimize
+        )
 
     def backward_var(self, grad, index, **kwargs):
         """
@@ -182,8 +190,10 @@ class EinSum(BroadcastableOp):
             # "iji" becomes "ji", later we will write along
             # the diagonal of an array to reinstate this axis that
             # we just removed
-            mapping_gen = ({k: v for k, v in zip(lbl, arr.shape)}
-                            for lbl, arr in zip(self.in_lbls, numpy_arrays))
+            mapping_gen = (
+                {k: v for k, v in zip(lbl, arr.shape)}
+                for lbl, arr in zip(self.in_lbls, numpy_arrays)
+            )
             lbl_to_size = _merge_max_mappings(*mapping_gen)
             var_shape = tuple(lbl_to_size[lbl] for lbl in var_lbl)
         else:
@@ -200,7 +210,7 @@ class EinSum(BroadcastableOp):
         # of an axis; e.g. k, jk -> ijk
         # Broadcast the gradient along all such dimensions; e.g. k -> ik
         # then proceed as usual; e.g. ik, jk -> ijk
-        unique_in_lbls = (set(chain.from_iterable(in_lbls)) | set(grad_lbl))
+        unique_in_lbls = set(chain.from_iterable(in_lbls)) | set(grad_lbl)
         if len(set(var_lbl) - unique_in_lbls) > 0:
             exp_dims = [slice(None) for i in range(grad.ndim)]
             grad_shape = list(grad.shape)
@@ -210,19 +220,22 @@ class EinSum(BroadcastableOp):
                     exp_dims.insert(n, np.newaxis)
                     grad_shape.insert(n, var_shape[n])
 
-            grad = np.broadcast_to(grad if not grad.ndim else grad[tuple(exp_dims)], grad_shape)
+            grad = np.broadcast_to(
+                grad if not grad.ndim else grad[tuple(exp_dims)], grad_shape
+            )
 
         # "ji, k -> ijk"
         back_prop_lbls = ",".join([grad_lbl] + in_lbls) + "->" + var_lbl
 
         # (grad, y)
-        operands = (grad,) + numpy_arrays[:index] + numpy_arrays[index + 1:]
+        operands = (grad,) + numpy_arrays[:index] + numpy_arrays[index + 1 :]
 
         if not repeat_lbls:
             # dfdx: einsum("ji, k -> ijk", grad, y)
             outshape = self.variables[index].shape
-            dfdx = reduce_broadcast(np.einsum(back_prop_lbls, *operands, optimize=self.optimize),
-                                    outshape)
+            dfdx = reduce_broadcast(
+                np.einsum(back_prop_lbls, *operands, optimize=self.optimize), outshape
+            )
             if var_shape != dfdx.shape:
                 # if y was broadcast over x, the gradient needs to
                 # be broadcast to x's shape: dfdx-shape (i,j,1) -> (i,j,k)
@@ -252,8 +265,10 @@ class EinSum(BroadcastableOp):
 
         # compute strides required to traverse the appropriate diagonals of
         # the output tensor.
-        strides = tuple(sum(dfdx.strides[ind] for ind in _get_indices(lbl, original_var_lbl))
-                        for lbl in var_lbl)
+        strides = tuple(
+            sum(dfdx.strides[ind] for ind in _get_indices(lbl, original_var_lbl))
+            for lbl in var_lbl
+        )
         out_view = as_strided(dfdx, shape=out_view_shape, strides=strides)
         np.einsum(back_prop_lbls, *operands, out=out_view, optimize=self.optimize)
         if factor > 1:
@@ -282,18 +297,26 @@ class EinSum(BroadcastableOp):
         for index, var in enumerate(self.variables):
             if not var.constant:
                 if not var._ops:
-                    raise Exception("Invalid Backprop: part of the computational graph containing "
-                                    "this tensor was cleared prior to backprop")
+                    raise Exception(
+                        "Invalid Backprop: part of the computational graph containing "
+                        "this tensor was cleared prior to backprop"
+                    )
                 if var.grad is None:
                     o = self.backward_var(grad, index, **kwargs)
                     if o is not None:
                         tmp_grad = reduce_broadcast(o, var.shape)
-                        var.grad = np.copy(tmp_grad) if np.shares_memory(tmp_grad, grad) else tmp_grad
+                        var.grad = (
+                            np.copy(tmp_grad)
+                            if np.shares_memory(tmp_grad, grad)
+                            else tmp_grad
+                        )
                 else:
                     o = self.backward_var(grad, index, **kwargs)
                     if o is not None:
                         var.grad += reduce_broadcast(o, var.shape)
 
-        for var in {i for i in self.variables if not i.constant and i.creator is not None}:
+        for var in {
+            i for i in self.variables if not i.constant and i.creator is not None
+        }:
             var._accum_ops.add(self)
             var._backward(graph=graph)

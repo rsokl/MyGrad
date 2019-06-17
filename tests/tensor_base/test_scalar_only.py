@@ -26,8 +26,12 @@ class NotScalarOnlyOp(Operation):
         return np.array([0])
 
 
-@given(a_const=st.booleans(), a_scalar_only=st.booleans(),
-       b_const=st.booleans(), b_scalar_only=st.booleans())
+@given(
+    a_const=st.booleans(),
+    a_scalar_only=st.booleans(),
+    b_const=st.booleans(),
+    b_scalar_only=st.booleans(),
+)
 def test_scalar_only_op(a_const, a_scalar_only, b_const, b_scalar_only):
     """ op produces scalar_only result unless result is scalar. """
     a = Tensor(0, constant=a_const, _scalar_only=a_scalar_only)
@@ -46,14 +50,20 @@ def test_scalar_only_op(a_const, a_scalar_only, b_const, b_scalar_only):
         out.backward()  # a, b, out are const (nothing computed)
 
 
-@given(a_const=st.booleans(), a_scalar_only=st.booleans(),
-       b_const=st.booleans(), b_scalar_only=st.booleans())
+@given(
+    a_const=st.booleans(),
+    a_scalar_only=st.booleans(),
+    b_const=st.booleans(),
+    b_scalar_only=st.booleans(),
+)
 def test_standard_op(a_const, a_scalar_only, b_const, b_scalar_only):
     """ op produces standard result unless an `a` or `b` is a scalar_only variable. """
     a = Tensor(0, constant=a_const, _scalar_only=a_scalar_only)
     b = Tensor(0, constant=b_const, _scalar_only=b_scalar_only)
 
-    scalar_only = (a.scalar_only and not a.constant) or (b.scalar_only and not b.constant)
+    scalar_only = (a.scalar_only and not a.constant) or (
+        b.scalar_only and not b.constant
+    )
     out = Tensor._op(NotScalarOnlyOp, a, b)
 
     assert scalar_only is (out.scalar_only and not out.constant)

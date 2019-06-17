@@ -2,20 +2,22 @@ from mygrad.tensor_base import Tensor
 
 from .ops import *
 
-__all__ = ["sin",
-           "sinc",
-           "cos",
-           "tan",
-           "cot",
-           "csc",
-           "sec",
-           "arccos",
-           "arccsc",
-           "arcsin",
-           "arctan",
-           "arcsec",
-           "arccot",
-           "arctan2"]
+__all__ = [
+    "sin",
+    "sinc",
+    "cos",
+    "tan",
+    "cot",
+    "csc",
+    "sec",
+    "arccos",
+    "arccsc",
+    "arcsin",
+    "arctan",
+    "arcsec",
+    "arccot",
+    "arctan2",
+]
 
 
 def sin(a, constant=False):

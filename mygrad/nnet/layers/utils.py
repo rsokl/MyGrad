@@ -120,8 +120,14 @@ def sliding_window_view(arr, window_shape, step, dilation=None):
         True
         """
 
-    step = tuple(int(step) for i in range(len(window_shape))) if isinstance(step, Integral) else tuple(step)
-    assert all(isinstance(i, Integral) and i > 0 for i in step), "`step` be a sequence of positive integers"
+    step = (
+        tuple(int(step) for i in range(len(window_shape)))
+        if isinstance(step, Integral)
+        else tuple(step)
+    )
+    assert all(
+        isinstance(i, Integral) and i > 0 for i in step
+    ), "`step` be a sequence of positive integers"
 
     window_shape = tuple(window_shape)
     if not all(isinstance(i, Integral) and i > 0 for i in window_shape):
@@ -144,27 +150,30 @@ def sliding_window_view(arr, window_shape, step, dilation=None):
         else:
             np.asarray(dilation)
             assert all(isinstance(i, Integral) for i in dilation)
-            if any(w * d > s for w, d, s in zip(window_shape[::-1], dilation[::-1], arr.shape[::-1])):
+            if any(
+                w * d > s
+                for w, d, s in zip(window_shape[::-1], dilation[::-1], arr.shape[::-1])
+            ):
                 msg = """ The dilated window must fit within the trailing dimensions of `arr`."""
                 raise ValueError(msg)
 
-    if not arr.flags['C_CONTIGUOUS']:
+    if not arr.flags["C_CONTIGUOUS"]:
         arr = np.ascontiguousarray(arr)
 
     step = np.array(step)  # (Sx, ..., Sz)
     window_shape = np.array(window_shape)  # (Wx, ..., Wz)
-    in_shape = np.array(arr.shape[-len(step):])  # (x, ... , z)
+    in_shape = np.array(arr.shape[-len(step) :])  # (x, ... , z)
     nbyte = arr.strides[-1]  # size, in bytes, of element in `arr`
 
     # per-byte strides required to fill a window
     win_stride = tuple(np.cumprod(arr.shape[:0:-1])[::-1]) + (1,)
 
     # per-byte strides required to advance the window
-    step_stride = tuple(win_stride[-len(step):] * step)
+    step_stride = tuple(win_stride[-len(step) :] * step)
 
     # update win_stride to accommodate dilation
     win_stride = np.array(win_stride)
-    win_stride[-len(step):] *= dilation
+    win_stride[-len(step) :] *= dilation
     win_stride = tuple(win_stride)
 
     # tuple of bytes to step to traverse corresponding dimensions of view
@@ -175,7 +184,7 @@ def sliding_window_view(arr, window_shape, step, dilation=None):
     out_shape = tuple((in_shape - ((window_shape - 1) * dilation + 1)) // step + 1)
 
     # ([X, (...), Z], ..., [Wx, (...), Wz])
-    out_shape = out_shape + arr.shape[:-len(step)] + tuple(window_shape)
+    out_shape = out_shape + arr.shape[: -len(step)] + tuple(window_shape)
     out_shape = tuple(int(i) for i in out_shape)
 
     return as_strided(arr, shape=out_shape, strides=stride, writeable=False)

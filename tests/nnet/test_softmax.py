@@ -8,8 +8,8 @@ from mygrad.nnet.activations import logsoftmax, softmax
 def test_static_softmax1d():
     # Verified against theano.tensor.softmax
 
-    skew = np.array([ 0.87566484,  0.53596079,  0.85693981,  0.09526036])
-    x = np.array([  0.,   1.,   2.,   3.])
+    skew = np.array([0.87566484, 0.53596079, 0.85693981, 0.09526036])
+    x = np.array([0.0, 1.0, 2.0, 3.0])
 
     x = Tensor(x)
     f = (softmax(x, constant=False) * skew).sum()
@@ -18,7 +18,7 @@ def test_static_softmax1d():
     assert_allclose(actual=f.data, desired=out)
 
     f.backward()
-    dx = np.array([0.01720112,  0.01715422,  0.12266443, -0.15701977])
+    dx = np.array([0.01720112, 0.01715422, 0.12266443, -0.15701977])
 
     assert_allclose(x.grad, dx, atol=1e-5, rtol=1e-5)
 
@@ -26,13 +26,15 @@ def test_static_softmax1d():
 def test_static_softmax2d():
     # Verified against theano.tensor.softmax
 
-    skew = np.array([[ 0.87566484,  0.53596079,  0.85693981,  0.09526036],
-                     [ 0.32024455,  0.81532148,  0.2480434 ,  0.85119342],
-                     [ 0.57943085,  0.33958252,  0.95864464,  0.22881712]])
+    skew = np.array(
+        [
+            [0.87566484, 0.53596079, 0.85693981, 0.09526036],
+            [0.32024455, 0.81532148, 0.2480434, 0.85119342],
+            [0.57943085, 0.33958252, 0.95864464, 0.22881712],
+        ]
+    )
 
-    x = np.array([[  0.,   1.,   2.,   3.],
-                  [  4.,   5.,   6.,   7.],
-                  [  8.,   9.,  10.,  11.]])
+    x = np.array([[0.0, 1.0, 2.0, 3.0], [4.0, 5.0, 6.0, 7.0], [8.0, 9.0, 10.0, 11.0]])
 
     x = Tensor(x)
     f = (softmax(x, constant=False) * skew).sum()
@@ -41,9 +43,13 @@ def test_static_softmax2d():
     assert_allclose(actual=f.data, desired=out)
 
     f.backward()
-    dx = np.array([[ 0.01720112,  0.01715422,  0.12266443, -0.15701977],
-                   [-0.01179518,  0.01108053, -0.10425844,  0.10497309],
-                   [ 0.00502799, -0.00723393,  0.12698131, -0.12477536]])
+    dx = np.array(
+        [
+            [0.01720112, 0.01715422, 0.12266443, -0.15701977],
+            [-0.01179518, 0.01108053, -0.10425844, 0.10497309],
+            [0.00502799, -0.00723393, 0.12698131, -0.12477536],
+        ]
+    )
 
     assert_allclose(x.grad, dx, atol=1e-5, rtol=1e-5)
 
@@ -51,8 +57,8 @@ def test_static_softmax2d():
 def test_static_logsoftmax1d():
     # Verified against theano.tensor.softmax
 
-    skew = np.array([ 0.87566484,  0.53596079,  0.85693981,  0.09526036])
-    x = np.array([  0.,   1.,   2.,   3.])
+    skew = np.array([0.87566484, 0.53596079, 0.85693981, 0.09526036])
+    x = np.array([0.0, 1.0, 2.0, 3.0])
 
     x = Tensor(x)
     f = (logsoftmax(x, constant=False) * skew).sum()
@@ -61,20 +67,22 @@ def test_static_logsoftmax1d():
     assert_allclose(actual=f.data, desired=out)
 
     f.backward()
-    dx = np.array([ 0.79988389,  0.3299668 ,  0.29699009, -1.42684078])
+    dx = np.array([0.79988389, 0.3299668, 0.29699009, -1.42684078])
 
     assert_allclose(x.grad, dx, atol=1e-5, rtol=1e-5)
 
 
 def test_static_logsoftmax2d():
     # Verified against theano.tensor.softmax
-    skew = np.array([[ 0.87566484,  0.53596079,  0.85693981,  0.09526036],
-                     [ 0.32024455,  0.81532148,  0.2480434 ,  0.85119342],
-                     [ 0.57943085,  0.33958252,  0.95864464,  0.22881712]])
+    skew = np.array(
+        [
+            [0.87566484, 0.53596079, 0.85693981, 0.09526036],
+            [0.32024455, 0.81532148, 0.2480434, 0.85119342],
+            [0.57943085, 0.33958252, 0.95864464, 0.22881712],
+        ]
+    )
 
-    x = np.array([[  0.,   1.,   2.,   3.],
-                  [  4.,   5.,   6.,   7.],
-                  [  8.,   9.,  10.,  11.]])
+    x = np.array([[0.0, 1.0, 2.0, 3.0], [4.0, 5.0, 6.0, 7.0], [8.0, 9.0, 10.0, 11.0]])
 
     x = Tensor(x)
     f = (logsoftmax(x, constant=False) * skew).sum()
@@ -83,8 +91,12 @@ def test_static_logsoftmax2d():
     assert_allclose(actual=f.data, desired=out)
 
     f.backward()
-    dx = np.array([[ 0.79988389,  0.3299668 ,  0.29699009, -1.42684078],
-                   [ 0.24859989,  0.62057111, -0.281343  , -0.587828  ],
-                   [ 0.5119002 ,  0.15601518,  0.45965687, -1.12757225]])
+    dx = np.array(
+        [
+            [0.79988389, 0.3299668, 0.29699009, -1.42684078],
+            [0.24859989, 0.62057111, -0.281343, -0.587828],
+            [0.5119002, 0.15601518, 0.45965687, -1.12757225],
+        ]
+    )
 
     assert_allclose(x.grad, dx, atol=1e-5, rtol=1e-5)

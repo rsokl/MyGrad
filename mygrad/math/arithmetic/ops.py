@@ -4,17 +4,19 @@ import numpy as np
 
 from mygrad.operation_base import BroadcastableOp, Operation
 
-__all__ = ["Add",
-           "Subtract",
-           "Multiply",
-           "Divide",
-           "Reciprocal",
-           "Power",
-           "Square",
-           "Positive",
-           "Negative",
-           "AddSequence",
-           "MultiplySequence"]
+__all__ = [
+    "Add",
+    "Subtract",
+    "Multiply",
+    "Divide",
+    "Reciprocal",
+    "Power",
+    "Square",
+    "Positive",
+    "Negative",
+    "AddSequence",
+    "MultiplySequence",
+]
 
 
 class Add(BroadcastableOp):
@@ -90,14 +92,14 @@ class Divide(BroadcastableOp):
         a, b = self.variables
         if index == 0:  # backprop through a
             return grad / b.data
-        else:           # broadcast through b
+        else:  # broadcast through b
             return -grad * a.data / (b.data ** 2)
 
 
 class Reciprocal(BroadcastableOp):
     def __call__(self, a):
         """ f(a) -> 1 / a"""
-        self.variables = (a, )
+        self.variables = (a,)
         return np.reciprocal(a.data)
 
     def backward_var(self, grad, index, **kwargs):
@@ -125,6 +127,7 @@ class Power(BroadcastableOp):
         else:
             return grad * (x ** y) * np.log(np.where(x, x, 1))
 
+
 class Square(Operation):
     def __call__(self, a):
         """ f(a) -> a ** 2
@@ -138,8 +141,10 @@ class Square(Operation):
     def backward_var(self, grad, index, **kwargs):
         return grad * 2 * self.variables[index].data
 
+
 class Positive(Operation):
     """ f(a) = +a """
+
     def __call__(self, a, where=True):
         """ Parameters
             ----------
@@ -158,6 +163,7 @@ class Positive(Operation):
 
 class Negative(Operation):
     """ f(a) = -a """
+
     def __call__(self, a, where=True):
         """ Parameters
             ----------
@@ -176,6 +182,7 @@ class Negative(Operation):
 
 class AddSequence(BroadcastableOp):
     """ Performs f(a, b, ..., z) = a + b + ... + z"""
+
     def __call__(self, *input_vars):
         assert len(input_vars) > 1, "`add_sequence` requires at least two operands"
         self.variables = input_vars
@@ -188,10 +195,11 @@ class AddSequence(BroadcastableOp):
 
 class MultiplySequence(BroadcastableOp):
     """ Performs f(a, b, ..., z) = a * b * ... * z"""
+
     def __call__(self, *input_vars):
         assert len(input_vars) > 1, "`multiply_sequence` requires at least two operands"
         self.variables = input_vars
-        out = reduce(lambda x, y: x*y, (var.data for var in input_vars))
+        out = reduce(lambda x, y: x * y, (var.data for var in input_vars))
         self._iszero = np.any(out == 0)
         return out
 
@@ -199,7 +207,9 @@ class MultiplySequence(BroadcastableOp):
         """ Back-propagates the gradient through all of the operation's inputs. This needs to be updated
             by an operation if that operation takes more than 2 Tensor arguments."""
         if not self._iszero:
-            self._product = grad * reduce(lambda x, y: x*y, (var.data for n, var in enumerate(self.variables)))
+            self._product = grad * reduce(
+                lambda x, y: x * y, (var.data for n, var in enumerate(self.variables))
+            )
         else:
             self._product = None
         super().backward(grad, graph=graph, **kwargs)
@@ -209,4 +219,7 @@ class MultiplySequence(BroadcastableOp):
         if not self._iszero:
             return self._product / var.data
         else:
-            return grad * reduce(lambda x, y: x*y, (var.data for n, var in enumerate(self.variables) if n != index))
+            return grad * reduce(
+                lambda x, y: x * y,
+                (var.data for n, var in enumerate(self.variables) if n != index),
+            )

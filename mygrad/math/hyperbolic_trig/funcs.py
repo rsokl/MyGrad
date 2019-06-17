@@ -2,17 +2,19 @@ from mygrad.tensor_base import Tensor
 
 from .ops import *
 
-__all__ = ["arccosh",
-           "arccoth",
-           "arccsch",
-           "arcsinh",
-           "arctanh",
-           "cosh",
-           "coth",
-           "csch",
-           "sech",
-           "sinh",
-           "tanh"]
+__all__ = [
+    "arccosh",
+    "arccoth",
+    "arccsch",
+    "arcsinh",
+    "arctanh",
+    "cosh",
+    "coth",
+    "csch",
+    "sech",
+    "sinh",
+    "tanh",
+]
 
 
 def arccosh(a, constant=False):

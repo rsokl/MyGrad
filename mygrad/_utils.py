@@ -24,8 +24,10 @@ def reduce_broadcast(grad, var_shape):
 
     if grad.ndim != len(var_shape):
         if grad.ndim < len(var_shape):
-            raise ValueError("The dimensionality of the gradient of the broadcasted operation"
-                             "is less than that of its associated variable")
+            raise ValueError(
+                "The dimensionality of the gradient of the broadcasted operation"
+                "is less than that of its associated variable"
+            )
         grad = grad.sum(axis=tuple(range(grad.ndim - len(var_shape))))
 
     keepdims = tuple(n for n, i in enumerate(grad.shape) if i != var_shape[n])

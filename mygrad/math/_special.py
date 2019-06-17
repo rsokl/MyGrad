@@ -57,7 +57,7 @@ def logsumexp(a, axis=None, keepdims=False):
     tmp = np.exp(a - a_max)
 
     # suppress warnings about log of zero
-    with np.errstate(divide='ignore'):
+    with np.errstate(divide="ignore"):
         s = np.sum(tmp, axis=axis, keepdims=keepdims)
         out = np.log(s)
 

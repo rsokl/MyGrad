@@ -2,12 +2,7 @@ from mygrad.tensor_base import Tensor
 
 from .ops import Abs, Cbrt, Maximum, Minimum, Sqrt
 
-__all__ = ["abs",
-           "absolute",
-           "cbrt",
-           "sqrt",
-           "maximum",
-           "minimum"]
+__all__ = ["abs", "absolute", "cbrt", "sqrt", "maximum", "minimum"]
 
 
 def abs(a, constant=False):

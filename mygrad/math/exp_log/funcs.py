@@ -2,15 +2,17 @@ from mygrad.tensor_base import Tensor
 
 from .ops import *
 
-__all__ = ["exp",
-           "exp2",
-           "expm1",
-           "logaddexp",
-           "logaddexp2",
-           "log",
-           "log2",
-           "log10",
-           "log1p"]
+__all__ = [
+    "exp",
+    "exp2",
+    "expm1",
+    "logaddexp",
+    "logaddexp2",
+    "log",
+    "log2",
+    "log10",
+    "log1p",
+]
 
 
 def exp(a, constant=False):
@@ -29,6 +31,7 @@ def exp(a, constant=False):
         mygrad.Tensor"""
     return Tensor._op(Exp, a, constant=constant)
 
+
 def exp2(a, constant=False):
     """``f(a) -> 2^a``
 
@@ -44,6 +47,7 @@ def exp2(a, constant=False):
         -------
         mygrad.Tensor"""
     return Tensor._op(Exp2, a, constant=constant)
+
 
 def expm1(a, constant=False):
     """ ``f(a) -> exp(a) - 1``

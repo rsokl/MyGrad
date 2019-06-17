@@ -27,7 +27,7 @@ class Squeeze(Operation):
             axis : Optional[int, Tuple[int, ...]] """
         self.variables = (a,)
         return np.squeeze(a.data, axis=axis)
-    
+
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
         return grad.reshape(a.shape)
@@ -39,7 +39,7 @@ class Flatten(Operation):
             ----------
             a : mygrad.Tensor"""
         self.variables = (a,)
-        return a.data.flatten(order='C')
+        return a.data.flatten(order="C")
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
@@ -52,7 +52,7 @@ class Ravel(Operation):
             ----------
             a : mygrad.Tensor"""
         self.variables = (a,)
-        return np.ravel(a.data, order='C')
+        return np.ravel(a.data, order="C")
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
@@ -84,6 +84,8 @@ class BroadcastTo(BroadcastableOp):
 
     def backward_var(self, grad, index, **kwargs):
         if index != 0:
-            raise IndexError("`broadcast_to` is a unary operation. "
-                             "`backward_var` was called for index {}".format(index))
+            raise IndexError(
+                "`broadcast_to` is a unary operation. "
+                "`backward_var` was called for index {}".format(index)
+            )
         return grad

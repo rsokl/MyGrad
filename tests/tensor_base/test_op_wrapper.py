@@ -6,7 +6,7 @@ class Dummy(Operation):
     def __call__(self, a, b):
         self.variables = (a, b)
         return 1
-    
+
 
 def dummy(a, b, constant=False):
     return Tensor._op(Dummy, a, b, constant=constant)

@@ -2,20 +2,22 @@ import numpy as np
 
 from mygrad.tensor_base import Tensor
 
-__all__ = ["empty",
-           "empty_like",
-           "eye",
-           "identity",
-           "ones",
-           "ones_like",
-           "zeros",
-           "zeros_like",
-           "full",
-           "full_like",
-           "arange",
-           "linspace",
-           "logspace",
-           "geomspace"]
+__all__ = [
+    "empty",
+    "empty_like",
+    "eye",
+    "identity",
+    "ones",
+    "ones_like",
+    "zeros",
+    "zeros_like",
+    "full",
+    "full_like",
+    "arange",
+    "linspace",
+    "logspace",
+    "geomspace",
+]
 
 
 def empty(shape, dtype=np.float32, constant=False):
@@ -101,7 +103,7 @@ def empty_like(other, dtype=None, constant=False):
     """
     if isinstance(other, Tensor):
         other = other.data
-        
+
     return Tensor(np.empty_like(other, dtype), constant=constant)
 
 
@@ -175,7 +177,7 @@ def identity(n, dtype=np.float32, constant=False):
                 [ 0.,  0.,  1.]])
     """
     return Tensor(np.identity(n, dtype), constant=constant)
-    
+
 
 def ones(shape, dtype=np.float32, constant=False):
     """ 
@@ -549,10 +551,14 @@ def linspace(start, stop, num=50, include_endpoint=True, dtype=None, constant=Fa
         >>> mg.linspace(2.0, 3.0, num=5, endpoint=False)
         Tensor([ 2. ,  2.2,  2.4,  2.6,  2.8])
     """
-    return Tensor(np.linspace(start, stop, num, include_endpoint, dtype=dtype), constant=constant)
+    return Tensor(
+        np.linspace(start, stop, num, include_endpoint, dtype=dtype), constant=constant
+    )
 
 
-def logspace(start, stop, num=50, include_endpoint=True, base=10, dtype=None, constant=False):
+def logspace(
+    start, stop, num=50, include_endpoint=True, base=10, dtype=None, constant=False
+):
     """ Return a Tensor with evenly-spaced numbers over a specified interval on a log scale.
 
         In linear space, values are generated within [base**start, base**stop], with the endpoint
@@ -608,7 +614,9 @@ def logspace(start, stop, num=50, include_endpoint=True, base=10, dtype=None, co
         Tensor
             A Tensor of `num` evenly-spaced values in the log interval [base**start, base**stop].
     """
-    return Tensor(np.logspace(start, stop, num, include_endpoint, base, dtype), constant=constant)
+    return Tensor(
+        np.logspace(start, stop, num, include_endpoint, base, dtype), constant=constant
+    )
 
 
 def geomspace(start, stop, num=50, include_endpoint=True, dtype=None, constant=False):
@@ -679,4 +687,6 @@ def geomspace(start, stop, num=50, include_endpoint=True, dtype=None, constant=F
         >>> mg.geomspace(-1000, -1, num=4)
         Tensor([-1000.,  -100.,   -10.,    -1.])
     """
-    return Tensor(np.geomspace(start, stop, num, include_endpoint, dtype), constant=constant)
+    return Tensor(
+        np.geomspace(start, stop, num, include_endpoint, dtype), constant=constant
+    )

@@ -16,15 +16,28 @@ from mygrad.tensor_manip.transpose_like.funcs import *
 
 from ._version import get_versions
 
-__version__ = get_versions()['version']
+__version__ = get_versions()["version"]
 del get_versions
 
 
-for attr in (sum, prod, cumprod, cumsum,
-             mean, std, var,
-             max, min,
-             argmax, argmin,
-             swapaxes, transpose, moveaxis,
-             reshape, squeeze, ravel,
-             matmul):
+for attr in (
+    sum,
+    prod,
+    cumprod,
+    cumsum,
+    mean,
+    std,
+    var,
+    max,
+    min,
+    argmax,
+    argmin,
+    swapaxes,
+    transpose,
+    moveaxis,
+    reshape,
+    squeeze,
+    ravel,
+    matmul,
+):
     setattr(Tensor, attr.__name__, attr)

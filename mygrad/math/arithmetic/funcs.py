@@ -14,17 +14,19 @@ from .ops import (
     Subtract,
 )
 
-__all__ = ["add",
-           "subtract",
-           "power",
-           "divide",
-           "square",
-           "reciprocal",
-           "multiply",
-           "multiply_sequence",
-           "add_sequence",
-           "positive",
-           "negative"]
+__all__ = [
+    "add",
+    "subtract",
+    "power",
+    "divide",
+    "square",
+    "reciprocal",
+    "multiply",
+    "multiply_sequence",
+    "add_sequence",
+    "positive",
+    "negative",
+]
 
 
 def add(a, b, constant=False):
@@ -107,6 +109,7 @@ def divide(a, b, constant=False):
         -------
         mygrad.Tensor"""
     return Tensor._op(Divide, a, b, constant=constant)
+
 
 def square(a, constant=False):
     """ ``f(a) -> a ** 2``

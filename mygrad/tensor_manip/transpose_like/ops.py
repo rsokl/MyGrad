@@ -2,11 +2,7 @@ import numpy as np
 
 from mygrad.operation_base import Operation
 
-__all__ = ["Tensor_Transpose_Property",
-           "Transpose",
-           "MoveAxis",
-           "Roll",
-           "SwapAxes"]
+__all__ = ["Tensor_Transpose_Property", "Transpose", "MoveAxis", "Roll", "SwapAxes"]
 
 
 class Tensor_Transpose_Property(Operation):
@@ -76,5 +72,9 @@ class Roll(Operation):
     def backward_var(self, grad, index, **kwargs):
         if not index == 0:
             raise IndexError
-        rev_shift = -self.shift if not hasattr(self.shift, '__iter__') else tuple(-i for i in self.shift)
+        rev_shift = (
+            -self.shift
+            if not hasattr(self.shift, "__iter__")
+            else tuple(-i for i in self.shift)
+        )
         return np.roll(grad, axis=self.axis, shift=rev_shift)

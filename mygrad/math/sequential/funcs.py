@@ -4,17 +4,19 @@ from mygrad.tensor_base import Tensor
 
 from .ops import *
 
-__all__ = ["sum",
-           "mean",
-           "var",
-           "std",
-           "amax",
-           "amin",
-           "max",
-           "min",
-           "prod",
-           "cumprod",
-           "cumsum"]
+__all__ = [
+    "sum",
+    "mean",
+    "var",
+    "std",
+    "amax",
+    "amin",
+    "max",
+    "min",
+    "prod",
+    "cumprod",
+    "cumsum",
+]
 
 
 def sum(x, axis=None, keepdims=False, constant=False):
@@ -232,9 +234,12 @@ def var(x, axis=None, ddof=0, keepdims=False, constant=False):
     >>> ((1-0.55)**2 + (0.1-0.55)**2)/2
     Tensor(0.2025)
     """
-    return Tensor._op(Variance, x, op_kwargs=dict(axis=axis,
-                                                  keepdims=keepdims,
-                                                  ddof=ddof), constant=constant)
+    return Tensor._op(
+        Variance,
+        x,
+        op_kwargs=dict(axis=axis, keepdims=keepdims, ddof=ddof),
+        constant=constant,
+    )
 
 
 def std(x, axis=None, ddof=0, keepdims=False, constant=False):
@@ -310,9 +315,12 @@ def std(x, axis=None, ddof=0, keepdims=False, constant=False):
     >>> mg.std(a, dtype=np.float64)
     Tensor(0.44999999925494177)
     """
-    return Tensor._op(StdDev, x, op_kwargs=dict(axis=axis,
-                                                keepdims=keepdims,
-                                                ddof=ddof), constant=constant)
+    return Tensor._op(
+        StdDev,
+        x,
+        op_kwargs=dict(axis=axis, keepdims=keepdims, ddof=ddof),
+        constant=constant,
+    )
 
 
 def max(x, axis=None, keepdims=False, constant=False):
@@ -359,7 +367,12 @@ def max(x, axis=None, keepdims=False, constant=False):
     >>> mg.amax(b)
     Tensor(nan)
     """
-    return Tensor._op(MaxMin, x, op_kwargs=dict(axis=axis, keepdims=keepdims, maxmin='max'), constant=constant)
+    return Tensor._op(
+        MaxMin,
+        x,
+        op_kwargs=dict(axis=axis, keepdims=keepdims, maxmin="max"),
+        constant=constant,
+    )
 
 
 def min(x, axis=None, keepdims=False, constant=False):
@@ -404,7 +417,13 @@ def min(x, axis=None, keepdims=False, constant=False):
     >>> mg.amin(b)
     Tensor(nan)
     """
-    return Tensor._op(MaxMin, x, op_kwargs=dict(axis=axis, keepdims=keepdims, maxmin='min'), constant=constant)
+    return Tensor._op(
+        MaxMin,
+        x,
+        op_kwargs=dict(axis=axis, keepdims=keepdims, maxmin="min"),
+        constant=constant,
+    )
+
 
 # aliases
 amin = min
@@ -460,7 +479,9 @@ def prod(a, axis=None, keepdims=False, constant=False):
     >>> mg.prod([[1.,2.],
     ...          [3.,4.]], axis=1)
     Tensor([  2.,  12.]) """
-    return Tensor._op(Prod, a, op_kwargs=dict(axis=axis, keepdims=keepdims), constant=constant)
+    return Tensor._op(
+        Prod, a, op_kwargs=dict(axis=axis, keepdims=keepdims), constant=constant
+    )
 
 
 def cumprod(a, axis=None, constant=False):

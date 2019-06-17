@@ -5,13 +5,13 @@ from mygrad.math._special import logsumexp as _logsumexp
 from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor
 
-__all__ = ['tanh', 'sigmoid', 'relu', 'softmax', 'logsoftmax']
+__all__ = ["tanh", "sigmoid", "relu", "softmax", "logsoftmax"]
 
 
 class Sigmoid(Operation):
     def __call__(self, a):
         self.variables = (a,)
-        x = -1. * a.data
+        x = -1.0 * a.data
         np.exp(x, out=x)
         x += 1
         np.reciprocal(x, out=x)
@@ -19,7 +19,7 @@ class Sigmoid(Operation):
         return self.sigmoid
 
     def backward_var(self, grad, index, **kwargs):
-        return grad * self.sigmoid * (1. - self.sigmoid)
+        return grad * self.sigmoid * (1.0 - self.sigmoid)
 
 
 def sigmoid(x, constant=False):
@@ -112,7 +112,11 @@ class Softmax(Operation):
         x = a.data
         assert 0 < a.ndim < 3
 
-        self.__kw = dict(axis=1, keepdims=True) if a.ndim == 2 else dict(axis=None, keepdims=False)
+        self.__kw = (
+            dict(axis=1, keepdims=True)
+            if a.ndim == 2
+            else dict(axis=None, keepdims=False)
+        )
         return _softmax(x, self.__kw)
 
     def backward_var(self, grad, index, **kwargs):
@@ -182,7 +186,11 @@ class LogSoftmax(Operation):
         x = a.data
         assert 0 < a.ndim < 3
 
-        self.__kw = dict(axis=1, keepdims=True) if x.ndim == 2 else dict(axis=None, keepdims=False)
+        self.__kw = (
+            dict(axis=1, keepdims=True)
+            if x.ndim == 2
+            else dict(axis=None, keepdims=False)
+        )
         return x - _logsumexp(x, **self.__kw)
 
     def backward_var(self, grad, index, **kwargs):

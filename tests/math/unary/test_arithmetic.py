@@ -28,14 +28,24 @@ def test_negative_backward():
     pass
 
 
-@fwdprop_test_factory(mygrad_func=reciprocal, true_func=np.reciprocal, num_arrays=1,
-                      assumptions=_is_non_zero)
+@fwdprop_test_factory(
+    mygrad_func=reciprocal,
+    true_func=np.reciprocal,
+    num_arrays=1,
+    assumptions=_is_non_zero,
+)
 def test_reciprocal_fwd():
     pass
 
 
-@backprop_test_factory(mygrad_func=reciprocal, true_func=np.reciprocal, num_arrays=1,
-                       assumptions=_is_non_zero, atol=1e-5, rtol=1e-5)
+@backprop_test_factory(
+    mygrad_func=reciprocal,
+    true_func=np.reciprocal,
+    num_arrays=1,
+    assumptions=_is_non_zero,
+    atol=1e-5,
+    rtol=1e-5,
+)
 def test_reciprocal_backward():
     pass
 
