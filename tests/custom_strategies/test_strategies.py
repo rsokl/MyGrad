@@ -25,7 +25,7 @@ def test_choices(seq: List[int], replace: bool, data: st.SearchStrategy):
                                     "belong to `seq`"
     assert len(chosen) == size, "the number of choices does not match `size`"
 
-    if not replace and len((set(seq))) == len(seq):
+    if not replace and len(set(seq)) == len(seq):
         unique_choices = sorted(set(chosen))
         assert unique_choices == sorted(chosen) , "`choices` with `replace=False` draws " \
                                                   "elements with replacement"

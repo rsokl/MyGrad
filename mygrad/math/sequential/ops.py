@@ -153,12 +153,12 @@ class Sum(Operation):
 
 class Mean(Sum):
     def __call__(self, a, axis=None, keepdims=False):
-        out = super(Mean, self).__call__(a, axis, keepdims)
+        out = super().__call__(a, axis, keepdims)
         self.n = a.data.size if self.axis is None else np.prod([a.shape[i] for i in self.axis])
         return out / self.n
 
     def backward_var(self, grad, index, **kwargs):
-        return super(Mean, self).backward_var(grad / self.n, index, **kwargs)
+        return super().backward_var(grad / self.n, index, **kwargs)
 
 
 class Prod(Operation):
@@ -178,7 +178,7 @@ class Prod(Operation):
         x = a.data
         grad = np.asarray(grad)
 
-        axes = set(range(a.ndim)) if self.axis is None else set(i if i >= 0 else a.ndim + i for i in self.axis)
+        axes = set(range(a.ndim)) if self.axis is None else {i if i >= 0 else a.ndim + i for i in self.axis}
 
         # make grad broadcast-compatible against x
         grad = grad.reshape(*(1 if n in axes else i for n, i in enumerate(a.shape)))

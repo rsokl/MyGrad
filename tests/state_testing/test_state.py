@@ -25,7 +25,7 @@ def _node_ID_str(num): return "v{}".format(num + 1)
 
 class GraphCompare(RuleBasedStateMachine):
     def __init__(self):
-        super(GraphCompare, self).__init__()
+        super().__init__()
         # stores the corresponding node/tensor v1, v2, ... as they are
         # created via the unit test (through `create_node` or `fuse_nodes`)
         # `Node` is the naive implementation of `Tensor` that we are checking
