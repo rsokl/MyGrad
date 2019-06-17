@@ -320,10 +320,7 @@ class GRUnit(Operation):
 
         self._hidden_seq.grad = dLds
 
-        if any(
-            not const
-            for const in (self.Uz.constant, self.Wz.constant, self.bz.constant)
-        ):
+        if not (self.Uz.constant and self.Wz.constant and self.bz.constant):
             dz = zgrad * const["z*(1 - z)"]
         # backprop through Wz
         if not self.Wz.constant:
@@ -342,10 +339,7 @@ class GRUnit(Operation):
                 )  # IMPORTANT augmented update: this must come after Wz and bz backprop
             _backprop(self.Uz, np.tensordot(self.X.data, dz, ([0, 1], [0, 1])))
 
-        if any(
-            not const
-            for const in (self.Ur.constant, self.Wr.constant, self.br.constant)
-        ):
+        if not (self.Ur.constant and self.Wr.constant and self.br.constant):
             dr = rgrad * const["r*(1 - r)"]
         # backprop through Wr
         if not self.Wr.constant:
@@ -366,10 +360,7 @@ class GRUnit(Operation):
                 )  # IMPORTANT augmented update: this must come after Wr and br backprop
             _backprop(self.Ur, np.tensordot(self.X.data, dr, ([0, 1], [0, 1])))
 
-        if any(
-            not const
-            for const in (self.Uh.constant, self.Wh.constant, self.bh.constant)
-        ):
+        if not (self.Uh.constant and self.Wh.constant and self.bh.constant):
             dh = hgrad * const["1 - h**2"]
         # backprop through Wh
         if not self.Wh.constant:

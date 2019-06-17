@@ -152,8 +152,7 @@ class BroadcastableOp(Operation):
                         self.backward_var(grad, index, **kwargs), var.shape
                     )
 
-        for var in {
-            i for i in self.variables if not i.constant and i.creator is not None
-        }:
-            var._accum_ops.add(self)
-            var._backward(graph=graph)
+        for var in self.variables:
+            if var.creator is not None and not var.constant:
+                var._accum_ops.add(self)
+                var._backward(graph=graph)

@@ -26,15 +26,15 @@ TESTS_REQUIRE = ["pytest >= 3.8", "hypothesis >= 4.6", "scipy"]
 
 DESCRIPTION = "A sleek auto-differentiation library that wraps numpy."
 LONG_DESCRIPTION = """
-mygrad is a simple, NumPy-centric autograd library. An autograd library enables 
-you to automatically compute derivatives of mathematical functions. This library is 
-designed to serve primarily as an education tool for learning about gradient-based 
-machine learning; it is easy to install, has a readable and easily customizable code base, 
-and provides a sleek interface that mimics NumPy. Furthermore, it leverages NumPy's 
+mygrad is a simple, NumPy-centric autograd library. An autograd library enables
+you to automatically compute derivatives of mathematical functions. This library is
+designed to serve primarily as an education tool for learning about gradient-based
+machine learning; it is easy to install, has a readable and easily customizable code base,
+and provides a sleek interface that mimics NumPy. Furthermore, it leverages NumPy's
 vectorization to achieve good performance despite the library's simplicity.
 
-This is not meant to be a competitor to libraries like PyTorch (which mygrad most 
-closely resembles) or TensorFlow. Rather, it is meant to serve as a useful tool for 
+This is not meant to be a competitor to libraries like PyTorch (which mygrad most
+closely resembles) or TensorFlow. Rather, it is meant to serve as a useful tool for
 students who are learning about training neural networks using back propagation.
 """
 
@@ -56,6 +56,6 @@ setup(
     },
     url=URL,
     download_url="https://github.com/rsokl/mygrad/tarball/" + versioneer.get_version(),
-    python_requires="!=2.*,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*",
+    python_requires=">=3.5",
     packages=find_packages(exclude=["tests", "tests.*"]),
 )

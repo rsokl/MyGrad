@@ -85,11 +85,7 @@ def build_graph(
     graph = Digraph(strict=True)
     graph.node_attr.update(fontsize="12")
 
-    _add_node(
-        fin,
-        graph,
-        **{"names": names, "dims": dims, "dtypes": dtypes, "sum_stats": sum_stats}
-    )
+    _add_node(fin, graph, names=names, dims=dims, dtypes=dtypes, sum_stats=sum_stats)
 
     if save:
         graph.render(filename="computational_graph", cleanup=True)
@@ -121,22 +117,19 @@ def _add_node(node, graph, op_id=None, **kwargs):
 
     if node.ndim:
         if kwargs["dims"]:
-            node_lab = node_lab + "\nDims: {}".format(node.shape)
+            node_lab += "\nDims: {}".format(node.shape)
         if kwargs["dtypes"]:
-            node_lab = node_lab + "\nDtype: {}".format(node.dtype)
+            node_lab += "\nDtype: {}".format(node.dtype)
         if kwargs["sum_stats"]:
-            node_lab = (
-                node_lab
-                + "\nMin: {min}\nMedian: {med}\nMean: {mean}\nMax: {max}".format(
-                    min=np.amin(node.data),
-                    med=np.median(node.data),
-                    mean=np.mean(node.data),
-                    max=np.amax(node.data),
-                )
+            node_lab += "\nMin: {min}\nMedian: {med}\nMean: {mean}\nMax: {max}".format(
+                min=np.amin(node.data),
+                med=np.median(node.data),
+                mean=np.mean(node.data),
+                max=np.amax(node.data),
             )
     else:
         if kwargs["dtypes"]:
-            node_lab = node_lab + "\nDtype: {}".format(node.dtype)
+            node_lab += "\nDtype: {}".format(node.dtype)
 
     graph.node(name=node_id, label=node_lab)
 

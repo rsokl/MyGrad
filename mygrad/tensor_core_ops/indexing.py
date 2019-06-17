@@ -135,27 +135,26 @@ class SetItem(BroadcastableOp):
                 not np.shares_memory(grad_sel, grad)
                 and grad_sel.size > 0
                 and grad_sel.ndim > 0
+                and not _is_bool_array_index(self.index)
+                and _is_int_array_index(self.index)
             ):
-                if not _is_bool_array_index(self.index) and _is_int_array_index(
-                    self.index
-                ):
-                    # create an array of unique elements, and see if indexing into it produces
-                    # any redundant elements
-                    unique = _arr(*grad.shape)
-                    sub_sel = unique[self.index].flat
-                    elements, first_inds, = np.unique(
-                        np.flip(sub_sel, axis=0), return_index=True
-                    )
-                    if len(first_inds) < len(sub_sel):
-                        # one or more elements were set redundantly, identify the entries in `b`
-                        # that actually were set to those elements (the last-most set-item calls
-                        # for those elements) and propagate only the corresponding elements from grad
+                # create an array of unique elements, and see if indexing into it produces
+                # any redundant elements
+                unique = _arr(*grad.shape)
+                sub_sel = unique[self.index].flat
+                elements, first_inds, = np.unique(
+                    np.flip(sub_sel, axis=0), return_index=True
+                )
+                if len(first_inds) < len(sub_sel):
+                    # one or more elements were set redundantly, identify the entries in `b`
+                    # that actually were set to those elements (the last-most set-item calls
+                    # for those elements) and propagate only the corresponding elements from grad
 
-                        first_inds = (len(sub_sel) - 1) - first_inds
-                        mask = np.zeros_like(sub_sel)
-                        mask[first_inds] = 1
-                        mask = mask.reshape(grad_sel.shape)
-                        grad_sel *= mask
+                    first_inds = (len(sub_sel) - 1) - first_inds
+                    mask = np.zeros_like(sub_sel)
+                    mask[first_inds] = 1
+                    mask = mask.reshape(grad_sel.shape)
+                    grad_sel *= mask
 
             # handle the edge case of "projecting down" on setitem. E.g:
             # x = Tensor([0, 1, 2])

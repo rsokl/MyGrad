@@ -121,9 +121,7 @@ def sliding_window_view(arr, window_shape, step, dilation=None):
         """
 
     step = (
-        tuple(int(step) for i in range(len(window_shape)))
-        if isinstance(step, Integral)
-        else tuple(step)
+        (int(step),) * len(window_shape) if isinstance(step, Integral) else tuple(step)
     )
     assert all(
         isinstance(i, Integral) and i > 0 for i in step

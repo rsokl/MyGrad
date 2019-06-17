@@ -489,7 +489,7 @@ def multi_matmul(tensors, constant=False):
     for a in tensors:
         if a.ndim < 1 or a.ndim > 2:
             raise ValueError(
-                "%d-dimensional array given. Tensor must be " "two-dimensional" % a.ndim
+                "%d-dimensional array given. Tensor must be two-dimensional" % (a.ndim,)
             )
 
     if n == 3:

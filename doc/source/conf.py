@@ -62,7 +62,6 @@ templates_path = ["_templates"]
 source_parsers = {".md": "recommonmark.parser.CommonMarkParser"}
 
 source_suffix = [".rst", ".md"]
-# source_suffix = '.rst'
 
 # The master toctree document.
 master_doc = "index"
@@ -169,7 +168,7 @@ texinfo_documents = [
         "MyGrad Documentation",
         author,
         "MyGrad",
-        "One line description of project.",
+        "A sleek auto-differentiation library that wraps numpy.",
         "Miscellaneous",
     )
 ]

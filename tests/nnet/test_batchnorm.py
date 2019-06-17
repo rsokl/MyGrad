@@ -40,17 +40,13 @@ def simple_batchnorm(x, gamma, beta, eps):
 def test_batchnorm(x, data):
     # optionally draw affine parameters
     gamma = data.draw(
-        st.one_of(
-            st.none(),
-            hnp.arrays(shape=x.shape[1:2], dtype=float, elements=st.floats(-10, 10)),
-        ),
+        st.none()
+        | hnp.arrays(shape=x.shape[1:2], dtype=float, elements=st.floats(-10, 10)),
         label="gamma",
     )
     beta = data.draw(
-        st.one_of(
-            st.none(),
-            hnp.arrays(shape=x.shape[1:2], dtype=float, elements=st.floats(-10, 10)),
-        ),
+        st.none()
+        | hnp.arrays(shape=x.shape[1:2], dtype=float, elements=st.floats(-10, 10)),
         label="beta",
     )
     x_orig = np.copy(x)

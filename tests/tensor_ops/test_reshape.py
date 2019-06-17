@@ -24,14 +24,8 @@ def gen_shape(size):
 
             >>> _factors(4)
             {1, 2, 4}"""
-        from functools import reduce
-
-        return set(
-            reduce(
-                list.__add__,
-                ([i, n // i] for i in range(1, int(n ** 0.5) + 1) if n % i == 0),
-            )
-        )
+        gen = ([i, n // i] for i in range(1, int(n ** 0.5) + 1) if n % i == 0)
+        return set(sum(gen, []))
 
     assert size > 0
     if size == 1:

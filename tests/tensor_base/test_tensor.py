@@ -38,7 +38,7 @@ def test_to_scalar():
         (Tensor([1, 2]), "Tensor([1, 2])"),
         (
             mg.arange(9).reshape((3, 3)),
-            "Tensor([[0, 1, 2],\n" "        [3, 4, 5],\n" "        [6, 7, 8]])",
+            "Tensor([[0, 1, 2],\n        [3, 4, 5],\n        [6, 7, 8]])",
         ),
     ],
 )
