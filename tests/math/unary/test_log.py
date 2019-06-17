@@ -1,7 +1,7 @@
-from mygrad import log, log2, log10, log1p
-from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
-
 import numpy as np
+
+from mygrad import log, log1p, log2, log10
+from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
 @fwdprop_test_factory(mygrad_func=log, true_func=np.log, index_to_bnds={0: (1e-5, 100)}, num_arrays=1)

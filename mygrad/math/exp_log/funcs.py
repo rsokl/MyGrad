@@ -1,6 +1,6 @@
-from .ops import *
-
 from mygrad.tensor_base import Tensor
+
+from .ops import *
 
 __all__ = ["exp",
            "exp2",
@@ -212,4 +212,3 @@ def log1p(a, constant=False):
         for ``x`` so small that ``1 + x == 1`` in floating-point
         accuracy."""
     return Tensor._op(Log1p, a, constant=constant)
-

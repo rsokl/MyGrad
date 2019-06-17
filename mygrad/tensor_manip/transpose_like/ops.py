@@ -1,5 +1,6 @@
-from mygrad.operation_base import Operation
 import numpy as np
+
+from mygrad.operation_base import Operation
 
 __all__ = ["Tensor_Transpose_Property",
            "Transpose",

@@ -1,5 +1,6 @@
-from mygrad.operation_base import Operation, BroadcastableOp
 import numpy as np
+
+from mygrad.operation_base import BroadcastableOp, Operation
 
 __all__ = ["Exp", "Exp2", "Expm1",
            "Log", "Log2", "Log10", "Log1p",

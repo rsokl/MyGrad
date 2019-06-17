@@ -2,9 +2,9 @@
 Defines the base class for mathematical operations capable of back-propagating
 gradients to their input tensors."""
 
-from mygrad._utils import reduce_broadcast
-
 import numpy as np
+
+from mygrad._utils import reduce_broadcast
 
 __all__ = ["Operation",
            "BroadcastableOp"]

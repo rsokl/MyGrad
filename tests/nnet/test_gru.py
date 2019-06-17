@@ -1,14 +1,13 @@
-from mygrad.tensor_base import Tensor
-from mygrad.nnet.layers import gru
-from mygrad.nnet.activations import tanh, sigmoid
-from mygrad import matmul
-
-import hypothesis.strategies as st
-from hypothesis import given, settings
 import hypothesis.extra.numpy as hnp
-
+import hypothesis.strategies as st
 import numpy as np
+from hypothesis import given, settings
 from numpy.testing import assert_allclose
+
+from mygrad import matmul
+from mygrad.nnet.activations import sigmoid, tanh
+from mygrad.nnet.layers import gru
+from mygrad.tensor_base import Tensor
 
 
 def dense(x, y): return matmul(x, y)

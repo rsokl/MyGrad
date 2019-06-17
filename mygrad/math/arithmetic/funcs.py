@@ -1,7 +1,18 @@
-from .ops import Add, Subtract, Power, Square, Divide, Multiply, MultiplySequence, AddSequence
-from .ops import Positive, Negative, Reciprocal
 from mygrad.tensor_base import Tensor
 
+from .ops import (
+    Add,
+    AddSequence,
+    Divide,
+    Multiply,
+    MultiplySequence,
+    Negative,
+    Positive,
+    Power,
+    Reciprocal,
+    Square,
+    Subtract,
+)
 
 __all__ = ["add",
            "subtract",

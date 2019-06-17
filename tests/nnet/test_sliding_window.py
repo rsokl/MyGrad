@@ -1,12 +1,10 @@
-from mygrad.nnet.layers.utils import sliding_window_view
-
+import hypothesis.extra.numpy as hnp
+import hypothesis.strategies as st
 import numpy as np
+from hypothesis import given, settings
 from numpy.testing import assert_allclose
 
-import hypothesis.strategies as st
-from hypothesis import given, settings
-import hypothesis.extra.numpy as hnp
-
+from mygrad.nnet.layers.utils import sliding_window_view
 
 dtype_strat_numpy = st.sampled_from((np.int8, np.int16, np.int32, np.int64,
                                      np.float16, np.float32, np.float64))
@@ -60,4 +58,3 @@ def test_memory_details(dtype):
     assert not y.flags["WRITEABLE"]
     assert np.shares_memory(x, y)
     assert_allclose(actual=y, desired=soln)
-

@@ -1,14 +1,20 @@
-from tests.custom_strategies import broadcastable_shape, choices, integer_index
-from tests.custom_strategies import slice_index, basic_index, adv_integer_index, valid_axes
-
-from hypothesis import given, note
-import hypothesis.strategies as st
-import hypothesis.extra.numpy as hnp
-
 from numbers import Real
+from typing import List, Tuple
 
+import hypothesis.extra.numpy as hnp
+import hypothesis.strategies as st
 import numpy as np
-from typing import Tuple, List
+from hypothesis import given, note
+
+from tests.custom_strategies import (
+    adv_integer_index,
+    basic_index,
+    broadcastable_shape,
+    choices,
+    integer_index,
+    slice_index,
+    valid_axes,
+)
 
 
 @given(seq=st.lists(elements=st.integers()),
@@ -161,4 +167,3 @@ def test_valid_axes(shape, data, permit_none, pos_only):
 
         if max_dim is not None:
             assert len(axis) <= max_dim
-

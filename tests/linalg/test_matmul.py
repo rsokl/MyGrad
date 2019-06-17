@@ -1,13 +1,11 @@
-from mygrad import matmul
-
-from tests.wrappers.uber import fwdprop_test_factory, backprop_test_factory
-from tests.custom_strategies import broadcastable_shape
-
+import hypothesis.strategies as st
 import numpy as np
+from hypothesis import settings
 from numpy.testing import assert_almost_equal
 
-import hypothesis.strategies as st
-from hypothesis import settings
+from mygrad import matmul
+from tests.custom_strategies import broadcastable_shape
+from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
 @st.composite

@@ -1,11 +1,10 @@
 """ Custom hypothesis search strategies """
+import math
 from collections.abc import Sequence
 from numbers import Integral
-import math
 
-import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
-
+import hypothesis.strategies as st
 import numpy as np
 
 __all__ = ["adv_integer_index",

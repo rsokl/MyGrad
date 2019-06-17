@@ -1,6 +1,6 @@
 import hypothesis.strategies as st
-from numpy.testing import assert_allclose
 from hypothesis import given
+from numpy.testing import assert_allclose
 
 from mygrad.tensor_base import Tensor
 

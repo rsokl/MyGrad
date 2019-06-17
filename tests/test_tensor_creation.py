@@ -1,9 +1,10 @@
-import numpy as np
-from numpy.testing import assert_array_equal
-from mygrad.tensor_creation.funcs import *
-from mygrad import Tensor
-from hypothesis import given
 import hypothesis.strategies as st
+import numpy as np
+from hypothesis import given
+from numpy.testing import assert_array_equal
+
+from mygrad import Tensor
+from mygrad.tensor_creation.funcs import *
 
 
 def check_tensor_array(tensor, array, constant):

@@ -1,21 +1,18 @@
 from copy import copy
 from itertools import chain
 
-import pytest
-
-from hypothesis import given
-import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
-from hypothesis import settings
-
+import hypothesis.strategies as st
 import numpy as np
+import pytest
+from hypothesis import given, settings
 from numpy.testing import assert_allclose
 
-from mygrad.linalg.funcs import einsum
 from mygrad import Tensor
+from mygrad.linalg.funcs import einsum
 
-from ..utils.numerical_gradient import numerical_gradient_full
 from ..custom_strategies import broadcastable_shape
+from ..utils.numerical_gradient import numerical_gradient_full
 
 
 def bool_strat():

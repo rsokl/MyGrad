@@ -1,18 +1,19 @@
-from ...wrappers.uber import fwdprop_test_factory as fwdprop_test_factory
-from ...wrappers.uber import backprop_test_factory as backprop_test_factory
-from ...custom_strategies import valid_axes
-from pytest import raises
-
-from mygrad import amax, amin, sum, mean, cumprod, cumsum, prod, var, std
-import mygrad
-
 from functools import partial
 
-import numpy as np
-
-from hypothesis import settings, given
-import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
+import hypothesis.strategies as st
+import numpy as np
+from hypothesis import given, settings
+from pytest import raises
+
+import mygrad
+from mygrad import amax, amin, cumprod, cumsum, mean, prod, std, sum, var
+
+from ...custom_strategies import valid_axes
+from ...wrappers.uber import (
+    backprop_test_factory as backprop_test_factory,
+    fwdprop_test_factory as fwdprop_test_factory,
+)
 
 
 def axis_arg(*arrs, min_dim=0):
@@ -297,4 +298,3 @@ def test_cumsum_fwd():
                        atol=1e-5)
 def test_cumsum_bkwd():
     pass
-

@@ -1,14 +1,14 @@
-import mygrad as mg
-from mygrad.tensor_base import Tensor
-from mygrad.nnet.losses import multiclass_hinge
-
-import numpy as np
-from numpy.testing import assert_allclose
-import hypothesis.strategies as st
-from hypothesis import given
 import hypothesis.extra.numpy as hnp
-
+import hypothesis.strategies as st
+import numpy as np
+from hypothesis import given
+from numpy.testing import assert_allclose
 from pytest import raises
+
+import mygrad as mg
+from mygrad.nnet.losses import multiclass_hinge
+from mygrad.tensor_base import Tensor
+
 
 @given(st.data())
 def test_multiclass_hinge(data):

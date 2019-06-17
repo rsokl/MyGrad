@@ -1,7 +1,8 @@
 import numpy as np
 from numpy.testing import assert_allclose
+
 from mygrad import Tensor
-from mygrad.nnet.activations import softmax, logsoftmax
+from mygrad.nnet.activations import logsoftmax, softmax
 
 
 def test_static_softmax1d():

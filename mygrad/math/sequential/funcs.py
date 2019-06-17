@@ -1,7 +1,8 @@
-from .ops import *
-from mygrad.tensor_base import Tensor
-from mygrad.math.misc.funcs import sqrt
 from mygrad.math.arithmetic.funcs import multiply
+from mygrad.math.misc.funcs import sqrt
+from mygrad.tensor_base import Tensor
+
+from .ops import *
 
 __all__ = ["sum",
            "mean",

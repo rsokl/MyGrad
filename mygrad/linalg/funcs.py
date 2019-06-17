@@ -1,8 +1,10 @@
-from .ops import *
-from mygrad import Tensor
-import mygrad as mg
-from numpy.core.einsumfunc import _parse_einsum_input
 import numpy as np
+from numpy.core.einsumfunc import _parse_einsum_input
+
+import mygrad as mg
+from mygrad import Tensor
+
+from .ops import *
 
 __all__ = ["multi_matmul", "matmul", "einsum"]
 

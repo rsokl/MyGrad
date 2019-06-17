@@ -1,12 +1,13 @@
-from mygrad.tensor_base import Tensor
+import hypothesis.extra.numpy as hnp
 import numpy as np
+from hypothesis import settings
 from numpy.testing import assert_allclose
 
-from ..wrappers.uber import fwdprop_test_factory, backprop_test_factory
-from ..custom_strategies import basic_index, adv_integer_index
-import hypothesis.extra.numpy as hnp
+from mygrad.tensor_base import Tensor
 
-from hypothesis import settings
+from ..custom_strategies import adv_integer_index, basic_index
+from ..wrappers.uber import backprop_test_factory, fwdprop_test_factory
+
 
 def test_getitem():
     x = Tensor([1, 2, 3])

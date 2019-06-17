@@ -1,11 +1,12 @@
-from mygrad import Tensor
-import mygrad as mg
-from mygrad.nnet.layers.batchnorm import batchnorm
-import numpy as np
-from numpy.testing import assert_allclose, assert_array_equal
-import hypothesis.strategies as st
-from hypothesis import given
 import hypothesis.extra.numpy as hnp
+import hypothesis.strategies as st
+import numpy as np
+from hypothesis import given
+from numpy.testing import assert_allclose, assert_array_equal
+
+import mygrad as mg
+from mygrad import Tensor
+from mygrad.nnet.layers.batchnorm import batchnorm
 
 
 def simple_batchnorm(x, gamma, beta, eps):
@@ -103,4 +104,3 @@ def test_batchnorm(x, data):
 
     if beta is not None:
         assert b2.grad is None
-

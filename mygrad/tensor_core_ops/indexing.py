@@ -1,6 +1,6 @@
-from mygrad.operation_base import Operation, BroadcastableOp
 import numpy as np
 
+from mygrad.operation_base import BroadcastableOp, Operation
 
 __all__ = ["GetItem",
            "SetItem"]
@@ -154,4 +154,3 @@ class SetItem(BroadcastableOp):
             return grad_sel
         else:
             raise IndexError
-

@@ -1,16 +1,16 @@
-import mygrad as mg
-from mygrad.tensor_base import Tensor
-from mygrad.nnet.losses import softmax_crossentropy
-from mygrad.nnet.activations import softmax
-from mygrad import log
-
-import numpy as np
-from numpy.testing import assert_allclose
-import hypothesis.strategies as st
-from hypothesis import given
 import hypothesis.extra.numpy as hnp
-
+import hypothesis.strategies as st
+import numpy as np
+from hypothesis import given
+from numpy.testing import assert_allclose
 from pytest import raises
+
+import mygrad as mg
+from mygrad import log
+from mygrad.nnet.activations import softmax
+from mygrad.nnet.losses import softmax_crossentropy
+from mygrad.tensor_base import Tensor
+
 
 @given(st.data())
 def test_softmax_crossentropy(data):

@@ -1,17 +1,23 @@
 """ Test all binary arithmetic operations, checks for appropriate broadcast behavior"""
-from ...wrappers.uber import fwdprop_test_factory, backprop_test_factory
-
-from mygrad import add, subtract, multiply, divide, power, logaddexp
-from mygrad import logaddexp2, maximum, minimum
-from mygrad import arctan2
-
 import numpy as np
-
-
-from mygrad.tensor_base import Tensor
+from hypothesis import settings
 from numpy.testing import assert_allclose
 
-from hypothesis import settings
+from mygrad import (
+    add,
+    arctan2,
+    divide,
+    logaddexp,
+    logaddexp2,
+    maximum,
+    minimum,
+    multiply,
+    power,
+    subtract,
+)
+from mygrad.tensor_base import Tensor
+
+from ...wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
 @fwdprop_test_factory(mygrad_func=add, true_func=np.add, num_arrays=2)

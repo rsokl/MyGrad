@@ -1,13 +1,16 @@
 """ Test `numerical_gradient`, `numerical_derivative`, and `broadcast_check`"""
 
-from tests.utils.numerical_gradient import numerical_gradient, numerical_gradient_full, finite_difference
-
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
-from hypothesis import given
-
 import numpy as np
+from hypothesis import given
 from numpy.testing import assert_allclose
+
+from tests.utils.numerical_gradient import (
+    finite_difference,
+    numerical_gradient,
+    numerical_gradient_full,
+)
 
 
 def unary_func(x): return x ** 2

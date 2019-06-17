@@ -1,7 +1,7 @@
-from tests.wrappers.uber import fwdprop_test_factory, backprop_test_factory
-from mygrad import sin, cos, tan, csc, sec, cot, sinc
-
 import numpy as np
+
+from mygrad import cos, cot, csc, sec, sin, sinc, tan
+from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
 @fwdprop_test_factory(num_arrays=1, mygrad_func=sin, true_func=np.sin)

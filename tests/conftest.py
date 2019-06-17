@@ -1,5 +1,6 @@
 import os
-from hypothesis import settings, Verbosity
+
+from hypothesis import Verbosity, settings
 
 settings.register_profile("ci", deadline=1000)
 settings.register_profile("intense", deadline=None, max_examples=1000)

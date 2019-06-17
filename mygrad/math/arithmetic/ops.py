@@ -1,5 +1,7 @@
 from functools import reduce
+
 import numpy as np
+
 from mygrad.operation_base import BroadcastableOp, Operation
 
 __all__ = ["Add",

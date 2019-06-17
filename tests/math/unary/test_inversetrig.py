@@ -1,7 +1,7 @@
-from tests.wrappers.uber import fwdprop_test_factory, backprop_test_factory
-
-from mygrad import arcsin, arccos, arctan, arccsc, arcsec, arccot
 import numpy as np
+
+from mygrad import arccos, arccot, arccsc, arcsec, arcsin, arctan
+from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
 @fwdprop_test_factory(mygrad_func=arcsin, true_func=np.arcsin,

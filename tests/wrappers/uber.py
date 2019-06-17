@@ -1,23 +1,24 @@
-from ..utils.numerical_gradient import numerical_gradient_full, numerical_gradient, finite_difference
-from ..custom_strategies import broadcastable_shape
+from copy import copy
+from functools import wraps
+from itertools import combinations
+from numbers import Real
+from typing import Any, Callable, Dict, Optional, Sequence, Tuple, Union
+
+import hypothesis.extra.numpy as hnp
+import hypothesis.strategies as st
+import numpy as np
+from hypothesis import assume, given, note
+from hypothesis.strategies import SearchStrategy
+from numpy.testing import assert_allclose, assert_array_equal
 
 from mygrad import Tensor
 
-from copy import copy
-from numbers import Real
-
-from hypothesis import given, assume, note
-import hypothesis.strategies as st
-import hypothesis.extra.numpy as hnp
-
-import numpy as np
-from numpy.testing import assert_allclose, assert_array_equal
-from functools import wraps
-from itertools import combinations
-
-
-from typing import Callable, Dict, Optional, Tuple, Sequence, Union, Any
-from hypothesis.strategies import SearchStrategy
+from ..custom_strategies import broadcastable_shape
+from ..utils.numerical_gradient import (
+    finite_difference,
+    numerical_gradient,
+    numerical_gradient_full,
+)
 
 
 class fwdprop_test_factory():

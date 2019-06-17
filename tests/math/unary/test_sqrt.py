@@ -1,6 +1,7 @@
-from tests.wrappers.uber import fwdprop_test_factory, backprop_test_factory
-from mygrad import sqrt
 import numpy as np
+
+from mygrad import sqrt
+from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
 @fwdprop_test_factory(mygrad_func=sqrt, true_func=np.sqrt, num_arrays=1, index_to_bnds={0: (0, 100)})

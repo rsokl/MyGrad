@@ -1,9 +1,10 @@
+from numbers import Integral
+
+import numpy as np
+
+from mygrad.nnet.layers.utils import sliding_window_view
 from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor
-import numpy as np
-from numbers import Integral
-from mygrad.nnet.layers.utils import sliding_window_view
-
 
 __all__ = ["conv_nd"]
 

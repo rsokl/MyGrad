@@ -1,13 +1,12 @@
+import hypothesis.extra.numpy as hnp
+import hypothesis.strategies as st
+import numpy as np
+from hypothesis import assume, given
+from numpy.testing import assert_allclose
+from pytest import raises
+
 from mygrad._utils import reduce_broadcast
 from tests.custom_strategies import broadcastable_shape
-import numpy as np
-
-from numpy.testing import assert_allclose
-
-from pytest import raises
-from hypothesis import given, assume
-import hypothesis.strategies as st
-import hypothesis.extra.numpy as hnp
 
 
 def test_bad_gradient_dimensionality():
@@ -74,8 +73,3 @@ def test_hybrid_broadcasting(grad):
     reduced = reduce_broadcast(grad=grad, var_shape=var_shape)
     answer = grad.sum(axis=0).sum(axis=-2, keepdims=True)
     assert_allclose(actual=reduced, desired=answer)
-
-
-
-
-

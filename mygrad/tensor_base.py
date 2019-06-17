@@ -5,16 +5,16 @@ etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 """
 
 from functools import wraps
-
-from mygrad.math.arithmetic.ops import *
-from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property
-from mygrad.tensor_core_ops.indexing import GetItem, SetItem
-from mygrad.linalg.ops import MatMul
-from mygrad.operation_base import Operation, BroadcastableOp
-from mygrad.tensor_manip.array_shape.ops import Flatten
+from typing import List, Set, Type, Union
 
 import numpy as np
-from typing import Union, Set, Type, List
+
+from mygrad.linalg.ops import MatMul
+from mygrad.math.arithmetic.ops import *
+from mygrad.operation_base import BroadcastableOp, Operation
+from mygrad.tensor_core_ops.indexing import GetItem, SetItem
+from mygrad.tensor_manip.array_shape.ops import Flatten
+from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property
 
 __all__ = ['Tensor']
 

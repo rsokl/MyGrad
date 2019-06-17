@@ -1,19 +1,16 @@
-from mygrad import Tensor
-from mygrad.operation_base import Operation
-import mygrad as mg
-from mygrad.math.arithmetic.ops import Add, Subtract, Multiply, Divide, Power
-from mygrad.math.arithmetic.ops import Negative
-from mygrad.linalg.ops import MatMul
-
-from hypothesis import given
-import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
-
-from pytest import raises
-import pytest
-
+import hypothesis.strategies as st
 import numpy as np
+import pytest
+from hypothesis import given
 from numpy.testing import assert_allclose, assert_array_equal, assert_equal
+from pytest import raises
+
+import mygrad as mg
+from mygrad import Tensor
+from mygrad.linalg.ops import MatMul
+from mygrad.math.arithmetic.ops import Add, Divide, Multiply, Negative, Power, Subtract
+from mygrad.operation_base import Operation
 
 
 def test_to_scalar():

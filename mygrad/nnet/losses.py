@@ -1,10 +1,10 @@
-from mygrad.operation_base import Operation
-from mygrad.tensor_base import Tensor
-from mygrad.math._special import logsumexp
+from numbers import Real
 
 import numpy as np
 
-from numbers import Real
+from mygrad.math._special import logsumexp
+from mygrad.operation_base import Operation
+from mygrad.tensor_base import Tensor
 
 __all__ = ["multiclass_hinge", "softmax_crossentropy", "margin_ranking_loss"]
 

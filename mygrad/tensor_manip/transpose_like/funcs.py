@@ -1,5 +1,6 @@
-from .ops import Transpose, MoveAxis, SwapAxes, Roll
 from mygrad.tensor_base import Tensor
+
+from .ops import MoveAxis, Roll, SwapAxes, Transpose
 
 __all__ = ["transpose",
            "moveaxis",

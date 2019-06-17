@@ -1,15 +1,13 @@
-from mygrad.tensor_base import Tensor
-from mygrad import matmul
-from mygrad.nnet.layers import simple_RNN
-from mygrad.nnet.activations import tanh
-
-
-import hypothesis.strategies as st
-from hypothesis import given, settings
 import hypothesis.extra.numpy as hnp
-
+import hypothesis.strategies as st
 import numpy as np
+from hypothesis import given, settings
 from numpy.testing import assert_allclose
+
+from mygrad import matmul
+from mygrad.nnet.activations import tanh
+from mygrad.nnet.layers import simple_RNN
+from mygrad.tensor_base import Tensor
 
 
 @settings(deadline=None)

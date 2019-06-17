@@ -1,10 +1,9 @@
 import numpy as np
 
+from mygrad import tanh
 from mygrad.math._special import logsumexp as _logsumexp
-
 from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor
-from mygrad import tanh
 
 __all__ = ['tanh', 'sigmoid', 'relu', 'softmax', 'logsoftmax']
 

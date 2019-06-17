@@ -1,15 +1,12 @@
-from tests.custom_strategies import valid_axes
-
-from mygrad.math._special import logsumexp
-from scipy import special
-
-from hypothesis import given
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
-
 import numpy as np
-
+from hypothesis import given
 from numpy.testing import assert_array_equal
+from scipy import special
+
+from mygrad.math._special import logsumexp
+from tests.custom_strategies import valid_axes
 
 
 @given(data=st.data(),

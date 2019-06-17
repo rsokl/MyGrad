@@ -1,11 +1,11 @@
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
-from numpy.testing import assert_allclose
 from hypothesis import given
+from numpy.testing import assert_allclose
 
-from mygrad.tensor_base import Tensor
 from mygrad import reshape
+from mygrad.tensor_base import Tensor
 
 
 def gen_shape(size):

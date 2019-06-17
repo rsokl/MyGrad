@@ -1,11 +1,11 @@
 import functools
-import mygrad as mg
 
-from hypothesis import given, note
-import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
-
+import hypothesis.strategies as st
+from hypothesis import given, note
 from numpy.testing import assert_allclose
+
+import mygrad as mg
 
 
 def multi_matmul_slow(arrays): return functools.reduce(mg.matmul, arrays)
@@ -72,4 +72,3 @@ def test_multi_matmul(num_arrays, left_1d, right_1d, output_is_constant, data):
     actual.null_gradients()
     for n, arr1 in enumerate(arrs1):
         assert arr1.grad is None, "tensor-{} did not get its gradient nulled".format(n)
-

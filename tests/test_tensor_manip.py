@@ -4,11 +4,20 @@ import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
 from hypothesis import assume, given, settings
-from mygrad import (broadcast_to, expand_dims, moveaxis, ravel, roll, squeeze,
-                    swapaxes, transpose)
-from mygrad.tensor_base import Tensor
 from numpy.testing import assert_allclose
 from pytest import raises
+
+from mygrad import (
+    broadcast_to,
+    expand_dims,
+    moveaxis,
+    ravel,
+    roll,
+    squeeze,
+    swapaxes,
+    transpose,
+)
+from mygrad.tensor_base import Tensor
 
 from .custom_strategies import broadcastable_shape, valid_axes
 from .utils.numerical_gradient import numerical_gradient_full

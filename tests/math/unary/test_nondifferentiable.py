@@ -1,14 +1,13 @@
+import hypothesis.extra.numpy as hnp
+import hypothesis.strategies as st
+import numpy as np
+from hypothesis import given
+from numpy.testing import assert_allclose
+
 import mygrad as mg
 from mygrad.tensor_base import Tensor
 
-import hypothesis.strategies as st
-from numpy.testing import assert_allclose
-
 from ...custom_strategies import valid_axes
-from hypothesis import given
-import hypothesis.extra.numpy as hnp
-
-import numpy as np
 
 dtype_strat_numpy = st.sampled_from((np.int8, np.int16, np.int32, np.int64,
                                      np.float16, np.float32, np.float64))

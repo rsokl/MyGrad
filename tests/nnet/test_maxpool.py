@@ -1,8 +1,9 @@
 import numpy as np
 from numpy.testing import assert_allclose
+from pytest import raises
+
 from mygrad.nnet.layers import max_pool
 from mygrad.tensor_base import Tensor
-from pytest import raises
 
 
 def text_constant():

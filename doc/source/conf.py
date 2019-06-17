@@ -1,5 +1,6 @@
-from mygrad import linalg
 import mygrad
+from mygrad import linalg
+
 # -*- coding: utf-8 -*-
 #
 # Configuration file for the Sphinx documentation builder.

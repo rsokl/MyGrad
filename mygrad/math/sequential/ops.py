@@ -1,7 +1,9 @@
-from mygrad.operation_base import Operation
-import numpy as np
-from functools import reduce
 from collections.abc import Sequence
+from functools import reduce
+
+import numpy as np
+
+from mygrad.operation_base import Operation
 
 __all__ = ["MaxMin", "Sum", "Mean", "Prod", "CumProd", "CumSum",
            "Variance", "StdDev"]

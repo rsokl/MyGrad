@@ -1,6 +1,7 @@
-from tests.wrappers.uber import fwdprop_test_factory, backprop_test_factory
-from mygrad import arcsinh, arccosh, arctanh, arccsch, arccoth
 import numpy as np
+
+from mygrad import arccosh, arccoth, arccsch, arcsinh, arctanh
+from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
 def _is_non_zero(x):

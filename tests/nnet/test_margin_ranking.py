@@ -1,11 +1,11 @@
+import hypothesis.extra.numpy as hnp
+import hypothesis.strategies as st
 import numpy as np
+from hypothesis import given
+from numpy.testing import assert_allclose, assert_array_equal
+
 import mygrad as mg
 from mygrad.nnet.losses import margin_ranking_loss
-
-from numpy.testing import assert_allclose, assert_array_equal
-import hypothesis.strategies as st
-from hypothesis import given
-import hypothesis.extra.numpy as hnp
 
 
 def simple_loss(x1, x2, y, margin):

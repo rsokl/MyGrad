@@ -25,4 +25,3 @@ def test_constant_arg():
     assert o_false.constant is False
     assert a._ops == {o_false.creator}
     assert b._ops == {o_false.creator}
-

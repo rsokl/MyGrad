@@ -1,6 +1,7 @@
-from mygrad.operation_base import Operation, BroadcastableOp
-from mygrad._utils import reduce_broadcast
 import numpy as np
+
+from mygrad._utils import reduce_broadcast
+from mygrad.operation_base import BroadcastableOp, Operation
 
 __all__ = ["Reshape", "Flatten", "Squeeze", "Ravel", "ExpandDims", "BroadcastTo"]
 
@@ -86,4 +87,3 @@ class BroadcastTo(BroadcastableOp):
             raise IndexError("`broadcast_to` is a unary operation. "
                              "`backward_var` was called for index {}".format(index))
         return grad
-

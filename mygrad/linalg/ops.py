@@ -1,12 +1,13 @@
-from mygrad.operation_base import BroadcastableOp
-from mygrad._utils import reduce_broadcast
-import numpy as np
-from itertools import chain
-from functools import reduce
-
-from numpy.lib.stride_tricks import as_strided
-from copy import copy
 from collections import Counter
+from copy import copy
+from functools import reduce
+from itertools import chain
+
+import numpy as np
+from numpy.lib.stride_tricks import as_strided
+
+from mygrad._utils import reduce_broadcast
+from mygrad.operation_base import BroadcastableOp
 
 __all__ = ["MatMul", "EinSum"]
 

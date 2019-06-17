@@ -1,7 +1,7 @@
 from decimal import Decimal
+from typing import List, Optional, Tuple
 
 import numpy as np
-from typing import Tuple, List, Optional
 
 from mygrad._utils import reduce_broadcast
 

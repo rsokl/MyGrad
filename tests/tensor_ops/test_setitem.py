@@ -1,17 +1,19 @@
-from mygrad.tensor_base import Tensor
+import hypothesis.extra.numpy as hnp
+import hypothesis.strategies as st
 import numpy as np
+import pytest
+from hypothesis import given, settings
 from numpy.testing import assert_allclose, assert_array_equal
 
-from hypothesis import given, settings
-import hypothesis.strategies as st
-import hypothesis.extra.numpy as hnp
+from mygrad.tensor_base import Tensor
+from mygrad.tensor_core_ops.indexing import (
+    _arr,
+    _is_bool_array_index,
+    _is_int_array_index,
+)
 
-import pytest
-
+from ..custom_strategies import adv_integer_index, basic_index, broadcastable_shape
 from ..utils.numerical_gradient import numerical_gradient_full
-from ..custom_strategies import basic_index, adv_integer_index, broadcastable_shape
-
-from mygrad.tensor_core_ops.indexing import _arr, _is_bool_array_index, _is_int_array_index
 
 
 # test utilties used by setitem

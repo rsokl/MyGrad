@@ -1,7 +1,7 @@
-from tests.wrappers.uber import fwdprop_test_factory, backprop_test_factory
-from mygrad import sinh, cosh, tanh, csch, sech, coth
-
 import numpy as np
+
+from mygrad import cosh, coth, csch, sech, sinh, tanh
+from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
 def _is_nonzero(x):

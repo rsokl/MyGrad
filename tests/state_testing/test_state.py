@@ -8,16 +8,22 @@ any patterns, invoke `null_gradients` and `clear_graph` arbitrarily as well.
 The values and gradients of the nodes in the mygrad and naive graphs must match as an invariant to
 any permutation of test states (i.e. permutations of the aforementioned rules)"""
 
-import hypothesis.strategies as st
-from hypothesis.stateful import Bundle, RuleBasedStateMachine, rule, invariant, precondition
-from numpy.testing import assert_equal, assert_almost_equal
-from mygrad import Tensor, add, multiply
-
-from pytest import raises
-
 from typing import List, Tuple
 
-from .simple_graph import _add, _multiply, Node
+import hypothesis.strategies as st
+from hypothesis.stateful import (
+    Bundle,
+    RuleBasedStateMachine,
+    invariant,
+    precondition,
+    rule,
+)
+from numpy.testing import assert_almost_equal, assert_equal
+from pytest import raises
+
+from mygrad import Tensor, add, multiply
+
+from .simple_graph import Node, _add, _multiply
 
 
 def _node_ID_str(num): return "v{}".format(num + 1)
@@ -113,4 +119,3 @@ class GraphCompare(RuleBasedStateMachine):
 
 
 TestGraphComparison = GraphCompare.TestCase
-

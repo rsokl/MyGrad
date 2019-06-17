@@ -1,5 +1,6 @@
-from .ops import *
 from mygrad.tensor_base import Tensor
+
+from .ops import *
 
 __all__ = ["sin",
            "sinc",

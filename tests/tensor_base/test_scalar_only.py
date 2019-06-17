@@ -1,13 +1,11 @@
 import hypothesis.strategies as st
-from hypothesis import given
-
-from pytest import raises
-import pytest
-
 import numpy as np
+import pytest
+from hypothesis import given
+from pytest import raises
 
+from mygrad.operation_base import BroadcastableOp, Operation
 from mygrad.tensor_base import Tensor
-from mygrad.operation_base import Operation, BroadcastableOp
 
 
 class ScalarOnlyOp(BroadcastableOp):

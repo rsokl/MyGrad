@@ -1,6 +1,7 @@
-from mygrad.tensor_base import Tensor
-from mygrad import multiply_sequence, add_sequence
 from numpy.testing import assert_allclose
+
+from mygrad import add_sequence, multiply_sequence
+from mygrad.tensor_base import Tensor
 
 
 def test_seq_add():

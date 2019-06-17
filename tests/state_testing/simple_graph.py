@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class SimpleOperation:
     def __call__(self, *input_vars):
         self.variables = input_vars

@@ -1,19 +1,17 @@
 """ Test conv fwd-prop and back-prop for ND convs"""
 
-from ..wrappers.uber import backprop_test_factory, fwdprop_test_factory
-from ..utils.numerical_gradient import numerical_gradient_full
-
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
-from hypothesis import given, assume, settings
-
+import numpy as np
+from hypothesis import assume, given, settings
+from numpy.testing import assert_allclose
 from pytest import raises
 
-import numpy as np
-from mygrad.nnet.layers import conv_nd
 from mygrad import Tensor
+from mygrad.nnet.layers import conv_nd
 
-from numpy.testing import assert_allclose
+from ..utils.numerical_gradient import numerical_gradient_full
+from ..wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
 def get_outshape(x_shape, w_shape, stride, dilation):
@@ -309,6 +307,3 @@ def test_conv_ND_bkwd(data, shape, num_filters, num_batch, num_channel):
     for n, (arr, d_num) in enumerate(zip((x, kernels), grads_numerical)):
         assert_allclose(arr.grad, d_num, atol=1e-4, rtol=1e-4,
                         err_msg="arr-{}: numerical derivative and mygrad derivative do not match".format(n))
-
-
-

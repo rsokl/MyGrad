@@ -1,6 +1,8 @@
-from graphviz import Digraph
-from mygrad.tensor_base import Tensor
 import numpy as np
+from graphviz import Digraph
+
+from mygrad.tensor_base import Tensor
+
 
 def build_graph(fin, names=None, *, render=True, save=False, dims=False, dtypes=False, sum_stats=False):
     """ Builds and renders a computational graph.
