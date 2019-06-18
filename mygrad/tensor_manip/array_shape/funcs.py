@@ -1,6 +1,6 @@
-from .ops import *
 from mygrad.tensor_base import Tensor
 
+from .ops import *
 
 __all__ = ["reshape", "squeeze", "ravel", "expand_dims", "broadcast_to"]
 

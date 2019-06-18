@@ -1,15 +1,15 @@
-from mygrad.operation_base import Operation, BroadcastableOp
 import numpy as np
 
+from mygrad.operation_base import BroadcastableOp, Operation
 
-__all__ = ["GetItem",
-           "SetItem"]
+__all__ = ["GetItem", "SetItem"]
 
 
 class GetItem(Operation):
     """ Defines the __getitem__ interface for a Tensor, supporting back-propagation
 
         Supports back-propagation through all valid numpy-indexing (basic, advanced, mixed, etc.)"""
+
     def __call__(self, a, index):
         """ a[index]
 
@@ -57,7 +57,10 @@ def _is_int_array_index(index):
         Returns
         -------
         bool """
-    return any(np.issubdtype(np.asarray(ind).dtype, np.int_) and np.asarray(ind).ndim for ind in index)
+    return any(
+        np.issubdtype(np.asarray(ind).dtype, np.int_) and np.asarray(ind).ndim
+        for ind in index
+    )
 
 
 def _is_bool_array_index(index):
@@ -79,6 +82,7 @@ class SetItem(BroadcastableOp):
 
         Supports back-propagation through all valid numpy-indexing (basic, advanced, mixed, etc.),
         as well as """
+
     def __call__(self, a, b, index):
         """ a[index] = b
 
@@ -127,23 +131,30 @@ class SetItem(BroadcastableOp):
             # should be propagated back into b. Thus we must check to see if any items are
             # being set redundantly, and mask out any elements in `grad` corresponding to
             # the elements in `b` that weren't actually set.
-            if not np.shares_memory(grad_sel, grad) and grad_sel.size > 0 and grad_sel.ndim > 0:
-                if not _is_bool_array_index(self.index) and _is_int_array_index(self.index):
-                    # create an array of unique elements, and see if indexing into it produces
-                    # any redundant elements
-                    unique = _arr(*grad.shape)
-                    sub_sel = unique[self.index].flat
-                    elements, first_inds, = np.unique(np.flip(sub_sel, axis=0), return_index=True)
-                    if len(first_inds) < len(sub_sel):
-                        # one or more elements were set redundantly, identify the entries in `b`
-                        # that actually were set to those elements (the last-most set-item calls
-                        # for those elements) and propagate only the corresponding elements from grad
+            if (
+                not np.shares_memory(grad_sel, grad)
+                and grad_sel.size > 0
+                and grad_sel.ndim > 0
+                and not _is_bool_array_index(self.index)
+                and _is_int_array_index(self.index)
+            ):
+                # create an array of unique elements, and see if indexing into it produces
+                # any redundant elements
+                unique = _arr(*grad.shape)
+                sub_sel = unique[self.index].flat
+                elements, first_inds, = np.unique(
+                    np.flip(sub_sel, axis=0), return_index=True
+                )
+                if len(first_inds) < len(sub_sel):
+                    # one or more elements were set redundantly, identify the entries in `b`
+                    # that actually were set to those elements (the last-most set-item calls
+                    # for those elements) and propagate only the corresponding elements from grad
 
-                        first_inds = (len(sub_sel) - 1) - first_inds
-                        mask = np.zeros_like(sub_sel)
-                        mask[first_inds] = 1
-                        mask = mask.reshape(grad_sel.shape)
-                        grad_sel *= mask
+                    first_inds = (len(sub_sel) - 1) - first_inds
+                    mask = np.zeros_like(sub_sel)
+                    mask[first_inds] = 1
+                    mask = mask.reshape(grad_sel.shape)
+                    grad_sel *= mask
 
             # handle the edge case of "projecting down" on setitem. E.g:
             # x = Tensor([0, 1, 2])
@@ -154,4 +165,3 @@ class SetItem(BroadcastableOp):
             return grad_sel
         else:
             raise IndexError
-

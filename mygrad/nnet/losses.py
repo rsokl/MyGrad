@@ -1,10 +1,10 @@
-from mygrad.operation_base import Operation
-from mygrad.tensor_base import Tensor
-from mygrad.math._special import logsumexp
+from numbers import Real
 
 import numpy as np
 
-from numbers import Real
+from mygrad.math._special import logsumexp
+from mygrad.operation_base import Operation
+from mygrad.tensor_base import Tensor
 
 __all__ = ["multiclass_hinge", "softmax_crossentropy", "margin_ranking_loss"]
 
@@ -30,24 +30,30 @@ def _check_loss_inputs(x, y_true):
         `y_true` must be a shape-(N,) array-like object
     """
     if not x.ndim == 2:
-        raise ValueError('`x` must be a 2-dimensional array-like object, got {}-dim'.format(x.ndim))
+        raise ValueError(
+            "`x` must be a 2-dimensional array-like object, got {}-dim".format(x.ndim)
+        )
 
     if isinstance(y_true, Tensor):
         y_true = y_true.data
 
     y_true = np.asarray(y_true)
     if not np.issubdtype(y_true.dtype, np.integer):
-        raise TypeError("`y_true` must be an integer-type "
-                        "array-like object, got {}".format(y_true.dtype))
+        raise TypeError(
+            "`y_true` must be an integer-type "
+            "array-like object, got {}".format(y_true.dtype)
+        )
 
     if y_true.ndim != 1 or y_true.shape[0] != x.shape[0]:
-        raise ValueError('`y_true` must be a shape-(N,) array: \n'
-                         '\tExpected shape-{}\n'
-                         '\tGot shape-{}'.format((x.shape[0],), y_true.shape))
+        raise ValueError(
+            "`y_true` must be a shape-(N,) array: \n"
+            "\tExpected shape-{}\n"
+            "\tGot shape-{}".format((x.shape[0],), y_true.shape)
+        )
 
 
 class MulticlassHinge(Operation):
-    def __call__(self, a, y, hinge=1.):
+    def __call__(self, a, y, hinge=1.0):
         """ Computes the average multiclass hinge loss
 
         Parameters
@@ -95,7 +101,7 @@ class MulticlassHinge(Operation):
         return grad * self.back
 
 
-def multiclass_hinge(x, y_true, hinge=1., constant=False):
+def multiclass_hinge(x, y_true, hinge=1.0, constant=False):
     """ Parameters
         ----------
         x : array_like, shape=(N, K)
@@ -156,7 +162,7 @@ class SoftmaxCrossEntropy(Operation):
         loss = -np.sum(log_softmax[label_locs]) / scores.shape[0]
 
         self.back = np.exp(log_softmax)
-        self.back[label_locs] -= 1.
+        self.back[label_locs] -= 1.0
         self.back /= scores.shape[0]
         return loss
 
@@ -297,10 +303,10 @@ class MarginRanking(Operation):
         M = margin - self.y * (x1 - x2)
         not_thresh = M <= 0
         loss = M
-        loss[not_thresh] = 0.
+        loss[not_thresh] = 0.0
 
         self._grad = np.ones_like(M)
-        self._grad[not_thresh] = 0.
+        self._grad[not_thresh] = 0.0
         self._grad /= M.size
         return np.mean(loss)
 
@@ -352,7 +358,9 @@ def margin_ranking_loss(x1, x2, y, margin, constant=False):
         y = y.data
 
     y = np.asarray(y)
-    assert y.ndim == 0 or (y.ndim == 1 and len(y) == len(x1)), "`y` must be a scalar or shape-(N,) array of ones"
+    assert y.ndim == 0 or (
+        y.ndim == 1 and len(y) == len(x1)
+    ), "`y` must be a scalar or shape-(N,) array of ones"
     if y.ndim:
         assert y.size == 1 or len(y) == len(x1)
         if x1.ndim == 2:

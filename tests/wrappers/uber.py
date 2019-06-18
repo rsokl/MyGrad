@@ -1,26 +1,27 @@
-from ..utils.numerical_gradient import numerical_gradient_full, numerical_gradient, finite_difference
-from ..custom_strategies import broadcastable_shape
+from copy import copy
+from functools import wraps
+from itertools import combinations
+from numbers import Real
+from typing import Any, Callable, Dict, Optional, Sequence, Tuple, Union
+
+import hypothesis.extra.numpy as hnp
+import hypothesis.strategies as st
+import numpy as np
+from hypothesis import assume, given, note
+from hypothesis.strategies import SearchStrategy
+from numpy.testing import assert_allclose, assert_array_equal
 
 from mygrad import Tensor
 
-from copy import copy
-from numbers import Real
-
-from hypothesis import given, assume, note
-import hypothesis.strategies as st
-import hypothesis.extra.numpy as hnp
-
-import numpy as np
-from numpy.testing import assert_allclose, assert_array_equal
-from functools import wraps
-from itertools import combinations
+from ..custom_strategies import broadcastable_shape
+from ..utils.numerical_gradient import (
+    finite_difference,
+    numerical_gradient,
+    numerical_gradient_full,
+)
 
 
-from typing import Callable, Dict, Optional, Tuple, Sequence, Union, Any
-from hypothesis.strategies import SearchStrategy
-
-
-class fwdprop_test_factory():
+class fwdprop_test_factory:
     """ Decorator
 
         Randomly draw N arrays x, (...) to verify that a mygrad function,
@@ -47,15 +48,21 @@ class fwdprop_test_factory():
         ... def test_add():
         ...     pass
         """
-    def __init__(self, *,
-                 mygrad_func: Callable[[Tensor], Tensor],
-                 true_func: Callable[[np.ndarray], np.ndarray],
-                 num_arrays: int,
-                 index_to_bnds: Dict[int, Tuple[int, int]] = {},
-                 index_to_no_go: Dict[int, Sequence[int]] = {},
-                 kwargs: Union[Callable, Dict[str, Union[Any, Callable[[Any], SearchStrategy]]]] = {},
-                 index_to_arr_shapes: Dict[int, Union[Sequence[int], SearchStrategy]] = {},
-                 assumptions: Optional[Callable[..., bool]] = None):
+
+    def __init__(
+        self,
+        *,
+        mygrad_func: Callable[[Tensor], Tensor],
+        true_func: Callable[[np.ndarray], np.ndarray],
+        num_arrays: int,
+        index_to_bnds: Dict[int, Tuple[int, int]] = {},
+        index_to_no_go: Dict[int, Sequence[int]] = {},
+        kwargs: Union[
+            Callable, Dict[str, Union[Any, Callable[[Any], SearchStrategy]]]
+        ] = {},
+        index_to_arr_shapes: Dict[int, Union[Sequence[int], SearchStrategy]] = {},
+        assumptions: Optional[Callable[..., bool]] = None
+    ):
         """
         Parameters
         ----------
@@ -112,9 +119,13 @@ class fwdprop_test_factory():
         Returns
         -------
         hypothesis.searchstrategy.SearchStrategy"""
-        return hnp.arrays(shape=self.index_to_arr_shapes.get(0, hnp.array_shapes(max_side=3, max_dims=3)),
-                          dtype=float,
-                          elements=st.floats(*self.index_to_bnds.get(0, (-10., 10.))))
+        return hnp.arrays(
+            shape=self.index_to_arr_shapes.get(
+                0, hnp.array_shapes(max_side=3, max_dims=3)
+            ),
+            dtype=float,
+            elements=st.floats(*self.index_to_bnds.get(0, (-10.0, 10.0))),
+        )
 
     def gen_other_array(self, x: np.ndarray, i: int) -> st.SearchStrategy:
         """
@@ -130,38 +141,52 @@ class fwdprop_test_factory():
         Returns
         -------
         hypothesis.searchstrategy.SearchStrategy"""
-        return hnp.arrays(shape=self.index_to_arr_shapes.get(i, broadcastable_shape(x.shape)),
-                          dtype=float,
-                          elements=st.floats(*self.index_to_bnds.get(i, (-10., 10.))))
+        return hnp.arrays(
+            shape=self.index_to_arr_shapes.get(i, broadcastable_shape(x.shape)),
+            dtype=float,
+            elements=st.floats(*self.index_to_bnds.get(i, (-10.0, 10.0))),
+        )
 
     def __call__(self, f):
-        @given(x=self.gen_first_array(),
-               constant=st.booleans(),
-               data=st.data())
+        @given(x=self.gen_first_array(), constant=st.booleans(), data=st.data())
         @wraps(f)
         def wrapper(x, constant, data):
             arrs = [x]  # list of drawn arrays to feed to functions
 
-            for i in range(1, self.num_arrays):  # draw additional arrays according to `num_arrays`
+            for i in range(
+                1, self.num_arrays
+            ):  # draw additional arrays according to `num_arrays`
                 y = data.draw(self.gen_other_array(x, i), label="array-{}".format(i))
                 arrs.append(y)
 
-            arr_copies = [copy(arr) for arr in arrs]  # list of array-copies to check for mutation
+            arr_copies = [
+                copy(arr) for arr in arrs
+            ]  # list of array-copies to check for mutation
 
             if callable(self.kwargs):
                 kwargs = data.draw(self.kwargs(*arrs))
                 if not isinstance(kwargs, dict):
-                    raise TypeError("`kwargs` was a search strategy. This needs to draw dictionaries,"
-                                    "instead drew: {}".format(kwargs))
+                    raise TypeError(
+                        "`kwargs` was a search strategy. This needs to draw dictionaries,"
+                        "instead drew: {}".format(kwargs)
+                    )
             else:
                 # set or draw keyword args to be passed to functions
-                kwargs = {k: (data.draw(v(*arrs), label="kwarg: {}".format(k)) if callable(v) else v)
-                          for k, v in self.kwargs.items()}
+                kwargs = {
+                    k: (
+                        data.draw(v(*arrs), label="kwarg: {}".format(k))
+                        if callable(v)
+                        else v
+                    )
+                    for k, v in self.kwargs.items()
+                }
 
             if self.assumptions is not None:
                 assume(self.assumptions(*arrs, **kwargs))
 
-            for i, arr in enumerate(arrs):  # assure arrays don't contain forbidden values
+            for i, arr in enumerate(
+                arrs
+            ):  # assure arrays don't contain forbidden values
                 for value in self.index_to_no_go.get(i, ()):
                     assume(np.all(arr != value))
 
@@ -170,22 +195,35 @@ class fwdprop_test_factory():
             tensor_out = o.data
             true_out = self.true_func(*arrs, **kwargs)
 
-            assert isinstance(o, Tensor), \
-                "`mygrad_func` returned type {}, should return `mygrad.Tensor`".format(type(o))
-            assert o.constant is constant, \
-                "`mygrad_func` returned tensor.constant={}, should be constant={}".format(o.constant, constant)
+            assert isinstance(
+                o, Tensor
+            ), "`mygrad_func` returned type {}, should return `mygrad.Tensor`".format(
+                type(o)
+            )
+            assert (
+                o.constant is constant
+            ), "`mygrad_func` returned tensor.constant={}, should be constant={}".format(
+                o.constant, constant
+            )
 
-            assert_allclose(actual=tensor_out, desired=true_out,
-                            err_msg="`mygrad_func(x)` and `true_func(x)` produce different results",
-                            atol=1e-7)
+            assert_allclose(
+                actual=tensor_out,
+                desired=true_out,
+                err_msg="`mygrad_func(x)` and `true_func(x)` produce different results",
+                atol=1e-7,
+            )
 
             for n, (arr, arr_copy) in enumerate(zip(arrs, arr_copies)):
-                assert_array_equal(arr, arr_copy,
-                                   err_msg="arr-{} was mutated during forward prop".format(n))
+                assert_array_equal(
+                    arr,
+                    arr_copy,
+                    err_msg="arr-{} was mutated during forward prop".format(n),
+                )
+
         return wrapper
 
 
-class backprop_test_factory():
+class backprop_test_factory:
     """ Decorator
 
         Randomly draw arrays x, ... to verify that a binary mygrad function,
@@ -211,22 +249,29 @@ class backprop_test_factory():
         ... def test_add():
         ...     pass"""
 
-    def __init__(self, *,
-                 mygrad_func: Callable[[Tensor], Tensor],
-                 true_func:  Callable[[np.ndarray], np.ndarray],
-                 num_arrays: int,
-                 index_to_bnds: Optional[Dict[int, Tuple[int, int]]] = None,
-                 index_to_no_go: Optional[Dict[int, Sequence[int]]] = None,
-                 index_to_arr_shapes: Optional[Dict[int, Union[Sequence[int], SearchStrategy]]] = None,
-                 index_to_unique: Optional[Union[Dict[int, bool], bool]] = None,
-                 elements_strategy: Optional[SearchStrategy] = None,
-                 kwargs: Optional[Union[Callable, Dict[str, Union[Any, Callable[[Any], SearchStrategy]]]]] = None,
-                 h: float=1e-20,
-                 rtol: float=1e-8,
-                 atol: float=1e-8,
-                 vary_each_element: bool=False,
-                 finite_difference=False,
-                 assumptions: Optional[Callable[..., bool]] = None):
+    def __init__(
+        self,
+        *,
+        mygrad_func: Callable[[Tensor], Tensor],
+        true_func: Callable[[np.ndarray], np.ndarray],
+        num_arrays: int,
+        index_to_bnds: Optional[Dict[int, Tuple[int, int]]] = None,
+        index_to_no_go: Optional[Dict[int, Sequence[int]]] = None,
+        index_to_arr_shapes: Optional[
+            Dict[int, Union[Sequence[int], SearchStrategy]]
+        ] = None,
+        index_to_unique: Optional[Union[Dict[int, bool], bool]] = None,
+        elements_strategy: Optional[SearchStrategy] = None,
+        kwargs: Optional[
+            Union[Callable, Dict[str, Union[Any, Callable[[Any], SearchStrategy]]]]
+        ] = None,
+        h: float = 1e-20,
+        rtol: float = 1e-8,
+        atol: float = 1e-8,
+        vary_each_element: bool = False,
+        finite_difference=False,
+        assumptions: Optional[Callable[..., bool]] = None
+    ):
         """
         Parameters
         ----------
@@ -292,9 +337,13 @@ class backprop_test_factory():
 
         index_to_bnds = index_to_bnds if index_to_bnds is not None else {}
         index_to_no_go = index_to_no_go if index_to_no_go is not None else {}
-        index_to_arr_shapes = index_to_arr_shapes if index_to_arr_shapes is not None else {}
+        index_to_arr_shapes = (
+            index_to_arr_shapes if index_to_arr_shapes is not None else {}
+        )
         index_to_unique = index_to_unique if index_to_unique is not None else {}
-        self.elements_strategy = elements_strategy if elements_strategy is not None else st.floats
+        self.elements_strategy = (
+            elements_strategy if elements_strategy is not None else st.floats
+        )
         kwargs = kwargs if kwargs is not None else {}
 
         assert num_arrays > 0
@@ -309,7 +358,9 @@ class backprop_test_factory():
             index_to_no_go = {k: index_to_no_go for k in range(num_arrays)}
         self.index_to_no_go = index_to_no_go
 
-        if isinstance(index_to_arr_shapes, (tuple, list, np.ndarray, st.SearchStrategy)):
+        if isinstance(
+            index_to_arr_shapes, (tuple, list, np.ndarray, st.SearchStrategy)
+        ):
             index_to_arr_shapes = {k: index_to_arr_shapes for k in range(num_arrays)}
             self.index_to_arr_shapes = index_to_arr_shapes
         self.index_to_arr_shapes = index_to_arr_shapes
@@ -335,14 +386,21 @@ class backprop_test_factory():
         self.finite_difference = finite_difference
 
         if finite_difference and vary_each_element:
-            raise NotImplementedError("`finite_difference` does not have an implementation supporting "
-                                      "\n`vary_each_element=True`")
+            raise NotImplementedError(
+                "`finite_difference` does not have an implementation supporting "
+                "\n`vary_each_element=True`"
+            )
 
         if finite_difference and h < 1e-8:
             from warnings import warn
-            warn("The `finite_difference` method is being used with an h-value of {}."
-                 "\nThis is likely too small, and was intended for use with the complex-step "
-                 "\nmethod. Please update `h` in this call to `backprop_test_factory`".format(h))
+
+            warn(
+                "The `finite_difference` method is being used with an h-value of {}."
+                "\nThis is likely too small, and was intended for use with the complex-step "
+                "\nmethod. Please update `h` in this call to `backprop_test_factory`".format(
+                    h
+                )
+            )
 
     def gen_first_array(self) -> st.SearchStrategy:
         """
@@ -351,10 +409,14 @@ class backprop_test_factory():
         Returns
         -------
         hypothesis.searchstrategy.SearchStrategy"""
-        return hnp.arrays(shape=self.index_to_arr_shapes.get(0, hnp.array_shapes(max_side=3, max_dims=3)),
-                          dtype=float,
-                          elements=self.elements_strategy(*self.index_to_bnds.get(0, (-100, 100))),
-                          unique=self.index_to_unique.get(0, False))
+        return hnp.arrays(
+            shape=self.index_to_arr_shapes.get(
+                0, hnp.array_shapes(max_side=3, max_dims=3)
+            ),
+            dtype=float,
+            elements=self.elements_strategy(*self.index_to_bnds.get(0, (-100, 100))),
+            unique=self.index_to_unique.get(0, False),
+        )
 
     def gen_other_array(self, x: np.ndarray, i: int) -> st.SearchStrategy:
         """
@@ -370,41 +432,54 @@ class backprop_test_factory():
         Returns
         -------
         hypothesis.searchstrategy.SearchStrategy"""
-        return hnp.arrays(shape=self.index_to_arr_shapes.get(i, broadcastable_shape(x.shape)),
-                          dtype=float,
-                          elements=self.elements_strategy(*self.index_to_bnds.get(i, (-100, 100))),
-                          unique=self.index_to_unique.get(i, False))
+        return hnp.arrays(
+            shape=self.index_to_arr_shapes.get(i, broadcastable_shape(x.shape)),
+            dtype=float,
+            elements=self.elements_strategy(*self.index_to_bnds.get(i, (-100, 100))),
+            unique=self.index_to_unique.get(i, False),
+        )
 
     def __call__(self, f):
-        @given(x=self.gen_first_array(),
-               data=st.data())
+        @given(x=self.gen_first_array(), data=st.data())
         @wraps(f)
         def wrapper(x, data):
             arrs = [x]  # list of drawn arrays to feed to functions
             # draw additional arrays according to `num_arrays`
             for i in range(1, self.num_arrays):
-                arrs.append(data.draw(self.gen_other_array(x, i), label="array-{}".format(i)))
+                arrs.append(
+                    data.draw(self.gen_other_array(x, i), label="array-{}".format(i))
+                )
 
             arrs = tuple(Tensor(arr) for arr in arrs)
             arr_copies = tuple(copy(arr) for arr in arrs)
 
             if callable(self.kwargs):
-                kwargs = data.draw(self.kwargs(*arrs), label='kwargs')
+                kwargs = data.draw(self.kwargs(*arrs), label="kwargs")
                 if not isinstance(kwargs, dict):
-                    raise TypeError("`kwargs` was a search strategy. This needs to draw dictionaries,"
-                                    "instead drew: {}".format(kwargs))
+                    raise TypeError(
+                        "`kwargs` was a search strategy. This needs to draw dictionaries,"
+                        "instead drew: {}".format(kwargs)
+                    )
             else:
                 # The keyword args to be passed to `self.op`. If any provided argument is callable
                 # it is assumed to by a hypothesis search strategy, and all of the drawn arrays will
                 # be passed to the strategy, in order to draw a value for that keyword argument.
                 # Otherwise the provided value is used as-is.
-                kwargs = {k: (data.draw(v(*arrs), label="kwarg: {}".format(k)) if callable(v) else v)
-                          for k, v in self.kwargs.items()}
+                kwargs = {
+                    k: (
+                        data.draw(v(*arrs), label="kwarg: {}".format(k))
+                        if callable(v)
+                        else v
+                    )
+                    for k, v in self.kwargs.items()
+                }
 
             if self.assumptions is not None:
                 assume(self.assumptions(*arrs, **kwargs))
 
-            for i, arr in enumerate(arrs):  # assure arrays don't contain forbidden values
+            for i, arr in enumerate(
+                arrs
+            ):  # assure arrays don't contain forbidden values
                 for value in self.index_to_no_go.get(i, ()):
                     assume(np.all(arr != value))
 
@@ -412,11 +487,15 @@ class backprop_test_factory():
             out = self.op(*arrs, **kwargs)
 
             # gradient to be backpropped through this operation
-            grad = data.draw(hnp.arrays(shape=out.shape,
-                                        dtype=float,
-                                        elements=st.floats(-10, 10),
-                                        unique=True),
-                             label="grad")
+            grad = data.draw(
+                hnp.arrays(
+                    shape=out.shape,
+                    dtype=float,
+                    elements=st.floats(-10, 10),
+                    unique=True,
+                ),
+                label="grad",
+            )
             grad_copy = copy(grad)  # keep a copy to check for later mutations
 
             # compute analytic derivatives via mygrad-backprop
@@ -431,25 +510,39 @@ class backprop_test_factory():
             if not self.finite_difference:
                 # compute derivatives via numerical approximation of derivative
                 # using the complex-step method
-                numerical_grad = numerical_gradient_full if self.vary_each_element else numerical_gradient
+                numerical_grad = (
+                    numerical_gradient_full
+                    if self.vary_each_element
+                    else numerical_gradient
+                )
 
             else:
                 numerical_grad = finite_difference
-            grads_numerical = numerical_grad(self.true_func, *(i.data for i in arrs),
-                                             back_grad=grad, kwargs=kwargs)
+            grads_numerical = numerical_grad(
+                self.true_func, *(i.data for i in arrs), back_grad=grad, kwargs=kwargs
+            )
 
             # check that the analytic and numeric derivatives match
             for n, (arr, d_num) in enumerate(zip(arrs, grads_numerical)):
-                assert_allclose(arr.grad, d_num, **self.tolerances,
-                                err_msg="arr-{}: mygrad derivative and numerical derivative do not match".format(n))
+                assert_allclose(
+                    arr.grad,
+                    d_num,
+                    **self.tolerances,
+                    err_msg="arr-{}: mygrad derivative and numerical derivative do not match".format(
+                        n
+                    )
+                )
 
                 # check that none of the set derivatives is a view of `grad`
-                assert not np.shares_memory(arr.grad, grad), "arr-{}.grad stores a view of grad".format(n)
+                assert not np.shares_memory(
+                    arr.grad, grad
+                ), "arr-{}.grad stores a view of grad".format(n)
 
             # check that none of the set derivatives are views of one another
             for arr_i, arr_j in combinations(arrs, 2):
-                assert not np.shares_memory(arr_i.grad, arr_j.grad), \
-                    "two input arrays were propagated views of the same gradient"
+                assert not np.shares_memory(
+                    arr_i.grad, arr_j.grad
+                ), "two input arrays were propagated views of the same gradient"
 
             # verify that null_gradients works
             out.null_gradients()
@@ -457,10 +550,15 @@ class backprop_test_factory():
 
             # check if any of the input-arrays were mutated
             for n, (arr, arr_copy) in enumerate(zip(arrs, arr_copies)):
-                assert_array_equal(arr.data, arr_copy.data,
-                                   err_msg="arr-{} was mutated during backward prop".format(n))
+                assert_array_equal(
+                    arr.data,
+                    arr_copy.data,
+                    err_msg="arr-{} was mutated during backward prop".format(n),
+                )
 
             # check if `grad` was mutated
-            assert_array_equal(grad, grad_copy,
-                               err_msg="`grad` was mutated during backward prop")
+            assert_array_equal(
+                grad, grad_copy, err_msg="`grad` was mutated during backward prop"
+            )
+
         return wrapper

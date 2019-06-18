@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class SimpleOperation:
     def __call__(self, *input_vars):
         self.variables = input_vars
@@ -56,13 +57,15 @@ class Node:
     def backward(self, grad=None, terminal_node=False):
         if self.constant:
             return
-        grad = np.asarray(grad) if grad is not None else np.asarray(1., dtype=float)
+        grad = np.asarray(grad) if grad is not None else np.asarray(1.0, dtype=float)
         if terminal_node:
             self.grad = np.asarray(grad)
         else:
             if not terminal_node and not self._ops:
-                raise Exception("Invalid Backprop: part of the computational graph containing "
-                                "this tensor was cleared prior to backprop")
+                raise Exception(
+                    "Invalid Backprop: part of the computational graph containing "
+                    "this tensor was cleared prior to backprop"
+                )
             self.grad = np.asarray(grad if self.grad is None else self.grad + grad)
 
         if self.creator is not None:

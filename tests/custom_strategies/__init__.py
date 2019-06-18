@@ -1,34 +1,40 @@
 """ Custom hypothesis search strategies """
+import math
 from collections.abc import Sequence
 from numbers import Integral
-import math
 
-import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
-
+import hypothesis.strategies as st
 import numpy as np
 
-__all__ = ["adv_integer_index",
-           "broadcastable_shape",
-           "choices",
-           "valid_axes",
-           "basic_index"]
+__all__ = [
+    "adv_integer_index",
+    "broadcastable_shape",
+    "choices",
+    "valid_axes",
+    "basic_index",
+]
 
 
 def _check_min_max(min_val, min_dim, max_dim, param_name, max_val=None):
     if not isinstance(min_dim, Integral) or min_dim < min_val:
-        raise ValueError("`min_{name}` must be larger than {min_val}. "
-                         "Got {val}".format(min_val=min_val, name=param_name,
-                                            val=min_dim))
+        raise ValueError(
+            "`min_{name}` must be larger than {min_val}. "
+            "Got {val}".format(min_val=min_val, name=param_name, val=min_dim)
+        )
 
     if not isinstance(max_dim, Integral) or max_dim < min_dim:
-        raise ValueError("`max_{name}` must be an integer that is "
-                         "not smaller than `min_{name}`. Got {val}".format(name=param_name,
-                                                                           val=max_dim))
+        raise ValueError(
+            "`max_{name}` must be an integer that is "
+            "not smaller than `min_{name}`. Got {val}".format(
+                name=param_name, val=max_dim
+            )
+        )
     if max_val is not None and max_dim > max_val:
-        raise ValueError("`min_{name}` cannot be larger than {max_val}. "
-                         "Got {val}".format(max_val=max_val, name=param_name,
-                                            val=max_dim))
+        raise ValueError(
+            "`min_{name}` cannot be larger than {max_val}. "
+            "Got {val}".format(max_val=max_val, name=param_name, val=max_dim)
+        )
 
 
 def choices(seq, size, replace=True):
@@ -50,15 +56,16 @@ def choices(seq, size, replace=True):
     if not isinstance(size, Integral) or size < 0:
         raise ValueError("`size` must be a non-negative integer. Got {}".format(size))
     if size > len(seq) and not replace:
-        raise ValueError("`size` must not exceed the length of `seq` when `replace` is `False`")
-    if size > len(seq) and not seq:
-        raise ValueError("`size` must be 0, given an empty `seq`")
-    inds = list(range(len(seq)))
-    if replace or size == 0:
-        strat = st.tuples(*[st.sampled_from(inds)]*size)
-    else:
-        strat = st.permutations(inds)
-    return strat.map(lambda x: tuple(seq[i] for i in x[:size]))
+        raise ValueError(
+            "`size` must not exceed the length of `seq` when `replace` is `False`"
+        )
+    if not seq:
+        if size:
+            raise ValueError("`size` must be 0, given an empty `seq`")
+        return st.just(())
+    return st.lists(
+        st.sampled_from(seq), min_size=size, max_size=size, unique=not replace
+    ).map(tuple)
 
 
 @st.composite
@@ -67,13 +74,23 @@ def _rand_neg_axis(draw, axes, ndim):
     size = draw(st.integers(0, len(axes)))
     neg_inds = draw(choices(range(len(axes)), size, replace=False))
     axes = st.just(axes)
-    return draw(axes.map(lambda x: tuple(i - ndim if n in neg_inds else i
-                                         for n, i in enumerate(x))))
+    return draw(
+        axes.map(
+            lambda x: tuple(i - ndim if n in neg_inds else i for n, i in enumerate(x))
+        )
+    )
 
 
 @st.composite
-def valid_axes(draw, ndim, pos_only=False, single_axis_only=False, permit_none=True,
-               min_dim=0, max_dim=None):
+def valid_axes(
+    draw,
+    ndim,
+    pos_only=False,
+    single_axis_only=False,
+    permit_none=True,
+    min_dim=0,
+    max_dim=None,
+):
     """ Hypothesis search strategy: Given array dimensionality, generate valid
     `axis` arguments (including `None`) for numpy's sequential functions.
 
@@ -109,9 +126,9 @@ def valid_axes(draw, ndim, pos_only=False, single_axis_only=False, permit_none=T
         ndim = len(ndim)
 
     max_dim = ndim if max_dim is None else max_dim
-    _check_min_max(min_val=0, max_val=ndim,
-                   min_dim=min_dim, max_dim=max_dim,
-                   param_name="dim")
+    _check_min_max(
+        min_val=0, max_val=ndim, min_dim=min_dim, max_dim=max_dim, param_name="dim"
+    )
 
     if single_axis_only:
         axis_strat = st.integers(min_value=-ndim, max_value=ndim - 1)
@@ -128,8 +145,9 @@ def valid_axes(draw, ndim, pos_only=False, single_axis_only=False, permit_none=T
 
 
 @st.composite
-def broadcastable_shape(draw, shape, min_dim=0, max_dim=5,
-                        min_side=1, max_side=5, allow_singleton=True):
+def broadcastable_shape(
+    draw, shape, min_dim=0, max_dim=5, min_side=1, max_side=5, allow_singleton=True
+):
     """ Hypothesis search strategy: given an array shape, generate a
     broadcast-compatible shape, specifying the minimum/maximum permissable
     number of dimensions in the resulting shape (both values are inclusive).
@@ -185,23 +203,29 @@ def broadcastable_shape(draw, shape, min_dim=0, max_dim=5,
     _check_min_max(0, min_dim, max_dim, "dim")
     _check_min_max(1, min_side, max_side, "side")
 
-    if not isinstance(shape, Sequence) or any(i < 0 or not isinstance(i, Integral) for i in shape):
-        raise ValueError("`shape` must be a sequence of non-negative integers. Got: {}".format(shape))
+    if not isinstance(shape, Sequence) or any(
+        i < 0 or not isinstance(i, Integral) for i in shape
+    ):
+        raise ValueError(
+            "`shape` must be a sequence of non-negative integers. Got: {}".format(shape)
+        )
 
     ndim = draw(st.integers(min_dim - len(shape), max_dim - len(shape))) + len(shape)
     n_aligned = min(len(shape), ndim)
     n_leading = ndim - n_aligned
     if n_aligned > 0:
         if allow_singleton:
-            aligned_dims = draw(st.tuples(*(st.sampled_from((size, 1))
-                                            for size in shape[-n_aligned:])))
+            aligned_dims = draw(
+                st.tuples(*(st.sampled_from((size, 1)) for size in shape[-n_aligned:]))
+            )
         else:
             aligned_dims = shape[-n_aligned:]
     else:
         aligned_dims = tuple()
 
-    leading_dims = draw(st.tuples(*(st.integers(min_side, max_side)
-                                    for i in range(n_leading))))
+    leading_dims = draw(
+        st.tuples(*(st.integers(min_side, max_side) for i in range(n_leading)))
+    )
     return leading_dims + aligned_dims
 
 
@@ -224,10 +248,17 @@ def integer_index(size):
 
 
 @st.composite
-def slice_index(draw, size, 
-                min_start=None, max_start=None,
-                min_stop=None, max_stop=None,
-                min_step=1, max_step=2, negative_step=True):
+def slice_index(
+    draw,
+    size,
+    min_start=None,
+    max_start=None,
+    min_stop=None,
+    max_stop=None,
+    min_step=1,
+    max_step=2,
+    negative_step=True,
+):
     """ Hypothesis search strategy: Generate a valid slice-index
     for an axis of a given size. Slices are chosen such that
     most slices will not be empty.
@@ -271,7 +302,9 @@ def slice_index(draw, size,
     _check_min_max(0, min_step, max_step, "step")
 
     start = draw(st.one_of(st.integers(min_start, max_start - 1), st.none()))
-    stop = draw(st.one_of(st.integers(start if start is not None else 0, size), st.none()))
+    stop = draw(
+        st.one_of(st.integers(start if start is not None else 0, size), st.none())
+    )
 
     step = draw(st.integers(min_step, max_step))
 
@@ -325,17 +358,20 @@ def basic_index(draw, shape, min_dim=0, max_dim=5):
     num_newaxis = max(0, ndim_out - num_slice_axes)
     num_int_axes = max(0, ndim - num_slice_axes)
     int_axes = draw(choices(range(ndim), size=num_int_axes, replace=False))
-    slice_axes = draw(choices(sorted(set(range(ndim)) - set(int_axes)),
-                              size=num_slice_axes, replace=False))
+    slice_axes = draw(
+        choices(
+            sorted(set(range(ndim)) - set(int_axes)), size=num_slice_axes, replace=False
+        )
+    )
 
-    index = [np.newaxis]*ndim
+    index = [np.newaxis] * ndim
     for i in int_axes:
         index[i] = draw(integer_index(shape[i]))
 
     for i in slice_axes:
         index[i] = draw(slice_index(shape[i]))
 
-    for i in draw(choices(range(len(index)+1), size=num_newaxis)):
+    for i in draw(choices(range(len(index) + 1), size=num_newaxis)):
         index.insert(i, np.newaxis)
     return tuple(index)
 
@@ -374,9 +410,17 @@ def adv_integer_index(draw, shape, min_dims=1, max_dims=3, min_side=1, max_side=
     -----
     `draw` is a parameter reserved by hypothesis, and should not be specified
     by the user."""
-    index_shape = draw(hnp.array_shapes(min_dims=min_dims, max_dims=max_dims,
-                                        min_side=min_side, max_side=max_side))
-    index = draw(st.tuples(*(hnp.arrays(dtype=int,
-                                        shape=index_shape, elements=integer_index(size))
-                             for size in shape)))
+    index_shape = draw(
+        hnp.array_shapes(
+            min_dims=min_dims, max_dims=max_dims, min_side=min_side, max_side=max_side
+        )
+    )
+    index = draw(
+        st.tuples(
+            *(
+                hnp.arrays(dtype=int, shape=index_shape, elements=integer_index(size))
+                for size in shape
+            )
+        )
+    )
     return index

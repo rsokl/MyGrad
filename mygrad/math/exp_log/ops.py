@@ -1,9 +1,18 @@
-from mygrad.operation_base import Operation, BroadcastableOp
 import numpy as np
 
-__all__ = ["Exp", "Exp2", "Expm1",
-           "Log", "Log2", "Log10", "Log1p",
-           "Logaddexp", "Logaddexp2"]
+from mygrad.operation_base import BroadcastableOp, Operation
+
+__all__ = [
+    "Exp",
+    "Exp2",
+    "Expm1",
+    "Log",
+    "Log2",
+    "Log10",
+    "Log1p",
+    "Logaddexp",
+    "Logaddexp2",
+]
 
 
 class Exp(Operation):
@@ -23,6 +32,7 @@ class Exp(Operation):
     def backward_var(self, grad, index, **kwargs):
         return grad * np.exp(self.variables[index].data)
 
+
 class Exp2(Operation):
     def __call__(self, a):
         """ f(a) -> 2^a
@@ -36,9 +46,10 @@ class Exp2(Operation):
             numpy.ndarray"""
         self.variables = (a,)
         return np.exp2(a.data)
-    
+
     def backward_var(self, grad, index, **kwargs):
         return grad * np.exp2(self.variables[index].data) * np.log(2)
+
 
 class Expm1(Operation):
     """ f(a) -> exp(a) - 1
@@ -56,6 +67,7 @@ class Expm1(Operation):
 
 class Logaddexp(BroadcastableOp):
     """f(a,b) -> log(exp(a) + exp(b))"""
+
     def __call__(self, a, b):
         self.variables = (a, b)
         out = np.logaddexp(a.data, b.data)
@@ -73,6 +85,7 @@ class Logaddexp(BroadcastableOp):
 
 class Logaddexp2(BroadcastableOp):
     """f(a,b) -> log2(exp(a) + exp(b))"""
+
     def __call__(self, a, b):
         self.variables = (a, b)
         out = np.logaddexp2(a.data, b.data)
@@ -90,6 +103,7 @@ class Logaddexp2(BroadcastableOp):
 
 class Log(Operation):
     """ f(a) -> ln(a)"""
+
     def __call__(self, a):
         self.variables = (a,)
         return np.log(a.data)
@@ -110,6 +124,7 @@ class Log2(Operation):
 
 class Log10(Operation):
     """ f(a) -> log10(a)"""
+
     def __call__(self, a):
         self.variables = (a,)
         return np.log10(a.data)
@@ -123,6 +138,7 @@ class Log1p(Operation):
 
         log1p is accurate for x so small that 1 + x == 1 in
         floating-point accuracy."""
+
     def __call__(self, a):
         self.variables = (a,)
         return np.log1p(a.data)

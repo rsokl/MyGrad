@@ -1,13 +1,8 @@
-from .ops import Sqrt, Cbrt, Abs, Maximum, Minimum
 from mygrad.tensor_base import Tensor
 
+from .ops import Abs, Cbrt, Maximum, Minimum, Sqrt
 
-__all__ = ["abs",
-           "absolute",
-           "cbrt",
-           "sqrt",
-           "maximum",
-           "minimum"]
+__all__ = ["abs", "absolute", "cbrt", "sqrt", "maximum", "minimum"]
 
 
 def abs(a, constant=False):
@@ -114,4 +109,3 @@ def minimum(a, b, constant=False):
         The gradient does not exist where a == b; we use a
         value of 0 here."""
     return Tensor._op(Minimum, a, b, constant=constant)
-

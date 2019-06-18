@@ -1,9 +1,10 @@
+from numbers import Integral
+
+import numpy as np
+
+from mygrad.nnet.layers.utils import sliding_window_view
 from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor
-import numpy as np
-from numbers import Integral
-from mygrad.nnet.layers.utils import sliding_window_view
-
 
 __all__ = ["conv_nd"]
 
@@ -21,25 +22,47 @@ class ConvND(Operation):
 
         assert x.ndim > 2
         assert x.ndim == w.ndim
-        assert w.shape[1] == x.shape[1], "The channel-depth of the batch and filters must agree"
+        assert (
+            w.shape[1] == x.shape[1]
+        ), "The channel-depth of the batch and filters must agree"
 
         num_conv_channels = w.ndim - 2
-        x_shape = np.array(x.shape[2:])  # (X0, ...): shape of the channels being convolved over
+        x_shape = np.array(
+            x.shape[2:]
+        )  # (X0, ...): shape of the channels being convolved over
         w_shape = np.array(w.shape[2:])  # (W0, ...): shape of each conv filter
 
-        dilation = np.array((dilation,) * num_conv_channels) if isinstance(dilation, Integral) else np.array(dilation,
-                                                                                                             dtype=int)
+        dilation = (
+            np.array((dilation,) * num_conv_channels)
+            if isinstance(dilation, Integral)
+            else np.array(dilation, dtype=int)
+        )
 
-        assert len(dilation) == num_conv_channels and all(d >= 1 and isinstance(d, Integral) for d in dilation)
+        assert len(dilation) == num_conv_channels and all(
+            d >= 1 and isinstance(d, Integral) for d in dilation
+        )
 
-        padding = np.array((padding,) * num_conv_channels) if isinstance(padding, Integral) else np.array(padding,
-                                                                                                          dtype=int)
-        assert len(padding) == num_conv_channels and all(p >= 0 and isinstance(p, Integral) for p in padding)
+        padding = (
+            np.array((padding,) * num_conv_channels)
+            if isinstance(padding, Integral)
+            else np.array(padding, dtype=int)
+        )
+        assert len(padding) == num_conv_channels and all(
+            p >= 0 and isinstance(p, Integral) for p in padding
+        )
 
-        stride = np.array((stride,) * num_conv_channels) if isinstance(stride, Integral) else np.asarray(stride, dtype=int)
-        assert len(stride) == num_conv_channels and all(s >= 1 and isinstance(s, Integral) for s in stride)
+        stride = (
+            np.array((stride,) * num_conv_channels)
+            if isinstance(stride, Integral)
+            else np.asarray(stride, dtype=int)
+        )
+        assert len(stride) == num_conv_channels and all(
+            s >= 1 and isinstance(s, Integral) for s in stride
+        )
 
-        out_shape = (x_shape + 2 * padding - ((w_shape - 1)*dilation + 1)) / stride + 1
+        out_shape = (
+            x_shape + 2 * padding - ((w_shape - 1) * dilation + 1)
+        ) / stride + 1
 
         if not all(i.is_integer() and i > 0 for i in out_shape):
             msg = "Stride and kernel dimensions are incompatible: \n"
@@ -56,27 +79,28 @@ class ConvND(Operation):
 
         # symmetric 0-padding for X0, X1, ... dimensions
         axis_pad = tuple((i, i) for i in (0, 0, *padding))
-        x = np.pad(x, axis_pad, mode='constant') if sum(padding) else x
+        x = np.pad(x, axis_pad, mode="constant") if sum(padding) else x
 
         # (G0, ...) is the tuple of grid-positions for placing each window (not including stride)
         # (N, C, X0, ...) -> (G0, ..., N, C, W0, ...)
-        windowed_data = sliding_window_view(x,
-                                            window_shape=w_shape,
-                                            step=self.stride,
-                                            dilation=self.dilation)
+        windowed_data = sliding_window_view(
+            x, window_shape=w_shape, step=self.stride, dilation=self.dilation
+        )
 
         w_conv_channels = list(range(1, num_conv_channels + 2))  # C, W0, ...
-        window_conv_channels = [i + 1 + num_conv_channels        # C, W0, ...
-                                for i in range(num_conv_channels + 1)]
+        window_conv_channels = [
+            i + 1 + num_conv_channels  # C, W0, ...
+            for i in range(num_conv_channels + 1)
+        ]
 
         # (F, C, W0, ...) ⋆ (G0, ..., N, C, W0, ...) -> (F, G0, ..., N)
-        conv_out = np.tensordot(w,
-                                windowed_data,
-                                axes=[w_conv_channels, window_conv_channels])
+        conv_out = np.tensordot(
+            w, windowed_data, axes=[w_conv_channels, window_conv_channels]
+        )
 
         # (F, G0, ..., N) -> (N, F, G0, ...)
         out = np.moveaxis(conv_out, source=-1, destination=0)
-        return out if out.flags['C_CONTIGUOUS'] else np.ascontiguousarray(out)
+        return out if out.flags["C_CONTIGUOUS"] else np.ascontiguousarray(out)
 
     def backward_var(self, grad, index, **kwargs):
         """ Computes dX, where X is the data batch
@@ -88,7 +112,9 @@ class ConvND(Operation):
         num_conv_channels = grad.ndim - 2
 
         if index == 0:  # backprop through x
-            x_shape = x.shape[:2] + tuple(i+2*p for i, p in zip(x.shape[-num_conv_channels:], self.padding))
+            x_shape = x.shape[:2] + tuple(
+                i + 2 * p for i, p in zip(x.shape[-num_conv_channels:], self.padding)
+            )
             dx = np.zeros(x_shape, dtype=x.dtype)  # (N, C, X0, ...)
 
             # `gp` stores all of the various broadcast multiplications of each grad
@@ -97,10 +123,10 @@ class ConvND(Operation):
             gp = np.tensordot(grad, w, axes=[[1], [0]])
             for ind in np.ndindex(grad.shape[-num_conv_channels:]):
                 # ind: (g0, ...) - grid-position of filter placement
-                slices = tuple(slice(i * s, i * s + w * d, d) for i, w, s, d in zip(ind, 
-                                                                                    w.shape[2:],
-                                                                                    self.stride, 
-                                                                                    self.dilation))
+                slices = tuple(
+                    slice(i * s, i * s + w * d, d)
+                    for i, w, s, d in zip(ind, w.shape[2:], self.stride, self.dilation)
+                )
                 # Add (grad-element * filter) to each appropriate window position in `dx`
                 # dx[N, C, g0*s0 : g0*s0 + w0*d0 : d0, (...)] += gp[N, g0, (...), C, W0, (...)]
                 dx[(..., *slices)] += gp[(slice(None), *ind, ...)]
@@ -115,18 +141,17 @@ class ConvND(Operation):
             # backprop into f
             # symmetric 0-padding for H, W dimensions
             axis_pad = tuple((i, i) for i in (0, 0, *self.padding))
-            x = np.pad(x, axis_pad, mode='constant') if sum(self.padding) else x
+            x = np.pad(x, axis_pad, mode="constant") if sum(self.padding) else x
 
             # (G0, ...) is the tuple of grid-indices for placing each window (not including stride)
             # (N, C, X0, ...) -> (G0, ..., N, C, W0, ...)
-            windowed_data = sliding_window_view(x,
-                                                window_shape=w.shape[2:],
-                                                step=self.stride,
-                                                dilation=self.dilation)
+            windowed_data = sliding_window_view(
+                x, window_shape=w.shape[2:], step=self.stride, dilation=self.dilation
+            )
 
             # (N, F, G0, ...) -tdot- (G0, ..., N, C, W0, ...) --> (F, C, W0, ...)
             grad_axes = list(range(2, num_conv_channels + 2)) + [0]  # (G0, ..., N)
-            window_axes = list(range(num_conv_channels + 1))         # (G0, ..., N)
+            window_axes = list(range(num_conv_channels + 1))  # (G0, ..., N)
             return np.tensordot(grad, windowed_data, axes=[grad_axes, window_axes])
 
 
@@ -256,5 +281,10 @@ def conv_nd(x, filter_bank, *, stride, padding=0, dilation=1, constant=False):
 
         Extrapolating further, ``conv_nd`` is capable of performing ND convolutions!
         """
-    return Tensor._op(ConvND, x, filter_bank, op_kwargs=dict(stride=stride, padding=padding, dilation=dilation),
-                      constant=constant)
+    return Tensor._op(
+        ConvND,
+        x,
+        filter_bank,
+        op_kwargs=dict(stride=stride, padding=padding, dilation=dilation),
+        constant=constant,
+    )

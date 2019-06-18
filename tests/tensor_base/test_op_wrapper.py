@@ -6,7 +6,7 @@ class Dummy(Operation):
     def __call__(self, a, b):
         self.variables = (a, b)
         return 1
-    
+
 
 def dummy(a, b, constant=False):
     return Tensor._op(Dummy, a, b, constant=constant)
@@ -25,4 +25,3 @@ def test_constant_arg():
     assert o_false.constant is False
     assert a._ops == {o_false.creator}
     assert b._ops == {o_false.creator}
-

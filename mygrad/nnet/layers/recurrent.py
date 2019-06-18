@@ -1,12 +1,16 @@
+from numbers import Integral
+
+import numpy as np
+
 from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor
-from numbers import Integral
-import numpy as np
 
 try:
     from numba import njit
 except ImportError:
-    raise ImportError("The package `numba` must be installed in order to access the simple-rnn.")
+    raise ImportError(
+        "The package `numba` must be installed in order to access the simple-rnn."
+    )
 
 
 @njit
@@ -40,7 +44,9 @@ def _rnn_bptt(X, dLt_dst, dst_dft, W, bp_lim, old_dst=None):
             target_index = slice(1, len(dLt_dst) - (i + 1))
 
             # dL_{n} / ds_{t+1} -> dL_{n} / df_{t+1}  | ( n > t )
-            dLn_ft1 = dst_dft[source_index] * (dLt_dst[source_index] - old_dst[source_index])
+            dLn_ft1 = dst_dft[source_index] * (
+                dLt_dst[source_index] - old_dst[source_index]
+            )
             old_dst = np.copy(dLt_dst)
 
         else:  # no backprop truncation
@@ -57,6 +63,7 @@ def _backprop(var, grad):
             var.grad = np.asarray(grad)
         else:
             var.grad += grad
+
 
 class RecurrentUnit(Operation):
     """ Defines a basic recurrent unit for a RNN.
@@ -137,21 +144,31 @@ class RecurrentUnit(Operation):
 
         s = self._hidden_seq
 
-        dst_dft = (1 - s.data ** 2)  # ds_{t} / d_f{t}
+        dst_dft = 1 - s.data ** 2  # ds_{t} / d_f{t}
         dLt_dst = np.copy(grad)  # dL_{t} / ds_{t}
 
         _rnn_bptt(self.X.data, dLt_dst, dst_dft, self.W.data, self.bp_lim)
 
-        self._hidden_seq.grad = dLt_dst  # element t: dL_{t} / ds_{t} + ... + dL_{T_lim} / ds_{t}
+        self._hidden_seq.grad = (
+            dLt_dst
+        )  # element t: dL_{t} / ds_{t} + ... + dL_{T_lim} / ds_{t}
 
-        dLt_dft = dLt_dst[1:] * dst_dft[1:]  # dL_{t} / df_{t} + ... + dL_{T_lim} / df_{t}
+        dLt_dft = (
+            dLt_dst[1:] * dst_dft[1:]
+        )  # dL_{t} / df_{t} + ... + dL_{T_lim} / df_{t}
 
         if not self.U.constant:
-            _backprop(self.U, np.einsum("ijk, ijl -> kl", self.X.data, dLt_dft))  # dL_{1} / dU + ... + dL_{T} / dU
+            _backprop(
+                self.U, np.einsum("ijk, ijl -> kl", self.X.data, dLt_dft)
+            )  # dL_{1} / dU + ... + dL_{T} / dU
         if not self.W.constant:
-            _backprop(self.W, np.einsum("ijk, ijl -> kl", s.data[:-1], dLt_dft))  # dL_{1} / dW + ... + dL_{T} / dW
+            _backprop(
+                self.W, np.einsum("ijk, ijl -> kl", s.data[:-1], dLt_dft)
+            )  # dL_{1} / dW + ... + dL_{T} / dW
         if not self.X.constant:
-            _backprop(self.X, dot(dLt_dft, self.U.data.T))  # dL_{1} / dX + ... + dL_{T} / dX
+            _backprop(
+                self.X, dot(dLt_dft, self.U.data.T)
+            )  # dL_{1} / dX + ... + dL_{T} / dX
 
 
 def simple_RNN(X, U, W, s0=None, bp_lim=None, constant=False):
@@ -201,7 +218,8 @@ def simple_RNN(X, U, W, s0=None, bp_lim=None, constant=False):
         - :math:`N` : Batch size
         - :math:`C` : Length of single datum
         - :math:`D` : Length of 'hidden' descriptor"""
-    s = Tensor._op(RecurrentUnit, X, U, W, op_kwargs=dict(s0=s0, bp_lim=bp_lim),
-                   constant=constant)
+    s = Tensor._op(
+        RecurrentUnit, X, U, W, op_kwargs=dict(s0=s0, bp_lim=bp_lim), constant=constant
+    )
     s.creator._hidden_seq = s
     return s

@@ -1,19 +1,32 @@
-from .ops import Add, Subtract, Power, Square, Divide, Multiply, MultiplySequence, AddSequence
-from .ops import Positive, Negative, Reciprocal
 from mygrad.tensor_base import Tensor
 
+from .ops import (
+    Add,
+    AddSequence,
+    Divide,
+    Multiply,
+    MultiplySequence,
+    Negative,
+    Positive,
+    Power,
+    Reciprocal,
+    Square,
+    Subtract,
+)
 
-__all__ = ["add",
-           "subtract",
-           "power",
-           "divide",
-           "square",
-           "reciprocal",
-           "multiply",
-           "multiply_sequence",
-           "add_sequence",
-           "positive",
-           "negative"]
+__all__ = [
+    "add",
+    "subtract",
+    "power",
+    "divide",
+    "square",
+    "reciprocal",
+    "multiply",
+    "multiply_sequence",
+    "add_sequence",
+    "positive",
+    "negative",
+]
 
 
 def add(a, b, constant=False):
@@ -96,6 +109,7 @@ def divide(a, b, constant=False):
         -------
         mygrad.Tensor"""
     return Tensor._op(Divide, a, b, constant=constant)
+
 
 def square(a, constant=False):
     """ ``f(a) -> a ** 2``

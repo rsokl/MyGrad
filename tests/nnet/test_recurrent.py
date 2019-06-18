@@ -1,41 +1,41 @@
-from mygrad.tensor_base import Tensor
-from mygrad import matmul
-from mygrad.nnet.layers import simple_RNN
-from mygrad.nnet.activations import tanh
-
-
-import hypothesis.strategies as st
-from hypothesis import given, settings
 import hypothesis.extra.numpy as hnp
-
+import hypothesis.strategies as st
 import numpy as np
+from hypothesis import given, settings
 from numpy.testing import assert_allclose
+
+from mygrad import matmul
+from mygrad.nnet.activations import tanh
+from mygrad.nnet.layers import simple_RNN
+from mygrad.tensor_base import Tensor
 
 
 @settings(deadline=None)
 @given(st.data())
 def test_recurrent(data):
-    X = data.draw(hnp.arrays(shape=hnp.array_shapes(max_side=5, min_dims=3, max_dims=3),
-                             dtype=float,
-                             elements=st.floats(-10, 10)))
+    X = data.draw(
+        hnp.arrays(
+            shape=hnp.array_shapes(max_side=5, min_dims=3, max_dims=3),
+            dtype=float,
+            elements=st.floats(-10, 10),
+        )
+    )
     T, N, C = X.shape
     D = data.draw(st.sampled_from(list(range(1, 5))))
 
-    s0 = data.draw(hnp.arrays(shape=(N, D),
-                              dtype=float,
-                              elements=st.floats(0.0, 0.0)))
+    s0 = data.draw(hnp.arrays(shape=(N, D), dtype=float, elements=st.floats(0.0, 0.0)))
 
-    W = data.draw(hnp.arrays(shape=(D, D),
-                             dtype=float,
-                             elements=st.floats(-10.0, 10.0)))
+    W = data.draw(
+        hnp.arrays(shape=(D, D), dtype=float, elements=st.floats(-10.0, 10.0))
+    )
 
-    U = data.draw(hnp.arrays(shape=(C, D),
-                             dtype=float,
-                             elements=st.floats(-10.0, 10.0)))
+    U = data.draw(
+        hnp.arrays(shape=(C, D), dtype=float, elements=st.floats(-10.0, 10.0))
+    )
 
-    V = data.draw(hnp.arrays(shape=(D, C),
-                             dtype=float,
-                             elements=st.floats(-10.0, 10.0)))
+    V = data.draw(
+        hnp.arrays(shape=(D, C), dtype=float, elements=st.floats(-10.0, 10.0))
+    )
 
     X = Tensor(X)
     X2 = X.__copy__()

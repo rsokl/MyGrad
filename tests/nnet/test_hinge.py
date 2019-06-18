@@ -1,24 +1,32 @@
-import mygrad as mg
-from mygrad.tensor_base import Tensor
-from mygrad.nnet.losses import multiclass_hinge
-
-import numpy as np
-from numpy.testing import assert_allclose
-import hypothesis.strategies as st
-from hypothesis import given
 import hypothesis.extra.numpy as hnp
-
+import hypothesis.strategies as st
+import numpy as np
+from hypothesis import given
+from numpy.testing import assert_allclose
 from pytest import raises
+
+import mygrad as mg
+from mygrad.nnet.losses import multiclass_hinge
+from mygrad.tensor_base import Tensor
+
 
 @given(st.data())
 def test_multiclass_hinge(data):
     """ Test the built-in implementation of multiclass hinge against the pure pygrad version"""
-    s = data.draw(hnp.arrays(shape=hnp.array_shapes(max_side=10, min_dims=2, max_dims=2),
-                             dtype=float,
-                             elements=st.floats(-100, 100)))
-    l = data.draw(hnp.arrays(shape=(s.shape[0],),
-                             dtype=hnp.integer_dtypes(),
-                             elements=st.integers(min_value=0, max_value=s.shape[1] - 1)))
+    s = data.draw(
+        hnp.arrays(
+            shape=hnp.array_shapes(max_side=10, min_dims=2, max_dims=2),
+            dtype=float,
+            elements=st.floats(-100, 100),
+        )
+    )
+    l = data.draw(
+        hnp.arrays(
+            shape=(s.shape[0],),
+            dtype=hnp.integer_dtypes(),
+            elements=st.integers(min_value=0, max_value=s.shape[1] - 1),
+        )
+    )
     hinge_scores = Tensor(s)
     hinge_loss = multiclass_hinge(hinge_scores, l, constant=False)
     hinge_loss.backward()
@@ -27,7 +35,7 @@ def test_multiclass_hinge(data):
     correct_labels = (range(len(l)), l)
     correct_class_scores = pygrad_scores[correct_labels]  # Nx1
 
-    Lij = pygrad_scores - correct_class_scores[:, np.newaxis] + 1.  # NxC margins
+    Lij = pygrad_scores - correct_class_scores[:, np.newaxis] + 1.0  # NxC margins
     Lij[Lij <= 0] = 0
     Lij[correct_labels] = 0
 

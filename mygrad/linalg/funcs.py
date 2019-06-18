@@ -1,11 +1,12 @@
-from .ops import *
-from mygrad import Tensor
-import mygrad as mg
-from numpy.core.einsumfunc import _parse_einsum_input
 import numpy as np
+from numpy.core.einsumfunc import _parse_einsum_input
+
+import mygrad as mg
+from mygrad import Tensor
+
+from .ops import *
 
 __all__ = ["multi_matmul", "matmul", "einsum"]
-
 
 
 def matmul(a, b, constant=False):
@@ -347,20 +348,25 @@ def einsum(*operands, optimize=False, constant=False):
         # operands form: "ijk, ijk", x, y
         variables = operands[1:]
         if any(isinstance(i, Tensor) for i in operands):
-            operands[1:] = (var.data if isinstance(var, Tensor) else var for var in operands[1:])
+            operands[1:] = (
+                var.data if isinstance(var, Tensor) else var for var in operands[1:]
+            )
     else:
         # operands form: op0, sublist0, op1, sublist1, ..., [sublistout]
         end = -1 if len(operands) % 2 else None  # -1 if sublistout is included
         variables = operands[:end:2]
         if any(isinstance(i, Tensor) for i in operands):
-            operands[:end:2] = (var.data if isinstance(var, Tensor) else var for var in operands[:end:2])
+            operands[:end:2] = (
+                var.data if isinstance(var, Tensor) else var for var in operands[:end:2]
+            )
 
     in_lbls, out_lbls, _ = _parse_einsum_input(operands)
-    return Tensor._op(EinSum, *variables, op_kwargs=dict(in_lbls=in_lbls,
-                                                         out_lbls=out_lbls,
-                                                         optimize=optimize),
-                      constant=constant)
-
+    return Tensor._op(
+        EinSum,
+        *variables,
+        op_kwargs=dict(in_lbls=in_lbls, out_lbls=out_lbls, optimize=optimize),
+        constant=constant
+    )
 
 
 def multi_matmul(tensors, constant=False):
@@ -468,16 +474,23 @@ def multi_matmul(tensors, constant=False):
 
     # Explicitly convert vectors to 2D arrays to keep the logic of this function simpler
     if tensors[0].ndim == 1:
-        tensors[0] = mg.expand_dims(tensors[0], axis=0,
-                                    constant=tensors[0].constant if isinstance(tensors[0], Tensor) else True)
+        tensors[0] = mg.expand_dims(
+            tensors[0],
+            axis=0,
+            constant=tensors[0].constant if isinstance(tensors[0], Tensor) else True,
+        )
     if tensors[-1].ndim == 1:
-        tensors[-1] = mg.expand_dims(tensors[-1], axis=1,
-                                     constant=tensors[-1].constant if isinstance(tensors[-1], Tensor) else True)
-        
+        tensors[-1] = mg.expand_dims(
+            tensors[-1],
+            axis=1,
+            constant=tensors[-1].constant if isinstance(tensors[-1], Tensor) else True,
+        )
+
     for a in tensors:
         if a.ndim < 1 or a.ndim > 2:
-            raise ValueError('%d-dimensional array given. Tensor must be '
-                             'two-dimensional' % a.ndim)
+            raise ValueError(
+                "%d-dimensional array given. Tensor must be two-dimensional" % (a.ndim,)
+            )
 
     if n == 3:
         result = _multi_matmul_three(tensors[0], tensors[1], tensors[2], constant)
@@ -553,5 +566,8 @@ def _multi_matmul(arrays, order, i, j, constant=False) -> Tensor:
     if i == j:
         return arrays[i]
     else:
-        return matmul(_multi_matmul(arrays, order, i, order[i, j], constant),
-                      _multi_matmul(arrays, order, order[i, j] + 1, j, constant), constant)
+        return matmul(
+            _multi_matmul(arrays, order, i, order[i, j], constant),
+            _multi_matmul(arrays, order, order[i, j] + 1, j, constant),
+            constant,
+        )

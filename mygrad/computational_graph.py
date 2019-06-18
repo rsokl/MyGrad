@@ -1,8 +1,19 @@
-from graphviz import Digraph
-from mygrad.tensor_base import Tensor
 import numpy as np
+from graphviz import Digraph
 
-def build_graph(fin, names=None, *, render=True, save=False, dims=False, dtypes=False, sum_stats=False):
+from mygrad.tensor_base import Tensor
+
+
+def build_graph(
+    fin,
+    names=None,
+    *,
+    render=True,
+    save=False,
+    dims=False,
+    dtypes=False,
+    sum_stats=False
+):
     """ Builds and renders a computational graph.
 
         Parameters
@@ -74,7 +85,7 @@ def build_graph(fin, names=None, *, render=True, save=False, dims=False, dtypes=
     graph = Digraph(strict=True)
     graph.node_attr.update(fontsize="12")
 
-    _add_node(fin, graph, **{'names':names, 'dims':dims, 'dtypes':dtypes, 'sum_stats':sum_stats})
+    _add_node(fin, graph, names=names, dims=dims, dtypes=dtypes, sum_stats=sum_stats)
 
     if save:
         graph.render(filename="computational_graph", cleanup=True)
@@ -87,12 +98,12 @@ def _add_node(node, graph, op_id=None, **kwargs):
     """ Recursively traces computational graph and adds nodes to Digraph. """
     node_id = str(id(node))
     node_lab = repr(node)
-    if kwargs['names'] is not None:
-        for key in kwargs['names']:
-            if id(kwargs['names'][key]) == id(node):
+    if kwargs["names"] is not None:
+        for key in kwargs["names"]:
+            if id(kwargs["names"][key]) == id(node):
                 node_lab = key
                 break
-            elif id(kwargs['names'][key]) == id(node.data):
+            elif id(kwargs["names"][key]) == id(node.data):
                 node_lab = key + "\n*Constant*"
                 node_id = str(id(node.data))
                 break
@@ -105,15 +116,20 @@ def _add_node(node, graph, op_id=None, **kwargs):
                 node_lab = "Intermediary Tensor"
 
     if node.ndim:
-        if kwargs['dims']:
-            node_lab = node_lab + "\nDims: {}".format(node.shape)
-        if kwargs['dtypes']:
-            node_lab = node_lab + "\nDtype: {}".format(node.dtype)
-        if kwargs['sum_stats']:
-            node_lab = node_lab + "\nMin: {min}\nMedian: {med}\nMean: {mean}\nMax: {max}".format(min=np.amin(node.data), med=np.median(node.data), mean=np.mean(node.data), max=np.amax(node.data))
+        if kwargs["dims"]:
+            node_lab += "\nDims: {}".format(node.shape)
+        if kwargs["dtypes"]:
+            node_lab += "\nDtype: {}".format(node.dtype)
+        if kwargs["sum_stats"]:
+            node_lab += "\nMin: {min}\nMedian: {med}\nMean: {mean}\nMax: {max}".format(
+                min=np.amin(node.data),
+                med=np.median(node.data),
+                mean=np.mean(node.data),
+                max=np.amax(node.data),
+            )
     else:
-        if kwargs['dtypes']:
-            node_lab = node_lab + "\nDtype: {}".format(node.dtype)
+        if kwargs["dtypes"]:
+            node_lab += "\nDtype: {}".format(node.dtype)
 
     graph.node(name=node_id, label=node_lab)
 

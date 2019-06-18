@@ -1,10 +1,11 @@
-from mygrad.operation_base import Operation
-import numpy as np
-from functools import reduce
 from collections.abc import Sequence
+from functools import reduce
 
-__all__ = ["MaxMin", "Sum", "Mean", "Prod", "CumProd", "CumSum",
-           "Variance", "StdDev"]
+import numpy as np
+
+from mygrad.operation_base import Operation
+
+__all__ = ["MaxMin", "Sum", "Mean", "Prod", "CumProd", "CumSum", "Variance", "StdDev"]
 
 
 class MaxMin(Operation):
@@ -35,12 +36,12 @@ class MaxMin(Operation):
         op = np.argmax if maxmin == "max" else np.argmin
 
         # let numpy handle error checking
-        np.amax(np.empty([1]*a.ndim), axis=axis, keepdims=keepdims)
+        np.amax(np.empty([1] * a.ndim), axis=axis, keepdims=keepdims)
 
         if a.ndim == 0:
             return a.data
 
-        if hasattr(axis, '__iter__'):
+        if hasattr(axis, "__iter__"):
             assert isinstance(axis, tuple)
             axis = tuple(ax % a.ndim for ax in axis)
             axis = None if len(axis) == a.ndim else tuple(sorted(axis))
@@ -66,16 +67,20 @@ class MaxMin(Operation):
 
         # max(x, axis=(i,j,...) ) -> Reshape data to use argmax along trailing axis
         else:
-            self.static_ax = tuple(sorted(set(range(a.ndim)) - set(self.axis)))  # non-reduced axes (m, n, ..)
+            self.static_ax = tuple(
+                sorted(set(range(a.ndim)) - set(self.axis))
+            )  # non-reduced axes (m, n, ..)
             self.to_trans = self.static_ax + self.axis  # (m, n, ..., i, j, ...)
             self.from_trans = tuple(np.argsort(self.to_trans))
             outshape = tuple(a.shape[i] for i in self.static_ax)
 
-            z = a.data.transpose(*self.to_trans).reshape(*outshape, -1)  # (m, n, ..., i*j*[...])
+            z = a.data.transpose(*self.to_trans).reshape(
+                *outshape, -1
+            )  # (m, n, ..., i*j*[...])
 
             k = op(z, axis=-1)
             self.indices = tuple(i for i in np.indices(k.shape))
-            self.indices += (k, )
+            self.indices += (k,)
             self.tmp_grad_shape = z.shape
             z = z[self.indices]
 
@@ -153,12 +158,16 @@ class Sum(Operation):
 
 class Mean(Sum):
     def __call__(self, a, axis=None, keepdims=False):
-        out = super(Mean, self).__call__(a, axis, keepdims)
-        self.n = a.data.size if self.axis is None else np.prod([a.shape[i] for i in self.axis])
+        out = super().__call__(a, axis, keepdims)
+        self.n = (
+            a.data.size
+            if self.axis is None
+            else np.prod([a.shape[i] for i in self.axis])
+        )
         return out / self.n
 
     def backward_var(self, grad, index, **kwargs):
-        return super(Mean, self).backward_var(grad / self.n, index, **kwargs)
+        return super().backward_var(grad / self.n, index, **kwargs)
 
 
 class Prod(Operation):
@@ -178,7 +187,11 @@ class Prod(Operation):
         x = a.data
         grad = np.asarray(grad)
 
-        axes = set(range(a.ndim)) if self.axis is None else set(i if i >= 0 else a.ndim + i for i in self.axis)
+        axes = (
+            set(range(a.ndim))
+            if self.axis is None
+            else {i if i >= 0 else a.ndim + i for i in self.axis}
+        )
 
         # make grad broadcast-compatible against x
         grad = grad.reshape(*(1 if n in axes else i for n, i in enumerate(a.shape)))
@@ -187,7 +200,7 @@ class Prod(Operation):
         # of prod(x) only if there are no zeros in `x`.
         # If there are zeros we need to patch some of the nans
         # that we just created, with the correct derivative.
-        with np.errstate(divide='ignore', invalid='ignore'):
+        with np.errstate(divide="ignore", invalid="ignore"):
             dldx = np.prod(x, axis=self.axis, keepdims=True) / x
 
         # if two or more zeros occur within a given sequence, then
@@ -196,20 +209,22 @@ class Prod(Operation):
             x = x.copy()
 
             # computes the number of 0s to occur within each sequence
-            has_zero = np.broadcast_to(np.sum(x == 0, axis=self.axis, keepdims=True), x.shape)
+            has_zero = np.broadcast_to(
+                np.sum(x == 0, axis=self.axis, keepdims=True), x.shape
+            )
             dldx[has_zero > 1] = np.nan_to_num(dldx[has_zero > 1])
 
             # if only a single 0 occurs within a given sequence, the
             # derivative needs to be recomputed at that location by
             # setting that element 0 -> 1
             if np.any(np.isnan(dldx)):
-                is_zero = (x == 0)
+                is_zero = x == 0
                 x[is_zero] = 1
-                with np.errstate(divide='ignore', invalid='ignore'):
+                with np.errstate(divide="ignore", invalid="ignore"):
                     loc = np.logical_and(is_zero, has_zero == 1)
                     dldx[loc] = (np.prod(x, axis=self.axis, keepdims=True) / x)[loc]
 
-        return grad*dldx
+        return grad * dldx
 
 
 def _reverse_cumsum(x, axis=None):
@@ -260,6 +275,7 @@ def _find_first_zeros_along_axis(x, axis):
 
         >>> _find_first_zeros_along_axis(x, axis=1)
         ((0, 1, 2), (2, 2, 2))"""
+
     def add_to_seen(seen, inds):
         if inds[1:] not in (i[1:] for i in seen):
             seen.append(inds)
@@ -277,7 +293,10 @@ def _find_first_zeros_along_axis(x, axis):
     if axis is None:
         axis = 0
 
-    gen_inds = (move(list(seq), origin=0, dest=axis) for seq in reduce(add_to_seen, zip(*wer), []))
+    gen_inds = (
+        move(list(seq), origin=0, dest=axis)
+        for seq in reduce(add_to_seen, zip(*wer), [])
+    )
     return tuple(zip(*gen_inds))
 
 
@@ -307,7 +326,7 @@ class CumProd(Operation):
         # of cumprod(x) only if there are no zeros in `x`.
         # If there are zeros we need to patch some of the nans
         # that we just created, with the correct derivative.
-        with np.errstate(divide='ignore', invalid='ignore'):
+        with np.errstate(divide="ignore", invalid="ignore"):
             # assuming x0, ..., xn are all non-zero
             #
             # dldx = [g0 + g1*x1 + g2*x1*x2 + ...,
@@ -329,7 +348,7 @@ class CumProd(Operation):
             x[locs] = 1
 
             g_cumprod = g * np.cumprod(x, axis=axis)
-            with np.errstate(divide='ignore', invalid='ignore'):
+            with np.errstate(divide="ignore", invalid="ignore"):
                 dldx[locs] = (_reverse_cumsum(g_cumprod, axis=axis) / x)[locs]
             np.nan_to_num(dldx, copy=False)
 
@@ -368,19 +387,25 @@ class Variance(Operation):
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
 
-        N = a.size if self.kwargs["axis"] is None else np.prod([a.shape[i] for i in self.kwargs["axis"]])
+        N = (
+            a.size
+            if self.kwargs["axis"] is None
+            else np.prod([a.shape[i] for i in self.kwargs["axis"]])
+        )
         N -= self.kwargs["ddof"]
 
         grad = np.asarray(grad)
         if grad.ndim == 0:
-           grad = np.full(a.shape, grad, dtype=float)
+            grad = np.full(a.shape, grad, dtype=float)
         else:
             if not self.kwargs["keepdims"]:
                 index = [slice(None)] * a.ndim
                 for i in self.kwargs["axis"]:
                     index[i] = np.newaxis
                 grad = grad[tuple(index)]
-        back = (2. / N) * (a.data - a.data.mean(axis=self.kwargs["axis"], keepdims=True))
+        back = (2.0 / N) * (
+            a.data - a.data.mean(axis=self.kwargs["axis"], keepdims=True)
+        )
         return back * grad
 
 
@@ -402,17 +427,23 @@ class StdDev(Operation):
         if isinstance(self.kwargs["axis"], Sequence) and not self.kwargs["axis"]:
             return np.zeros(a.shape, dtype=float)
 
-        N = a.size if self.kwargs["axis"] is None else np.prod([a.shape[i] for i in self.kwargs["axis"]])
+        N = (
+            a.size
+            if self.kwargs["axis"] is None
+            else np.prod([a.shape[i] for i in self.kwargs["axis"]])
+        )
         N -= self.kwargs["ddof"]
 
         grad = np.asarray(grad) / (2 * np.sqrt(a.data.var(**self.kwargs)))
         if grad.ndim == 0:
-           grad = np.full(a.shape, grad, dtype=float)
+            grad = np.full(a.shape, grad, dtype=float)
         else:
             if not self.kwargs["keepdims"]:
                 index = [slice(None)] * a.ndim
                 for i in self.kwargs["axis"]:
                     index[i] = np.newaxis
                 grad = grad[tuple(index)]
-        back = (2. / N) * (a.data - a.data.mean(axis=self.kwargs["axis"], keepdims=True))
+        back = (2.0 / N) * (
+            a.data - a.data.mean(axis=self.kwargs["axis"], keepdims=True)
+        )
         return back * grad

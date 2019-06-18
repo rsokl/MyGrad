@@ -1,12 +1,8 @@
-from mygrad.operation_base import Operation, BroadcastableOp
 import numpy as np
 
+from mygrad.operation_base import BroadcastableOp, Operation
 
-__all__ = ["Abs",
-           "Sqrt",
-           "Cbrt",
-           "Maximum",
-           "Minimum"]
+__all__ = ["Abs", "Sqrt", "Cbrt", "Maximum", "Minimum"]
 
 
 class Abs(Operation):
@@ -16,7 +12,9 @@ class Abs(Operation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        return grad * np.piecewise(a.data, [a.data < 0, a.data == 0, a.data > 0], [-1, np.nan, 1])
+        return grad * np.piecewise(
+            a.data, [a.data < 0, a.data == 0, a.data > 0], [-1, np.nan, 1]
+        )
 
 
 class Sqrt(Operation):

@@ -1,6 +1,7 @@
-from mygrad.operation_base import Operation
-from mygrad import Tensor
 import numpy as np
+
+from mygrad import Tensor
+from mygrad.operation_base import Operation
 
 __all__ = ["batchnorm"]
 
@@ -18,6 +19,7 @@ class BatchNorm(Operation):
     `mean` and `var` are bound as instance-attributes upon
     calling the batch-norm instance.
     """
+
     scalar_only = True
 
     def __call__(self, x, gamma, beta, *, eps):
@@ -52,7 +54,7 @@ class BatchNorm(Operation):
         x = x.data
         self.mean = x.mean(axis=normed_dims)
         self.var = np.einsum(x, range(x.ndim), x, range(x.ndim), [1])
-        self.var /= (x.size / x.shape[1])
+        self.var /= x.size / x.shape[1]
         self.var -= self.mean ** 2
         if eps:
             self.var += eps
@@ -81,14 +83,16 @@ class BatchNorm(Operation):
             grad = grad - np.mean(grad, axis=normed_dims, keepdims=True)
             x_sub_Ex = x - mean
             rterm = x_sub_Ex / var
-            rterm /= (x.size / x.shape[1])
-            rterm *= np.reshape(np.einsum(grad, range(x.ndim),
-                                          x_sub_Ex, range(x.ndim),
-                                          [1]),
-                                keepdims_shape)
+            rterm /= x.size / x.shape[1]
+            rterm *= np.reshape(
+                np.einsum(grad, range(x.ndim), x_sub_Ex, range(x.ndim), [1]),
+                keepdims_shape,
+            )
             grad -= rterm
             grad /= np.sqrt(var)
-            if self.gamma is not None:  # backprop through optional affine transformation
+            if (
+                self.gamma is not None
+            ):  # backprop through optional affine transformation
                 gamma = self.gamma.data
                 grad *= gamma.reshape(keepdims_shape)
             return grad
@@ -153,6 +157,6 @@ def batchnorm(x, *, gamma=None, beta=None, eps, constant=False):
         gamma = np.array([])
     if beta is None:
         beta = np.array([])
-    return Tensor._op(BatchNorm, x, gamma, beta, op_kwargs=dict(eps=eps), constant=constant)
-
-
+    return Tensor._op(
+        BatchNorm, x, gamma, beta, op_kwargs=dict(eps=eps), constant=constant
+    )
