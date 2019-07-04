@@ -64,8 +64,11 @@ def choices(seq, size, replace=True):
             raise ValueError("`size` must be 0, given an empty `seq`")
         return st.just(())
     return st.lists(
-        st.sampled_from(seq), min_size=size, max_size=size, unique=not replace
-    ).map(tuple)
+        st.sampled_from(range(len(seq))),
+        min_size=size,
+        max_size=size,
+        unique=not replace,
+    ).map(lambda x: tuple(seq[i] for i in x))
 
 
 @st.composite
