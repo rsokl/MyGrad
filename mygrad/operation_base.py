@@ -79,7 +79,7 @@ class Operation:
             NotImplemented Error"""
         raise NotImplementedError
 
-    def backward(self, grad, *, graph, **kwargs):
+    def backward(self, grad, *, graph, _reduction=None, **kwargs):
         """ Back-propagates the gradient through all of the operation's inputs.
         Constant tensors do not propagate a gradient.
 
@@ -90,6 +90,8 @@ class Operation:
         graph : Set[Operation]
             The set of all operations relevant to the terminal node of the computational graph,
             which triggered back-propagation.
+
+        reduction : Optional[Callable[[ndarray, Tuple[int, ...]], ndarray]]
         """
         for index, var in enumerate(self.variables):
             if not var.constant:
@@ -98,15 +100,25 @@ class Operation:
                         "Invalid Backprop: part of the computational graph containing "
                         "this tensor was cleared prior to backprop"
                     )
+
                 if var.grad is None:
                     tmp_grad = np.asarray(self.backward_var(grad, index, **kwargs))
+                    if _reduction is not None:
+                        tmp_grad = _reduction(
+                            self.backward_var(grad, index, **kwargs), var.shape
+                        )
                     var.grad = (
                         np.copy(tmp_grad)
                         if np.shares_memory(tmp_grad, grad)
                         else tmp_grad
                     )
                 else:
-                    var.grad += self.backward_var(grad, index, **kwargs)
+                    if _reduction is None:
+                        var.grad += self.backward_var(grad, index, **kwargs)
+                    else:
+                        var.grad += _reduction(
+                            self.backward_var(grad, index, **kwargs), var.shape
+                        )
 
         for var in {
             i for i in self.variables if not i.constant and i.creator is not None
@@ -116,43 +128,6 @@ class Operation:
 
 
 class BroadcastableOp(Operation):
-    """ Signals that an Operation's forward pass can broadcast its tensor
-        arguments."""
-
-    def backward(self, grad, *, graph, **kwargs):
-        """ Back-propagates the gradient through all of the operation's inputs.
-        Constant tensors do not propagate a gradient.
-
-        grad : numpy.ndarray
-            The back-propagated total derivative with respect to the present
-            operation (`f`): d(out)/df
-
-        graph : Set[Operation]
-            The set of all operations relevant to the terminal node of the computational graph,
-            which triggered back-propagation.
-        """
-        for index, var in enumerate(self.variables):
-            if not var.constant:
-                if not var._ops:
-                    raise Exception(
-                        "Invalid Backprop: part of the computational graph containing "
-                        "this tensor was cleared prior to backprop"
-                    )
-                if var.grad is None:
-                    tmp_grad = reduce_broadcast(
-                        self.backward_var(grad, index, **kwargs), var.shape
-                    )
-                    var.grad = (
-                        np.copy(tmp_grad)
-                        if np.shares_memory(tmp_grad, grad)
-                        else tmp_grad
-                    )
-                else:
-                    var.grad += reduce_broadcast(
-                        self.backward_var(grad, index, **kwargs), var.shape
-                    )
-
-        for var in self.variables:
-            if var.creator is not None and not var.constant:
-                var._accum_ops.add(self)
-                var._backward(graph=graph)
+    """ Signals that an Operation's forward pass can broadcast its tensor arguments."""
+    def backward(self, grad, *, graph, _reduction=None, **kwargs):
+        return super().backward(grad, graph=graph, _reduction=reduce_broadcast)

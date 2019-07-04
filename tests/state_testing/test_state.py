@@ -11,6 +11,7 @@ any permutation of test states (i.e. permutations of the aforementioned rules)""
 from typing import List, Tuple
 
 import hypothesis.strategies as st
+from hypothesis import settings
 from hypothesis.stateful import (
     Bundle,
     RuleBasedStateMachine,
@@ -21,7 +22,7 @@ from hypothesis.stateful import (
 from numpy.testing import assert_almost_equal, assert_equal
 from pytest import raises
 
-from mygrad import Tensor, add, multiply
+from mygrad import Tensor, add, multiply, cos
 
 from .simple_graph import Node, _add, _multiply
 
@@ -30,6 +31,7 @@ def _node_ID_str(num):
     return "v{}".format(num + 1)
 
 
+@settings(max_examples=1000)
 class GraphCompare(RuleBasedStateMachine):
     def __init__(self):
         super().__init__()

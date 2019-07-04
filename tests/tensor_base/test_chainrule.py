@@ -1,8 +1,10 @@
 import hypothesis.strategies as st
 from hypothesis import given
+import numpy as np
 from numpy.testing import assert_allclose
 
 from mygrad.tensor_base import Tensor
+import mygrad as mg
 
 
 @given(
@@ -35,3 +37,30 @@ def test_chainrule_scalar(x, y, z, side_effects):
     assert_allclose(z.grad, f.data ** 2 + z.data * 2 * f.data)
 
     assert w.grad is None
+
+
+def test_identical_inputs():
+    v1 = Tensor(2.0, constant=False)
+    v2 = v1 + v1
+    v3 = v2 + v2
+    v3.backward(1.0)  # v3 = 4 * v1
+    assert v3.data.item() == 8.0
+    assert v1.grad.item() == 4.0
+
+
+@given(data=st.floats(-10, 10), grad=(st.none() | st.floats(-10, 10)))
+def test_non_broadcastable(data, grad):
+    v1 = Tensor(data, constant=False)
+    v2 = mg.exp(v1)
+    v3 = mg.cos(v2)
+    v3.backward(grad)
+
+    if grad is None:
+        grad = 1.0
+
+    assert_allclose(actual=v2.data, desired=np.exp(v1.data))
+    assert_allclose(actual=v3.data, desired=np.cos(np.exp(v1.data)))
+
+    assert_allclose(actual=v3.grad, desired=grad)
+    assert_allclose(actual=v2.grad, desired=-np.sin(v2.data) * grad)
+    assert_allclose(actual=v1.grad, desired=np.exp(v1.data) * -np.sin(v2.data) * grad)
