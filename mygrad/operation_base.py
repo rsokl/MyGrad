@@ -103,10 +103,10 @@ class Operation:
 
                 if var.grad is None:
                     tmp_grad = np.asarray(self.backward_var(grad, index, **kwargs))
+
                     if _reduction is not None:
-                        tmp_grad = _reduction(
-                            self.backward_var(grad, index, **kwargs), var.shape
-                        )
+                        tmp_grad = _reduction(tmp_grad, var.shape)
+
                     var.grad = (
                         np.copy(tmp_grad)
                         if np.shares_memory(tmp_grad, grad)
@@ -129,5 +129,6 @@ class Operation:
 
 class BroadcastableOp(Operation):
     """ Signals that an Operation's forward pass can broadcast its tensor arguments."""
+
     def backward(self, grad, *, graph, _reduction=None, **kwargs):
         return super().backward(grad, graph=graph, _reduction=reduce_broadcast)
