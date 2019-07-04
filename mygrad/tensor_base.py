@@ -234,10 +234,10 @@ class Tensor:
         return cls(op_out, constant=is_const, _creator=f, _scalar_only=scalar_only)
 
     def backward(self, grad=None):
-        """ Compute set or accumulate `self.grad` with `grad`, and pass `self.creator.backward(grad)`.
-        In effect, calling `self.backward()` will trigger a "back-propagation" from `self` through
-        the preceding nodes in the computational graph. Thus a node, `a`, will have the attribute
-        `self.grad` return the total derivative d(self)/da.
+        """ Compute set or accumulate ``self.grad`` with `grad`, and pass ``self.creator.backward(grad)``.
+        In effect, calling ``self.backward()`` will trigger a "back-propagation" from ``self`` through
+        the preceding nodes in the computational graph. Thus a node, ``a``, will have the attribute
+        ``self.grad`` return the total derivative `d(self)/da`.
 
         Parameters
         ----------
@@ -248,8 +248,8 @@ class Tensor:
         Raises
         ------
         Exception
-            The configuration of the computational graph is such that `self` must be a 0D tensor
-            (i.e. scalar) to invoke self.backward().
+            The configuration of the computational graph is such that ``self`` must be a 0D tensor
+            (i.e. scalar) to invoke ``self.backward()``.
 
         Examples
         --------
@@ -413,7 +413,7 @@ class Tensor:
 
     @property
     def constant(self):
-        """ If `True`, this tensor is a constant; it will not propagate any gradient.
+        """ If ``True``, this tensor is a constant; it will not propagate any gradient.
 
         Additionally, any tensor that is a descendant of constant tensors will also
         be a constant.
@@ -574,6 +574,31 @@ class Tensor:
         )
         copy.grad = np.copy(self.grad) if self.grad is not None else None
         return copy
+
+    def copy(self):
+        """ Produces a copy of ``self`` with ``copy.creator=None``.
+
+        Copies of the underlying numpy data array and gradient array are created.
+
+        Returns
+        -------
+        Tensor
+
+        Examples
+        --------
+        >>> import mygrad as mg
+        >>> x = mg.Tensor(data, constant=constant)
+        >>> y = x * 2
+        >>> y.backward()
+        >>> y_copy = y.copy()
+        >>> y_copy
+        Tensor(6)
+        >>> y_copy.grad
+        array(1.)
+        >>> y_copy.creator is None
+        True
+        """
+        return self.__copy__()
 
     def item(self):
         """ Copy an element of a tensor to a standard Python scalar and return it.

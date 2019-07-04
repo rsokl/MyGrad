@@ -13,6 +13,26 @@ from mygrad.math.arithmetic.ops import Add, Divide, Multiply, Negative, Power, S
 from mygrad.operation_base import Operation
 
 
+@given(
+    data=hnp.arrays(shape=hnp.array_shapes(), dtype=hnp.floating_dtypes()),
+    constant=st.booleans(),
+)
+def test_copy(data, constant):
+    x = Tensor(data, constant=constant)
+    y = x * 2
+    y.backward()
+    y_copy = y.copy()
+
+    assert y.creator is not None
+    assert y.dtype == y_copy.dtype
+    assert y_copy.constant is constant
+    if y.grad is None:
+        assert y_copy.grad is None
+    else:
+        assert_array_equal(y.grad, y_copy.grad)
+    assert_array_equal(y.data, y_copy.data)
+
+
 def test_to_scalar():
     nd_tensor = Tensor([1, 2])
     with raises(TypeError):
