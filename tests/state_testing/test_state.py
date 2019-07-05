@@ -22,7 +22,7 @@ from hypothesis.stateful import (
 from numpy.testing import assert_almost_equal, assert_equal
 from pytest import raises
 
-from mygrad import Tensor, add, multiply, cos
+from mygrad import Tensor, add, multiply
 
 from .simple_graph import Node, _add, _multiply
 
