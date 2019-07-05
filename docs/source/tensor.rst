@@ -1,10 +1,10 @@
 MyGrad's Tensor
 ***************
-``mygrad.Tensor`` is the most critical piece of MyGrad. It is a
+:class:`~mygrad.Tensor` is the most critical piece of MyGrad. It is a
 numpy-array-like object capable of serving as a node in a computational
 graph that supports back-propagation of derivatives via the chain rule.
 
-You can effectively do a drop-in replacement of a numpy array with a ``mygrad.Tensor``
+You can effectively do a drop-in replacement of a numpy array with a :class:`~mygrad.Tensor`
 for all basic mathematical operations. This includes `basic and advanced indexing <https://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/BasicIndexing.html#Introducing-Basic-and-Advanced-Indexing>`_,
 `broadcasting <https://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/Broadcasting.html>`_, sums `over axes <https://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/VectorizedOperations.html#Specifying-the-axis-Keyword-Argument-in-Sequential-NumPy-Functions>`_, etc; it will simply just work.
 
@@ -23,10 +23,10 @@ and their skills will transfer seamlessly when using this autograd library.
 
 Creating a Tensor
 -----------------
-``mygrad.Tensor`` can be passed any "array-like" object of numerical data.
+:class:`~mygrad.Tensor` can be passed any "array-like" object of numerical data.
 This includes numbers, sequences (e.g. lists), nested sequences, numpy-ndarrays,
 and other mygrad-tensors. mygrad also provides familiar numpy-style tensor-creation
-functions (e.g. ``mygrad.arange``, ``mygrad.linspace``, etc.)
+functions (e.g. :func:`~mygrad.arange`, :func:`~mygrad.linspace`, etc.)
 
 >>> import mygrad as mg
 >>> mg.Tensor(2.3)  # creating a 0-dimensional tensor
@@ -78,7 +78,7 @@ True
 
 Accessing the Underlying NumPy Array
 ------------------------------------
-``mygrad.Tensor`` is a thin wrapper on ``numpy.ndarray``. A tensor's
+:class:`~mygrad.Tensor` is a thin wrapper on ``numpy.ndarray``. A tensor's
 underlying numpy-array can be accessed via ``.data``. This returns
 a direct reference to the numpy array.
 
@@ -110,6 +110,7 @@ Documentation for mygrad.Tensor
    Tensor.backward
    Tensor.scalar_only
    Tensor.null_gradients
+   Tensor.copy
    Tensor.clear_graph
    Tensor.creator
 

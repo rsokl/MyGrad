@@ -91,7 +91,9 @@ class Operation:
             The set of all operations relevant to the terminal node of the computational graph,
             which triggered back-propagation.
 
-        reduction : Optional[Callable[[ndarray, Tuple[int, ...]], ndarray]]
+        _reduction : Optional[Callable[[ndarray, Tuple[int, ...]], ndarray]]
+            Developer option-only. A callable used to process the gradient
+            prior to accumulation (e.g. broadcast-reduction)
         """
         for index, var in enumerate(self.variables):
             if not var.constant:
