@@ -84,7 +84,7 @@ class Tensor:
     derivatives.
 
     >>> f.null_gradients()
-    >>> x.grad is None and y.grad is None and f.grad is Nonw
+    >>> x.grad is None and y.grad is None and f.grad is None
     True
 
     Accessing the Underlying NumPy Array
@@ -171,7 +171,7 @@ class Tensor:
         Op : Type[Operation]
             Operation-class, used to perform forward-pass on `input_vars`.
 
-        input_vars : array_like
+        input_vars : Tuple[array_like]
             An arbitrary number of input-tensors. These can take any form that
             can be converted to an array.  This includes numbers, sequences, nested
             numerical sequences, numpy-ndarrays, and mygrad-tensors.
