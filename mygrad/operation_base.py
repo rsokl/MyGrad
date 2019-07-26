@@ -2,6 +2,8 @@
 Defines the base class for mathematical operations capable of back-propagating
 gradients to their input tensors."""
 
+from typing import Set, Optional
+
 import numpy as np
 
 from mygrad._utils import reduce_broadcast
@@ -35,9 +37,16 @@ class Operation:
         unambiguously.
         """
 
-    scalar_only = False
+    # tracks if a given operation-instance performs a
+    # non-vectorized or broadcasted operation , which
+    # requires that backpropagation be invoked from a scalar
+    scalar_only = False  # type: bool
 
-    def __call__(self, *input_vars):
+    # stores a set of all the operation-instances that participate in
+    # the computational graph up to and including the present operation
+    graph = None  # type: Optional[Set[Operation]]
+
+    def __call__(self, *input_vars, **kwargs):
         """ Performs a forward pass, f, of this Operation::
 
             f(x1, ...., xn) -> out
@@ -47,6 +56,9 @@ class Operation:
         *input_vars : mygrad.Tensor
             The input-arguments of f. The tuple (x1, ...., xn)
             should be bound to the instance-attribute `self.variables`
+
+        **kwargs : Any
+            Additional arguments for the operation
 
         Returns
         -------
