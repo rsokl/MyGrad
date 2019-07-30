@@ -170,7 +170,7 @@ dtype_strat_numpy = st.sampled_from(
 )
 def test_init_params(data, creator, constant, scalar_only, dtype, numpy_dtype):
     elements = (
-        (lambda x, y: st.floats(x, y, width=8*np.dtype(numpy_dtype).itemsize))
+        (lambda x, y: st.floats(x, y, width=8 * np.dtype(numpy_dtype).itemsize))
         if np.issubdtype(numpy_dtype, np.floating)
         else st.integers
     )
@@ -265,7 +265,9 @@ def test_neg(x):
 def test_comparison_ops(
     op: str, x: np.ndarray, x_constant: bool, y_constant: bool, data: st.SearchStrategy
 ):
-    y = data.draw(hnp.arrays(shape=x.shape, dtype=x.dtype, elements=st.floats(-10, 10, width=16)))
+    y = data.draw(
+        hnp.arrays(shape=x.shape, dtype=x.dtype, elements=st.floats(-10, 10, width=16))
+    )
     x = Tensor(x, constant=x_constant)
     y = Tensor(y, constant=y_constant)
     assert hasattr(Tensor, op), "`Tensor` is missing the attribute {}".format(op)
