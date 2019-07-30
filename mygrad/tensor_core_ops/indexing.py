@@ -11,17 +11,22 @@ class GetItem(Operation):
         Supports back-propagation through all valid numpy-indexing (basic, advanced, mixed, etc.)"""
 
     def __call__(self, a, index):
-        """ a[index]
+        """ ``a[index]``
 
-            Parameters
-            ----------
-            a : mygrad.Tensor
-                The tensor whose entries are being accessed.
+        Parameters
+        ----------
+        a : mygrad.Tensor
+            The tensor whose entries are being accessed.
 
-            index : valid-array-index
-                An n-dimensional index for specifying entries or subregions of `a`.
-                All means of numpy-array indexing (basic, advanced, mixed, etc) are
-                supported."""
+        index : valid-array-index
+            An n-dimensional index for specifying entries or subregions of `a`.
+            All means of numpy-array indexing (basic, advanced, mixed, etc) are
+            supported.
+
+        Returns
+        -------
+        numpy.ndarray
+            The array returned by the get-item operation"""
         self.variables = (a,)
         self.index = index
         return a.data[index]
