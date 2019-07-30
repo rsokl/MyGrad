@@ -2,6 +2,7 @@
 import math
 from collections.abc import Sequence
 from numbers import Integral
+from typing import Any, Tuple, Union
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
@@ -14,6 +15,16 @@ __all__ = [
     "valid_axes",
     "basic_index",
 ]
+
+
+def everything_except(
+    excluded_types: Union[type, Tuple[type, ...]]
+) -> st.SearchStrategy[Any]:
+    return (
+        st.from_type(type)
+        .flatmap(st.from_type)
+        .filter(lambda x: not isinstance(x, excluded_types))
+    )
 
 
 def _check_min_max(min_val, min_dim, max_dim, param_name, max_val=None):
