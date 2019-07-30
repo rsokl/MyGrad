@@ -2,11 +2,13 @@
 Defines the base class for mathematical operations capable of back-propagating
 gradients to their input tensors."""
 
-from typing import Set, Optional
+from numbers import Real
+from typing import Optional, Set
 
 import numpy as np
 
 from mygrad._utils import reduce_broadcast
+from mygrad.errors import InvalidGradient
 
 __all__ = ["Operation", "BroadcastableOp"]
 
@@ -117,9 +119,26 @@ class Operation:
                         "Invalid Backprop: part of the computational graph containing "
                         "this tensor was cleared prior to backprop"
                     )
+                backed_grad = self.backward_var(grad, index, **kwargs)
+
+                if not isinstance(backed_grad, (np.ndarray, Real)) or not np.issubdtype(
+                    np.asarray(backed_grad).dtype, np.number
+                ):
+                    raise InvalidGradient(
+                        "An invalid gradient-value was produced by "
+                        "`{name}.backward_var(..., index={index})`."
+                        "\nGradients are expected to be real-valued scalars or "
+                        "numpy arrays, got a gradient of type: {_type}"
+                        "\nIt is likely that there is an error in the implementation "
+                        "of `{name}.backward_var`.".format(
+                            name=type(self).__name__,
+                            index=index,
+                            _type=type(backed_grad),
+                        )
+                    )
 
                 if var.grad is None:
-                    tmp_grad = np.asarray(self.backward_var(grad, index, **kwargs))
+                    tmp_grad = np.asarray(backed_grad)
 
                     if _reduction is not None:
                         tmp_grad = _reduction(tmp_grad, var.shape)
@@ -131,12 +150,9 @@ class Operation:
                     )
                 else:
                     if _reduction is None:
-                        var.grad += self.backward_var(grad, index, **kwargs)
+                        var.grad += backed_grad
                     else:
-                        var.grad += _reduction(
-                            self.backward_var(grad, index, **kwargs), var.shape
-                        )
-
+                        var.grad += _reduction(backed_grad, var.shape)
         for var in {
             i for i in self.variables if not i.constant and i.creator is not None
         }:
