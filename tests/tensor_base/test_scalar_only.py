@@ -6,6 +6,7 @@ from pytest import raises
 
 from mygrad.operation_base import BroadcastableOp, Operation
 from mygrad.tensor_base import Tensor
+from mygrad.errors import InvalidBackprop
 
 
 class ScalarOnlyOp(BroadcastableOp):
@@ -44,7 +45,7 @@ def test_scalar_only_op(a_const, a_scalar_only, b_const, b_scalar_only):
 
     # check out.backward()
     if scalar_only:
-        with raises(Exception):
+        with raises(InvalidBackprop):
             out.backward()
     else:
         out.backward()  # a, b, out are const (nothing computed)
@@ -70,7 +71,7 @@ def test_standard_op(a_const, a_scalar_only, b_const, b_scalar_only):
 
     # check out.backward()
     if scalar_only:
-        with raises(Exception):
+        with raises(InvalidBackprop):
             out.backward()
     else:
         if a.constant and b.constant:
@@ -90,5 +91,5 @@ def test_practical_scalar_only(constant, operation):
     if constant:
         out.backward()
     else:
-        with raises(Exception):
+        with raises(InvalidBackprop):
             out.backward()

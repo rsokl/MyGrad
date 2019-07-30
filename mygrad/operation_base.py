@@ -8,7 +8,7 @@ from typing import Optional, Set
 import numpy as np
 
 from mygrad._utils import reduce_broadcast
-from mygrad.errors import InvalidGradient
+from mygrad.errors import InvalidBackprop, InvalidGradient
 
 __all__ = ["Operation", "BroadcastableOp"]
 
@@ -115,9 +115,9 @@ class Operation:
         for index, var in enumerate(self.variables):
             if not var.constant:
                 if not var._ops:
-                    raise Exception(
-                        "Invalid Backprop: part of the computational graph containing "
-                        "this tensor was cleared prior to backprop"
+                    raise InvalidBackprop(
+                        "Part of the computational graph containing "
+                        "this tensor was 'cleared' prior to backprop."
                     )
                 backed_grad = self.backward_var(grad, index, **kwargs)
 

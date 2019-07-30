@@ -10,7 +10,7 @@ from typing import List, Set, Type, Union
 
 import numpy as np
 
-from mygrad.errors import InvalidGradient
+from mygrad.errors import InvalidGradient, InvalidBackprop
 from mygrad.linalg.ops import MatMul
 from mygrad.math.arithmetic.ops import *
 from mygrad.operation_base import BroadcastableOp, Operation
@@ -290,9 +290,10 @@ class Tensor:
                 )
         else:
             if self.ndim > 0 and self._scalar_only:
-                raise Exception(
-                    "Invalid Backprop: backpropagation must be triggered by a "
-                    "scalar for this computational graph"
+                raise InvalidBackprop(
+                    "Backpropagation must be invoked from a "
+                    "scalar-tensor (a 0D tensor) for this computational "
+                    "graph."
                 )
             dtype = float if np.issubdtype(self.dtype, np.signedinteger) else self.dtype
             self.grad = (

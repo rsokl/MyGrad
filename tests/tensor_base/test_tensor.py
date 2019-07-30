@@ -8,7 +8,7 @@ from pytest import raises
 
 import mygrad as mg
 from mygrad import Tensor
-from mygrad.errors import InvalidGradient
+from mygrad.errors import InvalidBackprop, InvalidGradient
 from mygrad.linalg.ops import MatMul
 from mygrad.math.arithmetic.ops import Add, Divide, Multiply, Negative, Power, Subtract
 from mygrad.operation_base import Operation
@@ -440,5 +440,5 @@ def test_clear_graph(x, y, z):
     assert z.creator is None
     assert f.creator is None
 
-    with raises(Exception):
+    with raises(InvalidBackprop):
         g.backward()
