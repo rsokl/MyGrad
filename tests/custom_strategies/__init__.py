@@ -20,6 +20,8 @@ __all__ = [
 def everything_except(
     excluded_types: Union[type, Tuple[type, ...]]
 ) -> st.SearchStrategy[Any]:
+    """Returns hypothesis strategy that generates values of any type other than
+    those specified in ``excluded_types``."""
     return (
         st.from_type(type)
         .flatmap(st.from_type)
