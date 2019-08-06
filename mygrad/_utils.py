@@ -1,3 +1,9 @@
+from numbers import Real
+from typing import Any
+
+import numpy as np
+
+
 def reduce_broadcast(grad, var_shape):
     """ Sum-reduce axes of `grad` so its shape matches `var_shape.
 
@@ -35,3 +41,19 @@ def reduce_broadcast(grad, var_shape):
         grad = grad.sum(axis=keepdims, keepdims=True)
 
     return grad
+
+
+def is_invalid_gradient(grad: Any) -> bool:
+    """Raises ``InvalidGradient`` if ``grad`` is not array-like.
+
+    Parameters
+    ----------
+    grad : Any
+
+
+    Returns
+    -------
+    ``True`` if ``grad`` is invalid"""
+    return not isinstance(grad, (np.ndarray, Real)) or not np.issubdtype(
+        np.asarray(grad).dtype, np.number
+    )

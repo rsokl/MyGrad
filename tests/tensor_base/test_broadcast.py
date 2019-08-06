@@ -1,7 +1,7 @@
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
-from hypothesis import assume, given
+from hypothesis import given
 from numpy.testing import assert_allclose
 from pytest import raises
 

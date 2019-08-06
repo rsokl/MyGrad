@@ -5,11 +5,11 @@ etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 """
 
 from functools import wraps
-from numbers import Real
 from typing import List, Set, Type, Union
 
 import numpy as np
 
+from mygrad._utils import is_invalid_gradient
 from mygrad.errors import InvalidGradient, InvalidBackprop
 from mygrad.linalg.ops import MatMul
 from mygrad.math.arithmetic.ops import *
@@ -276,18 +276,19 @@ class Tensor:
 
         if grad is not None:
             self.grad = np.asarray(grad.data if isinstance(grad, Tensor) else grad)
-
-            if not isinstance(self.grad, (np.ndarray, Real)) or not np.issubdtype(
-                np.asarray(self.grad).dtype, np.number
-            ):
+            if is_invalid_gradient(self.grad):
                 raise InvalidGradient(
                     "An invalid gradient-value was passed to "
-                    "`{name}.backward()`."
+                    "\n\t`{call_signature}`"
                     "\nGradients are expected to be real-valued scalars or "
                     "numpy arrays, got a gradient of type: {_type}".format(
-                        name=type(self).__name__, _type=type(grad)
+                        call_signature="{name}.backward(<gradient>)".format(
+                            name=type(self).__name__
+                        ),
+                        _type=type(grad),
                     )
                 )
+
         else:
             if self.ndim > 0 and self._scalar_only:
                 raise InvalidBackprop(

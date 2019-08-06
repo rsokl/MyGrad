@@ -2,12 +2,11 @@
 Defines the base class for mathematical operations capable of back-propagating
 gradients to their input tensors."""
 
-from numbers import Real
 from typing import Optional, Set
 
 import numpy as np
 
-from mygrad._utils import reduce_broadcast
+from mygrad._utils import is_invalid_gradient, reduce_broadcast
 from mygrad.errors import InvalidBackprop, InvalidGradient
 
 __all__ = ["Operation", "BroadcastableOp"]
@@ -121,22 +120,18 @@ class Operation:
                     )
                 backed_grad = self.backward_var(grad, index, **kwargs)
 
-                if not isinstance(backed_grad, (np.ndarray, Real)) or not np.issubdtype(
-                    np.asarray(backed_grad).dtype, np.number
-                ):
+                if is_invalid_gradient(backed_grad):
                     raise InvalidGradient(
-                        "An invalid gradient-value was produced by "
-                        "`{name}.backward_var(..., index={index})`."
+                        "An invalid gradient-value was passed to:"
+                        "\n\t`{call_signature}`"
                         "\nGradients are expected to be real-valued scalars or "
-                        "numpy arrays, got a gradient of type: {_type}"
-                        "\nIt is likely that there is an error in the implementation "
-                        "of `{name}.backward_var`.".format(
-                            name=type(self).__name__,
-                            index=index,
-                            _type=type(backed_grad),
+                        "numpy arrays, got a gradient of type: {_type}".format(
+                            call_signature="{name}.backward_var(<gradient>, index={index})".format(
+                                name=type(self).__name__, index=index
+                            ),
+                            _type=type(grad),
                         )
                     )
-
                 if var.grad is None:
                     tmp_grad = np.asarray(backed_grad)
 
