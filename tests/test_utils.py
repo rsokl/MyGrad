@@ -27,7 +27,7 @@ from tests.custom_strategies import everything_except
         ((st.integers(min_value=-1e6, max_value=1e6) | st.floats()), False),
     ],
 )
-@settings(deadline=None, suppress_health_check=(HealthCheck.filter_too_much,))
+@settings(deadline=None, suppress_health_check=(HealthCheck.too_slow,))
 @given(data=st.data())
 def test_is_invalid_gradient(grad, is_invalid, data: st.DataObject):
     if isinstance(grad, st.SearchStrategy):
