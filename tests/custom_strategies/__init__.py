@@ -10,10 +10,11 @@ import numpy as np
 
 __all__ = [
     "adv_integer_index",
+    "basic_index",
     "broadcastable_shape",
     "choices",
+    "everything_except",
     "valid_axes",
-    "basic_index",
 ]
 
 
