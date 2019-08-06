@@ -31,7 +31,10 @@ def everything_except(
 
 
 def _check_min_max(min_val, min_dim, max_dim, param_name, max_val=None):
-    """Ensures that `min_val <= min_dim` and `min_val <= max_dim`.
+    """Ensures that:
+        min_val <= min_dim
+        min_val <= max_dim
+        min_val <= max_val
     If `max_val` is specified, ensures that `max_dim <= max_val`
 
     Raises
@@ -54,6 +57,13 @@ def _check_min_max(min_val, min_dim, max_dim, param_name, max_val=None):
         raise ValueError(
             "`min_{name}` cannot be larger than {max_val}. "
             "Got {val}".format(max_val=max_val, name=param_name, val=max_dim)
+        )
+
+    if max_dim < min_dim:
+        raise ValueError(
+            "`min_{name}={_min}` cannot be larger than max_{name}={_max}.".format(
+                _min=min_val, _max=max_val, name=param_name
+            )
         )
 
 

@@ -44,7 +44,7 @@ def reduce_broadcast(grad, var_shape):
 
 
 def is_invalid_gradient(grad: Any) -> bool:
-    """Raises ``InvalidGradient`` if ``grad`` is not array-like.
+    """Returns ``True`` if ``grad`` is not array-like.
 
     Parameters
     ----------
