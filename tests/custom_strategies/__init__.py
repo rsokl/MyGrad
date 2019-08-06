@@ -62,7 +62,7 @@ def _check_min_max(min_val, min_dim, max_dim, param_name, max_val=None):
     if max_dim < min_dim:
         raise ValueError(
             "`min_{name}={_min}` cannot be larger than max_{name}={_max}.".format(
-                _min=min_val, _max=max_val, name=param_name
+                _min=min_dim, _max=max_dim, name=param_name
             )
         )
 
