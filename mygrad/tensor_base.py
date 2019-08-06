@@ -9,6 +9,8 @@ from typing import List, Set, Type, Union
 
 import numpy as np
 
+from mygrad._utils import is_invalid_gradient
+from mygrad.errors import InvalidGradient, InvalidBackprop
 from mygrad.linalg.ops import MatMul
 from mygrad.math.arithmetic.ops import *
 from mygrad.operation_base import BroadcastableOp, Operation
@@ -84,7 +86,7 @@ class Tensor:
     derivatives.
 
     >>> f.null_gradients()
-    >>> x.grad is None and y.grad is None and f.grad is Nonw
+    >>> x.grad is None and y.grad is None and f.grad is None
     True
 
     Accessing the Underlying NumPy Array
@@ -171,7 +173,7 @@ class Tensor:
         Op : Type[Operation]
             Operation-class, used to perform forward-pass on `input_vars`.
 
-        input_vars : array_like
+        input_vars : Tuple[array_like]
             An arbitrary number of input-tensors. These can take any form that
             can be converted to an array.  This includes numbers, sequences, nested
             numerical sequences, numpy-ndarrays, and mygrad-tensors.
@@ -274,11 +276,25 @@ class Tensor:
 
         if grad is not None:
             self.grad = np.asarray(grad.data if isinstance(grad, Tensor) else grad)
+            if is_invalid_gradient(self.grad):
+                raise InvalidGradient(
+                    "An invalid gradient-value was passed to "
+                    "\n\t`{call_signature}`"
+                    "\nGradients are expected to be real-valued scalars or "
+                    "numpy arrays, got a gradient of type: {_type}".format(
+                        call_signature="{name}.backward(<gradient>)".format(
+                            name=type(self).__name__
+                        ),
+                        _type=type(grad),
+                    )
+                )
+
         else:
             if self.ndim > 0 and self._scalar_only:
-                raise Exception(
-                    "Invalid Backprop: backpropagation must be triggered by a "
-                    "scalar for this computational graph"
+                raise InvalidBackprop(
+                    "Backpropagation must be invoked from a "
+                    "scalar-tensor (a 0D tensor) for this computational "
+                    "graph."
                 )
             dtype = float if np.issubdtype(self.dtype, np.signedinteger) else self.dtype
             self.grad = (

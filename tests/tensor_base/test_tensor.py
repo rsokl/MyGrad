@@ -8,9 +8,11 @@ from pytest import raises
 
 import mygrad as mg
 from mygrad import Tensor
+from mygrad.errors import InvalidBackprop, InvalidGradient
 from mygrad.linalg.ops import MatMul
 from mygrad.math.arithmetic.ops import Add, Divide, Multiply, Negative, Power, Subtract
 from mygrad.operation_base import Operation
+from tests.utils import does_not_raise
 
 
 @given(
@@ -66,11 +68,17 @@ def test_repr(tensor, repr_):
     assert repr(tensor) == repr_
 
 
+@given(constant=st.booleans())
+def test_invalid_gradient_raises(constant: bool):
+    x = Tensor(3, constant=constant) * 2
+    with (pytest.raises(InvalidGradient) if not constant else does_not_raise()):
+        x.backward("bad")
+
+
 @pytest.mark.parametrize("element", (0, [0, 1, 2]))
 def test_contains(element):
     t = Tensor([[0, 1, 2], [3, 4, 5]])
-    assert element in t
-    assert element in t.data
+    assert (element in t) is (element in t.data)
 
 
 @given(
@@ -89,6 +97,7 @@ def test_properties(a, constant, scalar, creator):
         ref = Operation()
         tensor = Tensor(a, constant=constant, _creator=ref, _scalar_only=scalar)
     else:
+        ref = None
         tensor = Tensor(a, constant=constant, _scalar_only=scalar)
 
     assert tensor.ndim == array.ndim
@@ -160,7 +169,11 @@ dtype_strat_numpy = st.sampled_from(
     numpy_dtype=dtype_strat_numpy,
 )
 def test_init_params(data, creator, constant, scalar_only, dtype, numpy_dtype):
-    elements = st.floats if np.issubdtype(numpy_dtype, np.floating) else st.integers
+    elements = (
+        (lambda x, y: st.floats(x, y, width=8 * np.dtype(numpy_dtype).itemsize))
+        if np.issubdtype(numpy_dtype, np.floating)
+        else st.integers
+    )
     a = data.draw(
         hnp.arrays(
             shape=hnp.array_shapes(max_side=3, max_dims=5),
@@ -243,7 +256,7 @@ def test_neg(x):
     x=hnp.arrays(
         shape=hnp.array_shapes(),
         dtype=hnp.floating_dtypes(),
-        elements=st.floats(-10, 10),
+        elements=st.floats(-10, 10, width=16),
     ),
     x_constant=st.booleans(),
     y_constant=st.booleans(),
@@ -252,7 +265,9 @@ def test_neg(x):
 def test_comparison_ops(
     op: str, x: np.ndarray, x_constant: bool, y_constant: bool, data: st.SearchStrategy
 ):
-    y = data.draw(hnp.arrays(shape=x.shape, dtype=x.dtype, elements=st.floats(-10, 10)))
+    y = data.draw(
+        hnp.arrays(shape=x.shape, dtype=x.dtype, elements=st.floats(-10, 10, width=16))
+    )
     x = Tensor(x, constant=x_constant)
     y = Tensor(y, constant=y_constant)
     assert hasattr(Tensor, op), "`Tensor` is missing the attribute {}".format(op)
@@ -431,5 +446,5 @@ def test_clear_graph(x, y, z):
     assert z.creator is None
     assert f.creator is None
 
-    with raises(Exception):
+    with raises(InvalidBackprop):
         g.backward()

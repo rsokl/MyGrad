@@ -1,7 +1,7 @@
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
-from hypothesis import given
+from hypothesis import given, settings
 from numpy.testing import assert_array_equal
 from scipy import special
 
@@ -9,6 +9,7 @@ from mygrad.math._special import logsumexp
 from tests.custom_strategies import valid_axes
 
 
+@settings(deadline=None)
 @given(
     data=st.data(),
     x=hnp.arrays(
