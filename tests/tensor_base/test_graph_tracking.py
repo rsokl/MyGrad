@@ -18,5 +18,11 @@ def test_op_tracks_graph():
 
     i = ((h + 3) ** 2) / 5
     assert h.creator.graph < i.creator.graph
-    assert len(i.creator.graph - h.creator.graph) == 3, "should be {Add, Subtract, Divide}"
-    assert all(isinstance(x, (Add, Power, Divide)) for x in i.creator.graph - h.creator.graph)
+    assert (
+        len(i.creator.graph - h.creator.graph) == 3
+    ), "should be {{Add, Subtract, Divide}}, but got {}".format(
+        i.creator.graph - h.creator.graph
+    )
+    assert all(
+        isinstance(x, (Add, Power, Divide)) for x in i.creator.graph - h.creator.graph
+    )
