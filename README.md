@@ -86,7 +86,7 @@ functions of tensor-valued variables!
 array([ 1.,  4., 12.])
 ```
 
-`mygrad.nn` supplies essential functions for machine learning, including:
+`mygrad.nnet` supplies essential functions for machine learning, including:
 - N-dimensional convolutions (with striding, dilation, and padding)
 - N-dimensional pooling
 - A [gated recurrent unit](https://en.wikipedia.org/wiki/Gated_recurrent_unit) for sequence-learning (with input-level
