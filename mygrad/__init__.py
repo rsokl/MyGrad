@@ -2,6 +2,7 @@ from mygrad.tensor_base import Tensor  # isort:skip  # avoid an import cycle
 
 from mygrad.linalg.funcs import *
 from mygrad.math.arithmetic.funcs import *
+from mygrad.math.consts import *
 from mygrad.math.exp_log.funcs import *
 from mygrad.math.hyperbolic_trig.funcs import *
 from mygrad.math.misc.funcs import *
