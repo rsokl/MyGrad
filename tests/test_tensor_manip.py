@@ -274,8 +274,9 @@ def _is_broadcastable(*arrs, **kwargs):
     true_func=np.broadcast_to,
     num_arrays=1,
     index_to_arr_shapes={0: hnp.array_shapes(min_dims=0)},
-    kwargs=dict(shape=lambda arr: broadcastable_shape(arr.shape, min_dim=arr.ndim)),
-    assumptions=_is_broadcastable,
+    kwargs=dict(
+        shape=lambda arr: hnp.array_shapes(min_dims=0).map(lambda x: x + arr.shape)
+    ),
 )
 def test_broadcast_to_fwd():
     pass
@@ -287,8 +288,9 @@ def test_broadcast_to_fwd():
     num_arrays=1,
     vary_each_element=True,
     index_to_arr_shapes={0: hnp.array_shapes(min_dims=0)},
-    kwargs=dict(shape=lambda arr: broadcastable_shape(arr.shape, min_dim=arr.ndim)),
-    assumptions=_is_broadcastable,
+    kwargs=dict(
+        shape=lambda arr: hnp.array_shapes(min_dims=0).map(lambda x: x + arr.shape)
+    ),
 )
 def test_broadcast_to_bkwd():
     pass
