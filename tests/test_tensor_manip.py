@@ -263,12 +263,6 @@ def test_ravel_fwd():
 def test_ravel_bkwd():
     pass
 
-
-def _is_broadcastable(*arrs, **kwargs):
-    x = arrs[0]
-    return x.shape == kwargs["shape"][-x.ndim :]
-
-
 @fwdprop_test_factory(
     mygrad_func=broadcast_to,
     true_func=np.broadcast_to,
