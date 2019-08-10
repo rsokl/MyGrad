@@ -6,7 +6,7 @@ from typing import Optional, Set
 
 import numpy as np
 
-from mygrad._utils import is_invalid_gradient, reduce_broadcast
+from mygrad._utils import is_invalid_gradient, reduce_broadcast, SkipGradient
 from mygrad.errors import InvalidBackprop, InvalidGradient
 
 __all__ = ["Operation", "BroadcastableOp"]
@@ -90,7 +90,7 @@ class Operation:
 
         Raises
         ------
-        NotImplemented Error"""
+        SkipGradient"""
         raise NotImplementedError
 
     def backward(self, grad, *, graph, _reduction=None, **kwargs):
@@ -118,7 +118,11 @@ class Operation:
                         "Part of the computational graph containing "
                         "this tensor was 'cleared' prior to backprop."
                     )
-                backed_grad = self.backward_var(grad, index, **kwargs)
+
+                try:
+                    backed_grad = self.backward_var(grad, index, **kwargs)
+                except SkipGradient:
+                    continue
 
                 if is_invalid_gradient(backed_grad):
                     raise InvalidGradient(

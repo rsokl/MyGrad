@@ -3,6 +3,13 @@ from typing import Any
 
 import numpy as np
 
+__all__ = ["is_invalid_gradient", "reduce_broadcast", "SkipGradient"]
+
+
+class SkipGradient(Exception):
+    """ The gradient for the current tensor-label pair has already
+    been computed, scaled, and back-propped, skip gradient calculation."""
+
 
 def reduce_broadcast(grad, var_shape):
     """ Sum-reduce axes of `grad` so its shape matches `var_shape.
