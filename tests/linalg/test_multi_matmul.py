@@ -1,3 +1,5 @@
+import pytest
+from typing import List
 import functools
 
 import hypothesis.extra.numpy as hnp
@@ -10,6 +12,13 @@ import mygrad as mg
 
 def multi_matmul_slow(arrays):
     return functools.reduce(mg.matmul, arrays)
+
+
+@given(st.lists(st.just(mg.Tensor([0., 1.])), min_size=0, max_size=1))
+def test_input_validation(tensors: List[mg.Tensor]):
+    """multi_matmul requires at least two input-tensors"""
+    with pytest.raises(ValueError):
+        mg.multi_matmul(tensors)
 
 
 @given(
