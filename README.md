@@ -4,6 +4,8 @@
 [![PyPi version](https://img.shields.io/pypi/v/mygrad.svg)](https://pypi.python.org/pypi/mygrad)
 ![Python version support](https://img.shields.io/badge/python-3.5%20%203.6%20%203.7-blue.svg)
 
+# [MyGrad's Documentation](https://mygrad.readthedocs.io/en/latest/)
+
 # Introducing mygrad
 `mygrad` is a simple, NumPy-centric autograd library. An autograd library enables you to automatically compute derivatives of mathematical functions. This library
 is designed to serve both as a tool for prototyping/testing and as an education tool for learning about gradient-based machine learning; it is easy to install, has a readable and easily customizable code
@@ -14,7 +16,7 @@ This is not meant to be a competitor to libraries like PyTorch (which `mygrad` m
 TensorFlow. Rather, it is meant to serve as a useful tool for students who are learning about training neural networks
 using back propagation.
 
-A more in-depth discussion of MyGrad and documentation for its internals can be found [here](https://mygrad.readthedocs.io/en/latest/).
+
 
 ## Installing mygrad (this project)
 To install MyGrad, you can pip-install it:
@@ -86,7 +88,7 @@ functions of tensor-valued variables!
 array([ 1.,  4., 12.])
 ```
 
-`mygrad.nn` supplies essential functions for machine learning, including:
+`mygrad.nnet` supplies essential functions for machine learning, including:
 - N-dimensional convolutions (with striding, dilation, and padding)
 - N-dimensional pooling
 - A [gated recurrent unit](https://en.wikipedia.org/wiki/Gated_recurrent_unit) for sequence-learning (with input-level

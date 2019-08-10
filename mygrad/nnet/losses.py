@@ -209,6 +209,7 @@ def softmax_crossentropy(x, y_true, constant=False):
     (:math:`s_{k}`) is normalized using the 'softmax' transformation:
 
     .. math::
+
         p_{k} = \frac{e^{s_k}}{\sum_{i=1}^{C}{e^{s_i}}}
 
     This produces the "prediction probability distribution", :math:`p`, for each datum.
@@ -217,12 +218,15 @@ def softmax_crossentropy(x, y_true, constant=False):
     :math:`t`, for the datum is :math:`1` for the correct class-index and :math:`0` elsewhere.
 
     The cross-entropy loss for that datum is thus:
+
     .. math::
        l = - \sum_{k=1}^{C}{t_{k} \log{p_{k}}}
 
     Having computed each per-datum cross entropy loss, this function then returns the loss
     averaged over all :math:`N` pieces of data:
+
     .. math::
+
        L = \frac{1}{N}\sum_{i=1}^{N}{l_{i}}
 
     Examples

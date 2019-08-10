@@ -2,9 +2,12 @@
 Defines the base class for mathematical operations capable of back-propagating
 gradients to their input tensors."""
 
+from typing import Optional, Set
+
 import numpy as np
 
-from mygrad._utils import reduce_broadcast
+from mygrad._utils import is_invalid_gradient, reduce_broadcast
+from mygrad.errors import InvalidBackprop, InvalidGradient
 
 __all__ = ["Operation", "BroadcastableOp"]
 
@@ -35,9 +38,16 @@ class Operation:
         unambiguously.
         """
 
-    scalar_only = False
+    # tracks if a given operation-instance performs a
+    # non-vectorized or broadcasted operation , which
+    # requires that backpropagation be invoked from a scalar
+    scalar_only = False  # type: bool
 
-    def __call__(self, *input_vars):
+    # stores a set of all the operation-instances that participate in
+    # the computational graph up to and including the present operation
+    graph = None  # type: Optional[Set[Operation]]
+
+    def __call__(self, *input_vars, **kwargs):
         """ Performs a forward pass, f, of this Operation::
 
             f(x1, ...., xn) -> out
@@ -47,6 +57,9 @@ class Operation:
         *input_vars : mygrad.Tensor
             The input-arguments of f. The tuple (x1, ...., xn)
             should be bound to the instance-attribute `self.variables`
+
+        **kwargs : Any
+            Additional arguments for the operation
 
         Returns
         -------
@@ -101,13 +114,26 @@ class Operation:
         for index, var in enumerate(self.variables):
             if not var.constant:
                 if not var._ops:
-                    raise Exception(
-                        "Invalid Backprop: part of the computational graph containing "
-                        "this tensor was cleared prior to backprop"
+                    raise InvalidBackprop(
+                        "Part of the computational graph containing "
+                        "this tensor was 'cleared' prior to backprop."
                     )
+                backed_grad = self.backward_var(grad, index, **kwargs)
 
+                if is_invalid_gradient(backed_grad):
+                    raise InvalidGradient(
+                        "An invalid gradient-value was passed to:"
+                        "\n\t`{call_signature}`"
+                        "\nGradients are expected to be real-valued scalars or "
+                        "numpy arrays, got a gradient of type: {_type}".format(
+                            call_signature="{name}.backward_var(<gradient>, index={index})".format(
+                                name=type(self).__name__, index=index
+                            ),
+                            _type=type(grad),
+                        )
+                    )
                 if var.grad is None:
-                    tmp_grad = np.asarray(self.backward_var(grad, index, **kwargs))
+                    tmp_grad = np.asarray(backed_grad)
 
                     if _reduction is not None:
                         tmp_grad = _reduction(tmp_grad, var.shape)
@@ -119,12 +145,9 @@ class Operation:
                     )
                 else:
                     if _reduction is None:
-                        var.grad += self.backward_var(grad, index, **kwargs)
+                        var.grad += backed_grad
                     else:
-                        var.grad += _reduction(
-                            self.backward_var(grad, index, **kwargs), var.shape
-                        )
-
+                        var.grad += _reduction(backed_grad, var.shape)
         for var in {
             i for i in self.variables if not i.constant and i.creator is not None
         }:

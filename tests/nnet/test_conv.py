@@ -3,7 +3,7 @@
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
-from hypothesis import assume, given, settings
+from hypothesis import assume, given, settings, HealthCheck
 from numpy.testing import assert_allclose
 from pytest import raises
 
@@ -240,7 +240,7 @@ def test_conv_1d_bkwd():
     behavior with `constant` arg, good behavior of null_gradients, etc."""
 
 
-@settings(deadline=None)
+@settings(deadline=None, suppress_health_check=(HealthCheck.filter_too_much,))
 @given(
     data=st.data(),
     shape=hnp.array_shapes(min_dims=1, max_dims=3, max_side=12),
@@ -280,7 +280,7 @@ def test_conv_ND_fwd(data, shape, num_filters, num_batch, num_channel):
     assert_allclose(actual=mygrad_conv, desired=numpy_conv, atol=1e-6, rtol=1e-6)
 
 
-@settings(deadline=None)
+@settings(deadline=None, suppress_health_check=(HealthCheck.filter_too_much,))
 @given(
     data=st.data(),
     shape=hnp.array_shapes(min_dims=1, max_dims=3, max_side=6),

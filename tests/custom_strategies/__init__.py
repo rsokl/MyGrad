@@ -2,6 +2,7 @@
 import math
 from collections.abc import Sequence
 from numbers import Integral
+from typing import Any, Tuple, Union
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
@@ -9,14 +10,36 @@ import numpy as np
 
 __all__ = [
     "adv_integer_index",
+    "basic_index",
     "broadcastable_shape",
     "choices",
+    "everything_except",
     "valid_axes",
-    "basic_index",
 ]
 
 
+def everything_except(
+    excluded_types: Union[type, Tuple[type, ...]]
+) -> st.SearchStrategy[Any]:
+    """Returns hypothesis strategy that generates values of any type other than
+    those specified in ``excluded_types``."""
+    return (
+        st.from_type(type)
+        .flatmap(st.from_type)
+        .filter(lambda x: not isinstance(x, excluded_types))
+    )
+
+
 def _check_min_max(min_val, min_dim, max_dim, param_name, max_val=None):
+    """Ensures that:
+        min_val <= min_dim
+        min_val <= max_dim
+        min_val <= max_val
+    If `max_val` is specified, ensures that `max_dim <= max_val`
+
+    Raises
+    ------
+    ValueError"""
     if not isinstance(min_dim, Integral) or min_dim < min_val:
         raise ValueError(
             "`min_{name}` must be larger than {min_val}. "
@@ -34,6 +57,13 @@ def _check_min_max(min_val, min_dim, max_dim, param_name, max_val=None):
         raise ValueError(
             "`min_{name}` cannot be larger than {max_val}. "
             "Got {val}".format(max_val=max_val, name=param_name, val=max_dim)
+        )
+
+    if max_dim < min_dim:
+        raise ValueError(
+            "`min_{name}={_min}` cannot be larger than max_{name}={_max}.".format(
+                _min=min_dim, _max=max_dim, name=param_name
+            )
         )
 
 
