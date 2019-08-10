@@ -1,17 +1,35 @@
 import numpy as np
 
-Inf = np.array(np.Inf)
-Infinity = np.array(np.Infinity)
-NAN = np.array(np.NAN)
-NINF = np.array(np.NINF)
-NZERO = np.array(np.NZERO)
-NaN = np.array(np.NaN)
-PINF = np.array(np.PINF)
-PZERO = np.array(np.PZERO)
-e = np.array(np.e)
-euler_gamma = np.array(np.euler_gamma)
-inf = np.array(np.inf)
-infty = np.array(np.infty)
-nan = np.array(np.nan)
-newaxis = np.array(np.newaxis)
-pi = np.array(np.pi)
+__all__ = [
+    'Inf',
+    'Infinity',
+    'NAN',
+    'NINF',
+    'NZERO',
+    'NaN',
+    'PINF',
+    'PZERO',
+    'e',
+    'euler_gamma',
+    'inf',
+    'infty',
+    'nan',
+    'newaxis',
+    'pi',
+]
+
+Inf = np.Inf
+Infinity = np.Infinity
+NAN = np.NAN
+NINF = np.NINF
+NZERO = np.NZERO
+NaN = np.NaN
+PINF = np.PINF
+PZERO = np.PZERO
+e = np.e
+euler_gamma = np.euler_gamma
+inf = np.inf
+infty = np.infty
+nan = np.nan
+newaxis = np.newaxis
+pi = np.pi
