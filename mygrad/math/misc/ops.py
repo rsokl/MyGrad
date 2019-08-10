@@ -54,7 +54,10 @@ class Maximum(BroadcastableOp):
             mask = self.greater_than_mask
         elif index == 1:
             mask = np.logical_not(self.greater_than_mask)
-            np.logical_not(mask, out=mask, where=self.equal_mask)
+            if mask.ndim:
+                np.logical_not(mask, out=mask, where=self.equal_mask)
+            elif self.equal_mask:
+                mask = np.logical_not(mask)
         else:
             raise IndexError
 
@@ -73,7 +76,10 @@ class Minimum(BroadcastableOp):
             mask = self.less_than_mask
         elif index == 1:
             mask = np.logical_not(self.less_than_mask)
-            np.logical_not(mask, out=mask, where=self.equal_mask)
+            if mask.ndim:
+                np.logical_not(mask, out=mask, where=self.equal_mask)
+            elif self.equal_mask:
+                mask = np.logical_not(mask)
         else:
             raise IndexError
 

@@ -121,7 +121,7 @@ class fwdprop_test_factory:
         hypothesis.searchstrategy.SearchStrategy"""
         return hnp.arrays(
             shape=self.index_to_arr_shapes.get(
-                0, hnp.array_shapes(max_side=3, max_dims=3)
+                0, hnp.array_shapes(max_side=3, min_dims=0, max_dims=3)
             ),
             dtype=float,
             elements=st.floats(*self.index_to_bnds.get(0, (-10.0, 10.0))),
@@ -411,7 +411,7 @@ class backprop_test_factory:
         hypothesis.searchstrategy.SearchStrategy"""
         return hnp.arrays(
             shape=self.index_to_arr_shapes.get(
-                0, hnp.array_shapes(max_side=3, max_dims=3)
+                0, hnp.array_shapes(max_side=3, min_dims=0, max_dims=3)
             ),
             dtype=float,
             elements=self.elements_strategy(*self.index_to_bnds.get(0, (-100, 100))),

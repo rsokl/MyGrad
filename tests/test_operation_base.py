@@ -25,10 +25,15 @@ def old_op(a):
     return Tensor._op(OldOperation, a)
 
 
-@given(constant=st.booleans(), arr=hnp.arrays(dtype=float, shape=hnp.array_shapes()),
-       op_before=st.booleans(), op_after=st.booleans())
-def test_backpropping_non_numeric_gradient_raises(constant: bool, arr: np.ndarray, op_before: bool,
-                                                  op_after):
+@given(
+    constant=st.booleans(),
+    arr=hnp.arrays(dtype=float, shape=hnp.array_shapes()),
+    op_before=st.booleans(),
+    op_after=st.booleans(),
+)
+def test_backpropping_non_numeric_gradient_raises(
+    constant: bool, arr: np.ndarray, op_before: bool, op_after
+):
     x = Tensor(arr, constant=constant)
 
     if op_before:

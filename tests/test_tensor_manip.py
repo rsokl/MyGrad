@@ -154,7 +154,7 @@ def _expand_dims_axis(arr):
 
 
 def _swap_axes_axis(arr):
-    return st.integers(-arr.ndim, arr.ndim - 1)
+    return st.integers(-arr.ndim, arr.ndim - 1) if arr.ndim else st.just(0)
 
 
 def _valid_moveaxis_args(*arrs, **kwargs):
@@ -219,6 +219,7 @@ def test_moveaxis_bkwd():
     true_func=np.swapaxes,
     num_arrays=1,
     kwargs=dict(axis1=_swap_axes_axis, axis2=_swap_axes_axis),
+    index_to_arr_shapes={0: hnp.array_shapes(max_side=3, min_dims=1, max_dims=3)},
 )
 def test_swapaxes_fwd():
     pass
@@ -230,6 +231,7 @@ def test_swapaxes_fwd():
     num_arrays=1,
     kwargs=dict(axis1=_swap_axes_axis, axis2=_swap_axes_axis),
     vary_each_element=True,
+    index_to_arr_shapes={0: hnp.array_shapes(max_side=3, min_dims=1, max_dims=3)},
 )
 def test_swapaxes_bkwd():
     pass
@@ -295,15 +297,18 @@ def test_broadcast_to_bkwd():
 def gen_roll_args(draw, arr):
     shift = draw(st.integers() | st.tuples(*(st.integers() for i in arr.shape)))
 
-    ax_strat = hnp.valid_tuple_axes(
-        arr.ndim,
-        **(
-            dict(min_size=len(shift), max_size=len(shift))
-            if isinstance(shift, tuple)
-            else {}
+    if arr.ndim:
+        ax_strat = hnp.valid_tuple_axes(
+            arr.ndim,
+            **(
+                dict(min_size=len(shift), max_size=len(shift))
+                if isinstance(shift, tuple)
+                else {}
+            )
         )
-    )
-    axis = draw(st.none() | st.integers(-arr.ndim, arr.ndim - 1) | ax_strat)
+        axis = draw(st.none() | st.integers(-arr.ndim, arr.ndim - 1) | ax_strat)
+    else:
+        axis = None
     return dict(shift=shift, axis=axis)
 
 

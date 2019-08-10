@@ -18,13 +18,19 @@ from ...wrappers.uber import (
 
 def axis_arg(*arrs, min_dim=0):
     """ Wrapper for passing valid-axis search strategy to test factory"""
-    return valid_axes(arrs[0].ndim, min_dim=min_dim)
+    if arrs[0].ndim:
+        return valid_axes(arrs[0].ndim, min_dim=min_dim)
+    else:
+        return st.just(tuple())
 
 
 def single_axis_arg(*arrs):
     """ Wrapper for passing valid-axis (single-value only)
     search strategy to test factory"""
-    return valid_axes(arrs[0].ndim, single_axis_only=True)
+    if arrs[0].ndim:
+        return valid_axes(arrs[0].ndim, single_axis_only=True)
+    else:
+        return st.none()
 
 
 def keepdims_arg(*arrs):
@@ -35,7 +41,8 @@ def keepdims_arg(*arrs):
 def ddof_arg(*arrs):
     """ Wrapper for passing ddof strategy to test factory
     (argument for var and std)"""
-    return st.integers(0, min(arrs[0].shape) - 1)
+    min_side = min(arrs[0].shape) if arrs[0].shape else 0
+    return st.integers(0, min_side - 1) if min_side else st.just(0)
 
 
 @fwdprop_test_factory(

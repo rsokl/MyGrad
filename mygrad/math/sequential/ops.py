@@ -38,6 +38,8 @@ class MaxMin(Operation):
         # let numpy handle error checking
         np.amax(np.empty([1] * a.ndim), axis=axis, keepdims=keepdims)
 
+        self.variables = (a,)
+
         if a.ndim == 0:
             return a.data
 
@@ -48,7 +50,6 @@ class MaxMin(Operation):
         elif axis is not None:
             axis = (axis % a.ndim,)
 
-        self.variables = (a,)
         self.axis = axis
         self.keepdims = keepdims
 
@@ -186,6 +187,9 @@ class Prod(Operation):
         a = self.variables[index]
         x = a.data
         grad = np.asarray(grad)
+
+        if a.ndim == 0:
+            return grad
 
         axes = (
             set(range(a.ndim))
