@@ -197,8 +197,9 @@ class MultiplySequence(BroadcastableOp):
     """ Performs f(a, b, ..., z) = a * b * ... * z"""
 
     def __call__(self, *input_vars):
-        assert len(input_vars) > 1, "`multiply_sequence` requires at least two operands"
         self.variables = input_vars
+        assert 2 <= len(self.variables)
+
         out = reduce(lambda x, y: x * y, (var.data for var in input_vars))
         self._iszero = np.any(out == 0)
         return out

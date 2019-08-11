@@ -205,6 +205,12 @@ def multiply_sequence(*variables, constant=False):
     It is more efficient to back-propagate through this
     function than it is through a computational graph
     with N-1 corresponding multiplication operations."""
+    if len(variables) < 2:
+        raise ValueError(
+            "`multiply_sequence` requires at least two inputs, got {} inputs".format(
+                len(variables)
+            )
+        )
     return Tensor._op(MultiplySequence, *variables, constant=constant)
 
 
@@ -230,6 +236,12 @@ def add_sequence(*variables, constant=False):
     It is more efficient to back-propagate through this
     function than it is through a computational graph
     with N-1 corresponding multiplication operations."""
+    if len(variables) < 2:
+        raise ValueError(
+            "`add_sequence` requires at least two inputs, got {} inputs".format(
+                len(variables)
+            )
+        )
     return Tensor._op(AddSequence, *variables, constant=constant)
 
 
