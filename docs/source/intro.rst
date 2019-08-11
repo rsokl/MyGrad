@@ -70,7 +70,7 @@ Some Bells and Whistles
     array([ 1.,  4., 12.])
 
 
-:mod:`mygrad.nn` supplies essential functions for machine learning, including:
+:mod:`mygrad.nnet` supplies essential functions for machine learning, including:
 
 - N-dimensional convolutions (with striding, dilation, and padding)
 - N-dimensional pooling
