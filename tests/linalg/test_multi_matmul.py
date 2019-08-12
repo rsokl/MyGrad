@@ -27,7 +27,7 @@ def test_input_validation_too_few_tensors(tensors: List[mg.Tensor]):
     )
 )
 def test_input_validation_large_dimensionality(shapes: List[Tuple[int, ...]]):
-    """multi_matmul requires at least two input-tensors"""
+    """multi_matmul only operates on 1D and 2D tensors"""
     tensors = [mg.ones(shape=shape) for shape in shapes]
     with pytest.raises(ValueError):
         mg.multi_matmul(tensors)
