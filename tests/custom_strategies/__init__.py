@@ -2,7 +2,7 @@
 import math
 from collections.abc import Sequence
 from numbers import Integral
-from typing import Any, Tuple, Union
+from typing import Any, Iterable, Optional, Tuple, Union
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
@@ -101,29 +101,21 @@ def choices(seq, size, replace=True):
     ).map(lambda x: tuple(seq[i] for i in x))
 
 
-@st.composite
-def _rand_neg_axis(draw, axes, ndim):
-    """Randomly replace axis values with negative counterpart: axis - ndim"""
-    size = draw(st.integers(0, len(axes)))
-    neg_inds = draw(choices(range(len(axes)), size, replace=False))
-    axes = st.just(axes)
-    return draw(
-        axes.map(
-            lambda x: tuple(i - ndim if n in neg_inds else i for n, i in enumerate(x))
-        )
-    )
+def _to_positive(x: Union[int, Iterable], ndim: int) -> Union[int, Tuple[int, ...]]:
+    if hasattr(x, "__iter__"):
+        return tuple(_to_positive(i, ndim) for i in x)
+    return x if -1 < x else ndim + x
 
 
-@st.composite
 def valid_axes(
-    draw,
-    ndim,
-    pos_only=False,
-    single_axis_only=False,
-    permit_none=True,
-    min_dim=0,
-    max_dim=None,
-):
+    ndim: int,
+    pos_only: bool = False,
+    single_axis_only: bool = False,
+    permit_none: bool = True,
+    permit_int: bool = True,
+    min_dim: int = 0,
+    max_dim: Optional[int] = None,
+) -> st.SearchStrategy[Union[None, int, Tuple[int, ...]]]:
     """ Hypothesis search strategy: Given array dimensionality, generate valid
     `axis` arguments (including `None`) for numpy's sequential functions.
 
@@ -146,9 +138,19 @@ def valid_axes(
         If True, `None` may be returned instead of a tuple of all of the
         available axes.
 
+    permit_int: bool, optional (default=True)
+        If True, the returned value may be an integer
+
+    min_dim : int, optional (default=0)
+        The smallest number of entries permitted in the returned tuple of axes
+
+    max_dim : Optional[int]
+        The largest number of entries permitted in the returned tuple of axes.
+        The defaults is ``ndim``.
+
     Returns
     -------
-    hypothesis.searchstrategy.SearchStrategy[Union[NoneType, int, Tuple[int...]]
+    st.SearchStrategy[Union[None, int, Tuple[int, ...]]]
 
     Examples
     --------
@@ -158,23 +160,23 @@ def valid_axes(
     if isinstance(ndim, (tuple, list)):
         ndim = len(ndim)
 
-    max_dim = ndim if max_dim is None else max_dim
-    _check_min_max(
-        min_val=0, max_val=ndim, min_dim=min_dim, max_dim=max_dim, param_name="dim"
-    )
+    single_axis_strat = st.integers(-ndim, ndim - 1) if ndim else st.just(0)
 
-    if single_axis_only:
-        axis_strat = st.integers(min_value=-ndim, max_value=ndim - 1)
-        return draw(st.one_of(st.none(), axis_strat) if permit_none else axis_strat)
+    strats = []
 
-    dim_strat = st.integers(min_value=min_dim, max_value=max_dim)
-    num_axes = draw(st.one_of(dim_strat, st.none()) if permit_none else dim_strat)
+    if permit_none:
+        strats.append(st.none())
 
-    if num_axes is None:
-        return None
+    if permit_int and min_dim <= 1 and (max_dim is None or 1 <= max_dim):
+        strats.append(single_axis_strat)
 
-    axes = draw(choices(range(ndim), num_axes, replace=False))
-    return axes if pos_only else draw(_rand_neg_axis(axes, ndim))
+    if not single_axis_only:
+        strats.append(hnp.valid_tuple_axes(ndim, min_size=min_dim, max_size=max_dim))
+
+    strat = st.one_of(*strats)
+    if pos_only:
+        strat = strat.map(lambda x: x if x is None else _to_positive(x, ndim))
+    return strat
 
 
 @st.composite

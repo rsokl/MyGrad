@@ -155,6 +155,8 @@ def _var(x, keepdims=False, axis=None, ddof=0):
     complex-step numerical derivative."""
 
     def mean(y, keepdims=False, axis=None, ddof=0):
+        if isinstance(axis, int):
+            axis = (axis,)
         N = y.size if axis is None else np.prod([y.shape[i] for i in axis])
         return y.sum(keepdims=keepdims, axis=axis) / (N - ddof)
 
@@ -237,6 +239,8 @@ def _std(x, keepdims=False, axis=None, ddof=0):
     complex-step numerical derivative."""
 
     def mean(y, keepdims=False, axis=None, ddof=0):
+        if isinstance(axis, int):
+            axis = (axis,)
         N = y.size if axis is None else np.prod([y.shape[i] for i in axis])
         return y.sum(keepdims=keepdims, axis=axis) / (N - ddof)
 

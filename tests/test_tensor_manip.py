@@ -3,7 +3,7 @@ from itertools import permutations
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
-from hypothesis import assume, given, settings
+from hypothesis import given, settings
 from numpy.testing import assert_allclose
 from pytest import raises
 
@@ -19,7 +19,7 @@ from mygrad import (
 )
 from mygrad.tensor_base import Tensor
 
-from .custom_strategies import broadcastable_shape, valid_axes
+from .custom_strategies import valid_axes
 from .utils.numerical_gradient import numerical_gradient_full
 from .wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
@@ -34,9 +34,12 @@ from .wrappers.uber import backprop_test_factory, fwdprop_test_factory
     data=st.data(),
 )
 def test_transpose(x, data):
-    axes = data.draw(valid_axes(x.ndim), label="axes")
-    if axes is not None:
-        assume(len(axes) == x.ndim)
+    axes = data.draw(
+        valid_axes(x.ndim, min_dim=x.ndim, max_dim=x.ndim).map(
+            lambda out: (out,) if isinstance(out, int) else out
+        ),
+        label="axes",
+    )
 
     x_arr = Tensor(np.copy(x))
 
@@ -126,7 +129,7 @@ def test_squeeze(x, data):
 
     try:
         numpy_out = np.squeeze(x, axes)
-    except ValueError as e:
+    except ValueError:
         with raises(ValueError):
             squeeze(x_arr, axes, constant=False)
         return
@@ -187,8 +190,8 @@ def test_expand_dims_bkwd():
     true_func=np.moveaxis,
     num_arrays=1,
     kwargs=dict(
-        source=lambda x: valid_axes(x.ndim, permit_none=False),
-        destination=lambda x: valid_axes(x.ndim, permit_none=False),
+        source=lambda x: valid_axes(x.ndim, permit_none=False, permit_int=False),
+        destination=lambda x: valid_axes(x.ndim, permit_none=False, permit_int=False),
     ),
     assumptions=_valid_moveaxis_args,
     index_to_arr_shapes={0: hnp.array_shapes(max_side=4, max_dims=5)},
@@ -203,8 +206,8 @@ def test_moveaxis_fwd():
     true_func=np.moveaxis,
     num_arrays=1,
     kwargs=dict(
-        source=lambda x: valid_axes(x.ndim, permit_none=False),
-        destination=lambda x: valid_axes(x.ndim, permit_none=False),
+        source=lambda x: valid_axes(x.ndim, permit_none=False, permit_int=False),
+        destination=lambda x: valid_axes(x.ndim, permit_none=False, permit_int=False),
     ),
     assumptions=_valid_moveaxis_args,
     vary_each_element=True,

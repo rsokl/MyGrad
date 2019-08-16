@@ -199,10 +199,16 @@ def test_valid_axes(shape, data, permit_none, pos_only):
         assert axis is not None
 
     if pos_only and axis is not None:
-        assert all(i >= 0 for i in axis)
+        if isinstance(axis, tuple):
+            assert all(i >= 0 for i in axis)
+        else:
+            assert axis >= 0
 
     if axis is not None:
-        assert min_dim <= len(axis)
+        if isinstance(axis, tuple):
+            assert min_dim <= len(axis)
 
-        if max_dim is not None:
-            assert len(axis) <= max_dim
+            if max_dim is not None:
+                assert len(axis) <= max_dim
+        else:
+            assert min_dim <= 1
