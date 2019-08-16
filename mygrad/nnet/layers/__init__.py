@@ -7,8 +7,7 @@ __all__ = ["conv_nd", "max_pool", "batchnorm"]
 
 try:
     from .gru import gru
-    from .recurrent import simple_RNN
 
-    __all__ += ["gru", "simple_RNN"]
+    __all__ += ["gru"]
 except ImportError:  # pragma: no cover
     pass

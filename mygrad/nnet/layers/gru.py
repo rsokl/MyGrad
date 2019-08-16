@@ -7,7 +7,7 @@ from mygrad.tensor_base import Tensor
 
 try:
     from numba import njit, vectorize
-except ImportError:
+except ImportError:  # pragma: no cover
     raise ImportError(
         "The package `numba` must be installed in order to access the gru."
     )
