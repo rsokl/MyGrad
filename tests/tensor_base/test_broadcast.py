@@ -1,12 +1,12 @@
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
-from hypothesis import given
+from hypothesis import assume, given
 from numpy.testing import assert_allclose
 from pytest import raises
 
 from mygrad._utils import reduce_broadcast
-from tests.custom_strategies import broadcastable_shape
+from tests.custom_strategies import broadcastable_shapes
 
 
 def test_bad_gradient_dimensionality():
@@ -43,14 +43,14 @@ def test_reduce_broadcast_same_shape(grad):
 def test_reduce_broadcast_nokeepdim(var_shape, data):
     """ example broadcasting: (2, 3) -> (5, 2, 3)"""
     grad_shape = data.draw(
-        broadcastable_shape(
-            shape=var_shape,
-            min_dim=len(var_shape) + 1,
-            max_dim=len(var_shape) + 3,
-            allow_singleton=False,
+        broadcastable_shapes(
+            shape=var_shape, min_dims=len(var_shape) + 1, max_dims=len(var_shape) + 3
         ),
         label="grad_shape",
     )
+    assume(
+        all(x == y for x, y in zip(var_shape[::-1], grad_shape[::-1]))
+    )  # don't permit singletons
     grad = np.ones(grad_shape, dtype=float)
 
     reduced_grad = reduce_broadcast(grad=grad, var_shape=var_shape)
@@ -66,8 +66,8 @@ def test_reduce_broadcast_keepdim(var_shape, data):
     grad = data.draw(
         hnp.arrays(
             dtype=float,
-            shape=broadcastable_shape(
-                shape=var_shape, min_dim=len(var_shape), max_dim=len(var_shape)
+            shape=broadcastable_shapes(
+                shape=var_shape, min_dims=len(var_shape), max_dims=len(var_shape)
             ),
             elements=st.just(1.0),
         ),

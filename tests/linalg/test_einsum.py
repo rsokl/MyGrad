@@ -5,13 +5,13 @@ import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
 import pytest
-from hypothesis import given, settings
+from hypothesis import assume, given, settings
 from numpy.testing import assert_allclose
 
 from mygrad import Tensor
 from mygrad.linalg.funcs import einsum
 
-from ..custom_strategies import broadcastable_shape
+from ..custom_strategies import broadcastable_shapes
 from ..utils.numerical_gradient import numerical_gradient_full
 
 
@@ -308,7 +308,7 @@ def test_redundant_args():
 @given(num=st.integers(1, 10), optimize=bool_strat(), data=st.data())
 def test_einsum_bkwd1(num, optimize, data):
     x = Tensor(np.random.rand(num))
-    y_shape = data.draw(broadcastable_shape(x.shape, min_dim=1, max_dim=1))
+    y_shape = data.draw(broadcastable_shapes(x.shape, min_dims=1, max_dims=1))
     y = Tensor(np.random.rand(*y_shape))
 
     grad = data.draw(st.floats(-100, 100))
@@ -344,7 +344,7 @@ def test_einsum_bkwd2(num, optimize, data):
     y = Tensor(np.random.rand(num))
 
     # flip so that leading dim of x is broadcastable with y
-    x_shape = data.draw(broadcastable_shape(y.shape, min_dim=2, max_dim=2))[::-1]
+    x_shape = data.draw(broadcastable_shapes(y.shape, min_dims=2, max_dims=2))[::-1]
     x = Tensor(np.random.rand(*x_shape))
     grad = np.random.rand(x.shape[-1])
 
@@ -369,15 +369,23 @@ def test_einsum_bkwd3(shape, optimize, data):
     script = "ia, ia, i -> a"
     x = Tensor(np.random.rand(*shape))
 
-    y_shape = data.draw(broadcastable_shape(shape, min_dim=2, max_dim=2))
+    y_shape = data.draw(
+        broadcastable_shapes(shape, min_dims=2, max_dims=2), label="y_shape"
+    )
     y = Tensor(np.random.rand(*y_shape))
 
-    z_shape = data.draw(broadcastable_shape(x.shape[:1], min_dim=1, max_dim=1))
+    z_shape = data.draw(
+        broadcastable_shapes(x.shape[:1], min_dims=1, max_dims=1), label="z_shape"
+    )
     z = Tensor(np.random.rand(*z_shape))
 
-    grad = np.random.rand(x.shape[1])
+    try:
+        o = einsum(script, x, y, z, optimize=optimize)
+    except ValueError:
+        assume(False)  # skip over invalid einsum shapes
+        return
 
-    o = einsum(script, x, y, z, optimize=optimize)
+    grad = np.random.rand(*o.shape)
     o.backward(grad)
 
     def f(x, y, z):
@@ -400,7 +408,7 @@ def test_einsum_bkwd4(shape, optimize, data):
 
     x = Tensor(np.random.rand(*shape))
 
-    y_shape = data.draw(broadcastable_shape(x.shape[:1], min_dim=1, max_dim=1))
+    y_shape = data.draw(broadcastable_shapes(x.shape[:1], min_dims=1, max_dims=1))
     y = Tensor(np.random.rand(*y_shape))
 
     grad = np.random.rand(1).item()

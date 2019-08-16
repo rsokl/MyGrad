@@ -1,17 +1,17 @@
 """ Custom hypothesis search strategies """
 import math
-from collections.abc import Sequence
 from numbers import Integral
 from typing import Any, Iterable, Optional, Tuple, Union
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
+from hypothesis.extra.numpy import broadcastable_shapes
 
 __all__ = [
     "adv_integer_index",
     "basic_index",
-    "broadcastable_shape",
+    "broadcastable_shapes",
     "choices",
     "everything_except",
     "valid_axes",
@@ -177,91 +177,6 @@ def valid_axes(
     if pos_only:
         strat = strat.map(lambda x: x if x is None else _to_positive(x, ndim))
     return strat
-
-
-@st.composite
-def broadcastable_shape(
-    draw, shape, min_dim=0, max_dim=5, min_side=1, max_side=5, allow_singleton=True
-):
-    """ Hypothesis search strategy: given an array shape, generate a
-    broadcast-compatible shape, specifying the minimum/maximum permissable
-    number of dimensions in the resulting shape (both values are inclusive).
-
-    Examples from this strategy shrink towards the input shape.
-
-    Parameters
-    ----------
-    shape : Tuple[int, ...]
-        The shape with which
-
-    min_dim : int, optional (default=0)
-        The smallest number of dimensions that the broadcast-compatible
-        shape can possess.
-
-    max_dim : int, optional (default=5)
-        The largest number of dimensions that the broadcast-compatible
-        shape can possess.
-
-    min_side : int, optional (default=1)
-        The smallest size that a new, leading dimensions can
-        possess
-
-    max_side : int, optional (default=5)
-        The largest size that a new, leading dimension can
-        possess.
-
-    allow_singleton : bool, optional (default=True)
-        If `False` the aligned dimensions of the broadcastable
-        shape cannot contain singleton dimensions (i.e. size-1
-        dimensions aligned with larger dimensions)
-
-    Returns
-    -------
-    hypothesis.searchstrategy.SearchStrategy[Tuple[int, ...]]
-
-    Notes
-    -----
-    `draw` is a parameter reserved by hypothesis, and should not be specified
-    by the user.
-
-    Examples
-    --------
-    >>> for i in range(5):
-    ...    print(broadcastable_shape(shape=(2, 3)).example())
-    (1, 3)
-    ()
-    (2, 3)
-    (5, 2, 3)
-    (8, 5, 1, 3)
-    (3, )
-    """
-    _check_min_max(0, min_dim, max_dim, "dim")
-    _check_min_max(1, min_side, max_side, "side")
-
-    if not isinstance(shape, Sequence) or any(
-        i < 0 or not isinstance(i, Integral) for i in shape
-    ):
-        raise ValueError(
-            "`shape` must be a sequence of non-negative integers. Got: {}".format(shape)
-        )
-
-    ndim = draw(st.integers(min_dim - len(shape), max_dim - len(shape))) + len(shape)
-    n_aligned = min(len(shape), ndim)
-    n_leading = ndim - n_aligned
-    if n_aligned > 0:
-        if allow_singleton:
-            aligned_dims = draw(
-                st.tuples(*(st.sampled_from((size, 1)) for size in shape[-n_aligned:]))
-            )
-        else:
-            aligned_dims = shape[-n_aligned:]
-    else:
-        aligned_dims = tuple()
-
-    leading_dims = draw(
-        st.tuples(*(st.integers(min_side, max_side) for i in range(n_leading)))
-    )
-    return leading_dims + aligned_dims
 
 
 def integer_index(size):

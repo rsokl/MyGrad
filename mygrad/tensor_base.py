@@ -10,9 +10,9 @@ from typing import List, Set, Type, Union
 import numpy as np
 
 from mygrad._utils import is_invalid_gradient
-from mygrad.errors import InvalidGradient, InvalidBackprop
+from mygrad.errors import InvalidBackprop, InvalidGradient
 from mygrad.linalg.ops import MatMul
-from mygrad.math.arithmetic.ops import *
+from mygrad.math.arithmetic.ops import Add, Divide, Multiply, Negative, Power, Subtract
 from mygrad.operation_base import BroadcastableOp, Operation
 from mygrad.tensor_core_ops.indexing import GetItem, SetItem
 from mygrad.tensor_manip.array_shape.ops import Flatten
@@ -327,9 +327,11 @@ class Tensor:
         if self._constant:
             return
 
-        assert (
-            self.grad.shape == self.shape
-        ), "A tensor and its associated gradient must possess the same shape"
+        assert self.grad.shape == self.shape, (
+            "A tensor and its associated gradient must possess the same shape. Got:"
+            "\ntensor-shape: {}"
+            "\ngrad-shape: {}".format(self.shape, self.grad.shape)
+        )
         if self._creator is not None and not bool(
             graph & (self._ops - self._accum_ops)
         ):

@@ -135,8 +135,8 @@ def test_seq_mult(shape_1: Tuple[int, ...], num_arrays: int, data: st.DataObject
         assert_allclose(
             expected.grad,
             actual.grad,
-            rtol=1e-4,
-            atol=1e-4,
+            rtol=1e-3,
+            atol=1e-3,
             err_msg="tensor-{}".format(n),
         )
 

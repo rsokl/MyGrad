@@ -7,13 +7,13 @@ from typing import Any, Callable, Dict, Optional, Sequence, Tuple, Union
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
-from hypothesis import assume, given, note
+from hypothesis import assume, given
 from hypothesis.strategies import SearchStrategy
 from numpy.testing import assert_allclose, assert_array_equal
 
 from mygrad import Tensor
 
-from ..custom_strategies import broadcastable_shape
+from ..custom_strategies import broadcastable_shapes
 from ..utils.numerical_gradient import (
     finite_difference,
     numerical_gradient,
@@ -84,7 +84,7 @@ class fwdprop_test_factory:
             The shape for array-i. This can be an exact shape or a hypothesis search
             strategy that draws shapes.
                 Default for array-0: `hnp.array_shapes(max_side=3, max_dims=3)`
-                Default for array-i: `broadcastable_shape(arr-0.shape)`
+                Default for array-i: `broadcastable_shapes(arr-0.shape)`
 
         kwargs : Union[Callable, Dict[str, Union[Any, Callable[[Any], SearchStrategy]]]]
             Keyword arguments and their values to be passed to the functions.
@@ -142,7 +142,7 @@ class fwdprop_test_factory:
         -------
         hypothesis.searchstrategy.SearchStrategy"""
         return hnp.arrays(
-            shape=self.index_to_arr_shapes.get(i, broadcastable_shape(x.shape)),
+            shape=self.index_to_arr_shapes.get(i, broadcastable_shapes(x.shape)),
             dtype=float,
             elements=st.floats(*self.index_to_bnds.get(i, (-10.0, 10.0))),
         )
@@ -297,7 +297,7 @@ class backprop_test_factory:
             The shape for array-i. This can be an exact shape or a hypothesis search
             strategy that draws shapes.
                 Default for array-0: `hnp.array_shapes(max_side=3, max_dims=3)`
-                Default for array-i: `broadcastable_shape(arr-0.shape)`
+                Default for array-i: `broadcastable_shapes(arr-0.shape)`
 
         index_to_unique : Optional[Union[Dict[int, bool], bool]]
             Determines whether the elements drawn for each of the input-arrays are
@@ -433,7 +433,7 @@ class backprop_test_factory:
         -------
         hypothesis.searchstrategy.SearchStrategy"""
         return hnp.arrays(
-            shape=self.index_to_arr_shapes.get(i, broadcastable_shape(x.shape)),
+            shape=self.index_to_arr_shapes.get(i, broadcastable_shapes(x.shape)),
             dtype=float,
             elements=self.elements_strategy(*self.index_to_bnds.get(i, (-100, 100))),
             unique=self.index_to_unique.get(i, False),
