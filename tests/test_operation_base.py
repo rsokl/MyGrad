@@ -45,5 +45,11 @@ def test_backpropping_non_numeric_gradient_raises(
         x = x * 2
 
     # if constant tensor, backprop should not be triggered - no exception raised
-    with (pytest.raises(InvalidGradient) if not constant else does_not_raise()):
+    with (
+        pytest.raises(InvalidGradient) if not constant else does_not_raise()
+    ) as exec_info:
         x.backward()
+
+    if exec_info is not None:
+        err_msg = str(exec_info.value)
+        assert "NoneType" in err_msg
