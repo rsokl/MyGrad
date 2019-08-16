@@ -186,7 +186,7 @@ def multiply(a, b, constant=False):
 def multiply_sequence(*variables, constant=False):
     """  ``f(a, b, ...) -> a + b + ...``
 
-    Add a sequence of N tensors.
+    Multiply a sequence of N tensors.
 
     Parameters
     ----------
