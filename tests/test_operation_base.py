@@ -32,7 +32,7 @@ def old_op(a):
     op_after=st.booleans(),
 )
 def test_backpropping_non_numeric_gradient_raises(
-    constant: bool, arr: np.ndarray, op_before: bool, op_after
+    constant: bool, arr: np.ndarray, op_before: bool, op_after: bool
 ):
     x = Tensor(arr, constant=constant)
 
