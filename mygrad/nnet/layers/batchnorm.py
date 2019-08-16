@@ -103,7 +103,7 @@ class BatchNorm(Operation):
         elif (index == 1 and self.gamma is None) or index == 2:
             normed_dims = tuple(i for i in range(x.ndim) if i != 1)
             return grad.sum(axis=normed_dims)
-        else:
+        else:  # pragma: no cover
             raise IndexError
 
 

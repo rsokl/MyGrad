@@ -10,5 +10,5 @@ try:
     from .recurrent import simple_RNN
 
     __all__ += ["gru", "simple_RNN"]
-except ImportError:
+except ImportError:  # pragma: no cover
     pass

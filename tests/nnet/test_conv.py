@@ -3,7 +3,7 @@
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
-from hypothesis import assume, given, settings, HealthCheck
+from hypothesis import HealthCheck, assume, given, settings
 from numpy.testing import assert_allclose
 from pytest import raises
 
@@ -91,7 +91,7 @@ def convolve_numpy(input_image, conv_filter, stride, dilation=None):
     return out
 
 
-def conv_bank(input_images, conv_filters, stride, dilation=None):
+def conv_bank(input_images, conv_filters, stride, dilation=None, padding=tuple()):
     """ Convolve a bank of filters over a stack of images.
 
     Parameters
@@ -113,8 +113,17 @@ def conv_bank(input_images, conv_filters, stride, dilation=None):
         The result of convolving `input_image` with `conv_filter` at a stride of `stride`,
         where (H', ...) is the result of `get_outshape`.
     """
+
+    if isinstance(padding, int):
+        padding = (padding,) * (input_images.ndim - 2)
+    if sum(padding):
+        # symmetric 0-padding for X0, X1, ... dimensions
+        axis_pad = tuple((i, i) for i in (0, 0, *padding))
+        input_images = np.pad(input_images, axis_pad, mode="constant")
+
     img_shape = input_images.shape[2:]
     conv_shape = conv_filters.shape[2:]
+
     if dilation is None:
         dilation = (1,) * len(stride)
     out_shape = get_outshape(img_shape, conv_shape, stride, dilation)
@@ -124,9 +133,6 @@ def conv_bank(input_images, conv_filters, stride, dilation=None):
         for j, conv in enumerate(conv_filters):
             out[i, j] = convolve_numpy(image, conv, stride, dilation)
     return out
-
-
-## Defining Tests
 
 
 def test_convnd_fwd_trivial():
@@ -200,6 +206,35 @@ def test_bad_conv_shapes():
         conv_nd(x, w, stride=3, padding=1)  # shape mismatch
 
 
+@settings(deadline=None)
+@given(ndim=st.integers(1, 4), data=st.data())
+def test_padding(ndim: int, data: st.DataObject):
+    """Ensure that convolving a padding-only image with a commensurate kernel yields the single entry: 0"""
+    padding = data.draw(
+        st.integers(1, 3) | st.tuples(*[st.integers(1, 3)] * ndim), label="padding"
+    )
+    x = Tensor(
+        data.draw(
+            hnp.arrays(shape=(1, 1) + (0,) * ndim, dtype=float, elements=st.floats()),
+            label="x",
+        )
+    )
+    pad_tuple = padding if isinstance(padding, tuple) else (padding,) * ndim
+    kernel = data.draw(
+        hnp.arrays(
+            shape=(1, 1) + tuple(2 * p for p in pad_tuple),
+            dtype=float,
+            elements=st.floats(allow_nan=False, allow_infinity=False),
+        )
+    )
+    out = conv_nd(x, kernel, padding=padding, stride=1)
+    assert out.shape == (1,) * x.ndim
+    assert out.item() == 0.0
+
+    out.sum().backward()
+    assert x.grad.shape == x.shape
+
+
 @fwdprop_test_factory(
     mygrad_func=conv_nd,
     true_func=conv_bank,
@@ -214,13 +249,15 @@ def test_conv_1d_fwd():
     behavior with `constant` arg, etc."""
 
 
-def _conv_nd(x, w, stride, dilation=1):
+def _conv_nd(x, w, stride, dilation=1, padding=0):
     """ use mygrad-conv_nd forward pass for numerical derivative
 
         Returns
         -------
         numpy.ndarray"""
-    return conv_nd(x, w, stride=stride, dilation=dilation, constant=True).data
+    return conv_nd(
+        x, w, stride=stride, dilation=dilation, padding=padding, constant=True
+    ).data
 
 
 @settings(deadline=None)
@@ -243,12 +280,24 @@ def test_conv_1d_bkwd():
 @settings(deadline=None, suppress_health_check=(HealthCheck.filter_too_much,))
 @given(
     data=st.data(),
-    shape=hnp.array_shapes(min_dims=1, max_dims=3, max_side=12),
+    shape=hnp.array_shapes(min_dims=1, max_dims=3, max_side=10),
     num_filters=st.integers(1, 3),
     num_batch=st.integers(1, 3),
     num_channel=st.integers(1, 3),
 )
 def test_conv_ND_fwd(data, shape, num_filters, num_batch, num_channel):
+    img_shape = (num_batch, num_channel) + shape
+
+    padding = data.draw(
+        st.integers(0, 2) | st.tuples(*[st.integers(0, 2)] * len(shape)),
+        label="padding",
+    )
+
+    if isinstance(padding, tuple):
+        shape = tuple(s + 2 * p for s, p in zip(shape, padding))
+    else:
+        shape = tuple(s + 2 * padding for s in shape)
+
     win_dim = len(shape)
     shape = (num_batch, num_channel) + shape
     win_shape = data.draw(
@@ -262,7 +311,7 @@ def test_conv_ND_fwd(data, shape, num_filters, num_batch, num_channel):
     dilation = data.draw(
         st.tuples(*(st.integers(1, s) for s in max_dilation)), label="dilation"
     )
-    conf = dict(stride=stride, dilation=dilation)
+    conf = dict(stride=stride, dilation=dilation, padding=padding)
 
     # skip invalid data/kernel/stride/dilation combinations
     assume(get_outshape(shape[2:], kernel_shape[2:], stride, dilation) is not None)
@@ -272,7 +321,7 @@ def test_conv_ND_fwd(data, shape, num_filters, num_batch, num_channel):
         label="kernels",
     )
     x = data.draw(
-        hnp.arrays(dtype=float, shape=shape, elements=st.floats(-10, 10)), label="x"
+        hnp.arrays(dtype=float, shape=img_shape, elements=st.floats(-10, 10)), label="x"
     )
 
     mygrad_conv = conv_nd(x, kernels, **conf).data
@@ -290,6 +339,18 @@ def test_conv_ND_fwd(data, shape, num_filters, num_batch, num_channel):
 )
 def test_conv_ND_bkwd(data, shape, num_filters, num_batch, num_channel):
     """ Test conv-backprop 1D-3D with various strides and dilations."""
+    img_shape = (num_batch, num_channel) + shape
+
+    padding = data.draw(
+        st.integers(0, 2) | st.tuples(*[st.integers(0, 2)] * len(shape)),
+        label="padding",
+    )
+
+    if isinstance(padding, tuple):
+        shape = tuple(s + 2 * p for s, p in zip(shape, padding))
+    else:
+        shape = tuple(s + 2 * padding for s in shape)
+
     win_dim = len(shape)
     shape = (num_batch, num_channel) + shape
     win_shape = data.draw(
@@ -305,7 +366,7 @@ def test_conv_ND_bkwd(data, shape, num_filters, num_batch, num_channel):
     dilation = data.draw(
         st.tuples(*(st.integers(1, s) for s in max_dilation)), label="dilation"
     )
-    conf = dict(stride=stride, dilation=dilation)
+    conf = dict(stride=stride, dilation=dilation, padding=padding)
 
     # skip invalid data/kernel/stride/dilation combinations
     assume(get_outshape(shape[2:], kernel_shape[2:], stride, dilation) is not None)
@@ -315,8 +376,9 @@ def test_conv_ND_bkwd(data, shape, num_filters, num_batch, num_channel):
         label="kernels",
     )
     x = data.draw(
-        hnp.arrays(dtype=float, shape=shape, elements=st.floats(-10, 10)), label="x"
+        hnp.arrays(dtype=float, shape=img_shape, elements=st.floats(-10, 10)), label="x"
     )
+
     x = Tensor(x)
     kernels = Tensor(kernels)
 
