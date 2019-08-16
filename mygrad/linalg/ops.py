@@ -7,7 +7,6 @@ import numpy as np
 from numpy.lib.stride_tricks import as_strided
 
 from mygrad._utils import reduce_broadcast, SkipGradient
-from mygrad.errors import InvalidBackprop
 from mygrad.operation_base import BroadcastableOp
 
 __all__ = ["MatMul", "EinSum"]

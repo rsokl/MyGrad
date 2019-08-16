@@ -51,7 +51,7 @@ def sum(x, axis=None, keepdims=False, constant=False):
 
     See Also
     --------
-    ndarray.sum : Equivalent method.
+    mygrad.Tensor.sum : Equivalent method.
 
     cumsum : Cumulative sum of array elements.
 
