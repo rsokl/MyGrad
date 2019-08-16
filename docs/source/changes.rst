@@ -20,7 +20,7 @@ This release makes substantial improvements to MyGrad's error-checking and handl
 
 :func:`~mygrad.maximum` and :func:`~mygrad.minimum` were patched to permit backpropagation through scalar inputs.
 
-Internal implementation details of :func:`~mygrad.einsum` were adjusted to remove redundant code in the its backpropagation machinery.
+Internal implementation details of :func:`~mygrad.einsum` were adjusted to remove redundant code in its backpropagation machinery.
 
 MyGrad's testing framework was improved to achieve more complete test coverage and to eliminate some flaky testing behavior.
 
