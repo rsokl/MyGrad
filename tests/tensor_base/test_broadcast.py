@@ -1,7 +1,7 @@
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
-from hypothesis import assume, given
+from hypothesis import given
 from numpy.testing import assert_allclose
 from pytest import raises
 
@@ -44,13 +44,13 @@ def test_reduce_broadcast_nokeepdim(var_shape, data):
     """ example broadcasting: (2, 3) -> (5, 2, 3)"""
     grad_shape = data.draw(
         broadcastable_shapes(
-            shape=var_shape, min_dims=len(var_shape) + 1, max_dims=len(var_shape) + 3
+            shape=var_shape,
+            min_dims=len(var_shape) + 1,
+            max_dims=len(var_shape) + 3,
+            min_side=2,
         ),
         label="grad_shape",
     )
-    assume(
-        all(x == y for x, y in zip(var_shape[::-1], grad_shape[::-1]))
-    )  # don't permit singletons
     grad = np.ones(grad_shape, dtype=float)
 
     reduced_grad = reduce_broadcast(grad=grad, var_shape=var_shape)
