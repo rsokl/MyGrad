@@ -129,7 +129,7 @@ class Operation:
                             call_signature="{name}.backward_var(<gradient>, index={index})".format(
                                 name=type(self).__name__, index=index
                             ),
-                            _type=type(grad),
+                            _type=type(backed_grad),
                         )
                     )
                 if var.grad is None:
