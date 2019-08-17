@@ -6,7 +6,7 @@ from typing import Optional, Set
 
 import numpy as np
 
-from mygrad._utils import is_invalid_gradient, reduce_broadcast, SkipGradient
+from mygrad._utils import SkipGradient, is_invalid_gradient, reduce_broadcast
 from mygrad.errors import InvalidBackprop, InvalidGradient
 
 __all__ = ["Operation", "BroadcastableOp"]
@@ -47,7 +47,7 @@ class Operation:
     # the computational graph up to and including the present operation
     graph = None  # type: Optional[Set[Operation]]
 
-    def __call__(self, *input_vars, **kwargs):
+    def __call__(self, *input_vars, **kwargs):  # pragma: no cover
         """ Performs a forward pass, f, of this Operation::
 
             f(x1, ...., xn) -> out
@@ -69,7 +69,7 @@ class Operation:
         self.variables = input_vars
         raise NotImplementedError
 
-    def backward_var(self, grad, index, **kwargs):
+    def backward_var(self, grad, index, **kwargs):  # pragma: no cover
         """ Given ``grad = d(out)/d(f)``, computes ``d(out)/d(var)``, and passes this result
         to ``var.backward()``, where var is the tensor-argument at position ``index``.
 
