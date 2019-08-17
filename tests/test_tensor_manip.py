@@ -8,6 +8,7 @@ from numpy.testing import assert_allclose
 from pytest import raises
 
 from mygrad import (
+    Tensor,
     broadcast_to,
     expand_dims,
     moveaxis,
@@ -17,11 +18,17 @@ from mygrad import (
     swapaxes,
     transpose,
 )
-from mygrad.tensor_base import Tensor
 
 from .custom_strategies import valid_axes
 from .utils.numerical_gradient import numerical_gradient_full
 from .wrappers.uber import backprop_test_factory, fwdprop_test_factory
+
+
+def test_input_validation():
+    x = Tensor([[1, 2]])
+
+    with raises(TypeError):
+        transpose(x, (0,), 1)
 
 
 @settings(deadline=None)

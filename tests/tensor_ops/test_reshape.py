@@ -1,6 +1,7 @@
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
+import pytest
 from hypothesis import given
 from numpy.testing import assert_allclose
 
@@ -42,6 +43,16 @@ def gen_shape(size):
         rem = int(size / np.prod(shape))
 
     return tuple(int(i) for i in shape)
+
+
+def test_input_validation():
+    x = np.array([1, 2])
+
+    with pytest.raises(TypeError):
+        reshape(x)
+
+    with pytest.raises(TypeError):
+        reshape(x, (2,), 2)
 
 
 @given(
