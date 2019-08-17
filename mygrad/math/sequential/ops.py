@@ -1,5 +1,6 @@
 from collections.abc import Sequence
 from functools import reduce
+from typing import Any
 
 import numpy as np
 
@@ -376,59 +377,25 @@ class CumSum(Operation):
 
 
 class Variance(Operation):
+    _method_name = "var"
+
+    def _grad_preprocess(self, grad: Any) -> np.ndarray:
+        """Helper method provided so that `Variance` and `StdDev` can
+        share the same implementation for `backward_var`."""
+        return np.asarray(grad)
+
     def __call__(self, a, axis=None, keepdims=False, ddof=0):
-        """ Parameters
-            ----------
-            a : mygrad.Tensor"""
         self.variables = (a,)
 
         if axis is not None and not hasattr(axis, "__iter__"):
             axis = (axis,)
 
         self.kwargs = dict(axis=axis, keepdims=keepdims, ddof=ddof)
-        return a.data.var(**self.kwargs)
+        return getattr(a.data, self._method_name)(**self.kwargs)
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-
-        N = (
-            a.size
-            if self.kwargs["axis"] is None
-            else np.prod([a.shape[i] for i in self.kwargs["axis"]])
-        )
-        N -= self.kwargs["ddof"]
-
-        grad = np.asarray(grad)
-        if grad.ndim == 0:
-            grad = np.full(a.shape, grad, dtype=float)
-        else:
-            if not self.kwargs["keepdims"]:
-                index = [slice(None)] * a.ndim
-                for i in self.kwargs["axis"]:
-                    index[i] = np.newaxis
-                grad = grad[tuple(index)]
-        back = (2.0 / N) * (
-            a.data - a.data.mean(axis=self.kwargs["axis"], keepdims=True)
-        )
-        return back * grad
-
-
-class StdDev(Operation):
-    def __call__(self, a, axis=None, keepdims=False, ddof=0):
-        """ Parameters
-            ----------
-            a : mygrad.Tensor"""
-        self.variables = (a,)
-
-        if axis is not None and not hasattr(axis, "__iter__"):
-            axis = (axis,)
-
-        self.kwargs = dict(axis=axis, keepdims=keepdims, ddof=ddof)
-        return a.data.std(**self.kwargs)
-
-    def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
-        if isinstance(self.kwargs["axis"], Sequence) and not self.kwargs["axis"]:
+        if isinstance(self.kwargs["axis"], Sequence) and len(self.kwargs["axis"]) == 0:
             return np.zeros(a.shape, dtype=float)
 
         N = (
@@ -438,7 +405,7 @@ class StdDev(Operation):
         )
         N -= self.kwargs["ddof"]
 
-        grad = np.asarray(grad) / (2 * np.sqrt(a.data.var(**self.kwargs)))
+        grad = self._grad_preprocess(grad)
         if grad.ndim == 0:
             grad = np.full(a.shape, grad, dtype=float)
         else:
@@ -451,3 +418,15 @@ class StdDev(Operation):
             a.data - a.data.mean(axis=self.kwargs["axis"], keepdims=True)
         )
         return back * grad
+
+
+class StdDev(Variance):
+    _method_name = "std"
+
+    def _grad_preprocess(self, grad: Any) -> np.ndarray:
+        """Helper method provided so that `Variance` and `StdDev` can
+        share the same implementation for `backward_var`.
+
+        Includes backpropagation through the sqrt after the variance."""
+        a = self.variables[0]
+        return np.asarray(grad) / (2 * np.sqrt(a.data.var(**self.kwargs)))
