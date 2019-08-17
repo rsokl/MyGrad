@@ -1,16 +1,24 @@
 sudo: false
 language: python
-python:
-  - "3.5"
-  - "3.6"
-install: pip install tox-travis
-script: tox
-# Enable 3.7 without globally enabling sudo and dist: xenial for other build jobs
-matrix:
+install: pip install tox
+jobs:
   include:
     - python: 3.7
+      name: "Python 3.7"
       dist: xenial
       sudo: true
+      script: tox -e py37
+    - python: 3.7
+      name: "Coverage"
+      dist: xenial
+      sudo: true
+      script: tox -e coverage
+    - python: 3.6
+      name: "Python 3.6"
+      script: tox -e py36
+    - python: 3.5
+      name: "Python 3.5"
+      script: tox -e py35
 branches:
   only:
   - master
