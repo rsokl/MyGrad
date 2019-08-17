@@ -15,6 +15,15 @@ from mygrad.operation_base import Operation
 from tests.utils import does_not_raise
 
 
+@pytest.mark.parametrize(
+    "data", [None, np.array(None), np.array([[0], [0, 0]]), np.array(1, dtype="O")]
+)
+@given(constant=st.booleans(), creator=st.none() | st.just(MatMul()))
+def test_input_type_checking(data, constant, creator):
+    with raises(TypeError):
+        Tensor(data, constant=constant, _creator=creator)
+
+
 @given(
     data=hnp.arrays(shape=hnp.array_shapes(), dtype=hnp.floating_dtypes()),
     constant=st.booleans(),
@@ -234,6 +243,13 @@ def test_special_methods(
     else:
         assert tensor_out.creator.variables[0] is y
         assert tensor_out.creator.variables[1] is x
+
+
+@given(x=hnp.arrays(shape=hnp.array_shapes(), dtype=hnp.floating_dtypes()))
+def test_pos(x):
+    x = Tensor(x)
+    y = +x
+    assert y is x
 
 
 @given(x=hnp.arrays(shape=hnp.array_shapes(), dtype=hnp.floating_dtypes()))
