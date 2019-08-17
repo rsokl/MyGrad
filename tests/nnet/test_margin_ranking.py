@@ -1,11 +1,43 @@
+from typing import Tuple
+
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
+import pytest
 from hypothesis import given
 from numpy.testing import assert_allclose, assert_array_equal
 
 import mygrad as mg
 from mygrad.nnet.losses import margin_ranking_loss
+
+
+@pytest.mark.parametrize(
+    "args",
+    [
+        dict(x1=st.sampled_from([np.ones((1,)), np.ones((1, 1, 1))])),
+        dict(x1=np.ones((3, 4), dtype=int)),
+        dict(x2=np.ones((3, 4), dtype=int)),
+        dict(x2=np.ones((3, 5))),
+        dict(margin=None),
+        dict(margin=-1),
+        dict(y=np.ones((3, 4))),
+        dict(y=np.ones((5,))),
+    ],
+)
+@given(data=st.data())
+def test_input_validation(args, data: st.DataObject):
+    kwargs = dict(x1=np.ones((3, 4)), y=mg.Tensor(1), margin=0.5)
+
+    if "x2" not in args:
+        args["x2"] = np.ones_like(kwargs["x1"])
+
+    kwargs.update(
+        (k, (data.draw(v, label=k)) if isinstance(v, st.SearchStrategy) else v)
+        for k, v in args.items()
+    )
+
+    with pytest.raises((ValueError, TypeError)):
+        margin_ranking_loss(**kwargs)
 
 
 def simple_loss(x1, x2, y, margin):
@@ -31,9 +63,12 @@ def simple_loss(x1, x2, y, margin):
 @given(
     shape=hnp.array_shapes(min_dims=1, max_dims=2),
     margin=st.floats(0, 1000),
+    labels_as_tensor=st.booleans(),
     data=st.data(),
 )
-def test_ranked_margin(shape, margin, data):
+def test_ranked_margin(
+    shape: Tuple[int, ...], margin: float, labels_as_tensor: bool, data: st.DataObject
+):
     x1 = data.draw(
         hnp.arrays(shape=shape, dtype=float, elements=st.floats(-1000, 1000)),
         label="x1",
@@ -48,7 +83,7 @@ def test_ranked_margin(shape, margin, data):
             shape=shape[:1],
             dtype=hnp.integer_dtypes(),
             elements=st.sampled_from((-1, 1)),
-        ),
+        ).map(lambda x: mg.Tensor(x) if labels_as_tensor else x),
         label="y",
     )
 

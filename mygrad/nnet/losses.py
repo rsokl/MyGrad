@@ -356,17 +356,23 @@ def margin_ranking_loss(x1, x2, y, margin, constant=False):
         raise ValueError("`x1` and `x2` must have the same shape")
     if not np.issubdtype(x1.dtype, np.floating):
         raise TypeError("`x1` must contain floats")
-    if not isinstance(margin, Real) and margin >= 0:
+    if not np.issubdtype(x2.dtype, np.floating):
+        raise TypeError("`x2` must contain floats")
+    if not isinstance(margin, Real) or margin < 0:
         raise ValueError("`margin` must be a non-negative scalar")
+
     if isinstance(y, Tensor):
         y = y.data
 
     y = np.asarray(y)
-    assert y.ndim == 0 or (
-        y.ndim == 1 and len(y) == len(x1)
-    ), "`y` must be a scalar or shape-(N,) array of ones"
+
+    if y.size == 1:
+        y = np.array(y.item())
+
+    if not y.ndim == 0 and not (y.ndim == 1 and len(y) == len(x1)):
+        raise ValueError("`y` must be a scalar or shape-(N,) array of ones")
+
     if y.ndim:
-        assert y.size == 1 or len(y) == len(x1)
         if x1.ndim == 2:
             y = y.reshape(-1, 1)
     return Tensor._op(MarginRanking, x1, x2, op_args=(y, margin), constant=constant)
