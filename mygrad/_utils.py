@@ -38,8 +38,9 @@ def reduce_broadcast(grad, var_shape):
     if grad.ndim != len(var_shape):
         if grad.ndim < len(var_shape):
             raise ValueError(
-                "The dimensionality of the gradient of the broadcasted operation"
-                "is less than that of its associated variable"
+                "The dimensionality of the gradient of the broadcasted "
+                "operation ({}) is less than that of its associated variable "
+                "({})".format(grad.ndim, len(var_shape))
             )
         grad = grad.sum(axis=tuple(range(grad.ndim - len(var_shape))))
 
