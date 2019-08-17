@@ -133,7 +133,7 @@ class Tensor:
         """
         assert isinstance(constant, bool)
         self._scalar_only = _scalar_only
-        self._creator = _creator
+        self._creator = _creator  # type: Union[None, Operation]
 
         if isinstance(x, Tensor):
             self.data = x.data
@@ -324,9 +324,10 @@ class Tensor:
         AssertionError
             Raises if the tensor and its associated gradient possess different shapes.
         """
-        if self._constant:
-            return
-
+        assert self.grad is not None, (
+            "backprop, post grad-accumulation, was triggered "
+            "on a tensor with no gradient"
+        )
         assert self.grad.shape == self.shape, (
             "A tensor and its associated gradient must possess the same shape. Got:"
             "\ntensor-shape: {}"
