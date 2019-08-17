@@ -3,20 +3,20 @@ import numpy as np
 from mygrad.tensor_base import Tensor
 
 __all__ = [
+    "arange",
     "empty",
     "empty_like",
     "eye",
+    "geomspace",
     "identity",
-    "ones",
-    "ones_like",
-    "zeros",
-    "zeros_like",
-    "full",
-    "full_like",
-    "arange",
     "linspace",
     "logspace",
-    "geomspace",
+    "ones",
+    "ones_like",
+    "full",
+    "full_like",
+    "zeros",
+    "zeros_like",
 ]
 
 
@@ -46,22 +46,22 @@ def empty(shape, dtype=np.float32, constant=False):
         ones : Return a new tensor setting values to one.
         zeros : Return a new tensor setting values to zero.
         full : Return a new tensor of given shape filled with value.
-    
-    
+
+
         Notes
         -----
         `empty`, unlike `zeros`, does not set the array values to zero,
         and may therefore be marginally faster.  On the other hand, it requires
         the user to manually set all the values in the array, and should be
         used with caution.
-    
+
         Examples
         --------
         >>> import mygrad as mg
         >>> mg.empty([2, 2], constant=True)
         Tensor([[ -9.74499359e+001,   6.69583040e-309],
                 [  2.13182611e-314,   3.06959433e-309]])         #random
-    
+
         >>> mg.empty([2, 2], dtype=int)
         Tensor([[-1073741821, -1067949133],
                 [  496041986,    19249760]])                     #random
@@ -180,7 +180,7 @@ def identity(n, dtype=np.float32, constant=False):
 
 
 def ones(shape, dtype=np.float32, constant=False):
-    """ 
+    """
     Return a Tensor of the given shape and type, filled with ones.
 
     Parameters
@@ -207,7 +207,7 @@ def ones(shape, dtype=np.float32, constant=False):
     empty : Return a new uninitialized tensor.
     zeros : Return a new tensor setting values to zero.
     full : Return a new tensor of given shape filled with value.
-    
+
     Examples
     --------
     >>> import mygrad as mg
@@ -275,7 +275,7 @@ def ones_like(other, dtype=None, constant=False):
 
 
 def zeros(shape, dtype=np.float32, constant=False):
-    """ 
+    """
     Return a Tensor of the given shape and type, filled with zeros.
 
     Parameters
@@ -323,7 +323,7 @@ def zeros(shape, dtype=np.float32, constant=False):
 
 
 def zeros_like(other, dtype=None, constant=False):
-    """ 
+    """
     Return a Tensor of the same shape and type as the given, filled with zeros.
 
     Parameters
@@ -349,7 +349,7 @@ def zeros_like(other, dtype=None, constant=False):
     ones_like : Return an tensor of ones with shape and type of input.
     full_like : Return a new tensor with shape of input filled with value.
     zeros : Return a new tensor setting values to zero.
-    
+
     Examples
     --------
     >>> import mygrad as mg
@@ -376,7 +376,7 @@ def zeros_like(other, dtype=None, constant=False):
 
 
 def full(shape, fill_value, dtype=None, constant=False):
-    """ 
+    """
     Return a Tensor of the given shape and type, filled with `fill_value`.
 
     Parameters
@@ -445,7 +445,7 @@ def full_like(other, fill_value, dtype=None, constant=False):
         Tensor([ 0.1,  0.1,  0.1,  0.1,  0.1,  0.1])
         >>> mg.full_like(x, np.nan, dtype=np.double)
         Tensor([ nan,  nan,  nan,  nan,  nan,  nan])
-    
+
         >>> y = mg.arange(6, dtype=np.double)
         >>> mg.full_like(y, 0.1)
         Tensor([ 0.1,  0.1,  0.1,  0.1,  0.1,  0.1])
@@ -484,7 +484,7 @@ def arange(stop, start=0, step=1, dtype=None, constant=False):
         -------
         Tensor
             A Tensor of evenly-spaced values in [start, end).
-        
+
         Examples
         --------
         >>> import mygrad as mg
@@ -589,7 +589,7 @@ def logspace(
         constant : bool, optional (default=False)
             If ``True``, the returned tensor is a constant (it
             does not back-propagate a gradient)
-    
+
         See Also
         --------
         arange : Similar to linspace, with the step size specified instead of the
@@ -598,7 +598,7 @@ def logspace(
         linspace : Similar to logspace, but with the samples uniformly distributed
                    in linear space, instead of log space.
         geomspace : Similar to logspace, but with endpoints specified directly.
-    
+
         Examples
         --------
         >>> import mygrad as mg
@@ -608,7 +608,7 @@ def logspace(
         Tensor([ 100.        ,  177.827941  ,  316.22776602,  562.34132519])
         >>> mg.logspace(2.0, 3.0, num=4, base=2.0)
         Tensor([ 4.        ,  5.0396842 ,  6.34960421,  8.        ])
-        
+
         Returns
         -------
         Tensor
@@ -645,7 +645,7 @@ def geomspace(start, stop, num=50, include_endpoint=True, dtype=None, constant=F
         constant : bool, optional (default=False)
             If ``True``, the returned tensor is a constant (it
             does not back-propagate a gradient)
-            
+
         Returns
         -------
         Tensor
