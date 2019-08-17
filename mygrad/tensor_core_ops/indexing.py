@@ -166,7 +166,15 @@ class SetItem(BroadcastableOp):
             # y = Tensor([3])
             # x[0] = y  # this is legal since x[0] and y have the same size
             if grad_sel.ndim < b.ndim:
-                grad_sel = grad_sel.reshape(b.shape)
+                if grad_sel.size == b.size:
+                    grad_sel = grad_sel.reshape(b.shape)
+                else:
+                    # Broadcasting occurred during set-item and `b` contains
+                    # excess leading singleton dimensions. Make `grad_sel`
+                    # commensurate with `b` for subsequent `reduce_broadcast`
+                    # to work
+                    grad_sel = grad_sel[(np.newaxis,) * (b.ndim - grad_sel.ndim)]
+
             return grad_sel
         else:
             raise IndexError  # pragma: no cover
