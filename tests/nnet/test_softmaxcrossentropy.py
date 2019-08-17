@@ -1,6 +1,7 @@
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
+import pytest
 from hypothesis import given
 from numpy.testing import assert_allclose
 from pytest import raises
@@ -10,6 +11,20 @@ from mygrad import log
 from mygrad.nnet.activations import softmax
 from mygrad.nnet.losses import softmax_crossentropy
 from mygrad.tensor_base import Tensor
+
+
+@pytest.mark.parametrize(
+    ("data", "labels"),
+    [
+        (np.ones((2,), dtype=float), np.zeros((2,), dtype=int)),  # 1D data
+        (np.ones((2, 1), dtype=float), np.zeros((2,), dtype=float)),  # non-int labels
+        (np.ones((2, 1), dtype=float), np.zeros((2, 1), dtype=int)),  # bad label-ndim
+        (np.ones((2, 1), dtype=float), np.zeros((3,), dtype=int)),  # bad label-shape
+    ],
+)
+def test_input_validation(data, labels):
+    with raises((ValueError, TypeError)):
+        softmax_crossentropy(data, labels)
 
 
 @given(st.data())
@@ -22,7 +37,7 @@ def test_softmax_crossentropy(data):
             elements=st.floats(-100, 100),
         )
     )
-    l = data.draw(
+    loss = data.draw(
         hnp.arrays(
             shape=(s.shape[0],),
             dtype=hnp.integer_dtypes(),
@@ -30,13 +45,13 @@ def test_softmax_crossentropy(data):
         )
     )
     scores = Tensor(s)
-    softmax_cross = softmax_crossentropy(scores, l, constant=False)
+    softmax_cross = softmax_crossentropy(scores, loss, constant=False)
     softmax_cross.backward()
 
     pygrad_scores = Tensor(s)
     probs = softmax(pygrad_scores)
 
-    correct_labels = (range(len(l)), l)
+    correct_labels = (range(len(loss)), loss)
     truth = np.zeros(pygrad_scores.shape)
     truth[correct_labels] = 1
 

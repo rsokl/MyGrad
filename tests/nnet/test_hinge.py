@@ -1,6 +1,7 @@
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
+import pytest
 from hypothesis import given
 from numpy.testing import assert_allclose
 from pytest import raises
@@ -8,6 +9,20 @@ from pytest import raises
 import mygrad as mg
 from mygrad.nnet.losses import multiclass_hinge
 from mygrad.tensor_base import Tensor
+
+
+@pytest.mark.parametrize(
+    ("data", "labels"),
+    [
+        (np.ones((2,), dtype=float), np.zeros((2,), dtype=int)),  # 1D data
+        (np.ones((2, 1), dtype=float), np.zeros((2,), dtype=float)),  # non-int labels
+        (np.ones((2, 1), dtype=float), np.zeros((2, 1), dtype=int)),  # bad label-ndim
+        (np.ones((2, 1), dtype=float), np.zeros((3,), dtype=int)),  # bad label-shape
+    ],
+)
+def test_input_validation(data, labels):
+    with raises((ValueError, TypeError)):
+        multiclass_hinge(data, labels)
 
 
 @given(st.data())
@@ -20,7 +35,7 @@ def test_multiclass_hinge(data):
             elements=st.floats(-100, 100),
         )
     )
-    l = data.draw(
+    loss = data.draw(
         hnp.arrays(
             shape=(s.shape[0],),
             dtype=hnp.integer_dtypes(),
@@ -28,11 +43,11 @@ def test_multiclass_hinge(data):
         )
     )
     hinge_scores = Tensor(s)
-    hinge_loss = multiclass_hinge(hinge_scores, l, constant=False)
+    hinge_loss = multiclass_hinge(hinge_scores, loss, constant=False)
     hinge_loss.backward()
 
     pygrad_scores = Tensor(s)
-    correct_labels = (range(len(l)), l)
+    correct_labels = (range(len(loss)), loss)
     correct_class_scores = pygrad_scores[correct_labels]  # Nx1
 
     Lij = pygrad_scores - correct_class_scores[:, np.newaxis] + 1.0  # NxC margins
