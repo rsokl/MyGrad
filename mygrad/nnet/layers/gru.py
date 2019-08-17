@@ -17,7 +17,7 @@ except ImportError:  # pragma: no cover
     ["int32(int32)", "int64(int64)", "float32(float32)", "float64(float64)"],
     nopython=True,
 )
-def sig(f):
+def sig(f):  # pragma: no cover
     """
     Calculates a sigmoid function
     """
@@ -28,7 +28,7 @@ def sig(f):
     ["int32(int32)", "int64(int64)", "float32(float32)", "float64(float64)"],
     nopython=True,
 )
-def d_sig(f):
+def d_sig(f):  # pragma: no cover
     """
     Calculates the derivative of a sigmoid function
     """
@@ -39,7 +39,7 @@ def d_sig(f):
     ["int32(int32)", "int64(int64)", "float32(float32)", "float64(float64)"],
     nopython=True,
 )
-def d_tanh(f):
+def d_tanh(f):  # pragma: no cover
     """
     Calculates the derivative of a tanh function
     """
@@ -126,12 +126,12 @@ def _gru_bptt(
 ):
     Wz, Wh, Wr = Wz.T, Wh.T, Wr.T
     bptt = bp_lim < len(X) - 1
-    if bptt:
+    if bptt:  # pragma: no cover
         old_dLds = np.zeros_like(dLds)
 
     for i in range(bp_lim):
         #  dL(t) / ds(t) + dL(t+1) / ds(t)
-        if bptt:
+        if bptt:  # pragma: no cover
             source_index = slice(1, len(dLds) - i)
             target_index = slice(None, len(dLds) - (i + 1))
             dt = dLds[source_index] - old_dLds[source_index]
@@ -157,7 +157,7 @@ def _gru_bptt(
         )
 
 
-def _backprop(var, grad):
+def _backprop(var, grad):  # pragma: no cover
     if not var.constant:
         if var.grad is None:
             var.grad = np.asarray(grad)
@@ -259,22 +259,6 @@ class GRUnit(Operation):
         return self._hidden_seq
 
     def backward(self, grad, *, graph, **kwargs):
-        if all(
-            i.constant
-            for i in [
-                self.X,
-                self.Uz,
-                self.Wz,
-                self.bz,
-                self.Ur,
-                self.Wr,
-                self.br,
-                self.Uh,
-                self.Wh,
-                self.bh,
-            ]
-        ):
-            return None
 
         s = self._hidden_seq.data[:-1]
         z = self._z.data
@@ -438,112 +422,117 @@ def gru(
     constant=False,
 ):
     r""" Performs a forward pass of sequential data through a Gated Recurrent Unit layer, returning
-        the 'hidden-descriptors' arrived at by utilizing the trainable parameters as follows::
+    the 'hidden-descriptors' arrived at by utilizing the trainable parameters as follows::
 
-                    Z_{t} = sigmoid(X_{t} Uz + S_{t-1} Wz + bz)
-                    R_{t} = sigmoid(X_{t} Ur + S_{t-1} Wr + br)
-                    H_{t} =    tanh(X_{t} Uh + (R{t} * S_{t-1}) Wh + bh)
-                    S_{t} = (1 - Z{t}) * H{t} + Z{t} * S_{t-1}
+                Z_{t} = sigmoid(X_{t} Uz + S_{t-1} Wz + bz)
+                R_{t} = sigmoid(X_{t} Ur + S_{t-1} Wr + br)
+                H_{t} =    tanh(X_{t} Uh + (R{t} * S_{t-1}) Wh + bh)
+                S_{t} = (1 - Z{t}) * H{t} + Z{t} * S_{t-1}
 
-        Parameters
-        ----------
-        X : array_like, shape=(T, N, C)
-           The sequential data to be passed forward.
+    Parameters
+    ----------
+    X : array_like, shape=(T, N, C)
+       The sequential data to be passed forward.
 
-        Uz : array_like, shape=(C, D)
-           The weights used to map sequential data to its hidden-descriptor representation
+    Uz : array_like, shape=(C, D)
+       The weights used to map sequential data to its hidden-descriptor representation
 
-        Wz : array_like, shape=(D, D)
-            The weights used to map a hidden-descriptor to a hidden-descriptor.
+    Wz : array_like, shape=(D, D)
+        The weights used to map a hidden-descriptor to a hidden-descriptor.
 
-        bz : array_like, shape=(D,)
-           The biases used to scale a hidden-descriptor.
+    bz : array_like, shape=(D,)
+       The biases used to scale a hidden-descriptor.
 
-        Ur : array_like, shape=(C, D)
-           The weights used to map sequential data to its hidden-descriptor representation
+    Ur : array_like, shape=(C, D)
+       The weights used to map sequential data to its hidden-descriptor representation
 
-        Wr : array_like, shape=(D, D)
-            The weights used to map a hidden-descriptor to a hidden-descriptor.
+    Wr : array_like, shape=(D, D)
+        The weights used to map a hidden-descriptor to a hidden-descriptor.
 
-        br : array_like, shape=(D,)
-           The biases used to scale a hidden-descriptor.
+    br : array_like, shape=(D,)
+       The biases used to scale a hidden-descriptor.
 
-        Uh : array_like, shape=(C, D)
-           The weights used to map sequential data to its hidden-descriptor representation
+    Uh : array_like, shape=(C, D)
+       The weights used to map sequential data to its hidden-descriptor representation
 
-        Wh : array_like, shape=(D, D)
-            The weights used to map a hidden-descriptor to a hidden-descriptor.
+    Wh : array_like, shape=(D, D)
+        The weights used to map a hidden-descriptor to a hidden-descriptor.
 
-        bh : array_like, shape=(D,)
-           The biases used to scale a hidden-descriptor.
+    bh : array_like, shape=(D,)
+       The biases used to scale a hidden-descriptor.
 
-        s0 : Optional[array_like], shape=(N, D)
-            The 'seed' hidden descriptors to feed into the RNN. If None, a Tensor
-            of zeros of shape (N, D) is created.
+    s0 : Optional[array_like], shape=(N, D)
+        The 'seed' hidden descriptors to feed into the RNN. If None, a Tensor
+        of zeros of shape (N, D) is created.
 
-        bp_lim : Optional[int]
-            The (non-zero) limit of the depth of back propagation through time to be
-            performed. If `None` back propagation is passed back through the entire sequence.
+    bp_lim : Optional[int]
+        *This feature is experimental and is currently untested*.
+        The (non-zero) limit of the depth of back propagation through time to be
+        performed. If `None` back propagation is passed back through the entire sequence.
 
-            E.g. `bp_lim=3` will propagate gradients only up to 3 steps backward through the
-            recursive sequence.
+        E.g. `bp_lim=3` will propagate gradients only up to 3 steps backward through the
+        recursive sequence.
 
-        dropout : float (default=0.), 0 <= dropout < 1
-            If non-zero, the dropout scheme described in [1]_ is applied. See Notes
-            for more details.
+    dropout : float (default=0.), 0 <= dropout < 1
+        If non-zero, the dropout scheme described in [1]_ is applied. See Notes
+        for more details.
 
-        constant : bool, optional (default=False)
-            If True, the resulting Tensor is a constant.
+    constant : bool, optional (default=False)
+        If True, the resulting Tensor is a constant.
 
-        Returns
-        -------
-        mygrad.Tensor, shape=(T+1, N, D)
-            The sequence of 'hidden-descriptors' produced by the forward pass of the RNN.
+    Returns
+    -------
+    mygrad.Tensor, shape=(T+1, N, D)
+        The sequence of 'hidden-descriptors' produced by the forward pass of the RNN.
 
-        Notes
-        -----
-        - :math:`T` : Sequence length
-        - :math:`N` : Batch size
-        - :math:`C` : Length of single datum
-        - :math:`D` : Length of 'hidden' descriptor
+    Notes
+    -----
+    - :math:`T` : Sequence length
+    - :math:`N` : Batch size
+    - :math:`C` : Length of single datum
+    - :math:`D` : Length of 'hidden' descriptor
 
-        The GRU system of equations is given by:
+    The GRU system of equations is given by:
 
-        .. math::
+    .. math::
 
-                    Z_{t} = \sigma (X_{t} U_z + S_{t-1} Wz + bz)
+                Z_{t} = \sigma (X_{t} U_z + S_{t-1} Wz + bz)
 
-                    R_{t} = \sigma (X_{t} U_r + S_{t-1} Wr + br)
+                R_{t} = \sigma (X_{t} U_r + S_{t-1} Wr + br)
 
-                    H_{t} =  tanh(X_{t} U_h + (R_{t} * S_{t-1}) W_h + b_h)
+                H_{t} =  tanh(X_{t} U_h + (R_{t} * S_{t-1}) W_h + b_h)
 
-                    S_{t} = (1 - Z_{t}) * H_{t} + Z_{t} * S_{t-1}
+                S_{t} = (1 - Z_{t}) * H_{t} + Z_{t} * S_{t-1}
 
-        Following the dropout scheme specified in [1]_, the hidden-hidden weights (Wz/Wr/Wh)
-        randomly have their weights dropped prior to forward/back-prop. The input connections
-        (via Uz/Ur/Uh) have variational dropout ([2]_) applied to them with a common dropout
-        mask across all t. That is three static dropout masks, each with shape-(N,D), are
-        applied to
+    Following the dropout scheme specified in [1]_, the hidden-hidden weights (Wz/Wr/Wh)
+    randomly have their weights dropped prior to forward/back-prop. The input connections
+    (via Uz/Ur/Uh) have variational dropout ([2]_) applied to them with a common dropout
+    mask across all t. That is three static dropout masks, each with shape-(N,D), are
+    applied to
 
-        .. math::
-                                              X_{t} U_z
+    .. math::
+                                          X_{t} U_z
 
-                                              X_{t} U_r
+                                          X_{t} U_r
 
-                                              X_{t} U_h
-        respectively, for all :math:`t`.
+                                          X_{t} U_h
+    respectively, for all :math:`t`.
 
-        References
-        ----------
-        .. [1] S. Merity, et. al. "Regularizing and Optimizing LSTM Language Models",
-               arXiv:1708.02182v1, 2017.
+    References
+    ----------
+    .. [1] S. Merity, et. al. "Regularizing and Optimizing LSTM Language Models",
+           arXiv:1708.02182v1, 2017.
 
-        .. [2] Y. Gal, Z. Ghahramani "A Theoretically Grounded Application of Dropout
-               in Recurrent Neural Networks" arXiv:1512.05287v5, 2016. """
+    .. [2] Y. Gal, Z. Ghahramani "A Theoretically Grounded Application of Dropout
+           in Recurrent Neural Networks" arXiv:1512.05287v5, 2016. """
     if s0 is not None:
-        assert isinstance(s0, np.ndarray) or (
-            isinstance(s0, Tensor) and s0.constant is True
-        )
+        if not isinstance(s0, np.ndarray) and not (
+            isinstance(s0, Tensor) and (constant or s0.constant)
+        ):
+            raise ValueError(
+                "GRU does not support non-constant tensors for the initial hidden"
+                "state value, `s0`"
+            )
     s = Tensor._op(
         GRUnit,
         X,

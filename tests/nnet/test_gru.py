@@ -1,6 +1,9 @@
+from typing import Tuple
+
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
+import pytest
 from hypothesis import given, settings
 from numpy.testing import assert_allclose
 
@@ -8,10 +11,73 @@ from mygrad import matmul
 from mygrad.nnet.activations import sigmoid, tanh
 from mygrad.nnet.layers import gru
 from mygrad.tensor_base import Tensor
+from tests.utils import does_not_raise
 
 
-def dense(x, y):
-    return matmul(x, y)
+@settings(deadline=None)
+@given(
+    s0=st.none()
+    | hnp.arrays(shape=(1, 2), dtype=float, elements=st.floats())
+    | hnp.arrays(shape=(1, 2), dtype=float, elements=st.floats()).map(
+        lambda x: Tensor(x, constant=True)
+    )
+    | hnp.arrays(shape=(1, 2), dtype=float, elements=st.floats()).map(
+        lambda x: Tensor(x)
+    ),
+    dropout=st.floats(0, 1),
+    out_constant=st.booleans(),
+)
+def test_nonconstant_s0_raises(s0, dropout: float, out_constant: bool):
+    T, N, C, D = 5, 1, 3, 2
+    X = Tensor(np.random.rand(T, N, C))
+    Wz, Wr, Wh = Tensor(np.random.rand(3, D, D))
+    Uz, Ur, Uh = Tensor(np.random.rand(3, C, D))
+    bz, br, bh = Tensor(np.random.rand(3, D))
+
+    with does_not_raise() if (
+        out_constant or s0 is None or isinstance(s0, np.ndarray) or s0.constant
+    ) else pytest.raises(ValueError):
+        gru(
+            X,
+            Uz,
+            Wz,
+            bz,
+            Ur,
+            Wr,
+            br,
+            Uh,
+            Wh,
+            bh,
+            s0=s0,
+            dropout=dropout,
+            constant=out_constant,
+        )
+
+
+@settings(deadline=None)
+@given(out_constant=st.booleans())
+def test_all_constant(out_constant: bool):
+    T, N, C, D = 5, 1, 3, 2
+    X = Tensor(np.random.rand(T, N, C), constant=True)
+    Wz, Wr, Wh = Tensor(np.random.rand(3, D, D), constant=True)
+    Uz, Ur, Uh = Tensor(np.random.rand(3, C, D), constant=True)
+    bz, br, bh = Tensor(np.random.rand(3, D), constant=True)
+
+    gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, constant=out_constant).backward()
+
+    assert X.grad is None
+
+    assert Wz.grad is None
+    assert Wr.grad is None
+    assert Wh.grad is None
+
+    assert Uz.grad is None
+    assert Ur.grad is None
+    assert Uh.grad is None
+
+    assert bz.grad is None
+    assert br.grad is None
+    assert bh.grad is None
 
 
 @settings(deadline=None)
@@ -29,46 +95,19 @@ def test_gru_fwd(data):
     D = data.draw(st.sampled_from(list(range(1, 5))), label="D")
     dropout = data.draw(st.sampled_from([0, 0.45]), label="dropout")
 
-    Wz = data.draw(
-        hnp.arrays(shape=(D, D), dtype=float, elements=st.floats(-10.0, 10.0)),
-        label="Wz",
+    Wz, Wr, Wh = data.draw(
+        hnp.arrays(shape=(3, D, D), dtype=float, elements=st.floats(-10.0, 10.0)),
+        label="Wz, Wr, Wh",
     )
 
-    Uz = data.draw(
-        hnp.arrays(shape=(C, D), dtype=float, elements=st.floats(-10.0, 10.0)),
-        label="Uz",
+    Uz, Ur, Uh = data.draw(
+        hnp.arrays(shape=(3, C, D), dtype=float, elements=st.floats(-10.0, 10.0)),
+        label="Uz, Ur, Uh",
     )
 
-    bz = data.draw(
-        hnp.arrays(shape=(D,), dtype=float, elements=st.floats(-10.0, 10.0)), label="bz"
-    )
-
-    Wr = data.draw(
-        hnp.arrays(shape=(D, D), dtype=float, elements=st.floats(-10.0, 10.0)),
-        label="Wr",
-    )
-
-    Ur = data.draw(
-        hnp.arrays(shape=(C, D), dtype=float, elements=st.floats(-10.0, 10.0)),
-        label="Ur",
-    )
-
-    br = data.draw(
-        hnp.arrays(shape=(D,), dtype=float, elements=st.floats(-10.0, 10.0)), label="br"
-    )
-
-    Wh = data.draw(
-        hnp.arrays(shape=(D, D), dtype=float, elements=st.floats(-10.0, 10.0)),
-        label="Wh",
-    )
-
-    Uh = data.draw(
-        hnp.arrays(shape=(C, D), dtype=float, elements=st.floats(-10.0, 10.0)),
-        label="Uh",
-    )
-
-    bh = data.draw(
-        hnp.arrays(shape=(D,), dtype=float, elements=st.floats(-10.0, 10.0)), label="bh"
+    bz, br, bh = data.draw(
+        hnp.arrays(shape=(3, D), dtype=float, elements=st.floats(-10.0, 10.0)),
+        label="bz, br, bh",
     )
 
     V = data.draw(
@@ -115,7 +154,7 @@ def test_gru_fwd(data):
     s2 = s0.__copy__()
 
     s = gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, dropout=dropout, constant=True)
-    o = dense(s[1:], V)
+    o = matmul(s[1:], V)
     ls = o.sum()
 
     assert s.constant is True
@@ -144,19 +183,23 @@ def test_gru_fwd(data):
         Wh2d = Wh2
     for n, x in enumerate(X2):
         if not dropout:
-            z = sigmoid(dense(x, Uz2) + dense(stt, Wz2d) + bz2)
-            r = sigmoid(dense(x, Ur2) + dense(stt, Wr2d) + br2)
-            h = tanh(dense(x, Uh2) + dense((r * stt), Wh2d) + bh2)
+            z = sigmoid(matmul(x, Uz2) + matmul(stt, Wz2d) + bz2)
+            r = sigmoid(matmul(x, Ur2) + matmul(stt, Wr2d) + br2)
+            h = tanh(matmul(x, Uh2) + matmul((r * stt), Wh2d) + bh2)
         else:
-            z = sigmoid((s.creator._dropUz[0] * dense(x, Uz2)) + dense(stt, Wz2d) + bz2)
-            r = sigmoid((s.creator._dropUr[0] * dense(x, Ur2)) + dense(stt, Wr2d) + br2)
+            z = sigmoid(
+                (s.creator._dropUz[0] * matmul(x, Uz2)) + matmul(stt, Wz2d) + bz2
+            )
+            r = sigmoid(
+                (s.creator._dropUr[0] * matmul(x, Ur2)) + matmul(stt, Wr2d) + br2
+            )
             h = tanh(
-                (s.creator._dropUh[0] * dense(x, Uh2)) + dense((r * stt), Wh2d) + bh2
+                (s.creator._dropUh[0] * matmul(x, Uh2)) + matmul((r * stt), Wh2d) + bh2
             )
 
         stt = (1 - z) * h + z * stt
         all_s.append(stt)
-        o = dense(stt, V2)
+        o = matmul(stt, V2)
         ls2 += o.sum()
 
     tolerances = dict(atol=1e-5, rtol=1e-5)
@@ -188,63 +231,50 @@ def test_gru_fwd(data):
 
 
 @settings(deadline=None)
-@given(st.data())
-def test_gru_backward(data):
+@given(
+    data=st.data(),
+    X=hnp.arrays(
+        shape=hnp.array_shapes(max_side=5, min_dims=3, max_dims=3),
+        dtype=float,
+        elements=st.floats(-10, 10),
+    ),
+    D=st.sampled_from(list(range(1, 5))),
+    bp_lim=st.booleans(),
+    dropout=st.sampled_from([0, 0.45]),
+    U_constants=st.tuples(*[st.booleans()] * 3),
+    W_constants=st.tuples(*[st.booleans()] * 3),
+    b_constants=st.tuples(*[st.booleans()] * 3),
+    X_constant=st.booleans(),
+    V_constant=st.booleans(),
+)
+def test_gru_backward(
+    data: st.DataObject,
+    X: np.ndarray,
+    D: int,
+    bp_lim: bool,
+    dropout: bool,
+    U_constants: Tuple[bool, bool, bool],
+    W_constants: Tuple[bool, bool, bool],
+    b_constants: Tuple[bool, bool, bool],
+    X_constant: bool,
+    V_constant: bool,
+):
     tolerances = dict(atol=1e-5, rtol=1e-5)
-    X = data.draw(
-        hnp.arrays(
-            shape=hnp.array_shapes(max_side=5, min_dims=3, max_dims=3),
-            dtype=float,
-            elements=st.floats(-10, 10),
-        ),
-        label="X",
-    )
     T, N, C = X.shape
-    D = data.draw(st.sampled_from(list(range(1, 5))), label="D")
-    dropout = data.draw(
-        st.sampled_from([0, 0.45]), label="dropout"
-    )  # TODO: RESTORE DROPOUT
 
-    Wz = data.draw(
-        hnp.arrays(shape=(D, D), dtype=float, elements=st.floats(-10.0, 10.0)),
-        label="Wz",
+    Wz, Wr, Wh = data.draw(
+        hnp.arrays(shape=(3, D, D), dtype=float, elements=st.floats(-10.0, 10.0)),
+        label="Wz, Wr, Wh",
     )
 
-    Uz = data.draw(
-        hnp.arrays(shape=(C, D), dtype=float, elements=st.floats(-10.0, 10.0)),
-        label="Uz",
+    Uz, Ur, Uh = data.draw(
+        hnp.arrays(shape=(3, C, D), dtype=float, elements=st.floats(-10.0, 10.0)),
+        label="Uz, Ur, Uh",
     )
 
-    bz = data.draw(
-        hnp.arrays(shape=(D,), dtype=float, elements=st.floats(-10.0, 10.0)), label="bz"
-    )
-
-    Wr = data.draw(
-        hnp.arrays(shape=(D, D), dtype=float, elements=st.floats(-10.0, 10.0)),
-        label="Wr",
-    )
-
-    Ur = data.draw(
-        hnp.arrays(shape=(C, D), dtype=float, elements=st.floats(-10.0, 10.0)),
-        label="Ur",
-    )
-
-    br = data.draw(
-        hnp.arrays(shape=(D,), dtype=float, elements=st.floats(-10.0, 10.0)), label="br"
-    )
-
-    Wh = data.draw(
-        hnp.arrays(shape=(D, D), dtype=float, elements=st.floats(-10.0, 10.0)),
-        label="Wh",
-    )
-
-    Uh = data.draw(
-        hnp.arrays(shape=(C, D), dtype=float, elements=st.floats(-10.0, 10.0)),
-        label="Uh",
-    )
-
-    bh = data.draw(
-        hnp.arrays(shape=(D,), dtype=float, elements=st.floats(-10.0, 10.0)), label="bh"
+    bz, br, bh = data.draw(
+        hnp.arrays(shape=(3, D), dtype=float, elements=st.floats(-10.0, 10.0)),
+        label="bz, br, bh",
     )
 
     V = data.draw(
@@ -254,44 +284,59 @@ def test_gru_backward(data):
 
     s0 = np.zeros((N, D), dtype=float)
 
-    X = Tensor(X)
+    X = Tensor(X, constant=X_constant)
     X2 = X.__copy__()
 
-    Wz = Tensor(Wz)
+    Wz = Tensor(Wz, constant=W_constants[0])
     Wz2 = Wz.__copy__()
 
-    Uz = Tensor(Uz)
+    Uz = Tensor(Uz, constant=U_constants[0])
     Uz2 = Uz.__copy__()
 
-    bz = Tensor(bz)
+    bz = Tensor(bz, constant=b_constants[0])
     bz2 = bz.__copy__()
 
-    Wr = Tensor(Wr)
+    Wr = Tensor(Wr, constant=W_constants[1])
     Wr2 = Wr.__copy__()
 
-    Ur = Tensor(Ur)
+    Ur = Tensor(Ur, constant=U_constants[1])
     Ur2 = Ur.__copy__()
 
-    br = Tensor(br)
+    br = Tensor(br, constant=b_constants[1])
     br2 = br.__copy__()
 
-    Wh = Tensor(Wh)
+    Wh = Tensor(Wh, constant=W_constants[2])
     Wh2 = Wh.__copy__()
 
-    Uh = Tensor(Uh)
+    Uh = Tensor(Uh, constant=U_constants[2])
     Uh2 = Uh.__copy__()
 
-    bh = Tensor(bh)
+    bh = Tensor(bh, constant=b_constants[2])
     bh2 = bh.__copy__()
 
-    V = Tensor(V)
+    V = Tensor(V, constant=V_constant)
     V2 = V.__copy__()
 
     s0 = Tensor(s0)
     s2 = s0.__copy__()
 
-    s = gru(X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, dropout=dropout, constant=False)
-    o = dense(s[1:], V)
+    # bp_lim = len(X) - 1 should behave the same as no bp-lim
+    s = gru(
+        X,
+        Uz,
+        Wz,
+        bz,
+        Ur,
+        Wr,
+        br,
+        Uh,
+        Wh,
+        bh,
+        dropout=dropout,
+        constant=False,
+        bp_lim=len(X) - 1 if bp_lim else None,
+    )
+    o = matmul(s[1:], V)
     ls = o.sum()
     ls.backward()
 
@@ -308,42 +353,89 @@ def test_gru_backward(data):
         Wh2d = Wh2
     for n, x in enumerate(X2):
         if not dropout:
-            z = sigmoid(dense(x, Uz2) + dense(stt, Wz2d) + bz2)
-            r = sigmoid(dense(x, Ur2) + dense(stt, Wr2d) + br2)
-            h = tanh(dense(x, Uh2) + dense((r * stt), Wh2d) + bh2)
+            z = sigmoid(matmul(x, Uz2) + matmul(stt, Wz2d) + bz2)
+            r = sigmoid(matmul(x, Ur2) + matmul(stt, Wr2d) + br2)
+            h = tanh(matmul(x, Uh2) + matmul((r * stt), Wh2d) + bh2)
         else:
-            z = sigmoid((s.creator._dropUz[0] * dense(x, Uz2)) + dense(stt, Wz2d) + bz2)
-            r = sigmoid((s.creator._dropUr[0] * dense(x, Ur2)) + dense(stt, Wr2d) + br2)
+            z = sigmoid(
+                (s.creator._dropUz[0] * matmul(x, Uz2)) + matmul(stt, Wz2d) + bz2
+            )
+            r = sigmoid(
+                (s.creator._dropUr[0] * matmul(x, Ur2)) + matmul(stt, Wr2d) + br2
+            )
             h = tanh(
-                (s.creator._dropUh[0] * dense(x, Uh2)) + dense((r * stt), Wh2d) + bh2
+                (s.creator._dropUh[0] * matmul(x, Uh2)) + matmul((r * stt), Wh2d) + bh2
             )
         stt = (1 - z) * h + z * stt
         all_s.append(stt)
-        o = dense(stt, V2)
+        o = matmul(stt, V2)
         ls2 += o.sum()
     ls2.backward()
 
     rec_s_grad = np.stack([i.grad for i in all_s[1:]])
 
-    assert_allclose(rec_s_grad, s.grad, **tolerances)
+    if not s.constant:
+        assert_allclose(rec_s_grad, s.grad, **tolerances)
+    else:
+        assert s.grad is None
 
-    assert_allclose(Wz.grad, Wz2.grad, **tolerances)
-    assert_allclose(Wr.grad, Wr2.grad, **tolerances)
-    assert_allclose(Wh.grad, Wh2.grad, **tolerances)
+    if not Wz.constant:
+        assert_allclose(Wz.grad, Wz2.grad, **tolerances)
+    else:
+        assert Wz.grad is None
 
-    assert_allclose(Uz.grad, Uz2.grad, **tolerances)
-    assert_allclose(Ur.grad, Ur2.grad, **tolerances)
-    assert_allclose(Uh.grad, Uh2.grad, **tolerances)
+    if not Wr.constant:
+        assert_allclose(Wr.grad, Wr2.grad, **tolerances)
+    else:
+        assert Wr.grad is None
 
-    assert_allclose(bz.grad, bz2.grad, **tolerances)
-    assert_allclose(br.grad, br2.grad, **tolerances)
-    assert_allclose(bh.grad, bh2.grad, **tolerances)
+    if not Wh.constant:
+        assert_allclose(Wh.grad, Wh2.grad, **tolerances)
+    else:
+        assert Wh.grad is None
 
-    assert_allclose(V.grad, V2.grad, **tolerances)
+    if not Uz.constant:
+        assert_allclose(Uz.grad, Uz2.grad, **tolerances)
+    else:
+        assert Uz.grad is None
 
-    assert_allclose(X.grad, X2.grad, **tolerances)
+    if not Ur.constant:
+        assert_allclose(Ur.grad, Ur2.grad, **tolerances)
+    else:
+        assert Ur.grad is None
+
+    if not Uh.constant:
+        assert_allclose(Uh.grad, Uh2.grad, **tolerances)
+    else:
+        assert Uh.grad is None
+
+    if not bz.constant:
+        assert_allclose(bz.grad, bz2.grad, **tolerances)
+    else:
+        assert bz.grad is None
+
+    if not br.constant:
+        assert_allclose(br.grad, br2.grad, **tolerances)
+    else:
+        assert br.grad is None
+
+    if not bh.constant:
+        assert_allclose(bh.grad, bh2.grad, **tolerances)
+    else:
+        assert bh.grad is None
+
+    if not V.constant:
+        assert_allclose(V.grad, V2.grad, **tolerances)
+    else:
+        assert V.grad is None
+
+    if not X.constant:
+        assert_allclose(X.grad, X2.grad, **tolerances)
+    else:
+        assert X.grad is None
 
     ls.null_gradients()
     ls2.null_gradients()
+
     for x in [s, Wz, Wr, Wh, bz, br, bh, X, Uz, Ur, Uh, V]:
         assert x.grad is None
