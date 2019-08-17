@@ -231,14 +231,14 @@ class Prod(Operation):
         return grad * dldx
 
 
-def _reverse_cumsum(x, axis=None):
+def _reverse_cumsum(x, axis=None):  # pragma: no cover
     """ (x0, x1, x2) -> (x0, x0 + x1, x0 + x1 + x2)"""
     if axis is None:
         axis = 0
     return np.flip(np.cumsum(np.flip(x, axis=axis), axis=axis), axis=axis)
 
 
-def _find_first_zeros_along_axis(x, axis):
+def _find_first_zeros_along_axis(x, axis):  # pragma: no cover
     """ Return the indices at which 0 first occurs in `x` as viewed
         along the specified axis
 
