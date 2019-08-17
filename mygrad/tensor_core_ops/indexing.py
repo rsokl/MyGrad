@@ -169,4 +169,4 @@ class SetItem(BroadcastableOp):
                 grad_sel = grad_sel.reshape(b.shape)
             return grad_sel
         else:
-            raise IndexError
+            raise IndexError  # pragma: no cover

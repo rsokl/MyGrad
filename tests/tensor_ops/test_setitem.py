@@ -162,22 +162,31 @@ def test_no_mutate():
         dtype=float,
         elements=st.floats(-10.0, 10.0),
     ),
+    # if True, tests the edge case of "projecting down" on setitem. E.g:
+    # x = Tensor([0, 1, 2])
+    # y = Tensor([3])
+    # x[0] = y  # this is legal since x[0] and y have the same size
+    add_newaxis=st.booleans(),  # tests down-projection compatibility
     data=st.data(),
 )
-def test_setitem_basic_index(x, data):
+def test_setitem_basic_index(x: np.ndarray, add_newaxis: bool, data: st.DataObject):
     """ index conforms strictly to basic indexing """
     index = data.draw(basic_index(x.shape), label="index")
     o = np.asarray(x[index])
 
     note("x[index]: {}".format(o))
     y = data.draw(
-        hnp.arrays(
-            shape=broadcastable_shapes(o.shape, max_dims=o.ndim, max_side=max(o.shape)),
-            dtype=float,
-            elements=st.floats(-10.0, 10.0),
-        )
-        if o.shape and o.size
-        else st.floats(-10.0, 10.0).map(lambda _x: np.array(_x)),
+        (
+            hnp.arrays(
+                shape=broadcastable_shapes(
+                    o.shape, max_dims=o.ndim, max_side=max(o.shape)
+                ),
+                dtype=float,
+                elements=st.floats(-10.0, 10.0),
+            )
+            if o.shape and o.size
+            else st.floats(-10.0, 10.0).map(lambda _x: np.array(_x))
+        ).map(lambda _y: _y[np.newaxis] if add_newaxis else _y),
         label="y",
     )
 
