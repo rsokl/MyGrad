@@ -155,7 +155,7 @@ def test_no_mutate():
     assert_allclose(np.array([0.0, 0.0]), y.data)
 
 
-@settings(deadline=None)
+@settings(deadline=None, max_examples=1000)
 @given(
     x=hnp.arrays(
         shape=hnp.array_shapes(max_side=4, max_dims=5),
