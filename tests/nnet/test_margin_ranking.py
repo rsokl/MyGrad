@@ -51,6 +51,8 @@ def simple_loss(x1, x2, y, margin):
     -------
     mygrad.Tensor, shape=()
     """
+    if isinstance(y, mg.Tensor):
+        y = y.data
     y = np.asarray(y)
     if y.ndim:
         assert y.size == 1 or len(y) == len(x1)
@@ -89,7 +91,7 @@ def test_ranked_margin(
 
     x1_copy = np.copy(x1)
     x2_copy = np.copy(x2)
-    y_copy = np.copy(y)
+    y_copy = y.copy() if isinstance(y, mg.Tensor) else np.copy(y)
 
     x1_dum = mg.Tensor(x1)
     x2_dum = mg.Tensor(x2)
@@ -122,6 +124,10 @@ def test_ranked_margin(
 
     assert_array_equal(x1, x1_copy, err_msg="`x1` was mutated by backward")
     assert_array_equal(x2, x2_copy, err_msg="`x2` was mutated by backward")
+
+    if isinstance(y, mg.Tensor):
+        y = y.data
+
     if isinstance(y, np.ndarray):
         assert_array_equal(y, y_copy, err_msg="`y` was mutated by backward")
 
