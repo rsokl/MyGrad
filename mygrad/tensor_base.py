@@ -331,6 +331,7 @@ class Tensor:
         ------
         AssertionError
             Raises if the tensor and its associated gradient possess different shapes.
+            Raises if `_backward` triggered on a tensor with gradient of `None`.
         """
         assert self.grad is not None, (
             "backprop, post grad-accumulation, was triggered "
