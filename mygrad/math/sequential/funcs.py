@@ -1,5 +1,3 @@
-from mygrad.math.arithmetic.funcs import multiply
-from mygrad.math.misc.funcs import sqrt
 from mygrad.tensor_base import Tensor
 
 from .ops import *
@@ -20,7 +18,7 @@ __all__ = [
 
 
 def sum(x, axis=None, keepdims=False, constant=False):
-    """ 
+    """
     Sum of tensor elements over a given axis.
 
     Parameters
@@ -53,22 +51,22 @@ def sum(x, axis=None, keepdims=False, constant=False):
 
     See Also
     --------
-    ndarray.sum : Equivalent method.
-    
+    mygrad.Tensor.sum : Equivalent method.
+
     cumsum : Cumulative sum of array elements.
-    
+
     mean, average
-    
+
     Notes
     -----
     Arithmetic is modular when using integer types, and no error is
     raised on overflow.
-    
+
     The sum of an empty tensor is the neutral element 0:
-    
+
     >>> mygrad.sum([])
     Tensor(0.0)
-    
+
     Examples
     --------
     >>> import mygrad as mg
@@ -98,7 +96,7 @@ def sum(x, axis=None, keepdims=False, constant=False):
 
 
 def mean(x, axis=None, keepdims=False, constant=False):
-    """ 
+    """
     Mean of tensor elements over a given axis.
 
     Parameters
@@ -226,9 +224,9 @@ def var(x, axis=None, ddof=0, keepdims=False, constant=False):
     >>> a[1, :] = 0.1
     >>> mg.var(a)
     Tensor(0.20250003)
-    
+
     Computing the variance in float64 is more accurate:
-    
+
     >>> mg.var(a, dtype=np.float64)
     Tensor(0.20249999932944759)
     >>> ((1-0.55)**2 + (0.1-0.55)**2)/2
@@ -376,7 +374,7 @@ def max(x, axis=None, keepdims=False, constant=False):
 
 
 def min(x, axis=None, keepdims=False, constant=False):
-    """ 
+    """
     Return the minimum of a tensor or minimum along its axes.
 
     Parameters

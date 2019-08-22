@@ -10,9 +10,17 @@ from typing import List, Set, Type, Union
 import numpy as np
 
 from mygrad._utils import is_invalid_gradient
-from mygrad.errors import InvalidGradient, InvalidBackprop
+from mygrad.errors import InvalidBackprop, InvalidGradient
 from mygrad.linalg.ops import MatMul
-from mygrad.math.arithmetic.ops import *
+from mygrad.math.arithmetic.ops import (
+    Add,
+    Divide,
+    Multiply,
+    Negative,
+    Positive,
+    Power,
+    Subtract,
+)
 from mygrad.operation_base import BroadcastableOp, Operation
 from mygrad.tensor_core_ops.indexing import GetItem, SetItem
 from mygrad.tensor_manip.array_shape.ops import Flatten
@@ -133,7 +141,7 @@ class Tensor:
         """
         assert isinstance(constant, bool)
         self._scalar_only = _scalar_only
-        self._creator = _creator
+        self._creator = _creator  # type: Union[None, Operation]
 
         if isinstance(x, Tensor):
             self.data = x.data
@@ -323,13 +331,17 @@ class Tensor:
         ------
         AssertionError
             Raises if the tensor and its associated gradient possess different shapes.
+            Raises if `_backward` triggered on a tensor with gradient of `None`.
         """
-        if self._constant:
-            return
-
-        assert (
-            self.grad.shape == self.shape
-        ), "A tensor and its associated gradient must possess the same shape"
+        assert self.grad is not None, (
+            "backprop, post grad-accumulation, was triggered "
+            "on a tensor with no gradient"
+        )
+        assert self.grad.shape == self.shape, (
+            "A tensor and its associated gradient must possess the same shape. Got:"
+            "\ntensor-shape: {}"
+            "\ngrad-shape: {}".format(self.shape, self.grad.shape)
+        )
         if self._creator is not None and not bool(
             graph & (self._ops - self._accum_ops)
         ):
@@ -568,7 +580,7 @@ class Tensor:
         return self._op(Negative, self)
 
     def __pos__(self):
-        return self
+        return self._op(Positive, self)
 
     def __repr__(self):
         return repr(self.data).replace("array", "Tensor").replace("\n", "\n ")

@@ -1,3 +1,5 @@
+import pytest
+from typing import List, Tuple
 import functools
 
 import hypothesis.extra.numpy as hnp
@@ -10,6 +12,25 @@ import mygrad as mg
 
 def multi_matmul_slow(arrays):
     return functools.reduce(mg.matmul, arrays)
+
+
+@given(st.lists(st.just(mg.Tensor([0.0, 1.0])), min_size=0, max_size=1))
+def test_input_validation_too_few_tensors(tensors: List[mg.Tensor]):
+    """multi_matmul requires at least two input-tensors"""
+    with pytest.raises(ValueError):
+        mg.multi_matmul(tensors)
+
+
+@given(
+    st.lists(hnp.array_shapes(min_dims=1), min_size=2).filter(
+        lambda shapes: any(not (1 <= len(x) <= 2) for x in shapes)
+    )
+)
+def test_input_validation_large_dimensionality(shapes: List[Tuple[int, ...]]):
+    """multi_matmul only operates on 1D and 2D tensors"""
+    tensors = [mg.ones(shape=shape) for shape in shapes]
+    with pytest.raises(ValueError):
+        mg.multi_matmul(tensors)
 
 
 @given(

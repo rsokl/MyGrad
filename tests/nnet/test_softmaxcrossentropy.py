@@ -1,6 +1,7 @@
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
+import pytest
 from hypothesis import given
 from numpy.testing import assert_allclose
 from pytest import raises
@@ -12,9 +13,23 @@ from mygrad.nnet.losses import softmax_crossentropy
 from mygrad.tensor_base import Tensor
 
 
+@pytest.mark.parametrize(
+    ("data", "labels"),
+    [
+        (np.ones((2,), dtype=float), np.zeros((2,), dtype=int)),  # 1D data
+        (np.ones((2, 1), dtype=float), np.zeros((2,), dtype=float)),  # non-int labels
+        (np.ones((2, 1), dtype=float), np.zeros((2, 1), dtype=int)),  # bad label-ndim
+        (np.ones((2, 1), dtype=float), np.zeros((3,), dtype=int)),  # bad label-shape
+    ],
+)
+def test_input_validation(data, labels):
+    with raises((ValueError, TypeError)):
+        softmax_crossentropy(data, labels)
+
+
 @given(st.data())
 def test_softmax_crossentropy(data):
-    """ Test the built-in implementation of multiclass hinge against the pure pygrad version"""
+    """ Test the built-in implementation of multiclass hinge against the pure mygrad version"""
     s = data.draw(
         hnp.arrays(
             shape=hnp.array_shapes(max_side=10, min_dims=2, max_dims=2),
@@ -22,7 +37,7 @@ def test_softmax_crossentropy(data):
             elements=st.floats(-100, 100),
         )
     )
-    l = data.draw(
+    loss = data.draw(
         hnp.arrays(
             shape=(s.shape[0],),
             dtype=hnp.integer_dtypes(),
@@ -30,20 +45,20 @@ def test_softmax_crossentropy(data):
         )
     )
     scores = Tensor(s)
-    softmax_cross = softmax_crossentropy(scores, l, constant=False)
+    softmax_cross = softmax_crossentropy(scores, loss, constant=False)
     softmax_cross.backward()
 
-    pygrad_scores = Tensor(s)
-    probs = softmax(pygrad_scores)
+    mygrad_scores = Tensor(s)
+    probs = softmax(mygrad_scores)
 
-    correct_labels = (range(len(l)), l)
-    truth = np.zeros(pygrad_scores.shape)
+    correct_labels = (range(len(loss)), loss)
+    truth = np.zeros(mygrad_scores.shape)
     truth[correct_labels] = 1
 
-    pygrad_cross = (-1 / s.shape[0]) * (log(probs) * truth).sum()
-    pygrad_cross.backward()
-    assert_allclose(softmax_cross.data, pygrad_cross.data, atol=1e-5, rtol=1e-5)
-    assert_allclose(scores.grad, pygrad_scores.grad, atol=1e-5, rtol=1e-5)
+    mygrad_cross = (-1 / s.shape[0]) * (log(probs) * truth).sum()
+    mygrad_cross.backward()
+    assert_allclose(softmax_cross.data, mygrad_cross.data, atol=1e-5, rtol=1e-5)
+    assert_allclose(scores.grad, mygrad_scores.grad, atol=1e-5, rtol=1e-5)
 
 
 @given(shape=st.sampled_from([(3, 1), (3, 4), tuple()]))

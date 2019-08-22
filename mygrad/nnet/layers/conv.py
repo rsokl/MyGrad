@@ -157,130 +157,149 @@ class ConvND(Operation):
 
 def conv_nd(x, filter_bank, *, stride, padding=0, dilation=1, constant=False):
     """ Use `filter_bank` to perform strided N-dimensional neural network-style
-        convolutions (see Notes) over `x`.::
+    convolutions (see Notes) over `x`.::
 
-                f(x, w) -> x ⋆ w
+            f(x, w) -> x ⋆ w
 
-                shapes:
-                (N, C, X0, ...) ⋆ (F, C, W0, ...) -> (N, F, G0, ...)
+            shapes:
+            (N, C, X0, ...) ⋆ (F, C, W0, ...) -> (N, F, G0, ...)
 
-        ``x`` represents a batch of data over which the filters
-        are convolved. Specifically, it must be a tensor of shape
-        :math:`(N, C, X_0, ...)`, where :math:`N` is the number of samples in the batch,
-        C is the channel-depth of each datum, and :math:`(X_0, ...)` are the
-        dimensions over which the filters are convolved. Accordingly,
-        each filter must have a channel depth of :math:`C`.
+    ``x`` represents a batch of data over which the filters
+    are convolved. Specifically, it must be a tensor of shape
+    :math:`(N, C, X_0, ...)`, where :math:`N` is the number of samples in the batch,
+    C is the channel-depth of each datum, and :math:`(X_0, ...)` are the
+    dimensions over which the filters are convolved. Accordingly,
+    each filter must have a channel depth of :math:`C`.
 
-        Thus convolving :math:`F` filters, each with a shape :math:`(C, W_0, ...)`,
-        over the data batch will produce a tensor of shape
-        :math:`(N, F, G_0, ...)`, where :math:`(G_0, ...)` is the shape of the grid
-        commensurate with the filter placements
+    Thus convolving :math:`F` filters, each with a shape :math:`(C, W_0, ...)`,
+    over the data batch will produce a tensor of shape
+    :math:`(N, F, G_0, ...)`, where :math:`(G_0, ...)` is the shape of the grid
+    commensurate with the filter placements
 
-        Parameters
-        ----------
-        x : Union[Tensor, array_like], shape=(N, C, Xo, ...)
-            The data batch to be convolved over.
+    Parameters
+    ----------
+    x : Union[Tensor, array_like], shape=(N, C, Xo, ...)
+        The data batch to be convolved over.
 
-        filter_bank : Union[Tensor, array_like], shape=(F, C, Wo, ...)
-            The filters used to perform the convolutions.
+    filter_bank : Union[Tensor, array_like], shape=(F, C, Wo, ...)
+        The filters used to perform the convolutions.
 
-        stride : Union[int, Tuple[int, ...]]
-            (keyword-only argument) The step-size with which each 
-            filter is placed along the H and W axes during the 
-            convolution. The tuple indicates (stride-0, ...). If a 
-            single integer is provided, this stride is used for all 
-            convolved dimensions
+    stride : Union[int, Tuple[int, ...]]
+        (keyword-only argument) The step-size with which each
+        filter is placed along the H and W axes during the
+        convolution. The tuple indicates (stride-0, ...). If a
+        single integer is provided, this stride is used for all
+        convolved dimensions
 
-        padding : Union[int, Tuple[int, ...]]
-            (keyword-only argument) The number of zeros to be padded 
-            to both ends of each convolved dimension, respectively. 
-            If a single integer is provided, this padding is used for 
-            all of the convolved axes
+    padding : Union[int, Tuple[int, ...]]
+        (keyword-only argument) The number of zeros to be padded
+        to both ends of each convolved dimension, respectively.
+        If a single integer is provided, this padding is used for
+        all of the convolved axes
 
-        dilation : Union[int, Tuple[int, ...]], optional (default=1)
-            (keyword-only argument) The spacing used when placing kernel 
-            elements along the data. E.g. for a 1D convolution the ith 
-            placement of the kernel multiplied  against the dilated-window: 
-            ``x[:, :, i*s:(i*s + w*d):d]``, where ``s`` is
-            the stride, ``w`` is the kernel-size, and ``d`` is the dilation factor.
+    dilation : Union[int, Tuple[int, ...]], optional (default=1)
+        (keyword-only argument) The spacing used when placing kernel
+        elements along the data. E.g. for a 1D convolution the ith
+        placement of the kernel multiplied  against the dilated-window:
+        ``x[:, :, i*s:(i*s + w*d):d]``, where ``s`` is
+        the stride, ``w`` is the kernel-size, and ``d`` is the dilation factor.
 
-            If a single integer is provided, that dilation value is used for all
-            of the convolved axes
+        If a single integer is provided, that dilation value is used for all
+        of the convolved axes
 
-        constant : bool, optional (default=False)
-            If True, the resulting Tensor is a constant.
+    constant : bool, optional (default=False)
+        If True, the resulting Tensor is a constant.
 
-        Returns
-        -------
-        Tensor, shape=(N, F, G0, ...)
-            The result of each filter being convolved over each datum in
-            the batch.
+    Returns
+    -------
+    Tensor, shape=(N, F, G0, ...)
+        The result of each filter being convolved over each datum in
+        the batch.
 
-        Notes
-        -----
-         - The filters are *not* flipped by this operation, meaning that
-           an auto-correlation is being performed rather than a true convolution.
+    Notes
+    -----
+     - The filters are *not* flipped by this operation, meaning that
+       an auto-correlation is being performed rather than a true convolution.
 
-         - Only 'valid' filter placements are permitted - where the filters overlap
-           completely with the (padded) data.
+     - Only 'valid' filter placements are permitted - where the filters overlap
+       completely with the (padded) data.
 
-         - This is a "scalar-only" operation, meaning that back propagation through
-           this layer assumes that a scalar (i.e. a 0-dimensional tensor) will invoke
-           ``tensor.backward()`` for the computational graph. This is standard for a
-           neural network, which terminates in a scalar loss.
+     - This is a "scalar-only" operation, meaning that back propagation through
+       this layer assumes that a scalar (i.e. a 0-dimensional tensor) will invoke
+       ``tensor.backward()`` for the computational graph. This is standard for a
+       neural network, which terminates in a scalar loss.
 
-        Examples
-        --------
-        Here we perform a 1D convolution of a constant-valued kernel, ``k``, with a
-        'square-wave' signal, ``x``, using stride-1. Note that because we are constrained
-        to doing deep learning-style convolutions, that we prepend the dimensions
-        :math:`(N=1, C=1)` to ``x``, and :math:`(F=1, C=1)` and to ``k``. That is,
-        we are performing a convolution on one, single-channeled signal using
-        one kernel.
+    Examples
+    --------
+    Here we perform a 1D convolution of a constant-valued kernel, ``k``, with a
+    'square-wave' signal, ``x``, using stride-1. Note that because we are constrained
+    to doing deep learning-style convolutions, that we prepend the dimensions
+    :math:`(N=1, C=1)` to ``x``, and :math:`(F=1, C=1)` and to ``k``. That is,
+    we are performing a convolution on one, single-channeled signal using
+    one kernel.
 
-        See that this convolution produces the expected triangle-shaped
-        response. The shape of the resulting tensor is :math:`(N=1, F=1, G_0=12)`.
-        That is, the length-5 kernel can be placed in 12 valid positions, using a
-        stride of 1.
+    See that this convolution produces the expected triangle-shaped
+    response. The shape of the resulting tensor is :math:`(N=1, F=1, G_0=12)`.
+    That is, the length-5 kernel can be placed in 12 valid positions, using a
+    stride of 1.
 
-        >>> import mygrad as mg
-        >>> from mygrad.nnet import conv_nd
-        >>> x = mg.zeros((1, 1, 16))  # a square-wave signal
-        >>> x[..., 5:11] = 1
-        >>> k = mg.ones((1, 1, 5))    # a constant-valued kernel
-        >>> conv_nd(x, k, stride=1)   # performing a stride-1, 1D convolution
-        Tensor([[[0., 1., 2., 3., 4., 5., 5., 4., 3., 2., 1., 0.]]], dtype=float32)
+    >>> import mygrad as mg
+    >>> from mygrad.nnet import conv_nd
+    >>> x = mg.zeros((1, 1, 16))  # a square-wave signal
+    >>> x[..., 5:11] = 1
+    >>> k = mg.ones((1, 1, 5))    # a constant-valued kernel
+    >>> conv_nd(x, k, stride=1)   # performing a stride-1, 1D convolution
+    Tensor([[[0., 1., 2., 3., 4., 5., 5., 4., 3., 2., 1., 0.]]], dtype=float32)
 
-        Back-propagating through the (summed) convolution:
+    Back-propagating through the (summed) convolution:
 
-        >>> conv_nd(x, k, stride=1).sum().backward()  # sum to a scalar to perform back-prop
-        >>> x.grad  # d(summed_conv)/dx
-        array([[[1., 2., 3., 4., 5., 5., 5., 5., 5., 5., 5., 5., 4., 3., 2., 1.]]],
-              dtype=float32)
-        >>> k.grad  # d(summed_conv)/dk
-        array([[[6., 6., 6., 6., 6.]]])
+    >>> conv_nd(x, k, stride=1).sum().backward()  # sum to a scalar to perform back-prop
+    >>> x.grad  # d(summed_conv)/dx
+    array([[[1., 2., 3., 4., 5., 5., 5., 5., 5., 5., 5., 5., 4., 3., 2., 1.]]],
+          dtype=float32)
+    >>> k.grad  # d(summed_conv)/dk
+    array([[[6., 6., 6., 6., 6.]]])
 
-        Now, let's demonstrate a more typical usage for ``conv_nd`` in the context of
-        neural networks. ``x`` will represent 10, 32x32 RGB images, and we will use
-        5 distinct 2x2 kernels to convolve over each of these images . Note that
-        each kernel must possess 3-channel - one for each RGB channel.
+    Now, let's demonstrate a more typical usage for ``conv_nd`` in the context of
+    neural networks. ``x`` will represent 10, 32x32 RGB images, and we will use
+    5 distinct 2x2 kernels to convolve over each of these images . Note that
+    each kernel must possess 3-channel - one for each RGB channel.
 
-        That is, we will be performing NxF channel-wise 2D convolutions. Supposing
-        that we don't want the kernel placements to overlap, we can use a stride of 2. In
-        total, this will produce a shape-:math:`(N=10, F=5, G_0=16, G_1=16)` tensor as a
-        result.
+    That is, we will be performing NxF channel-wise 2D convolutions. Supposing
+    that we don't want the kernel placements to overlap, we can use a stride of 2. In
+    total, this will produce a shape-:math:`(N=10, F=5, G_0=16, G_1=16)` tensor as a
+    result.
 
-        >>> import numpy as np
-        >>> x = mg.Tensor(np.random.rand(10, 3, 32, 32))  # creating 10 random 32x32 RGB images
-        >>> k = mg.Tensor(np.random.rand(5, 3, 2, 2))     # creating 5 random 3-channel 2x2 kernels
+    >>> import numpy as np
+    >>> x = mg.Tensor(np.random.rand(10, 3, 32, 32))  # creating 10 random 32x32 RGB images
+    >>> k = mg.Tensor(np.random.rand(5, 3, 2, 2))     # creating 5 random 3-channel 2x2 kernels
 
-        Given the shapes of ``x`` and ``k``, ``conv_nd`` automatically executes a 2D convolution:
+    Given the shapes of ``x`` and ``k``, ``conv_nd`` automatically executes a 2D convolution:
 
-        >>> conv_nd(x, k, stride=2).shape
-        (10, 5, 16, 16)
+    >>> conv_nd(x, k, stride=2).shape
+    (10, 5, 16, 16)
 
-        Extrapolating further, ``conv_nd`` is capable of performing ND convolutions!
-        """
+    Extrapolating further, ``conv_nd`` is capable of performing ND convolutions!
+    """
+    if x.ndim < 3:
+        raise ValueError(
+            "`x` must possess at least three "
+            "dimensions, got {} dimensions".format(x.ndim)
+        )
+
+    if x.ndim != filter_bank.ndim:
+        raise ValueError(
+            "`x` ({}-dimensions) must have the same dimensionality as "
+            "`filter_bank` ({}-dimensions)".format(x.ndim, filter_bank.ndim)
+        )
+
+    if filter_bank.shape[1] != x.shape[1]:
+        raise ValueError(
+            "`x.shape[1]` ({}) must match `filter_bank.shape[1]` ({})".format(
+                x.shape[1], filter_bank.shape[1]
+            )
+        )
+
     return Tensor._op(
         ConvND,
         x,

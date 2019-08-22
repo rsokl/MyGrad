@@ -6,7 +6,7 @@ from numpy.testing import assert_allclose
 from pytest import raises
 
 from mygrad._utils import reduce_broadcast
-from tests.custom_strategies import broadcastable_shape
+from tests.custom_strategies import broadcastable_shapes
 
 
 def test_bad_gradient_dimensionality():
@@ -43,11 +43,11 @@ def test_reduce_broadcast_same_shape(grad):
 def test_reduce_broadcast_nokeepdim(var_shape, data):
     """ example broadcasting: (2, 3) -> (5, 2, 3)"""
     grad_shape = data.draw(
-        broadcastable_shape(
+        broadcastable_shapes(
             shape=var_shape,
-            min_dim=len(var_shape) + 1,
-            max_dim=len(var_shape) + 3,
-            allow_singleton=False,
+            min_dims=len(var_shape) + 1,
+            max_dims=len(var_shape) + 3,
+            min_side=2,
         ),
         label="grad_shape",
     )
@@ -66,8 +66,8 @@ def test_reduce_broadcast_keepdim(var_shape, data):
     grad = data.draw(
         hnp.arrays(
             dtype=float,
-            shape=broadcastable_shape(
-                shape=var_shape, min_dim=len(var_shape), max_dim=len(var_shape)
+            shape=broadcastable_shapes(
+                shape=var_shape, min_dims=len(var_shape), max_dims=len(var_shape)
             ),
             elements=st.just(1.0),
         ),

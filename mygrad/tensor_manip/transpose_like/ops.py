@@ -44,7 +44,7 @@ class MoveAxis(Operation):
         return np.moveaxis(a, source, destination)
 
     def backward_var(self, grad, index, **kwargs):
-        if not index == 0:
+        if not index == 0:  # pragma: no cover
             raise IndexError
         return np.moveaxis(grad, self.destination, self.source)
 
@@ -57,7 +57,7 @@ class SwapAxes(Operation):
         return np.swapaxes(a.data, axis1, axis2)
 
     def backward_var(self, grad, index, **kwargs):
-        if not index == 0:
+        if not index == 0:  # pragma: no cover
             raise IndexError
         return np.swapaxes(grad, self.axis2, self.axis1)
 
@@ -70,7 +70,7 @@ class Roll(Operation):
         return np.roll(a.data, shift=shift, axis=axis)
 
     def backward_var(self, grad, index, **kwargs):
-        if not index == 0:
+        if not index == 0:  # pragma: no cover
             raise IndexError
         rev_shift = (
             -self.shift

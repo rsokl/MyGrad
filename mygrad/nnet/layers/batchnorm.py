@@ -52,6 +52,7 @@ class BatchNorm(Operation):
         self.beta = beta
 
         x = x.data
+        self.x_norm = None  # required for backprop through gamma
         self.mean = x.mean(axis=normed_dims)
         self.var = np.einsum(x, range(x.ndim), x, range(x.ndim), [1])
         self.var /= x.size / x.shape[1]
@@ -61,12 +62,14 @@ class BatchNorm(Operation):
 
         y = x - self.mean.reshape(keepdims_shape)
         y /= np.sqrt(self.var).reshape(keepdims_shape)
-        self.x_norm = y
 
         # optional affine transformation
         if gamma is not None:
+            self.x_norm = y
             gamma = gamma.data
+            # must copy `y` to prevent mutation of `self.x_norm`
             y = y * gamma.reshape(keepdims_shape)
+
         if beta is not None:
             beta = beta.data
             y += beta.reshape(keepdims_shape)
@@ -103,7 +106,7 @@ class BatchNorm(Operation):
         elif (index == 1 and self.gamma is None) or index == 2:
             normed_dims = tuple(i for i in range(x.ndim) if i != 1)
             return grad.sum(axis=normed_dims)
-        else:
+        else:  # pragma: no cover
             raise IndexError
 
 

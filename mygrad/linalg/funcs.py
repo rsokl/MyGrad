@@ -461,6 +461,13 @@ def multi_matmul(tensors, constant=False):
     >>> A @ B @ C @ D
     """
 
+    for a in tensors:
+        if not (1 <= a.ndim <= 2):
+            raise ValueError(
+                "%d-dimensional tensor given. Tensor must be one or two-dimensional"
+                % (a.ndim,)
+            )
+
     n = len(tensors)
     if n < 2:
         raise ValueError("Expecting at least two arrays.")
@@ -485,12 +492,6 @@ def multi_matmul(tensors, constant=False):
             axis=1,
             constant=tensors[-1].constant if isinstance(tensors[-1], Tensor) else True,
         )
-
-    for a in tensors:
-        if a.ndim < 1 or a.ndim > 2:
-            raise ValueError(
-                "%d-dimensional array given. Tensor must be two-dimensional" % (a.ndim,)
-            )
 
     if n == 3:
         result = _multi_matmul_three(tensors[0], tensors[1], tensors[2], constant)

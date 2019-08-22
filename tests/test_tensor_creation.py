@@ -4,7 +4,22 @@ from hypothesis import given
 from numpy.testing import assert_array_equal
 
 from mygrad import Tensor
-from mygrad.tensor_creation.funcs import *
+from mygrad.tensor_creation.funcs import (
+    arange,
+    empty,
+    empty_like,
+    eye,
+    full,
+    full_like,
+    geomspace,
+    identity,
+    linspace,
+    logspace,
+    ones,
+    ones_like,
+    zeros,
+    zeros_like,
+)
 
 
 def check_tensor_array(tensor, array, constant):
@@ -49,6 +64,12 @@ def test_all_tensor_creation(constant, dtype):
     )
 
     check_tensor_array(
+        ones_like(Tensor(x), dtype=dtype, constant=constant),
+        np.ones_like(x, dtype=dtype),
+        constant,
+    )
+
+    check_tensor_array(
         zeros((4, 5, 6), dtype=dtype, constant=constant),
         np.zeros((4, 5, 6), dtype=dtype),
         constant,
@@ -61,6 +82,12 @@ def test_all_tensor_creation(constant, dtype):
     )
 
     check_tensor_array(
+        zeros_like(Tensor(x), dtype=dtype, constant=constant),
+        np.zeros_like(x, dtype=dtype),
+        constant,
+    )
+
+    check_tensor_array(
         full((4, 5, 6), 5.0, dtype=dtype, constant=constant),
         np.full((4, 5, 6), 5.0, dtype=dtype),
         constant,
@@ -68,6 +95,12 @@ def test_all_tensor_creation(constant, dtype):
 
     check_tensor_array(
         full_like(x, 5.0, dtype=dtype, constant=constant),
+        np.full_like(x, 5.0, dtype=dtype),
+        constant,
+    )
+
+    check_tensor_array(
+        full_like(Tensor(x), 5.0, dtype=dtype, constant=constant),
         np.full_like(x, 5.0, dtype=dtype),
         constant,
     )

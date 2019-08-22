@@ -115,8 +115,6 @@ class Arcsin(Operation):
 
     def __call__(self, a):
         self.variables = (a,)
-        if np.any(1 < a) or np.any(a < -1):
-            raise ValueError("Invalid arcsin-domain value")
         return np.arcsin(a.data)
 
     def backward_var(self, grad, index, **kwargs):
@@ -130,8 +128,6 @@ class Arccos(Operation):
 
     def __call__(self, a):
         self.variables = (a,)
-        if np.any(1 < a) or np.any(a < -1):
-            raise ValueError("Invalid arccos-domain value")
         return np.arccos(a.data)
 
     def backward_var(self, grad, index, **kwargs):
@@ -157,8 +153,6 @@ class Arccsc(Operation):
 
     def __call__(self, a):
         self.variables = (a,)
-        if np.any(-1 < a) and np.any(a < 1):
-            raise ValueError("Invalid arccsc-domain value")
         return np.arcsin(1 / a.data)
 
     def backward_var(self, grad, index, **kwargs):
@@ -174,8 +168,6 @@ class Arcsec(Operation):
 
     def __call__(self, a):
         self.variables = (a,)
-        if np.any(-1 < a) and np.any(a < 1):
-            raise ValueError("Invalid arcsec-domain value")
         return np.arccos(1 / a.data)
 
     def backward_var(self, grad, index, **kwargs):

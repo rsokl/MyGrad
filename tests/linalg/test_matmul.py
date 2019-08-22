@@ -4,21 +4,21 @@ from hypothesis import settings
 from numpy.testing import assert_almost_equal
 
 from mygrad import matmul
-from tests.custom_strategies import broadcastable_shape
+from tests.custom_strategies import broadcastable_shapes
 from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
 @st.composite
 def special_shape(draw, static_shape, shape=tuple(), min_dim=0, max_dim=5):
     """ search strategy that permits broadcastable dimensions to
-        be prepended to a static shape - for the purposes of 
+        be prepended to a static shape - for the purposes of
         drawing diverse shaped-arrays for matmul
-        
+
         Returns
         -------
         hypothesis.searchstrategy.SearchStrategy
             -> Tuple[int, ...]"""
-    return draw(broadcastable_shape(shape, min_dim, max_dim)) + static_shape
+    return draw(broadcastable_shapes(shape, min_dim, max_dim)) + static_shape
 
 
 @fwdprop_test_factory(

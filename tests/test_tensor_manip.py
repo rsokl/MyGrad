@@ -3,11 +3,12 @@ from itertools import permutations
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
-from hypothesis import assume, given, settings
+from hypothesis import given, settings
 from numpy.testing import assert_allclose
 from pytest import raises
 
 from mygrad import (
+    Tensor,
     broadcast_to,
     expand_dims,
     moveaxis,
@@ -17,11 +18,17 @@ from mygrad import (
     swapaxes,
     transpose,
 )
-from mygrad.tensor_base import Tensor
 
-from .custom_strategies import broadcastable_shape, valid_axes
+from .custom_strategies import valid_axes
 from .utils.numerical_gradient import numerical_gradient_full
 from .wrappers.uber import backprop_test_factory, fwdprop_test_factory
+
+
+def test_input_validation():
+    x = Tensor([[1, 2]])
+
+    with raises(TypeError):
+        transpose(x, (0,), 1)
 
 
 @settings(deadline=None)
@@ -34,9 +41,12 @@ from .wrappers.uber import backprop_test_factory, fwdprop_test_factory
     data=st.data(),
 )
 def test_transpose(x, data):
-    axes = data.draw(valid_axes(x.ndim), label="axes")
-    if axes is not None:
-        assume(len(axes) == x.ndim)
+    axes = data.draw(
+        valid_axes(x.ndim, min_dim=x.ndim, max_dim=x.ndim).map(
+            lambda out: (out,) if isinstance(out, int) else out
+        ),
+        label="axes",
+    )
 
     x_arr = Tensor(np.copy(x))
 
@@ -126,7 +136,7 @@ def test_squeeze(x, data):
 
     try:
         numpy_out = np.squeeze(x, axes)
-    except ValueError as e:
+    except ValueError:
         with raises(ValueError):
             squeeze(x_arr, axes, constant=False)
         return
@@ -154,7 +164,7 @@ def _expand_dims_axis(arr):
 
 
 def _swap_axes_axis(arr):
-    return st.integers(-arr.ndim, arr.ndim - 1)
+    return st.integers(-arr.ndim, arr.ndim - 1) if arr.ndim else st.just(0)
 
 
 def _valid_moveaxis_args(*arrs, **kwargs):
@@ -187,8 +197,8 @@ def test_expand_dims_bkwd():
     true_func=np.moveaxis,
     num_arrays=1,
     kwargs=dict(
-        source=lambda x: valid_axes(x.ndim, permit_none=False),
-        destination=lambda x: valid_axes(x.ndim, permit_none=False),
+        source=lambda x: valid_axes(x.ndim, permit_none=False, permit_int=False),
+        destination=lambda x: valid_axes(x.ndim, permit_none=False, permit_int=False),
     ),
     assumptions=_valid_moveaxis_args,
     index_to_arr_shapes={0: hnp.array_shapes(max_side=4, max_dims=5)},
@@ -203,8 +213,8 @@ def test_moveaxis_fwd():
     true_func=np.moveaxis,
     num_arrays=1,
     kwargs=dict(
-        source=lambda x: valid_axes(x.ndim, permit_none=False),
-        destination=lambda x: valid_axes(x.ndim, permit_none=False),
+        source=lambda x: valid_axes(x.ndim, permit_none=False, permit_int=False),
+        destination=lambda x: valid_axes(x.ndim, permit_none=False, permit_int=False),
     ),
     assumptions=_valid_moveaxis_args,
     vary_each_element=True,
@@ -219,6 +229,7 @@ def test_moveaxis_bkwd():
     true_func=np.swapaxes,
     num_arrays=1,
     kwargs=dict(axis1=_swap_axes_axis, axis2=_swap_axes_axis),
+    index_to_arr_shapes={0: hnp.array_shapes(max_side=3, min_dims=1, max_dims=3)},
 )
 def test_swapaxes_fwd():
     pass
@@ -230,6 +241,7 @@ def test_swapaxes_fwd():
     num_arrays=1,
     kwargs=dict(axis1=_swap_axes_axis, axis2=_swap_axes_axis),
     vary_each_element=True,
+    index_to_arr_shapes={0: hnp.array_shapes(max_side=3, min_dims=1, max_dims=3)},
 )
 def test_swapaxes_bkwd():
     pass
@@ -295,15 +307,18 @@ def test_broadcast_to_bkwd():
 def gen_roll_args(draw, arr):
     shift = draw(st.integers() | st.tuples(*(st.integers() for i in arr.shape)))
 
-    ax_strat = hnp.valid_tuple_axes(
-        arr.ndim,
-        **(
-            dict(min_size=len(shift), max_size=len(shift))
-            if isinstance(shift, tuple)
-            else {}
+    if arr.ndim:
+        ax_strat = hnp.valid_tuple_axes(
+            arr.ndim,
+            **(
+                dict(min_size=len(shift), max_size=len(shift))
+                if isinstance(shift, tuple)
+                else {}
+            )
         )
-    )
-    axis = draw(st.none() | st.integers(-arr.ndim, arr.ndim - 1) | ax_strat)
+        axis = draw(st.none() | st.integers(-arr.ndim, arr.ndim - 1) | ax_strat)
+    else:
+        axis = None
     return dict(shift=shift, axis=axis)
 
 

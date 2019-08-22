@@ -2,7 +2,7 @@ import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
 import pytest
-from hypothesis import given, settings
+from hypothesis import assume, given, note, settings
 from numpy.testing import assert_allclose, assert_array_equal
 
 from mygrad.tensor_base import Tensor
@@ -12,7 +12,7 @@ from mygrad.tensor_core_ops.indexing import (
     _is_int_array_index,
 )
 
-from ..custom_strategies import adv_integer_index, basic_index, broadcastable_shape
+from ..custom_strategies import adv_integer_index, basic_index, broadcastable_shapes
 from ..utils.numerical_gradient import numerical_gradient_full
 
 
@@ -155,7 +155,7 @@ def test_no_mutate():
     assert_allclose(np.array([0.0, 0.0]), y.data)
 
 
-@settings(deadline=None)
+@settings(deadline=None, max_examples=1000)
 @given(
     x=hnp.arrays(
         shape=hnp.array_shapes(max_side=4, max_dims=5),
@@ -164,22 +164,30 @@ def test_no_mutate():
     ),
     data=st.data(),
 )
-def test_setitem_basic_index(x, data):
+def test_setitem_basic_index(x: np.ndarray, data: st.DataObject):
     """ index conforms strictly to basic indexing """
     index = data.draw(basic_index(x.shape), label="index")
     o = np.asarray(x[index])
+
+    note("x[index]: {}".format(o))
     y = data.draw(
-        hnp.arrays(
-            shape=broadcastable_shape(o.shape, max_dim=o.ndim),
-            dtype=float,
-            elements=st.floats(-10.0, 10.0),
+        (
+            hnp.arrays(
+                # Permit shapes that are broadcast-compatible with x[index]
+                # The only excess dimensions permitted in this shape are
+                # leading singletons
+                shape=broadcastable_shapes(o.shape).map(
+                    lambda _x: tuple(
+                        1 if (len(_x) - n) > o.ndim else s for n, s in enumerate(_x)
+                    )
+                ),
+                dtype=float,
+                elements=st.floats(-10.0, 10.0),
+            )
+            if o.shape and o.size
+            else st.floats(-10.0, 10.0).map(lambda _x: np.array(_x))
         ),
         label="y",
-    )
-
-    grad = data.draw(
-        hnp.arrays(shape=x.shape, dtype=float, elements=st.floats(1, 10), unique=True),
-        label="grad",
     )
 
     x0 = np.copy(x)
@@ -188,10 +196,21 @@ def test_setitem_basic_index(x, data):
     x_arr = Tensor(np.copy(x))
     y_arr = Tensor(np.copy(y))
     x1_arr = x_arr[:]
+
+    try:
+        x0[index] = y0  # don't permit invalid set-items
+    except ValueError:
+        assume(False)
+        return
+
+    grad = data.draw(
+        hnp.arrays(shape=x.shape, dtype=float, elements=st.floats(1, 10), unique=True),
+        label="grad",
+    )
+
     x1_arr[index] = y_arr
     (x1_arr * grad).sum().backward()
 
-    x0[index] = y0
     assert_allclose(x1_arr.data, x0)
     assert_allclose(y_arr.data, y0)
 
@@ -218,10 +237,12 @@ def test_setitem_adv_int_index(x, data):
     o = np.asarray(x[index])
     y = data.draw(
         hnp.arrays(
-            shape=broadcastable_shape(o.shape, max_dim=o.ndim),
+            shape=broadcastable_shapes(o.shape, max_dims=o.ndim, max_side=max(o.shape)),
             dtype=float,
             elements=st.floats(-10.0, 10.0),
-        ),
+        )
+        if o.shape and o.size
+        else st.floats(-10.0, 10.0).map(lambda _x: np.array(_x)),
         label="y",
     )
 
@@ -235,11 +256,17 @@ def test_setitem_adv_int_index(x, data):
 
     x_arr = Tensor(np.copy(x))
     y_arr = Tensor(np.copy(y))
+
+    try:
+        x0[index] = y0  # don't permit invalid set-items
+    except ValueError:
+        assume(False)
+        return
+
     x1_arr = x_arr[:]
     x1_arr[index] = y_arr
     (x1_arr * grad).sum().backward()
 
-    x0[index] = y0
     assert_allclose(x1_arr.data, x0)
     assert_allclose(y_arr.data, y0)
 
@@ -266,10 +293,12 @@ def test_setitem_adv_bool_index(x, data):
     o = np.asarray(x[index])
     y = data.draw(
         hnp.arrays(
-            shape=broadcastable_shape(o.shape, max_dim=o.ndim),
+            shape=broadcastable_shapes(o.shape, max_dims=o.ndim, max_side=max(o.shape)),
             dtype=float,
             elements=st.floats(-10.0, 10.0),
-        ),
+        )
+        if o.shape and o.size
+        else st.floats(-10.0, 10.0).map(lambda _x: np.array(_x)),
         label="y",
     )
 
@@ -281,13 +310,18 @@ def test_setitem_adv_bool_index(x, data):
     x0 = np.copy(x)
     y0 = np.copy(y)
 
+    try:
+        x0[index] = y0  # don't permit invalid set-items
+    except ValueError:
+        assume(False)
+        return
+
     x_arr = Tensor(np.copy(x))
     y_arr = Tensor(np.copy(y))
     x1_arr = x_arr[:]
     x1_arr[index] = y_arr
     (x1_arr * grad).sum().backward()
 
-    x0[index] = y0
     assert_allclose(x1_arr.data, x0)
     assert_allclose(y_arr.data, y0)
 
@@ -313,7 +347,7 @@ def test_setitem_broadcast_index(x, data):
     o = np.asarray(x[index])
     y = data.draw(
         hnp.arrays(
-            shape=broadcastable_shape(o.shape, max_dim=o.ndim),
+            shape=broadcastable_shapes(o.shape, max_dims=o.ndim),
             dtype=float,
             elements=st.floats(-10.0, 10.0),
         ),
@@ -357,7 +391,7 @@ def test_setitem_mixed_index(x, data):
     o = np.asarray(x[index])
     y = data.draw(
         hnp.arrays(
-            shape=broadcastable_shape(o.shape, max_dim=o.ndim),
+            shape=broadcastable_shapes(o.shape, max_dims=o.ndim),
             dtype=float,
             elements=st.floats(-10.0, 10.0),
         ),
@@ -371,6 +405,12 @@ def test_setitem_mixed_index(x, data):
 
     x0 = np.copy(x)
     y0 = np.copy(y)
+
+    try:
+        x0[index] = y0  # don't permit invalid set-items
+    except ValueError:
+        assume(False)
+        return
 
     x_arr = Tensor(np.copy(x))
     y_arr = Tensor(np.copy(y))
@@ -403,7 +443,7 @@ def test_setitem_broadcast_bool_index(x, data):
     o = np.asarray(x[index])
     y = data.draw(
         hnp.arrays(
-            shape=broadcastable_shape(o.shape, max_dim=o.ndim),
+            shape=broadcastable_shapes(o.shape, max_dims=o.ndim),
             dtype=float,
             elements=st.floats(-10.0, 10.0),
         ),
@@ -447,7 +487,7 @@ def test_setitem_bool_basic_index(x, data):
     o = np.asarray(x[index])
     y = data.draw(
         hnp.arrays(
-            shape=broadcastable_shape(o.shape, max_dim=o.ndim),
+            shape=broadcastable_shapes(o.shape, max_dims=o.ndim),
             dtype=float,
             elements=st.floats(-10.0, 10.0),
         ),
@@ -462,13 +502,18 @@ def test_setitem_bool_basic_index(x, data):
     x0 = np.copy(x)
     y0 = np.copy(y)
 
+    try:
+        x0[index] = y0  # don't permit invalid set-items
+    except ValueError:
+        assume(False)
+        return
+
     x_arr = Tensor(np.copy(x))
     y_arr = Tensor(np.copy(y))
     x1_arr = x_arr[:]
     x1_arr[index] = y_arr
     (x1_arr * grad).sum().backward()
 
-    x0[index] = y0
     assert_allclose(x1_arr.data, x0)
     assert_allclose(y_arr.data, y0)
 
@@ -498,10 +543,12 @@ def test_setitem_bool_axes_index(x, data):
         return None
     y = data.draw(
         hnp.arrays(
-            shape=broadcastable_shape(o.shape, max_dim=o.ndim),
+            shape=broadcastable_shapes(o.shape, max_dims=o.ndim, max_side=max(o.shape)),
             dtype=float,
             elements=st.floats(-10.0, 10.0),
-        ),
+        )
+        if o.shape and o.size
+        else st.floats(-10.0, 10.0).map(lambda _x: np.array(_x)),
         label="y",
     )
 
@@ -513,13 +560,18 @@ def test_setitem_bool_axes_index(x, data):
     x0 = np.copy(x)
     y0 = np.copy(y)
 
+    try:
+        x0[index] = y0  # don't permit invalid set-items
+    except ValueError:
+        assume(False)
+        return
+
     x_arr = Tensor(np.copy(x))
     y_arr = Tensor(np.copy(y))
     x1_arr = x_arr[:]
     x1_arr[index] = y_arr
     (x1_arr * grad).sum().backward()
 
-    x0[index] = y0
     assert_allclose(x1_arr.data, x0)
     assert_allclose(y_arr.data, y0)
 

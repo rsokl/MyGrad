@@ -6,7 +6,7 @@ from itertools import chain
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
 
-from mygrad._utils import reduce_broadcast
+from mygrad._utils import reduce_broadcast, SkipGradient
 from mygrad.operation_base import BroadcastableOp
 
 __all__ = ["MatMul", "EinSum"]
@@ -38,8 +38,6 @@ class MatMul(BroadcastableOp):
                 return grad * b
             elif index == 1:
                 return grad * a
-            else:
-                raise IndexError
 
         if index == 0:  # compute grad through a
             if b.ndim > 1:  # ([...], j) w/ ([...], j, k)
@@ -60,8 +58,6 @@ class MatMul(BroadcastableOp):
             else:  # (j,) w/ ([...], j, k)
                 dfdx = a[:, np.newaxis] * np.expand_dims(grad, -2)
             return dfdx
-        else:
-            raise IndexError
 
 
 ### EinSum ###
@@ -102,7 +98,7 @@ def _merge_max_mappings(*mappings):
         Returns
         -------
         Dict[Any, Any]
-        
+
         Examples
         --------
         >>> _merge_max_mappings({"a":1, "b":4}, {"a":2})
@@ -177,7 +173,7 @@ class EinSum(BroadcastableOp):
             # the gradient for the current tensor-label pair
             # has already been computed, scaled, and back-propped,
             # skip gradient calculation.
-            return None
+            raise SkipGradient()
 
         numpy_arrays = tuple(i.data for i in self.variables)
         self.cache[(var, original_var_lbl)] = 0
@@ -278,45 +274,3 @@ class EinSum(BroadcastableOp):
             # pair is accounted for.
             dfdx *= factor
         return dfdx
-
-    def backward(self, grad, *, graph, **kwargs):
-        """ Back-propagates the gradient through all of the operation's inputs.
-            Constant tensors do not propagate a gradient.
-
-            This implementation of ``backward`` is specialized such that
-            `` self.backward_var`` can return ``None`` to bypass a
-            gradient-accumulation step.
-
-            Parameters
-            ----------
-            grad : numpy.ndarray
-                The back-propagated total derivative with respect to the present
-                operation (`f`): d(out)/df
-
-            graph : Set[Operation]"""
-        for index, var in enumerate(self.variables):
-            if not var.constant:
-                if not var._ops:
-                    raise Exception(
-                        "Invalid Backprop: part of the computational graph containing "
-                        "this tensor was cleared prior to backprop"
-                    )
-                if var.grad is None:
-                    o = self.backward_var(grad, index, **kwargs)
-                    if o is not None:
-                        tmp_grad = reduce_broadcast(o, var.shape)
-                        var.grad = (
-                            np.copy(tmp_grad)
-                            if np.shares_memory(tmp_grad, grad)
-                            else tmp_grad
-                        )
-                else:
-                    o = self.backward_var(grad, index, **kwargs)
-                    if o is not None:
-                        var.grad += reduce_broadcast(o, var.shape)
-
-        for var in {
-            i for i in self.variables if not i.constant and i.creator is not None
-        }:
-            var._accum_ops.add(self)
-            var._backward(graph=graph)

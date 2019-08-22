@@ -13,7 +13,6 @@ Layer operations
    conv_nd
    max_pool
    gru
-   simple_RNN
 
 
 Losses
