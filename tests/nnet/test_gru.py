@@ -81,19 +81,18 @@ def test_all_constant(out_constant: bool):
 
 
 @settings(deadline=None)
-@given(st.data())
-def test_gru_fwd(data):
-    X = data.draw(
-        hnp.arrays(
-            shape=hnp.array_shapes(max_side=5, min_dims=3, max_dims=3),
-            dtype=float,
-            elements=st.floats(-10, 10),
-        ),
-        label="X",
-    )
+@given(
+    X=hnp.arrays(
+        shape=hnp.array_shapes(max_side=5, min_dims=3, max_dims=3),
+        dtype=float,
+        elements=st.floats(-10, 10),
+    ),
+    D=st.sampled_from(list(range(1, 5))),
+    dropout=st.sampled_from([0, 0.45]),
+    data=st.data(),
+)
+def test_gru_fwd(X, D, dropout, data: st.DataObject):
     T, N, C = X.shape
-    D = data.draw(st.sampled_from(list(range(1, 5))), label="D")
-    dropout = data.draw(st.sampled_from([0, 0.45]), label="dropout")
 
     Wz, Wr, Wh = data.draw(
         hnp.arrays(shape=(3, D, D), dtype=float, elements=st.floats(-10.0, 10.0)),
