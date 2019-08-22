@@ -170,7 +170,7 @@ def sliding_window_view(arr, window_shape, step, dilation=None):
         and not hasattr(dilation, "__iter__")
     ):
         raise TypeError(
-            "`dilation` be None, a positive integer, or a sequence of "
+            "`dilation` must be None, a positive integer, or a sequence of "
             "positive integers, got: {}".format(dilation)
         )
     if dilation is None:
