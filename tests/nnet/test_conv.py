@@ -223,7 +223,7 @@ def test_convnd_fwd_trivial():
 def test_bad_conv_shapes():
     x = np.zeros((1, 2, 2, 2))
     w = np.zeros((1, 3, 2, 2))
-    with raises(AssertionError):
+    with raises(ValueError):
         conv_nd(x, w, stride=1, padding=0)  # mismatched channels
 
     w = np.zeros((1, 2, 3, 2))
