@@ -146,13 +146,14 @@ class Positive(Operation):
     """ f(a) = +a """
 
     def __call__(self, a, where=True):
-        """ Parameters
-            ----------
-            a: mygrad.Tensor
+        """
+        Parameters
+        ----------
+        a: mygrad.Tensor
 
-            where : array_like, optional
-                Values of True indicate to calculate the ufunc at that position,
-                values of False indicate to leave the value in the output alone."""
+        where : array_like, optional
+            Values of True indicate to calculate the ufunc at that position,
+            values of False indicate to leave the value in the output alone."""
         self.variables = (a,)
         self.conf = dict(where=where)
         return np.positive(a.data, where=where)
@@ -165,13 +166,14 @@ class Negative(Operation):
     """ f(a) = -a """
 
     def __call__(self, a, where=True):
-        """ Parameters
-            ----------
-            a : mygrad.Tensor
+        """
+        Parameters
+        ----------
+        a : mygrad.Tensor
 
-            where : array_like, optional
-                Values of True indicate to calculate the ufunc at that position,
-                values of False indicate to leave the value in the output alone."""
+        where : array_like, optional
+            Values of True indicate to calculate the ufunc at that position,
+            values of False indicate to leave the value in the output alone."""
         self.variables = (a,)
         self.conf = dict(where=where)
         return np.negative(a.data, where=where)
@@ -181,7 +183,7 @@ class Negative(Operation):
 
 
 class AddSequence(BroadcastableOp):
-    """ Performs f(a, b, ..., z) = a + b + ... + z"""
+    """Performs f(a, b, ..., z) = a + b + ... + z"""
 
     def __call__(self, *input_vars):
         assert len(input_vars) > 1, "`add_sequence` requires at least two operands"

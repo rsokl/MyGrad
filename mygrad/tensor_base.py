@@ -12,7 +12,15 @@ import numpy as np
 from mygrad._utils import is_invalid_gradient
 from mygrad.errors import InvalidBackprop, InvalidGradient
 from mygrad.linalg.ops import MatMul
-from mygrad.math.arithmetic.ops import Add, Divide, Multiply, Negative, Power, Subtract
+from mygrad.math.arithmetic.ops import (
+    Add,
+    Divide,
+    Multiply,
+    Negative,
+    Positive,
+    Power,
+    Subtract,
+)
 from mygrad.operation_base import BroadcastableOp, Operation
 from mygrad.tensor_core_ops.indexing import GetItem, SetItem
 from mygrad.tensor_manip.array_shape.ops import Flatten
@@ -571,7 +579,7 @@ class Tensor:
         return self._op(Negative, self)
 
     def __pos__(self):
-        return self
+        return self._op(Positive, self)
 
     def __repr__(self):
         return repr(self.data).replace("array", "Tensor").replace("\n", "\n ")

@@ -245,11 +245,16 @@ def test_special_methods(
         assert tensor_out.creator.variables[1] is x
 
 
-@given(x=hnp.arrays(shape=hnp.array_shapes(), dtype=hnp.floating_dtypes()))
-def test_pos(x):
-    x = Tensor(x)
+@given(
+    x=hnp.arrays(shape=hnp.array_shapes(), dtype=hnp.floating_dtypes()),
+    constant=st.booleans(),
+)
+def test_pos(x: np.ndarray, constant: bool):
+    x = Tensor(x, constant=constant)
     y = +x
-    assert y is x
+    assert y.creator.variables[0] is x
+    assert_array_equal(y.data, x.data)
+    assert y.constant is x.constant
 
 
 @given(x=hnp.arrays(shape=hnp.array_shapes(), dtype=hnp.floating_dtypes()))

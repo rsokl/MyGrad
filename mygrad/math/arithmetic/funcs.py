@@ -16,16 +16,16 @@ from .ops import (
 
 __all__ = [
     "add",
-    "subtract",
-    "power",
+    "add_sequence",
     "divide",
-    "square",
-    "reciprocal",
     "multiply",
     "multiply_sequence",
-    "add_sequence",
-    "positive",
     "negative",
+    "positive",
+    "power",
+    "reciprocal",
+    "square",
+    "subtract",
 ]
 
 
@@ -247,6 +247,8 @@ def add_sequence(*variables, constant=False):
 
 def positive(a, where=True, constant=False):
     """ ``f(a) -> +a``
+
+    Creates a new tensor.
 
     Parameters
     ----------
