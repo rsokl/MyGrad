@@ -141,7 +141,7 @@ def sliding_window_view(arr, window_shape, step, dilation=None):
 
     if not isinstance(step, Integral) and not hasattr(step, "__iter__"):
         raise TypeError(
-            "`step` be a positive integer or a sequence of positive "
+            "`step` must be a positive integer or a sequence of positive "
             "integers, got: {}".format(step)
         )
 
