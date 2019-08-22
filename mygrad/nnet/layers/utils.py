@@ -185,7 +185,7 @@ def sliding_window_view(arr, window_shape, step, dilation=None):
             dilation
         ) != len(window_shape):
             raise ValueError(
-                "`dilation` be None, a positive integer, or a sequence of "
+                "`dilation` must be None, a positive integer, or a sequence of "
                 "positive integers with the same length as `window_shape` "
                 "({}), got: {}".format(window_shape, dilation)
             )
