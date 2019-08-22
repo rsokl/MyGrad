@@ -500,7 +500,7 @@ def gru(
 
                 R_{t} = \sigma (X_{t} U_r + S_{t-1} Wr + br)
 
-                H_{t} =  tanh(X_{t} U_h + (R_{t} * S_{t-1}) W_h + b_h)
+                H_{t} =    tanh(X_{t} U_h + (R_{t} * S_{t-1}) W_h + b_h)
 
                 S_{t} = (1 - Z_{t}) * H_{t} + Z_{t} * S_{t-1}
 
