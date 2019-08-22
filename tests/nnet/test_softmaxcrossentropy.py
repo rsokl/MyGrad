@@ -29,7 +29,7 @@ def test_input_validation(data, labels):
 
 @given(st.data())
 def test_softmax_crossentropy(data):
-    """ Test the built-in implementation of multiclass hinge against the pure pygrad version"""
+    """ Test the built-in implementation of multiclass hinge against the pure mygrad version"""
     s = data.draw(
         hnp.arrays(
             shape=hnp.array_shapes(max_side=10, min_dims=2, max_dims=2),
@@ -48,17 +48,17 @@ def test_softmax_crossentropy(data):
     softmax_cross = softmax_crossentropy(scores, loss, constant=False)
     softmax_cross.backward()
 
-    pygrad_scores = Tensor(s)
-    probs = softmax(pygrad_scores)
+    mygrad_scores = Tensor(s)
+    probs = softmax(mygrad_scores)
 
     correct_labels = (range(len(loss)), loss)
-    truth = np.zeros(pygrad_scores.shape)
+    truth = np.zeros(mygrad_scores.shape)
     truth[correct_labels] = 1
 
-    pygrad_cross = (-1 / s.shape[0]) * (log(probs) * truth).sum()
-    pygrad_cross.backward()
-    assert_allclose(softmax_cross.data, pygrad_cross.data, atol=1e-5, rtol=1e-5)
-    assert_allclose(scores.grad, pygrad_scores.grad, atol=1e-5, rtol=1e-5)
+    mygrad_cross = (-1 / s.shape[0]) * (log(probs) * truth).sum()
+    mygrad_cross.backward()
+    assert_allclose(softmax_cross.data, mygrad_cross.data, atol=1e-5, rtol=1e-5)
+    assert_allclose(scores.grad, mygrad_scores.grad, atol=1e-5, rtol=1e-5)
 
 
 @given(shape=st.sampled_from([(3, 1), (3, 4), tuple()]))
