@@ -1,17 +1,58 @@
 """ Test conv fwd-prop and back-prop for ND convs"""
 
+from typing import Tuple
+
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
+import pytest
 from hypothesis import HealthCheck, assume, given, settings
 from numpy.testing import assert_allclose
 from pytest import raises
 
+import mygrad as mg
 from mygrad import Tensor
 from mygrad.nnet.layers import conv_nd
 
 from ..utils.numerical_gradient import numerical_gradient_full
 from ..wrappers.uber import backprop_test_factory, fwdprop_test_factory
+
+
+@pytest.mark.parametrize(
+    "shapes",
+    [  # x has too few dims
+        st.tuples(
+            hnp.array_shapes(min_dims=0, max_dims=2), hnp.array_shapes(min_dims=3)
+        ),
+        # x.ndim != k.ndim
+        hnp.array_shapes(min_dims=3).flatmap(
+            lambda x: st.tuples(
+                st.just(x),
+                hnp.array_shapes(min_dims=2).filter(lambda s: len(s) != len(x)),
+            )
+        ),
+        # channel sizes don't match
+        hnp.array_shapes(min_dims=3).flatmap(
+            lambda x: st.tuples(
+                st.just(x),
+                hnp.array_shapes(min_dims=len(x), max_dims=len(x)).filter(
+                    lambda s: s[1] != x[1]
+                ),
+            )
+        ),
+    ],
+)
+@given(data=st.data())
+def test_input_validation(
+    shapes: st.SearchStrategy[Tuple[Tuple[int, ...], Tuple[int, ...]]],
+    data: st.DataObject,
+):
+    x_shape, k_shape = data.draw(shapes, label="x_shape, k_shape")
+    x = mg.zeros(x_shape, dtype="float")
+    k = mg.zeros(k_shape, dtype="float")
+
+    with raises(ValueError):
+        conv_nd(x, k, stride=1)
 
 
 def get_outshape(x_shape, w_shape, stride, dilation):
