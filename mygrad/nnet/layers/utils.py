@@ -129,7 +129,7 @@ def sliding_window_view(arr, window_shape, step, dilation=None):
     window_shape = tuple(window_shape)
     if not all(isinstance(i, Integral) and i > 0 for i in window_shape):
         raise TypeError(
-            "`window_shape` be a sequence of positive integers, "
+            "`window_shape` must be a sequence of positive integers, "
             "got: {}".format(window_shape)
         )
 
@@ -141,7 +141,7 @@ def sliding_window_view(arr, window_shape, step, dilation=None):
 
     if not isinstance(step, Integral) and not hasattr(step, "__iter__"):
         raise TypeError(
-            "`step` be a positive integer or a sequence of positive "
+            "`step` must be a positive integer or a sequence of positive "
             "integers, got: {}".format(step)
         )
 
@@ -170,7 +170,7 @@ def sliding_window_view(arr, window_shape, step, dilation=None):
         and not hasattr(dilation, "__iter__")
     ):
         raise TypeError(
-            "`dilation` be None, a positive integer, or a sequence of "
+            "`dilation` must be None, a positive integer, or a sequence of "
             "positive integers, got: {}".format(dilation)
         )
     if dilation is None:
@@ -185,7 +185,7 @@ def sliding_window_view(arr, window_shape, step, dilation=None):
             dilation
         ) != len(window_shape):
             raise ValueError(
-                "`dilation` be None, a positive integer, or a sequence of "
+                "`dilation` must be None, a positive integer, or a sequence of "
                 "positive integers with the same length as `window_shape` "
                 "({}), got: {}".format(window_shape, dilation)
             )
