@@ -281,7 +281,7 @@ def conv_nd(x, filter_bank, *, stride, padding=0, dilation=1, constant=False):
 
     Extrapolating further, ``conv_nd`` is capable of performing ND convolutions!
     """
-    if x.ndim < 2:
+    if x.ndim < 3:
         raise ValueError(
             "`x` must possess at least three "
             "dimensions, got {} dimensions".format(x.ndim)
@@ -295,7 +295,7 @@ def conv_nd(x, filter_bank, *, stride, padding=0, dilation=1, constant=False):
 
     if filter_bank.shape[1] != x.shape[1]:
         raise ValueError(
-            "`x.shape[1]` ({}) muse match `filter_bank.shape[1]` ({})".format(
+            "`x.shape[1]` ({}) must match `filter_bank.shape[1]` ({})".format(
                 x.shape[1], filter_bank.shape[1]
             )
         )

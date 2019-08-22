@@ -151,7 +151,7 @@ def sliding_window_view(arr, window_shape, step, dilation=None):
 
     if not all(isinstance(i, Integral) and i > 0 for i in step):
         raise ValueError(
-            "`step` be a positive integer or a sequence of positive "
+            "`step` must be a positive integer or a sequence of positive "
             "integers, got: {}".format(step)
         )
 
