@@ -44,7 +44,7 @@ def simple_loss(x1, x2, y, margin):
     """
     x1 : mygrad.Tensor, shape=(N, D)
     x2 : mygrad.Tensor, shape=(N, D)
-    y : Union[int, numpy.ndarray], scalar or shape=(N,)
+    y : Union[int, numpy.ndarray, mygrad.Tensor], scalar or shape=(N,)
     margin : float
 
     Returns
