@@ -27,7 +27,8 @@ def test_input_validation(data, labels):
 
 @given(st.data())
 def test_multiclass_hinge(data):
-    """ Test the built-in implementation of multiclass hinge against the pure pygrad version"""
+    """Test the built-in implementation of multiclass hinge
+    against the pure mygrad version"""
     s = data.draw(
         hnp.arrays(
             shape=hnp.array_shapes(max_side=10, min_dims=2, max_dims=2),
@@ -46,18 +47,18 @@ def test_multiclass_hinge(data):
     hinge_loss = multiclass_hinge(hinge_scores, loss, constant=False)
     hinge_loss.backward()
 
-    pygrad_scores = Tensor(s)
+    mygrad_scores = Tensor(s)
     correct_labels = (range(len(loss)), loss)
-    correct_class_scores = pygrad_scores[correct_labels]  # Nx1
+    correct_class_scores = mygrad_scores[correct_labels]  # Nx1
 
-    Lij = pygrad_scores - correct_class_scores[:, np.newaxis] + 1.0  # NxC margins
+    Lij = mygrad_scores - correct_class_scores[:, np.newaxis] + 1.0  # NxC margins
     Lij[Lij <= 0] = 0
     Lij[correct_labels] = 0
 
-    pygrad_loss = Lij.sum() / pygrad_scores.shape[0]
-    pygrad_loss.backward()
-    assert_allclose(hinge_loss.data, pygrad_loss.data)
-    assert_allclose(pygrad_scores.grad, hinge_scores.grad)
+    mygrad_loss = Lij.sum() / mygrad_scores.shape[0]
+    mygrad_loss.backward()
+    assert_allclose(hinge_loss.data, mygrad_loss.data)
+    assert_allclose(mygrad_scores.grad, hinge_scores.grad)
 
 
 @given(shape=st.sampled_from([(3, 1), (3, 4), tuple()]))
