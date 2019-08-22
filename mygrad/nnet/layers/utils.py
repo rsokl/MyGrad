@@ -129,7 +129,7 @@ def sliding_window_view(arr, window_shape, step, dilation=None):
     window_shape = tuple(window_shape)
     if not all(isinstance(i, Integral) and i > 0 for i in window_shape):
         raise TypeError(
-            "`window_shape` be a sequence of positive integers, "
+            "`window_shape` must be a sequence of positive integers, "
             "got: {}".format(window_shape)
         )
 
