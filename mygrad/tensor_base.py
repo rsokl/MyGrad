@@ -5,7 +5,7 @@ etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 """
 
 from functools import wraps
-from typing import List, Set, Type, Union
+from typing import Set, Type, Union
 
 import numpy as np
 
@@ -206,11 +206,10 @@ class Tensor:
         if op_kwargs is None:
             op_kwargs = dict()
 
-        tensor_vars = []  # type: List[Tensor]
-        for var in input_vars:
-            if not isinstance(var, cls):
-                var = cls(var, constant=True)
-            tensor_vars.append(var)
+        tensor_vars = tuple(
+            cls(var, constant=True) if not isinstance(var, cls) else var
+            for var in input_vars
+        )
 
         is_const = constant or all(var.constant for var in tensor_vars)
 
