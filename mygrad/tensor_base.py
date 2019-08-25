@@ -394,7 +394,7 @@ class Tensor:
         clear_graph : bool, optional (default=True)
             If ``True`` clear the computational graph in addition to nulling the gradients.
 
-        seen : Optional[Set[Tensor]]
+        seen : Set[Tensor]
             The set of all Tensors already visited during null-gradients traversal"""
         self.grad = None
 
