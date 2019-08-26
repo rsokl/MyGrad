@@ -80,7 +80,7 @@ class Node:
 
     def clear_graph(self, terminal_node=True):
         if not terminal_node:
-            self._ops = []
+            self._ops.clear()
         if self.creator is not None:
             self.creator.clear_graph(terminal_node=False)
             self.creator = None

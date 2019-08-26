@@ -5,7 +5,7 @@ etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 """
 
 from functools import wraps
-from typing import List, Set, Type, Union
+from typing import Set, Type, Union
 
 import numpy as np
 
@@ -206,11 +206,10 @@ class Tensor:
         if op_kwargs is None:
             op_kwargs = dict()
 
-        tensor_vars = []  # type: List[Tensor]
-        for var in input_vars:
-            if not isinstance(var, cls):
-                var = cls(var, constant=True)
-            tensor_vars.append(var)
+        tensor_vars = tuple(
+            cls(var, constant=True) if not isinstance(var, cls) else var
+            for var in input_vars
+        )
 
         is_const = constant or all(var.constant for var in tensor_vars)
 
@@ -383,12 +382,33 @@ class Tensor:
         >>> all(tensor.grad is None for tensor in (f, w , x, y))
         True
         """
+        self._null_gradients(clear_graph=clear_graph, seen=set())
 
+    def _null_gradients(self, *, clear_graph: bool, seen: Set["Tensor"]):
+        """
+        Nulls gradients using depth-first graph traversal
+
+        Parameters
+        ----------
+        clear_graph : bool, optional (default=True)
+            If ``True`` clear the computational graph in addition to nulling the gradients.
+
+        seen : Set[Tensor]
+            The set of all Tensors already visited during null-gradients traversal"""
         self.grad = None
+
         if self._creator is None:
             return
-        for var in self._creator.variables:
-            var.null_gradients(clear_graph=False)
+
+        assert isinstance(seen, set)
+
+        if self in seen:
+            return
+
+        seen.add(self)  # marks tensor as "visited" during graph-traversal
+
+        for var in self._creator.variables:  # type: Tensor
+            var._null_gradients(clear_graph=False, seen=seen)
 
         if clear_graph:
             self.clear_graph()
@@ -400,11 +420,12 @@ class Tensor:
         if self._creator is None:
             return
 
-        for var in self._creator.variables:
+        creator = self._creator
+        self._creator = None  # marks tensor as "visited" during graph-traversal
+
+        for var in creator.variables:  # type: Tensor
             var._ops.clear()
             var.clear_graph()
-
-        self._creator = None
 
     @property
     def scalar_only(self):
