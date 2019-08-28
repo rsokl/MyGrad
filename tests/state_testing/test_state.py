@@ -31,7 +31,7 @@ def _node_ID_str(num):
     return "v{}".format(num + 1)
 
 
-@settings(max_examples=1000)
+@settings(max_examples=1000, deadline=None)
 class GraphCompare(RuleBasedStateMachine):
     def __init__(self):
         super().__init__()
