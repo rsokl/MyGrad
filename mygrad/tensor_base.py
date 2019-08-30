@@ -400,18 +400,25 @@ class Tensor:
         if self._creator is None:
             return
 
-        assert isinstance(seen, set)
+        if not clear_graph:
+            assert isinstance(seen, set)
 
-        if self in seen:
-            return
+            if self in seen:
+                return
 
-        seen.add(self)  # marks tensor as "visited" during graph-traversal
-
-        for var in self._creator.variables:  # type: Tensor
-            var._null_gradients(clear_graph=False, seen=seen)
+        creator = self._creator
 
         if clear_graph:
-            self.clear_graph()
+            # marks tensor as "visited" during clear-graph traversal
+            self._creator = None
+        else:
+            # marks tensor as "visited" during null-gradients graph traversal
+            seen.add(self)
+
+        for var in creator.variables:  # type: Tensor
+            if clear_graph:
+                var._ops.clear()
+            var._null_gradients(clear_graph=clear_graph, seen=seen)
 
     def clear_graph(self):
         """
