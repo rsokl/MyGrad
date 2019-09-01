@@ -2,7 +2,7 @@ import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
 import pytest
-from hypothesis import given
+from hypothesis import given, settings
 from numpy.testing import assert_allclose, assert_array_equal, assert_equal
 from pytest import raises
 
@@ -400,6 +400,7 @@ def test_null_gradients(x, y, z, clear_graph):
         assert g.creator is not None
 
 
+@settings(deadline=None)
 @given(
     x=st.floats(min_value=-1e-6, max_value=1e6),
     y=st.floats(min_value=-1e-6, max_value=1e6),
