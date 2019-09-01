@@ -400,7 +400,7 @@ def test_null_gradients(x, y, z, clear_graph):
         assert g.creator is not None
 
 
-@settings(deadline=True)
+@settings(deadline=None)
 @given(
     x=st.floats(min_value=-1e-6, max_value=1e6),
     y=st.floats(min_value=-1e-6, max_value=1e6),
