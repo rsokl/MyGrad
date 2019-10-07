@@ -5,7 +5,7 @@ from numpy.testing import assert_allclose
 
 from mygrad.tensor_base import Tensor
 
-from ..custom_strategies import adv_integer_index, basic_index
+from ..custom_strategies import adv_integer_index, basic_indices
 from ..wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
@@ -34,7 +34,7 @@ def get_item(*arrs, index, constant=False):
 
 
 def basic_index_wrap(*arrs):
-    return basic_index(arrs[0].shape)
+    return basic_indices(arrs[0].shape)
 
 
 def adv_index_int_wrap(*arrs):

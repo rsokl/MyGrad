@@ -8,7 +8,7 @@ from hypothesis import given, note
 
 from tests.custom_strategies import (
     adv_integer_index,
-    basic_index,
+    basic_indices,
     choices,
     integer_index,
     slice_index,
@@ -69,7 +69,7 @@ def test_basic_index(shape: Tuple[int, ...], data: st.SearchStrategy):
     min_dim = data.draw(st.integers(0, len(shape) + 2), label="min_dim")
     max_dim = data.draw(st.integers(min_dim, min_dim + len(shape)), label="max_dim")
     index = data.draw(
-        basic_index(shape=shape, min_dim=min_dim, max_dim=max_dim), label="index"
+        basic_indices(shape=shape, min_dims=min_dim, max_dims=max_dim), label="index"
     )
     x = np.zeros(shape, dtype=int)
     o = x[index]  # raises if invalid index

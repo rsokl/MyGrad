@@ -1,21 +1,23 @@
 """ Custom hypothesis search strategies """
 import math
+from functools import partial
 from numbers import Integral
 from typing import Any, Iterable, Optional, Tuple, Union
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
-import numpy as np
 from hypothesis.extra.numpy import broadcastable_shapes
 
 __all__ = [
     "adv_integer_index",
-    "basic_index",
+    "basic_indices",
     "broadcastable_shapes",
     "choices",
     "everything_except",
     "valid_axes",
 ]
+
+basic_indices = partial(hnp.basic_indices, allow_newaxis=True, allow_ellipsis=True)
 
 
 def everything_except(
@@ -264,66 +266,6 @@ def slice_index(
         if neg_step:
             step *= -1
     return slice(start, stop, step) if step > 0 else slice(stop, start, step)
-
-
-@st.composite
-def basic_index(draw, shape, min_dim=0, max_dim=5):
-    """ Hypothesis search strategy: given an array shape, generate a
-    a valid index for specifying an element/subarray of that array,
-    using basic indexing.
-
-    `draw` is a parameter reserved by hypothesis, and should not be specified
-    by the user.
-
-    Examples from this strategy shrink towards indices that will produce arrays
-    with the lowest dimensionality. This shrinks indices containing new-axes, to
-    those with slices, to integer-indexing.
-
-    Parameters
-    ----------
-    shape : Tuple[int, ...]
-        The shape of the array whose indices are being generated
-
-    min_dim: int, optional (default=0)
-        The minimum of dimensionality of the resulting that will be
-        produced by the index.
-
-    max_dim : int, optional (default=5)
-        The maximum of dimensionality of the resulting that will be
-        produced by the index.
-
-    Returns
-    -------
-    hypothesis.searchstrategy.SearchStrategy[Tuple[int, ...]]
-    """
-    _check_min_max(0, min_dim, max_dim, "dim")
-
-    ndim = len(shape)
-    ndim_out = draw(st.integers(min_dim, max_dim))
-
-    if not ndim_out:
-        return draw(st.tuples(*(integer_index(size) for size in shape)))
-
-    num_slice_axes = draw(st.sampled_from(range(1, min(ndim, ndim_out) + 1)[::-1]))
-    num_newaxis = max(0, ndim_out - num_slice_axes)
-    num_int_axes = max(0, ndim - num_slice_axes)
-    int_axes = draw(choices(range(ndim), size=num_int_axes, replace=False))
-    slice_axes = draw(
-        choices(
-            sorted(set(range(ndim)) - set(int_axes)), size=num_slice_axes, replace=False
-        )
-    )
-
-    index = [np.newaxis] * ndim
-    for i in int_axes:
-        index[i] = draw(integer_index(shape[i]))
-
-    for i in slice_axes:
-        index[i] = draw(slice_index(shape[i]))
-
-    for i in draw(choices(range(len(index) + 1), size=num_newaxis)):
-        index.insert(i, np.newaxis)
-    return tuple(index)
 
 
 @st.composite
