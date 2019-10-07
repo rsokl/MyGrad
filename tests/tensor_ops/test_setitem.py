@@ -12,7 +12,7 @@ from mygrad.tensor_core_ops.indexing import (
     _is_int_array_index,
 )
 
-from ..custom_strategies import adv_integer_index, basic_index, broadcastable_shapes
+from ..custom_strategies import adv_integer_index, basic_indices, broadcastable_shapes
 from ..utils.numerical_gradient import numerical_gradient_full
 
 
@@ -166,7 +166,7 @@ def test_no_mutate():
 )
 def test_setitem_basic_index(x: np.ndarray, data: st.DataObject):
     """ index conforms strictly to basic indexing """
-    index = data.draw(basic_index(x.shape), label="index")
+    index = data.draw(basic_indices(x.shape), label="index")
     o = np.asarray(x[index])
 
     note("x[index]: {}".format(o))
