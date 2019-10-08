@@ -7,6 +7,7 @@ from typing import Any, Iterable, Optional, Tuple, Union
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 from hypothesis.extra.numpy import broadcastable_shapes
+from numpy import ndarray
 
 __all__ = [
     "adv_integer_index",
@@ -16,6 +17,8 @@ __all__ = [
     "everything_except",
     "valid_axes",
 ]
+
+Shape = Tuple[int, ...]
 
 basic_indices = partial(hnp.basic_indices, allow_newaxis=True, allow_ellipsis=True)
 
@@ -268,8 +271,13 @@ def slice_index(
     return slice(start, stop, step) if step > 0 else slice(stop, start, step)
 
 
-@st.composite
-def adv_integer_index(draw, shape, min_dims=1, max_dims=3, min_side=1, max_side=3):
+def adv_integer_index(
+    shape: Shape,
+    min_dims: int = 1,
+    max_dims: int = 3,
+    min_side: int = 1,
+    max_side: int = 3,
+) -> st.SearchStrategy[Tuple[ndarray, ...]]:
     """ Hypothesis search strategy: given an array shape, generate a
     a valid index for specifying an element/subarray of that array,
     using advanced indexing with integer-valued arrays.
@@ -297,22 +305,11 @@ def adv_integer_index(draw, shape, min_dims=1, max_dims=3, min_side=1, max_side=
     Returns
     -------
     hypothesis.searchstrategy.SearchStrategy[Tuple[numpy.ndarray, ...]]
+    """
 
-    Notes
-    -----
-    `draw` is a parameter reserved by hypothesis, and should not be specified
-    by the user."""
-    index_shape = draw(
-        hnp.array_shapes(
+    return hnp.integer_array_indices(
+        shape=shape,
+        result_shape=hnp.array_shapes(
             min_dims=min_dims, max_dims=max_dims, min_side=min_side, max_side=max_side
-        )
+        ),
     )
-    index = draw(
-        st.tuples(
-            *(
-                hnp.arrays(dtype=int, shape=index_shape, elements=integer_index(size))
-                for size in shape
-            )
-        )
-    )
-    return index
