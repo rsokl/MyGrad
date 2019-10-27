@@ -8,7 +8,7 @@ AUTHOR = "Ryan Soklaski"
 AUTHOR_EMAIL = "rsoklaski@gmail.com"
 URL = "https://github.com/rsokl/MyGrad"
 CLASSIFIERS = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Intended Audience :: Science/Research",
