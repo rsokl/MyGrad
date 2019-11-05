@@ -112,29 +112,18 @@ class fwdprop_test_factory:
         self.num_arrays = num_arrays
         self.assumptions = assumptions
 
-    def gen_first_array(self) -> st.SearchStrategy:
-        """
-        Hypothesis search strategy for drawing the array x to be passed to f(x, ...)
-
-        Returns
-        -------
-        hypothesis.searchstrategy.SearchStrategy"""
-        return hnp.arrays(
-            shape=self.index_to_arr_shapes.get(
-                0, hnp.array_shapes(max_side=3, min_dims=0, max_dims=3)
-            ),
-            dtype=float,
-            elements=st.floats(*self.index_to_bnds.get(0, (-10.0, 10.0))),
+        # stores the indices of the unspecified array shapes
+        self.missing_shapes = set(range(self.num_arrays)) - set(
+            self.index_to_arr_shapes
         )
 
-    def gen_other_array(self, x: np.ndarray, i: int) -> st.SearchStrategy:
+    def arrays(self, i: int) -> st.SearchStrategy:
         """
         Hypothesis search strategy for drawing an array y to be passed to f(x, ..., y_i,...).
         By default, y is drawn to have a shape that is broadcast-compatible with x.
 
         Parameters
         ----------
-        x : numpy.ndarray
         i : int
             The argument index-location of y in the signature of f.
 
@@ -142,26 +131,35 @@ class fwdprop_test_factory:
         -------
         hypothesis.searchstrategy.SearchStrategy"""
         return hnp.arrays(
-            shape=self.index_to_arr_shapes.get(i, broadcastable_shapes(x.shape)),
+            shape=self.index_to_arr_shapes.get(i),
             dtype=float,
             elements=st.floats(*self.index_to_bnds.get(i, (-10.0, 10.0))),
         )
 
     def __call__(self, f):
-        @given(x=self.gen_first_array(), constant=st.booleans(), data=st.data())
+        @given(
+            shapes=(
+                hnp.mutually_broadcastable_shapes(num_shapes=len(self.missing_shapes))
+                if self.missing_shapes
+                else st.just(hnp.BroadcastableShapes(input_shapes=(), result_shape=()))
+            ),
+            constant=st.booleans(),
+            data=st.data(),
+        )
         @wraps(f)
-        def wrapper(x, constant, data):
-            arrs = [x]  # list of drawn arrays to feed to functions
+        def wrapper(shapes: hnp.BroadcastableShapes, constant, data: st.DataObject):
+            self.index_to_arr_shapes.update(
+                (k, v) for k, v in zip(sorted(self.missing_shapes), shapes.input_shapes)
+            )
 
-            for i in range(
-                1, self.num_arrays
-            ):  # draw additional arrays according to `num_arrays`
-                y = data.draw(self.gen_other_array(x, i), label="array-{}".format(i))
-                arrs.append(y)
+            # list of drawn arrays to feed to functions
+            arrs = data.draw(
+                st.tuples(*[self.arrays(i) for i in range(self.num_arrays)]),
+                label="arrays",
+            )
 
-            arr_copies = [
-                copy(arr) for arr in arrs
-            ]  # list of array-copies to check for mutation
+            # list of array-copies to check for mutation
+            arr_copies = [copy(arr) for arr in arrs]
 
             if callable(self.kwargs):
                 kwargs = data.draw(self.kwargs(*arrs))
