@@ -132,7 +132,7 @@ class fwdprop_test_factory:
         return hnp.arrays(
             shape=self.index_to_arr_shapes.get(i),
             dtype=float,
-            elements=st.floats(*self.index_to_bnds.get(i, (-10.0, 10.0))),
+            elements=st.floats(*self.index_to_bnds.get(i, (-1e6, 1e6))),
         )
 
     def __call__(self, f):
@@ -420,7 +420,7 @@ class backprop_test_factory:
         return hnp.arrays(
             shape=self.index_to_arr_shapes.get(i),
             dtype=float,
-            elements=st.floats(*self.index_to_bnds.get(i, (-10.0, 10.0))),
+            elements=st.floats(*self.index_to_bnds.get(i, (-1e6, 1e6))),
             unique=self.index_to_unique.get(i, False),
         )
 
