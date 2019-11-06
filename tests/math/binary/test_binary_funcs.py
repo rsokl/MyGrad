@@ -97,7 +97,7 @@ def test_logaddexp_fwd():
     mygrad_func=logaddexp,
     true_func=np.logaddexp,
     num_arrays=2,
-    index_to_bnds={0: (-2, 2), 1: (-2, 2)},
+    index_to_bnds=(-10, 10),
     finite_difference=True,
     h=1e-8,
     atol=1e-4,
@@ -121,6 +121,7 @@ def test_logaddexp2_fwd():
     rtol=1e-4,
     finite_difference=True,
     h=1e-8,
+    index_to_bnds=(-100, 100),
 )
 def test_logaddexp2_bkwd():
     pass

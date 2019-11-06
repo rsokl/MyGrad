@@ -282,6 +282,7 @@ def test_padding(ndim: int, data: st.DataObject):
     num_arrays=2,
     index_to_arr_shapes={0: (4, 5, 7), 1: (2, 5, 3)},
     kwargs=dict(stride=(1,), dilation=(1,)),
+    index_to_bnds={0: (-10, 10), 1: (-10, 10)},
 )
 def test_conv_1d_fwd():
     """ (N=4, C=5, W=7) x (F=2, C=5, Wf=3); stride=1, dilation=1
