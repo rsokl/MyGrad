@@ -67,6 +67,8 @@ Other special functions
 .. autosummary::
    :toctree: generated/
 
+   add_sequence
+   multiply_sequence
    sinc
 
 Arithmetic operations
