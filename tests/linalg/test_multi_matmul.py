@@ -1,9 +1,9 @@
-import pytest
-from typing import List, Tuple
 import functools
+from typing import List, Tuple
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
+import pytest
 from hypothesis import given, note
 from numpy.testing import assert_allclose
 
@@ -49,8 +49,7 @@ def test_multi_matmul(num_arrays, left_1d, right_1d, output_is_constant, data):
     Includes edge cases in which the 1st and last tensors in the sequence are 1D
     """
     shape_endpoints = data.draw(
-        st.tuples(*[st.integers(1, 10) for i in range(num_arrays + 1)]),
-        label="endpoints",
+        st.tuples(*[st.integers(1, 10)] * (num_arrays + 1)), label="endpoints"
     )
     shapes = [shape_endpoints[i : i + 2] for i in range(num_arrays)]
 
