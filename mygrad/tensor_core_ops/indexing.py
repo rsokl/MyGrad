@@ -177,4 +177,4 @@ class SetItem(BroadcastableOp):
 
             return grad_sel
         else:
-            raise IndexError  # pragma: no cover
+            raise IndexError()  # pragma: no cover
