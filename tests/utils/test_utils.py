@@ -108,14 +108,12 @@ def test_numerical_gradient_no_broadcast(data, x):
 
 
 @given(
-    data=st.data(),
     x=hnp.arrays(shape=(3, 4), dtype=float, elements=st.floats(-100, 100)),
     y=hnp.arrays(shape=(2, 3, 4), dtype=float, elements=st.floats(-100, 100)),
     grad=hnp.arrays(shape=(2, 3, 4), dtype=float, elements=st.floats(-100, 100)),
-    as_decimal=st.booleans(),
 )
-def test_numerical_gradient_x_broadcast(data, x, y, grad, as_decimal):
-    atol, rtol = (1e-7, 1e-7) if as_decimal else (1e-2, 1e-2)
+def test_numerical_gradient_x_broadcast(x, y, grad):
+    atol, rtol = (1e-7, 1e-7)
 
     # broadcast x
     dx, dy = numerical_gradient(binary_func, x, y, back_grad=grad)
@@ -124,14 +122,12 @@ def test_numerical_gradient_x_broadcast(data, x, y, grad, as_decimal):
 
 
 @given(
-    data=st.data(),
     y=hnp.arrays(shape=(3, 4), dtype=float, elements=st.floats(-100, 100)),
     x=hnp.arrays(shape=(2, 3, 4), dtype=float, elements=st.floats(-100, 100)),
     grad=hnp.arrays(shape=(2, 3, 4), dtype=float, elements=st.floats(-100, 100)),
-    as_decimal=st.booleans(),
 )
-def test_numerical_gradient_y_broadcast(data, x, y, grad, as_decimal):
-    atol, rtol = (1e-7, 1e-7) if as_decimal else (1e-2, 1e-2)
+def test_numerical_gradient_y_broadcast(x, y, grad):
+    atol, rtol = (1e-7, 1e-7)
 
     # broadcast x
     dx, dy = numerical_gradient(binary_func, x, y, back_grad=grad)
@@ -140,14 +136,12 @@ def test_numerical_gradient_y_broadcast(data, x, y, grad, as_decimal):
 
 
 @given(
-    data=st.data(),
     x=hnp.arrays(shape=(2, 1, 4), dtype=float, elements=st.floats(-100, 100)),
     y=hnp.arrays(shape=(1, 3, 4), dtype=float, elements=st.floats(-100, 100)),
     grad=hnp.arrays(shape=(2, 3, 4), dtype=float, elements=st.floats(-100, 100)),
-    as_decimal=st.booleans(),
 )
-def test_numerical_gradient_xy_broadcast(data, x, y, grad, as_decimal):
-    atol, rtol = (1e-7, 1e-7) if as_decimal else (1e-2, 1e-2)
+def test_numerical_gradient_xy_broadcast(x, y, grad):
+    atol, rtol = (1e-7, 1e-7)
 
     # broadcast x
     dx, dy = numerical_gradient(binary_func, x, y, back_grad=grad)
