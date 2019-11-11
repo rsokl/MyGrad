@@ -59,7 +59,7 @@ class fwdprop_test_factory:
         *,
         mygrad_func: Callable[[Tensor], Tensor],
         true_func: Callable[[np.ndarray], np.ndarray],
-        num_arrays: Optional[int],
+        num_arrays: Optional[int] = None,
         shapes: Optional[hnp.MutuallyBroadcastableShapesStrategy] = None,
         index_to_bnds: Dict[int, Tuple[int, int]] = None,
         index_to_no_go: Dict[int, Sequence[int]] = None,
