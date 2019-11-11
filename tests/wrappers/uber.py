@@ -69,9 +69,9 @@ class fwdprop_test_factory:
             Callable, Dict[str, Union[Any, Callable[[Any], SearchStrategy]]]
         ] = None,
         index_to_arr_shapes: Dict[int, Union[Sequence[int], SearchStrategy]] = None,
-        assumptions: Optional[Callable[..., bool]] = None,
         atol: float = 1e-7,
         rtol: float = 1e-7,
+        assumptions: Optional[Callable[..., bool]] = None,
     ):
         """
         Parameters
