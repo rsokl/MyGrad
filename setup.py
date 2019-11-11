@@ -15,7 +15,6 @@ CLASSIFIERS = [
     "Intended Audience :: Education",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.5",
     "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
     "Topic :: Scientific/Engineering",
@@ -56,6 +55,6 @@ setup(
     },
     url=URL,
     download_url="https://github.com/rsokl/mygrad/tarball/" + versioneer.get_version(),
-    python_requires=">=3.5",
+    python_requires=">=3.6",
     packages=find_packages(exclude=["tests", "tests.*"]),
 )
