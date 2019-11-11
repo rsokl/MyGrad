@@ -59,7 +59,8 @@ class fwdprop_test_factory:
         *,
         mygrad_func: Callable[[Tensor], Tensor],
         true_func: Callable[[np.ndarray], np.ndarray],
-        num_arrays: int,
+        num_arrays: Optional[int],
+        shapes: Optional[hnp.MutuallyBroadcastableShapesStrategy] = None,
         index_to_bnds: Dict[int, Tuple[int, int]] = None,
         index_to_no_go: Dict[int, Sequence[int]] = None,
         kwargs: Union[
@@ -76,6 +77,12 @@ class fwdprop_test_factory:
 
         true_func : Callable[[numpy.ndarray, ...], numpy.ndarray]
             A known correct version of the function
+
+        num_arrays: Optional[int]
+            The number of arrays to be fed to the function
+
+        shapes: Optional[hnp.MutuallyBroadcastableShapesStrategy]
+            A strategy that generates all of the input shapes to feed to the function.
 
         index_to_bnds : Dict[int, Tuple[int, int]]
             Indicate the lower and upper bounds from which the elements
@@ -111,7 +118,23 @@ class fwdprop_test_factory:
         kwargs = _to_dict(kwargs)
         index_to_arr_shapes = _to_dict(index_to_arr_shapes)
 
+        if not ((num_arrays is not None) ^ (shapes is not None)):
+            raise ValueError(
+                "Either `num_arrays`(={}) must be specified "
+                "xor `shapes`(={}) must be specified".format(num_arrays, shapes)
+            )
+
+        if shapes is not None:
+            if not isinstance(shapes, hnp.MutuallyBroadcastableShapesStrategy):
+                raise TypeError(
+                    "`shapes` should be "
+                    "Optional[SearchStrategy[hnp.MutuallyBroadcastableShapesStrategy]]"
+                    ", got {}".format(shapes)
+                )
+            num_arrays = shapes.num_shapes
+
         assert num_arrays > 0
+
         self.op = mygrad_func
         self.true_func = true_func
 
@@ -120,12 +143,22 @@ class fwdprop_test_factory:
         self.index_to_arr_shapes = index_to_arr_shapes
         self.kwargs = kwargs
         self.num_arrays = num_arrays
+        self.shapes = shapes
         self.assumptions = assumptions
 
         # stores the indices of the unspecified array shapes
         self.missing_shapes = set(range(self.num_arrays)) - set(
             self.index_to_arr_shapes
         )
+
+        if shapes is None:
+            self.shapes = (
+                hnp.mutually_broadcastable_shapes(num_shapes=len(self.missing_shapes))
+                if self.missing_shapes
+                else st.just(hnp.BroadcastableShapes(input_shapes=(), result_shape=()))
+            )
+        else:
+            self.shapes = shapes
 
     def arrays(self, i: int) -> st.SearchStrategy:
         """
@@ -147,15 +180,7 @@ class fwdprop_test_factory:
         )
 
     def __call__(self, f):
-        @given(
-            shapes=(
-                hnp.mutually_broadcastable_shapes(num_shapes=len(self.missing_shapes))
-                if self.missing_shapes
-                else st.just(hnp.BroadcastableShapes(input_shapes=(), result_shape=()))
-            ),
-            constant=st.booleans(),
-            data=st.data(),
-        )
+        @given(shapes=self.shapes, constant=st.booleans(), data=st.data())
         @wraps(f)
         def wrapper(shapes: hnp.BroadcastableShapes, constant, data: st.DataObject):
             self.index_to_arr_shapes.update(
@@ -164,7 +189,7 @@ class fwdprop_test_factory:
 
             # list of drawn arrays to feed to functions
             arrs = data.draw(
-                st.tuples(*[self.arrays(i) for i in range(self.num_arrays)]),
+                st.tuples(*(self.arrays(i) for i in range(self.num_arrays))),
                 label="arrays",
             )
 
