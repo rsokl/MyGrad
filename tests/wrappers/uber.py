@@ -63,11 +63,14 @@ class fwdprop_test_factory:
         num_arrays: Optional[int] = None,
         shapes: Optional[hnp.MutuallyBroadcastableShapesStrategy] = None,
         index_to_bnds: Dict[int, Tuple[int, int]] = None,
+        default_bnds: Tuple[float, float] = (-1e6, 1e6),
         index_to_no_go: Dict[int, Sequence[int]] = None,
         kwargs: Union[
             Callable, Dict[str, Union[Any, Callable[[Any], SearchStrategy]]]
         ] = None,
         index_to_arr_shapes: Dict[int, Union[Sequence[int], SearchStrategy]] = None,
+        atol: float = 1e-7,
+        rtol: float = 1e-7,
         assumptions: Optional[Callable[..., bool]] = None
     ):
         """
@@ -87,7 +90,10 @@ class fwdprop_test_factory:
 
         index_to_bnds : Dict[int, Tuple[int, int]]
             Indicate the lower and upper bounds from which the elements
-            for array-i is drawn. By default, [-10, 10].
+            for array-i is drawn.
+
+        default_bnds : Tuple[float, float]
+            Default lower and upper bounds from which all array elements are drawn
 
         index_to_no_go : Dict[int, Sequence[int]]
             Values that array-i cannot possess. By default, no values are
@@ -114,6 +120,7 @@ class fwdprop_test_factory:
             be fed to ``mygrad_func``. If ``assumptions`` returns ``False``, that test
             case will be marked as skipped by hypothesis.
         """
+        self.tolerances = dict(atol=atol, rtol=rtol)
         index_to_bnds = _to_dict(index_to_bnds)
         index_to_no_go = _to_dict(index_to_no_go)
         kwargs = _to_dict(kwargs)
@@ -151,6 +158,7 @@ class fwdprop_test_factory:
         self.true_func = true_func
 
         self.index_to_bnds = index_to_bnds
+        self.default_bnds = default_bnds
         self.index_to_no_go = index_to_no_go
         self.index_to_arr_shapes = index_to_arr_shapes
         self.kwargs = kwargs
@@ -188,7 +196,7 @@ class fwdprop_test_factory:
         return hnp.arrays(
             shape=self.index_to_arr_shapes.get(i),
             dtype=float,
-            elements=st.floats(*self.index_to_bnds.get(i, (-1e6, 1e6))),
+            elements=st.floats(*self.index_to_bnds.get(i, self.default_bnds)),
         )
 
     def __call__(self, f):
@@ -255,7 +263,7 @@ class fwdprop_test_factory:
                 actual=tensor_out,
                 desired=true_out,
                 err_msg="`mygrad_func(x)` and `true_func(x)` produce different results",
-                atol=1e-7,
+                **self.tolerances,
             )
 
             for n, (arr, arr_copy) in enumerate(zip(arrs, arr_copies)):
@@ -302,6 +310,7 @@ class backprop_test_factory:
         num_arrays: Optional[int] = None,
         shapes: Optional[hnp.MutuallyBroadcastableShapesStrategy] = None,
         index_to_bnds: Optional[Dict[int, Tuple[int, int]]] = None,
+        default_bnds: Tuple[float, float] = (-1e6, 1e6),
         index_to_no_go: Optional[Dict[int, Sequence[int]]] = None,
         index_to_arr_shapes: Optional[
             Dict[int, Union[Sequence[int], SearchStrategy]]
@@ -337,6 +346,9 @@ class backprop_test_factory:
         index_to_bnds : Optional[Dict[int, Tuple[int, int]]]
             Indicate the lower and upper bounds from which the elements
             for array-i is drawn. By default, [-100, 100].
+
+        default_bnds : Tuple[float, float]
+            Default lower and upper bounds from which all array elements are drawn.
 
         index_to_no_go : Optional[Dict[int, Sequence[int]]]
             Values that array-i cannot possess. By default, no values are
@@ -424,6 +436,7 @@ class backprop_test_factory:
         self.op = mygrad_func
         self.true_func = true_func
 
+        self.default_bnds = default_bnds
         if isinstance(index_to_bnds, (tuple, list, np.ndarray)):
             index_to_bnds = {k: index_to_bnds for k in range(num_arrays)}
         self.index_to_bnds = index_to_bnds
@@ -506,7 +519,7 @@ class backprop_test_factory:
         return hnp.arrays(
             shape=self.index_to_arr_shapes.get(i),
             dtype=float,
-            elements=st.floats(*self.index_to_bnds.get(i, (-1e6, 1e6))),
+            elements=st.floats(*self.index_to_bnds.get(i, self.default_bnds)),
             unique=self.index_to_unique.get(i, False),
         )
 
@@ -605,7 +618,7 @@ class backprop_test_factory:
                     **self.tolerances,
                     err_msg="arr-{}: mygrad derivative and numerical derivative do not match".format(
                         n
-                    )
+                    ),
                 )
 
                 # check that none of the set derivatives is a view of `grad`
