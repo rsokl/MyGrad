@@ -19,7 +19,7 @@ from hypothesis.stateful import (
     precondition,
     rule,
 )
-from numpy.testing import assert_almost_equal, assert_equal
+from numpy.testing import assert_allclose, assert_equal
 from pytest import raises
 
 from mygrad import Tensor, add, multiply
@@ -124,8 +124,12 @@ class GraphCompare(RuleBasedStateMachine):
             if n.grad is None or t.grad is None:
                 assert n.grad is t.grad, _node_ID_str(num)
             else:
-                assert_almost_equal(
-                    desired=n.grad, actual=t.grad, err_msg=_node_ID_str(num)
+                assert_allclose(
+                    actual=t.grad,
+                    desired=n.grad,
+                    atol=1e-5,
+                    rtol=1e-5,
+                    err_msg=_node_ID_str(num),
                 )
             assert not t._accum_ops, _node_ID_str(num)
 
