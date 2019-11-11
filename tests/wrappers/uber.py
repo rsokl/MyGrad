@@ -20,6 +20,12 @@ from ..utils.numerical_gradient import (
 )
 
 
+def _to_dict(x):
+    if x is None:
+        return {}
+    return x
+
+
 class fwdprop_test_factory:
     """ Decorator
 
@@ -54,12 +60,12 @@ class fwdprop_test_factory:
         mygrad_func: Callable[[Tensor], Tensor],
         true_func: Callable[[np.ndarray], np.ndarray],
         num_arrays: int,
-        index_to_bnds: Dict[int, Tuple[int, int]] = {},
-        index_to_no_go: Dict[int, Sequence[int]] = {},
+        index_to_bnds: Dict[int, Tuple[int, int]] = None,
+        index_to_no_go: Dict[int, Sequence[int]] = None,
         kwargs: Union[
             Callable, Dict[str, Union[Any, Callable[[Any], SearchStrategy]]]
-        ] = {},
-        index_to_arr_shapes: Dict[int, Union[Sequence[int], SearchStrategy]] = {},
+        ] = None,
+        index_to_arr_shapes: Dict[int, Union[Sequence[int], SearchStrategy]] = None,
         assumptions: Optional[Callable[..., bool]] = None
     ):
         """
@@ -100,6 +106,11 @@ class fwdprop_test_factory:
             be fed to ``mygrad_func``. If ``assumptions`` returns ``False``, that test
             case will be marked as skipped by hypothesis.
         """
+        index_to_bnds = _to_dict(index_to_bnds)
+        index_to_no_go = _to_dict(index_to_no_go)
+        kwargs = _to_dict(kwargs)
+        index_to_arr_shapes = _to_dict(index_to_arr_shapes)
+
         assert num_arrays > 0
         self.op = mygrad_func
         self.true_func = true_func
@@ -332,16 +343,14 @@ class backprop_test_factory:
             case will be marked as skipped by hypothesis.
         """
 
-        index_to_bnds = index_to_bnds if index_to_bnds is not None else {}
-        index_to_no_go = index_to_no_go if index_to_no_go is not None else {}
-        index_to_arr_shapes = (
-            index_to_arr_shapes if index_to_arr_shapes is not None else {}
-        )
-        index_to_unique = index_to_unique if index_to_unique is not None else {}
+        index_to_bnds = _to_dict(index_to_bnds)
+        index_to_no_go = _to_dict(index_to_no_go)
+        index_to_arr_shapes = _to_dict(index_to_arr_shapes)
+        index_to_unique = _to_dict(index_to_unique)
         self.elements_strategy = (
             elements_strategy if elements_strategy is not None else st.floats
         )
-        kwargs = kwargs if kwargs is not None else {}
+        kwargs = _to_dict(kwargs)
 
         assert num_arrays > 0
         self.op = mygrad_func
