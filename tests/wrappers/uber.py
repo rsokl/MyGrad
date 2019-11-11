@@ -143,7 +143,7 @@ class fwdprop_test_factory:
                     "Optional[hnp.MutuallyBroadcastableShapesStrategy]"
                     ", got {}".format(shapes)
                 )
-            num_arrays = shapes.num_shapes
+            num_arrays = shapes_type.num_shapes
 
         assert num_arrays > 0
 
@@ -417,7 +417,7 @@ class backprop_test_factory:
                     "Optional[hnp.MutuallyBroadcastableShapesStrategy]"
                     ", got {}".format(shapes)
                 )
-            num_arrays = shapes.num_shapes
+            num_arrays = shapes_type.num_shapes
 
         assert num_arrays > 0
 
