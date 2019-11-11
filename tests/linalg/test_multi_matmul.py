@@ -3,15 +3,20 @@ from typing import List, Tuple
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
+import numpy as np
 import pytest
-from hypothesis import given, note
-from numpy.testing import assert_allclose
+from hypothesis import given
 
 import mygrad as mg
+from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
-def multi_matmul_slow(arrays):
-    return functools.reduce(mg.matmul, arrays)
+def matmul_wrapper(*args, constant=False):
+    return mg.multi_matmul(args, constant)
+
+
+def multi_matmul_slow(*arrays, **kwargs):
+    return functools.reduce(np.matmul, arrays)
 
 
 @given(st.lists(st.just(mg.Tensor([0.0, 1.0])), min_size=0, max_size=1))
@@ -33,92 +38,48 @@ def test_input_validation_large_dimensionality(shapes: List[Tuple[int, ...]]):
         mg.multi_matmul(tensors)
 
 
-@given(
-    num_arrays=st.integers(2, 5),
-    left_1d=st.booleans(),
-    right_1d=st.booleans(),
-    output_is_constant=st.booleans(),
-    data=st.data(),
+@pytest.mark.parametrize(
+    "signature",
+    (
+        "(a?,b),(b,e?)->(a?,e?)",
+        "(a?,b),(b,c),(c,e?)->(a?,e?)",
+        "(a?,b),(b,c),(c,d),(d,e?)->(a?,e?)",
+    ),
 )
-def test_multi_matmul(num_arrays, left_1d, right_1d, output_is_constant, data):
-    """
-    Ensures that ``multi_matmul`` behaves identically to:
-
-        functools.reduce(mg.matmul, arrays)
-
-    Includes edge cases in which the 1st and last tensors in the sequence are 1D
-    """
-    shape_endpoints = data.draw(
-        st.tuples(*[st.integers(1, 10)] * (num_arrays + 1)), label="endpoints"
+def test_matmul_fwd(signature):
+    @fwdprop_test_factory(
+        mygrad_func=matmul_wrapper,
+        true_func=multi_matmul_slow,
+        shapes=hnp.mutually_broadcastable_shapes(signature=signature, max_dims=0),
+        default_bnds=(-10, 10),
+        atol=1e-5,
+        rtol=1e-5,
     )
-    shapes = [shape_endpoints[i : i + 2] for i in range(num_arrays)]
+    def test_runner():
+        pass
 
-    if left_1d:
-        shapes[0] = shapes[0][:0:-1]
+    test_runner()
 
-    if right_1d:
-        shapes[-1] = shapes[-1][:1]
 
-    constants = data.draw(
-        st.tuples(*[st.booleans() for i in range(num_arrays)]), label="constants"
+@pytest.mark.parametrize(
+    "signature",
+    (
+        "(a?,b),(b,e?)->(a?,e?)",
+        "(a?,b),(b,c),(c,e?)->(a?,e?)",
+        "(a?,b),(b,c),(c,d),(d,e?)->(a?,e?)",
+    ),
+)
+def test_matmul_bkwd(signature):
+    @backprop_test_factory(
+        mygrad_func=matmul_wrapper,
+        true_func=multi_matmul_slow,
+        shapes=hnp.mutually_broadcastable_shapes(signature=signature, max_dims=0),
+        default_bnds=(-10, 10),
+        atol=1e-5,
+        rtol=1e-5,
+        vary_each_element=True,
     )
-    output_is_constant = output_is_constant or all(constants)
+    def test_runner():
+        pass
 
-    arrs = [
-        data.draw(
-            hnp.arrays(dtype=float, shape=shapes[i], elements=st.floats(0, 1e6)),
-            label="arr-{}".format(i),
-        )
-        for i in range(num_arrays)
-    ]
-    note("tensor shapes: {}".format([i.shape for i in arrs]))
-
-    arrs1 = [mg.Tensor(x, constant=const) for x, const in zip(arrs, constants)]
-    arrs2 = [x.__copy__() for x in arrs1]
-
-    actual = mg.multi_matmul(arrs1, constant=output_is_constant)
-    desired = multi_matmul_slow(arrs2)
-    assert_allclose(
-        actual.data,
-        desired.data,
-        atol=1e-6,
-        rtol=1e-6,
-        err_msg="`multi_matmul` does not produce the same result as "
-        "`functools.reduce(mg.matmul, arrays)`",
-    )
-
-    assert (
-        actual.constant is output_is_constant
-    ), "`multi_matmul` does not carry constant info properly"
-
-    if output_is_constant:
-        return
-
-    grad = data.draw(
-        hnp.arrays(shape=desired.shape, dtype=float, elements=st.floats(0, 1e6))
-    )
-
-    (desired * grad).sum().backward()
-    (actual * grad).sum().backward()
-
-    for n, (const, arr1, arr2) in enumerate(zip(constants, arrs1, arrs2)):
-        assert (
-            const is arr1.constant is arr2.constant
-        ), "tensor-{}-constant was not set properly".format(n)
-
-        if const:
-            assert (
-                arr2.grad is None
-            ), "tensor-{} is a constant, but its gradient is not `None`".format(n)
-        else:
-            assert_allclose(
-                arr1.grad,
-                arr2.grad,
-                atol=1e-6,
-                rtol=1e-6,
-                err_msg="The gradients for tensor-{} for not match".format(n),
-            )
-
-    actual.null_gradients()
-    for n, arr1 in enumerate(arrs1):
-        assert arr1.grad is None, "tensor-{} did not get its gradient nulled".format(n)
+    test_runner()
