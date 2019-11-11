@@ -8,6 +8,7 @@ import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
 from hypothesis import assume, given
+from hypothesis.searchstrategy.lazy import LazyStrategy
 from hypothesis.strategies import SearchStrategy
 from numpy.testing import assert_allclose, assert_array_equal
 
@@ -125,10 +126,21 @@ class fwdprop_test_factory:
             )
 
         if shapes is not None:
-            if not isinstance(shapes, hnp.MutuallyBroadcastableShapesStrategy):
+            if not isinstance(shapes, st.SearchStrategy):
                 raise TypeError(
                     "`shapes` should be "
-                    "Optional[SearchStrategy[hnp.MutuallyBroadcastableShapesStrategy]]"
+                    "Optional[hnp.MutuallyBroadcastableShapesStrategy]"
+                    ", got {}".format(shapes)
+                )
+
+            shapes_type = (
+                shapes.wrapped_strategy if isinstance(shapes, LazyStrategy) else shapes
+            )
+
+            if not isinstance(shapes_type, hnp.MutuallyBroadcastableShapesStrategy):
+                raise TypeError(
+                    "`shapes` should be "
+                    "Optional[hnp.MutuallyBroadcastableShapesStrategy]"
                     ", got {}".format(shapes)
                 )
             num_arrays = shapes.num_shapes
@@ -388,10 +400,21 @@ class backprop_test_factory:
             )
 
         if shapes is not None:
-            if not isinstance(shapes, hnp.MutuallyBroadcastableShapesStrategy):
+            if not isinstance(shapes, st.SearchStrategy):
                 raise TypeError(
                     "`shapes` should be "
-                    "Optional[SearchStrategy[hnp.MutuallyBroadcastableShapesStrategy]]"
+                    "Optional[hnp.MutuallyBroadcastableShapesStrategy]"
+                    ", got {}".format(shapes)
+                )
+
+            shapes_type = (
+                shapes.wrapped_strategy if isinstance(shapes, LazyStrategy) else shapes
+            )
+
+            if not isinstance(shapes_type, hnp.MutuallyBroadcastableShapesStrategy):
+                raise TypeError(
+                    "`shapes` should be "
+                    "Optional[hnp.MutuallyBroadcastableShapesStrategy]"
                     ", got {}".format(shapes)
                 )
             num_arrays = shapes.num_shapes
