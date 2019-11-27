@@ -109,3 +109,17 @@ def minimum(a, b, constant=False):
         The gradient does not exist where a == b; we use a
         value of 0 here."""
     return Tensor._op(Minimum, a, b, constant=constant)
+
+
+def clip(a: Tensor, a_min, a_max):
+    if a_min is None and a_max is None:
+        raise ValueError("`a_min` and `a_max` cannot both be set to `None`")
+    a = a.copy()
+
+    if a_min is not None:
+        a[a < a_min] = a_min
+
+    if a_max is not None:
+        a[a_max < a] = a_max
+
+    return a
