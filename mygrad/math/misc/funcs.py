@@ -1,9 +1,10 @@
 from mygrad.tensor_base import Tensor
 
 from .ops import Abs, Cbrt, Maximum, Minimum, Sqrt
+from mygrad.math.arithmetic.funcs import positive
 
-__all__ = ["abs", "absolute", "cbrt", "sqrt", "maximum", "minimum"]
 
+__all__ = ["abs", "absolute", "cbrt", "clip", "sqrt", "maximum", "minimum"]
 
 def abs(a, constant=False):
     """ ``f(a) -> abs(a)``
@@ -111,10 +112,12 @@ def minimum(a, b, constant=False):
     return Tensor._op(Minimum, a, b, constant=constant)
 
 
-def clip(a: Tensor, a_min, a_max):
+def clip(a: Tensor, a_min, a_max, constant=False):
     if a_min is None and a_max is None:
         raise ValueError("`a_min` and `a_max` cannot both be set to `None`")
-    a = a.copy()
+    # we will be updating in-place, but do not want to mutate the input
+    # thus we operate on `+a`
+    a = positive(a, constant=constant)
 
     if a_min is not None:
         a[a < a_min] = a_min
