@@ -91,10 +91,10 @@ Miscellaneous
 .. autosummary::
    :toctree: generated/
 
-   square
+   clip
    sqrt
    cbrt
-
+   square
    absolute
    maximum
    minimum
