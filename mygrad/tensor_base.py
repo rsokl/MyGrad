@@ -536,7 +536,7 @@ class Tensor:
     def __getitem__(self, item):
         return self._op(GetItem, self, op_args=(item,))
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key, value, *, _unique_indices=False):
         if self.constant and (not isinstance(value, Tensor) or value.constant):
             self.data[key] = value.data if isinstance(value, Tensor) else value
             return None
@@ -560,7 +560,13 @@ class Tensor:
                     )
 
         # self becomes the tensor post-setitem
-        out = self._op(SetItem, old_tensor, value, op_args=(key,))
+        out = self._op(
+            SetItem,
+            old_tensor,
+            value,
+            op_args=(key,),
+            op_kwargs=dict(_unique_indices=_unique_indices),
+        )
         self._creator = out.creator
         self._scalar_only = out._scalar_only
         self._ops = out._ops
