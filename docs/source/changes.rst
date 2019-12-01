@@ -6,6 +6,23 @@ This is a record of all past mygrad releases and what went into them,
 in reverse chronological order. All previous releases should still be available
 on pip.
 
+.. _v1.3.0:
+
+-------------------
+1.3.0 - 2019-11-30
+-------------------
+
+This release adds ``mygrad.clip`` and ``mygrad.where``.
+
+It also includes a major fix to the graph-traveral mechanism for null-gradients and clear-graph,
+eliminating an exponentially-scaling runtime.
+
+``+x`` will now invoke ``mygrad.positive``, mirroring the numpy behavior
+
+There are improvements to user-facing error messages and input validation in addition to major
+improvements to mygrad's test suite. There is now a 100% line-coverage gate in mygrad's CI system.
+
+
 .. _v1.2.0:
 
 -------------------
