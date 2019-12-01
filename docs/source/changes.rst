@@ -14,7 +14,7 @@ on pip.
 
 This release adds ``mygrad.clip`` and ``mygrad.where``.
 
-It also includes a major fix to the graph-traveral mechanism for null-gradients and clear-graph,
+It also includes a major fix to the graph-traversal mechanism for null-gradients and clear-graph,
 eliminating an exponentially-scaling runtime.
 
 ``+x`` will now invoke ``mygrad.positive``, mirroring the numpy behavior
