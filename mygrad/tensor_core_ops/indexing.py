@@ -88,7 +88,7 @@ class SetItem(BroadcastableOp):
         Supports back-propagation through all valid numpy-indexing (basic, advanced, mixed, etc.),
         as well as """
 
-    def __call__(self, a, b, index, *, _unique_indices=False):
+    def __call__(self, a, b, index):
         """ a[index] = b
 
             Parameters
@@ -105,26 +105,11 @@ class SetItem(BroadcastableOp):
                 All means of numpy-array indexing (basic, advanced, mixed, etc) are
                 supported.
 
-            _unique_indices : bool, optional (default=False)
-                Developer flag only. Set to true if it is known that the integer
-                indices being passed are guaranteed to point to unique elements in
-                ``a``. This will bypass the expensive uniqueness check for integer
-                indexing
-
             Notes
             -----
             Additional computational overhead is required for back-propagation when
             `index` contains any integer-valued arrays, to accommodate for the scenario
             in which a single element is set multiple times."""
-
-        assert isinstance(_unique_indices, bool)
-        self._unique_indices = _unique_indices
-
-        if _unique_indices:
-            assert _is_int_array_index(b.data), (
-                "`_unique_indices` was set to True, but the provided index, "
-                "{}, is not integer-array".format(b.data)
-            )
 
         out = np.copy(a.data) if not a.constant else a.data
         self.variables = (a, b)
@@ -152,8 +137,7 @@ class SetItem(BroadcastableOp):
             # being set redundantly, and mask out any elements in `grad` corresponding to
             # the elements in `b` that weren't actually set.
             if (
-                not self._unique_indices
-                and not np.shares_memory(grad_sel, grad)
+                not np.shares_memory(grad_sel, grad)
                 and grad_sel.size > 0
                 and grad_sel.ndim > 0
                 and not _is_bool_array_index(self.index)
