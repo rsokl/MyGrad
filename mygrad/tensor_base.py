@@ -560,7 +560,7 @@ class Tensor:
                     )
 
         # self becomes the tensor post-setitem
-        out = self._op(SetItem, old_tensor, value, op_args=(key,))
+        out = self._op(SetItem, old_tensor, value, op_args=(key,),)
         self._creator = out.creator
         self._scalar_only = out._scalar_only
         self._ops = out._ops
