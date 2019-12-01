@@ -55,9 +55,9 @@ def test_where_condition_only_fwd(condition):
 
 
 @given(
-    condition=hnp.arrays(shape=hnp.array_shapes(min_dims=0), dtype=bool),
-    x=st.none() | hnp.arrays(shape=hnp.array_shapes(min_dims=0), dtype=int,),
-    y=st.none() | hnp.arrays(shape=hnp.array_shapes(min_dims=0), dtype=int,),
+    condition=hnp.arrays(shape=hnp.array_shapes(min_dims=1), dtype=bool),
+    x=st.none() | hnp.arrays(shape=hnp.array_shapes(min_dims=1), dtype=int,),
+    y=st.none() | hnp.arrays(shape=hnp.array_shapes(min_dims=1), dtype=int,),
 )
 def test_clip_input_validation(condition, x, y):
     args = [i for i in (x, y) if i is not None]
