@@ -202,7 +202,7 @@ def test_clip_input_validation(a, a_min, a_max):
         numpy_out = np.clip(a, a_min, a_max)
     except Exception as e:
         with pytest.raises(type(e)):
-            clip(a, a_min, a_max)
+            np.clip(a, a_min, a_max)
         return
     mygrad_out = clip(a, a_min, a_max)
 
