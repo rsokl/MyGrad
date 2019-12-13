@@ -27,7 +27,7 @@ def test_input_validation_too_few_tensors(tensors: List[mg.Tensor]):
 
 
 @given(
-    st.lists(hnp.array_shapes(min_dims=1), min_size=2).filter(
+    st.lists(hnp.array_shapes(min_dims=1, min_side=2, max_side=2), min_size=2).filter(
         lambda shapes: any(not (1 <= len(x) <= 2) for x in shapes)
     )
 )

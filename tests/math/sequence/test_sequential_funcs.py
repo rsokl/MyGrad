@@ -327,6 +327,7 @@ def test_prod_fwd():
     pass
 
 
+@settings(max_examples=200)
 @backprop_test_factory(
     mygrad_func=prod,
     true_func=np.prod,
