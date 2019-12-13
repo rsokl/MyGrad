@@ -342,7 +342,6 @@ def test_roll_bkwd():
 
 
 def gen_int_repeat_args(arr: Tensor):
-
     valid_axis = st.none()
     valid_axis |= st.integers(-arr.ndim, arr.ndim - 1) if arr.ndim else st.just(0)
     return st.fixed_dictionaries(

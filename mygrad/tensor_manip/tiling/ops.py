@@ -11,7 +11,9 @@ __all__ = ["Repeat"]
 
 class Repeat(BroadcastableOp):
     # Repeat can broadcast in the case:
-    # repeat(1, 2) -> [1 1]
+    #    repeat(1, 2) -> [1 1]
+    scalar_only = True  # type: bool
+
     def __call__(
         self, a: Tensor, repeats: Union[int, Sequence[int]], axis: Optional[int] = None
     ):
