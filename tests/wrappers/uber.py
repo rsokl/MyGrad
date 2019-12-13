@@ -9,6 +9,7 @@ import hypothesis.strategies as st
 import numpy as np
 from hypothesis import assume, given
 from hypothesis.strategies import SearchStrategy
+from hypothesis.strategies._internal.lazy import LazyStrategy
 from numpy.testing import assert_allclose, assert_array_equal
 
 from mygrad import Tensor
@@ -18,11 +19,6 @@ from ..utils.numerical_gradient import (
     numerical_gradient,
     numerical_gradient_full,
 )
-
-try:
-    from hypothesis.strategies._internal.lazy import LazyStrategy
-except ImportError:
-    from hypothesis.searchstrategy.lazy import LazyStrategy
 
 
 def _to_dict(x):
