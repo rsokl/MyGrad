@@ -8,8 +8,8 @@ import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
 from hypothesis import assume, given
-from hypothesis.searchstrategy.lazy import LazyStrategy
 from hypothesis.strategies import SearchStrategy
+from hypothesis.strategies._internal.lazy import LazyStrategy
 from numpy.testing import assert_allclose, assert_array_equal
 
 from mygrad import Tensor
