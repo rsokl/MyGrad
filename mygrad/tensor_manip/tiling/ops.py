@@ -24,7 +24,10 @@ class Repeat(BroadcastableOp):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index].data  # type: np.ndarray
-        if isinstance(self._repeats, int):
+        if isinstance(self._repeats, int) or len(self._repeats) == 1:
+            if not isinstance(self._repeats, int):
+                (self._repeats,) = self._repeats
+
             if not self._repeats:
                 # skip accumulation if `repeats` is all zeros
                 return np.zeros(a.shape, dtype=grad.dtype)
