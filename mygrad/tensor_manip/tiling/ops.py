@@ -3,13 +3,15 @@ from typing import Optional, Sequence, Union
 import numpy as np
 
 from mygrad.nnet.layers.utils import sliding_window_view
-from mygrad.operation_base import Operation
+from mygrad.operation_base import BroadcastableOp
 from mygrad.tensor_base import Tensor
 
 __all__ = ["Repeat"]
 
 
-class Repeat(Operation):
+class Repeat(BroadcastableOp):
+    # Repeat can broadcast in the case:
+    # repeat(1, 2) -> [1 1]
     def __call__(
         self, a: Tensor, repeats: Union[int, Sequence[int]], axis: Optional[int] = None
     ):
@@ -21,12 +23,17 @@ class Repeat(Operation):
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index].data  # type: np.ndarray
         if isinstance(self._repeats, int):
+            if not self._repeats:
+                return np.zeros(a.shape, dtype=grad.dtype)
+
             if self._axis is None:
                 # input array was treated as if it was flattened
                 grad = grad.ravel()
                 window_shape = (self._repeats,)
             else:
-                window_shape = [1] * a.ndim
+                # if `a` is a scalar, we will treat it like a
+                # 1D array, since the `repeat` op did broadcasting
+                window_shape = [1] * max(1, a.ndim)
                 window_shape[self._axis] = self._repeats
                 window_shape = tuple(window_shape)
 
