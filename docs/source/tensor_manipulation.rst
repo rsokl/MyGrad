@@ -33,3 +33,11 @@ Changing number of dimensions
    broadcast_to
    expand_dims
    squeeze
+
+
+Tiling arrays
+-------------
+.. autosummary::
+   :toctree: generated/
+
+   repeat
