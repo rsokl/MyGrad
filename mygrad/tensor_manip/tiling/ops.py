@@ -26,6 +26,7 @@ class Repeat(BroadcastableOp):
         a = self.variables[index].data  # type: np.ndarray
         if isinstance(self._repeats, int):
             if not self._repeats:
+                # skip accumulation if `repeats` is all zeros
                 return np.zeros(a.shape, dtype=grad.dtype)
 
             if self._axis is None:
@@ -53,4 +54,17 @@ class Repeat(BroadcastableOp):
                 grad.shape = a.shape
             return grad
         else:
-            raise NotImplementedError()
+            # We will create a grid of flat-indices commensurate with the
+            # original input array. These will be used accumulate the incoming
+            # gradient into the appropriate tensor elements.
+            #
+            # In order to deal with the flexibility of specifying multiple
+            # distinct repeat values, we will perform the identical repeat
+            # operation on the grid of flat-indices. Thus making them
+            # commensurate with the incoming gradient. `add.at` then makes
+            # short work of accumulating the incoming gradient as appropriate
+            out_grad = np.zeros((a.size,), dtype=grad.dtype)
+            indices = np.arange(a.size).reshape(a.shape)
+            indices = np.repeat(indices, repeats=self._repeats, axis=self._axis)
+            np.add.at(out_grad, indices.ravel(), grad.ravel())
+            return out_grad.reshape(a.shape)
