@@ -26,13 +26,11 @@ def test_input_validation_too_few_tensors(tensors: List[mg.Tensor]):
         mg.multi_matmul(tensors)
 
 
-@given(
-    st.lists(hnp.array_shapes(min_dims=1, min_side=2, max_side=2), min_size=2).filter(
-        lambda shapes: any(not (1 <= len(x) <= 2) for x in shapes)
-    )
-)
+@given(st.lists(hnp.array_shapes(min_dims=1, min_side=2, max_side=2), min_size=2))
 def test_input_validation_large_dimensionality(shapes: List[Tuple[int, ...]]):
     """multi_matmul only operates on 1D and 2D tensors"""
+    if all((1 <= len(x) <= 2) for x in shapes):
+        shapes[0] = (1, 1, *shapes[0])
     tensors = [mg.ones(shape=shape) for shape in shapes]
     with pytest.raises(ValueError):
         mg.multi_matmul(tensors)
