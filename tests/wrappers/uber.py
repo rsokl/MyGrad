@@ -519,7 +519,9 @@ class backprop_test_factory:
         return hnp.arrays(
             shape=self.index_to_arr_shapes.get(i),
             dtype=float,
-            elements=st.floats(*self.index_to_bnds.get(i, self.default_bnds)),
+            elements=self.elements_strategy(
+                *self.index_to_bnds.get(i, self.default_bnds)
+            ),
             unique=self.index_to_unique.get(i, False),
         )
 
