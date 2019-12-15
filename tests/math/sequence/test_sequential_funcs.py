@@ -327,7 +327,6 @@ def test_prod_fwd():
     pass
 
 
-@settings(max_examples=200)
 @backprop_test_factory(
     mygrad_func=prod,
     true_func=np.prod,
@@ -337,6 +336,20 @@ def test_prod_fwd():
     index_to_bnds={0: (-2, 2)},
 )
 def test_prod_bkwd():
+    pass
+
+
+@backprop_test_factory(
+    mygrad_func=prod,
+    true_func=np.prod,
+    num_arrays=1,
+    elements_strategy=st.integers,
+    kwargs=dict(axis=axis_arg, keepdims=keepdims_arg),
+    vary_each_element=True,
+    index_to_bnds={0: (-2, 2)},
+)
+def test_multi_zero_prod_bkwd():
+    """Drives tests cases with various configurations of zeros"""
     pass
 
 
