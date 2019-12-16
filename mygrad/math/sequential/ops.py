@@ -212,7 +212,6 @@ class Prod(Operation):
         # the nans in the sequences can simply be set to 0
         if np.any(np.isnan(dldx)):
             x = x.copy()
-            print("HERE")
 
             # computes the number of 0s to occur within each sequence
             has_zero = np.broadcast_to(
@@ -224,7 +223,6 @@ class Prod(Operation):
             # derivative needs to be recomputed at that location by
             # setting that element 0 -> 1
             if np.any(np.isnan(dldx)):
-                print("HERE2")
                 is_zero = x == 0
                 x[is_zero] = 1
                 with np.errstate(divide="ignore", invalid="ignore"):
