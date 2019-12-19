@@ -9,7 +9,7 @@ from mygrad.math._special import logsumexp
 from tests.custom_strategies import valid_axes
 
 
-@settings(deadline=None)
+@settings(deadline=None, max_examples=500)
 @given(
     data=st.data(),
     x=hnp.arrays(
