@@ -57,5 +57,6 @@ setup(
     url=URL,
     download_url="https://github.com/rsokl/mygrad/tarball/" + versioneer.get_version(),
     python_requires=">=3.5",
-    packages=find_packages(exclude=["tests", "tests.*"]),
+    packages=find_packages(where="src", exclude=["tests", "tests.*"]),
+    package_dir={"": "src"},
 )
