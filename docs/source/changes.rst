@@ -6,6 +6,16 @@ This is a record of all past mygrad releases and what went into them,
 in reverse chronological order. All previous releases should still be available
 on pip.
 
+.. _v1.4.0:
+
+-------------------
+1.4.0 - 2019-12-19
+-------------------
+
+This release adds the ``mygrad.repeat`` operation. It also includes some minor
+improvements to mygrad's test suite.
+
+
 .. _v1.3.0:
 
 -------------------
