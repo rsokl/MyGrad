@@ -31,7 +31,7 @@ or clone this repository and navigate to the MyGrad directory, then run:
 python setup.py install
 ```
 
-MyGrad requires `numpy`. It is highly recommended that you utilized `numpy` built with [MKL](https://en.wikipedia.org/wiki/Math_Kernel_Library)
+MyGrad requires `numpy`. It is highly recommended that you utilize a release of `numpy` built with [MKL](https://en.wikipedia.org/wiki/Math_Kernel_Library)
  for access to optimized math routines.
 
 ## A Simple Application
