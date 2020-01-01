@@ -17,12 +17,12 @@ from tests.utils import does_not_raise
 @settings(deadline=None)
 @given(
     s0=st.none()
-    | hnp.arrays(shape=(1, 2), dtype=float, elements=st.floats())
-    | hnp.arrays(shape=(1, 2), dtype=float, elements=st.floats()).map(
-        lambda x: Tensor(x, constant=True)
-    )
-    | hnp.arrays(shape=(1, 2), dtype=float, elements=st.floats()).map(
+    | hnp.arrays(shape=(1, 2), dtype=float, elements=st.just(0))
+    | hnp.arrays(shape=(1, 2), dtype=float, elements=st.just(0)).map(
         lambda x: Tensor(x)
+    )
+    | hnp.arrays(shape=(1, 2), dtype=float, elements=st.just(0)).map(
+        lambda x: Tensor(x, constant=True)
     ),
     dropout=st.floats(0, 1),
     out_constant=st.booleans(),
