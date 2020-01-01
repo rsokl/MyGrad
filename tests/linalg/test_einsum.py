@@ -19,7 +19,7 @@ def bool_strat():
     """ einsum's optimize=True option has bugs prior to version 1.14.5
         (caught by these very unit tests!), thus we only test `optimize=True`
         for more recent versions."""
-    return st.booleans() if np.__version__ <= "1.14.5" else st.just(False)
+    return st.booleans() if np.__version__ >= "1.14.5" else st.just(False)
 
 
 def compare_einsum(*operands, optimize=False):
