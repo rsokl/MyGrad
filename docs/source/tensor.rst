@@ -61,7 +61,7 @@ then df/dx represents ``[df/d(x0), df/d(x1), df/d(x2)]``
 
 >>> f.backward()  # computes df/dx and df/dy
 >>> x.grad  # df/dx
-array(6.0)
+array(2.0)
 >>> y.grad  # df/dy
 array(4.0)
 >>> f.grad
