@@ -13,7 +13,8 @@ on pip.
 -------------------
 
 This release performs an internal refactor in the ``nnet`` module of the library, as well as
-an analogous refactor in the test suite.
+an analogous refactor in the test suite. This also fixes a docstring in the ``multiclass_hinge``
+loss to properly show a description in the readthedocs page.
 
 .. _v1.4.0:
 
