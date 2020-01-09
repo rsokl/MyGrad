@@ -3,6 +3,11 @@ language: python
 install: pip install tox
 jobs:
   include:
+    - python: 3.8-dev
+      name: "Python 3.8"
+      dist: xenial
+      sudo: true
+      script: tox -e py38
     - python: 3.7
       name: "Python 3.7"
       dist: xenial
