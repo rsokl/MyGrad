@@ -4,4 +4,4 @@ from .relu import relu
 from .sigmoid import sigmoid
 from .softmax import logsoftmax, softmax
 
-__all__ = ["logsoftmax", "relu", "sigmoid", "tanh", "softmax"]
+__all__ = ["logsoftmax", "relu", "sigmoid", "softmax", "tanh"]
