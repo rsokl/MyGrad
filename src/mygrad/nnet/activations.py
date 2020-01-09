@@ -5,7 +5,7 @@ from mygrad.math._special import logsumexp as _logsumexp
 from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor
 
-__all__ = ["tanh", "sigmoid", "relu", "softmax", "logsoftmax"]
+__all__ = ["tanh", "sigmoid", "relu", "softmax", "log_softmax"]
 
 
 class Sigmoid(Operation):
@@ -51,7 +51,7 @@ def sigmoid(x, constant=False):
     return Tensor._op(Sigmoid, x, constant=constant)
 
 
-class ReLu(Operation):
+class ReLU(Operation):
     def __call__(self, a):
         self.variables = (a,)
         self.back = np.asarray(a > 0, dtype=a.dtype)
@@ -94,7 +94,7 @@ def relu(x, constant=False):
     >>> x.grad  # d(relu(x))/dx
     array([0., 0., 0., 1., 1.])
     """
-    return Tensor._op(ReLu, x, constant=constant)
+    return Tensor._op(ReLU, x, constant=constant)
 
 
 def _softmax(x, kwargs):
@@ -200,7 +200,7 @@ class LogSoftmax(Operation):
         return grad - soft * np.sum(grad, **self.__kw)
 
 
-def logsoftmax(x, constant=False):
+def log_softmax(x, constant=False):
     r"""
     Applies the log-softmax activation function::
 
@@ -243,10 +243,10 @@ def logsoftmax(x, constant=False):
     Examples
     --------
     >>> import mygrad as mg
-    >>> from mygrad.nnet import logsoftmax
+    >>> from mygrad.nnet import log_softmax
     >>> x = mg.Tensor([[  2.,   2.,    2.],
     ...                [2E50, 2E50,  1E50]])
-    >>> logsoftmax(x)
+    >>> log_softmax(x)
     Tensor([[-1.09861229e+00, -1.09861229e+00, -1.09861229e+00],
             [ 0.00000000e+00,  0.00000000e+00, -1.00000000e+50]])
     """

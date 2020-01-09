@@ -34,7 +34,7 @@ Activations
    sigmoid
    relu
    softmax
-   logsoftmax
+   log_softmax
 
 
 

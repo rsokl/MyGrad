@@ -1,6 +1,6 @@
-mygrad.nnet.logsoftmax
+mygrad.nnet.log_softmax
 ======================
 
 .. currentmodule:: mygrad.nnet
 
-.. autofunction:: logsoftmax
+.. autofunction:: log_softmax
