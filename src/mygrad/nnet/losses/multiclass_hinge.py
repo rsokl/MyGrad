@@ -8,7 +8,7 @@ from ._utils import check_loss_inputs
 
 class MulticlassHinge(Operation):
     def __call__(self, a, y, hinge=1.0):
-        """ Computes the average multiclass hinge loss
+        """ Computes the average multiclass hinge loss.
 
         Parameters
         ----------
@@ -56,33 +56,35 @@ class MulticlassHinge(Operation):
 
 
 def multiclass_hinge(x, y_true, hinge=1.0, constant=False):
-    """ Parameters
-        ----------
-        x : array_like, shape=(N, K)
-            The K class scores for each of the N pieces of data.
+    """ Computes the average multiclass hinge loss.
 
-        y_true : array_like, shape=(N,)
-            The correct class-indices, in [0, K), for each datum.
+    Parameters
+    ----------
+    x : array_like, shape=(N, K)
+        The K class scores for each of the N pieces of data.
 
-        hinge : float
-            The size of the "hinge" outside of which a nonzero loss
-            is incurred.
+    y_true : array_like, shape=(N,)
+        The correct class-indices, in [0, K), for each datum.
 
-        constant : bool, optional(default=False)
-            If ``True``, the returned tensor is a constant (it
-            does not back-propagate a gradient)
+    hinge : float
+        The size of the "hinge" outside of which a nonzero loss
+        is incurred.
 
-        Returns
-        -------
-        The average multiclass hinge loss
+    constant : bool, optional(default=False)
+        If ``True``, the returned tensor is a constant (it
+        does not back-propagate a gradient)
 
-        Raises
-        ------
-        TypeError
-            `y_true` must be an integer-type array-like object
+    Returns
+    -------
+    The average multiclass hinge loss
 
-        ValueError
-            `x` must be a 2-dimensional array-like object
-            `y_true` must be a shape-(N,) array-like object
-        """
+    Raises
+    ------
+    TypeError
+        `y_true` must be an integer-type array-like object
+
+    ValueError
+        `x` must be a 2-dimensional array-like object
+        `y_true` must be a shape-(N,) array-like object
+    """
     return Tensor._op(MulticlassHinge, x, op_args=(y_true, hinge), constant=constant)
