@@ -12,7 +12,7 @@ on pip.
 1.4.1 - 2020-01-09
 -------------------
 
-This release performs an internal refatctor in the ``nnet`` module of the library, as well as
+This release performs an internal refactor in the ``nnet`` module of the library, as well as
 an analogous refactor in the test suite.
 
 .. _v1.4.0:
