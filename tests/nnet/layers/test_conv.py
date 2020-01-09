@@ -14,8 +14,8 @@ import mygrad as mg
 from mygrad import Tensor
 from mygrad.nnet.layers import conv_nd
 
-from ..utils.numerical_gradient import numerical_gradient_full
-from ..wrappers.uber import backprop_test_factory, fwdprop_test_factory
+from ...utils.numerical_gradient import numerical_gradient_full
+from ...wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
 @pytest.mark.parametrize(
