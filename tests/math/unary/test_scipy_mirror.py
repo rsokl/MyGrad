@@ -18,9 +18,7 @@ from tests.custom_strategies import valid_axes
     ),
     keepdims=st.booleans(),
 )
-@pytest.mark.filterwarnings(
-    "ignore"
-)  # ignore runtime warnings for exhaustive evaluation
+@pytest.mark.filterwarnings("ignore: overflow")
 def test_logsumexp(data: st.SearchStrategy, x: np.ndarray, keepdims: bool):
     axes = data.draw(valid_axes(ndim=x.ndim), label="axes")
     mygrad_result = logsumexp(x, axis=axes, keepdims=keepdims)

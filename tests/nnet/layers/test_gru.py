@@ -229,7 +229,10 @@ def test_gru_fwd(X, D, dropout, data: st.DataObject):
         assert x.grad is None
 
 
-@settings(deadline=None)
+# There is an occasional overflow in the oracle sigmoid
+# that is acceptable - reducing the input domain to ameliorate this
+# would potentially mask real numerical issues
+@settings(deadline=None, max_examples=1000)
 @given(
     data=st.data(),
     X=hnp.arrays(
@@ -246,6 +249,7 @@ def test_gru_fwd(X, D, dropout, data: st.DataObject):
     X_constant=st.booleans(),
     V_constant=st.booleans(),
 )
+@pytest.mark.filterwarnings("ignore: overflow encountered in exp")
 def test_gru_backward(
     data: st.DataObject,
     X: np.ndarray,
