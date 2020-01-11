@@ -137,13 +137,21 @@ def test_init_data_rand(x):
     assert_equal(actual=Tensor(x).data, desired=x)
 
 
-@given(x=hnp.arrays(dtype=float, shape=hnp.array_shapes()))
+@given(
+    x=hnp.arrays(
+        dtype=float,
+        shape=hnp.array_shapes(),
+        elements=st.floats(allow_infinity=False, allow_nan=False),
+    )
+    | st.floats(allow_infinity=False, allow_nan=False)
+    | st.integers(-100, 100),
+)
 def test_items(x):
     """ verify that tensor.item() mirrors array.item()"""
     tensor = Tensor(x)
     try:
-        value = x.item()
-        assert_allclose(value, tensor.item())
+        value = np.asarray(x).item()
+        assert_array_equal(value, tensor.item())
     except ValueError:
         with raises(ValueError):
             tensor.item()
