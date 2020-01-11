@@ -92,6 +92,7 @@ def test_all_constant(out_constant: bool):
     data=st.data(),
 )
 @pytest.mark.filterwarnings("ignore: overflow encountered in exp")
+@pytest.mark.filterwarnings("ignore: overflow encountered in sig")
 def test_gru_fwd(X, D, dropout, data: st.DataObject):
     T, N, C = X.shape
 
@@ -251,6 +252,7 @@ def test_gru_fwd(X, D, dropout, data: st.DataObject):
     V_constant=st.booleans(),
 )
 @pytest.mark.filterwarnings("ignore: overflow encountered in exp")
+@pytest.mark.filterwarnings("ignore: overflow encountered in sig")
 def test_gru_backward(
     data: st.DataObject,
     X: np.ndarray,
