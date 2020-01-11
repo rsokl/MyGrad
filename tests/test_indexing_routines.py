@@ -43,6 +43,7 @@ def test_where_bkwd():
 
 
 @given(condition=st.from_type(type) | hnp.arrays(shape=hnp.array_shapes(), dtype=int))
+@pytest.mark.filterwarnings("ignore")
 def test_where_condition_only_fwd(condition):
     """mygrad.where should merely mirror numpy.where when only `where(condition)`
     is specified."""
