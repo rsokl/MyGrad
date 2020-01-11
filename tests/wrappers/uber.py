@@ -72,7 +72,7 @@ class fwdprop_test_factory:
         atol: float = 1e-7,
         rtol: float = 1e-7,
         assumptions: Optional[Callable[..., bool]] = None,
-        permit_0d_array_as_float: bool = True,
+        permit_0d_array_as_float: bool = True
     ):
         """
         Parameters
@@ -340,7 +340,7 @@ class backprop_test_factory:
         atol: float = 1e-8,
         vary_each_element: bool = False,
         finite_difference=False,
-        assumptions: Optional[Callable[..., bool]] = None,
+        assumptions: Optional[Callable[..., bool]] = None
     ):
         """
         Parameters
