@@ -249,7 +249,10 @@ def test_swapaxes_bkwd():
 
 
 @fwdprop_test_factory(
-    mygrad_func=Tensor.flatten, true_func=np.ndarray.flatten, num_arrays=1
+    mygrad_func=Tensor.flatten,
+    true_func=np.ndarray.flatten,
+    num_arrays=1,
+    permit_0d_array_as_float=False,
 )
 def test_flatten_fwd():
     pass

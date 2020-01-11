@@ -153,6 +153,7 @@ def test_var_fwd():
 def _var(x, keepdims=False, axis=None, ddof=0):
     """Defines variance without using abs. Permits use of
     complex-step numerical derivative."""
+    x = np.asarray(x)
 
     def mean(y, keepdims=False, axis=None, ddof=0):
         if isinstance(axis, int):
@@ -237,6 +238,7 @@ def test_std_fwd():
 def _std(x, keepdims=False, axis=None, ddof=0):
     """Defines standard dev without using abs. Permits use of
     complex-step numerical derivative."""
+    x = np.asarray(x)
 
     def mean(y, keepdims=False, axis=None, ddof=0):
         if isinstance(axis, int):

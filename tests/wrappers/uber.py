@@ -71,7 +71,8 @@ class fwdprop_test_factory:
         index_to_arr_shapes: Dict[int, Union[Sequence[int], SearchStrategy]] = None,
         atol: float = 1e-7,
         rtol: float = 1e-7,
-        assumptions: Optional[Callable[..., bool]] = None
+        assumptions: Optional[Callable[..., bool]] = None,
+        permit_0d_array_as_float: bool = True,
     ):
         """
         Parameters
@@ -119,6 +120,9 @@ class fwdprop_test_factory:
             A callable that is fed the generated arrays and keyword arguments that will
             be fed to ``mygrad_func``. If ``assumptions`` returns ``False``, that test
             case will be marked as skipped by hypothesis.
+
+        permit_0d_array_as_float : bool, optional (default=True)
+            If True, drawn 0D arrays will potentially be case to numpy-floats.
         """
         self.tolerances = dict(atol=atol, rtol=rtol)
         index_to_bnds = _to_dict(index_to_bnds)
@@ -165,6 +169,7 @@ class fwdprop_test_factory:
         self.num_arrays = num_arrays
         self.shapes = shapes
         self.assumptions = assumptions
+        self.permit_0d_array_as_float = permit_0d_array_as_float
 
         # stores the indices of the unspecified array shapes
         self.missing_shapes = set(range(self.num_arrays)) - set(
@@ -242,6 +247,16 @@ class fwdprop_test_factory:
             ):  # assure arrays don't contain forbidden values
                 for value in self.index_to_no_go.get(i, ()):
                     assume(np.all(arr != value))
+
+            if self.permit_0d_array_as_float:
+                # potentially cast a 0D array as a float
+                arrs = tuple(
+                    arr.item()
+                    if arr.ndim == 0
+                    and data.draw(st.booleans(), label="arr-{} to float".format(n))
+                    else arr
+                    for n, arr in enumerate(arrs)
+                )
 
             # execute mygrad and "true" functions. Compare outputs and check mygrad behavior
             o = self.op(*(Tensor(i) for i in arrs), **kwargs, constant=constant)
@@ -325,7 +340,7 @@ class backprop_test_factory:
         atol: float = 1e-8,
         vary_each_element: bool = False,
         finite_difference=False,
-        assumptions: Optional[Callable[..., bool]] = None
+        assumptions: Optional[Callable[..., bool]] = None,
     ):
         """
         Parameters
