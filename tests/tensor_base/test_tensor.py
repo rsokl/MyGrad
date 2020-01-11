@@ -2,7 +2,7 @@ import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
 import pytest
-from hypothesis import given, settings
+from hypothesis import assume, given, settings
 from numpy.testing import assert_allclose, assert_array_equal, assert_equal
 from pytest import raises
 
@@ -258,6 +258,7 @@ def test_special_methods(
     constant=st.booleans(),
 )
 def test_pos(x: np.ndarray, constant: bool):
+    assume(np.all(np.isfinite(x)))
     x = Tensor(x, constant=constant)
     y = +x
     assert y.creator.variables[0] is x
@@ -267,6 +268,7 @@ def test_pos(x: np.ndarray, constant: bool):
 
 @given(x=hnp.arrays(shape=hnp.array_shapes(), dtype=hnp.floating_dtypes()))
 def test_neg(x):
+    assume(np.all(np.isfinite(x)))
     x = Tensor(x)
     op_name = "__neg__"
     assert hasattr(Tensor, op_name)
