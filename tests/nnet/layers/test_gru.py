@@ -91,6 +91,7 @@ def test_all_constant(out_constant: bool):
     dropout=st.sampled_from([0, 0.45]),
     data=st.data(),
 )
+@pytest.mark.filterwarnings("ignore: overflow encountered in exp")
 def test_gru_fwd(X, D, dropout, data: st.DataObject):
     T, N, C = X.shape
 
