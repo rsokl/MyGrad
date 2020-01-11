@@ -1,6 +1,7 @@
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
+import pytest
 from hypothesis import given, settings
 from numpy.testing import assert_array_equal
 from scipy import special
@@ -13,12 +14,13 @@ from tests.custom_strategies import valid_axes
 @given(
     data=st.data(),
     x=hnp.arrays(
-        shape=hnp.array_shapes(min_dims=0),
-        dtype=np.float,
-        elements=st.floats(),
+        shape=hnp.array_shapes(min_dims=0), dtype=np.float, elements=st.floats(),
     ),
     keepdims=st.booleans(),
 )
+@pytest.mark.filterwarnings(
+    "ignore"
+)  # ignore runtime warnings for exhaustive evaluation
 def test_logsumexp(data: st.SearchStrategy, x: np.ndarray, keepdims: bool):
     axes = data.draw(valid_axes(ndim=x.ndim), label="axes")
     mygrad_result = logsumexp(x, axis=axes, keepdims=keepdims)
