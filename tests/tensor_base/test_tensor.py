@@ -30,7 +30,7 @@ def test_input_type_checking(data, constant, creator):
 )
 def test_copy(data, constant):
     x = Tensor(data, constant=constant)
-    y = x * 2
+    y = +x
     y.backward()
     y_copy = y.copy()
 
