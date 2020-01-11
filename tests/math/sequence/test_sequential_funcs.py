@@ -3,6 +3,7 @@ from functools import partial
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
+import pytest
 from hypothesis import given, settings
 from pytest import raises
 
@@ -146,6 +147,7 @@ def test_mean_bkwd():
     num_arrays=1,
     kwargs=dict(axis=axis_arg, keepdims=keepdims_arg, ddof=ddof_arg),
 )
+@pytest.mark.filterwarnings("ignore")  # runtime warnings for empty sequences
 def test_var_fwd():
     pass
 
@@ -230,6 +232,7 @@ def test_var_no_axis_bkwrd(x):
     num_arrays=1,
     kwargs=dict(axis=axis_arg, keepdims=keepdims_arg, ddof=ddof_arg),
 )
+@pytest.mark.filterwarnings("ignore")  # runtime warnings for empty sequences
 def test_std_fwd():
     pass
 
