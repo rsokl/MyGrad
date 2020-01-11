@@ -4,7 +4,7 @@ import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
 import pytest
-from hypothesis import given, settings
+from hypothesis import example, given, settings
 from numpy.testing import assert_allclose
 
 from mygrad import matmul
@@ -15,6 +15,7 @@ from tests.utils import does_not_raise
 
 
 @settings(deadline=None)
+@example(s0=np.array([[0.0, 0.0]]), dropout=0.0, out_constant=False)
 @given(
     s0=st.none()
     | hnp.arrays(shape=(1, 2), dtype=float, elements=st.just(0))
