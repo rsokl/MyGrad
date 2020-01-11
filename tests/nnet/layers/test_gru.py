@@ -232,7 +232,7 @@ def test_gru_fwd(X, D, dropout, data: st.DataObject):
 # There is an occasional overflow in the oracle sigmoid
 # that is acceptable - reducing the input domain to ameliorate this
 # would potentially mask real numerical issues
-@settings(deadline=None, max_examples=1000)
+@settings(deadline=None)
 @given(
     data=st.data(),
     X=hnp.arrays(
