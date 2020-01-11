@@ -21,7 +21,7 @@ def test_cbrt_fwd():
     assumptions=_is_non_zero,
     atol=1e-5,
     rtol=1e-5,
-    finite_difference=True,
+    use_finite_difference=True,
     h=1e-8,
 )
 def test_cbrt_backward():

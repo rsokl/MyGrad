@@ -339,7 +339,7 @@ class backprop_test_factory:
         rtol: float = 1e-8,
         atol: float = 1e-8,
         vary_each_element: bool = False,
-        finite_difference=False,
+        use_finite_difference=False,
         assumptions: Optional[Callable[..., bool]] = None
     ):
         """
@@ -399,7 +399,7 @@ class backprop_test_factory:
             entries, like 'add' and 'sum'. Otherwise, the gradient is constructed
             by varying each element of each array independently.
 
-        finite_difference : bool, optional (default=False)
+        use_finite_difference : bool, optional (default=False)
             If True, the finite-difference method will be used to compute the numerical
             derivative instead of the complex step method (default). This is necessary
             if the function being tested is not analytic or does not have a complex-value
@@ -484,16 +484,16 @@ class backprop_test_factory:
         assert assumptions is None or callable(assumptions)
         self.assumptions = assumptions
 
-        assert isinstance(finite_difference, bool)
-        self.finite_difference = finite_difference
+        assert isinstance(use_finite_difference, bool)
+        self.use_finite_difference = use_finite_difference
 
-        if finite_difference and vary_each_element:
+        if use_finite_difference and vary_each_element:
             raise NotImplementedError(
                 "`finite_difference` does not have an implementation supporting "
                 "\n`vary_each_element=True`"
             )
 
-        if finite_difference and h < 1e-8:
+        if use_finite_difference and h < 1e-8:
             from warnings import warn
 
             warn(
@@ -612,7 +612,7 @@ class backprop_test_factory:
             else:
                 out.backward(grad)
 
-            if not self.finite_difference:
+            if not self.use_finite_difference:
                 # compute derivatives via numerical approximation of derivative
                 # using the complex-step method
                 numerical_grad = (
