@@ -17,7 +17,7 @@ def _not_large(*arrs, **kwargs):
 
 
 @backprop_test_factory(
-    mygrad_func=sigmoid, true_func=lambda x: 1 / (1 + np.exp(-x)), num_arrays=1, assumptions=_not_large
+    mygrad_func=sigmoid, true_func=lambda x: 1 / (1 + np.exp(-x)), num_arrays=1, index_to_bnds={0: (-500, 500)},
 )
 def test_sigmoid_bkwd():
     pass
