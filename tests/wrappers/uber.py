@@ -122,7 +122,7 @@ class fwdprop_test_factory:
             case will be marked as skipped by hypothesis.
 
         permit_0d_array_as_float : bool, optional (default=True)
-            If True, drawn 0D arrays will potentially be case to numpy-floats.
+            If True, drawn 0D arrays will potentially be cast to numpy-floats.
         """
         self.tolerances = dict(atol=atol, rtol=rtol)
         index_to_bnds = _to_dict(index_to_bnds)
