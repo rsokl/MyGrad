@@ -94,7 +94,7 @@ def test_logaddexp_fwd():
     true_func=np.logaddexp,
     num_arrays=2,
     index_to_bnds=(-10, 10),
-    finite_difference=True,
+    use_finite_difference=True,
     h=1e-8,
     atol=1e-4,
     rtol=1e-4,
@@ -115,7 +115,7 @@ def test_logaddexp2_fwd():
     num_arrays=2,
     atol=1e-4,
     rtol=1e-4,
-    finite_difference=True,
+    use_finite_difference=True,
     h=1e-8,
     index_to_bnds=(-100, 100),
 )
@@ -138,7 +138,7 @@ def test_arctan2_fwd():
     atol=1e-4,
     rtol=1e-4,
     index_to_bnds={1: (1, 10)},
-    finite_difference=True,
+    use_finite_difference=True,
     h=1e-8,
 )
 def test_arctan2_bkwd():
