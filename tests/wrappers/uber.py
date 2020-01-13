@@ -71,7 +71,8 @@ class fwdprop_test_factory:
         index_to_arr_shapes: Dict[int, Union[Sequence[int], SearchStrategy]] = None,
         atol: float = 1e-7,
         rtol: float = 1e-7,
-        assumptions: Optional[Callable[..., bool]] = None
+        assumptions: Optional[Callable[..., bool]] = None,
+        permit_0d_array_as_float: bool = True
     ):
         """
         Parameters
@@ -119,6 +120,9 @@ class fwdprop_test_factory:
             A callable that is fed the generated arrays and keyword arguments that will
             be fed to ``mygrad_func``. If ``assumptions`` returns ``False``, that test
             case will be marked as skipped by hypothesis.
+
+        permit_0d_array_as_float : bool, optional (default=True)
+            If True, drawn 0D arrays will potentially be cast to numpy-floats.
         """
         self.tolerances = dict(atol=atol, rtol=rtol)
         index_to_bnds = _to_dict(index_to_bnds)
@@ -165,6 +169,7 @@ class fwdprop_test_factory:
         self.num_arrays = num_arrays
         self.shapes = shapes
         self.assumptions = assumptions
+        self.permit_0d_array_as_float = permit_0d_array_as_float
 
         # stores the indices of the unspecified array shapes
         self.missing_shapes = set(range(self.num_arrays)) - set(
@@ -242,6 +247,16 @@ class fwdprop_test_factory:
             ):  # assure arrays don't contain forbidden values
                 for value in self.index_to_no_go.get(i, ()):
                     assume(np.all(arr != value))
+
+            if self.permit_0d_array_as_float:
+                # potentially cast a 0D array as a float
+                arrs = tuple(
+                    arr.item()
+                    if arr.ndim == 0
+                    and data.draw(st.booleans(), label="arr-{} to float".format(n))
+                    else arr
+                    for n, arr in enumerate(arrs)
+                )
 
             # execute mygrad and "true" functions. Compare outputs and check mygrad behavior
             o = self.op(*(Tensor(i) for i in arrs), **kwargs, constant=constant)
@@ -324,7 +339,7 @@ class backprop_test_factory:
         rtol: float = 1e-8,
         atol: float = 1e-8,
         vary_each_element: bool = False,
-        finite_difference=False,
+        use_finite_difference=False,
         assumptions: Optional[Callable[..., bool]] = None
     ):
         """
@@ -384,7 +399,7 @@ class backprop_test_factory:
             entries, like 'add' and 'sum'. Otherwise, the gradient is constructed
             by varying each element of each array independently.
 
-        finite_difference : bool, optional (default=False)
+        use_finite_difference : bool, optional (default=False)
             If True, the finite-difference method will be used to compute the numerical
             derivative instead of the complex step method (default). This is necessary
             if the function being tested is not analytic or does not have a complex-value
@@ -469,16 +484,16 @@ class backprop_test_factory:
         assert assumptions is None or callable(assumptions)
         self.assumptions = assumptions
 
-        assert isinstance(finite_difference, bool)
-        self.finite_difference = finite_difference
+        assert isinstance(use_finite_difference, bool)
+        self.use_finite_difference = use_finite_difference
 
-        if finite_difference and vary_each_element:
+        if use_finite_difference and vary_each_element:
             raise NotImplementedError(
                 "`finite_difference` does not have an implementation supporting "
                 "\n`vary_each_element=True`"
             )
 
-        if finite_difference and h < 1e-8:
+        if use_finite_difference and h < 1e-8:
             from warnings import warn
 
             warn(
@@ -597,7 +612,7 @@ class backprop_test_factory:
             else:
                 out.backward(grad)
 
-            if not self.finite_difference:
+            if not self.use_finite_difference:
                 # compute derivatives via numerical approximation of derivative
                 # using the complex-step method
                 numerical_grad = (

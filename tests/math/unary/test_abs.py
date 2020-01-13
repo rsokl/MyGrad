@@ -20,7 +20,7 @@ def test_abs_fwd():
     index_to_bnds={0: (-10, 10)},
     assumptions=_is_non_zero,
     atol=1e-5,
-    finite_difference=True,
+    use_finite_difference=True,
     h=1e-8,
 )
 def test_abs_backward():
@@ -40,7 +40,7 @@ def test_absolute_fwd():
     index_to_no_go={0: (0,)},
     atol=1e-5,
     assumptions=_is_non_zero,
-    finite_difference=True,
+    use_finite_difference=True,
     h=1e-8,
 )
 def test_absolute_backward():
