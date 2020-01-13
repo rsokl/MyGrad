@@ -7,7 +7,7 @@ from mygrad.tensor_base import Tensor
 class Sigmoid(Operation):
     def __call__(self, a):
         self.variables = (a,)
-        x = -1.0 * a.data
+        x = np.asarray(-1.0 * a.data)
         np.exp(x, out=x)
         x += 1
         np.reciprocal(x, out=x)
