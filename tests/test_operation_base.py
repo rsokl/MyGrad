@@ -27,7 +27,12 @@ def old_op(a):
 
 @given(
     constant=st.booleans(),
-    arr=hnp.arrays(dtype=float, shape=hnp.array_shapes()),
+    arr=hnp.arrays(
+        dtype=np.float64,
+        shape=hnp.array_shapes(min_dims=0),
+        elements=st.floats(-1e6, 1e6),
+    )
+    | st.floats(-1e6, 1e6),
     op_before=st.booleans(),
     op_after=st.booleans(),
 )

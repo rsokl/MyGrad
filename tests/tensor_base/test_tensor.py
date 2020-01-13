@@ -2,7 +2,7 @@ import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
 import pytest
-from hypothesis import given, settings
+from hypothesis import assume, given, settings
 from numpy.testing import assert_allclose, assert_array_equal, assert_equal
 from pytest import raises
 
@@ -30,7 +30,7 @@ def test_input_type_checking(data, constant, creator):
 )
 def test_copy(data, constant):
     x = Tensor(data, constant=constant)
-    y = x * 2
+    y = +x
     y.backward()
     y_copy = y.copy()
 
@@ -137,13 +137,21 @@ def test_init_data_rand(x):
     assert_equal(actual=Tensor(x).data, desired=x)
 
 
-@given(x=hnp.arrays(dtype=float, shape=hnp.array_shapes()))
+@given(
+    x=hnp.arrays(
+        dtype=float,
+        shape=hnp.array_shapes(),
+        elements=st.floats(allow_infinity=False, allow_nan=False),
+    )
+    | st.floats(allow_infinity=False, allow_nan=False)
+    | st.integers(-100, 100),
+)
 def test_items(x):
     """ verify that tensor.item() mirrors array.item()"""
     tensor = Tensor(x)
     try:
-        value = x.item()
-        assert_allclose(value, tensor.item())
+        value = np.asarray(x).item()
+        assert_array_equal(value, tensor.item())
     except ValueError:
         with raises(ValueError):
             tensor.item()
@@ -250,6 +258,7 @@ def test_special_methods(
     constant=st.booleans(),
 )
 def test_pos(x: np.ndarray, constant: bool):
+    assume(np.all(np.isfinite(x)))
     x = Tensor(x, constant=constant)
     y = +x
     assert y.creator.variables[0] is x
@@ -259,6 +268,7 @@ def test_pos(x: np.ndarray, constant: bool):
 
 @given(x=hnp.arrays(shape=hnp.array_shapes(), dtype=hnp.floating_dtypes()))
 def test_neg(x):
+    assume(np.all(np.isfinite(x)))
     x = Tensor(x)
     op_name = "__neg__"
     assert hasattr(Tensor, op_name)

@@ -41,7 +41,7 @@ def test_is_invalid_gradient(grad, is_invalid, data: st.DataObject):
 
 @given(shapes=hnp.mutually_broadcastable_shapes(num_shapes=2, max_dims=5))
 def test_reduce_broadcast_shape_consistency(shapes: hnp.BroadcastableShapes):
-    grad = np.empty(shapes.result_shape)
+    grad = np.zeros(shapes.result_shape)
 
     assert (
         reduce_broadcast(grad, var_shape=shapes.input_shapes[0]).shape

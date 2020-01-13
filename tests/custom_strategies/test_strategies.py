@@ -137,7 +137,7 @@ def test_valid_axes(shape, data, permit_none, pos_only):
         ),
         label="axis",
     )
-    x = np.empty(shape)
+    x = np.zeros(shape)
     np.sum(x, axis=axis)
     if not permit_none:
         assert axis is not None
