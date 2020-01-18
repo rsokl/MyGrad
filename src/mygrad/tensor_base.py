@@ -204,7 +204,7 @@ class Tensor:
             op_args = tuple()
 
         if op_kwargs is None:
-            op_kwargs = dict()
+            op_kwargs = None
 
         tensor_vars = tuple(
             cls(var, constant=True) if not isinstance(var, cls) else var
