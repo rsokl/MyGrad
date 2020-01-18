@@ -28,3 +28,4 @@ branches:
   only:
   - master
   - develop
+  - mygrad-2.0
