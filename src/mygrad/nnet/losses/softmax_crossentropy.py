@@ -26,6 +26,8 @@ class SoftmaxCrossEntropy(Operation):
             Returns
             -------
             The average softmax loss"""
+        if isinstance(y_true, Tensor):
+            y_true = y_true.data
 
         check_loss_inputs(x, y_true)
         self.variables = (x,)
