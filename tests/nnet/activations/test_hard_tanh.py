@@ -6,29 +6,31 @@ from mygrad.nnet.activations import hard_tanh
 from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
-@given(
-    minimum=st.floats(allow_infinity=False, allow_nan=False),
-    maximum=st.floats(allow_infinity=False, allow_nan=False),
+@fwdprop_test_factory(
+    mygrad_func=hard_tanh,
+    true_func=lambda x, lower_bound, upper_bound: np.maximum(
+        np.minimum(x, upper_bound), lower_bound
+    ),
+    num_arrays=1,
+    kwargs={
+        "lower_bound": lambda x: st.floats(allow_infinity=False, allow_nan=False),
+        "upper_bound": lambda x: st.floats(allow_infinity=False, allow_nan=False),
+    },
 )
-def test_relu_fwd(minimum, maximum):
-    @fwdprop_test_factory(
-        mygrad_func=hard_tanh,
-        true_func=lambda x: np.maximum(np.minimum(x, maximum), minimum),
-        num_arrays=1,
-    )
-    def wrapped_test():
-        pass
+def test_hard_tanh_fwd():
+    pass
 
 
-@given(
-    minimum=st.floats(allow_infinity=False, allow_nan=False),
-    maximum=st.floats(allow_infinity=False, allow_nan=False),
+@backprop_test_factory(
+    mygrad_func=hard_tanh,
+    true_func=lambda x, lower_bound, upper_bound: np.maximum(
+        np.minimum(x, upper_bound), lower_bound
+    ),
+    num_arrays=1,
+    kwargs={
+        "lower_bound": lambda x: st.floats(allow_infinity=False, allow_nan=False),
+        "upper_bound": lambda x: st.floats(allow_infinity=False, allow_nan=False),
+    },
 )
-def test_relu_bkwd(minimum, maximum):
-    @backprop_test_factory(
-        mygrad_func=hard_tanh,
-        true_func=lambda x: np.maximum(np.minimum(x, maximum), minimum),
-        num_arrays=1,
-    )
-    def wrapped_test():
-        pass
+def test_hard_tanh_bkwd():
+    pass
