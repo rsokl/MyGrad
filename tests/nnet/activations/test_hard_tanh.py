@@ -13,7 +13,7 @@ from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 def test_relu_fwd(minimum, maximum):
     @fwdprop_test_factory(
         mygrad_func=hard_tanh,
-        true_func=lambda x: np.maximum(np.minimum(x, 1), -1),
+        true_func=lambda x: np.maximum(np.minimum(x, maximum), minimum),
         num_arrays=1,
     )
     def wrapped_test():
@@ -27,7 +27,7 @@ def test_relu_fwd(minimum, maximum):
 def test_relu_bkwd(minimum, maximum):
     @backprop_test_factory(
         mygrad_func=hard_tanh,
-        true_func=lambda x: np.maximum(np.minimum(x, 1), -1),
+        true_func=lambda x: np.maximum(np.minimum(x, maximum), minimum),
         num_arrays=1,
     )
     def wrapped_test():
