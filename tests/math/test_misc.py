@@ -197,6 +197,7 @@ def test_clip_bkwd(mygrad_clip: Callable, numpy_clip: Callable, num_arrays: int)
         dtype=float,
     ),
 )
+@pytest.mark.filterwarnings("ignore: invalid value")
 def test_clip_input_validation(a, a_min, a_max):
     try:
         numpy_out = np.clip(a, a_min, a_max)
