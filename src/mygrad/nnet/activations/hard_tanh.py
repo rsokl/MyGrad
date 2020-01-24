@@ -9,7 +9,7 @@ def hard_tanh(x, *, lower_bound=-1, upper_bound=1, constant=False):
 
     Parameters
     ----------
-    x : Union[numpy.ndarray, mygrad.Tensor]
+    x : array_like
         The input, to which to apply the hard tanh function.
 
     lower_bound : Real, optional (default=-1)
