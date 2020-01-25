@@ -42,6 +42,19 @@ def method_unpacked_reshape(arr, newshape, reshaper, **kwargs):
     )
 
 
+def in_place_reshape(arr, newshape, reshaper, **kwargs):
+    to_array = np.asarray if reshaper is np.reshape else Tensor
+    arr = +arr  # "touch" array so we can check gradient
+
+    if isinstance(arr, Number):
+        arr = to_array(arr)
+
+    arr.shape = newshape
+    if isinstance(arr, Tensor) and kwargs.get("constant", False):
+        arr._constant = True
+    return arr
+
+
 @pytest.mark.parametrize(
     "reshape_type",
     [
@@ -49,6 +62,7 @@ def method_unpacked_reshape(arr, newshape, reshaper, **kwargs):
         keyword_reshape,
         method_tuple_reshape,
         method_unpacked_reshape,
+        in_place_reshape,
     ],
 )
 def test_reshape_fwd(reshape_type):
@@ -71,6 +85,7 @@ def test_reshape_fwd(reshape_type):
         keyword_reshape,
         method_tuple_reshape,
         method_unpacked_reshape,
+        in_place_reshape,
     ],
 )
 def test_reshape_bkwd(reshape_type):
@@ -80,7 +95,6 @@ def test_reshape_bkwd(reshape_type):
         num_arrays=1,
         kwargs=dict(newshape=lambda arrs: valid_shapes(arrs.size)),
         vary_each_element=True,
-        atol=1e-9,
     )
     def test_bkwd():
         pass

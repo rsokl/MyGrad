@@ -47,7 +47,7 @@ def reshape(a, newshape, constant=False):
     Tensor([[1, 2],
             [3, 4],
             [5, 6]])"""
-    return Tensor._op(Reshape, a, op_args=(newshape,), constant=constant)
+    return Tensor._op(Reshape, a, op_args=(newshape,), force_constant=constant)
 
 
 def squeeze(a, axis=None, constant=False):
@@ -95,7 +95,7 @@ def squeeze(a, axis=None, constant=False):
     ValueError: cannot select an axis to squeeze out which has size not equal to one
     >>> mg.squeeze(x, axis=2).shape
     (1, 3)"""
-    return Tensor._op(Squeeze, a, op_args=(axis,), constant=constant)
+    return Tensor._op(Squeeze, a, op_args=(axis,), force_constant=constant)
 
 
 def ravel(a, constant=False):
@@ -131,7 +131,7 @@ def ravel(a, constant=False):
     >>> mg.ravel(x)
     Tensor([1, 2, 3, 4])
     """
-    return Tensor._op(Ravel, a, constant=constant)
+    return Tensor._op(Ravel, a, force_constant=constant)
 
 
 def expand_dims(a, axis, constant=False):
@@ -169,7 +169,7 @@ def expand_dims(a, axis, constant=False):
     >>> z.shape
     (1, 2, 1)
     """
-    return Tensor._op(ExpandDims, a, op_args=(axis,), constant=constant)
+    return Tensor._op(ExpandDims, a, op_args=(axis,), force_constant=constant)
 
 
 def broadcast_to(a, shape, constant=False):
@@ -216,4 +216,4 @@ def broadcast_to(a, shape, constant=False):
     ValueError: operands could not be broadcast together with remapped
     shapes [original->remapped]: (3,) and requested shape (4,4)
     """
-    return Tensor._op(BroadcastTo, a, op_args=(shape,), constant=constant)
+    return Tensor._op(BroadcastTo, a, op_args=(shape,), force_constant=constant)

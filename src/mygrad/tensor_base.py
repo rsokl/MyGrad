@@ -172,7 +172,7 @@ class Tensor:
         *input_vars,
         op_args=None,
         op_kwargs=None,
-        constant=False
+        force_constant=False
     ):
         """ Wraps operations performed between tensors: f(a, b, ...).
 
@@ -192,7 +192,7 @@ class Tensor:
         op_kwargs : Optional[Dict[str, Any]]
             Arbitrary keyword arguments passed to the operation's forward pass.
 
-        constant : bool, optional (default=False)
+        force_constant : bool, optional (default=False)
             If True, the resulting Tensor is a constant.
 
         Returns
@@ -211,7 +211,7 @@ class Tensor:
             for var in input_vars
         )
 
-        is_const = constant or all(var.constant for var in tensor_vars)
+        is_const = force_constant or all(var.constant for var in tensor_vars)
 
         f = Op()
         f.graph = {f}
@@ -550,11 +550,14 @@ class Tensor:
         self.data = tensor.data
         self._constant = tensor.constant
 
-    def __setitem__(self, key, value):
-        if self.constant and (not isinstance(value, Tensor) or value.constant):
-            self.data[key] = value.data if isinstance(value, Tensor) else value
-            return None
-
+    def _in_place_op(
+        self,
+        inplace_op: Type[Operation],
+        *input_vars,
+        op_args=None,
+        op_kwargs=None,
+        force_constant=False
+    ):
         # old_tensor is the tensor pre-setitem
         old_tensor = Tensor(
             self,
@@ -574,8 +577,23 @@ class Tensor:
                     )
 
         # self becomes the tensor post-setitem
-        out = self._op(SetItem, old_tensor, value, op_args=(key,),)
+        out = self._op(
+            inplace_op,
+            old_tensor,
+            *input_vars,
+            op_args=op_args,
+            op_kwargs=op_kwargs,
+            force_constant=force_constant
+        )
         self._mirror_tensor(out)
+
+    def __setitem__(self, key, value):
+        if self.constant and (not isinstance(value, Tensor) or value.constant):
+            self.data[key] = value.data if isinstance(value, Tensor) else value
+            return None
+
+        # self becomes the tensor post-setitem
+        self._in_place_op(SetItem, value, op_args=(key,))
 
     def __add__(self, other):
         return self._op(Add, self, other)
@@ -724,7 +742,7 @@ class Tensor:
         >>> x.flatten()
         Tensor([1, 2, 3, 4])
         """
-        return Tensor._op(Flatten, self, constant=constant)
+        return Tensor._op(Flatten, self, force_constant=constant)
 
     @property
     def size(self):
@@ -837,7 +855,7 @@ class Tensor:
             if len(newshape) > 1:
                 raise TypeError("an integer is required")
             newshape = newshape[0]
-        return Tensor._op(Reshape, self, op_args=(newshape,), constant=constant)
+        return Tensor._op(Reshape, self, op_args=(newshape,), force_constant=constant)
 
     @property
     def shape(self):
@@ -865,6 +883,12 @@ class Tensor:
         mygrad.reshape : similar function
         Tensor.reshape : similar method"""
         return self.data.shape
+
+    @shape.setter
+    def shape(self, newshape):
+        if self.constant:
+            self.data.shape = newshape
+        self._in_place_op(Reshape, op_args=(newshape,))
 
     @property
     def T(self):
