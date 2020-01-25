@@ -44,4 +44,4 @@ def sigmoid(x, constant=False):
     >>> sigmoid(x)
     Tensor([0.00669285, 0.02005754, 0.0585369 , 0.1588691 , 0.36457644,
         0.63542356, 0.8411309 , 0.9414631 , 0.97994246, 0.99330715])"""
-    return Tensor._op(Sigmoid, x, constant=constant)
+    return Tensor._op(Sigmoid, x, force_constant=constant)

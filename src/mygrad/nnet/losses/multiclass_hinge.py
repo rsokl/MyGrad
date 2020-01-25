@@ -87,4 +87,6 @@ def multiclass_hinge(x, y_true, hinge=1.0, constant=False):
         `x` must be a 2-dimensional array-like object
         `y_true` must be a shape-(N,) array-like object
     """
-    return Tensor._op(MulticlassHinge, x, op_args=(y_true, hinge), constant=constant)
+    return Tensor._op(
+        MulticlassHinge, x, op_args=(y_true, hinge), force_constant=constant
+    )

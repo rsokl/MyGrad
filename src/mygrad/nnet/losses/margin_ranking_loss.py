@@ -102,4 +102,6 @@ def margin_ranking_loss(x1, x2, y, margin, constant=False):
     if y.ndim:
         if x1.ndim == 2:
             y = y.reshape(-1, 1)
-    return Tensor._op(MarginRanking, x1, x2, op_args=(y, margin), constant=constant)
+    return Tensor._op(
+        MarginRanking, x1, x2, op_args=(y, margin), force_constant=constant
+    )

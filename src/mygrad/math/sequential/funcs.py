@@ -92,7 +92,7 @@ def sum(x, axis=None, keepdims=False, constant=False):
     >>> mg.sum([10], initial=5)
     Tensor(15)
     """
-    return Tensor._op(Sum, x, op_args=(axis, keepdims), constant=constant)
+    return Tensor._op(Sum, x, op_args=(axis, keepdims), force_constant=constant)
 
 
 def mean(x, axis=None, keepdims=False, constant=False):
@@ -154,7 +154,7 @@ def mean(x, axis=None, keepdims=False, constant=False):
     >>> mg.mean(a, dtype=np.float64)
     Tensor(0.55000000074505806)
     """
-    return Tensor._op(Mean, x, op_args=(axis, keepdims), constant=constant)
+    return Tensor._op(Mean, x, op_args=(axis, keepdims), force_constant=constant)
 
 
 def var(x, axis=None, ddof=0, keepdims=False, constant=False):
@@ -236,7 +236,7 @@ def var(x, axis=None, ddof=0, keepdims=False, constant=False):
         Variance,
         x,
         op_kwargs=dict(axis=axis, keepdims=keepdims, ddof=ddof),
-        constant=constant,
+        force_constant=constant,
     )
 
 
@@ -317,7 +317,7 @@ def std(x, axis=None, ddof=0, keepdims=False, constant=False):
         StdDev,
         x,
         op_kwargs=dict(axis=axis, keepdims=keepdims, ddof=ddof),
-        constant=constant,
+        force_constant=constant,
     )
 
 
@@ -369,7 +369,7 @@ def max(x, axis=None, keepdims=False, constant=False):
         MaxMin,
         x,
         op_kwargs=dict(axis=axis, keepdims=keepdims, maxmin="max"),
-        constant=constant,
+        force_constant=constant,
     )
 
 
@@ -419,7 +419,7 @@ def min(x, axis=None, keepdims=False, constant=False):
         MaxMin,
         x,
         op_kwargs=dict(axis=axis, keepdims=keepdims, maxmin="min"),
-        constant=constant,
+        force_constant=constant,
     )
 
 
@@ -478,7 +478,7 @@ def prod(a, axis=None, keepdims=False, constant=False):
     ...          [3.,4.]], axis=1)
     Tensor([  2.,  12.]) """
     return Tensor._op(
-        Prod, a, op_kwargs=dict(axis=axis, keepdims=keepdims), constant=constant
+        Prod, a, op_kwargs=dict(axis=axis, keepdims=keepdims), force_constant=constant
     )
 
 
@@ -531,7 +531,7 @@ def cumprod(a, axis=None, constant=False):
     Tensor([[  1,   2,   6],
             [  4,  20, 120]])"""
 
-    return Tensor._op(CumProd, a, op_kwargs=dict(axis=axis), constant=constant)
+    return Tensor._op(CumProd, a, op_kwargs=dict(axis=axis), force_constant=constant)
 
 
 def cumsum(a, axis=None, constant=False):
@@ -573,4 +573,4 @@ def cumsum(a, axis=None, constant=False):
             [ 4,  9, 15]])
     """
 
-    return Tensor._op(CumSum, a, op_kwargs=dict(axis=axis), constant=constant)
+    return Tensor._op(CumSum, a, op_kwargs=dict(axis=axis), force_constant=constant)

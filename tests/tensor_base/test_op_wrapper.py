@@ -9,7 +9,7 @@ class Dummy(Operation):
 
 
 def dummy(a, b, constant=False):
-    return Tensor._op(Dummy, a, b, constant=constant)
+    return Tensor._op(Dummy, a, b, force_constant=constant)
 
 
 def test_constant_arg():

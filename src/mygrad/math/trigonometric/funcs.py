@@ -34,7 +34,7 @@ def sin(a, constant=False):
         Returns
         -------
         mygrad.Tensor"""
-    return Tensor._op(Sin, a, constant=constant)
+    return Tensor._op(Sin, a, force_constant=constant)
 
 
 def sinc(a, constant=False):
@@ -51,7 +51,7 @@ def sinc(a, constant=False):
         Returns
         -------
         mygrad.Tensor"""
-    return Tensor._op(Sinc, a, constant=constant)
+    return Tensor._op(Sinc, a, force_constant=constant)
 
 
 def cos(a, constant=False):
@@ -68,7 +68,7 @@ def cos(a, constant=False):
         Returns
         -------
         mygrad.Tensor"""
-    return Tensor._op(Cos, a, constant=constant)
+    return Tensor._op(Cos, a, force_constant=constant)
 
 
 def tan(a, constant=False):
@@ -85,7 +85,7 @@ def tan(a, constant=False):
         Returns
         -------
         mygrad.Tensor"""
-    return Tensor._op(Tan, a, constant=constant)
+    return Tensor._op(Tan, a, force_constant=constant)
 
 
 def cot(a, constant=False):
@@ -102,7 +102,7 @@ def cot(a, constant=False):
         Returns
         -------
         mygrad.Tensor"""
-    return Tensor._op(Cot, a, constant=constant)
+    return Tensor._op(Cot, a, force_constant=constant)
 
 
 def csc(a, constant=False):
@@ -119,7 +119,7 @@ def csc(a, constant=False):
         Returns
         -------
         mygrad.Tensor"""
-    return Tensor._op(Csc, a, constant=constant)
+    return Tensor._op(Csc, a, force_constant=constant)
 
 
 def sec(a, constant=False):
@@ -136,7 +136,7 @@ def sec(a, constant=False):
         Returns
         -------
         mygrad.Tensor"""
-    return Tensor._op(Sec, a, constant=constant)
+    return Tensor._op(Sec, a, force_constant=constant)
 
 
 def arccos(a, constant=False):
@@ -153,7 +153,7 @@ def arccos(a, constant=False):
         Returns
         -------
         mygrad.Tensor"""
-    return Tensor._op(Arccos, a, constant=constant)
+    return Tensor._op(Arccos, a, force_constant=constant)
 
 
 def arccsc(a, constant=False):
@@ -170,7 +170,7 @@ def arccsc(a, constant=False):
         Returns
         -------
         mygrad.Tensor"""
-    return Tensor._op(Arccsc, a, constant=constant)
+    return Tensor._op(Arccsc, a, force_constant=constant)
 
 
 def arccot(a, constant=False):
@@ -187,7 +187,7 @@ def arccot(a, constant=False):
         Returns
         -------
         mygrad.Tensor"""
-    return Tensor._op(Arccot, a, constant=constant)
+    return Tensor._op(Arccot, a, force_constant=constant)
 
 
 def arcsin(a, constant=False):
@@ -204,7 +204,7 @@ def arcsin(a, constant=False):
         Returns
         -------
         mygrad.Tensor"""
-    return Tensor._op(Arcsin, a, constant=constant)
+    return Tensor._op(Arcsin, a, force_constant=constant)
 
 
 def arctan(a, constant=False):
@@ -221,7 +221,7 @@ def arctan(a, constant=False):
         Returns
         -------
         mygrad.Tensor"""
-    return Tensor._op(Arctan, a, constant=constant)
+    return Tensor._op(Arctan, a, force_constant=constant)
 
 
 def arcsec(a, constant=False):
@@ -238,7 +238,7 @@ def arcsec(a, constant=False):
         Returns
         -------
         mygrad.Tensor"""
-    return Tensor._op(Arcsec, a, constant=constant)
+    return Tensor._op(Arcsec, a, force_constant=constant)
 
 
 def arctan2(a, b, constant=False):
@@ -256,4 +256,4 @@ def arctan2(a, b, constant=False):
         Returns
         -------
         mygrad.Tensor"""
-    return Tensor._op(Arctan2, a, b, constant=constant)
+    return Tensor._op(Arctan2, a, b, force_constant=constant)

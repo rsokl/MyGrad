@@ -23,7 +23,7 @@ def abs(a, constant=False):
     Notes
     -----
     The derivative at a == 0 returns nan"""
-    return Tensor._op(Abs, a, constant=constant)
+    return Tensor._op(Abs, a, force_constant=constant)
 
 
 absolute = abs
@@ -43,7 +43,7 @@ def sqrt(a, constant=False):
     Returns
     -------
     mygrad.Tensor"""
-    return Tensor._op(Sqrt, a, constant=constant)
+    return Tensor._op(Sqrt, a, force_constant=constant)
 
 
 def cbrt(a, constant=False):
@@ -60,7 +60,7 @@ def cbrt(a, constant=False):
     Returns
     -------
     mygrad.Tensor"""
-    return Tensor._op(Cbrt, a, constant=constant)
+    return Tensor._op(Cbrt, a, force_constant=constant)
 
 
 def maximum(a, b, constant=False):
@@ -84,7 +84,7 @@ def maximum(a, b, constant=False):
     -----
     The gradient does not exist where a == b; we use a
     value of 0 here."""
-    return Tensor._op(Maximum, a, b, constant=constant)
+    return Tensor._op(Maximum, a, b, force_constant=constant)
 
 
 def minimum(a, b, constant=False):
@@ -108,7 +108,7 @@ def minimum(a, b, constant=False):
     -----
     The gradient does not exist where a == b; we use a
     value of 0 here."""
-    return Tensor._op(Minimum, a, b, constant=constant)
+    return Tensor._op(Minimum, a, b, force_constant=constant)
 
 
 def clip(a, a_min, a_max, constant=False):

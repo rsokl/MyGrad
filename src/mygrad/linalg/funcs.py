@@ -106,7 +106,7 @@ def matmul(a, b, constant=False):
     Traceback (most recent call last):
     ...
     ValueError: Scalar operands are not allowed, use '*' instead"""
-    return Tensor._op(MatMul, a, b, constant=constant)
+    return Tensor._op(MatMul, a, b, force_constant=constant)
 
 
 def einsum(*operands, optimize=False, constant=False):
@@ -365,7 +365,7 @@ def einsum(*operands, optimize=False, constant=False):
         EinSum,
         *variables,
         op_kwargs=dict(in_lbls=in_lbls, out_lbls=out_lbls, optimize=optimize),
-        constant=constant
+        force_constant=constant
     )
 
 

@@ -161,5 +161,5 @@ def batchnorm(x, *, gamma=None, beta=None, eps, constant=False):
     if beta is None:
         beta = np.array([])
     return Tensor._op(
-        BatchNorm, x, gamma, beta, op_kwargs=dict(eps=eps), constant=constant
+        BatchNorm, x, gamma, beta, op_kwargs=dict(eps=eps), force_constant=constant
     )

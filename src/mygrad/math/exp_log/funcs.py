@@ -29,7 +29,7 @@ def exp(a, constant=False):
     Returns
     -------
     mygrad.Tensor"""
-    return Tensor._op(Exp, a, constant=constant)
+    return Tensor._op(Exp, a, force_constant=constant)
 
 
 def exp2(a, constant=False):
@@ -46,7 +46,7 @@ def exp2(a, constant=False):
     Returns
     -------
     mygrad.Tensor"""
-    return Tensor._op(Exp2, a, constant=constant)
+    return Tensor._op(Exp2, a, force_constant=constant)
 
 
 def expm1(a, constant=False):
@@ -70,7 +70,7 @@ def expm1(a, constant=False):
     -----
     This function provides greater precision than ``exp(x) - 1`` for
     small values of ``x``."""
-    return Tensor._op(Expm1, a, constant=constant)
+    return Tensor._op(Expm1, a, force_constant=constant)
 
 
 def logaddexp(a, b, constant=False):
@@ -98,7 +98,7 @@ def logaddexp(a, b, constant=False):
     numbers. In such cases the logarithm of the calculated
     probability is stored. This function allows adding probabilities
     stored in such a fashion. """
-    return Tensor._op(Logaddexp, a, b, constant=constant)
+    return Tensor._op(Logaddexp, a, b, force_constant=constant)
 
 
 def logaddexp2(a, b, constant=False):
@@ -128,7 +128,7 @@ def logaddexp2(a, b, constant=False):
     numbers. In such cases the logarithm of the calculated
     probability is stored. This function allows adding probabilities
     stored in such a fashion. """
-    return Tensor._op(Logaddexp2, a, b, constant=constant)
+    return Tensor._op(Logaddexp2, a, b, force_constant=constant)
 
 
 def log(a, constant=False):
@@ -152,7 +152,7 @@ def log(a, constant=False):
     -----
     This function provides greater precision than ``exp(x) - 1`` for
     small values of ``x``."""
-    return Tensor._op(Log, a, constant=constant)
+    return Tensor._op(Log, a, force_constant=constant)
 
 
 def log2(a, constant=False):
@@ -171,7 +171,7 @@ def log2(a, constant=False):
     Returns
     -------
     mygrad.Tensor"""
-    return Tensor._op(Log2, a, constant=constant)
+    return Tensor._op(Log2, a, force_constant=constant)
 
 
 def log10(a, constant=False):
@@ -190,7 +190,7 @@ def log10(a, constant=False):
     Returns
     -------
     mygrad.Tensor"""
-    return Tensor._op(Log10, a, constant=constant)
+    return Tensor._op(Log10, a, force_constant=constant)
 
 
 def log1p(a, constant=False):
@@ -215,4 +215,4 @@ def log1p(a, constant=False):
     For real-valued input, log1p is accurate also
     for ``x`` so small that ``1 + x == 1`` in floating-point
     accuracy."""
-    return Tensor._op(Log1p, a, constant=constant)
+    return Tensor._op(Log1p, a, force_constant=constant)

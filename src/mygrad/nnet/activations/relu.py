@@ -47,4 +47,4 @@ def relu(x, constant=False):
     >>> x.grad  # d(relu(x))/dx
     array([0., 0., 0., 1., 1.])
     """
-    return Tensor._op(ReLu, x, constant=constant)
+    return Tensor._op(ReLu, x, force_constant=constant)

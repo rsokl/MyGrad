@@ -57,4 +57,4 @@ def repeat(
             [3, 4],
             [3, 4]])
     """
-    return Tensor._op(Repeat, a, op_args=(repeats, axis), constant=constant)
+    return Tensor._op(Repeat, a, op_args=(repeats, axis), force_constant=constant)

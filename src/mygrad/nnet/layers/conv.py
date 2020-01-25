@@ -305,5 +305,5 @@ def conv_nd(x, filter_bank, *, stride, padding=0, dilation=1, constant=False):
         x,
         filter_bank,
         op_kwargs=dict(stride=stride, padding=padding, dilation=dilation),
-        constant=constant,
+        force_constant=constant,
     )

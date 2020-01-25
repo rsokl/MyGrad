@@ -62,7 +62,7 @@ def softmax(x, constant=False):
     -----
     - :math:`N` is the number of samples in the batch.
     - :math:`C` is the number of possible classes for which scores are provided.
-    
+
     This implements a numerically-stable version of softmax, however
     log-softmax is still the more numerically stable activation function.
 
@@ -83,7 +83,7 @@ def softmax(x, constant=False):
     Tensor([[0.33333333, 0.33333333, 0.33333333],
             [0.5       , 0.5       , 0.        ]])
     """
-    return Tensor._op(Softmax, x, constant=constant)
+    return Tensor._op(Softmax, x, force_constant=constant)
 
 
 class LogSoftmax(Operation):
@@ -158,4 +158,4 @@ def logsoftmax(x, constant=False):
     Tensor([[-1.09861229e+00, -1.09861229e+00, -1.09861229e+00],
             [ 0.00000000e+00,  0.00000000e+00, -1.00000000e+50]])
     """
-    return Tensor._op(LogSoftmax, x, constant=constant)
+    return Tensor._op(LogSoftmax, x, force_constant=constant)

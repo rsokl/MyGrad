@@ -96,5 +96,5 @@ def where(condition, x=not_set, y=not_set, constant=False):
         raise ValueError("either both or neither of x and y should be given")
 
     return Tensor._op(
-        Where, x, y, op_kwargs=dict(condition=condition), constant=constant
+        Where, x, y, op_kwargs=dict(condition=condition), force_constant=constant
     )

@@ -235,4 +235,4 @@ def max_pool(x, pool, stride, constant=False):
     pooling window would have been tiled along the last *three* axes
     of ``x``.
     """
-    return Tensor._op(MaxPoolND, x, op_args=(pool, stride), constant=constant)
+    return Tensor._op(MaxPoolND, x, op_args=(pool, stride), force_constant=constant)

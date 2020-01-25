@@ -31,7 +31,7 @@ def arccosh(a, constant=False):
         Returns
         -------
         mygrad.Tensor"""
-    return Tensor._op(Arccosh, a, constant=constant)
+    return Tensor._op(Arccosh, a, force_constant=constant)
 
 
 def arccoth(a, constant=False):
@@ -48,7 +48,7 @@ def arccoth(a, constant=False):
         Returns
         -------
         mygrad.Tensor"""
-    return Tensor._op(Arccoth, a, constant=constant)
+    return Tensor._op(Arccoth, a, force_constant=constant)
 
 
 def arccsch(a, constant=False):
@@ -65,7 +65,7 @@ def arccsch(a, constant=False):
         Returns
         -------
         mygrad.Tensor"""
-    return Tensor._op(Arccsch, a, constant=constant)
+    return Tensor._op(Arccsch, a, force_constant=constant)
 
 
 def arcsinh(a, constant=False):
@@ -82,7 +82,7 @@ def arcsinh(a, constant=False):
         Returns
         -------
         mygrad.Tensor"""
-    return Tensor._op(Arcsinh, a, constant=constant)
+    return Tensor._op(Arcsinh, a, force_constant=constant)
 
 
 def arctanh(a, constant=False):
@@ -99,7 +99,7 @@ def arctanh(a, constant=False):
         Returns
         -------
         mygrad.Tensor"""
-    return Tensor._op(Arctanh, a, constant=constant)
+    return Tensor._op(Arctanh, a, force_constant=constant)
 
 
 def cosh(a, constant=False):
@@ -116,7 +116,7 @@ def cosh(a, constant=False):
         Returns
         -------
         mygrad.Tensor"""
-    return Tensor._op(Cosh, a, constant=constant)
+    return Tensor._op(Cosh, a, force_constant=constant)
 
 
 def coth(a, constant=False):
@@ -133,7 +133,7 @@ def coth(a, constant=False):
         Returns
         -------
         mygrad.Tensor"""
-    return Tensor._op(Coth, a, constant=constant)
+    return Tensor._op(Coth, a, force_constant=constant)
 
 
 def csch(a, constant=False):
@@ -150,7 +150,7 @@ def csch(a, constant=False):
         Returns
         -------
         mygrad.Tensor"""
-    return Tensor._op(Csch, a, constant=constant)
+    return Tensor._op(Csch, a, force_constant=constant)
 
 
 def sech(a, constant=False):
@@ -167,7 +167,7 @@ def sech(a, constant=False):
         Returns
         -------
         mygrad.Tensor"""
-    return Tensor._op(Sech, a, constant=constant)
+    return Tensor._op(Sech, a, force_constant=constant)
 
 
 def sinh(a, constant=False):
@@ -184,7 +184,7 @@ def sinh(a, constant=False):
         Returns
         -------
         mygrad.Tensor"""
-    return Tensor._op(Sinh, a, constant=constant)
+    return Tensor._op(Sinh, a, force_constant=constant)
 
 
 def tanh(x, constant=False):
@@ -212,4 +212,4 @@ def tanh(x, constant=False):
     Tensor([-0.9999092 , -0.99916247, -0.99229794, -0.93110961, -0.5046724 ,
              0.5046724 ,  0.93110961,  0.99229794,  0.99916247,  0.9999092 ])
     """
-    return Tensor._op(Tanh, x, constant=constant)
+    return Tensor._op(Tanh, x, force_constant=constant)

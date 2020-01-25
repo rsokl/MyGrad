@@ -149,4 +149,6 @@ def softmax_crossentropy(x, y_true, constant=False):
     >>> softmax_crossentropy(x, y_true)
     Tensor(0.54930614)
     """
-    return Tensor._op(SoftmaxCrossEntropy, x, op_args=(y_true,), constant=constant)
+    return Tensor._op(
+        SoftmaxCrossEntropy, x, op_args=(y_true,), force_constant=constant
+    )

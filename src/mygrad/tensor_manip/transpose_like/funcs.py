@@ -46,7 +46,7 @@ def transpose(a, *axes, constant=False):
                 "'{}' object cannot be interpreted as an integer".format(type(axes[0]))
             )
         axes = axes[0]
-    return Tensor._op(Transpose, a, op_args=(axes,), constant=constant)
+    return Tensor._op(Transpose, a, op_args=(axes,), force_constant=constant)
 
 
 def moveaxis(a, source, destination, constant=False):
@@ -85,7 +85,9 @@ def moveaxis(a, source, destination, constant=False):
         (5, 3, 4)
         >>> moveaxis(x, [0, 1], [-1, -2]).shape
         (5, 4, 3) """
-    return Tensor._op(MoveAxis, a, op_args=(source, destination), constant=constant)
+    return Tensor._op(
+        MoveAxis, a, op_args=(source, destination), force_constant=constant
+    )
 
 
 def swapaxes(a, axis1, axis2, constant=False):
@@ -130,7 +132,7 @@ def swapaxes(a, axis1, axis2, constant=False):
                [[1, 5],
                 [3, 7]]])
     """
-    return Tensor._op(SwapAxes, a, op_args=(axis1, axis2), constant=constant)
+    return Tensor._op(SwapAxes, a, op_args=(axis1, axis2), force_constant=constant)
 
 
 def roll(a, shift, axis=None, constant=False):
@@ -185,5 +187,5 @@ def roll(a, shift, axis=None, constant=False):
            [9, 5, 6, 7, 8]])
     """
     return Tensor._op(
-        Roll, a, op_kwargs=dict(shift=shift, axis=axis), constant=constant
+        Roll, a, op_kwargs=dict(shift=shift, axis=axis), force_constant=constant
     )
