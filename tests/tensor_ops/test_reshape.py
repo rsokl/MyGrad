@@ -106,7 +106,7 @@ def test_reshape_bkwd(reshape_type):
     "bad_input", [tuple(), ((2,), 2), (((2,), 2)), (2, (2,)), ((2, (2,)))]
 )
 def test_input_validation(bad_input):
-    x = np.array([1, 2])
+    x = Tensor([1, 2])
 
     with pytest.raises(TypeError):
         x.reshape(*bad_input)
