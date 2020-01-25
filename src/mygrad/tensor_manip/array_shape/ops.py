@@ -6,17 +6,17 @@ __all__ = ["Reshape", "Flatten", "Squeeze", "Ravel", "ExpandDims", "BroadcastTo"
 
 
 class Reshape(Operation):
-    def __call__(self, a, shape):
+    def __call__(self, a, newshape):
         """ Parameters
             ----------
             a : mygrad.Tensor
-            shape : Tuple[int, ...]"""
+            newshape : Tuple[int, ...]"""
         self.variables = (a,)
-        return a.data.reshape(shape)
+        return np.reshape(a.data, newshape)
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        return grad.reshape(*a.shape)
+        return np.reshape(grad, a.shape)
 
 
 class Squeeze(Operation):

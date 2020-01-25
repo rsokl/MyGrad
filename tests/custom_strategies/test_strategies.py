@@ -5,14 +5,17 @@ import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
 from hypothesis import given, note
+from numpy.testing import assert_array_equal
 
 from tests.custom_strategies import (
+    _factors,
     adv_integer_index,
     basic_indices,
     choices,
     integer_index,
     slice_index,
     valid_axes,
+    valid_shapes,
 )
 
 
@@ -156,3 +159,22 @@ def test_valid_axes(shape, data, permit_none, pos_only):
                 assert len(axis) <= max_dim
         else:
             assert min_dim <= 1
+
+
+@given(st.integers(min_value=0, max_value=1000))
+def test_factors(size: int):
+    factors = _factors(size)
+    a_factors = np.array(factors)
+    assert len(set(a_factors)) == len(a_factors)
+    assert_array_equal(a_factors * a_factors[::-1], size)
+
+
+@given(
+    arr=hnp.arrays(
+        dtype=bool, fill=st.just(False), shape=hnp.array_shapes(min_dims=0, max_dims=10)
+    ),
+    data=st.data(),
+)
+def test_valid_shapes(arr: np.ndarray, data: st.DataObject):
+    newshape = data.draw(valid_shapes(arr.size), label="newshape")
+    arr.reshape(newshape)

@@ -38,7 +38,6 @@ for attr in (
     swapaxes,
     transpose,
     moveaxis,
-    reshape,
     squeeze,
     ravel,
     matmul,

@@ -23,7 +23,7 @@ from mygrad.math.arithmetic.ops import (
 )
 from mygrad.operation_base import BroadcastableOp, Operation
 from mygrad.tensor_core_ops.indexing import GetItem, SetItem
-from mygrad.tensor_manip.array_shape.ops import Flatten
+from mygrad.tensor_manip.array_shape.ops import Flatten, Reshape
 from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property
 
 __all__ = ["Tensor"]
@@ -536,6 +536,20 @@ class Tensor:
     def __getitem__(self, item):
         return self._op(GetItem, self, op_args=(item,))
 
+    def _mirror_tensor(self, tensor: "Tensor"):
+        """ *Dev use only*
+        Points all of the attributes of ``self`` to those of
+        ``tensor`` so that they reference all of the same data structures.
+
+        This is used to facilitate "in-place" operations.
+        """
+        self._creator = tensor.creator
+        self._scalar_only = tensor._scalar_only
+        self._ops = tensor._ops
+        self._accum_ops = tensor._accum_ops
+        self.data = tensor.data
+        self._constant = tensor.constant
+
     def __setitem__(self, key, value):
         if self.constant and (not isinstance(value, Tensor) or value.constant):
             self.data[key] = value.data if isinstance(value, Tensor) else value
@@ -561,12 +575,7 @@ class Tensor:
 
         # self becomes the tensor post-setitem
         out = self._op(SetItem, old_tensor, value, op_args=(key,),)
-        self._creator = out.creator
-        self._scalar_only = out._scalar_only
-        self._ops = out._ops
-        self._accum_ops = out._accum_ops
-        self.data = out.data
-        self._constant = out.constant
+        self._mirror_tensor(out)
 
     def __add__(self, other):
         return self._op(Add, self, other)
@@ -781,6 +790,54 @@ class Tensor:
         >>> type(x.dtype)
         <type 'numpy.dtype'>"""
         return self.data.dtype
+
+    def reshape(self, *newshape, constant=False):
+        """ Returns a tensor with a new shape, without changing its data.
+
+        This docstring was adapted from ``numpy.reshape``
+
+        Parameters
+        ----------
+        *newshape : Union[int, Tuple[int, ...]]
+            The new shape should be compatible with the original shape. If
+            an integer, then the result will be a 1-D tensor of that length.
+            One shape dimension can be -1. In this case, the value is
+            inferred from the length of the tensor and remaining dimensions.
+
+        constant : bool, optional(default=False)
+            If ``True``, the returned tensor is a constant (it
+            does not back-propagate a gradient)
+
+        Returns
+        -------
+        mygrad.Tensor
+            ``a`` with its shape changed permuted.  A new tensor is returned.
+
+        Notes
+        -----
+        ``reshape`` utilizes C-ordering, meaning that it reads & writes elements using
+        C-like index ordering; the last axis index changing fastest, and, proceeding
+        in reverse order, the first axis index changing slowest.
+
+        Examples
+        --------
+        >>> import mygrad as mg
+        >>> a = mg.Tensor([[1, 2, 3], [4, 5, 6]])
+        >>> a.reshape(6)
+        Tensor([1, 2, 3, 4, 5, 6])
+
+        >>> a.reshape(3, -1))   # the unspecified value is inferred to be 2
+        Tensor([[1, 2],
+                [3, 4],
+                [5, 6]])"""
+
+        if not newshape:
+            raise TypeError("reshape() takes at least 1 argument (0 given)")
+        if hasattr(newshape[0], "__iter__"):
+            if len(newshape) > 1:
+                raise TypeError("an integer is required")
+            newshape = newshape[0]
+        return Tensor._op(Reshape, self, op_args=(newshape,), constant=constant)
 
     @property
     def shape(self):
