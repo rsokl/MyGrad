@@ -27,9 +27,8 @@ def test_input_validation(data, labels):
         softmax_crossentropy(data, labels)
 
 
-@given(st.data())
-def test_softmax_crossentropy(data):
-    """ Test the built-in implementation of multiclass hinge against the pure mygrad version"""
+@given(data=st.data(), labels_as_tensor=st.booleans())
+def test_softmax_crossentropy(data: st.DataObject, labels_as_tensor: bool):
     s = data.draw(
         hnp.arrays(
             shape=hnp.array_shapes(max_side=10, min_dims=2, max_dims=2),
@@ -37,21 +36,21 @@ def test_softmax_crossentropy(data):
             elements=st.floats(-100, 100),
         )
     )
-    loss = data.draw(
+    y_true = data.draw(
         hnp.arrays(
             shape=(s.shape[0],),
             dtype=hnp.integer_dtypes(),
             elements=st.integers(min_value=0, max_value=s.shape[1] - 1),
-        )
+        ).map(Tensor if labels_as_tensor else lambda x: x)
     )
     scores = Tensor(s)
-    softmax_cross = softmax_crossentropy(scores, loss, constant=False)
+    softmax_cross = softmax_crossentropy(scores, y_true, constant=False)
     softmax_cross.backward()
 
     mygrad_scores = Tensor(s)
     probs = softmax(mygrad_scores)
 
-    correct_labels = (range(len(loss)), loss)
+    correct_labels = (range(len(y_true)), y_true.data if labels_as_tensor else y_true)
     truth = np.zeros(mygrad_scores.shape)
     truth[correct_labels] = 1
 
