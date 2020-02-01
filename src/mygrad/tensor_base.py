@@ -829,7 +829,7 @@ class Tensor:
         Returns
         -------
         mygrad.Tensor
-            ``a`` with its shape changed permuted.  A new tensor is returned.
+            ``a`` with its shape changed.  A new tensor is returned.
 
         Notes
         -----
