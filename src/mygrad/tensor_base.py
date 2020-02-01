@@ -847,7 +847,8 @@ class Tensor:
         >>> a.reshape(3, -1))   # the unspecified value is inferred to be 2
         Tensor([[1, 2],
                 [3, 4],
-                [5, 6]])"""
+                [5, 6]])
+                """
 
         if not newshape:
             raise TypeError("reshape() takes at least 1 argument (0 given)")
