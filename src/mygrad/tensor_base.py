@@ -5,7 +5,7 @@ etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 """
 
 from functools import wraps
-from typing import Set, Type, Union
+from typing import Optional, Set, Type, Union
 
 import numpy as np
 
@@ -157,6 +157,31 @@ class Tensor:
 
         # track the operations that have contributed to this tensor's gradient during a back-prop
         self._accum_ops = set()  # type: Set[Operation]
+
+    def astype(self, dtype: type, *, constant: Optional[bool] = None) -> "Tensor":
+        """Returns a distinct tensor with its data modified to have the speified
+        data type.
+
+        The resulting tensor does belong to any pre-existing computation graph; i.e.
+        it is as if this tensor was created 'by scratch'.
+
+        Parameters
+        ----------
+        dtype : type
+            The real-values data type
+
+        constant : Optional[bool]
+            If specified, determines in the returned tensor is a constant.
+            Otherwise this argument is inferred from the original tensor.
+
+        Returns
+        -------
+        Tensor
+            The resulting tensor with the specified data type.
+        """
+        constant = constant if constant is not None else self.constant
+        self._check_valid_dtype(dtype)
+        return type(self)(self.data.astype(dtype), constant=constant)
 
     @staticmethod
     def _check_valid_dtype(dtype):
