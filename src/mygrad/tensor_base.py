@@ -159,7 +159,7 @@ class Tensor:
         self._accum_ops = set()  # type: Set[Operation]
 
     def astype(self, dtype: type, *, constant: Optional[bool] = None) -> "Tensor":
-        """Returns a distinct tensor with its data modified to have the speified
+        """Returns a distinct tensor with its data modified to have the specified
         data type.
 
         The resulting tensor does belong to any pre-existing computation graph; i.e.
@@ -171,7 +171,7 @@ class Tensor:
             The real-values data type
 
         constant : Optional[bool]
-            If specified, determines in the returned tensor is a constant.
+            If specified, determines if the returned tensor is a constant.
             Otherwise this argument is inferred from the original tensor.
 
         Returns
