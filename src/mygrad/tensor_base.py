@@ -163,7 +163,7 @@ class Tensor:
         data type.
 
         The resulting tensor does belong to any pre-existing computation graph; i.e.
-        it is as if this tensor was created 'by scratch'.
+        it is as if this tensor was created 'from scratch'.
 
         Parameters
         ----------
@@ -180,7 +180,6 @@ class Tensor:
             The resulting tensor with the specified data type.
         """
         constant = constant if constant is not None else self.constant
-        self._check_valid_dtype(dtype)
         return type(self)(self.data.astype(dtype), constant=constant)
 
     @staticmethod
