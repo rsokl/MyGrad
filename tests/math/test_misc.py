@@ -119,6 +119,13 @@ def amax_clip_only(clip_func, a, b, constant=False):
     )
 
 
+skip_if_lower_than_numpy_1p17 = pytest.mark.skipif(
+    np.__version__ < "1.17",
+    reason="numpy.clip behavior was made consistent in numpy-1.17; "
+           "test must by run on numpy 1.17 or later",
+)
+
+
 @pytest.mark.parametrize(
     ("mygrad_clip", "numpy_clip", "num_arrays"),
     [
@@ -135,6 +142,7 @@ def amax_clip_only(clip_func, a, b, constant=False):
         (clip, np.clip, 3),
     ],
 )
+@skip_if_lower_than_numpy_1p17
 def test_clip_fwd(mygrad_clip: Callable, numpy_clip: Callable, num_arrays: int):
     @fwdprop_test_factory(
         num_arrays=num_arrays, mygrad_func=mygrad_clip, true_func=numpy_clip
@@ -167,6 +175,7 @@ def is_not_close_clip(a: Tensor, a_min=None, a_max=None) -> bool:
         (clip, np.clip, 3),
     ],
 )
+@skip_if_lower_than_numpy_1p17
 def test_clip_bkwd(mygrad_clip: Callable, numpy_clip: Callable, num_arrays: int):
     @backprop_test_factory(
         num_arrays=num_arrays,
@@ -197,6 +206,7 @@ def test_clip_bkwd(mygrad_clip: Callable, numpy_clip: Callable, num_arrays: int)
         dtype=float,
     ),
 )
+@skip_if_lower_than_numpy_1p17
 @pytest.mark.filterwarnings("ignore: invalid value")
 def test_clip_input_validation(a, a_min, a_max):
     try:
