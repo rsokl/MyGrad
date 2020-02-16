@@ -158,7 +158,9 @@ class Tensor:
         # track the operations that have contributed to this tensor's gradient during a back-prop
         self._accum_ops = set()  # type: Set[Operation]
 
-    def astype(self, dtype: type, *, constant: Optional[bool] = None) -> "Tensor":
+    def astype(
+        self, dtype: Union[type, str], *, constant: Optional[bool] = None
+    ) -> "Tensor":
         """Returns a distinct tensor with its data modified to have the specified
         data type.
 
@@ -167,8 +169,9 @@ class Tensor:
 
         Parameters
         ----------
-        dtype : type
-            The real-values data type
+        dtype : Union[type, str]
+            The real-valued numeric data type. This can be a numpy dtype or
+            a corresponding string identifier.
 
         constant : Optional[bool]
             If specified, determines if the returned tensor is a constant.
@@ -178,6 +181,24 @@ class Tensor:
         -------
         Tensor
             The resulting tensor with the specified data type.
+
+        Examples
+        --------
+        >>> import mygrad as mg
+        >>> import numpy as np
+        >>> x = mg.arange(10); x
+        Tensor([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+
+        Using a string to specify the data type:
+
+        >>> x.astype("float32")
+        Tensor([0., 1., 2., 3., 4., 5., 6., 7., 8., 9.], dtype=float32)
+
+        Specifying a numpy data type object, and specifying that the
+        tensor is to be treated as a constant:
+
+        >>> x.astype(np.int8, constant=True)
+        Tensor([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype=int8)
         """
         constant = constant if constant is not None else self.constant
         return type(self)(self.data.astype(dtype), constant=constant)
