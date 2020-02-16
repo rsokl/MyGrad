@@ -4,7 +4,7 @@ import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
 import pytest
-from hypothesis import given
+from hypothesis import given, settings
 from numpy.testing import assert_array_equal
 
 from mygrad import Tensor
@@ -35,6 +35,7 @@ def test_astype(tensor: Tensor, dest_type: type, constant: Optional[bool]):
         assert_array_equal(new_tensor.data, tensor.data)
 
 
+@settings(max_examples=30)
 @pytest.mark.parametrize(
     "type_strategy",
     [hnp.integer_dtypes(), hnp.unsigned_integer_dtypes(), hnp.floating_dtypes()],
