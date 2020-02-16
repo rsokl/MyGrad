@@ -14,9 +14,9 @@ on pip.
 
 New features:
 
-- Adds func:`~mygrad.Tensor.astype` method.
-- Adds func:`~mygrad.nnet.activations.hard_tanh`
-- ``y_true`` can now be passed as a ``Tensor`` to func:`~mygrad.nnet.losses.softmax_crossentropy`
+- Adds :func:`~mygrad.Tensor.astype` method.
+- Adds :func:`~mygrad.nnet.activations.hard_tanh`
+- ``y_true`` can now be passed as a ``Tensor`` to :func:`~mygrad.nnet.losses.softmax_crossentropy`
 
 
 This update also includes various improvements to the library's test suite.
@@ -37,7 +37,7 @@ loss to properly show a description in the readthedocs page.
 1.4.0 - 2019-12-19
 -------------------
 
-This release adds the ``mygrad.repeat`` operation. It also includes some minor
+This release adds the :func:`~mygrad.repeat` operation. It also includes some minor
 improvements to mygrad's test suite.
 
 
@@ -47,7 +47,7 @@ improvements to mygrad's test suite.
 1.3.0 - 2019-11-30
 -------------------
 
-This release adds ``mygrad.clip`` and ``mygrad.where``.
+This release adds :func:`~mygrad.clip` and :func:`~mygrad.where`.
 
 It also includes a major fix to the graph-traversal mechanism for null-gradients and clear-graph,
 eliminating an exponentially-scaling runtime.
