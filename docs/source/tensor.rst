@@ -103,6 +103,7 @@ Documentation for mygrad.Tensor
    Tensor.shape
    Tensor.ndim
    Tensor.size
+   Tensor.astype
    Tensor.dtype
    Tensor.item
    Tensor.T

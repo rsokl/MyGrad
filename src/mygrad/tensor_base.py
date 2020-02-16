@@ -219,19 +219,21 @@ class Tensor:
         op_kwargs=None,
         constant=False
     ):
-        """ Wraps operations performed between tensors: f(a, b, ...).
+        """Wraps operations performed between tensors: f(a, b, ...).
+
+        For developer use only.
 
         Parameters
         ----------
         Op : Type[Operation]
             Operation-class, used to perform forward-pass on `input_vars`.
 
-        input_vars : Tuple[array_like]
+        input_vars : Tuple[array_like, ...]
             An arbitrary number of input-tensors. These can take any form that
             can be converted to an array.  This includes numbers, sequences, nested
             numerical sequences, numpy-ndarrays, and mygrad-tensors.
 
-        op_args : Optional[Tuple[Any]]
+        op_args : Optional[Tuple[Any, ...]]
             Arbitrary positional arguments passed to the operation's forward pass.
 
         op_kwargs : Optional[Dict[str, Any]]
