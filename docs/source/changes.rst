@@ -6,6 +6,21 @@ This is a record of all past mygrad releases and what went into them,
 in reverse chronological order. All previous releases should still be available
 on pip.
 
+.. _v1.5.0:
+
+-------------------
+1.5.0 - 2020-01-09
+-------------------
+
+New features:
+
+- Adds func:`~mygrad.Tensor.astype` method.
+- Adds func:`~mygrad.nnet.activations.hard_tanh`
+- ``y_true`` can now be passed as a ``Tensor`` to func:`~mygrad.nnet.losses.softmax_crossentropy`
+
+
+This update also includes various improvements to the library's test suite.
+
 .. _v1.4.1:
 
 -------------------
