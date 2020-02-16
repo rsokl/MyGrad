@@ -119,7 +119,7 @@ def clip(a, a_min, a_max, constant=False):
     is specified, values smaller than 0 become 0, and values larger
     than 1 become 1.
 
-    Equivalent to `mg.maximum(a_min, mg.minimum(a, a_max))``.
+    Equivalent to `mg.minimum(a_max, mg.maximum(a, a_min))``.
 
     No check is performed to ensure ``a_min < a_max``.
 
