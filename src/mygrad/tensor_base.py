@@ -162,7 +162,7 @@ class Tensor:
         """Returns a distinct tensor with its data modified to have the specified
         data type.
 
-        The resulting tensor does belong to any pre-existing computation graph; i.e.
+        The resulting tensor does not belong to any pre-existing computation graph; i.e.
         it is as if this tensor was created 'from scratch'.
 
         Parameters
