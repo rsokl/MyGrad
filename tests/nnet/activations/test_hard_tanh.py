@@ -1,9 +1,18 @@
-import numpy as np
-from hypothesis import given
 import hypothesis.strategies as st
+import numpy as np
+import pytest
 
 from mygrad.nnet.activations import hard_tanh
 from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
+
+
+@pytest.mark.parametrize("lower_bound, upper_bound", [(None, 1), (1, None)])
+def test_input_validation(lower_bound, upper_bound):
+    with pytest.raises(TypeError):
+        hard_tanh(2, lower_bound=lower_bound, upper_bound=upper_bound)
+
+
+finite_floats = st.floats(allow_infinity=False, allow_nan=False)
 
 
 @fwdprop_test_factory(
@@ -13,8 +22,8 @@ from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
     ),
     num_arrays=1,
     kwargs={
-        "lower_bound": lambda x: st.floats(allow_infinity=False, allow_nan=False),
-        "upper_bound": lambda x: st.floats(allow_infinity=False, allow_nan=False),
+        "lower_bound": lambda x: finite_floats | finite_floats.map(np.array),
+        "upper_bound": lambda x: finite_floats | finite_floats.map(np.array),
     },
 )
 def test_hard_tanh_fwd():
@@ -28,8 +37,8 @@ def test_hard_tanh_fwd():
     ),
     num_arrays=1,
     kwargs={
-        "lower_bound": lambda x: st.floats(allow_infinity=False, allow_nan=False),
-        "upper_bound": lambda x: st.floats(allow_infinity=False, allow_nan=False),
+        "lower_bound": lambda x: finite_floats | finite_floats.map(np.array),
+        "upper_bound": lambda x: finite_floats | finite_floats.map(np.array),
     },
 )
 def test_hard_tanh_bkwd():
