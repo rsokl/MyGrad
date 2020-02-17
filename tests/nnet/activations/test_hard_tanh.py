@@ -30,6 +30,10 @@ def test_hard_tanh_fwd():
     pass
 
 
+def assume_data_not_on_bounds(x, lower_bound, upper_bound):
+    return np.all(np.logical_and(x != lower_bound, x != upper_bound))
+
+
 @backprop_test_factory(
     mygrad_func=hard_tanh,
     true_func=lambda x, lower_bound, upper_bound: np.maximum(
@@ -40,6 +44,7 @@ def test_hard_tanh_fwd():
         "lower_bound": lambda x: finite_floats | finite_floats.map(np.array),
         "upper_bound": lambda x: finite_floats | finite_floats.map(np.array),
     },
+    assumptions=assume_data_not_on_bounds,
 )
 def test_hard_tanh_bkwd():
     pass

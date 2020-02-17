@@ -5,7 +5,7 @@ etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 """
 
 from functools import wraps
-from typing import Set, Type, Union
+from typing import Optional, Set, Type, Union
 
 import numpy as np
 
@@ -158,6 +158,51 @@ class Tensor:
         # track the operations that have contributed to this tensor's gradient during a back-prop
         self._accum_ops = set()  # type: Set[Operation]
 
+    def astype(
+        self, dtype: Union[type, str], *, constant: Optional[bool] = None
+    ) -> "Tensor":
+        """Returns a distinct tensor with its data modified to have the specified
+        data type.
+
+        The resulting tensor does not belong to any pre-existing computation graph; i.e.
+        it is as if this tensor was created 'from scratch'.
+
+        Parameters
+        ----------
+        dtype : Union[type, str]
+            The real-valued numeric data type. This can be a numpy dtype or
+            a corresponding string identifier.
+
+        constant : Optional[bool]
+            If specified, determines if the returned tensor is a constant.
+            Otherwise this argument is inferred from the original tensor.
+
+        Returns
+        -------
+        Tensor
+            The resulting tensor with the specified data type.
+
+        Examples
+        --------
+        >>> import mygrad as mg
+        >>> import numpy as np
+        >>> x = mg.arange(10); x
+        Tensor([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+
+        Using a string to specify the data type:
+
+        >>> x.astype("float32")
+        Tensor([0., 1., 2., 3., 4., 5., 6., 7., 8., 9.], dtype=float32)
+
+        Specifying a numpy data type object, and specifying that the
+        tensor is to be treated as a constant:
+
+        >>> x.astype(np.int8, constant=True)
+        Tensor([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype=int8)
+        """
+        constant = constant if constant is not None else self.constant
+        return type(self)(self.data.astype(dtype), constant=constant)
+
     @staticmethod
     def _check_valid_dtype(dtype):
         if not np.issubdtype(dtype, np.number):
@@ -174,19 +219,21 @@ class Tensor:
         op_kwargs=None,
         constant=False
     ):
-        """ Wraps operations performed between tensors: f(a, b, ...).
+        """Wraps operations performed between tensors: f(a, b, ...).
+
+        For developer use only.
 
         Parameters
         ----------
         Op : Type[Operation]
             Operation-class, used to perform forward-pass on `input_vars`.
 
-        input_vars : Tuple[array_like]
+        input_vars : Tuple[array_like, ...]
             An arbitrary number of input-tensors. These can take any form that
             can be converted to an array.  This includes numbers, sequences, nested
             numerical sequences, numpy-ndarrays, and mygrad-tensors.
 
-        op_args : Optional[Tuple[Any]]
+        op_args : Optional[Tuple[Any, ...]]
             Arbitrary positional arguments passed to the operation's forward pass.
 
         op_kwargs : Optional[Dict[str, Any]]

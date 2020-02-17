@@ -30,11 +30,12 @@ Activations
 .. autosummary::
    :toctree: generated/
 
-   tanh
-   sigmoid
-   relu
-   softmax
+   hard_tanh
    logsoftmax
+   sigmoid
+   softmax
+   relu
+   tanh
 
 
 
