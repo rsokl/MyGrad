@@ -7,6 +7,8 @@ from mygrad.tensor_base import Tensor
 
 def _softmax(x, kwargs):
     x = x - x.max(**kwargs)
+    if np.issubdtype(x.dtype, np.integer):
+        x = x.astype(np.float)
     np.exp(x, out=x)
     x /= x.sum(**kwargs)
     return x
