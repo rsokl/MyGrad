@@ -128,7 +128,7 @@ class Tensor:
 
     def __init__(
         self,
-        x: ArrayLike,
+        x: Union["Tensor", ArrayLike],
         *,
         dtype: Optional[type] = None,
         constant: bool = False,
