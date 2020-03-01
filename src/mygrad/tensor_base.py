@@ -3,9 +3,20 @@ This module defines the base tensor class along with all of its essential
 attributes and special methods. Public math methods, e.g. ``sum``, ``mean``,
 etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 """
-
 from functools import wraps
-from typing import Optional, Set, Type, Union
+from numbers import Real
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+)
 
 import numpy as np
 
@@ -25,8 +36,11 @@ from mygrad.operation_base import BroadcastableOp, Operation
 from mygrad.tensor_core_ops.indexing import GetItem, SetItem
 from mygrad.tensor_manip.array_shape.ops import Flatten
 from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property
+from mygrad.typing import ArrayLike
 
 __all__ = ["Tensor"]
+
+T = TypeVar("T")
 
 
 class Tensor:
@@ -113,7 +127,13 @@ class Tensor:
     __array_priority__ = 15.0
 
     def __init__(
-        self, x, *, dtype=None, constant=False, _scalar_only=False, _creator=None
+        self,
+        x: ArrayLike,
+        *,
+        dtype: Optional[type] = None,
+        constant: bool = False,
+        _scalar_only: bool = False,
+        _creator: Optional[Operation] = None
     ):
         """
         Parameters
@@ -141,7 +161,7 @@ class Tensor:
         """
         assert isinstance(constant, bool)
         self._scalar_only = _scalar_only
-        self._creator = _creator  # type: Union[None, Operation]
+        self._creator = _creator
 
         if isinstance(x, Tensor):
             self.data = x.data
@@ -204,7 +224,7 @@ class Tensor:
         return type(self)(self.data.astype(dtype), constant=constant)
 
     @staticmethod
-    def _check_valid_dtype(dtype):
+    def _check_valid_dtype(dtype: type) -> None:
         if not np.issubdtype(dtype, np.number):
             raise TypeError(
                 "Tensor data must be a numeric type, received {}".format(dtype)
@@ -214,11 +234,11 @@ class Tensor:
     def _op(
         cls,
         Op: Type[Operation],
-        *input_vars,
-        op_args=None,
-        op_kwargs=None,
-        constant=False
-    ):
+        *input_vars: ArrayLike,
+        op_args: Optional[Any] = None,
+        op_kwargs: Optional[Dict[str, Any]] = None,
+        constant: bool = False
+    ) -> "Tensor":
         """Wraps operations performed between tensors: f(a, b, ...).
 
         For developer use only.
@@ -289,7 +309,7 @@ class Tensor:
 
         return cls(op_out, constant=is_const, _creator=f, _scalar_only=scalar_only)
 
-    def backward(self, grad=None):
+    def backward(self, grad: Optional[ArrayLike] = None) -> None:
         """ Compute set or accumulate ``self.grad`` with `grad`, and pass ``self.creator.backward(grad)``.
         In effect, calling ``self.backward()`` will trigger a "back-propagation" from ``self`` through
         the preceding nodes in the computational graph. Thus a node, ``a``, will have the attribute
@@ -360,7 +380,7 @@ class Tensor:
         if self.creator is not None:
             self._backward(graph=self.creator.graph)
 
-    def _backward(self, *, graph):
+    def _backward(self, *, graph: Set[Operation]) -> None:
         """
         **For dev-use only**
 
@@ -394,7 +414,7 @@ class Tensor:
             self._accum_ops.clear()
             self._creator.backward(self.grad, graph=graph)
 
-    def null_gradients(self, clear_graph=True):
+    def null_gradients(self, clear_graph: bool = True) -> None:
         """
         Sets the gradient for this tensor and for all preceding tensors in the computation graph
         to ``None``.
@@ -431,7 +451,7 @@ class Tensor:
         """
         self._null_gradients(clear_graph=clear_graph, seen=set())
 
-    def _null_gradients(self, *, clear_graph: bool, seen: Set["Tensor"]):
+    def _null_gradients(self, *, clear_graph: bool, seen: Set["Tensor"]) -> None:
         """
         Nulls gradients using depth-first graph traversal
 
@@ -467,7 +487,7 @@ class Tensor:
                 var._ops.clear()
             var._null_gradients(clear_graph=clear_graph, seen=seen)
 
-    def clear_graph(self):
+    def clear_graph(self) -> None:
         """
         Clear the computational graph for all of the nodes preceding this tensor.
         """
@@ -482,7 +502,7 @@ class Tensor:
             var.clear_graph()
 
     @property
-    def scalar_only(self):
+    def scalar_only(self) -> bool:
         """ Indicates whether or not `self.ndim` must be 0 in order to invoke `self.backward()`.
 
         E.g. a computational graph that involves a broadcast-multiplication of a non-constant
@@ -515,7 +535,7 @@ class Tensor:
         return self._scalar_only
 
     @property
-    def constant(self):
+    def constant(self) -> bool:
         """ If ``True``, this tensor is a constant; it will not propagate any gradient.
 
         Additionally, any tensor that is a descendant of constant tensors will also
@@ -574,16 +594,18 @@ class Tensor:
         """
         return self._creator
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.data)
 
-    def __contains__(self, item):
+    def __contains__(self, item: Any) -> bool:
         return self.data.__contains__(item)
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: Union[int, slice, Sequence[Any]]) -> "Tensor":
         return self._op(GetItem, self, op_args=(item,))
 
-    def __setitem__(self, key, value):
+    def __setitem__(
+        self, key: Union[int, slice, Sequence[Any]], value: Union[ArrayLike, "Tensor"]
+    ) -> None:
         if self.constant and (not isinstance(value, Tensor) or value.constant):
             self.data[key] = value.data if isinstance(value, Tensor) else value
             return None
@@ -607,7 +629,7 @@ class Tensor:
                     )
 
         # self becomes the tensor post-setitem
-        out = self._op(SetItem, old_tensor, value, op_args=(key,),)
+        out = self._op(SetItem, old_tensor, value, op_args=(key,))
         self._creator = out.creator
         self._scalar_only = out._scalar_only
         self._ops = out._ops
@@ -615,52 +637,52 @@ class Tensor:
         self.data = out.data
         self._constant = out.constant
 
-    def __add__(self, other):
+    def __add__(self, other: Union[ArrayLike, "Tensor"]) -> "Tensor":
         return self._op(Add, self, other)
 
-    def __radd__(self, other):
+    def __radd__(self, other: Union[ArrayLike, "Tensor"]) -> "Tensor":
         return self._op(Add, other, self)
 
-    def __sub__(self, other):
+    def __sub__(self, other: Union[ArrayLike, "Tensor"]) -> "Tensor":
         return self._op(Subtract, self, other)
 
-    def __rsub__(self, other):
+    def __rsub__(self, other: Union[ArrayLike, "Tensor"]) -> "Tensor":
         return self._op(Subtract, other, self)
 
-    def __truediv__(self, other):
+    def __truediv__(self, other: Union[ArrayLike, "Tensor"]) -> "Tensor":
         return self._op(Divide, self, other)
 
-    def __rtruediv__(self, other):
+    def __rtruediv__(self, other: Union[ArrayLike, "Tensor"]) -> "Tensor":
         return self._op(Divide, other, self)
 
-    def __mul__(self, other):
+    def __mul__(self, other: Union[ArrayLike, "Tensor"]) -> "Tensor":
         return self._op(Multiply, self, other)
 
-    def __rmul__(self, other):
+    def __rmul__(self, other: Union[ArrayLike, "Tensor"]) -> "Tensor":
         return self._op(Multiply, other, self)
 
-    def __matmul__(self, other):
+    def __matmul__(self, other: Union[ArrayLike, "Tensor"]) -> "Tensor":
         return self._op(MatMul, self, other)
 
-    def __rmatmul__(self, other):
+    def __rmatmul__(self, other: Union[ArrayLike, "Tensor"]) -> "Tensor":
         return self._op(MatMul, other, self)
 
-    def __pow__(self, other):
+    def __pow__(self, other: Union[ArrayLike, "Tensor"]) -> "Tensor":
         return self._op(Power, self, other)
 
-    def __rpow__(self, other):
+    def __rpow__(self, other: Union[ArrayLike, "Tensor"]) -> "Tensor":
         return self._op(Power, other, self)
 
-    def __neg__(self):
+    def __neg__(self) -> "Tensor":
         return self._op(Negative, self)
 
-    def __pos__(self):
+    def __pos__(self) -> "Tensor":
         return self._op(Positive, self)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return repr(self.data).replace("array", "Tensor").replace("\n", "\n ")
 
-    def __copy__(self):
+    def __copy__(self) -> "Tensor":
         """ Produces a copy of ``self`` with ``copy.creator=None``.
 
         Copies of the underlying numpy data array and gradient array are created.
@@ -678,7 +700,7 @@ class Tensor:
         copy.grad = np.copy(self.grad) if self.grad is not None else None
         return copy
 
-    def copy(self):
+    def copy(self) -> "Tensor":
         """ Produces a copy of ``self`` with ``copy.creator=None``.
 
         Copies of the underlying numpy data array and gradient array are created.
@@ -703,7 +725,7 @@ class Tensor:
         """
         return self.__copy__()
 
-    def item(self):
+    def item(self) -> Real:
         """ Copy an element of a tensor to a standard Python scalar and return it.
 
         Note that the returned object does not support back-propagation.
@@ -726,17 +748,17 @@ class Tensor:
             raise ValueError("can only convert a tensor of size 1 to a Python scalar")
         return self.data.item()
 
-    def __float__(self):
+    def __float__(self) -> float:
         if self.size > 1:
             raise TypeError("can only convert a tensor of size 1 to a Python scalar")
         return float(self.data)
 
-    def __int__(self):
+    def __int__(self) -> int:
         if self.size > 1:
             raise TypeError("can only convert a tensor of size 1 to a Python scalar")
         return int(self.data)
 
-    def flatten(self, constant=False):
+    def flatten(self, constant: bool = False) -> "Tensor":
         """ Return a copy of the tensor collapsed into one dimension.
 
         This docstring was adapted from ``numpy.ndarray.flatten``.
@@ -765,7 +787,7 @@ class Tensor:
         return Tensor._op(Flatten, self, constant=constant)
 
     @property
-    def size(self):
+    def size(self) -> int:
         """
         Number of elements in the tensor. i.e., the product of the tensor's
         dimensions.
@@ -784,7 +806,7 @@ class Tensor:
         return self.data.size
 
     @property
-    def ndim(self):
+    def ndim(self) -> int:
         """ Number of tensor dimensions. I.e. the number
         of indices that must be supplied to uniquely specify
         an element in the tensor.
@@ -811,7 +833,7 @@ class Tensor:
         return self.data.ndim
 
     @property
-    def dtype(self):
+    def dtype(self) -> type:
         """ Data-type of the tensor's elements.
 
         Returns
@@ -830,7 +852,7 @@ class Tensor:
         return self.data.dtype
 
     @property
-    def shape(self):
+    def shape(self) -> Tuple[int, ...]:
         """ Tuple of tensor dimension-sizes.
 
         Sizes are reported in row-major order.
@@ -857,7 +879,7 @@ class Tensor:
         return self.data.shape
 
     @property
-    def T(self):
+    def T(self) -> "Tensor":
         """ Same as self.transpose(), except that self is returned if self.ndim < 2 and
         a view of the underlying data is utilized whenever possible.
 
@@ -879,7 +901,7 @@ class Tensor:
 
 
 # set all comparison operators - mirrors ndarray methods
-def tensor_to_array_wrapper(func):
+def tensor_to_array_wrapper(func: Callable) -> Callable:
     @wraps(func)
     def wrapped(x, y):
         return func(x.data, y.data if isinstance(y, Tensor) else y)
