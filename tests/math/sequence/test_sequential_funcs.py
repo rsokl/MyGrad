@@ -8,7 +8,7 @@ from hypothesis import given, settings
 from pytest import raises
 
 import mygrad
-from mygrad import amax, amin, cumprod, cumsum, mean, prod, std, sum, var
+from mygrad import amax, amin, cumprod, cumsum, mean, _canonicalize_weights, average, prod, std, sum, var
 
 from ...custom_strategies import valid_axes
 from ...wrappers.uber import (
@@ -45,6 +45,31 @@ def ddof_arg(*arrs):
     min_side = min(arrs[0].shape) if arrs[0].shape else 0
     return st.integers(0, min_side - 1) if min_side else st.just(0)
 
+
+@st.composite
+def gen_average_args(draw, arr):
+    # Weight is either
+    # - the same shape as arr OR
+    # - 1D with compatible length
+    # See: https://github.com/numpy/numpy/blob/c31cc36a8a814ed4844a2a553454185601914a5a/numpy/lib/function_base.py#L397
+    wt_same_shape, wt_1D = range(2)
+    if arr.ndim == 0 or draw(st.one_of(st.just(wt_same_shape), st.just(wt_1D))) == wt_same_shape:
+        axis = draw(axis_arg(arr))
+        wt_shape = arr.shape
+    else: # wt_1D
+        # Only integer axis is supported for 1D weights
+        axis = draw(st.integers(min_value=0, max_value=len(arr.shape) - 1))
+        wt_shape = (arr.shape[axis],)
+    # Filter any axis summing up to 0 to avoid ZeroDivisionError
+    wt_strat = hnp.arrays(
+        dtype=np.float,
+        shape=wt_shape,
+        elements=st.floats(allow_infinity=False, allow_nan=False, min_value=-10, max_value=10),
+    ).filter(
+        lambda wt: not np.isclose( _canonicalize_weights(arr, axis, wt).sum(axis=axis), 0).any()
+    )
+    weights = draw(wt_strat | st.none())
+    return dict(axis=axis, weights=weights)
 
 @fwdprop_test_factory(
     mygrad_func=amax,
@@ -138,6 +163,55 @@ def test_mean_fwd():
     vary_each_element=True,
 )
 def test_mean_bkwd():
+    pass
+
+
+@fwdprop_test_factory(
+    mygrad_func=average,
+    true_func=np.average,
+    num_arrays=1,
+    kwargs=gen_average_args,
+)
+def test_average_fwd():
+    pass
+
+
+def test_average_weights_zero_sum():
+    with raises(ZeroDivisionError):
+        average(np.array([1, 2]), weights=np.array([-1, 1]))
+
+
+def test_canonicalize_weights():
+    x = np.empty((2, 2))
+    # Same shape, no-op
+    assert _canonicalize_weights(x, axis=0, weights=np.empty((2, 2))).shape == x.shape
+    # Differing shapes, make weights broadcastable
+    assert _canonicalize_weights(x, axis=0, weights=np.empty((2, ))).shape == (2, 1)
+    assert _canonicalize_weights(x, axis=1, weights=np.empty((2, ))).shape == (1, 2)
+
+
+def test_canonicalize_weights_misuse():
+    x = np.empty((2, 2))
+    with raises(TypeError):
+        # Missing axis
+        _canonicalize_weights(x, axis=None, weights=np.empty((2,)))
+    with raises(TypeError):
+        # Weights not 1D
+        _canonicalize_weights(x, axis=0, weights=np.empty((2, 1)))
+    with raises(ValueError):
+        # Incompatible weights length
+        _canonicalize_weights(x, axis=0, weights=np.empty((3,)))
+
+
+@backprop_test_factory(
+    mygrad_func=average,
+    true_func=np.average,
+    num_arrays=1,
+    kwargs=gen_average_args,
+    index_to_bnds={0: (-10, 10)},
+    vary_each_element=True,
+)
+def test_average_bkwd():
     pass
 
 
