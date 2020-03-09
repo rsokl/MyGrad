@@ -29,6 +29,8 @@ for attr in (
     cumprod,
     cumsum,
     mean,
+    _canonicalize_weights,
+    average,
     std,
     var,
     max,
