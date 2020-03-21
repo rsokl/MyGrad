@@ -1,21 +1,21 @@
 import numpy as np
 
 __all__ = [
-    'Inf',
-    'Infinity',
-    'NAN',
-    'NINF',
-    'NZERO',
-    'NaN',
-    'PINF',
-    'PZERO',
-    'e',
-    'euler_gamma',
-    'inf',
-    'infty',
-    'nan',
-    'newaxis',
-    'pi',
+    "Inf",
+    "Infinity",
+    "NAN",
+    "NINF",
+    "NZERO",
+    "NaN",
+    "PINF",
+    "PZERO",
+    "e",
+    "euler_gamma",
+    "inf",
+    "infty",
+    "nan",
+    "newaxis",
+    "pi",
 ]
 
 Inf = np.Inf

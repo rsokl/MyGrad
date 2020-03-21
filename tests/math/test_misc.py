@@ -122,7 +122,7 @@ def amax_clip_only(clip_func, a, b, constant=False):
 skip_if_lower_than_numpy_1p17 = pytest.mark.skipif(
     np.__version__ < "1.17",
     reason="numpy.clip behavior was made consistent in numpy-1.17; "
-           "test must by run on numpy 1.17 or later",
+    "test must by run on numpy 1.17 or later",
 )
 
 
