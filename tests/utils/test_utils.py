@@ -52,7 +52,7 @@ def test_finite_difference_no_broadcast(data, x):
     assert finite_difference(unary_func, x, back_grad=grad, vary_ind=[])[0] is None
 
     # no broadcast
-    dx, = finite_difference(unary_func, x, back_grad=grad)
+    (dx,) = finite_difference(unary_func, x, back_grad=grad)
 
     assert_allclose(dx, grad * 2 * x, atol=atol, rtol=rtol)
 
@@ -93,7 +93,7 @@ def test_numerical_gradient_no_broadcast(data, x):
     assert numerical_gradient(unary_func, x, back_grad=grad, vary_ind=[])[0] is None
 
     # no broadcast
-    dx, = numerical_gradient(unary_func, x, back_grad=grad)
+    (dx,) = numerical_gradient(unary_func, x, back_grad=grad)
 
     assert_allclose(dx, grad * 2 * x, atol=atol, rtol=rtol)
 
@@ -157,6 +157,6 @@ def test_numerical_gradient_xy_broadcast(x, y, grad):
 )
 def test_numerical_gradient_vary_each(x, grad):
     atol, rtol = (1e-7, 1e-7)
-    dx, = numerical_gradient_full(lambda y: y[::-1], x, back_grad=np.array(grad))
+    (dx,) = numerical_gradient_full(lambda y: y[::-1], x, back_grad=np.array(grad))
     x_grad = grad[::-1]
     assert_allclose(actual=dx, desired=x_grad, atol=atol, rtol=rtol)

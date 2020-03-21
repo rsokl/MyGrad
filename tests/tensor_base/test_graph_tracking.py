@@ -1,5 +1,5 @@
 import mygrad as mg
-from mygrad.math.arithmetic.ops import Add, Power, Divide
+from mygrad.math.arithmetic.ops import Add, Divide, Power
 
 
 def test_op_tracks_graph():

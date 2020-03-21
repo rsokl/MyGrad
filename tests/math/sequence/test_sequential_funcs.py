@@ -357,7 +357,6 @@ def test_prod_bkwd():
 )
 def test_multi_zero_prod_bkwd():
     """Drives tests cases with various configurations of zeros"""
-    pass
 
 
 def test_int_axis_cumprod():
