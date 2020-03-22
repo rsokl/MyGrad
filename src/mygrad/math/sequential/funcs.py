@@ -7,7 +7,6 @@ from .ops import *
 __all__ = [
     "sum",
     "mean",
-    "_canonicalize_weights",
     "average",
     "var",
     "std",

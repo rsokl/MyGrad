@@ -58,17 +58,17 @@ def gen_average_args(draw, arr):
         wt_shape = arr.shape
     else: # wt_1D
         # Only integer axis is supported for 1D weights
-        axis = draw(st.integers(min_value=0, max_value=len(arr.shape) - 1))
+        axis = draw(st.integers(min_value=-arr.ndim, max_value=arr.ndim - 1))
         wt_shape = (arr.shape[axis],)
     # Filter any axis summing up to 0 to avoid ZeroDivisionError
     wt_strat = hnp.arrays(
         dtype=np.float,
         shape=wt_shape,
-        elements=st.floats(allow_infinity=False, allow_nan=False, min_value=-10, max_value=10),
+        elements=st.floats(min_value=-10, max_value=10),
     ).filter(
         lambda wt: not np.isclose( _canonicalize_weights(arr, axis, wt).sum(axis=axis), 0).any()
     )
-    weights = draw(wt_strat | st.none())
+    weights = draw(st.none() | wt_strat)
     return dict(axis=axis, weights=weights)
 
 @fwdprop_test_factory(
