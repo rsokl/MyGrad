@@ -7,7 +7,7 @@ import pytest
 from hypothesis import given, settings
 from pytest import raises
 
-import mygrad
+import mygrad as mg
 from mygrad import amax, amin, average, cumprod, cumsum, mean, prod, std, sum, var
 from mygrad.math.sequential.funcs import _canonicalize_weights
 
@@ -123,8 +123,8 @@ def test_min_bkwd():
 
 
 def test_min_max_aliases():
-    assert mygrad.max == amax
-    assert mygrad.min == amin
+    assert mg.max == amax
+    assert mg.min == amin
 
 
 @fwdprop_test_factory(
@@ -181,6 +181,18 @@ def test_average_fwd():
 def test_average_weights_zero_sum():
     with raises(ZeroDivisionError):
         average(np.array([1, 2]), weights=np.array([-1, 1]))
+
+
+def test_average_scl():
+    x = mg.Tensor(np.array([1, 2, 3, 4]))
+    weights = mg.Tensor(np.array([1, 2, 3, 4]))
+    avg, scl = average(x, weights=weights, returned=True)
+    expected_avg, expected_scl = np.average(x.data, weights=weights.data, returned=True)
+    assert np.isclose(avg.data, expected_avg)
+    assert np.isclose(scl.data, expected_scl)
+    scl.backward()
+    assert avg.grad is None
+    assert weights.grad is not None
 
 
 def test_canonicalize_weights():
@@ -282,8 +294,6 @@ def test_var_bkwd():
     )
 )
 def test_var_no_axis_fwd(x):
-    import mygrad as mg
-
     x = mg.Tensor(x, constant=False)
     o = mg.var(x, axis=())
     assert np.all(o.data == np.zeros_like(x.data))
@@ -297,8 +307,6 @@ def test_var_no_axis_fwd(x):
     )
 )
 def test_var_no_axis_bkwrd(x):
-    import mygrad as mg
-
     x = mg.Tensor(x, constant=False)
     mg.var(x, axis=()).backward()
     assert np.all(x.grad == np.zeros_like(x.data))
@@ -378,8 +386,6 @@ def test_std_bkwd():
     )
 )
 def test_std_no_axis_fwd(x):
-    import mygrad as mg
-
     x = mg.Tensor(x, constant=False)
     o = mg.std(x, axis=())
     assert np.all(o.data == np.zeros_like(x.data))
@@ -393,8 +399,6 @@ def test_std_no_axis_fwd(x):
     )
 )
 def test_std_no_axis_bkwrd(x):
-    import mygrad as mg
-
     x = mg.Tensor(x, constant=False)
     mg.std(x, axis=()).backward()
     assert np.all(x.grad == np.zeros_like(x.data))
@@ -433,7 +437,6 @@ def test_prod_bkwd():
 )
 def test_multi_zero_prod_bkwd():
     """Drives tests cases with various configurations of zeros"""
-    pass
 
 
 def test_int_axis_cumprod():
