@@ -8,7 +8,8 @@ from hypothesis import given, settings
 from pytest import raises
 
 import mygrad
-from mygrad import amax, amin, cumprod, cumsum, mean, _canonicalize_weights, average, prod, std, sum, var
+from mygrad import amax, amin, average, cumprod, cumsum, mean, prod, std, sum, var
+from mygrad.math.sequential.funcs import _canonicalize_weights
 
 from ...custom_strategies import valid_axes
 from ...wrappers.uber import (
@@ -53,23 +54,27 @@ def gen_average_args(draw, arr):
     # - 1D with compatible length
     # See: https://github.com/numpy/numpy/blob/c31cc36a8a814ed4844a2a553454185601914a5a/numpy/lib/function_base.py#L397
     wt_same_shape, wt_1D = range(2)
-    if arr.ndim == 0 or draw(st.one_of(st.just(wt_same_shape), st.just(wt_1D))) == wt_same_shape:
+    if (
+        arr.ndim == 0
+        or draw(st.one_of(st.just(wt_same_shape), st.just(wt_1D))) == wt_same_shape
+    ):
         axis = draw(axis_arg(arr))
         wt_shape = arr.shape
-    else: # wt_1D
+    else:  # wt_1D
         # Only integer axis is supported for 1D weights
         axis = draw(st.integers(min_value=-arr.ndim, max_value=arr.ndim - 1))
         wt_shape = (arr.shape[axis],)
     # Filter any axis summing up to 0 to avoid ZeroDivisionError
     wt_strat = hnp.arrays(
-        dtype=np.float,
-        shape=wt_shape,
-        elements=st.floats(min_value=-10, max_value=10),
+        dtype=np.float, shape=wt_shape, elements=st.floats(min_value=-10, max_value=10),
     ).filter(
-        lambda wt: not np.isclose( _canonicalize_weights(arr, axis, wt).sum(axis=axis), 0).any()
+        lambda wt: not np.isclose(
+            _canonicalize_weights(arr, axis, wt).sum(axis=axis).data, 0
+        ).any()
     )
     weights = draw(st.none() | wt_strat)
     return dict(axis=axis, weights=weights)
+
 
 @fwdprop_test_factory(
     mygrad_func=amax,
@@ -167,10 +172,7 @@ def test_mean_bkwd():
 
 
 @fwdprop_test_factory(
-    mygrad_func=average,
-    true_func=np.average,
-    num_arrays=1,
-    kwargs=gen_average_args,
+    mygrad_func=average, true_func=np.average, num_arrays=1, kwargs=gen_average_args,
 )
 def test_average_fwd():
     pass
@@ -186,8 +188,8 @@ def test_canonicalize_weights():
     # Same shape, no-op
     assert _canonicalize_weights(x, axis=0, weights=np.empty((2, 2))).shape == x.shape
     # Differing shapes, make weights broadcastable
-    assert _canonicalize_weights(x, axis=0, weights=np.empty((2, ))).shape == (2, 1)
-    assert _canonicalize_weights(x, axis=1, weights=np.empty((2, ))).shape == (1, 2)
+    assert _canonicalize_weights(x, axis=0, weights=np.empty((2,))).shape == (2, 1)
+    assert _canonicalize_weights(x, axis=1, weights=np.empty((2,))).shape == (1, 2)
 
 
 def test_canonicalize_weights_misuse():

@@ -1,5 +1,6 @@
 import numpy as np
 
+import mygrad
 from mygrad.tensor_base import Tensor
 
 from .ops import *
@@ -167,16 +168,14 @@ def _canonicalize_weights(x, axis, weights):
         return weights
     if axis is None:
         raise TypeError(
-            "Axis must be specified when shapes of a and weights "
-            "differ.")
+            "Axis must be specified when shapes of a and weights " "differ."
+        )
     if weights.ndim != 1:
-        raise TypeError(
-            "1D weights expected when shapes of a and weights differ.")
+        raise TypeError("1D weights expected when shapes of a and weights differ.")
     if weights.shape[0] != x.shape[axis]:
-        raise ValueError(
-            "Length of weights not compatible with specified axis.")
+        raise ValueError("Length of weights not compatible with specified axis.")
     # setup weights to broadcast along axis
-    weights = np.broadcast_to(weights, (x.ndim-1)*(1,) + weights.shape)
+    weights = mygrad.broadcast_to(weights, (x.ndim - 1) * (1,) + weights.shape)
     return weights.swapaxes(-1, axis)
 
 
@@ -187,12 +186,11 @@ def average(x, axis=None, weights=None, constant=False, returned=False):
         weights = _canonicalize_weights(x, axis, weights)
         scl = sum(weights, axis=axis, constant=constant)
         if np.any(scl == 0.0):
-            raise ZeroDivisionError(
-                "Weights sum to zero, can't be normalized")
+            raise ZeroDivisionError("Weights sum to zero, can't be normalized")
         avg = sum(x * weights, axis=axis, constant=constant) / scl
     if returned:
         if avg.shape != scl.shape:
-            scl = np.broadcast_to(scl, avg.shape)
+            scl = mygrad.broadcast_to(scl, avg.shape)
         return avg, scl
     else:
         return avg
