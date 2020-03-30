@@ -229,6 +229,23 @@ def test_average_bkwd():
     pass
 
 
+# Helps test the 2nd Tensor output of average.
+def average_returned_wrapper(average_func):
+    return lambda x, axis, weights: average_func(x, axis=axis, weights=weights, returned=True)[1]
+
+
+@backprop_test_factory(
+    mygrad_func=average_returned_wrapper(average),
+    true_func=average_returned_wrapper(np.average),
+    num_arrays=1,
+    kwargs=gen_average_args,
+    index_to_bnds={0: (-10, 10)},
+    vary_each_element=True,
+)
+def test_average_scl_bkwd():
+    pass
+
+
 @fwdprop_test_factory(
     mygrad_func=var,
     true_func=np.var,
