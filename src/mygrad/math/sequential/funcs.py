@@ -168,7 +168,7 @@ def _canonicalize_weights(x, axis, weights):
         return weights
     if axis is None:
         raise TypeError(
-            "Axis must be specified when shapes of a and weights " "differ."
+            "Axis must be specified when shapes of a and weights differ."
         )
     if weights.ndim != 1:
         raise TypeError("1D weights expected when shapes of a and weights differ.")
@@ -181,13 +181,13 @@ def _canonicalize_weights(x, axis, weights):
 
 def average(x, axis=None, weights=None, constant=False, returned=False):
     if weights is None:
-        avg = mean(x, axis=axis, constant=constant)
-    else:
-        weights = _canonicalize_weights(x, axis, weights)
-        scl = sum(weights, axis=axis, constant=constant)
-        if np.any(scl == 0.0):
-            raise ZeroDivisionError("Weights sum to zero, can't be normalized")
-        avg = sum(x * weights, axis=axis, constant=constant) / scl
+        weights = Tensor(np.ones(x.shape, dtype=x.dtype))
+
+    weights = _canonicalize_weights(x, axis, weights)
+    scl = sum(weights, axis=axis, constant=constant)
+    if np.any(scl == 0.0):
+        raise ZeroDivisionError("Weights sum to zero, can't be normalized")
+    avg = sum(x * weights, axis=axis, constant=constant) / scl
     if returned:
         if avg.shape != scl.shape:
             scl = mygrad.broadcast_to(scl, avg.shape)
