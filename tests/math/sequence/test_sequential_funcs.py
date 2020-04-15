@@ -53,11 +53,7 @@ def gen_average_args(draw, arr):
     # - the same shape as arr OR
     # - 1D with compatible length
     # See: https://github.com/numpy/numpy/blob/c31cc36a8a814ed4844a2a553454185601914a5a/numpy/lib/function_base.py#L397
-    wt_same_shape, wt_1D = range(2)
-    if (
-        arr.ndim == 0
-        or draw(st.one_of(st.just(wt_same_shape), st.just(wt_1D))) == wt_same_shape
-    ):
+    if arr.ndim == 0 or draw(st.booleans()):
         axis = draw(axis_arg(arr))
         wt_shape = arr.shape
     else:  # wt_1D
@@ -231,7 +227,9 @@ def test_average_bkwd():
 
 # Helps test the 2nd Tensor output of average.
 def average_returned_wrapper(average_func):
-    return lambda x, axis, weights: average_func(x, axis=axis, weights=weights, returned=True)[1]
+    return lambda x, axis, weights: average_func(
+        x, axis=axis, weights=weights, returned=True
+    )[1]
 
 
 @backprop_test_factory(
