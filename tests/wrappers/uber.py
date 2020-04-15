@@ -27,6 +27,45 @@ def _to_dict(x):
     return x
 
 
+def get_hypothesis_db_key(self, *extras: Any) -> bytes:
+    """
+    The Hypothesis example database is keyed off a hash of the test function,
+    and so reusing a test function via this kind of factory can lead to
+    unexpected collisions or evictions.  While it's never *incorrect*, this
+    can make the DB much less effective.
+
+    Assigning a distinctive bytestring - such as a stable hash or repr of
+    all the arguments to the factory instance - to the `add_digest` attribute
+    will adjust the key, as if it was a @pytest.mark.parametrize-d test.
+
+    (this isn't part of the public interface either, so it could stop working
+    or even break things in future; but since MyGrad and Hypothesis share
+    maintainers we can probably cope with that.)
+    """
+
+    def stable_maybe_dict_repr(x):
+        return sorted(_to_dict(x).items())
+
+    attributes = (
+        getattr(self.op, "__qualname__", repr(self.op)),
+        # function (__qualname__), ufunc (__name__), or functools.partial (repr)
+        getattr(
+            self.true_func,
+            "__qualname__",
+            getattr(self.true_func, "__name__", repr(self.true_func)),
+        ),
+        stable_maybe_dict_repr(self.tolerances),
+        stable_maybe_dict_repr(self.index_to_bnds),
+        self.default_bnds,
+        stable_maybe_dict_repr(self.index_to_no_go),
+        stable_maybe_dict_repr(self.index_to_arr_shapes),
+        self.num_arrays,
+        self.shapes,
+        *extras,
+    )
+    return repr(attributes).encode()
+
+
 class fwdprop_test_factory:
     """ Decorator
 
@@ -288,6 +327,9 @@ class fwdprop_test_factory:
                     err_msg="arr-{} was mutated during forward prop".format(n),
                 )
 
+        wrapper._hypothesis_internal_add_digest = get_hypothesis_db_key(
+            self, self.permit_0d_array_as_float
+        )
         return wrapper
 
 
@@ -666,4 +708,11 @@ class backprop_test_factory:
                 grad, grad_copy, err_msg="`grad` was mutated during backward prop"
             )
 
+        wrapper._hypothesis_internal_add_digest = get_hypothesis_db_key(
+            self,
+            self.elements_strategy,
+            self.h,
+            self.vary_each_element,
+            self.use_finite_difference,
+        )
         return wrapper
