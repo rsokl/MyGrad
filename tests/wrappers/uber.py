@@ -335,6 +335,7 @@ class backprop_test_factory:
         kwargs: Optional[
             Union[Callable, Dict[str, Union[Any, Callable[[Any], SearchStrategy]]]]
         ] = None,
+        arrs_from_kwargs: Optional[Dict[int, str]] = None,
         h: float = 1e-20,
         rtol: float = 1e-8,
         atol: float = 1e-8,
@@ -393,6 +394,11 @@ class backprop_test_factory:
             will be called, passing it the list of arrays as an input argument, such
             that the strategy can draw based on those particular arrays.
 
+        arrs_from_kwargs : Optional[Dict[int, str]]
+            The mapping i (int) -> k (str) indicates that array-i should be
+            derived from kwargs[k], which must be a numpy array or MyGrad
+            tensor.
+
         vary_each_element : bool, optional (default=False)
             If False, then use a faster numerical derivative that varies entire
             arrays at once: arr -> arr + h; valid only for functions that map over
@@ -419,6 +425,32 @@ class backprop_test_factory:
             elements_strategy if elements_strategy is not None else st.floats
         )
         kwargs = _to_dict(kwargs)
+        arrs_from_kwargs = _to_dict(arrs_from_kwargs)
+
+        if not set(arrs_from_kwargs) <= (
+            set(range(num_arrays)) if num_arrays is not None else set()
+        ):
+
+            raise ValueError(
+                "`kwargs_to_arr` must map an array-ID to a kwarg-name. "
+                "Got invalid key(s): "
+                + ", ".join(
+                    k
+                    for k in set(arrs_from_kwargs)
+                    - (set(range(num_arrays)) if num_arrays is not None else set())
+                )
+            )
+
+        if any(not isinstance(v, str) for v in arrs_from_kwargs.values()):
+            raise ValueError(
+                "`kwargs_to_arr` must map an array-ID to a kwarg-name."
+                "Got invalid key(s): "
+                + ", ".join(
+                    v for v in arrs_from_kwargs.values() if not isinstance(v, str)
+                )
+            )
+
+        self.arrs_from_kwargs = arrs_from_kwargs
 
         if not ((num_arrays is not None) ^ (shapes is not None)):
             raise ValueError(
@@ -551,12 +583,14 @@ class backprop_test_factory:
             # list of drawn arrays to feed to functions
             arrs = data.draw(
                 st.tuples(
-                    *(self.arrays(i).map(Tensor) for i in range(self.num_arrays))
-                ),
+                    *(
+                        self.arrays(i).map(Tensor)
+                        for i in range(self.num_arrays)
+                        if i not in self.arrs_from_kwargs
+                    )
+                ).map(list),
                 label="arrays",
             )
-
-            arr_copies = tuple(copy(arr) for arr in arrs)
 
             if callable(self.kwargs):
                 kwargs = data.draw(self.kwargs(*arrs), label="kwargs")
@@ -578,6 +612,31 @@ class backprop_test_factory:
                     )
                     for k, v in self.kwargs.items()
                 }
+
+            if not set(self.arrs_from_kwargs.values()) <= set(kwargs):
+                raise ValueError(
+                    "`arrs_from_kwargs` specifies kwargs that aren't present: {}".format(
+                        ", ".join(
+                            v for v in self.arrs_from_kwargs.values() if v not in kwargs
+                        )
+                    )
+                )
+
+            for arr_id, key in sorted(
+                self.arrs_from_kwargs.items(), key=lambda x: x[0]
+            ):
+                v = kwargs.pop(key)
+                if not isinstance(v, (np.ndarray, Tensor)):
+                    raise ValueError(
+                        "kwarg {} is to be used as array-{}, but is neither "
+                        "an array nor a tensor, got {}".format(key, arr_id, v)
+                    )
+
+                arrs.insert(arr_id, Tensor(v))
+
+            arrs = tuple(arrs)
+
+            arr_copies = tuple(copy(arr) for arr in arrs)
 
             if self.assumptions is not None:
                 assume(self.assumptions(*arrs, **kwargs))
@@ -629,6 +688,9 @@ class backprop_test_factory:
 
             # check that the analytic and numeric derivatives match
             for n, (arr, d_num) in enumerate(zip(arrs, grads_numerical)):
+                assert arr.grad is not None, "arr-{} grad is None, expected {}".format(
+                    n, d_num
+                )
                 assert_allclose(
                     arr.grad,
                     d_num,
