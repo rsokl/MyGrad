@@ -13,6 +13,11 @@ from mygrad._utils import is_invalid_gradient, reduce_broadcast
 from tests.custom_strategies import broadcastable_shapes, everything_except
 
 
+@st.composite
+def f(draw):
+    return 1
+
+
 @pytest.mark.parametrize(
     ("grad", "is_invalid"),
     [

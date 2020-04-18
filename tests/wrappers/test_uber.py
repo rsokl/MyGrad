@@ -38,18 +38,18 @@ def test_arr_from_kwargs(args_as_kwargs):
         assert_allclose(
             np.real(a if isinstance(a, np.ndarray) else a.data),
             expected_a,
-            err_msg="Got bad value for `a`: {}".format(a),
+            err_msg=f"Got bad value for `a`: {a}",
         )
 
         assert_allclose(
             np.real(b if isinstance(b, np.ndarray) else b.data),
             expected_b,
-            err_msg="Got bad value for `b`: {}".format(b),
+            err_msg=f"Got bad value for `b`: {b}",
         )
         assert_allclose(
             np.real(c if isinstance(c, np.ndarray) else c.data),
             expected_c,
-            err_msg="Got bad value for `c`: {}".format(c),
+            err_msg=f"Got bad value for `c`: {c}",
         )
 
         if kwarg1 is not None:

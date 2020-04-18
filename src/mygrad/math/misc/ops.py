@@ -59,7 +59,7 @@ class Maximum(BroadcastableOp):
             elif self.equal_mask:
                 mask = np.logical_not(mask)
         else:  # pragma: no cover
-            raise IndexError("Back-propagation through tensor-{}".format(index))
+            raise IndexError(f"Back-propagation through tensor-{index}")
 
         return mask * grad
 
@@ -81,6 +81,6 @@ class Minimum(BroadcastableOp):
             elif self.equal_mask:
                 mask = np.logical_not(mask)
         else:  # pragma: no cover
-            raise IndexError("Back-propagation through tensor-{}".format(index))
+            raise IndexError(f"Back-propagation through tensor-{index}")
 
         return mask * grad

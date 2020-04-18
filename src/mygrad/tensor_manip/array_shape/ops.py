@@ -84,7 +84,7 @@ class BroadcastTo(BroadcastableOp):
     def backward_var(self, grad, index, **kwargs):
         if index != 0:  # pragma: no cover
             raise IndexError(
-                "`broadcast_to` is a unary operation. "
-                "`backward_var` was called for index {}".format(index)
+                f"`broadcast_to` is a unary operation. "
+                f"`backward_var` was called for index {index}"
             )
         return grad

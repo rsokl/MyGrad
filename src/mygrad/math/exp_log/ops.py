@@ -80,7 +80,7 @@ class Logaddexp(BroadcastableOp):
         elif index == 1:
             return grad / (1 + np.exp(a.data - b.data))
         else:  # pragma: no cover
-            raise IndexError("Back-propagation through tensor-{}".format(index))
+            raise IndexError(f"Back-propagation through tensor-{index}")
 
 
 class Logaddexp2(BroadcastableOp):
@@ -98,7 +98,7 @@ class Logaddexp2(BroadcastableOp):
         elif index == 1:
             return grad / (1 + 2 ** (a.data - b.data))
         else:  # pragma: no cover
-            raise IndexError("Back-propagation through tensor-{}".format(index))
+            raise IndexError(f"Back-propagation through tensor-{index}")
 
 
 class Log(Operation):
