@@ -12,7 +12,7 @@ def build_graph(
     save=False,
     dims=False,
     dtypes=False,
-    sum_stats=False
+    sum_stats=False,
 ):
     """ Builds and renders a computational graph.
 
@@ -117,19 +117,19 @@ def _add_node(node, graph, op_id=None, **kwargs):
 
     if node.ndim:
         if kwargs["dims"]:
-            node_lab += "\nDims: {}".format(node.shape)
+            node_lab += f"\nDims: {node.shape}"
         if kwargs["dtypes"]:
-            node_lab += "\nDtype: {}".format(node.dtype)
+            node_lab += f"\nDtype: {node.dtype}"
         if kwargs["sum_stats"]:
-            node_lab += "\nMin: {min}\nMedian: {med}\nMean: {mean}\nMax: {max}".format(
-                min=np.amin(node.data),
-                med=np.median(node.data),
-                mean=np.mean(node.data),
-                max=np.amax(node.data),
+            node_lab += (
+                f"\nMin: {np.amin(node.data)}"
+                f"\nMedian: {np.median(node.data)}"
+                f"\nMean: {np.mean(node.data)}"
+                f"\nMax: {np.amax(node.data)}"
             )
     else:
         if kwargs["dtypes"]:
-            node_lab += "\nDtype: {}".format(node.dtype)
+            node_lab += f"\nDtype: {node.dtype}"
 
     graph.node(name=node_id, label=node_lab)
 

@@ -79,10 +79,10 @@ class MaxPoolND(Operation):
         out_shape = (x_shape - w_shape) / stride + 1
 
         if not all(i.is_integer() and i > 0 for i in out_shape):
-            msg = "Stride and kernel dimensions are incompatible: \n"
-            msg += "Input dimensions: {}\n".format(tuple(x_shape))
-            msg += "Stride dimensions: {}\n".format(tuple(stride))
-            msg += "Pooling dimensions: {}\n".format(tuple(w_shape))
+            msg = f"Stride and kernel dimensions are incompatible: \n"
+            msg += f"Input dimensions: {(tuple(x_shape))}\n"
+            msg += f"Stride dimensions: {(tuple(stride))}\n"
+            msg += f"Pooling dimensions: {(tuple(w_shape))}\n"
             raise ValueError(msg)
 
         pool_axes = tuple(-(i + 1) for i in range(num_pool))

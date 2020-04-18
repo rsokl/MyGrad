@@ -47,28 +47,22 @@ def _check_min_max(min_val, min_dim, max_dim, param_name, max_val=None):
     ValueError"""
     if not isinstance(min_dim, Integral) or min_dim < min_val:
         raise ValueError(
-            "`min_{name}` must be larger than {min_val}. "
-            "Got {val}".format(min_val=min_val, name=param_name, val=min_dim)
+            f"`min_{param_name}` must be larger than {min_val}. " f"Got {min_dim}"
         )
 
     if not isinstance(max_dim, Integral) or max_dim < min_dim:
         raise ValueError(
-            "`max_{name}` must be an integer that is "
-            "not smaller than `min_{name}`. Got {val}".format(
-                name=param_name, val=max_dim
-            )
+            f"`max_{param_name}` must be an integer that is "
+            f"not smaller than `min_{param_name}`. Got {max_dim}"
         )
     if max_val is not None and max_dim > max_val:
         raise ValueError(
-            "`min_{name}` cannot be larger than {max_val}. "
-            "Got {val}".format(max_val=max_val, name=param_name, val=max_dim)
+            f"`min_{param_name}` cannot be larger than {max_val}. " f"Got {max_dim}"
         )
 
     if max_dim < min_dim:
         raise ValueError(
-            "`min_{name}={_min}` cannot be larger than max_{name}={_max}.".format(
-                _min=min_dim, _max=max_dim, name=param_name
-            )
+            f"`min_{param_name}={min_dim}` cannot be larger than max_{param_name}={max_dim}."
         )
 
 
@@ -89,7 +83,7 @@ def choices(seq, size, replace=True):
     hypothesis.strategiesSearchStrategy[Tuple[Any, ...]]
         A tuple of length `size` containing elements of `seq`"""
     if not isinstance(size, Integral) or size < 0:
-        raise ValueError("`size` must be a non-negative integer. Got {}".format(size))
+        raise ValueError(f"`size` must be a non-negative integer. Got {size}")
     if size > len(seq) and not replace:
         raise ValueError(
             "`size` must not exceed the length of `seq` when `replace` is `False`"

@@ -206,9 +206,7 @@ class Tensor:
     @staticmethod
     def _check_valid_dtype(dtype):
         if not np.issubdtype(dtype, np.number):
-            raise TypeError(
-                "Tensor data must be a numeric type, received {}".format(dtype)
-            )
+            raise TypeError(f"Tensor data must be a numeric type, received {dtype}")
 
     @classmethod
     def _op(
@@ -217,7 +215,7 @@ class Tensor:
         *input_vars,
         op_args=None,
         op_kwargs=None,
-        constant=False
+        constant=False,
     ):
         """Wraps operations performed between tensors: f(a, b, ...).
 
@@ -332,15 +330,10 @@ class Tensor:
             self.grad = np.asarray(grad.data if isinstance(grad, Tensor) else grad)
             if is_invalid_gradient(self.grad):
                 raise InvalidGradient(
-                    "An invalid gradient-value was passed to "
-                    "\n\t`{call_signature}`"
-                    "\nGradients are expected to be real-valued scalars or "
-                    "numpy arrays, got a gradient of type: {_type}".format(
-                        call_signature="{name}.backward(<gradient>)".format(
-                            name=type(self).__name__
-                        ),
-                        _type=type(grad),
-                    )
+                    f"An invalid gradient-value was passed to "
+                    f"\n\t`{type(self).__name__}.backward(<gradient>)`"
+                    f"\nGradients are expected to be real-valued scalars or "
+                    f"numpy arrays, got a gradient of type: {type(grad)}"
                 )
 
         else:
@@ -384,9 +377,9 @@ class Tensor:
             "on a tensor with no gradient"
         )
         assert self.grad.shape == self.shape, (
-            "A tensor and its associated gradient must possess the same shape. Got:"
-            "\ntensor-shape: {}"
-            "\ngrad-shape: {}".format(self.shape, self.grad.shape)
+            f"A tensor and its associated gradient must possess the same shape. Got:"
+            f"\ntensor-shape: {self.shape}"
+            f"\ngrad-shape: {self.grad.shape}"
         )
         if self._creator is not None and not bool(
             graph & (self._ops - self._accum_ops)

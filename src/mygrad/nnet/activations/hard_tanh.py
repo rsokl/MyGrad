@@ -55,16 +55,12 @@ def hard_tanh(x, *, lower_bound=-1, upper_bound=1, constant=False):
 
     if not isinstance(lower_bound, Real):
         raise TypeError(
-            "`lower_bound` must be a real-valued scalar, got {} (type {})".format(
-                lower_bound, type(lower_bound)
-            )
+            f"`lower_bound` must be a real-valued scalar, got {lower_bound} (type { type(lower_bound)})"
         )
 
     if not isinstance(upper_bound, Real):
         raise TypeError(
-            "`upper_bound` must be a real-valued scalar, got {} (type {})".format(
-                upper_bound, type(upper_bound)
-            )
+            f"`upper_bound` must be a real-valued scalar, got {upper_bound} (type {type(upper_bound)})"
         )
 
     return maximum(

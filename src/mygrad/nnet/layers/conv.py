@@ -66,11 +66,11 @@ class ConvND(Operation):
 
         if not all(i.is_integer() and i > 0 for i in out_shape):
             msg = "Stride and kernel dimensions are incompatible: \n"
-            msg += "Input dimensions: {}\n".format(tuple(x_shape))
-            msg += "Stride dimensions: {}\n".format(tuple(stride))
-            msg += "Kernel dimensions: {}\n".format(tuple(w_shape))
-            msg += "Padding dimensions: {}\n".format(tuple(padding))
-            msg += "Dilation dimensions: {}\n".format(tuple(dilation))
+            msg += f"Input dimensions: {tuple(x_shape)}\n"
+            msg += f"Stride dimensions: {tuple(stride)}\n"
+            msg += f"Kernel dimensions: {tuple(w_shape)}\n"
+            msg += f"Padding dimensions: {tuple(padding)}\n"
+            msg += f"Dilation dimensions: {tuple(dilation)}\n"
             raise ValueError(msg)
 
         self.padding = padding
@@ -283,21 +283,18 @@ def conv_nd(x, filter_bank, *, stride, padding=0, dilation=1, constant=False):
     """
     if x.ndim < 3:
         raise ValueError(
-            "`x` must possess at least three "
-            "dimensions, got {} dimensions".format(x.ndim)
+            f"`x` must possess at least three " f"dimensions, got {x.ndim} dimensions"
         )
 
     if x.ndim != filter_bank.ndim:
         raise ValueError(
-            "`x` ({}-dimensions) must have the same dimensionality as "
-            "`filter_bank` ({}-dimensions)".format(x.ndim, filter_bank.ndim)
+            f"`x` ({x.ndim}-dimensions) must have the same dimensionality as "
+            f"`filter_bank` ({filter_bank.ndim}-dimensions)"
         )
 
     if filter_bank.shape[1] != x.shape[1]:
         raise ValueError(
-            "`x.shape[1]` ({}) must match `filter_bank.shape[1]` ({})".format(
-                x.shape[1], filter_bank.shape[1]
-            )
+            f"`x.shape[1]` ({x.shape[1]}) must match `filter_bank.shape[1]` ({filter_bank.shape[1]})"
         )
 
     return Tensor._op(
