@@ -1,5 +1,6 @@
 numpy==1.16.2
 numba==0.41.0
+llvmlite==0.32.1
 sphinx==3.0.4
 numpydoc>=1.0.0
 sphinx-rtd-theme==0.5.0
