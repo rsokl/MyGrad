@@ -1,3 +1,4 @@
+from hypothesis import settings, HealthCheck
 import hypothesis.strategies as st
 import numpy as np
 import pytest
@@ -16,7 +17,10 @@ def test_input_validation(alpha):
 def _finite_params(arrs, alpha):
     if isinstance(arrs, Tensor):
         arrs = arrs.data
-    return np.all(np.isfinite(alpha * np.exp(arrs)))
+    return (
+        np.all(np.isfinite(alpha * (np.exp(arrs) - 1)))
+        and np.all(np.abs(np.exp(arrs)) > 1e-8)
+    )
 
 
 def _np_elu(x, alpha):
@@ -37,16 +41,12 @@ def test_elu_fwd():
     pass
 
 
-def _away_from_zero(*arrs, **kwargs):
-    x = arrs[0]
-    return np.all(np.abs(x.data) > 1e-8)
-
-
+@settings(suppress_health_check=(HealthCheck.filter_too_much,))
 @backprop_test_factory(
     mygrad_func=elu,
     true_func=_np_elu,
     num_arrays=1,
-    assumptions=lambda arrs, alpha: _finite_params(arrs, alpha) and _away_from_zero(arrs),
+    assumptions=lambda arrs, alpha: _finite_params(arrs, alpha),
     kwargs={"alpha": lambda x: finite_floats | finite_floats.map(np.array)},
 )
 def test_elu_bkwd():
