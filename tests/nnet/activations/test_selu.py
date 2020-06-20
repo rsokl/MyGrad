@@ -26,9 +26,6 @@ def test_selu_fwd():
     pass
 
 
-def _away_from_zero(*arrs, **kwargs):
-    x = arrs[0]
-    return np.all(np.abs(x.data) > 1e-8)
 
 
 @backprop_test_factory(
