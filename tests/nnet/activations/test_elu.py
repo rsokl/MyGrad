@@ -1,5 +1,3 @@
-import sys
-
 import hypothesis.strategies as st
 import numpy as np
 import pytest
@@ -33,7 +31,6 @@ finite_floats = st.floats(allow_infinity=False, allow_nan=False)
     true_func=_np_elu,
     num_arrays=1,
     kwargs={"alpha": lambda x: finite_floats | finite_floats.map(np.array)},
-    index_to_bnds={0: (np.log(sys.float_info.max), None)},
     assumptions=_finite_params,
 )
 def test_leaky_relu_fwd():
@@ -51,7 +48,6 @@ def _away_from_zero(*arrs, **kwargs):
     num_arrays=1,
     assumptions=lambda arrs, alpha: _finite_params(arrs, alpha) and _away_from_zero(arrs),
     kwargs={"alpha": lambda x: finite_floats | finite_floats.map(np.array)},
-    index_to_bnds={0: (np.log(sys.float_info.max), None)},
 )
 def test_leaky_relu_bkwd():
     pass
