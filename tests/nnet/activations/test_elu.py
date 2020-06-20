@@ -46,7 +46,7 @@ def test_elu_fwd():
     mygrad_func=elu,
     true_func=_np_elu,
     num_arrays=1,
-    assumptions=lambda arrs, alpha: _finite_params(arrs, alpha),
+    assumptions=_finite_params,
     kwargs={"alpha": lambda x: finite_floats | finite_floats.map(np.array)},
 )
 def test_elu_bkwd():
