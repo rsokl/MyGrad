@@ -9,10 +9,10 @@ from mygrad import Tensor
 from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
-@pytest.mark.parametrize("slope", (None, 1j))
-def test_input_validation(slope):
+@pytest.mark.parametrize("alpha", (None, 1j))
+def test_input_validation(alpha):
     with pytest.raises(TypeError):
-        elu(2, slope=slope)
+        elu(2, alpha=alpha)
 
 
 def _finite_params(arrs, alpha):
