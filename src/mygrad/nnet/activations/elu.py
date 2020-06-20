@@ -1,3 +1,5 @@
+from numbers import Real
+
 import numpy as np
 from mygrad import Tensor
 from mygrad.operation_base import Operation
@@ -77,4 +79,12 @@ def elu(x, alpha, constant=False):
            3.67879441e-02, 1.00000000e+00, 1.00000000e+00, 1.00000000e+00,
            1.00000000e+00, 1.00000000e+00, 1.00000000e+00])
     """
+    if isinstance(alpha, (np.ndarray, Tensor)):
+        alpha = alpha.item()
+
+    if not isinstance(alpha, Real):
+        raise TypeError(
+            f"`slope` must be a real-valued scalar, got {alpha} (type {type(alpha)})"
+        )
+
     return Tensor._op(ELU, x, op_args=(alpha,), constant=constant)

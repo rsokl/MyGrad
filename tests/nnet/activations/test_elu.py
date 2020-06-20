@@ -1,17 +1,19 @@
 import sys
 
-import numpy as np
-
 import hypothesis.strategies as st
+import numpy as np
+import pytest
+
 from mygrad.nnet.activations import elu
 from mygrad import Tensor
 from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
-# @pytest.mark.parametrize("slope", (None, 1j))
-# def test_input_validation(slope):
-#     with pytest.raises(TypeError):
-#         elu(2, slope=slope)
+@pytest.mark.parametrize("slope", (None, 1j))
+def test_input_validation(slope):
+    with pytest.raises(TypeError):
+        elu(2, slope=slope)
+
 
 def _finite_params(arrs, alpha):
     if isinstance(arrs, Tensor):
