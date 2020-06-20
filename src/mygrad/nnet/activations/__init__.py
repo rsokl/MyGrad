@@ -5,6 +5,7 @@ from .leaky_relu import leaky_relu
 from .relu import relu
 from .sigmoid import sigmoid
 from .softmax import logsoftmax, softmax
+from .soft_sign import soft_sign
 
 __all__ = [
     "hard_tanh",
@@ -13,5 +14,6 @@ __all__ = [
     "relu",
     "sigmoid",
     "softmax",
+    "soft_sign",
     "tanh",
 ]
