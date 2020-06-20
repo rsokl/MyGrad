@@ -1,8 +1,15 @@
 import numpy as np
+import pytest
 
 import hypothesis.strategies as st
 from mygrad.nnet.activations import leaky_relu
 from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
+
+
+@pytest.mark.parametrize("slope", (None, 1j))
+def test_input_validation(slope):
+    with pytest.raises(TypeError):
+        leaky_relu(2, slope=slope)
 
 
 def _np_leaky_relu(x, slope):
