@@ -33,7 +33,7 @@ finite_floats = st.floats(allow_infinity=False, allow_nan=False)
     kwargs={"alpha": lambda x: finite_floats | finite_floats.map(np.array)},
     assumptions=_finite_params,
 )
-def test_leaky_relu_fwd():
+def test_elu_fwd():
     pass
 
 
@@ -49,5 +49,5 @@ def _away_from_zero(*arrs, **kwargs):
     assumptions=lambda arrs, alpha: _finite_params(arrs, alpha) and _away_from_zero(arrs),
     kwargs={"alpha": lambda x: finite_floats | finite_floats.map(np.array)},
 )
-def test_leaky_relu_bkwd():
+def test_elu_bkwd():
     pass
