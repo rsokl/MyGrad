@@ -27,6 +27,45 @@ def _to_dict(x):
     return x
 
 
+def get_hypothesis_db_key(self, *extras: Any) -> bytes:
+    """
+    The Hypothesis example database is keyed off a hash of the test function,
+    and so reusing a test function via this kind of factory can lead to
+    unexpected collisions or evictions.  While it's never *incorrect*, this
+    can make the DB much less effective.
+
+    Assigning a distinctive bytestring - such as a stable hash or repr of
+    all the arguments to the factory instance - to the `add_digest` attribute
+    will adjust the key, as if it was a @pytest.mark.parametrize-d test.
+
+    (this isn't part of the public interface either, so it could stop working
+    or even break things in future; but since MyGrad and Hypothesis share
+    maintainers we can probably cope with that.)
+    """
+
+    def stable_maybe_dict_repr(x):
+        return sorted(_to_dict(x).items())
+
+    attributes = (
+        getattr(self.op, "__qualname__", repr(self.op)),
+        # function (__qualname__), ufunc (__name__), or functools.partial (repr)
+        getattr(
+            self.true_func,
+            "__qualname__",
+            getattr(self.true_func, "__name__", repr(self.true_func)),
+        ),
+        stable_maybe_dict_repr(self.tolerances),
+        stable_maybe_dict_repr(self.index_to_bnds),
+        self.default_bnds,
+        stable_maybe_dict_repr(self.index_to_no_go),
+        stable_maybe_dict_repr(self.index_to_arr_shapes),
+        self.num_arrays,
+        self.shapes,
+        *extras,
+    )
+    return repr(attributes).encode()
+
+
 class fwdprop_test_factory:
     """ Decorator
 
@@ -72,7 +111,7 @@ class fwdprop_test_factory:
         atol: float = 1e-7,
         rtol: float = 1e-7,
         assumptions: Optional[Callable[..., bool]] = None,
-        permit_0d_array_as_float: bool = True
+        permit_0d_array_as_float: bool = True,
     ):
         """
         Parameters
@@ -132,16 +171,16 @@ class fwdprop_test_factory:
 
         if not ((num_arrays is not None) ^ (shapes is not None)):
             raise ValueError(
-                "Either `num_arrays`(={}) must be specified "
-                "xor `shapes`(={}) must be specified".format(num_arrays, shapes)
+                f"Either `num_arrays`(={num_arrays}) must be specified "
+                f"xor `shapes`(={shapes}) must be specified"
             )
 
         if shapes is not None:
             if not isinstance(shapes, st.SearchStrategy):
                 raise TypeError(
-                    "`shapes` should be "
-                    "Optional[hnp.MutuallyBroadcastableShapesStrategy]"
-                    ", got {}".format(shapes)
+                    f"`shapes` should be "
+                    f"Optional[hnp.MutuallyBroadcastableShapesStrategy]"
+                    f", got {shapes}"
                 )
 
             shapes_type = (
@@ -150,9 +189,9 @@ class fwdprop_test_factory:
 
             if not isinstance(shapes_type, hnp.MutuallyBroadcastableShapesStrategy):
                 raise TypeError(
-                    "`shapes` should be "
-                    "Optional[hnp.MutuallyBroadcastableShapesStrategy]"
-                    ", got {}".format(shapes)
+                    f"`shapes` should be "
+                    f"Optional[hnp.MutuallyBroadcastableShapesStrategy]"
+                    f", got {shapes}"
                 )
             num_arrays = shapes_type.num_shapes
 
@@ -225,17 +264,13 @@ class fwdprop_test_factory:
                 kwargs = data.draw(self.kwargs(*arrs))
                 if not isinstance(kwargs, dict):
                     raise TypeError(
-                        "`kwargs` was a search strategy. This needs to draw dictionaries,"
-                        "instead drew: {}".format(kwargs)
+                        f"`kwargs` was a search strategy. This needs to draw dictionaries,"
+                        f"instead drew: {kwargs}"
                     )
             else:
                 # set or draw keyword args to be passed to functions
                 kwargs = {
-                    k: (
-                        data.draw(v(*arrs), label="kwarg: {}".format(k))
-                        if callable(v)
-                        else v
-                    )
+                    k: (data.draw(v(*arrs), label=f"kwarg: {f}") if callable(v) else v)
                     for k, v in self.kwargs.items()
                 }
 
@@ -253,7 +288,7 @@ class fwdprop_test_factory:
                 arrs = tuple(
                     arr.item()
                     if arr.ndim == 0
-                    and data.draw(st.booleans(), label="arr-{} to float".format(n))
+                    and data.draw(st.booleans(), label=f"arr-{n} to float")
                     else arr
                     for n, arr in enumerate(arrs)
                 )
@@ -265,14 +300,10 @@ class fwdprop_test_factory:
 
             assert isinstance(
                 o, Tensor
-            ), "`mygrad_func` returned type {}, should return `mygrad.Tensor`".format(
-                type(o)
-            )
+            ), "`mygrad_func` returned type {type(o)}, should return `mygrad.Tensor`"
             assert (
                 o.constant is constant
-            ), "`mygrad_func` returned tensor.constant={}, should be constant={}".format(
-                o.constant, constant
-            )
+            ), f"`mygrad_func` returned tensor.constant={o.constant}, should be constant={constant}"
 
             assert_allclose(
                 actual=tensor_out,
@@ -283,11 +314,12 @@ class fwdprop_test_factory:
 
             for n, (arr, arr_copy) in enumerate(zip(arrs, arr_copies)):
                 assert_array_equal(
-                    arr,
-                    arr_copy,
-                    err_msg="arr-{} was mutated during forward prop".format(n),
+                    arr, arr_copy, err_msg=f"arr-{n} was mutated during forward prop",
                 )
 
+        wrapper._hypothesis_internal_add_digest = get_hypothesis_db_key(
+            self, self.permit_0d_array_as_float
+        )
         return wrapper
 
 
@@ -335,12 +367,13 @@ class backprop_test_factory:
         kwargs: Optional[
             Union[Callable, Dict[str, Union[Any, Callable[[Any], SearchStrategy]]]]
         ] = None,
+        arrs_from_kwargs: Optional[Dict[int, str]] = None,
         h: float = 1e-20,
         rtol: float = 1e-8,
         atol: float = 1e-8,
         vary_each_element: bool = False,
         use_finite_difference=False,
-        assumptions: Optional[Callable[..., bool]] = None
+        assumptions: Optional[Callable[..., bool]] = None,
     ):
         """
         Parameters
@@ -393,6 +426,11 @@ class backprop_test_factory:
             will be called, passing it the list of arrays as an input argument, such
             that the strategy can draw based on those particular arrays.
 
+        arrs_from_kwargs : Optional[Dict[int, str]]
+            The mapping i (int) -> k (str) indicates that array-i should be
+            derived from kwargs[k], which must be a numpy array or MyGrad
+            tensor.
+
         vary_each_element : bool, optional (default=False)
             If False, then use a faster numerical derivative that varies entire
             arrays at once: arr -> arr + h; valid only for functions that map over
@@ -419,19 +457,45 @@ class backprop_test_factory:
             elements_strategy if elements_strategy is not None else st.floats
         )
         kwargs = _to_dict(kwargs)
+        arrs_from_kwargs = _to_dict(arrs_from_kwargs)
+
+        if not set(arrs_from_kwargs) <= (
+            set(range(num_arrays)) if num_arrays is not None else set()
+        ):
+
+            raise ValueError(
+                "`kwargs_to_arr` must map an array-ID to a kwarg-name. "
+                "Got invalid key(s): "
+                + ", ".join(
+                    k
+                    for k in set(arrs_from_kwargs)
+                    - (set(range(num_arrays)) if num_arrays is not None else set())
+                )
+            )
+
+        if any(not isinstance(v, str) for v in arrs_from_kwargs.values()):
+            raise ValueError(
+                "`kwargs_to_arr` must map an array-ID to a kwarg-name."
+                "Got invalid key(s): "
+                + ", ".join(
+                    v for v in arrs_from_kwargs.values() if not isinstance(v, str)
+                )
+            )
+
+        self.arrs_from_kwargs = arrs_from_kwargs
 
         if not ((num_arrays is not None) ^ (shapes is not None)):
             raise ValueError(
-                "Either `num_arrays`(={}) must be specified "
-                "xor `shapes`(={}) must be specified".format(num_arrays, shapes)
+                f"Either `num_arrays`(={num_arrays}) must be specified "
+                f"xor `shapes`(={shapes}) must be specified"
             )
 
         if shapes is not None:
             if not isinstance(shapes, st.SearchStrategy):
                 raise TypeError(
-                    "`shapes` should be "
-                    "Optional[hnp.MutuallyBroadcastableShapesStrategy]"
-                    ", got {}".format(shapes)
+                    f"`shapes` should be "
+                    f"Optional[hnp.MutuallyBroadcastableShapesStrategy]"
+                    f", got {shapes}"
                 )
 
             shapes_type = (
@@ -440,9 +504,9 @@ class backprop_test_factory:
 
             if not isinstance(shapes_type, hnp.MutuallyBroadcastableShapesStrategy):
                 raise TypeError(
-                    "`shapes` should be "
-                    "Optional[hnp.MutuallyBroadcastableShapesStrategy]"
-                    ", got {}".format(shapes)
+                    f"`shapes` should be "
+                    f"Optional[hnp.MutuallyBroadcastableShapesStrategy]"
+                    f", got {shapes}"
                 )
             num_arrays = shapes_type.num_shapes
 
@@ -497,11 +561,9 @@ class backprop_test_factory:
             from warnings import warn
 
             warn(
-                "The `finite_difference` method is being used with an h-value of {}."
-                "\nThis is likely too small, and was intended for use with the complex-step "
-                "\nmethod. Please update `h` in this call to `backprop_test_factory`".format(
-                    h
-                )
+                f"The `finite_difference` method is being used with an h-value of {h}."
+                f"\nThis is likely too small, and was intended for use with the complex-step "
+                f"\nmethod. Please update `h` in this call to `backprop_test_factory`"
             )
 
         # stores the indices of the unspecified array shapes
@@ -551,19 +613,21 @@ class backprop_test_factory:
             # list of drawn arrays to feed to functions
             arrs = data.draw(
                 st.tuples(
-                    *(self.arrays(i).map(Tensor) for i in range(self.num_arrays))
-                ),
+                    *(
+                        self.arrays(i).map(Tensor)
+                        for i in range(self.num_arrays)
+                        if i not in self.arrs_from_kwargs
+                    )
+                ).map(list),
                 label="arrays",
             )
-
-            arr_copies = tuple(copy(arr) for arr in arrs)
 
             if callable(self.kwargs):
                 kwargs = data.draw(self.kwargs(*arrs), label="kwargs")
                 if not isinstance(kwargs, dict):
                     raise TypeError(
-                        "`kwargs` was a search strategy. This needs to draw dictionaries,"
-                        "instead drew: {}".format(kwargs)
+                        f"`kwargs` was a search strategy. This needs to draw dictionaries,"
+                        f"instead drew: {kwargs}"
                     )
             else:
                 # The keyword args to be passed to `self.op`. If any provided argument is callable
@@ -571,13 +635,31 @@ class backprop_test_factory:
                 # be passed to the strategy, in order to draw a value for that keyword argument.
                 # Otherwise the provided value is used as-is.
                 kwargs = {
-                    k: (
-                        data.draw(v(*arrs), label="kwarg: {}".format(k))
-                        if callable(v)
-                        else v
-                    )
+                    k: (data.draw(v(*arrs), label=f"kwarg: {k}") if callable(v) else v)
                     for k, v in self.kwargs.items()
                 }
+
+            if not set(self.arrs_from_kwargs.values()) <= set(kwargs):
+                raise ValueError(
+                    f"`arrs_from_kwargs` specifies kwargs that aren't present: "
+                    f"{', '.join(v for v in self.arrs_from_kwargs.values() if v not in kwargs)}"
+                )
+
+            for arr_id, key in sorted(
+                self.arrs_from_kwargs.items(), key=lambda x: x[0]
+            ):
+                v = kwargs.pop(key)
+                if not isinstance(v, (np.ndarray, Tensor)):
+                    raise ValueError(
+                        f"kwarg {key} is to be used as array-{arr_id}, but is neither "
+                        f"an array nor a tensor, got {v}"
+                    )
+
+                arrs.insert(arr_id, Tensor(v))
+
+            arrs = tuple(arrs)
+
+            arr_copies = tuple(copy(arr) for arr in arrs)
 
             if self.assumptions is not None:
                 assume(self.assumptions(*arrs, **kwargs))
@@ -629,19 +711,18 @@ class backprop_test_factory:
 
             # check that the analytic and numeric derivatives match
             for n, (arr, d_num) in enumerate(zip(arrs, grads_numerical)):
+                assert arr.grad is not None, f"arr-{n} grad is None, expected {d_num}"
                 assert_allclose(
                     arr.grad,
                     d_num,
                     **self.tolerances,
-                    err_msg="arr-{}: mygrad derivative and numerical derivative do not match".format(
-                        n
-                    ),
+                    err_msg=f"arr-{n}: mygrad derivative and numerical derivative do not match",
                 )
 
                 # check that none of the set derivatives is a view of `grad`
                 assert not np.shares_memory(
                     arr.grad, grad
-                ), "arr-{}.grad stores a view of grad".format(n)
+                ), f"arr-{n}.grad stores a view of grad"
 
             # check that none of the set derivatives are views of one another
             for arr_i, arr_j in combinations(arrs, 2):
@@ -658,7 +739,7 @@ class backprop_test_factory:
                 assert_array_equal(
                     arr.data,
                     arr_copy.data,
-                    err_msg="arr-{} was mutated during backward prop".format(n),
+                    err_msg=f"arr-{n} was mutated during backward prop",
                 )
 
             # check if `grad` was mutated
@@ -666,4 +747,11 @@ class backprop_test_factory:
                 grad, grad_copy, err_msg="`grad` was mutated during backward prop"
             )
 
+        wrapper._hypothesis_internal_add_digest = get_hypothesis_db_key(
+            self,
+            self.elements_strategy,
+            self.h,
+            self.vary_each_element,
+            self.use_finite_difference,
+        )
         return wrapper

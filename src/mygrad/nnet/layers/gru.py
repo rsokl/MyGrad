@@ -204,7 +204,7 @@ class GRUnit(Operation):
             self.bh,
         )
         T, N, C = X.shape
-        D, = bz.shape
+        (D,) = bz.shape
 
         seq = self.X.data
 

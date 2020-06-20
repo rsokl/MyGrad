@@ -74,7 +74,7 @@ def test_basic_index(shape: Tuple[int, ...], data: st.SearchStrategy):
     x = np.zeros(shape, dtype=int)
     o = x[index]  # raises if invalid index
 
-    note("`x[index]`: {}".format(o))
+    note(f"`x[index]`: {o}")
     if o.size and o.ndim > 0:
         assert np.shares_memory(x, o), (
             "The basic index should produce a " "view of the original array."
@@ -92,7 +92,7 @@ def test_advanced_integer_index(
     index = data.draw(adv_integer_index(shape, min_dims=min_dims, max_dims=max_dims))
     x = np.zeros(shape)
     out = x[index]  # raises if the index is invalid
-    note("x[index]: {}".format(out))
+    note(f"x[index]: {out}")
     assert min_dims <= out.ndim <= max_dims, "The input parameters were not respected"
     assert not np.shares_memory(
         x, out

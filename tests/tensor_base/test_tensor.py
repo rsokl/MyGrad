@@ -336,6 +336,13 @@ def test_math_methods(attr: str, constant: bool):
     assert type(method_out.creator) is type(function_out.creator)
 
 
+# Test https://github.com/rsokl/MyGrad/issues/210
+def test_0d_iter():
+    x = Tensor(3)
+    with pytest.raises(TypeError):
+        sum(x)
+
+
 @pytest.mark.parametrize("op", ("moveaxis", "swapaxes"))
 @given(constant=st.booleans())
 def test_axis_interchange_methods(op: str, constant: bool):

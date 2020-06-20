@@ -1,10 +1,10 @@
 import hypothesis.strategies as st
-from hypothesis import given
 import numpy as np
+from hypothesis import given
 from numpy.testing import assert_allclose
 
-from mygrad.tensor_base import Tensor
 import mygrad as mg
+from mygrad.tensor_base import Tensor
 
 
 @given(

@@ -4,9 +4,9 @@ import pytest
 from hypothesis import given
 from pytest import raises
 
+from mygrad.errors import InvalidBackprop
 from mygrad.operation_base import BroadcastableOp, Operation
 from mygrad.tensor_base import Tensor
-from mygrad.errors import InvalidBackprop
 
 
 class ScalarOnlyOp(BroadcastableOp):

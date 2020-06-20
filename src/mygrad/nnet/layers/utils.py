@@ -122,27 +122,25 @@ def sliding_window_view(arr, window_shape, step, dilation=None):
 
     if not hasattr(window_shape, "__iter__"):
         raise TypeError(
-            "`window_shape` must be a sequence of positive integers, got: {}".format(
-                window_shape
-            )
+            f"`window_shape` must be a sequence of positive integers, got: {window_shape}"
         )
     window_shape = tuple(window_shape)
     if not all(isinstance(i, Integral) and i > 0 for i in window_shape):
         raise TypeError(
-            "`window_shape` must be a sequence of positive integers, "
-            "got: {}".format(window_shape)
+            f"`window_shape` must be a sequence of positive integers, "
+            f"got: {window_shape}"
         )
 
     if len(window_shape) > arr.ndim:
         raise ValueError(
-            "`window_shape` ({}) cannot specify more values than "
-            "`arr.ndim` ({}).".format(window_shape, arr.ndim)
+            f"`window_shape` ({window_shape}) cannot specify more values than "
+            f"`arr.ndim` ({arr.ndim})."
         )
 
     if not isinstance(step, Integral) and not hasattr(step, "__iter__"):
         raise TypeError(
-            "`step` must be a positive integer or a sequence of positive "
-            "integers, got: {}".format(step)
+            f"`step` must be a positive integer or a sequence of positive "
+            f"integers, got: {step}"
         )
 
     step = (
@@ -151,17 +149,15 @@ def sliding_window_view(arr, window_shape, step, dilation=None):
 
     if not all(isinstance(i, Integral) and i > 0 for i in step):
         raise ValueError(
-            "`step` must be a positive integer or a sequence of positive "
-            "integers, got: {}".format(step)
+            f"`step` must be a positive integer or a sequence of positive "
+            f"integers, got: {step}"
         )
 
     if any(i > j for i, j in zip(window_shape[::-1], arr.shape[::-1])):
         raise ValueError(
-            "Each size of the window-shape must fit within the trailing "
-            "dimensions of `arr`."
-            "{} does not fit in {}".format(
-                window_shape, arr.shape[-len(window_shape) :]
-            )
+            f"Each size of the window-shape must fit within the trailing "
+            f"dimensions of `arr`."
+            f"{window_shape} does not fit in {arr.shape[-len(window_shape) :]}"
         )
 
     if (
@@ -170,8 +166,8 @@ def sliding_window_view(arr, window_shape, step, dilation=None):
         and not hasattr(dilation, "__iter__")
     ):
         raise TypeError(
-            "`dilation` must be None, a positive integer, or a sequence of "
-            "positive integers, got: {}".format(dilation)
+            f"`dilation` must be None, a positive integer, or a sequence of "
+            f"positive integers, got: {dilation}"
         )
     if dilation is None:
         dilation = np.ones((len(window_shape),), dtype=int)
@@ -185,20 +181,18 @@ def sliding_window_view(arr, window_shape, step, dilation=None):
             dilation
         ) != len(window_shape):
             raise ValueError(
-                "`dilation` must be None, a positive integer, or a sequence of "
-                "positive integers with the same length as `window_shape` "
-                "({}), got: {}".format(window_shape, dilation)
+                f"`dilation` must be None, a positive integer, or a sequence of "
+                f"positive integers with the same length as `window_shape` "
+                f"({window_shape}), got: {dilation}"
             )
         if any(
             w * d > s
             for w, d, s in zip(window_shape[::-1], dilation[::-1], arr.shape[::-1])
         ):
             raise ValueError(
-                "The dilated window ({}) must fit within the trailing "
-                "dimensions of `arr` ({})".format(
-                    tuple(w * d for w, d in zip(window_shape, dilation)),
-                    arr.shape[-len(window_shape) :],
-                )
+                f"The dilated window ({tuple(w * d for w, d in zip(window_shape, dilation))}) "
+                f"must fit within the trailing "
+                f"dimensions of `arr` ({arr.shape[-len(window_shape) :]})"
             )
 
     if not arr.flags["C_CONTIGUOUS"]:

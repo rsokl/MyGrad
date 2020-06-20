@@ -6,7 +6,7 @@ from itertools import chain
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
 
-from mygrad._utils import reduce_broadcast, SkipGradient
+from mygrad._utils import SkipGradient, reduce_broadcast
 from mygrad.operation_base import BroadcastableOp
 
 __all__ = ["MatMul", "EinSum"]
@@ -60,7 +60,7 @@ class MatMul(BroadcastableOp):
             return dfdx
 
 
-### EinSum ###
+# EinSum #
 
 
 def _unique_from_end(in_str):

@@ -126,15 +126,10 @@ class Operation:
 
                 if is_invalid_gradient(backed_grad):
                     raise InvalidGradient(
-                        "An invalid gradient-value was passed to:"
-                        "\n\t`{call_signature}`"
-                        "\nGradients are expected to be real-valued scalars or "
-                        "numpy arrays, got a gradient of type: {_type}".format(
-                            call_signature="{name}.backward_var(<gradient>, index={index})".format(
-                                name=type(self).__name__, index=index
-                            ),
-                            _type=type(backed_grad),
-                        )
+                        f"An invalid gradient-value was passed to:"
+                        f"\n\t`{type(self).__name__}.backward_var(<gradient>, index={index})`"
+                        f"\nGradients are expected to be real-valued scalars or "
+                        f"numpy arrays, got a gradient of type: {type(backed_grad)}"
                     )
                 if var.grad is None:
                     tmp_grad = np.asarray(backed_grad)

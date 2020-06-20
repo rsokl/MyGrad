@@ -21,9 +21,6 @@ jobs:
     - python: 3.6
       name: "Python 3.6"
       script: tox -e py36
-    - python: 3.5
-      name: "Python 3.5"
-      script: tox -e py35
 branches:
   only:
   - master

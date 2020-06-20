@@ -43,7 +43,7 @@ def transpose(a, *axes, constant=False):
     elif hasattr(axes[0], "__iter__") or axes[0] is None:
         if len(axes) > 1:
             raise TypeError(
-                "'{}' object cannot be interpreted as an integer".format(type(axes[0]))
+                f"'{type(axes[0])}' object cannot be interpreted as an integer"
             )
         axes = axes[0]
     return Tensor._op(Transpose, a, op_args=(axes,), constant=constant)

@@ -207,9 +207,7 @@ def multiply_sequence(*variables, constant=False):
     with N-1 corresponding multiplication operations."""
     if len(variables) < 2:
         raise ValueError(
-            "`multiply_sequence` requires at least two inputs, got {} inputs".format(
-                len(variables)
-            )
+            f"`multiply_sequence` requires at least two inputs, got {len(variables)} inputs"
         )
     return Tensor._op(MultiplySequence, *variables, constant=constant)
 
@@ -238,9 +236,7 @@ def add_sequence(*variables, constant=False):
     with N-1 corresponding addition operations."""
     if len(variables) < 2:
         raise ValueError(
-            "`add_sequence` requires at least two inputs, got {} inputs".format(
-                len(variables)
-            )
+            f"`add_sequence` requires at least two inputs, got {len(variables)} inputs"
         )
     return Tensor._op(AddSequence, *variables, constant=constant)
 
