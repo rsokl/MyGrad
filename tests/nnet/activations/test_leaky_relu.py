@@ -23,7 +23,7 @@ finite_floats = st.floats(allow_infinity=False, allow_nan=False)
 def _finite_params(arrs, slope):
     if isinstance(arrs, Tensor):
         arrs = arrs.data
-    return np.all(np.isfinite(slope * arrs))
+    return np.all(np.isfinite(slope * arrs)) and np.isfinite(slope * 10)
 
 
 @fwdprop_test_factory(
