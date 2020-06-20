@@ -26,8 +26,6 @@ def test_selu_fwd():
     pass
 
 
-
-
 @backprop_test_factory(
     mygrad_func=selu,
     true_func=_np_selu,
