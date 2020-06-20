@@ -16,7 +16,7 @@ def test_input_validation(alpha):
 def _finite_params(arrs, alpha):
     if isinstance(arrs, Tensor):
         arrs = arrs.data
-    return np.all(np.isfinite(alpha * arrs))
+    return np.all(np.isfinite(alpha * np.exp(arrs)))
 
 
 def _np_elu(x, alpha):
