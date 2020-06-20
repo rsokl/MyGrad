@@ -84,7 +84,7 @@ def elu(x, alpha, constant=False):
 
     if not isinstance(alpha, Real):
         raise TypeError(
-            f"`slope` must be a real-valued scalar, got {alpha} (type {type(alpha)})"
+            f"`alpha` must be a real-valued scalar, got {alpha} (type {type(alpha)})"
         )
 
     return Tensor._op(ELU, x, op_args=(alpha,), constant=constant)
