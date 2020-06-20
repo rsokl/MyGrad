@@ -22,7 +22,7 @@ def _np_selu(x):
     num_arrays=1,
     assumptions=_finite_params,
 )
-def test_leaky_relu_fwd():
+def test_selu_fwd():
     pass
 
 
@@ -37,5 +37,5 @@ def _away_from_zero(*arrs, **kwargs):
     num_arrays=1,
     assumptions=_finite_params,
 )
-def test_leaky_relu_bkwd():
+def test_selu_bkwd():
     pass
