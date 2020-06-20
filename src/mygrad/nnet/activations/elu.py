@@ -59,5 +59,22 @@ def elu(x, alpha, constant=False):
     -------
     mygrad.Tensor
         The ELU function applied to `x` elementwise.
+
+    Examples
+    --------
+    >>> import mygrad as mg
+    >>> from mygrad.nnet.activations import elu
+    >>> x = mg.arange(-5, 6)
+    >>> x
+    Tensor([-5, -4, -3, -2, -1,  0,  1,  2,  3,  4,  5])
+    >>> y = elu(x, alpha=0.1); y
+    Tensor([-0.09932621, -0.09816844, -0.09502129, -0.08646647, -0.06321206,
+             0.        ,  1.        ,  2.        ,  3.        ,  4.        ,
+             5.        ])
+    >>> y.backward()
+    >>> x.grad
+    array([6.73794700e-04, 1.83156389e-03, 4.97870684e-03, 1.35335283e-02,
+           3.67879441e-02, 1.00000000e+00, 1.00000000e+00, 1.00000000e+00,
+           1.00000000e+00, 1.00000000e+00, 1.00000000e+00])
     """
     return Tensor._op(ELU, x, op_args=(alpha,), constant=constant)
