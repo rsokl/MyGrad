@@ -9,7 +9,7 @@ from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 def _finite_params(arrs):
     if isinstance(arrs, Tensor):
         arrs = arrs.data
-    return np.all(np.isfinite(_SCALE * _ALPHA * arrs))
+    return np.all(np.isfinite(_SCALE * _ALPHA * np.exp(arrs)))
 
 
 def _np_selu(x):
