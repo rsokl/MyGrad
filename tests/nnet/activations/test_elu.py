@@ -22,7 +22,7 @@ def _finite_params(arrs, alpha):
 
 
 def _np_elu(x, alpha):
-    return np.where(x < 0, alpha * np.exp(x) - 1, x)
+    return np.where(x < 0, alpha * (np.exp(x) - 1), x)
 
 
 finite_floats = st.floats(allow_infinity=False, allow_nan=False)
