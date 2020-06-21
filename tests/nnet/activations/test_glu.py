@@ -24,7 +24,6 @@ def test_bad_shape_dimension(arr):
         glu(arr, idx)
 
 
-
 def _np_glu(x, dim):
     first_idx = list(slice(None) for _ in x.shape)
     second_idx = list(slice(None) for _ in x.shape)
