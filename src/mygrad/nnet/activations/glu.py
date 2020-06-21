@@ -4,7 +4,7 @@ from mygrad import multiply, Tensor
 from .sigmoid import sigmoid
 
 
-def glu(x, dim=-1, constant=False):
+def glu(x, axis=-1, constant=False):
     """ Returns the Gated Linear Unit A * σ(B), where A and B are split from `x`.
 
     Parameters
@@ -12,8 +12,8 @@ def glu(x, dim=-1, constant=False):
     x : mygrad.Tensor
         The input.
 
-    dim : int, optional (default=-1)
-        The dimension along which to split the input in half and apply the GLU.
+    axis : int, optional (default=-1)
+        The axis along which to split the input in half and apply the GLU.
 
     constant : boolean, optional (default=False)
         If ``True``, the returned tensor is a constant (it
@@ -31,7 +31,7 @@ def glu(x, dim=-1, constant=False):
         Yann Dauphin, Angela Fan, Michael Auli, David Grangier
     available at https://arxiv.org/abs/1612.08083
 
-    The GLU operation splits the input `x` in half along `dim`, storing the first half in A and the
+    The GLU operation splits the input `x` in half along `axis`, storing the first half in A and the
     second in B. The return value is then A ⊙ σ(B), where ⊙ is elementwise multiplication and σ is
     the sigmoid function.
 
@@ -48,18 +48,18 @@ def glu(x, dim=-1, constant=False):
     >>> x.grad
     array([ 0,  0,  0,  0,  0, -1,  0,  0,  0,  0])
     """
-    if isinstance(dim, (ndarray, Tensor)):
-        dim = dim.item()
+    if isinstance(axis, (ndarray, Tensor)):
+        axis = axis.item()
 
-    if not isinstance(dim, int):
+    if not isinstance(axis, int):
         raise TypeError(
-            f"`dim` must be an integer-valued scalar, got {dim} (type {type(dim)})"
+            f"`axis` must be an integer-valued scalar, got {axis} (type {type(axis)})"
         )
 
     first_idx = list(slice(None) for _ in x.shape)
     second_idx = list(slice(None) for _ in x.shape)
-    first_idx[dim] = slice(0, x.shape[dim] // 2)
-    second_idx[dim] = slice(x.shape[dim] // 2, None)
+    first_idx[axis] = slice(0, x.shape[axis] // 2)
+    second_idx[axis] = slice(x.shape[axis] // 2, None)
 
     first_half = x[tuple(first_idx)]
     second_half = x[tuple(second_idx)]
