@@ -35,7 +35,16 @@ def glu(x, dim=-1, constant=False):
 
     Examples
     --------
-
+    >>> import mygrad as mg
+    >>> from mygrad.nnet.activations import glu
+    >>> x = mg.arange(-5, 5)
+    >>> x
+    Tensor([-5, -4, -3, -2, -1,  0,  1,  2,  3,  4])
+    >>> y = glu(x); y
+    Tensor([-2.5       , -2.92423431, -2.64239123, -1.90514825, -0.98201379])
+    >>> y.backward()
+    >>> x.grad
+    array([ 0,  0,  0,  0,  0, -1,  0,  0,  0,  0])
     """
     first_idx = list(slice(None) for _ in x.shape)
     second_idx = list(slice(None) for _ in x.shape)
