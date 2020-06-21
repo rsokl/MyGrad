@@ -6,6 +6,7 @@ import hypothesis.extra.numpy as hnp
 import numpy as np
 import pytest
 
+import mygrad as mg
 from mygrad.nnet.activations import glu
 from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
@@ -25,6 +26,9 @@ def test_bad_shape_dimension(arr):
 
 
 def _np_glu(x, dim):
+    if isinstance(dim, (np.ndarray, mg.Tensor)):
+        dim = dim.item()
+
     first_idx = list(slice(None) for _ in x.shape)
     second_idx = list(slice(None) for _ in x.shape)
     first_idx[dim] = slice(0, x.shape[dim] // 2)
@@ -39,7 +43,9 @@ def _np_glu(x, dim):
 @st.composite
 def _dim_strategy(draw, arr):
     assume(any(not x % 2 for x in arr.shape))
-    return draw(st.sampled_from([i for i, dim in enumerate(arr.shape) if not dim % 2]))
+    val = draw(st.sampled_from([i for i, dim in enumerate(arr.shape) if not dim % 2]))
+    dtype = draw(st.sampled_from((np.array, mg.Tensor, int)))
+    return dtype(val)
 
 
 @settings(suppress_health_check=(HealthCheck.filter_too_much,))
