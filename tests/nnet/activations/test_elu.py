@@ -1,4 +1,3 @@
-from hypothesis import settings, HealthCheck
 import hypothesis.strategies as st
 import numpy as np
 import pytest
@@ -41,7 +40,6 @@ def test_elu_fwd():
     pass
 
 
-@settings(suppress_health_check=(HealthCheck.filter_too_much,))
 @backprop_test_factory(
     mygrad_func=elu,
     true_func=_np_elu,
