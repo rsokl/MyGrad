@@ -31,14 +31,22 @@ def _dim_strategy(draw, arr):
     mygrad_func=glu,
     true_func=_np_glu,
     num_arrays=1,
-    index_to_bnds={0: (-np.log(sys.float_info.max), None)},
-    kwargs={
-        "dim": lambda x: _dim_strategy(x),
-    },
+    index_to_bnds={0: (-np.log(sys.float_info.max), np.log(sys.float_info.max))},
+    kwargs={"dim": lambda x: _dim_strategy(x),},
     assumptions=lambda arr, dim: any(not x % 2 for x in arr.shape),
 )
 def test_glu_fwd():
     pass
 
 
-# TODO: backprop
+@backprop_test_factory(
+    mygrad_func=glu,
+    true_func=_np_glu,
+    num_arrays=1,
+    index_to_bnds={0: (-np.log(sys.float_info.max), np.log(sys.float_info.max))},
+    kwargs={"dim": lambda x: _dim_strategy(x),},
+    assumptions=lambda arr, dim: any(not x % 2 for x in arr.shape),
+    vary_each_element=True,
+)
+def test_glu_bkwd():
+    pass
