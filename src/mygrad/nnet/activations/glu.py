@@ -1,4 +1,6 @@
-from mygrad import multiply
+from numpy import ndarray
+
+from mygrad import multiply, Tensor
 from .sigmoid import sigmoid
 
 
@@ -46,6 +48,14 @@ def glu(x, dim=-1, constant=False):
     >>> x.grad
     array([ 0,  0,  0,  0,  0, -1,  0,  0,  0,  0])
     """
+    if isinstance(dim, (ndarray, Tensor)):
+        dim = dim.item()
+
+    if not isinstance(dim, int):
+        raise TypeError(
+            f"`dim` must be an integer-valued scalar, got {dim} (type {type(dim)})"
+        )
+
     first_idx = list(slice(None) for _ in x.shape)
     second_idx = list(slice(None) for _ in x.shape)
     first_idx[dim] = slice(0, x.shape[dim] // 2)
