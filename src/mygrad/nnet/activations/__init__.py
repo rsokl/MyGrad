@@ -6,6 +6,7 @@ from .relu import relu
 from .selu import selu
 from .sigmoid import sigmoid
 from .softmax import logsoftmax, softmax
+from .soft_sign import soft_sign
 
 __all__ = [
     "hard_tanh",
@@ -15,5 +16,6 @@ __all__ = [
     "selu",
     "sigmoid",
     "softmax",
+    "soft_sign",
     "tanh",
 ]
