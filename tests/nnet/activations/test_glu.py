@@ -1,6 +1,6 @@
 import sys
 
-from hypothesis import assume, given, settings, HealthCheck
+from hypothesis import assume, given
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
 import numpy as np
