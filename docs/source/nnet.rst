@@ -1,7 +1,7 @@
 Neural network operations (:mod:`mygrad.nnet`)
 **********************************************
 
-.. currentmodule:: mygrad.nnet
+.. currentmodule:: mygrad.nnet.layers
 
 
 Layer operations
@@ -14,6 +14,7 @@ Layer operations
    max_pool
    gru
 
+.. currentmodule:: mygrad.nnet.losses
 
 Losses
 ------
@@ -25,15 +26,23 @@ Losses
    margin_ranking_loss
 
 
+.. currentmodule:: mygrad.nnet.activations
+
 Activations
 -----------
 .. autosummary::
    :toctree: generated/
 
+
+   elu
+   glu
    hard_tanh
+   leaky_relu
    logsoftmax
+   selu
    sigmoid
    softmax
+   soft_sign
    relu
    tanh
 
