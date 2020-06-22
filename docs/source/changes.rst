@@ -6,6 +6,23 @@ This is a record of all past mygrad releases and what went into them,
 in reverse chronological order. All previous releases should still be available
 on pip.
 
+.. _v1.6.0:
+
+------------------
+1.6.0 - 2020-06-21
+------------------
+
+New features:
+
+- Adds :func:`~mygrad.nnet.activations.elu`
+- Adds :func:`~mygrad.nnet.activations.glu`
+- Adds :func:`~mygrad.nnet.activations.leaky_relu`
+- Adds :func:`~mygrad.nnet.activations.selu`
+- Adds :func:`~mygrad.nnet.activations.soft_sign`
+
+Big thanks to David Mascharka!
+
+
 .. _v1.5.0:
 
 -------------------

@@ -9,7 +9,7 @@ from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 def _finite_params(arrs):
     if isinstance(arrs, Tensor):
         arrs = arrs.data
-    return np.all(np.isfinite(_SCALE * _ALPHA * arrs))
+    return np.all(np.isfinite(_SCALE * _ALPHA * np.exp(arrs)))
 
 
 def _np_selu(x):
@@ -22,13 +22,8 @@ def _np_selu(x):
     num_arrays=1,
     assumptions=_finite_params,
 )
-def test_leaky_relu_fwd():
+def test_selu_fwd():
     pass
-
-
-def _away_from_zero(*arrs, **kwargs):
-    x = arrs[0]
-    return np.all(np.abs(x.data) > 1e-8)
 
 
 @backprop_test_factory(
@@ -37,5 +32,5 @@ def _away_from_zero(*arrs, **kwargs):
     num_arrays=1,
     assumptions=_finite_params,
 )
-def test_leaky_relu_bkwd():
+def test_selu_bkwd():
     pass

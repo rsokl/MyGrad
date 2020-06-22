@@ -1,5 +1,7 @@
 from mygrad import tanh
 
+from .elu import elu
+from .glu import glu
 from .hard_tanh import hard_tanh
 from .leaky_relu import leaky_relu
 from .relu import relu
@@ -9,6 +11,8 @@ from .softmax import logsoftmax, softmax
 from .soft_sign import soft_sign
 
 __all__ = [
+    "elu",
+    "glu",
     "hard_tanh",
     "leaky_relu",
     "logsoftmax",
