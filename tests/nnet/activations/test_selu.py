@@ -1,3 +1,5 @@
+import sys
+
 import numpy as np
 
 from mygrad import Tensor
@@ -20,6 +22,7 @@ def _np_selu(x):
     mygrad_func=selu,
     true_func=_np_selu,
     num_arrays=1,
+    index_to_bnds={0: (-np.log(sys.float_info.max), np.log(sys.float_info.max))},
     assumptions=_finite_params,
 )
 def test_selu_fwd():
@@ -30,6 +33,7 @@ def test_selu_fwd():
     mygrad_func=selu,
     true_func=_np_selu,
     num_arrays=1,
+    index_to_bnds={0: (-np.log(sys.float_info.max), np.log(sys.float_info.max))},
     assumptions=_finite_params,
 )
 def test_selu_bkwd():
