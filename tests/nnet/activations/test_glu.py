@@ -1,10 +1,10 @@
 import sys
 
-from hypothesis import assume, given
-import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
+import hypothesis.strategies as st
 import numpy as np
 import pytest
+from hypothesis import assume, given
 
 import mygrad as mg
 from mygrad.nnet.activations import glu
@@ -48,13 +48,26 @@ def _axis_strategy(draw, arr):
     return dtype(val)
 
 
+@st.composite
+def _glu_shape(draw):
+    shape = draw(hnp.array_shapes())
+    if not any(x % 2 == 0 for x in shape):
+        index = draw(st.integers(0, len(shape) - 1))
+        shape = list(shape)
+        shape[index] = draw(st.integers(0, 3).map(lambda x: 2 * x))
+    return tuple(shape)
+
+
 @fwdprop_test_factory(
     mygrad_func=glu,
     true_func=_np_glu,
     num_arrays=1,
-    index_to_bnds={0: (-np.sqrt(np.log(sys.float_info.max)), np.sqrt(np.log(sys.float_info.max)))},
+    index_to_bnds={
+        0: (-np.sqrt(np.log(sys.float_info.max)), np.sqrt(np.log(sys.float_info.max)))
+    },
     kwargs={"axis": lambda x: _axis_strategy(x)},
-    assumptions=lambda arr, axis: any(not x % 2 for x in arr.shape),
+    index_to_arr_shapes={0: _glu_shape()},
+    assumptions=lambda arr, axis: any(x % 2 == 0 for x in arr.shape),
 )
 def test_glu_fwd():
     pass
@@ -64,9 +77,12 @@ def test_glu_fwd():
     mygrad_func=glu,
     true_func=_np_glu,
     num_arrays=1,
-    index_to_bnds={0: (-np.sqrt(np.log(sys.float_info.max)), np.sqrt(np.log(sys.float_info.max)))},
+    index_to_bnds={
+        0: (-np.sqrt(np.log(sys.float_info.max)), np.sqrt(np.log(sys.float_info.max)))
+    },
     kwargs={"axis": lambda x: _axis_strategy(x)},
-    assumptions=lambda arr, axis: any(not x % 2 for x in arr.shape),
+    index_to_arr_shapes={0: _glu_shape()},
+    assumptions=lambda arr, axis: any(x % 2 == 0 for x in arr.shape),
     vary_each_element=True,
 )
 def test_glu_bkwd():
