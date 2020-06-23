@@ -597,7 +597,7 @@ class Tensor:
         op_kwargs=None,
         constant=False,
     ):
-        """A substitute for ``self._op``, to facilitate in-place operations.
+        """ A substitute for ``self._op``, to facilitate in-place operations.
 
         Note that in-place operations are generally less efficient than their
         counterparts due to the additional bookkeeping that is required to
