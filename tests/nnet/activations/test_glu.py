@@ -52,8 +52,8 @@ def _axis_strategy(draw, arr):
     mygrad_func=glu,
     true_func=_np_glu,
     num_arrays=1,
-    index_to_bnds={0: (-np.log(sys.float_info.max), np.log(sys.float_info.max))},
-    kwargs={"axis": lambda x: _axis_strategy(x),},
+    index_to_bnds={0: (-np.sqrt(np.log(sys.float_info.max)), np.sqrt(np.log(sys.float_info.max)))},
+    kwargs={"axis": lambda x: _axis_strategy(x)},
     assumptions=lambda arr, axis: any(not x % 2 for x in arr.shape),
 )
 def test_glu_fwd():
@@ -64,7 +64,7 @@ def test_glu_fwd():
     mygrad_func=glu,
     true_func=_np_glu,
     num_arrays=1,
-    index_to_bnds={0: (-np.log(sys.float_info.max), np.log(sys.float_info.max))},
+    index_to_bnds={0: (-np.sqrt(np.log(sys.float_info.max)), np.sqrt(np.log(sys.float_info.max)))},
     kwargs={"axis": lambda x: _axis_strategy(x)},
     assumptions=lambda arr, axis: any(not x % 2 for x in arr.shape),
     vary_each_element=True,
