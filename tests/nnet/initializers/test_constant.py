@@ -4,6 +4,7 @@ import hypothesis.extra.numpy as hnp
 
 import numpy as np
 
+from mygrad import Tensor
 from mygrad.nnet.initializers import constant as constant_initializer
 
 
@@ -18,5 +19,9 @@ def test_constant_initializer(array, constant):
     value = array.reshape(-1)[0]  # let hypothesis do all the heavy lifting picking an acceptable value for the dtype
     assume(not np.isnan(value))
     tensor = constant_initializer(array.shape, value=value, dtype=array.dtype, constant=constant)
+
+    assert isinstance(tensor, Tensor)
     assert np.allclose(tensor.data, value, equal_nan=True)
-    assert np.all(tensor[:, np.newaxis] == tensor[np.newaxis])
+    assert tensor.data.shape == array.shape
+    assert tensor.data.dtype == array.dtype
+
