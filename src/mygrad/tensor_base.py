@@ -602,7 +602,8 @@ class Tensor:
         Note that in-place operations are generally less efficient than their
         counterparts due to the additional bookkeeping that is required to
         update the computational graph. The benefit lies purely in convenience
-        for the user."""
+        for the user.
+        """
         # old_tensor is the tensor pre-setitem
         old_tensor = Tensor(
             self,
