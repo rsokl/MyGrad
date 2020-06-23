@@ -16,7 +16,13 @@ from tests.utils import does_not_raise
 
 
 @pytest.mark.parametrize(
-    "data", [None, np.array(None), np.array([[0], [0, 0]]), np.array(1, dtype="O")]
+    "data",
+    [
+        None,
+        np.array(None, dtype="O"),
+        np.array([[0], [0, 0]], dtype="O"),
+        np.array(1, dtype="O"),
+    ],
 )
 @given(constant=st.booleans(), creator=st.none() | st.just(MatMul()))
 def test_input_type_checking(data, constant, creator):
