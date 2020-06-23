@@ -113,6 +113,26 @@ class GraphCompare(RuleBasedStateMachine):
 
     @precondition(lambda self: not self.raised)
     @invariant()
+    def check_tensor_mirror(self):
+        """
+        Ensure that a tensor's mirror has all the same attributes as
+        the original tensor.
+        """
+        for num, (_, t) in enumerate(self.node_list):
+            mirror = Tensor([])
+            mirror._mirror_tensor(t)
+
+            for k, v in t.__dict__.items():
+                assert v is mirror.__dict__[k], k
+
+            assert t.dtype is mirror.dtype
+            assert t.shape == mirror.shape
+            assert t.constant is mirror.constant
+            assert t.ndim == mirror.ndim
+            assert t.creator is mirror.creator
+
+    @precondition(lambda self: not self.raised)
+    @invariant()
     def all_agree(self):
         """
         Ensure that all corresponding nodes/tensors have matching data and gradients
