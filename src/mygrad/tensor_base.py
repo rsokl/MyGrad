@@ -580,11 +580,30 @@ class Tensor:
             raise TypeError("iteration over a 0-d tensor")
         return self._op(GetItem, self, op_args=(item,))
 
-    def __setitem__(self, key, value):
-        if self.constant and (not isinstance(value, Tensor) or value.constant):
-            self.data[key] = value.data if isinstance(value, Tensor) else value
-            return None
+    def _mirror_tensor(self, tensor: "Tensor"):
+        """ *Dev use only*
 
+        Points all of the attributes of ``self`` to those of
+        ``tensor`` so that they reference all of the same data structures.
+        This is used to facilitate "in-place" operations.
+        """
+        self.__dict__ = tensor.__dict__
+
+    def _in_place_op(
+        self,
+        inplace_op: Type[Operation],
+        *input_vars,
+        op_args=None,
+        op_kwargs=None,
+        constant=False,
+    ):
+        """ A substitute for ``self._op``, to facilitate in-place operations.
+
+        Note that in-place operations are generally less efficient than their
+        counterparts due to the additional bookkeeping that is required to
+        update the computational graph. The benefit lies purely in convenience
+        for the user.
+        """
         # old_tensor is the tensor pre-setitem
         old_tensor = Tensor(
             self,
@@ -604,13 +623,23 @@ class Tensor:
                     )
 
         # self becomes the tensor post-setitem
-        out = self._op(SetItem, old_tensor, value, op_args=(key,),)
-        self._creator = out.creator
-        self._scalar_only = out._scalar_only
-        self._ops = out._ops
-        self._accum_ops = out._accum_ops
-        self.data = out.data
-        self._constant = out.constant
+        out = self._op(
+            inplace_op,
+            old_tensor,
+            *input_vars,
+            op_args=op_args,
+            op_kwargs=op_kwargs,
+            constant=constant,
+        )
+        self._mirror_tensor(out)
+
+    def __setitem__(self, key, value):
+        if self.constant and (not isinstance(value, Tensor) or value.constant):
+            self.data[key] = value.data if isinstance(value, Tensor) else value
+            return None
+
+        # self becomes the tensor post-setitem
+        self._in_place_op(SetItem, value, op_args=(key,))
 
     def __add__(self, other):
         return self._op(Add, self, other)
