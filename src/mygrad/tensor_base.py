@@ -886,7 +886,8 @@ class Tensor:
     def shape(self, newshape):
         if self.constant:
             self.data.shape = newshape
-        self._in_place_op(Reshape, op_args=(newshape,))
+            return
+        self._in_place_op(Reshape, op_args=(newshape,), constant=self.constant)
 
     def reshape(self, *newshape, constant=False):
         """ Returns a tensor with a new shape, without changing its data.
