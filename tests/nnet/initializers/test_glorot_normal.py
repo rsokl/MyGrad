@@ -37,7 +37,7 @@ def test_glorot_normal_statistics(shape, gain):
 
 @given(
     shape=hnp.array_shapes(min_dims=2),
-    gain=st.floats(allow_infinity=False, allow_nan=False),
+    gain=st.floats(0.1, 10),
     dtype=hnp.floating_dtypes(),
     constant=st.booleans(),
 )
