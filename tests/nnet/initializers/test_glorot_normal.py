@@ -23,10 +23,7 @@ def test_glorot_normal_input_validation(shape):
 _array_shapes = ((100_00, 100), (1000, 100, 10), (10, 10, 10, 10, 10, 10))  # each 1 million elements
 
 
-@given(
-    shape=st.sampled_from(_array_shapes),
-    gain=st.floats(0.1, 10) | st.floats(0.1, 10).map(Tensor) | st.floats(0.1, 10).map(np.array),
-)
+@given(shape=st.sampled_from(_array_shapes), gain=st.floats(0.1, 10))
 def test_glorot_normal_statistics(shape, gain):
     tensor = glorot_normal(shape)
     assert isinstance(tensor, Tensor)
@@ -38,9 +35,14 @@ def test_glorot_normal_statistics(shape, gain):
     assert np.isclose(val, 1, atol=1e-3)
 
 
-@given(shape=hnp.array_shapes(min_dims=2), dtype=hnp.floating_dtypes(), constant=st.booleans())
-def test_glorot_normal(shape, dtype, constant):
-    tensor = glorot_normal(shape, dtype=dtype, constant=constant)
+@given(
+    shape=hnp.array_shapes(min_dims=2),
+    gain=st.floats(0.1, 10),
+    dtype=hnp.floating_dtypes(),
+    constant=st.booleans(),
+)
+def test_glorot_normal(shape, gain, dtype, constant):
+    tensor = glorot_normal(shape, gain=Tensor(gain), dtype=dtype, constant=constant)
     assert tensor.shape == shape
     assert tensor.dtype == dtype
     assert tensor.constant == constant
