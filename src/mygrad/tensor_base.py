@@ -23,7 +23,7 @@ from mygrad.math.arithmetic.ops import (
 )
 from mygrad.operation_base import BroadcastableOp, Operation
 from mygrad.tensor_core_ops.indexing import GetItem, SetItem
-from mygrad.tensor_manip.array_shape.ops import Flatten
+from mygrad.tensor_manip.array_shape.ops import Flatten, Reshape
 from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property
 
 __all__ = ["Tensor"]
@@ -881,6 +881,60 @@ class Tensor:
         mygrad.reshape : similar function
         Tensor.reshape : similar method"""
         return self.data.shape
+
+    @shape.setter
+    def shape(self, newshape):
+        if self.constant:
+            self.data.shape = newshape
+        self._in_place_op(Reshape, op_args=(newshape,))
+
+    def reshape(self, *newshape, constant=False):
+        """ Returns a tensor with a new shape, without changing its data.
+        This docstring was adapted from ``numpy.reshape``
+
+        Parameters
+        ----------
+        *newshape : Union[int, Tuple[int, ...]]
+            The new shape should be compatible with the original shape. If
+            an integer, then the result will be a 1-D tensor of that length.
+            One shape dimension can be -1. In this case, the value is
+            inferred from the length of the tensor and remaining dimensions.
+
+        constant : bool, optional(default=False)
+            If ``True``, the returned tensor is a constant (it
+            does not back-propagate a gradient)
+
+        Returns
+        -------
+        mygrad.Tensor
+            ``a`` with its shape changed.  A new tensor is returned.
+
+        Notes
+        -----
+        ``reshape`` utilizes C-ordering, meaning that it reads & writes elements using
+        C-like index ordering; the last axis index changing fastest, and, proceeding
+        in reverse order, the first axis index changing slowest.
+
+        Examples
+        --------
+        >>> import mygrad as mg
+        >>> a = mg.Tensor([[1, 2, 3], [4, 5, 6]])
+        >>> a.reshape(6)
+        Tensor([1, 2, 3, 4, 5, 6])
+
+        >>> a.reshape(3, -1))   # the unspecified value is inferred to be 2
+        Tensor([[1, 2],
+                [3, 4],
+                [5, 6]])
+                """
+
+        if not newshape:
+            raise TypeError("reshape() takes at least 1 argument (0 given)")
+        if hasattr(newshape[0], "__iter__"):
+            if len(newshape) > 1:
+                raise TypeError("an integer is required")
+            newshape = newshape[0]
+        return Tensor._op(Reshape, self, op_args=(newshape,), constant=constant)
 
     @property
     def T(self):
