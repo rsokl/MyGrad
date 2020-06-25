@@ -340,7 +340,7 @@ def valid_shapes(
     """
 
     if not isinstance(size, int) or size < 0:
-        raise ValueError("size={} must be a non-negative integer".format(size))
+        raise ValueError(f"size={size} must be a non-negative integer")
 
     shape_length = draw(st.integers(min_len, max_len))  # type: int
     shape = []  # type: List[int]
