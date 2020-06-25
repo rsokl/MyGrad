@@ -21,9 +21,10 @@ def test_glorot_normal_input_validation(shape):
 
 
 _array_shapes = ((10_000, 100), (1000, 100, 10), (10, 10, 10, 10, 10, 10))
+_valid_gains = (1, 5/3, np.sqrt(2), np.sqrt(2 / (1.01 ** 2)))
 
 
-@given(shape=st.sampled_from(_array_shapes), gain=st.floats(0.1, 10))
+@given(shape=st.sampled_from(_array_shapes), gain=st.sampled_from(_valid_gains))
 def test_glorot_normal_statistics(shape, gain):
     tensor = glorot_uniform(shape, gain=gain)
     assert isinstance(tensor, Tensor)
