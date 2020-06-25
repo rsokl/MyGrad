@@ -927,7 +927,7 @@ class Tensor:
         Tensor([[1, 2],
                 [3, 4],
                 [5, 6]])
-                """
+            """
 
         if not newshape:
             raise TypeError("reshape() takes at least 1 argument (0 given)")
