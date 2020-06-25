@@ -27,6 +27,20 @@ def uniform(*shape, lower_bound=0, upper_bound=1, dtype=np.float32, constant=Fal
     -------
     mygrad.Tensor, shape=``shape``
         A Tensor, with values drawn uniformly from [lower_bound, upper_bound).
+
+    Examples
+    --------
+    >>> from mygrad.nnet.initializers import uniform
+    >>> uniform(2, 3)
+    Tensor([[0.8731087 , 0.30872548, 0.75528544],
+            [0.55404514, 0.7652222 , 0.4955769 ]], dtype=float32)
+
+    >>> uniform(2, 2, lower_bound=-1, upper_bound=3)
+    Tensor([[ 1.9151938 , -0.28968155],
+            [-0.01240687, -0.24448799]], dtype=float32)
+
+    >>> uniform(5, dtype="float16", constant=True)
+    Tensor([0.5186, 0.1481, 0.3745, 0.941 , 0.331 ], dtype=float16)
     """
     if lower_bound >= upper_bound:
         raise ValueError("Uniform lower bound cannot be greater than upper bound")
