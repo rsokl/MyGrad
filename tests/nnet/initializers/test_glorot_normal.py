@@ -20,18 +20,19 @@ def test_glorot_normal_input_validation(shape):
         glorot_normal(shape)
 
 
-_array_shapes = ((100_00, 100), (1000, 100, 10), (10, 10, 10, 10, 10, 10))  # each 1 million elements
+_array_shapes = ((10000, 100), (1000, 100, 10), (10, 10, 10, 10, 10, 10))  # each 1 million elements
+_valid_gains = (1, 5/3, np.sqrt(2), np.sqrt(2 / (1.01 ** 2)))  # most activations, tanh, relu, leaky
 
 
-@given(shape=st.sampled_from(_array_shapes), gain=st.floats(0.1, 10))
+@given(shape=st.sampled_from(_array_shapes), gain=st.sampled_from(_valid_gains))
 def test_glorot_normal_statistics(shape, gain):
-    tensor = glorot_normal(shape)
+    tensor = glorot_normal(shape, gain=gain)
     assert isinstance(tensor, Tensor)
     assert np.isclose(np.mean(tensor.data), 0, atol=1e-3)
 
     fan_in = tensor.shape[1] * (tensor.shape[-1] if tensor.ndim > 2 else 1)
     fan_out = tensor.shape[0] * (tensor.shape[-1] if tensor.ndim > 2 else 1)
-    val = np.sqrt(2 / (fan_in + fan_out)) / np.std(tensor.data)
+    val = np.sqrt(2 / (fan_in + fan_out)) / np.std(tensor.data) * gain
     assert np.isclose(val, 1, atol=1e-3)
 
 
