@@ -9,13 +9,13 @@ from mygrad.nnet.initializers import he_uniform
 
 
 @given(dtype=hnp.unsigned_integer_dtypes() | hnp.integer_dtypes() | hnp.complex_number_dtypes())
-def test_glorot_normal_dtype_validation(dtype):
+def test_he_uniform_dtype_validation(dtype):
     with pytest.raises(ValueError):
         he_uniform(1, 1, dtype=dtype)
 
 
 @given(shape=hnp.array_shapes(max_dims=1))
-def test_glorot_normal_input_validation(shape):
+def test_he_uniform_input_validation(shape):
     with pytest.raises(ValueError):
         he_uniform(shape)
 
@@ -25,7 +25,7 @@ _valid_gains = (1, 5/3, np.sqrt(2), np.sqrt(2 / (1.01 ** 2)))
 
 
 @given(shape=st.sampled_from(_array_shapes), gain=st.sampled_from(_valid_gains))
-def test_glorot_normal_statistics(shape, gain):
+def test_he_uniform_statistics(shape, gain):
     tensor = he_uniform(shape, gain=gain)
     assert isinstance(tensor, Tensor)
     assert np.isclose(np.mean(tensor.data), 0, atol=1e-2)
@@ -46,7 +46,7 @@ def test_glorot_normal_statistics(shape, gain):
     dtype=hnp.floating_dtypes(),
     constant=st.booleans(),
 )
-def test_glorot_normal(shape, gain, dtype, constant):
+def test_he_uniform(shape, gain, dtype, constant):
     tensor = he_uniform(shape, gain=Tensor(gain), dtype=dtype, constant=constant)
     assert tensor.shape == shape
     assert tensor.dtype == dtype
