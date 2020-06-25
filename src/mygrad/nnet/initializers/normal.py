@@ -28,7 +28,7 @@ def normal(*shape, mean=0, std=1, dtype=np.float32, constant=False):
         A Tensor, with values drawn from Ɲ(μ, σ²), where μ=`mean` and σ=`std`.
     """
     if not np.issubdtype(dtype, np.floating):
-        raise ValueError("Glorot Normal initialization requires a floating-point dtype")
+        raise ValueError("Normal initialization requires a floating-point dtype")
     if std < 0:
         raise ValueError("Standard deviation must be non-negative")
 
