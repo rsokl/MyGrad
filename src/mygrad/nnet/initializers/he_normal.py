@@ -44,7 +44,24 @@ def he_normal(*shape, gain=1, dtype=np.float32, constant=False):
     Examples
     --------
     >>> from mygrad.nnet.initializers import he_normal
-    
+    >>> he_normal(2, 3)
+    Tensor([[-2.3194842 ,  0.45956254, -0.28709933],
+            [-0.15776408,  0.6777564 , -0.05587448]], dtype=float32)
+
+    >>> he_normal(4, 2, gain=5/3, dtype="float64", constant=True)
+    Tensor([[ 0.25962918,  1.1503933 ],
+            [-0.13638746,  0.10581096],
+            [ 1.44805926,  0.51367645],
+            [-0.32018705, -0.80306442]])
+
+    >>> he_normal(2, 1, 2, dtype="float16")
+    Tensor([[[ 0.8057 , -0.2922 ]],
+            [[ 0.12213, -0.715  ]]], dtype=float16)
     """
+    if len(shape) == 1:
+        shape = shape[0]
+    if len(shape) < 2:
+        raise ValueError("He Normal initialization requires at least two dimensions")
+
     std = gain / np.sqrt(shape[1] * (np.prod(shape[2:]) if len(shape) > 2 else 1))
-    return normal(shape, mena=0, std=std, dtype=dtype, constant=constant)
+    return normal(shape, mean=0, std=std, dtype=dtype, constant=constant)
