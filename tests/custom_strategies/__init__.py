@@ -317,7 +317,7 @@ def _factors(n: int) -> List[int]:
         >>> _factors(4)
         {1, 2, 4}"""
     if not isinstance(n, int) and 0 <= n:
-        raise ValueError("n={} must be a non-negative integer".format(n))
+        raise ValueError(f"n={n} must be a non-negative integer")
     gen = ([i, n // i] for i in range(1, int(n ** 0.5) + 1) if n % i == 0)
     return sorted(set(sum(gen, [])))
 
