@@ -1,5 +1,5 @@
 import numpy as np
-from mygrad import Tensor
+from mygrad.nnet.initializers.normal import normal
 
 
 def he_normal(*shape, gain=1, dtype=np.float32, constant=False):
@@ -40,14 +40,11 @@ def he_normal(*shape, gain=1, dtype=np.float32, constant=False):
 
     where :math:`a` is the slope of the rectifier following this layer, which is incorporated
     using the `gain` variable above.
+
+    Examples
+    --------
+    >>> from mygrad.nnet.initializers import he_normal
+    
     """
-    if not np.issubdtype(dtype, np.floating):
-        raise ValueError("He Normal initialization requires a floating-point dtype")
-
-    if len(shape) == 1:
-        shape = shape[0]
-    if len(shape) < 2:
-        raise ValueError("He Normal initialization requires at least two dimensions")
-
     std = gain / np.sqrt(shape[1] * (np.prod(shape[2:]) if len(shape) > 2 else 1))
-    return Tensor(np.random.normal(0, std, shape), dtype=dtype, constant=constant)
+    return normal(shape, mena=0, std=std, dtype=dtype, constant=constant)
