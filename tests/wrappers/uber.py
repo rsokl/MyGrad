@@ -69,30 +69,30 @@ def get_hypothesis_db_key(self, *extras: Any) -> bytes:
 class fwdprop_test_factory:
     """ Decorator
 
-        Randomly draw N arrays x, (...) to verify that a mygrad function,
-        `f(x, ..., **kwargs)` returns a correct result through forward-propagation.
+    Randomly draw N arrays x, (...) to verify that a mygrad function,
+    `f(x, ..., **kwargs)` returns a correct result through forward-propagation.
 
-        By default, all arrays will have shapes that are broadcast-compatible with x.
+    By default, all arrays will have shapes that are broadcast-compatible with x.
 
-        This decorator is extremely uber: the decorated function's body is
-        never executed; this decorator builds the entire unit tests The
-        function definition is effectively there to name the test being
-        constructed.
+    This decorator is extremely uber: the decorated function's body is
+    never executed; this decorator builds the entire unit tests The
+    function definition is effectively there to name the test being
+    constructed.
 
-        The user specifies the number of arrays to be generated (at least one must be
-        generated), along with the bounds on their elements, their shapes, as well
-        as the keyword-args to be passed to the function.
+    The user specifies the number of arrays to be generated (at least one must be
+    generated), along with the bounds on their elements, their shapes, as well
+    as the keyword-args to be passed to the function.
 
-        Examples
-        --------
-        Writing a test that compares mygrad's add to numpy's add
+    Examples
+    --------
+    Writing a test that compares mygrad's add to numpy's add
 
-        >>> from mygrad import add
-        >>> import numpy as np
-        >>> @fwdprop_test_factory(mygrad_func=add, true_func=np.add, num_array_args=2)
-        ... def test_add():
-        ...     pass
-        """
+    >>> from mygrad import add
+    >>> import numpy as np
+    >>> @fwdprop_test_factory(mygrad_func=add, true_func=np.add, num_array_args=2)
+    ... def test_add():
+    ...     pass
+    """
 
     def __init__(
         self,
@@ -116,7 +116,7 @@ class fwdprop_test_factory:
         """
         Parameters
         ----------
-        mygrad_func : Callable[[numpy.ndarray, ...], mygrad.Tensor]
+        mygrad_func : Callable[[numpy.ndarray, ..., bool], mygrad.Tensor]
             The mygrad function whose forward pass validity is being checked.
 
         true_func : Callable[[numpy.ndarray, ...], numpy.ndarray]
@@ -294,16 +294,23 @@ class fwdprop_test_factory:
                 )
 
             # execute mygrad and "true" functions. Compare outputs and check mygrad behavior
-            o = self.op(*(Tensor(i) for i in arrs), **kwargs, constant=constant)
+            tensor_constants = data.draw(
+                st.tuples(*[st.booleans()] * len(arrs)), label="tensor_constants"
+            )
+            o = self.op(
+                *(Tensor(i, constant=c) for i, c in zip(arrs, tensor_constants)),
+                **kwargs,
+                constant=constant,
+            )
             tensor_out = o.data
             true_out = self.true_func(*arrs, **kwargs)
 
             assert isinstance(
                 o, Tensor
-            ), "`mygrad_func` returned type {type(o)}, should return `mygrad.Tensor`"
-            assert (
-                o.constant is constant
-            ), f"`mygrad_func` returned tensor.constant={o.constant}, should be constant={constant}"
+            ), f"`mygrad_func` returned type {type(o)}, should return `mygrad.Tensor`"
+            assert o.constant is constant or bool(
+                sum(tensor_constants)
+            ), f"`mygrad_func` returned tensor.constant={o.constant}, should be constant={ bool(sum(tensor_constants))}"
 
             assert_allclose(
                 actual=tensor_out,
@@ -326,28 +333,29 @@ class fwdprop_test_factory:
 class backprop_test_factory:
     """ Decorator
 
-        Randomly draw arrays x, ... to verify that a binary mygrad function,
-        `f(x, ..., **kwargs)` performs back-propagation appropriately.
+    Randomly draw arrays x, ... to verify that a binary mygrad function,
+    `f(x, ..., **kwargs)` performs back-propagation appropriately.
 
-        x.grad, ... are compared against numerical derivatives of f.
+    x.grad, ... are compared against numerical derivatives of f.
 
-        This decorator is extremely uber: the decorated function's body is
-        never executed. The function definition is effectively there to name
-        the test being constructed. This constructs the entire test
+    This decorator is extremely uber: the decorated function's body is
+    never executed. The function definition is effectively there to name
+    the test being constructed. This constructs the entire test
 
-        Notes
-        -----
-        By default this wrapper dispatches a numerical derivative that utilizes the complex
-        step methodology. This requires that the function being tested be analytic and have
-        a complex value implementation. See `tests.utils.numerical_gradient` for more details.
+    Notes
+    -----
+    By default this wrapper dispatches a numerical derivative that utilizes the complex
+    step methodology. This requires that the function being tested be analytic and have
+    a complex value implementation. See `tests.utils.numerical_gradient` for more details.
 
-        Examples
-        --------
-        >>> from mygrad import add
-        >>> import numpy as np
-        >>> @backprop_test_factory(mygrad_func=add, true_func=np.add)
-        ... def test_add():
-        ...     pass"""
+    Examples
+    --------
+    >>> from mygrad import add
+    >>> import numpy as np
+    >>> @backprop_test_factory(mygrad_func=add, true_func=np.add)
+    ... def test_add():
+    ...     pass
+    """
 
     def __init__(
         self,
