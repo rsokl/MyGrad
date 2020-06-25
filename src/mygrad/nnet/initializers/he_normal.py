@@ -42,7 +42,7 @@ def he_normal(*shape, gain=1, dtype=np.float32, constant=False):
     using the `gain` variable above.
     """
     if not np.issubdtype(dtype, np.floating):
-        raise ValueError("Glorot Normal initialization requires a floating-point dtype")
+        raise ValueError("He Normal initialization requires a floating-point dtype")
 
     if len(shape) == 1:
         shape = shape[0]
