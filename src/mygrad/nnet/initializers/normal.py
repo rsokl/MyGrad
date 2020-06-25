@@ -43,7 +43,7 @@ def normal(*shape, mean=0, std=1, dtype=np.float32, constant=False):
     Tensor([-0.03875407,  0.65368466, -0.72636993,  1.57404148, -1.17444345])
     """
     if not np.issubdtype(dtype, np.floating):
-        raise ValueError("Glorot Normal initialization requires a floating-point dtype")
+        raise ValueError("Normal initialization requires a floating-point dtype")
     if std < 0:
         raise ValueError("Standard deviation must be non-negative")
 
