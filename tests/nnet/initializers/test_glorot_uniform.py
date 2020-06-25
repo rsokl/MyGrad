@@ -8,12 +8,6 @@ from mygrad import Tensor
 from mygrad.nnet.initializers import glorot_uniform
 
 
-@given(dtype=hnp.unsigned_integer_dtypes() | hnp.integer_dtypes() | hnp.complex_number_dtypes())
-def test_glorot_normal_dtype_validation(dtype):
-    with pytest.raises(ValueError):
-        glorot_uniform(1, 1, dtype=dtype)
-
-
 @given(shape=hnp.array_shapes(max_dims=1))
 def test_glorot_normal_input_validation(shape):
     with pytest.raises(ValueError):

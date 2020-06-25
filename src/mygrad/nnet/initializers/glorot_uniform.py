@@ -1,5 +1,5 @@
 import numpy as np
-from mygrad import Tensor
+from mygrad.nnet.initializers.uniform import uniform
 
 
 def glorot_uniform(*shape, gain=1, dtype=np.float32, constant=False):
@@ -37,11 +37,6 @@ def glorot_uniform(*shape, gain=1, dtype=np.float32, constant=False):
     .. math::
         U[-\frac{\sqrt{6}}{\sqrt{n_j+n_{j+1}}}, \frac{\sqrt{6}}{\sqrt{n_j+n_{j+1}}}]
     """
-    if not np.issubdtype(dtype, np.floating):
-        raise ValueError("Glorot Uniform initialization requires a floating-point dtype")
-
-    if isinstance(gain, Tensor):
-        gain = gain.item()
     if len(shape) == 1:
         shape = shape[0]
     if len(shape) < 2:
@@ -49,6 +44,5 @@ def glorot_uniform(*shape, gain=1, dtype=np.float32, constant=False):
 
     fan_in = shape[1] * (np.prod(shape[2:]) if len(shape) > 2 else 1)
     fan_out = shape[0] * (np.prod(shape[2:]) if len(shape) > 2 else 1)
-
     bound = gain * np.sqrt(6 / (fan_in + fan_out))
-    return Tensor(np.random.uniform(-bound, bound, shape), dtype=dtype, constant=constant)
+    return uniform(shape, lower_bound=-bound, upper_bound=bound, dtype=dtype, constant=constant)
