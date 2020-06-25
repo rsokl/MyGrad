@@ -1,11 +1,12 @@
 """ Custom hypothesis search strategies """
 import math
-from functools import partial
+from functools import lru_cache, partial
 from numbers import Integral
-from typing import Any, Iterable, Optional, Tuple, Union
+from typing import Any, Iterable, List, Optional, Tuple, Union
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
+import numpy as np
 from hypothesis.extra.numpy import broadcastable_shapes
 from numpy import ndarray
 
@@ -306,4 +307,54 @@ def adv_integer_index(
         result_shape=hnp.array_shapes(
             min_dims=min_dims, max_dims=max_dims, min_side=min_side, max_side=max_side
         ),
+    )
+
+
+@lru_cache(maxsize=1000)
+def _factors(n: int) -> List[int]:
+    """ Returns the divisors of n
+
+        >>> _factors(4)
+        {1, 2, 4}"""
+    if not isinstance(n, int) and 0 <= n:
+        raise ValueError(f"n={n} must be a non-negative integer")
+    gen = ([i, n // i] for i in range(1, int(n ** 0.5) + 1) if n % i == 0)
+    return sorted(set(sum(gen, [])))
+
+
+@st.composite
+def valid_shapes(
+    draw, size: int, min_len: int = 1, max_len: int = 6
+) -> st.SearchStrategy[Union[int, Tuple[int, ...]]]:
+    """ Given an array's size, generate a compatible random shape
+
+    Parameters
+    ----------
+    size : int
+    min_len : int
+    max_len : int
+
+    Returns
+    -------
+    st.SearchStrategy[Tuple[int, ...]]
+    """
+
+    if not isinstance(size, int) or size < 0:
+        raise ValueError(f"size={size} must be a non-negative integer")
+
+    shape_length = draw(st.integers(min_len, max_len))  # type: int
+    shape = []  # type: List[int]
+    rem = int(size / np.prod(shape))
+    while len(shape) < shape_length:
+        if len(shape) == shape_length - 1:
+            shape.append(-1 if draw(st.booleans()) else rem)
+            break
+
+        shape.append(draw(st.sampled_from(_factors(rem))))
+        rem = int(size / np.prod(shape))
+
+    return (
+        shape[0]
+        if len(shape) == 1 and draw(st.booleans())
+        else tuple(int(i) for i in shape)
     )
