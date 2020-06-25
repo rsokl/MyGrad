@@ -38,7 +38,7 @@ def glorot_uniform(*shape, gain=1, dtype=np.float32, constant=False):
         U[-\frac{\sqrt{6}}{\sqrt{n_j+n_{j+1}}}, \frac{\sqrt{6}}{\sqrt{n_j+n_{j+1}}}]
     """
     if not np.issubdtype(dtype, np.floating):
-        raise ValueError("Glorot Normal initialization requires a floating-point dtype")
+        raise ValueError("Glorot Uniform initialization requires a floating-point dtype")
 
     if isinstance(gain, Tensor):
         gain = gain.item()
