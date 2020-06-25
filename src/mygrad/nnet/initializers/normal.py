@@ -33,11 +33,11 @@ def normal(*shape, mean=0, std=1, dtype=np.float32, constant=False):
     >>> from mygrad.nnet.initializers import normal
     >>> normal(1, 2, 3)
     Tensor([[[-0.06481607, -0.550582  ,  0.04689528],
-         [ 0.82973075,  2.83742   ,  1.0964519 ]]], dtype=float32)
+             [ 0.82973075,  2.83742   ,  1.0964519 ]]], dtype=float32)
 
     >>> normal(2, 2, dtype="float16", constant=True)
     Tensor([[-1.335 ,  0.9297],
-        [ 1.746 , -0.1222]], dtype=float16)
+            [ 1.746 , -0.1222]], dtype=float16)
 
     >>> normal(5, dtype="float64")
     Tensor([-0.03875407,  0.65368466, -0.72636993,  1.57404148, -1.17444345])
