@@ -40,10 +40,28 @@ def he_uniform(*shape, gain=1, dtype=np.float32, constant=False):
 
     where :math:`a` is the slope of the rectifier following this layer, which is incorporated
     using the `gain` variable above.
-    """
-    if not np.issubdtype(dtype, np.floating):
-        raise ValueError("He Uniform initialization requires a floating-point dtype")
 
+    The guidance put forward in that paper is that this initialization procedure should be prefered
+    over the ``mygrad.nnet.initializers.glorot_*`` functions especially when rectifiers (e.g. ReLU,
+    PReLU, leaky_relu) in very deep (> 1-20 or so layer) networks.
+
+    Examples
+    --------
+    >>> from mygrad.nnet.initializers import he_uniform
+    >>> he_uniform(2, 3)
+    Tensor([[-0.97671795,  0.85518736, -0.8187388 ],
+            [ 0.7599437 ,  0.94951814, -0.96755147]], dtype=float32)
+
+    >>> he_uniform(4, 2, gain=5/3, dtype="float64", constant=True)
+    Tensor([[-1.10372799, -0.16472136],
+            [-1.32614867,  1.14142637],
+            [ 0.78044471,  0.20562334],
+            [-1.23968259,  1.0057054 ]])
+
+    >>> he_uniform(2, 1, 2, dtype="float16")
+    Tensor([[[-0.1233,  0.1023]],
+            [[ 0.3845,  0.1003]]], dtype=float16)
+    """
     if len(shape) == 1:
         shape = shape[0]
     if len(shape) < 2:
