@@ -5,7 +5,7 @@ from .ops import *
 __all__ = ["reshape", "squeeze", "ravel", "expand_dims", "broadcast_to"]
 
 
-def reshape(a, *newshape, constant=False):
+def reshape(a, newshape, constant=False):
     """ Returns a tensor with a new shape, without changing its data.
 
         This docstring was adapted from ``numpy.reshape``
@@ -15,7 +15,7 @@ def reshape(a, *newshape, constant=False):
         a : array_like
             The tensor to be reshaped
 
-        *newshape : Union[int, Tuple[int, ...]]
+        newshape : Union[int, Tuple[int, ...]]
             The new shape should be compatible with the original shape. If
             an integer, then the result will be a 1-D tensor of that length.
             One shape dimension can be -1. In this case, the value is
@@ -34,8 +34,8 @@ def reshape(a, *newshape, constant=False):
         -----
         ``reshape`` utilizes C-ordering, meaning that it reads & writes elements using
         C-like index ordering; the last axis index changing fastest, and, proceeding
-        in reverse order, the first axis index changing slowest. 
-            
+        in reverse order, the first axis index changing slowest.
+
         Examples
         --------
         >>> import mygrad as mg
@@ -47,12 +47,6 @@ def reshape(a, *newshape, constant=False):
         Tensor([[1, 2],
                 [3, 4],
                 [5, 6]])"""
-    if not newshape:
-        raise TypeError("reshape() takes at least 1 argument (0 given)")
-    if hasattr(newshape[0], "__iter__"):
-        if len(newshape) > 1:
-            raise TypeError("an integer is required")
-        newshape = newshape[0]
     return Tensor._op(Reshape, a, op_args=(newshape,), constant=constant)
 
 
@@ -66,10 +60,10 @@ def squeeze(a, axis=None, constant=False):
     ----------
     a : array_like
         The tensor to be reshaped
-    
+
     axis : Optional[int, Tuple[int, ...]]
-        Selects a subset of the single-dimensional entries in the 
-        shape. If an axis is selected with shape entry greater than 
+        Selects a subset of the single-dimensional entries in the
+        shape. If an axis is selected with shape entry greater than
         one, an error is raised.
 
     constant : bool, optional(default=False)
