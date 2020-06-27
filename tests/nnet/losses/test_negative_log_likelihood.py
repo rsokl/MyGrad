@@ -12,17 +12,18 @@ from mygrad.tensor_base import Tensor
 
 
 @pytest.mark.parametrize(
-    ("data", "labels"),
+    ("data", "labels", "weights"),
     [
-        (np.ones((2,), dtype=float), np.zeros((2,), dtype=int)),  # 1D data
-        (np.ones((2, 1), dtype=float), np.zeros((2,), dtype=float)),  # non-int labels
-        (np.ones((2, 1), dtype=float), np.zeros((2, 1), dtype=int)),  # bad label-ndim
-        (np.ones((2, 1), dtype=float), np.zeros((3,), dtype=int)),  # bad label-shape
+        (np.ones((2,), dtype=float), np.zeros((2,), dtype=int), None),  # 1D data
+        (np.ones((2, 1), dtype=float), np.zeros((2,), dtype=float), None),  # non-int labels
+        (np.ones((2, 1), dtype=float), np.zeros((2, 1), dtype=int), None),  # bad label-ndim
+        (np.ones((2, 1), dtype=float), np.zeros((3,), dtype=int), None),  # bad label-shape
+        (np.ones((2, 2), dtype=float), np.zeros((2,), dtype=int), np.ones((1,)))  # bad weight shape
     ],
 )
-def test_input_validation(data, labels):
+def test_input_validation(data, labels, weights):
     with raises((ValueError, TypeError)):
-        negative_log_likelihood(data, labels)
+        negative_log_likelihood(data, labels, weights=weights)
 
 
 @given(data=st.data(), labels_as_tensor=st.booleans())

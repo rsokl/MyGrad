@@ -1,6 +1,6 @@
 import numpy as np
 
-from mygrad import Tensor, sum
+from mygrad import Tensor, mean
 from ._utils import check_loss_inputs
 
 
@@ -18,7 +18,7 @@ def negative_log_likelihood(x, y_true, *, weights=None, constant=False):
     y_true : array_like, shape=(N,)
         The correct class indices, in [0, C), for each datum.
 
-    weights : array_like, optional (default=None)
+    weights : array_like, shape=(C,) optional (default=None)
         The weighting factor to use on each class, or None.
 
     constant : bool, optional(default=False)
@@ -50,16 +50,28 @@ def negative_log_likelihood(x, y_true, *, weights=None, constant=False):
     >>> negative_log_likelihood(x, y_true)
     Tensor(0.)
 
-    # log-probabilities where the prediction is highly-confident and incorrect
+    # adding a class-weighting
     >>> x = mg.Tensor([[-4.6, -4.6, -0.02]])
-    >>> negative_log_likelihood(x, y_true)
-    Tensor(4.6)
+    >>> weights = mg.Tensor([2, 1, 1])
+    >>> negative_log_likelihood(x, y_true, weights=weights)
+    Tensor(9.2)
     """
     if isinstance(y_true, Tensor):
         y_true = y_true.data
-
     check_loss_inputs(x, y_true)
 
+    if weights is None:
+        weights = np.ones(x.shape[1])
+    if isinstance(weights, Tensor):
+        weights = weights.data
+
+    if weights.ndim != 1 or weights.shape[0] != x.shape[1]:
+        raise ValueError(
+            "`weights` must be a shape-(C,) array: \n"
+            f"\tExpected shape-{x.shape[1]}\n"
+            f"\tGot shape-{y_true.shape}"
+        )
+
     label_locs = (range(len(y_true)), y_true)
-    factors = weights[y_true] if weights is not None else np.ones_like(y_true)
-    return -sum(x[label_locs] * factors) / sum(factors)
+    factors = weights[y_true]
+    return -mean(x[label_locs] * factors)
