@@ -42,13 +42,6 @@ def test_negative_log_likelihood(data: st.DataObject, labels_as_tensor: bool):
             elements=st.integers(min_value=0, max_value=s.shape[1] - 1),
         ).map(Tensor if labels_as_tensor else lambda x: x)
     )
-    weights = data.draw(
-        hnp.arrays(
-            shape=(s.shape[1],),
-            dtype=float,
-            elements=st.floats(1e-8, 100),
-        )
-    )
     scores = Tensor(s)
     nll = negative_log_likelihood(mg.log(mg.nnet.softmax(scores)), y_true)
     nll.backward()
@@ -85,10 +78,11 @@ def test_weighted_negative_log_likelihood(data: st.DataObject, labels_as_tensor:
         )
     )
     scores = Tensor(s)
+    weights = Tensor(weights)
 
     for score, y in zip(scores, y_true):
         score = mg.log(mg.nnet.softmax(score.reshape(1, -1)))
         y = y.reshape(-1)
         nll = negative_log_likelihood(score, y)
         weighted_nll = negative_log_likelihood(score, y, weights=weights)
-        assert np.isclose(weighted_nll.data, weights[y.data] * nll.data)
+        assert np.isclose(weighted_nll.data, weights[y.data].data * nll.data)
