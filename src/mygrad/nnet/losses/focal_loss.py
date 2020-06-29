@@ -9,8 +9,8 @@ __all__ = ["softmax_focal_loss", "focal_loss"]
 
 
 class SoftmaxFocalLoss(Operation):
-    """ Returns the focal loss as described in https://arxiv.org/abs/1708.02002 which is
-    given by -ɑ(1-p)ˠlog(p).
+    """ Returns the per-datum focal loss as described in https://arxiv.org/abs/1708.02002 
+    which is given by -ɑ(1-p)ˠlog(p).
 
     Extended Description
     --------------------
@@ -23,6 +23,8 @@ class SoftmaxFocalLoss(Operation):
     one where :math:`i` is the label of the element :math:`y_i` and 0 elsewhere. That is,
     if the label :math:`y_k` is 1 and there are four possible label values, then
     :math:`\hat{y}_k = (0, 1, 0, 0)`.
+
+    It is recommended in the paper that you normalize by the number of foreground samples.
     """
 
     scalar_only = True
@@ -46,7 +48,7 @@ class SoftmaxFocalLoss(Operation):
         Returns
         -------
         numpy.ndarray
-            The average focal loss.
+            The per-datum focal loss.
         """
         if isinstance(targets, Tensor):
             targets = targets.data
@@ -65,17 +67,17 @@ class SoftmaxFocalLoss(Operation):
         one_m_pc = 1 - pc + 1e-14  # correct domain for when gamma < 1 and pc == 1
         log_pc = np.log(pc)
 
-        loss = -np.mean(alpha * one_m_pc ** gamma * log_pc)
+        loss = -(alpha * one_m_pc ** gamma * log_pc)
 
         self.back = scores
         self.back[label_locs] -= 1
         deriv = one_m_pc**gamma - pc * gamma * one_m_pc**(gamma - 1) * log_pc
         self.back *= deriv[:, np.newaxis]
-        self.back *= alpha / scores.shape[0]
+        self.back *= alpha
         return loss
 
     def backward_var(self, grad, index, **kwargs):
-        return grad * self.back
+        return grad[:, np.newaxis] * self.back
 
 
 def softmax_focal_loss(x, y, *, alpha=1, gamma=0, constant=False):
@@ -85,7 +87,7 @@ def softmax_focal_loss(x, y, *, alpha=1, gamma=0, constant=False):
     outputs : mygrad.Tensor, shape=(N, C)
         The C class scores for each of the N pieces of data.
 
-    targets : Sequence[int], shape=(N,)
+    targets : array_like, shape=(N,)
         The correct class indices, in [0, C), for each datum.
 
     alpha : Real, optional (default=1)
@@ -100,14 +102,14 @@ def softmax_focal_loss(x, y, *, alpha=1, gamma=0, constant=False):
 
     Returns
     -------
-    mygrad.Tensor
-        The average focal loss.
+    mygrad.Tensor, shape=(N,)
+        The per-datum focal loss.
     """
     return Tensor._op(SoftmaxFocalLoss, x, op_args=(y, alpha, gamma), constant=constant)
 
 
 def focal_loss(scores, targets, *, alpha=1, gamma=0, constant=False):
-    """ Return the focal loss.
+    """ Return the per-datum focal loss.
 
     Parameters
     ----------
@@ -129,13 +131,15 @@ def focal_loss(scores, targets, *, alpha=1, gamma=0, constant=False):
 
     Returns
     -------
-    mygrad.Tensor
-        The average focal loss.
+    mygrad.Tensor, shape=(N,)
+        The per-datum focal loss.
 
     Notes
     -----
     This function does not perform a softmax before computing the loss. If you need to take the
     softmax before computing the loss, see :class:`SoftmaxFocalLoss` instead.
+
+    It is recommended in the paper that you normalize by the number of foreground samples.
     """
     if isinstance(targets, Tensor):
         targets = targets.data
@@ -144,4 +148,4 @@ def focal_loss(scores, targets, *, alpha=1, gamma=0, constant=False):
 
     label_locs = (range(len(targets)), targets)
     pc = scores[label_locs]
-    return -mean(alpha * (1 - pc + 1e-14) ** gamma * log(pc), constant=constant)
+    return -(alpha * (1 - pc + 1e-14) ** gamma * log(pc, constant=constant))

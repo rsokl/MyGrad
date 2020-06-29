@@ -52,7 +52,7 @@ def test_softmax_focal_loss(num_datum, num_classes, alpha, gamma, data, grad, ta
     mygrad_focal_loss = sum(truth * (-alpha * (1 - probs + 1e-14)**gamma * log(probs))) / num_datum
     mygrad_focal_loss.backward(grad)
 
-    nn_loss = softmax_focal_loss(scores_nn, targets, alpha=alpha, gamma=gamma)
+    nn_loss = softmax_focal_loss(scores_nn, targets, alpha=alpha, gamma=gamma).mean()
     nn_loss.backward(grad)
 
     assert isinstance(nn_loss, Tensor) and nn_loss.ndim == 0
@@ -86,10 +86,10 @@ def test_focal_loss(num_datum, num_classes, alpha, gamma, data, grad, target_typ
     truth[range(num_datum), targets] = 1
     targets = target_type(targets)
 
-    fl = focal_loss(softmax(scores_mygrad), targets, alpha=alpha, gamma=gamma)
+    fl = focal_loss(softmax(scores_mygrad), targets, alpha=alpha, gamma=gamma).mean()
     fl.backward(grad)
 
-    nn_loss = softmax_focal_loss(scores_nn, targets, alpha=alpha, gamma=gamma)
+    nn_loss = softmax_focal_loss(scores_nn, targets, alpha=alpha, gamma=gamma).mean()
     nn_loss.backward(grad)
 
     assert isinstance(nn_loss, Tensor) and nn_loss.ndim == 0
