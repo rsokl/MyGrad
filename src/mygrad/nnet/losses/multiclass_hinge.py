@@ -7,12 +7,14 @@ from ._utils import check_loss_inputs
 
 
 class MulticlassHinge(Operation):
-    def __call__(self, a, y, hinge=1.0):
-        """ Computes the average multiclass hinge loss.
+    scalar_only = True
+
+    def __call__(self, x, y, hinge=1.0):
+        """ Computes the per-datum multiclass hinge loss.
 
         Parameters
         ----------
-        a : mygrad.Tensor, shape=(N, C)
+        x : mygrad.Tensor, shape=(N, C)
             The C class scores for each of the N pieces of data.
 
         y : numpy.ndarray, shape=(N,)
@@ -20,7 +22,7 @@ class MulticlassHinge(Operation):
 
         Returns
         -------
-        The average multiclass hinge loss
+        The per-datum multiclass hinge loss, shape=(N,)
 
         Raises
         ------
@@ -31,9 +33,9 @@ class MulticlassHinge(Operation):
             `x` must be a 2-dimensional array-like object
             `y_true` must be a shape-(N,) array-like object"""
 
-        check_loss_inputs(a, y)
-        self.variables = (a,)
-        scores = a.data
+        check_loss_inputs(x, y)
+        self.variables = (x,)
+        scores = x.data
         correct_labels = (range(len(y)), y)
         correct_class_scores = scores[correct_labels]  # Nx1
 
@@ -48,15 +50,14 @@ class MulticlassHinge(Operation):
         TMP[correct_labels] = 0  # NxC; 1 where margin > 0
         TMP[correct_labels] = -1 * TMP.sum(axis=-1)
         self.back = TMP
-        self.back /= scores.shape[0]
-        return np.sum(Lij) / scores.shape[0]
+        return np.sum(Lij, axis=1)
 
     def backward_var(self, grad, index, **kwargs):
-        return grad * self.back
+        return grad[:, np.newaxis] * self.back
 
 
 def multiclass_hinge(x, y_true, hinge=1.0, constant=False):
-    """ Computes the average multiclass hinge loss.
+    """ Computes the per-datum multiclass hinge loss.
 
     Parameters
     ----------
@@ -76,7 +77,7 @@ def multiclass_hinge(x, y_true, hinge=1.0, constant=False):
 
     Returns
     -------
-    The average multiclass hinge loss
+    The per-datum multiclass hinge loss, shape=(N,)
 
     Raises
     ------

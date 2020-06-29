@@ -101,7 +101,7 @@ def test_ranked_margin(
 
     loss_dum = simple_loss(x1_dum, x2_dum, y, margin)
 
-    loss_real = margin_ranking_loss(x1_real, x2_real, y, margin)
+    loss_real = margin_ranking_loss(x1_real, x2_real, y, margin).mean()
 
     assert_allclose(
         actual=loss_real.data, desired=loss_dum.data, err_msg="losses don't match"

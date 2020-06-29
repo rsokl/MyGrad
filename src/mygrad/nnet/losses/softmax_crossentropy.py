@@ -14,6 +14,8 @@ class SoftmaxCrossEntropy(Operation):
 
         log-softmax is used for improved numerical stability"""
 
+    scalar_only = True
+
     def __call__(self, x, y_true):
         """ Parameters
             ----------
@@ -25,7 +27,7 @@ class SoftmaxCrossEntropy(Operation):
 
             Returns
             -------
-            The average softmax loss"""
+            The unreduced softmax loss"""
         if isinstance(y_true, Tensor):
             y_true = y_true.data
 
@@ -34,15 +36,14 @@ class SoftmaxCrossEntropy(Operation):
         scores = x.data
         log_softmax = scores - logsumexp(scores, axis=-1, keepdims=True)
         label_locs = (range(len(scores)), y_true)
-        loss = -np.sum(log_softmax[label_locs]) / scores.shape[0]
+        loss = -log_softmax[label_locs]
 
         self.back = np.exp(log_softmax)
         self.back[label_locs] -= 1.0
-        self.back /= scores.shape[0]
         return loss
 
     def backward_var(self, grad, index, **kwargs):
-        return grad * self.back
+        return grad[:, np.newaxis] * self.back
 
 
 def softmax_crossentropy(x, y_true, constant=False):
@@ -67,7 +68,7 @@ def softmax_crossentropy(x, y_true, constant=False):
 
     Returns
     -------
-    The average softmax loss
+    The unreduced softmax loss
 
     Raises
     ------
@@ -97,12 +98,8 @@ def softmax_crossentropy(x, y_true, constant=False):
     .. math::
        l = - \sum_{k=1}^{C}{t_{k} \log{p_{k}}}
 
-    Having computed each per-datum cross entropy loss, this function then returns the loss
-    averaged over all :math:`N` pieces of data:
-
-    .. math::
-
-       L = \frac{1}{N}\sum_{i=1}^{N}{l_{i}}
+    This function then returns the loss for each :math:`N` pieces of data; it does not average
+    over all examples.
 
     Examples
     --------
@@ -118,7 +115,7 @@ def softmax_crossentropy(x, y_true, constant=False):
 
     Because the scores are identical for all three classes, the softmax normalization
     will simply produce :math:`p = [\frac{1}{3}, \frac{1}{3}, \frac{1}{3}]`. Because
-    class-0 is the "true" class, :math:`t = [1., 0., 0.]`. Thus our softmax cross-entropy
+    class-0 is the "true" class, :math:`t = [1., 0., 0.]`. Thus our average softmax cross-entropy
     loss should be:
 
     .. math::
@@ -127,12 +124,12 @@ def softmax_crossentropy(x, y_true, constant=False):
 
     Let's see that this is what ``softmax_crossentropy`` returns:
 
-    >>> softmax_crossentropy(x, y_true)
+    >>> softmax_crossentropy(x, y_true).mean()
     Tensor(1.09861229)
 
     Similarly, suppose a datum's scores are :math:`[0, 0, 10^6]`, then the softmax normalization
     will return :math:`p \approx [0., 0., 1.]`. If the true class for this datum is class-2, then
-    the loss should be nearly 0, since :math:`p` and :math:`t` are essentially identical:
+    the mean loss should be nearly 0, since :math:`p` and :math:`t` are essentially identical:
 
     .. math::
       -(0 \times \log{0} + 0 \times \log{0} + 1 \times \log{1})
@@ -145,10 +142,10 @@ def softmax_crossentropy(x, y_true, constant=False):
     ...                [0., 0., 1E6]])
     >>> y_true = mg.Tensor([0, 2])     # the class IDs for the two data
 
-    ``softmax_crossentropy(x, y_true)`` will return the average loss of these two data,
+    ``softmax_crossentropy(x, y_true).mean()`` will return the average loss of these two data,
     :math:`\frac{1}{2}(1.099 + 0) \approx 0.55`:
 
-    >>> softmax_crossentropy(x, y_true)
+    >>> softmax_crossentropy(x, y_true).mean()
     Tensor(0.54930614)
     """
     return Tensor._op(SoftmaxCrossEntropy, x, op_args=(y_true,), constant=constant)

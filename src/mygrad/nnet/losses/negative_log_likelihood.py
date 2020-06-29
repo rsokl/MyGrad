@@ -1,11 +1,12 @@
 import numpy as np
 
-from mygrad import Tensor, mean
+from mygrad import Tensor
 from ._utils import check_loss_inputs
 
 
 def negative_log_likelihood(x, y_true, *, weights=None, constant=False):
-    """ Returns the (weighted) negative log-likelihood loss between log-probabilities and y_true.
+    """ Returns the (weighted) per-datum negative log-likelihood loss
+    between log-probabilities and y_true.
 
     Note that this does not compute a softmax, so you should input log-probabilities to this.
     See ``softmax_crossentropy`` if you need your loss to compute a softmax.
@@ -27,8 +28,8 @@ def negative_log_likelihood(x, y_true, *, weights=None, constant=False):
 
     Returns
     -------
-    mygrad.Tensor, shape=()
-        The average (weighted) negative log-likelihood loss.
+    mygrad.Tensor, shape=(N,)
+        The per-datum (weighted) negative log-likelihood loss.
 
     Examples
     --------
@@ -42,18 +43,18 @@ def negative_log_likelihood(x, y_true, *, weights=None, constant=False):
     >>> logprob = mg.log(1 / 3).item()
     >>> x = mg.Tensor([[logprob, logprob, logprob]])  # a shape-(1, 3) tensor of log-probabilities
     >>> y_true = mg.Tensor([0])  # the correct class for this datum is class-0
-    >>> negative_log_likelihood(x, y_true)
+    >>> negative_log_likelihood(x, y_true).mean()
     Tensor(1.09861229)
 
     # log-probabilities where the prediction is highly-confident and correct
     >>> x = mg.Tensor([[0, -20, -20]])
-    >>> negative_log_likelihood(x, y_true)
+    >>> negative_log_likelihood(x, y_true).mean()
     Tensor(0.)
 
     # adding a class-weighting
     >>> x = mg.Tensor([[-4.6, -4.6, -0.02]])
     >>> weights = mg.Tensor([2, 1, 1])
-    >>> negative_log_likelihood(x, y_true, weights=weights)
+    >>> negative_log_likelihood(x, y_true, weights=weights).mean()
     Tensor(9.2)
     """
     if isinstance(y_true, Tensor):
@@ -74,4 +75,4 @@ def negative_log_likelihood(x, y_true, *, weights=None, constant=False):
 
     label_locs = (range(len(y_true)), y_true)
     factors = weights[y_true]
-    return -mean(x[label_locs] * factors)
+    return -(x[label_locs] * factors)

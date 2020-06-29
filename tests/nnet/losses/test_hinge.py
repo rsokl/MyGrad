@@ -44,7 +44,7 @@ def test_multiclass_hinge(data):
         )
     )
     hinge_scores = Tensor(s)
-    hinge_loss = multiclass_hinge(hinge_scores, loss, constant=False)
+    hinge_loss = multiclass_hinge(hinge_scores, loss, constant=False).mean()
     hinge_loss.backward()
 
     mygrad_scores = Tensor(s)

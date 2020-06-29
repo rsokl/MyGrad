@@ -7,6 +7,8 @@ from mygrad.tensor_base import Tensor
 
 
 class MarginRanking(Operation):
+    scalar_only = True
+
     def __call__(self, x1, x2, y, margin):
         """ Computes the margin ranking loss between ``x1``
         and ``x2``.
@@ -38,8 +40,8 @@ class MarginRanking(Operation):
 
         self._grad = np.ones_like(M)
         self._grad[not_thresh] = 0.0
-        self._grad /= M.size
-        return np.mean(loss)
+        # self._grad /= M.size
+        return loss
 
     def backward_var(self, grad, index, **kwargs):
         sign = -self.y if index == 0 else self.y
@@ -47,7 +49,7 @@ class MarginRanking(Operation):
 
 
 def margin_ranking_loss(x1, x2, y, margin, constant=False):
-    r"""Computes the margin average margin ranking loss.
+    r"""Computes the per-datum margin ranking loss.
     Equivalent to::
 
     >>> import mygrad as mg
@@ -74,7 +76,7 @@ def margin_ranking_loss(x1, x2, y, margin, constant=False):
 
     Returns
     -------
-    mygrad.Tensor, shape=()
+    mygrad.Tensor, shape=(N,)
         The mean margin ranking loss.
     """
     if not 0 < x1.ndim < 3:

@@ -43,11 +43,11 @@ def test_negative_log_likelihood(data: st.DataObject, labels_as_tensor: bool):
         ).map(Tensor if labels_as_tensor else lambda x: x)
     )
     scores = Tensor(s)
-    nll = negative_log_likelihood(mg.log(mg.nnet.softmax(scores)), y_true)
+    nll = negative_log_likelihood(mg.log(mg.nnet.softmax(scores)), y_true).mean()
     nll.backward()
 
     cross_entropy_scores = Tensor(s)
-    ce = softmax_crossentropy(cross_entropy_scores, y_true)
+    ce = softmax_crossentropy(cross_entropy_scores, y_true).mean()
     ce.backward()
 
     assert_allclose(nll.data, ce.data, atol=1e-5, rtol=1e-5)
