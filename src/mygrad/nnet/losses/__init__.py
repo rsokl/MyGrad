@@ -1,6 +1,7 @@
 from .focal_loss import focal_loss, softmax_focal_loss
 from .margin_ranking_loss import margin_ranking_loss
 from .multiclass_hinge import multiclass_hinge
+from .negative_log_likelihood import negative_log_likelihood
 from .softmax_crossentropy import softmax_crossentropy
 
 __all__ = [
