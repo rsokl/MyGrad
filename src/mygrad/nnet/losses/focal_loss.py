@@ -56,7 +56,7 @@ class SoftmaxFocalLoss(Operation):
         check_loss_inputs(scores, targets)
 
         self.variables = (scores,)
-        scores = np.copy(scores.data)
+        scores = np.copy(scores.data if isinstance(scores, Tensor) else scores)
 
         max_scores = np.max(scores, axis=1, keepdims=True)
         np.exp(scores - max_scores, out=scores)
