@@ -3,7 +3,7 @@ from mygrad import Tensor
 import numpy as np
 
 
-def rand(*shape):
+def rand(*shape, constant=False):
     """ Create a Tensor of the given shape and populate it with random 
     samples from a uniform distribution over [0, 1).
 
@@ -25,10 +25,10 @@ def rand(*shape):
     
     """
 
-    return Tensor(np.random.rand(*shape), constant=False)
+    return Tensor(np.random.rand(*shape), constant=constant)
 
 
-def randn(*shape):
+def randn(*shape, constant=False):
     """ Return a sample (or samples) from the “standard normal” distribution.
 
 
@@ -49,10 +49,10 @@ def randn(*shape):
     
     """
 
-    return Tensor(np.random.randn(*shape), constant=False)
+    return Tensor(np.random.randn(*shape), constant=constant)
 
 
-def randint(low, high=None, shape=None, dtype=int):
+def randint(low, high=None, shape=None, dtype=int, constant=False):
     """ Return random integers from the “discrete uniform” distribution of the specified dtype in the “half-open” interval [low, high). 
     If high is None (the default), then results are from [0, low).
 
@@ -81,10 +81,10 @@ def randint(low, high=None, shape=None, dtype=int):
     
     """
 
-    return Tensor(np.random.randint(low, high, shape, dtype), constant=False)
+    return Tensor(np.random.randint(low, high, shape, dtype), constant=constant)
 
 
-def random_integers(low, high=None, shape=None):
+def random_integers(low, high=None, shape=None, constant=False):
     """ Random integers of type np.int_ between low and high, inclusive.
 
 
@@ -108,10 +108,10 @@ def random_integers(low, high=None, shape=None):
         size-shaped array of random integers from the appropriate distribution, or a single such random int if size not provided.    
     """
 
-    return Tensor(np.random.random_integers(low, high, shape), constant=False)
+    return Tensor(np.random.random_integers(low, high, shape), constant=constant)
 
 
-def random_sample(shape=None):
+def random_sample(shape=None, constant=False):
     """ Return random floats in the half-open interval [0.0, 1.0).
 
     Results are from the “continuous uniform” distribution over the stated interval.
@@ -132,10 +132,10 @@ def random_sample(shape=None):
         size-shaped array of random integers from the appropriate distribution, or a single such random int if size not provided.    
     """
 
-    return Tensor(np.random.random_sample(shape), constant=False)
+    return Tensor(np.random.random_sample(shape), constant=constant)
 
 
-def random(shape=None):
+def random(shape=None, constant=False):
     """ Return random floats in the half-open interval [0.0, 1.0). 
     Alias for random_sample to ease forward-porting to the new random API.
     Parameters
@@ -155,10 +155,10 @@ def random(shape=None):
         size-shaped array of random integers from the appropriate distribution, or a single such random int if size not provided.    
     """
 
-    return Tensor(np.random.random(shape), constant=False)
+    return Tensor(np.random.random(shape), constant=constant)
 
 
-def ranf(shape=None):
+def ranf(shape=None, constant=False):
     """ Return random floats in the half-open interval [0.0, 1.0). 
     Alias for random_sample to ease forward-porting to the new random API.
     Parameters
@@ -178,10 +178,10 @@ def ranf(shape=None):
         size-shaped array of random integers from the appropriate distribution, or a single such random int if size not provided.    
     """
 
-    return Tensor(np.random.ranf(shape), constant=False)
+    return Tensor(np.random.ranf(shape), constant=constant)
 
 
-def sample(shape=None):
+def sample(shape=None, constant=False):
     """ Return random floats in the half-open interval [0.0, 1.0). 
     Alias for random_sample to ease forward-porting to the new random API.
     Parameters
@@ -201,4 +201,4 @@ def sample(shape=None):
         size-shaped array of random integers from the appropriate distribution, or a single such random int if size not provided.    
     """
 
-    return Tensor(np.random.sample(shape), constant=False)
+    return Tensor(np.random.sample(shape), constant=constant)
