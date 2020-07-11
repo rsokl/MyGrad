@@ -308,9 +308,10 @@ class fwdprop_test_factory:
             assert isinstance(
                 o, Tensor
             ), f"`mygrad_func` returned type {type(o)}, should return `mygrad.Tensor`"
-            assert o.constant is constant or bool(
-                sum(tensor_constants)
-            ), f"`mygrad_func` returned tensor.constant={o.constant}, should be constant={ bool(sum(tensor_constants))}"
+            assert o.constant is constant or bool(sum(tensor_constants)), (
+                f"`mygrad_func` returned tensor.constant={o.constant}, "
+                f"should be constant={constant or  bool(sum(tensor_constants))}"
+            )
 
             assert_allclose(
                 actual=tensor_out,

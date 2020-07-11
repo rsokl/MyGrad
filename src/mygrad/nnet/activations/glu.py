@@ -1,6 +1,7 @@
 from numpy import ndarray
 
-from mygrad import multiply, Tensor
+from mygrad import Tensor, multiply
+
 from .sigmoid import sigmoid
 
 
@@ -24,8 +25,8 @@ def glu(x, axis=-1, constant=False):
     mygrad.Tensor
         The result of applying the  Gated Linear Unit elementwise to the input.
 
-    Extended Description
-    --------------------
+    Notes
+    -----
     The Gated Linear Unit was proposed in the paper
         "Language Modeling with Gated Convolutional Networks"
         Yann Dauphin, Angela Fan, Michael Auli, David Grangier

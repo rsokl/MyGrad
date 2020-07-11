@@ -27,8 +27,8 @@ def he_uniform(*shape, gain=1, dtype=np.float32, constant=False):
     mygrad.Tensor, shape=``shape``
         A Tensor, with values initialized according to the He uniform initialization.
 
-    Extended Description
-    --------------------
+    Notes
+    -----
     He, Zhang, Ren, and Sun put forward this initialization in the paper
         "Delving Deep into Rectifiers: Surpassing Human-Level Performance
         on ImageNet Classification"
