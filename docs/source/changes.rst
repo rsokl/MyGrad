@@ -6,6 +6,15 @@ This is a record of all past mygrad releases and what went into them,
 in reverse chronological order. All previous releases should still be available
 on pip.
 
+.. _v1.7.1:
+
+------------------
+1.7.1 - 2020-07-11
+------------------
+
+Fixes a bug in :func:`~mygrad.nnet.losses.negative_log_likelihood`, where setting ``constant=True`` had no effect.
+
+
 .. _v1.7.0:
 
 ------------------
