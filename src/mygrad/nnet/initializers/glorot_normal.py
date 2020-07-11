@@ -1,9 +1,10 @@
 import numpy as np
+
 from mygrad import Tensor
 
 
 def glorot_normal(*shape, gain=1, dtype=np.float32, constant=False):
-    """ Initialize a `Tensor` according to the normal initialization procedure
+    r""" Initialize a `Tensor` according to the normal initialization procedure
     described by Glorot and Bengio.
 
     Parameters
@@ -43,7 +44,9 @@ def glorot_normal(*shape, gain=1, dtype=np.float32, constant=False):
     if len(shape) == 1:
         shape = shape[0]
     if len(shape) < 2:
-        raise ValueError("Glorot Normal initialization requires at least two dimensions")
+        raise ValueError(
+            "Glorot Normal initialization requires at least two dimensions"
+        )
 
     if isinstance(gain, Tensor):
         gain = gain.item()

@@ -1,9 +1,10 @@
 import numpy as np
+
 from mygrad.nnet.initializers.uniform import uniform
 
 
 def he_uniform(*shape, gain=1, dtype=np.float32, constant=False):
-    """ Initialize a ``mygrad.Tensor`` according to the uniform initialization procedure
+    r""" Initialize a ``mygrad.Tensor`` according to the uniform initialization procedure
     described by He et al.
 
     Parameters
@@ -68,4 +69,6 @@ def he_uniform(*shape, gain=1, dtype=np.float32, constant=False):
         raise ValueError("He Uniform initialization requires at least two dimensions")
 
     bound = gain / np.sqrt(3 / shape[1] * (np.prod(shape[2:]) if len(shape) > 2 else 1))
-    return uniform(shape, lower_bound=-bound, upper_bound=bound, dtype=dtype, constant=constant)
+    return uniform(
+        shape, lower_bound=-bound, upper_bound=bound, dtype=dtype, constant=constant
+    )
