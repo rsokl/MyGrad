@@ -6,6 +6,40 @@ This is a record of all past mygrad releases and what went into them,
 in reverse chronological order. All previous releases should still be available
 on pip.
 
+.. _v1.7.0:
+
+------------------
+1.7.0 - 2020-07-11
+------------------
+
+This release continues the process of integrating functions from `mynn <https://github.com/davidmascharka/MyNN>`_.
+
+New features:
+
+- Adds :func:`~mygrad.nnet.initializers.glorot_normal`
+- Adds :func:`~mygrad.nnet.initializers.glorot_uniform`
+- Adds :func:`~mygrad.nnet.initializers.he_normal`
+- Adds :func:`~mygrad.nnet.initializers.he_uniform`
+- Adds :func:`~mygrad.nnet.initializers.normal`
+- Adds :func:`~mygrad.nnet.initializers.uniform`
+- Adds :func:`~mygrad.nnet.losses.focal_loss`
+- Adds :func:`~mygrad.nnet.losses.negative_log_likelihood`
+
+Big thanks to David Mascharka!
+
+Improvements:
+
+The interfaces to :func:`~mygrad.reshape` and :func:`~mygrad.Tensor.reshape` were adjusted to match exactly the interfaces to their NumPy counterparts.
+I.e. :func:`~mygrad.reshape` now requires ``newshape`` to be a sequence, whereas :func:`~mygrad.Tensor.reshape` can accept an unpacked sequence for its
+``newshape``.
+
+:func:`~mygrad.Tensor.shape` is now settable - triggering an in-place reshape of a tensor, matching the corresponding behavior in NumPy.
+
+Internal changes:
+
+The logic for writing an in-place operation has been consolidated into a convenient wrapper: :func:`~mygrad.Tensor._in_place_op`.
+
+
 .. _v1.6.0:
 
 ------------------
