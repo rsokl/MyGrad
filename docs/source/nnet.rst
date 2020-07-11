@@ -21,9 +21,12 @@ Losses
 .. autosummary::
    :toctree: generated/
 
-   multiclass_hinge
-   softmax_crossentropy
+   focal_loss
    margin_ranking_loss
+   multiclass_hinge
+   negative_log_likelihood
+   softmax_crossentropy
+   softmax_focal_loss
 
 
 .. currentmodule:: mygrad.nnet.activations
@@ -47,6 +50,22 @@ Activations
    tanh
 
 
+.. currentmodule:: mygrad.nnet.initializers
+
+Initializers
+------------
+.. autosummary::
+   :toctree: generated/
+
+
+   focal_loss
+   glorot_normal
+   glorot_uniform
+   he_normal
+   he_uniform
+   negative_log_likelihood
+   normal
+   uniform
 
 .. currentmodule:: mygrad
 

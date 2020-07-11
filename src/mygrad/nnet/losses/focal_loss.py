@@ -1,15 +1,15 @@
 import numpy as np
 
+from mygrad import Tensor, log
 from mygrad.operation_base import Operation
-from mygrad import Tensor, mean, log
-from ._utils import check_loss_inputs
 
+from ._utils import check_loss_inputs
 
 __all__ = ["softmax_focal_loss", "focal_loss"]
 
 
 class SoftmaxFocalLoss(Operation):
-    """ Returns the per-datum focal loss as described in https://arxiv.org/abs/1708.02002 
+    r""" Returns the per-datum focal loss as described in https://arxiv.org/abs/1708.02002
     which is given by -ɑ(1-p)ˠlog(p).
 
     Extended Description
@@ -71,7 +71,7 @@ class SoftmaxFocalLoss(Operation):
 
         self.back = scores
         self.back[label_locs] -= 1
-        deriv = one_m_pc**gamma - pc * gamma * one_m_pc**(gamma - 1) * log_pc
+        deriv = one_m_pc ** gamma - pc * gamma * one_m_pc ** (gamma - 1) * log_pc
         self.back *= deriv[:, np.newaxis]
         self.back *= alpha
         return loss
@@ -80,11 +80,11 @@ class SoftmaxFocalLoss(Operation):
         return grad[:, np.newaxis] * self.back
 
 
-def softmax_focal_loss(x, y, *, alpha=1, gamma=0, constant=False):
+def softmax_focal_loss(scores, targets, *, alpha=1, gamma=0, constant=False):
     """
     Parameters
     ----------
-    outputs : mygrad.Tensor, shape=(N, C)
+    scores : mygrad.Tensor, shape=(N, C)
         The C class scores for each of the N pieces of data.
 
     targets : array_like, shape=(N,)
@@ -105,7 +105,9 @@ def softmax_focal_loss(x, y, *, alpha=1, gamma=0, constant=False):
     mygrad.Tensor, shape=(N,)
         The per-datum focal loss.
     """
-    return Tensor._op(SoftmaxFocalLoss, x, op_args=(y, alpha, gamma), constant=constant)
+    return Tensor._op(
+        SoftmaxFocalLoss, scores, op_args=(targets, alpha, gamma), constant=constant
+    )
 
 
 def focal_loss(scores, targets, *, alpha=1, gamma=0, constant=False):
