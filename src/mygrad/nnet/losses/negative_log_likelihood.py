@@ -1,6 +1,7 @@
 import numpy as np
 
 from mygrad import Tensor, mean
+
 from ._utils import check_loss_inputs
 
 
@@ -74,4 +75,4 @@ def negative_log_likelihood(x, y_true, *, weights=None, constant=False):
 
     label_locs = (range(len(y_true)), y_true)
     factors = weights[y_true]
-    return -mean(x[label_locs] * factors)
+    return -mean(x[label_locs] * factors, constant=constant)

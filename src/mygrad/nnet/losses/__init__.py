@@ -8,6 +8,7 @@ __all__ = [
     "focal_loss",
     "margin_ranking_loss",
     "multiclass_hinge",
+    "negative_log_likelihood",
     "softmax_crossentropy",
     "softmax_focal_loss",
 ]
