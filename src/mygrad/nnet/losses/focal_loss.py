@@ -113,16 +113,14 @@ def softmax_focal_loss(scores, targets, *, alpha=1, gamma=0, constant=False):
     The formulation for the focal loss introduced in https://arxiv.org/abs/1708.02002.
     It is given by -ɑ(1-p)ˠlog(p).
 
-
-    The focal loss is given by
+    The focal loss for datum-:math:`i` is given by
 
     .. math::
-        \frac{1}{N}\sum\limits_{1}^{N}-\alpha \hat{y}_i(1-p_i)^\gamma\log(p_i)
+        -\alpha \hat{y}_i(1-p_i)^\gamma\log(p_i)
 
-    where :math:`N` is the number of elements in `x` and `y` and :math:`\hat{y}_i` is
-    one where :math:`i` is the label of the element :math:`y_i` and 0 elsewhere. That is,
-    if the label :math:`y_k` is 1 and there are four possible label values, then
-    :math:`\hat{y}_k = (0, 1, 0, 0)`.
+    where :math:`\hat{y}_i` is one in correspondence to the label associated with the
+    datum and 0 elsewhere. That is, if the label :math:`y_k` is 2 and
+    there are four possible label values, then :math:`\hat{y}_k = (0, 0, 1, 0)`.
 
     It is recommended in the paper that you normalize by the number of foreground samples.
     """
@@ -163,15 +161,14 @@ def focal_loss(scores, targets, *, alpha=1, gamma=0, constant=False):
     It is given by -ɑ(1-p)ˠlog(p).
 
 
-    The focal loss is given by
+    The focal loss for datum-:math:`i` is given by
 
     .. math::
-        \frac{1}{N}\sum\limits_{1}^{N}-\alpha \hat{y}_i(1-p_i)^\gamma\log(p_i)
+        -\alpha \hat{y}_i(1-p_i)^\gamma\log(p_i)
 
-    where :math:`N` is the number of elements in `x` and `y` and :math:`\hat{y}_i` is
-    one where :math:`i` is the label of the element :math:`y_i` and 0 elsewhere. That is,
-    if the label :math:`y_k` is 1 and there are four possible label values, then
-    :math:`\hat{y}_k = (0, 1, 0, 0)`.
+    where :math:`\hat{y}_i` is one in correspondence to the label associated with the
+    datum and 0 elsewhere. That is, if the label :math:`y_k` is 2 and
+    there are four possible label values, then :math:`\hat{y}_k = (0, 0, 1, 0)`.
 
     It is recommended in the paper that you normalize by the number of foreground samples.
     """
