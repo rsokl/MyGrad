@@ -58,12 +58,10 @@ Initializers
    :toctree: generated/
 
 
-   focal_loss
    glorot_normal
    glorot_uniform
    he_normal
    he_uniform
-   negative_log_likelihood
    normal
    uniform
 
