@@ -46,6 +46,7 @@ def argmin(a, axis=None, out=None):
     a = a.data if isinstance(a, Tensor) else a
     return np.argmin(a, axis, out)
 
+
 def any(a, axis=None, out=None, keepdims=False):
     """ Test whether any array or Tensor element along a given axis evaluates to True.
 

@@ -7,7 +7,7 @@ from mygrad.math.consts import *
 from mygrad.math.exp_log.funcs import *
 from mygrad.math.hyperbolic_trig.funcs import *
 from mygrad.math.misc.funcs import *
-from mygrad.math.nondifferentiable import argmax, argmin, any
+from mygrad.math.nondifferentiable import any, argmax, argmin
 from mygrad.math.sequential.funcs import *
 from mygrad.math.sequential.funcs import max, min
 from mygrad.math.trigonometric.funcs import *
