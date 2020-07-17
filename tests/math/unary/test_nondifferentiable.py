@@ -60,7 +60,7 @@ def test_argmax(a, data):
     data=st.data(),
 )
 def test_any(a, data):
-    axis = data.draw(valid_axes(ndim=a.ndim, single_axis_only=True), label="axis")
+    axis = data.draw(valid_axes(ndim=a.ndim), label="axis")
     tensor = Tensor(a)
 
     # tensor input

@@ -96,4 +96,4 @@ def any(a, axis=None, out=None, keepdims=False):
     """
 
     a = a.data if isinstance(a, Tensor) else a
-    return np.any(a, axis, out, keepdims)
+    return np.any(a, axis=axis, out=out, keepdims=keepdims)
