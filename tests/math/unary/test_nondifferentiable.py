@@ -51,3 +51,34 @@ def test_argmax(a, data):
 
     # array input
     assert_allclose(mg.argmax(a, axis=axis), np.argmax(a, axis=axis))
+
+
+@given(
+    a=hnp.arrays(
+        shape=hnp.array_shapes(max_side=4, max_dims=5), dtype=dtype_strat_numpy
+    ),
+    data=st.data(),
+    keepdims=st.booleans(),
+)
+def test_any(a, data, keepdims):
+    axis = data.draw(valid_axes(ndim=a.ndim), label="axis")
+    tensor = Tensor(a)
+
+    # tensor input
+    assert_allclose(
+        mg.any(tensor, axis=axis, keepdims=keepdims),
+        np.any(a, axis=axis, keepdims=keepdims),
+    )
+
+    # tensor method
+    assert_allclose(
+        tensor.any(axis=axis, keepdims=keepdims), a.any(axis=axis, keepdims=keepdims)
+    )
+
+    # array input
+    assert_allclose(
+        mg.any(a, axis=axis, keepdims=keepdims), np.any(a, axis=axis, keepdims=keepdims)
+    )
+
+    # test when keepdims is not specified
+    assert_allclose(mg.any(a, axis=axis), np.any(a, axis=axis))
