@@ -17,6 +17,7 @@ from mygrad.tensor_manip.array_shape.funcs import *
 from mygrad.tensor_manip.tiling.funcs import *
 from mygrad.tensor_manip.transpose_like.funcs import *
 
+
 from ._version import get_versions
 
 __version__ = get_versions()["version"]
