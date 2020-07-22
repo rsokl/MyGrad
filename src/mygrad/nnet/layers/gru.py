@@ -14,8 +14,7 @@ except ImportError:  # pragma: no cover
 
 
 @vectorize(
-    ["int32(int32)", "int64(int64)", "float32(float32)", "float64(float64)"],
-    nopython=True,
+    ["float32(float32)", "float64(float64)"], nopython=True,
 )
 def sig(f):  # pragma: no cover
     """
@@ -25,8 +24,7 @@ def sig(f):  # pragma: no cover
 
 
 @vectorize(
-    ["int32(int32)", "int64(int64)", "float32(float32)", "float64(float64)"],
-    nopython=True,
+    ["float32(float32)", "float64(float64)"], nopython=True,
 )
 def d_sig(f):  # pragma: no cover
     """
@@ -36,8 +34,7 @@ def d_sig(f):  # pragma: no cover
 
 
 @vectorize(
-    ["int32(int32)", "int64(int64)", "float32(float32)", "float64(float64)"],
-    nopython=True,
+    ["float32(float32)", "float64(float64)"], nopython=True,
 )
 def d_tanh(f):  # pragma: no cover
     """
@@ -52,10 +49,7 @@ def dot(a, b):
     Calculates the dot product between 2 arrays
     of shapes (W,X,Y) and (Y,Z), respectively
     """
-    out = np.zeros((a.shape[0], a.shape[1], b.shape[-1]))
-    for i in range(len(a)):
-        out[i] = np.dot(a[i], b)
-    return out
+    return np.dot(a.reshape(-1, a.shape[-1]), b).reshape(*a.shape[:-1], b.shape[-1])
 
 
 @njit
@@ -203,22 +197,25 @@ class GRUnit(Operation):
             self.Wh,
             self.bh,
         )
+
+        self.type = max(t.dtype for t in self.variables)
+
         T, N, C = X.shape
         (D,) = bz.shape
 
         seq = self.X.data
 
         # t starts at 0 for S; all other sequences begin at t = 1
-        out = np.zeros((T + 1, N, D))
+        out = np.zeros((T + 1, N, D), dtype=self.type)
 
         if s0 is not None:
             out[0] = s0.data if isinstance(s0, Tensor) else s0
 
         # compute all contributions to Z, R, H from the input sequence
         # shape: T, N, D
-        z = np.tensordot(seq, self.Uz.data, [[-1], [0]])
-        r = np.tensordot(seq, self.Ur.data, [[-1], [0]])
-        h = np.tensordot(seq, self.Uh.data, [[-1], [0]])
+        z = np.tensordot(seq, self.Uz.data, [[-1], [0]]).astype(self.type, copy=False)
+        r = np.tensordot(seq, self.Ur.data, [[-1], [0]]).astype(self.type, copy=False)
+        h = np.tensordot(seq, self.Uh.data, [[-1], [0]]).astype(self.type, copy=False)
 
         if dropout:
             p = 1 - dropout
@@ -234,20 +231,20 @@ class GRUnit(Operation):
             r *= self._dropUr
             h *= self._dropUh
 
-            Wz = self._dropWz * self.Wz.data
-            Wr = self._dropWr * self.Wr.data
-            Wh = self._dropWh * self.Wh.data
+            Wz = (self._dropWz * self.Wz.data).astype(self.type, copy=False)
+            Wr = (self._dropWr * self.Wr.data).astype(self.type, copy=False)
+            Wh = (self._dropWh * self.Wh.data).astype(self.type, copy=False)
 
         else:
             self._dropUz, self._dropUr, self._dropUh = None, None, None
             self._dropWz, self._dropWr, self._dropWh = None, None, None
-            Wz = self.Wz.data
-            Wr = self.Wr.data
-            Wh = self.Wh.data
+            Wz = self.Wz.data.astype(self.type, copy=False)
+            Wr = self.Wr.data.astype(self.type, copy=False)
+            Wh = self.Wh.data.astype(self.type, copy=False)
 
-        z += bz.data  # X Uz + bz
-        r += br.data  # X Ur + br
-        h += bh.data  # X Uh + bh
+        z += bz.data.astype(self.type, copy=False)  # X Uz + bz
+        r += br.data.astype(self.type, copy=False)  # X Ur + br
+        h += bh.data.astype(self.type, copy=False)  # X Uh + bh
 
         _gru_layer(out, z, r, h, Wz, Wr, Wh)
 
@@ -265,18 +262,18 @@ class GRUnit(Operation):
         r = self._r.data
         h = self._h.data
 
-        dLds = grad[1:]
+        dLds = grad[1:].astype(self.type, copy=False)
 
         const = {"1 - h**2": d_tanh(h), "z*(1 - z)": d_sig(z), "r*(1 - r)": d_sig(r)}
 
         if self._dropout:
-            Wz = self._dropWz * self.Wz.data
-            Wr = self._dropWr * self.Wr.data
-            Wh = self._dropWh * self.Wh.data
+            Wz = (self._dropWz * self.Wz.data).astype(self.type, copy=False)
+            Wr = (self._dropWr * self.Wr.data).astype(self.type, copy=False)
+            Wh = (self._dropWh * self.Wh.data).astype(self.type, copy=False)
         else:
-            Wz = self.Wz.data
-            Wr = self.Wr.data
-            Wh = self.Wh.data
+            Wz = self.Wz.data.astype(self.type, copy=False)
+            Wr = self.Wr.data.astype(self.type, copy=False)
+            Wh = self.Wh.data.astype(self.type, copy=False)
 
         const["s - h"] = s - h
         const["1 - z"] = 1 - z
@@ -311,17 +308,24 @@ class GRUnit(Operation):
             dWz = np.tensordot(s, dz, ([0, 1], [0, 1]))
             if self._dropout:
                 dWz *= self._dropWz
-            _backprop(self.Wz, dWz)  # self.Wz.backward(dWz, **kwargs)
+            _backprop(
+                self.Wz, dWz.astype(self.Wz.dtype, copy=False)
+            )  # self.Wz.backward(dWz, **kwargs)
         # backprop through bz
         if not self.bz.constant:
-            _backprop(self.bz, dz.sum(axis=(0, 1)))
+            _backprop(self.bz, dz.sum(axis=(0, 1), dtype=self.bz.dtype))
         # backprop through bz
         if not self.Uz.constant:
             if self._dropout:
                 dz *= (
                     self._dropUz
                 )  # IMPORTANT augmented update: this must come after Wz and bz backprop
-            _backprop(self.Uz, np.tensordot(self.X.data, dz, ([0, 1], [0, 1])))
+            _backprop(
+                self.Uz,
+                np.tensordot(self.X.data, dz, ([0, 1], [0, 1])).astype(
+                    self.Uz.dtype, copy=False
+                ),
+            )
 
         if not (self.Ur.constant and self.Wr.constant and self.br.constant):
             dr = rgrad * const["r*(1 - r)"]
@@ -330,11 +334,11 @@ class GRUnit(Operation):
             dWr = np.tensordot(s, dr, ([0, 1], [0, 1]))
             if self._dropout:
                 dWr *= self._dropWr
-            _backprop(self.Wr, dWr)
+            _backprop(self.Wr, dWr.astype(self.Wr.dtype, copy=False))
         # backprop through br
         if not self.br.constant:
             _backprop(
-                self.br, dr.sum(axis=(0, 1))
+                self.br, dr.sum(axis=(0, 1), dtype=self.br.dtype)
             )  # self.br.backward(dr.sum(axis=(0, 1)), **kwargs)
         # backprop through Ur
         if not self.Ur.constant:
@@ -342,7 +346,12 @@ class GRUnit(Operation):
                 dr *= (
                     self._dropUr
                 )  # IMPORTANT augmented update: this must come after Wr and br backprop
-            _backprop(self.Ur, np.tensordot(self.X.data, dr, ([0, 1], [0, 1])))
+            _backprop(
+                self.Ur,
+                np.tensordot(self.X.data, dr, ([0, 1], [0, 1])).astype(
+                    self.Ur.dtype, copy=False
+                ),
+            )
 
         if not (self.Uh.constant and self.Wh.constant and self.bh.constant):
             dh = hgrad * const["1 - h**2"]
@@ -351,11 +360,13 @@ class GRUnit(Operation):
             dWh = np.tensordot((s * r), dh, ([0, 1], [0, 1]))
             if self._dropout:
                 dWh *= self._dropWh
-            _backprop(self.Wh, dWh)  # self.Wh.backward(dWh, **kwargs)
+            _backprop(
+                self.Wh, dWh.astype(self.Wh.dtype, copy=False)
+            )  # self.Wh.backward(dWh, **kwargs)
         # backprop through bh
         if not self.bh.constant:
             _backprop(
-                self.bh, dh.sum(axis=(0, 1))
+                self.bh, dh.sum(axis=(0, 1), dtype=self.bh.dtype)
             )  # self.bh.backward(dh.sum(axis=(0, 1)), **kwargs)
         # backprop through Uh
         if not self.Uh.constant:
@@ -363,26 +374,37 @@ class GRUnit(Operation):
                 dh *= (
                     self._dropUh
                 )  # IMPORTANT augmented update: this must come after Wh and bh backprop
-            _backprop(self.Uh, np.tensordot(self.X.data, dh, ([0, 1], [0, 1])))
+            _backprop(
+                self.Uh,
+                np.tensordot(self.X.data, dh, ([0, 1], [0, 1])).astype(
+                    self.Uh.dtype, copy=False
+                ),
+            )
 
         # backprop through X
         if not self.X.constant:
             tmp = dLds * const["1 - z"] * const["1 - h**2"]
             if not self._dropout:
-                dLdX = dot((dLds * const["s - h"]) * const["z*(1 - z)"], self.Uz.data.T)
-                dLdX += dot(tmp, self.Uh.data.T)
-                dLdX += dot(dot(tmp, Wh.T) * s * const["r*(1 - r)"], self.Ur.data.T)
+                dLdX = np.dot(
+                    (dLds * const["s - h"]) * const["z*(1 - z)"], self.Uz.data.T
+                )
+                dLdX += np.dot(tmp, self.Uh.data.T)
+                dLdX += np.dot(
+                    np.dot(tmp, Wh.T) * s * const["r*(1 - r)"], self.Ur.data.T
+                )
             else:
-                dLdX = dot(
+                dLdX = np.dot(
                     (self._dropUz * (dLds * const["s - h"]) * const["z*(1 - z)"]),
                     self.Uz.data.T,
                 )
-                dLdX += dot(self._dropUh * tmp, self.Uh.data.T)
-                dLdX += dot(
+                dLdX += np.dot(self._dropUh * tmp, self.Uh.data.T)
+                dLdX += np.dot(
                     self._dropUr * (dot(tmp, Wh.T) * s * const["r*(1 - r)"]),
                     self.Ur.data.T,
                 )
-            _backprop(self.X, dLdX)  # self.X.backward(dLdX, **kwargs)
+            _backprop(
+                self.X, dLdX.astype(self.X.dtype, copy=False)
+            )  # self.X.backward(dLdX, **kwargs)
 
         del self._z
         del self._r

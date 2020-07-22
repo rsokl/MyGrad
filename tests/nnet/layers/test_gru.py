@@ -90,25 +90,38 @@ def test_all_constant(out_constant: bool):
     ),
     D=st.sampled_from(list(range(1, 5))),
     dropout=st.sampled_from([0, 0.45]),
+    dtypes=st.tuples(*[hnp.floating_dtypes(endianness="=", sizes=(32, 64))] * 4),
     data=st.data(),
 )
 @pytest.mark.filterwarnings("ignore: overflow encountered in exp")
 @pytest.mark.filterwarnings("ignore: overflow encountered in sig")
-def test_gru_fwd(X, D, dropout, data: st.DataObject):
+def test_gru_fwd(X, D, dropout, dtypes, data: st.DataObject):
     T, N, C = X.shape
 
     Wz, Wr, Wh = data.draw(
-        hnp.arrays(shape=(3, D, D), dtype=float, elements=st.floats(-10.0, 10.0)),
+        hnp.arrays(
+            shape=(3, D, D),
+            dtype=dtypes[0],
+            elements=st.floats(-10.0, 10.0, width=dtypes[0].itemsize * 8),
+        ),
         label="Wz, Wr, Wh",
     )
 
     Uz, Ur, Uh = data.draw(
-        hnp.arrays(shape=(3, C, D), dtype=float, elements=st.floats(-10.0, 10.0)),
+        hnp.arrays(
+            shape=(3, C, D),
+            dtype=dtypes[1],
+            elements=st.floats(-10.0, 10.0, width=dtypes[1].itemsize * 8),
+        ),
         label="Uz, Ur, Uh",
     )
 
     bz, br, bh = data.draw(
-        hnp.arrays(shape=(3, D), dtype=float, elements=st.floats(-10.0, 10.0)),
+        hnp.arrays(
+            shape=(3, D),
+            dtype=dtypes[2],
+            elements=st.floats(-10.0, 10.0, width=dtypes[2].itemsize * 8),
+        ),
         label="bz, br, bh",
     )
 
@@ -117,7 +130,7 @@ def test_gru_fwd(X, D, dropout, data: st.DataObject):
         label="V",
     )
 
-    s0 = np.zeros((N, D), dtype=float)
+    s0 = np.zeros((N, D), dtype=dtypes[3])
 
     X = Tensor(X)
     X2 = X.__copy__()
@@ -251,6 +264,7 @@ def test_gru_fwd(X, D, dropout, data: st.DataObject):
     b_constants=st.tuples(*[st.booleans()] * 3),
     X_constant=st.booleans(),
     V_constant=st.booleans(),
+    dtypes=st.tuples(*[hnp.floating_dtypes(endianness="=", sizes=(32, 64))] * 4),
 )
 @pytest.mark.filterwarnings("ignore: overflow encountered in exp")
 @pytest.mark.filterwarnings("ignore: overflow encountered in sig")
@@ -265,22 +279,35 @@ def test_gru_backward(
     b_constants: Tuple[bool, bool, bool],
     X_constant: bool,
     V_constant: bool,
+    dtypes: Tuple[int, int, int, int],
 ):
     tolerances = dict(atol=1e-5, rtol=1e-5)
     T, N, C = X.shape
 
     Wz, Wr, Wh = data.draw(
-        hnp.arrays(shape=(3, D, D), dtype=float, elements=st.floats(-10.0, 10.0)),
+        hnp.arrays(
+            shape=(3, D, D),
+            dtype=dtypes[0],
+            elements=st.floats(-10.0, 10.0, width=dtypes[0].itemsize * 8),
+        ),
         label="Wz, Wr, Wh",
     )
 
     Uz, Ur, Uh = data.draw(
-        hnp.arrays(shape=(3, C, D), dtype=float, elements=st.floats(-10.0, 10.0)),
+        hnp.arrays(
+            shape=(3, C, D),
+            dtype=dtypes[1],
+            elements=st.floats(-10.0, 10.0, width=dtypes[1].itemsize * 8),
+        ),
         label="Uz, Ur, Uh",
     )
 
     bz, br, bh = data.draw(
-        hnp.arrays(shape=(3, D), dtype=float, elements=st.floats(-10.0, 10.0)),
+        hnp.arrays(
+            shape=(3, D),
+            dtype=dtypes[2],
+            elements=st.floats(-10.0, 10.0, width=dtypes[2].itemsize * 8),
+        ),
         label="bz, br, bh",
     )
 
@@ -289,7 +316,7 @@ def test_gru_backward(
         label="V",
     )
 
-    s0 = np.zeros((N, D), dtype=float)
+    s0 = np.zeros((N, D), dtype=dtypes[3])
 
     X = Tensor(X, constant=X_constant)
     X2 = X.__copy__()
