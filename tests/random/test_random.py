@@ -44,7 +44,7 @@ unpacked_shape_functions = [(np.random.rand, rand), (np.random.randn, randn)]
     )
 )
 @pytest.mark.parametrize("np_function,mg_function", unpacked_shape_functions)
-def test_random_shape_funcs(np_function, mg_function, a):
+def test_unpacked_shape_funcs(np_function, mg_function, a):
     shape = a.shape
     np.random.seed(0)
     arr = np_function(*shape)
