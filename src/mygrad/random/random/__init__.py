@@ -7,4 +7,13 @@ from .random_sample import random_sample
 from .ranf import ranf
 from .sample import sample
 
-__all__ = ["rand", "randint", "randn", "random", "random_integers", "random_sample", "ranf", "sample"]
+__all__ = [
+    "rand",
+    "randint",
+    "randn",
+    "random",
+    "random_integers",
+    "random_sample",
+    "ranf",
+    "sample",
+]
