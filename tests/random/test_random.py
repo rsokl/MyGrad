@@ -21,7 +21,7 @@ def test_rand(a):
     shape = a.shape
     b = rand(*shape)
     assert b.shape == a.shape
-    assert (0 <= b.data).all() and (b.data<= 1).all()
+    assert (0 <= b.data).all() and (b.data <= 1).all()
 
 
 @given(
@@ -39,17 +39,18 @@ def test_randn(a):
     a=hnp.arrays(
         shape=hnp.array_shapes(max_side=4, max_dims=5), dtype=dtype_strat_numpy
     ),
-    m = st.integers(-10000, 10000), n=st.integers(-10000, 10000)
+    m=st.integers(-10000, 10000),
+    n=st.integers(-10000, 10000),
 )
 def test_randint(a, m, n):
     shape = a.shape
     if m > n:
         m, n = n, m
     elif m == n:
-        n = n+1
+        n = n + 1
     b = randint(m, n, shape)
     assert b.shape == a.shape
-    assert (m <= b.data).all() and (b.data< n).all()
+    assert (m <= b.data).all() and (b.data < n).all()
 
 
 @given(
@@ -61,21 +62,22 @@ def test_random(a):
     shape = a.shape
     b = random(shape)
     assert b.shape == a.shape
-    assert (0 <= b.data).all() and (b.data<= 1).all()
+    assert (0 <= b.data).all() and (b.data <= 1).all()
 
 
 @given(
     a=hnp.arrays(
         shape=hnp.array_shapes(max_side=4, max_dims=5), dtype=dtype_strat_numpy
     ),
-    m = st.integers(-10000, 10000), n=st.integers(-10000, 10000)
+    m=st.integers(-10000, 10000),
+    n=st.integers(-10000, 10000),
 )
 def test_random_integers(m, n, a):
     shape = a.shape
     if m > n:
         m, n = n, m
     elif m == n:
-        n = n+1
+        n = n + 1
     b = random_integers(m, n, shape)
     assert b.shape == a.shape
     assert (m <= b.data).all() and (b.data <= n).all()
@@ -90,7 +92,7 @@ def test_random_sample(a):
     shape = a.shape
     b = random_sample(shape)
     assert b.shape == a.shape
-    assert (0 <= b.data).all() and (b.data<= 1).all()
+    assert (0 <= b.data).all() and (b.data <= 1).all()
 
 
 @given(
@@ -102,7 +104,7 @@ def test_ranf(a):
     shape = a.shape
     b = ranf(shape)
     assert b.shape == a.shape
-    assert (0 <= b.data).all() and (b.data<= 1).all()
+    assert (0 <= b.data).all() and (b.data <= 1).all()
 
 
 @given(
@@ -114,4 +116,4 @@ def test_sample(a):
     shape = a.shape
     b = sample(shape)
     assert b.shape == a.shape
-    assert (0 <= b.data).all() and (b.data<= 1).all()
+    assert (0 <= b.data).all() and (b.data <= 1).all()
