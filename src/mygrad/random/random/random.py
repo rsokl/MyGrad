@@ -13,13 +13,15 @@ def random(shape=None, constant=False):
     Parameters
     ----------
     shape: int or tuple of ints, optional
-        Output shape. If the given shape is, e.g., (m, n, k), then m * n * k samples are drawn. Default is None, in which case a single value is returned.
+        Output shape. If the given shape is, e.g., (m, n, k), then m * n * k samples are drawn. 
+        Default is None, in which case a single value is returned.
     
 
     Returns
     -------
     int or mygrad.Tensor of ints
-        size-shaped array of random integers from the appropriate distribution, or a single such random int if size not provided.    
+        size-shaped array of random integers from the appropriate distribution, or a 
+        single such random int if size not provided.    
     """
 
     return Tensor(np.random.random(shape), constant=constant)

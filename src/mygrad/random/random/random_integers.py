@@ -5,7 +5,6 @@ import numpy as np
 def random_integers(low, high=None, shape=None, constant=False):
     """ Random integers of type np.int_ between low and high, inclusive.
 
-
     Parameters
     ----------
     low: int
