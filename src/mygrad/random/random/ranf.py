@@ -10,7 +10,7 @@ def ranf(shape=None, constant=False):
     To create a random sample of a given shape on the interval [a, b), call 
     (b-a) * ranf(shape) + a
 
-    
+    Parameters
     ----------
     shape: int or tuple of ints, optional
         Output shape. If the given shape is, e.g., (m, n, k), then m * n * k samples are drawn.
