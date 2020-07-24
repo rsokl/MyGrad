@@ -1,11 +1,4 @@
-from .rand import rand
-from .randint import randint
-from .randn import randn
-from .random import random
-from .random_integers import random_integers
-from .random_sample import random_sample
-from .ranf import ranf
-from .sample import sample
+from .funcs import *
 
 __all__ = [
     "rand",
@@ -16,4 +9,5 @@ __all__ = [
     "random_sample",
     "ranf",
     "sample",
+    "seed",
 ]

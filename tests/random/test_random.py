@@ -6,7 +6,6 @@ from numpy.testing import assert_allclose
 import pytest
 
 from mygrad.random import *
-from mygrad.tensor_base import Tensor
 
 dtype_strat_numpy = st.sampled_from(
     (np.int8, np.int16, np.int32, np.int64, np.float16, np.float32, np.float64)
@@ -30,7 +29,7 @@ def test_random_shape_funcs(np_function, mg_function, a):
     shape = a.shape
     np.random.seed(0)
     arr = np_function(shape)
-    np.random.seed(0)
+    seed(0)
     tens = mg_function(shape)
     assert_allclose(arr, tens.data)
 
@@ -48,7 +47,7 @@ def test_unpacked_shape_funcs(np_function, mg_function, a):
     shape = a.shape
     np.random.seed(0)
     arr = np_function(*shape)
-    np.random.seed(0)
+    seed(0)
     tens = mg_function(*shape)
     assert_allclose(arr, tens.data)
 
@@ -69,13 +68,12 @@ bound_shape_functions = [
 @pytest.mark.parametrize("np_function,mg_function", bound_shape_functions)
 def test_bound_shape_functions(np_function, mg_function, m, n, a):
     shape = a.shape
-    shape = a.shape
     if m > n:
         m, n = n, m
     elif m == n:
         n = n + 1
     np.random.seed(0)
     arr = np_function(m, n, shape)
-    np.random.seed(0)
+    seed(0)
     tens = mg_function(m, n, shape)
     assert_allclose(arr, tens.data)
