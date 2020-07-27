@@ -5,7 +5,6 @@ __all__ = [
     "randint",
     "randn",
     "random",
-    "random_integers",
     "random_sample",
     "ranf",
     "sample",
