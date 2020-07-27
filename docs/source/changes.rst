@@ -6,6 +6,30 @@ This is a record of all past mygrad releases and what went into them,
 in reverse chronological order. All previous releases should still be available
 on pip.
 
+.. _v1.8.0:
+
+------------------
+1.8.0 - 2020-07-25
+------------------
+
+New features:
+
+- Adds :func:`~mygrad.any` and :func:`~mygrad.Tensor.any`
+- Adds :func:`~mygrad.random.rand`
+- Adds :func:`~mygrad.random.randint`
+- Adds :func:`~mygrad.random.randn`
+- Adds :func:`~mygrad.random.random`
+- Adds :func:`~mygrad.random.random_integers`
+- Adds :func:`~mygrad.random.random_sample`
+- Adds :func:`~mygrad.random.ranf`
+- Adds :func:`~mygrad.random.sample`
+- Adds :func:`~mygrad.random.seed`
+
+Thanks to Darshan Krishnaswamy and Sam Carpenter for adding this functionality!
+
+Fixes a bug in the GRU layer where mixed floating point precision dtypes between data and weights raised an error.
+Thanks to Petar Griggs for the fix!
+
 .. _v1.7.1:
 
 ------------------

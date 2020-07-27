@@ -1,5 +1,6 @@
-from mygrad import Tensor
 import numpy as np
+
+from mygrad import Tensor
 
 
 def rand(*shape, constant=False):
@@ -151,49 +152,6 @@ def random(shape=None, constant=False):
     """
 
     return Tensor(np.random.random(shape), constant=constant)
-
-
-def random_integers(low, high=None, shape=None, constant=False):
-    """ Random integers of type np.int_ between low and high, inclusive.
-
-    Parameters
-    ----------
-    low: int
-        Lowest (signed) integer to be drawn from the distribution
-        (unless high=None, in which case this parameter is the highest such integer).
-
-    high: int, optional
-        If provided, the largest (signed) integer to be drawn from the distribution
-        (see above for behavior if high=None).
-
-    shape: int or tuple of ints, optional
-        Output shape. If the given shape is, e.g., (m, n, k), then m * n * k samples are drawn.
-        Default is None, in which case a single value is returned.
-
-    constant : bool, optional (default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient)
-
-    Returns
-    -------
-    int or mygrad.Tensor of ints
-        ``shape``-shaped array of random integers from the appropriate distribution,
-        or a single such random int if size not provided.
-
-    Examples
-    --------
-    >>> from mygrad.random import random_integers
-    >>> random_integers(low=-4, high=4, shape=(4, 2))
-    Tensor([[ 1, -1],
-            [-2,  0],
-            [-4, -3],
-            [ 3, -3]])
-
-    >>> random_integers(4)
-    Tensor(2)
-    """
-
-    return Tensor(np.random.random_integers(low, high, shape), constant=constant)
 
 
 def random_sample(shape=None, constant=False):
