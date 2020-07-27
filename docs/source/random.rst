@@ -21,7 +21,7 @@ Simple random data
 Random generator
 ----------------
 
-MyGrad simply mirror's NumPy's system for managing random number generation
+MyGrad simply mirrors NumPy's system for managing random number generation
 
 .. autosummary::
    :toctree: generated/
