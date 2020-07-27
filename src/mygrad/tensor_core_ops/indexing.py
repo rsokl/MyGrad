@@ -1,3 +1,5 @@
+from numbers import Number
+
 import numpy as np
 
 from mygrad.operation_base import BroadcastableOp, Operation
@@ -29,12 +31,21 @@ class GetItem(Operation):
             The array returned by the get-item operation"""
         self.variables = (a,)
         self.index = index
+        out = a.data[index]
+        self._used_basic_indexing = np.shares_memory(a.data, out) or isinstance(
+            out, Number
+        )
         return a.data[index]
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
         out = np.zeros_like(a.data)
-        np.add.at(out, self.index, grad)
+        if self._used_basic_indexing:
+            out[self.index] += grad
+        else:
+            # although `add.at` will work for all cases, it is
+            # a very slow function: https://github.com/numpy/numpy/issues/5922
+            np.add.at(out, self.index, grad)
         return out
 
 
