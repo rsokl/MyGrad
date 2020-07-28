@@ -1,55 +1,10 @@
+from numbers import Number
+
 import numpy as np
 
 from mygrad.operation_base import BroadcastableOp, Operation
 
 __all__ = ["GetItem", "SetItem"]
-
-
-class GetItem(Operation):
-    """ Defines the __getitem__ interface for a Tensor, supporting back-propagation
-
-        Supports back-propagation through all valid numpy-indexing (basic, advanced, mixed, etc.)"""
-
-    def __call__(self, a, index):
-        """ ``a[index]``
-
-        Parameters
-        ----------
-        a : mygrad.Tensor
-            The tensor whose entries are being accessed.
-
-        index : valid-array-index
-            An n-dimensional index for specifying entries or subregions of `a`.
-            All means of numpy-array indexing (basic, advanced, mixed, etc) are
-            supported.
-
-        Returns
-        -------
-        numpy.ndarray
-            The array returned by the get-item operation"""
-        self.variables = (a,)
-        self.index = index
-        return a.data[index]
-
-    def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
-        out = np.zeros_like(a.data)
-        np.add.at(out, self.index, grad)
-        return out
-
-
-def _arr(*shape):
-    """ Construct an array of a specified consisting of values [0, _arr.size)
-        filled in row-major order.
-
-        Parameters
-        ----------
-        *shape : int
-
-        Returns
-        -------
-        numpy.ndarray"""
-    return np.arange(np.prod(shape)).reshape(shape)
 
 
 def _is_int_array_index(index):
@@ -79,6 +34,65 @@ def _is_bool_array_index(index):
         -------
         bool """
     return len(index) == 1 and np.issubdtype(np.asarray(index[0]).dtype, np.bool_)
+
+
+class GetItem(Operation):
+    """ Defines the __getitem__ interface for a Tensor, supporting back-propagation
+
+        Supports back-propagation through all valid numpy-indexing (basic, advanced, mixed, etc.)"""
+
+    def __call__(self, a, index):
+        """ ``a[index]``
+
+        Parameters
+        ----------
+        a : mygrad.Tensor
+            The tensor whose entries are being accessed.
+
+        index : valid-array-index
+            An n-dimensional index for specifying entries or subregions of `a`.
+            All means of numpy-array indexing (basic, advanced, mixed, etc) are
+            supported.
+
+        Returns
+        -------
+        numpy.ndarray
+            The array returned by the get-item operation"""
+        self.variables = (a,)
+        self.index = index if isinstance(index, tuple) else (index,)
+        out = a.data[index]
+
+        self._used_distinct_indices = (
+            np.shares_memory(a.data, out)
+            or isinstance(out, Number)
+            or _is_bool_array_index(self.index)
+        )
+        return a.data[index]
+
+    def backward_var(self, grad, index, **kwargs):
+        a = self.variables[index]
+        out = np.zeros_like(a.data)
+        if self._used_distinct_indices:
+            out[self.index] += grad
+        else:
+            # although `add.at` will work for all cases, it is
+            # a very slow function: https://github.com/numpy/numpy/issues/5922
+            np.add.at(out, self.index, grad)
+        return out
+
+
+def _arr(*shape):
+    """ Construct an array of a specified consisting of values [0, _arr.size)
+        filled in row-major order.
+
+        Parameters
+        ----------
+        *shape : int
+
+        Returns
+        -------
+        numpy.ndarray"""
+    return np.arange(np.prod(shape)).reshape(shape)
 
 
 class SetItem(BroadcastableOp):
