@@ -6,6 +6,17 @@ This is a record of all past mygrad releases and what went into them,
 in reverse chronological order. All previous releases should still be available
 on pip.
 
+.. _v1.8.1:
+
+------------------
+1.8.1 - 2020-07-28
+------------------
+
+This is an `internal change <https://github.com/rsokl/MyGrad/pull/265>`_ to the backprop
+mechanism for ``Tensor.__getitem__``, which produces considerable speedups (2x-4x) for backprop
+through basic indexing and boolean indexing. Thanks to Petar Griggs for finding this.
+
+
 .. _v1.8.0:
 
 ------------------
