@@ -1,8 +1,44 @@
+import hypothesis.extra.numpy as hnp
+import hypothesis.strategies as st
 import numpy as np
+from hypothesis import given
 from numpy.testing import assert_allclose
 
 from mygrad import Tensor
 from mygrad.nnet.activations import logsoftmax, softmax
+from tests.custom_strategies import valid_axes
+
+log_largest = np.log(np.finfo(np.float64).max)
+
+
+@given(
+    x=hnp.arrays(
+        shape=hnp.array_shapes(min_dims=0),
+        dtype=np.float64,
+        elements=st.floats(-log_largest, log_largest),
+    ),
+    data=st.data(),
+)
+def test_softmax_numerical_stability(x: np.ndarray, data: st.DataObject):
+    axis = data.draw(valid_axes(x.ndim), label="axis")
+    out = softmax(x, axis=axis).data
+    assert np.all(np.logical_and(0 <= out, out <= 1))
+    assert_allclose(out.sum(axis=axis), 1.0)
+
+
+@given(
+    x=hnp.arrays(
+        shape=hnp.array_shapes(min_dims=0),
+        dtype=np.float64,
+        elements=st.floats(-log_largest, log_largest),
+    ),
+    data=st.data(),
+)
+def test_log_softmax_numerical_stability(x: np.ndarray, data: st.DataObject):
+    axis = data.draw(valid_axes(x.ndim), label="axis")
+    out = np.exp(logsoftmax(x, axis=axis).data)
+    assert np.all(np.logical_and(0 <= out, out <= 1))
+    assert_allclose(out.sum(axis=axis), 1.0)
 
 
 def test_static_softmax_integer():

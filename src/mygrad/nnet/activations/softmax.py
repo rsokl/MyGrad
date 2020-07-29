@@ -9,24 +9,24 @@ def _softmax(x, kwargs):
     x = x - x.max(**kwargs)
     if np.issubdtype(x.dtype, np.integer):
         x = x.astype(np.float)
-    np.exp(x, out=x)
-    x /= x.sum(**kwargs)
+    if x.ndim > 0:
+        np.exp(x, out=x)
+        x /= x.sum(**kwargs)
+    else:
+        x = np.exp(x)
+        x = x / x.sum(**kwargs)
     return x
 
 
 class Softmax(Operation):
     scalar_only = True
 
-    def __call__(self, a):
+    def __call__(self, a, axis=-1):
         self.variables = (a,)
         x = a.data
-        assert 0 < a.ndim < 3
 
-        self.__kw = (
-            dict(axis=1, keepdims=True)
-            if a.ndim == 2
-            else dict(axis=None, keepdims=False)
-        )
+        self.__kw = dict(axis=axis, keepdims=True)
+
         return _softmax(x, self.__kw)
 
     def backward_var(self, grad, index, **kwargs):
@@ -36,7 +36,7 @@ class Softmax(Operation):
         return sg - soft * np.sum(sg, **self.__kw)
 
 
-def softmax(x, constant=False):
+def softmax(x, axis=-1, constant=False):
     r"""
     Applies the softmax activation function::
 
@@ -52,6 +52,10 @@ def softmax(x, constant=False):
         ``x`` is a 2D array. Otherwise softmax is computed
         on the 1D ``x``.
 
+    axis : Union[None, int, Tuple[int, ...]], optional (default=-1)
+        The axis/axes over which to compute the softmax.
+        By default, the softmax is computed over the trailing axis.
+
     constant : bool, optional(default=False)
         If ``True``, the returned tensor is a constant (it
         does not back-propagate a gradient)
@@ -64,7 +68,7 @@ def softmax(x, constant=False):
     -----
     - :math:`N` is the number of samples in the batch.
     - :math:`C` is the number of possible classes for which scores are provided.
-    
+
     This implements a numerically-stable version of softmax, however
     log-softmax is still the more numerically stable activation function.
 
@@ -85,22 +89,17 @@ def softmax(x, constant=False):
     Tensor([[0.33333333, 0.33333333, 0.33333333],
             [0.5       , 0.5       , 0.        ]])
     """
-    return Tensor._op(Softmax, x, constant=constant)
+    return Tensor._op(Softmax, x, op_kwargs=dict(axis=axis), constant=constant)
 
 
-class LogSoftmax(Operation):
+class LogSoftmax(Softmax):
     scalar_only = True
 
-    def __call__(self, a):
+    def __call__(self, a, axis=-1):
         self.variables = (a,)
         x = a.data
-        assert 0 < a.ndim < 3
 
-        self.__kw = (
-            dict(axis=1, keepdims=True)
-            if x.ndim == 2
-            else dict(axis=None, keepdims=False)
-        )
+        self.__kw = dict(axis=axis, keepdims=True)
         return x - _logsumexp(x, **self.__kw)
 
     def backward_var(self, grad, index, **kwargs):
@@ -110,7 +109,7 @@ class LogSoftmax(Operation):
         return grad - soft * np.sum(grad, **self.__kw)
 
 
-def logsoftmax(x, constant=False):
+def logsoftmax(x, axis=-1, constant=False):
     r"""
     Applies the log-softmax activation function::
 
@@ -125,6 +124,10 @@ def logsoftmax(x, constant=False):
         log-softmax is computed along the rows of ``x`` if
         ``x`` is a 2D array. Otherwise log-softmax is computed
         on the 1D ``x``.
+
+    axis : Union[None, int, Tuple[int, ...]], optional (default=-1)
+        The axis/axes over which to compute the log-softmax.
+        By default, the log-softmax is computed over the trailing axis.
 
     constant : bool, optional(default=False)
         If ``True``, the returned tensor is a constant (it
@@ -160,4 +163,4 @@ def logsoftmax(x, constant=False):
     Tensor([[-1.09861229e+00, -1.09861229e+00, -1.09861229e+00],
             [ 0.00000000e+00,  0.00000000e+00, -1.00000000e+50]])
     """
-    return Tensor._op(LogSoftmax, x, constant=constant)
+    return Tensor._op(LogSoftmax, x, op_kwargs=dict(axis=axis), constant=constant)
