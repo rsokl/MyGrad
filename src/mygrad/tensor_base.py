@@ -5,6 +5,7 @@ etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 """
 
 from functools import wraps
+from numbers import Number
 from typing import Optional, Set, Type, Union
 
 import numpy as np
@@ -19,6 +20,7 @@ from mygrad.math.arithmetic.ops import (
     Negative,
     Positive,
     Power,
+    Square,
     Subtract,
 )
 from mygrad.operation_base import BroadcastableOp, Operation
@@ -680,6 +682,14 @@ class Tensor:
         return self._op(MatMul, other, self)
 
     def __pow__(self, other):
+        if isinstance(other, Number) or (
+            isinstance(other, np.ndarray) and other.ndim == 0
+        ):
+            if other == 1:
+                return self._op(Positive, self)
+            elif other == 2:
+                return self._op(Square, self)
+
         return self._op(Power, self, other)
 
     def __rpow__(self, other):

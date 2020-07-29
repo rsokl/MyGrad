@@ -16,7 +16,7 @@ def test_op_tracks_graph():
     h = z - f
     assert h.creator.graph == {h.creator} | f.creator.graph
 
-    i = ((h + 3) ** 2) / 5
+    i = ((h + 3) ** 4) / 5
     assert h.creator.graph < i.creator.graph
     assert (
         len(i.creator.graph - h.creator.graph) == 3
