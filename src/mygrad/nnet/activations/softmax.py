@@ -42,15 +42,11 @@ def softmax(x, axis=-1, constant=False):
 
         f(x) = exp(x) / sum( exp(x) )
 
-    Compute the softmax over a 1D tensor of data, or along the
-    respective rows of a 2D tensor
+    Computes the softmax over one or more axes of an ND-tensor.
 
     Parameters
     ----------
-    x : array_like, shape=(D,) or shape=(N,D)
-        softmax is computed along the rows of ``x`` if
-        ``x`` is a 2D array. Otherwise softmax is computed
-        on the 1D ``x``.
+    x : array_like
 
     axis : Union[None, int, Tuple[int, ...]], optional (default=-1)
         The axis/axes over which to compute the softmax.
@@ -115,15 +111,11 @@ def logsoftmax(x, axis=-1, constant=False):
 
         f(x) = log ( exp(x) / sum( exp(x) ) )
 
-    Compute the softmax over a 1D tensor of data, or along the
-    respective rows of a 2D tensor
+    Computes the log-softmax over one or more axes of an ND-tensor.
 
     Parameters
     ----------
-    x : array_like, shape=(D,) or shape=(N,D)
-        log-softmax is computed along the rows of ``x`` if
-        ``x`` is a 2D array. Otherwise log-softmax is computed
-        on the 1D ``x``.
+    x : array_like
 
     axis : Union[None, int, Tuple[int, ...]], optional (default=-1)
         The axis/axes over which to compute the log-softmax.
@@ -135,7 +127,8 @@ def logsoftmax(x, axis=-1, constant=False):
 
     Returns
     -------
-    mygrad.Tensor
+    log_softmax : mygrad.Tensor
+        Tensor with same shape as ``x``
 
     Notes
     -----
