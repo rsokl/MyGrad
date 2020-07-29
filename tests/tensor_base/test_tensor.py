@@ -12,6 +12,7 @@ from mygrad.errors import InvalidBackprop, InvalidGradient
 from mygrad.linalg.ops import MatMul
 from mygrad.math.arithmetic.ops import Add, Divide, Multiply, Negative, Power, Subtract
 from mygrad.operation_base import Operation
+from tests.custom_strategies import everything_except
 from tests.utils import does_not_raise
 
 
@@ -48,6 +49,20 @@ def test_copy(data, constant):
     else:
         assert_array_equal(y.grad, y_copy.grad)
     assert_array_equal(y.data, y_copy.data)
+
+
+@settings(max_examples=10)
+@given(
+    tensor=st.builds(
+        mg.Tensor,
+        x=hnp.arrays(shape=hnp.array_shapes(), dtype=np.float32),
+        constant=st.booleans(),
+    ),
+    constant=everything_except(bool),
+)
+def test_set_constant_validation(tensor, constant):
+    with pytest.raises(TypeError):
+        tensor.constant = constant
 
 
 def test_to_scalar():

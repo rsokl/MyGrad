@@ -508,7 +508,7 @@ class Tensor:
         return self._scalar_only
 
     @property
-    def constant(self):
+    def constant(self) -> bool:
         """ If ``True``, this tensor is a constant; it will not propagate any gradient.
 
         Additionally, any tensor that is a descendant of constant tensors will also
@@ -547,6 +547,14 @@ class Tensor:
         True
         """
         return self._constant
+
+    @constant.setter
+    def constant(self, value: bool):
+        if not isinstance(value, bool):
+            raise TypeError(
+                f"`Tensor.constant` must be set with a boolean, got : {type(value)}"
+            )
+        self._constant = value
 
     @property
     def creator(self) -> Union[Operation, BroadcastableOp]:
