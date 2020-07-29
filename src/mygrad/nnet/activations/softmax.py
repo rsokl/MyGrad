@@ -25,15 +25,15 @@ class Softmax(Operation):
         self.variables = (a,)
         x = a.data
 
-        self.__kw = dict(axis=axis, keepdims=True)
+        self._kw = dict(axis=axis, keepdims=True)
 
-        return _softmax(x, self.__kw)
+        return _softmax(x, self._kw)
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        soft = _softmax(a.data, self.__kw)
+        soft = _softmax(a.data, self._kw)
         sg = soft * grad
-        return sg - soft * np.sum(sg, **self.__kw)
+        return sg - soft * np.sum(sg, **self._kw)
 
 
 def softmax(x, axis=-1, constant=False):
@@ -88,21 +88,21 @@ def softmax(x, axis=-1, constant=False):
     return Tensor._op(Softmax, x, op_kwargs=dict(axis=axis), constant=constant)
 
 
-class LogSoftmax(Softmax):
+class LogSoftmax(Operation):
     scalar_only = True
 
     def __call__(self, a, axis=-1):
         self.variables = (a,)
         x = a.data
 
-        self.__kw = dict(axis=axis, keepdims=True)
-        return x - _logsumexp(x, **self.__kw)
+        self._kw = dict(axis=axis, keepdims=True)
+        return x - _logsumexp(x, **self._kw)
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
         x = a.data
-        soft = _softmax(x, self.__kw)
-        return grad - soft * np.sum(grad, **self.__kw)
+        soft = _softmax(x, self._kw)
+        return grad - soft * np.sum(grad, **self._kw)
 
 
 def logsoftmax(x, axis=-1, constant=False):
