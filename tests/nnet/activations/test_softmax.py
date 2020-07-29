@@ -7,6 +7,7 @@ from numpy.testing import assert_allclose
 from mygrad import Tensor
 from mygrad.nnet.activations import logsoftmax, softmax
 from tests.custom_strategies import valid_axes
+from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 log_largest = np.log(np.finfo(np.float64).max)
 
@@ -37,8 +38,65 @@ def test_softmax_numerical_stability(x: np.ndarray, data: st.DataObject):
 def test_log_softmax_numerical_stability(x: np.ndarray, data: st.DataObject):
     axis = data.draw(valid_axes(x.ndim), label="axis")
     out = np.exp(logsoftmax(x, axis=axis).data)
-    assert np.all(np.logical_and(0 <= out, out <= 1))
+    assert np.all(np.logical_and(0 <= out, out <= 1)), out
     assert_allclose(out.sum(axis=axis), 1.0)
+
+
+def numpy_softmax(x, axis):
+    x = np.asarray(x)
+    x = np.exp(x - x.max(axis, keepdims=True))
+    return x / x.sum(axis, keepdims=True)
+
+
+def numpy_logsoftmax(x, axis):
+    return np.log(numpy_softmax(x, axis))
+
+
+@fwdprop_test_factory(
+    mygrad_func=softmax,
+    true_func=numpy_softmax,
+    num_arrays=1,
+    kwargs=dict(axis=lambda arrs: valid_axes(arrs.ndim)),
+)
+def test_softmax_fwd():
+    pass
+
+
+@backprop_test_factory(
+    mygrad_func=softmax,
+    true_func=numpy_softmax,
+    num_arrays=1,
+    kwargs=dict(axis=lambda arrs: valid_axes(arrs.ndim)),
+    vary_each_element=True,
+)
+def test_softmax_bkwd():
+    pass
+
+
+@fwdprop_test_factory(
+    mygrad_func=logsoftmax,
+    true_func=numpy_logsoftmax,
+    num_arrays=1,
+    kwargs=dict(axis=lambda arrs: valid_axes(arrs.ndim)),
+    index_to_bnds={0: (-10, 10)},
+)
+def test_logsoftmax_fwd():
+    pass
+
+
+@backprop_test_factory(
+    mygrad_func=logsoftmax,
+    true_func=numpy_logsoftmax,
+    num_arrays=1,
+    kwargs=dict(axis=lambda arrs: valid_axes(arrs.ndim)),
+    vary_each_element=True,
+    index_to_bnds={0: (-10, 10)},
+)
+def test_logsoftmax_bkwd():
+    pass
+
+
+# old tests; ensures backwards compatibility at least...
 
 
 def test_static_softmax_integer():
