@@ -71,13 +71,39 @@ class GetItem(Operation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        out = np.zeros_like(a.data)
+        inds = self.index
+
         if self._used_distinct_indices:
-            out[self.index] += grad
+            out = np.zeros_like(a.data)
+            out[inds] += grad
         else:
-            # although `add.at` will work for all cases, it is
-            # a very slow function: https://github.com/numpy/numpy/issues/5922
-            np.add.at(out, self.index, grad)
+            # used non-boolean advanced indexing
+            if all(isinstance(ind, np.ndarray) or isinstance(ind, int) for ind in inds):
+                # only array or integer indices used
+                if len(inds) != a.ndim:
+                    # trailing dimensions not indexed (filled with empty slices)
+                    ndim_to_add = a.ndim - len(inds)
+                    leading_indices = tuple(
+                        ind.reshape(ind.shape + (1,) * ndim_to_add)
+                        if isinstance(ind, np.ndarray)
+                        else ind
+                        for ind in inds
+                    )
+                    trailing_indices = tuple(
+                        np.arange(dim).reshape((-1,) + (1,) * (ndim_to_add - i - 1))
+                        for i, dim in enumerate(a.shape[len(inds) :])
+                    )
+                    inds = leading_indices + trailing_indices
+
+                inds = np.ravel_multi_index(inds, a.shape, mode="wrap")
+                out = np.bincount(
+                    inds.ravel(), weights=grad.ravel(), minlength=a.size
+                ).reshape(a.shape)
+            else:
+                out = np.zeros_like(a.data)
+                # although `add.at` will work for all cases, it is
+                # a very slow function: https://github.com/numpy/numpy/issues/5922
+                np.add.at(out, self.index, grad)
         return out
 
 
