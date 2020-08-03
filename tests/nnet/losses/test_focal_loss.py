@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 from hypothesis import given
 
+import mygrad as mg
 from mygrad.nnet.activations import softmax
 from mygrad.nnet.losses import focal_loss, softmax_focal_loss
 from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
@@ -12,6 +13,8 @@ from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 def numpy_focal_loss(
     scores: np.ndarray, targets: np.ndarray, alpha: float, gamma: float
 ) -> np.ndarray:
+    if isinstance(targets, mg.Tensor):
+        targets = targets.data
     rows = np.arange((len(scores)))
     pc = scores[rows, targets]
     return -alpha * np.clip(1 - pc, a_min=0, a_max=1) ** gamma * np.log(pc)
@@ -20,6 +23,8 @@ def numpy_focal_loss(
 def numpy_softmax_focal_loss(
     scores: np.ndarray, targets: np.ndarray, alpha: float, gamma: float
 ) -> np.ndarray:
+    if isinstance(targets, mg.Tensor):
+        targets = targets.data
     scores = softmax(scores).data
     rows = np.arange((len(scores)))
     pc = scores[rows, targets]
@@ -28,13 +33,15 @@ def numpy_softmax_focal_loss(
 
 @st.composite
 def targets(draw, scores):
-    return draw(
+    as_tensor = draw(st.booleans())
+    out = draw(
         st.lists(
             st.integers(0, scores.shape[1] - 1),
             min_size=len(scores),
             max_size=len(scores),
         )
     )
+    return mg.Tensor(out) if as_tensor else np.array(out)
 
 
 @pytest.mark.parametrize("fn", (softmax_focal_loss, focal_loss))
@@ -83,7 +90,7 @@ def test_focal_fwd():
     kwargs=dict(
         targets=lambda scores: targets(scores=scores),
         alpha=lambda scores: st.floats(-2, 2),
-        gamma=lambda scores: st.floats(0, 10),
+        gamma=lambda scores: st.floats(0, 10) | st.sampled_from([0.0, 1.0]),
     ),
     vary_each_element=True,
 )

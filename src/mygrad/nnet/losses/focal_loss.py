@@ -51,7 +51,7 @@ class FocalLoss(Operation):
         numpy.ndarray
             The per-datum focal loss.
         """
-        if isinstance(targets, Tensor):
+        if isinstance(targets, Tensor):  # pragma: nocover
             targets = targets.data
 
         check_loss_inputs(class_probs, targets)
