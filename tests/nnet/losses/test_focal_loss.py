@@ -2,6 +2,7 @@ import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
 import pytest
+from hypothesis import given
 
 from mygrad.nnet.activations import softmax
 from mygrad.nnet.losses import focal_loss, softmax_focal_loss
@@ -49,6 +50,12 @@ def targets(draw, scores):
 def test_input_validation(fn, data, labels):
     with pytest.raises((ValueError, TypeError)):
         fn(data, labels)
+
+
+@given(gamma=st.floats(max_value=0, exclude_max=True))
+def test_raises_on_bad_gamma(gamma: float):
+    with pytest.raises(ValueError):
+        focal_loss(np.array([[1.0]]), np.array([0]), gamma=gamma)
 
 
 @fwdprop_test_factory(

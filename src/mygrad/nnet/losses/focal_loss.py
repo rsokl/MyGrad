@@ -114,6 +114,7 @@ def focal_loss(class_probs, targets, *, alpha=1, gamma=0, constant=False):
 
     gamma : Real, optional (default=0)
         The ɣ focusing parameter. Note that for Ɣ=0 and ɑ=1, this is cross-entropy loss.
+        Must be a non-negative value.
 
     constant : bool, optional(default=False)
         If ``True``, the returned tensor is a constant (it
@@ -141,6 +142,8 @@ def focal_loss(class_probs, targets, *, alpha=1, gamma=0, constant=False):
 
     It is recommended in the paper that you normalize by the number of foreground samples.
     """
+    if gamma < 0:
+        raise ValueError(f"`gamma` must be a non-negative number, got: {gamma}")
     return Tensor._op(
         FocalLoss, class_probs, op_args=(targets, alpha, gamma), constant=constant
     )
@@ -164,6 +167,7 @@ def softmax_focal_loss(scores, targets, *, alpha=1, gamma=0, constant=False):
 
     gamma : Real, optional (default=0)
         The ɣ focusing parameter. Note that for Ɣ=0 and ɑ=1, this is cross-entropy loss.
+        Must be a non-negative value.
 
     constant : bool, optional(default=False)
         If ``True``, the returned tensor is a constant (it
