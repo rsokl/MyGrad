@@ -13,8 +13,7 @@ def _softmax(x, kwargs):
         np.exp(x, out=x)
         x /= x.sum(**kwargs)
     else:
-        x = np.exp(x)
-        x = x / x.sum(**kwargs)
+        x = np.ones_like(x)
     return x
 
 

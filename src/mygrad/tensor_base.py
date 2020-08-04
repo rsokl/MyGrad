@@ -5,6 +5,7 @@ etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 """
 
 from functools import wraps
+from numbers import Number
 from typing import Optional, Set, Type, Union
 
 import numpy as np
@@ -19,6 +20,7 @@ from mygrad.math.arithmetic.ops import (
     Negative,
     Positive,
     Power,
+    Square,
     Subtract,
 )
 from mygrad.operation_base import BroadcastableOp, Operation
@@ -508,7 +510,7 @@ class Tensor:
         return self._scalar_only
 
     @property
-    def constant(self):
+    def constant(self) -> bool:
         """ If ``True``, this tensor is a constant; it will not propagate any gradient.
 
         Additionally, any tensor that is a descendant of constant tensors will also
@@ -547,6 +549,14 @@ class Tensor:
         True
         """
         return self._constant
+
+    @constant.setter
+    def constant(self, value: bool):
+        if not isinstance(value, bool):
+            raise TypeError(
+                f"`Tensor.constant` must be set with a boolean, got : {type(value)}"
+            )
+        self._constant = value
 
     @property
     def creator(self) -> Union[Operation, BroadcastableOp]:
@@ -672,6 +682,14 @@ class Tensor:
         return self._op(MatMul, other, self)
 
     def __pow__(self, other):
+        if isinstance(other, Number) or (
+            isinstance(other, np.ndarray) and other.ndim == 0
+        ):
+            if other == 1:
+                return self._op(Positive, self)
+            elif other == 2:
+                return self._op(Square, self)
+
         return self._op(Power, self, other)
 
     def __rpow__(self, other):
