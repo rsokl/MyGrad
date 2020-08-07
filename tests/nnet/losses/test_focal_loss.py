@@ -59,7 +59,7 @@ def test_input_validation(fn, data, labels):
         fn(data, labels)
 
 
-@given(gamma=st.floats(max_value=0, exclude_max=True))
+@given(gamma=st.floats(max_value=0, exclude_max=True) | st.lists(st.floats()))
 def test_raises_on_bad_gamma(gamma: float):
     with pytest.raises(ValueError):
         focal_loss(np.array([[1.0]]), np.array([0]), gamma=gamma)

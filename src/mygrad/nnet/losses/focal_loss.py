@@ -1,3 +1,5 @@
+from numbers import Real
+
 import numpy as np
 
 from mygrad import Tensor
@@ -146,8 +148,9 @@ def focal_loss(class_probs, targets, *, alpha=1, gamma=0, constant=False):
 
     It is recommended in the paper that you normalize by the number of foreground samples.
     """
-    if gamma < 0:
+    if not isinstance(gamma, Real) or gamma < 0:
         raise ValueError(f"`gamma` must be a non-negative number, got: {gamma}")
+
     return Tensor._op(
         FocalLoss, class_probs, op_args=(targets, alpha, gamma), constant=constant
     )
