@@ -15,7 +15,7 @@ def numpy_focal_loss(
 ) -> np.ndarray:
     if isinstance(targets, mg.Tensor):
         targets = targets.data
-    rows = np.arange((len(scores)))
+    rows = np.arange(len(scores))
     pc = scores[rows, targets]
     return -alpha * np.clip(1 - pc, a_min=0, a_max=1) ** gamma * np.log(pc)
 
@@ -26,7 +26,7 @@ def numpy_softmax_focal_loss(
     if isinstance(targets, mg.Tensor):
         targets = targets.data
     scores = softmax(scores).data
-    rows = np.arange((len(scores)))
+    rows = np.arange(len(scores))
     pc = scores[rows, targets]
     return -alpha * np.clip(1 - pc, a_min=0, a_max=1) ** gamma * np.log(pc)
 
