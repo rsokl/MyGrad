@@ -1,13 +1,47 @@
-import numpy as np
-from numpy.testing import assert_allclose
-from hypothesis import given, assume
-import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
+import hypothesis.strategies as st
+import numpy as np
 import pytest
+from hypothesis import given
 
-from mygrad import Tensor, sum, log
+import mygrad as mg
 from mygrad.nnet.activations import softmax
-from mygrad.nnet.losses import softmax_focal_loss, focal_loss
+from mygrad.nnet.losses import focal_loss, softmax_focal_loss
+from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
+
+
+def numpy_focal_loss(
+    scores: np.ndarray, targets: np.ndarray, alpha: float, gamma: float
+) -> np.ndarray:
+    if isinstance(targets, mg.Tensor):
+        targets = targets.data
+    rows = np.arange(len(scores))
+    pc = scores[rows, targets]
+    return -alpha * np.clip(1 - pc, a_min=0, a_max=1) ** gamma * np.log(pc)
+
+
+def numpy_softmax_focal_loss(
+    scores: np.ndarray, targets: np.ndarray, alpha: float, gamma: float
+) -> np.ndarray:
+    if isinstance(targets, mg.Tensor):
+        targets = targets.data
+    scores = softmax(scores).data
+    rows = np.arange(len(scores))
+    pc = scores[rows, targets]
+    return -alpha * np.clip(1 - pc, a_min=0, a_max=1) ** gamma * np.log(pc)
+
+
+@st.composite
+def targets(draw, scores):
+    as_tensor = draw(st.booleans())
+    out = draw(
+        st.lists(
+            st.integers(0, scores.shape[1] - 1),
+            min_size=len(scores),
+            max_size=len(scores),
+        )
+    )
+    return mg.Tensor(out) if as_tensor else np.array(out)
 
 
 @pytest.mark.parametrize("fn", (softmax_focal_loss, focal_loss))
@@ -25,76 +59,73 @@ def test_input_validation(fn, data, labels):
         fn(data, labels)
 
 
-@given(
-    num_datum=st.integers(1, 100),
-    num_classes=st.integers(1, 15),
-    alpha=st.floats(-1, 1),
-    gamma=st.floats(0, 5),
-    data=st.data(),
-    grad=st.floats(-1, 1),
-    target_type=st.sampled_from((np.array, Tensor)),
+@given(gamma=st.floats(max_value=0, exclude_max=True) | st.lists(st.floats()))
+def test_raises_on_bad_gamma(gamma: float):
+    with pytest.raises(ValueError):
+        focal_loss(np.array([[1.0]]), np.array([0]), gamma=gamma)
+
+
+@fwdprop_test_factory(
+    mygrad_func=focal_loss,
+    true_func=numpy_focal_loss,
+    index_to_arr_shapes={0: hnp.array_shapes(min_dims=2, max_dims=2)},
+    index_to_bnds={0: (1e-14, 100)},
+    num_arrays=1,
+    kwargs=dict(
+        targets=lambda scores: targets(scores=scores),
+        alpha=lambda scores: st.floats(-2, 2),
+        gamma=lambda scores: st.floats(0, 10),
+    ),
 )
-def test_softmax_focal_loss(num_datum, num_classes, alpha, gamma, data, grad, target_type):
-    scores = data.draw(
-        hnp.arrays(shape=(num_datum, num_classes), dtype=float, elements=st.floats(1, 100))
-    )
-    assume((abs(scores.sum(axis=1)) > 0.001).all())
-
-    scores_mygrad = Tensor(scores)
-    scores_nn = Tensor(scores)
-
-    truth = np.zeros((num_datum, num_classes))
-    targets = data.draw(st.tuples(*(st.integers(0, num_classes - 1) for i in range(num_datum))))
-    truth[range(num_datum), targets] = 1
-    targets = target_type(targets)
-
-    probs = softmax(scores_mygrad)
-    mygrad_focal_loss = sum(truth * (-alpha * (1 - probs + 1e-14)**gamma * log(probs))) / num_datum
-    mygrad_focal_loss.backward(grad)
-
-    nn_loss = softmax_focal_loss(scores_nn, targets, alpha=alpha, gamma=gamma).mean()
-    nn_loss.backward(grad)
-
-    assert isinstance(nn_loss, Tensor) and nn_loss.ndim == 0
-    assert_allclose(nn_loss.data, mygrad_focal_loss.data, atol=1e-4, rtol=1e-4)
-    assert_allclose(scores_nn.grad, scores_mygrad.grad, atol=1e-4, rtol=1e-4)
-
-    nn_loss.null_gradients()
-    assert scores_nn.grad is None
+def test_focal_fwd():
+    pass
 
 
-@given(
-    num_datum=st.integers(1, 100),
-    num_classes=st.integers(1, 15),
-    alpha=st.floats(-1, 1),
-    gamma=st.floats(0, 5),
-    data=st.data(),
-    grad=st.floats(-1, 1),
-    target_type=st.sampled_from((np.array, Tensor)),
+@backprop_test_factory(
+    mygrad_func=focal_loss,
+    true_func=numpy_focal_loss,
+    index_to_arr_shapes={0: hnp.array_shapes(min_dims=2, max_dims=2)},
+    index_to_bnds={0: (1e-14, 1)},
+    num_arrays=1,
+    kwargs=dict(
+        targets=lambda scores: targets(scores=scores),
+        alpha=lambda scores: st.floats(-2, 2),
+        gamma=lambda scores: st.floats(0, 10) | st.sampled_from([0.0, 1.0]),
+    ),
+    vary_each_element=True,
 )
-def test_focal_loss(num_datum, num_classes, alpha, gamma, data, grad, target_type):
-    scores = data.draw(
-        hnp.arrays(shape=(num_datum, num_classes), dtype=float, elements=st.floats(1, 100))
-    )
-    assume((abs(scores.sum(axis=1)) > 0.001).all())
+def test_focal_bkwd():
+    pass
 
-    scores_mygrad = Tensor(scores)
-    scores_nn = Tensor(scores)
 
-    truth = np.zeros((num_datum, num_classes))
-    targets = data.draw(st.tuples(*(st.integers(0, num_classes - 1) for i in range(num_datum))))
-    truth[range(num_datum), targets] = 1
-    targets = target_type(targets)
+@fwdprop_test_factory(
+    mygrad_func=softmax_focal_loss,
+    true_func=numpy_softmax_focal_loss,
+    index_to_arr_shapes={0: hnp.array_shapes(min_dims=2, max_dims=2)},
+    index_to_bnds={0: (1e-14, 100)},
+    num_arrays=1,
+    kwargs=dict(
+        targets=lambda scores: targets(scores=scores),
+        alpha=lambda scores: st.floats(-2, 2),
+        gamma=lambda scores: st.floats(0, 10),
+    ),
+)
+def test_softmax_focal_fwd():
+    pass
 
-    fl = focal_loss(softmax(scores_mygrad), targets, alpha=alpha, gamma=gamma).mean()
-    fl.backward(grad)
 
-    nn_loss = softmax_focal_loss(scores_nn, targets, alpha=alpha, gamma=gamma).mean()
-    nn_loss.backward(grad)
-
-    assert isinstance(nn_loss, Tensor) and nn_loss.ndim == 0
-    assert_allclose(nn_loss.data, fl.data, atol=1e-4, rtol=1e-4)
-    assert_allclose(scores_nn.grad, scores_mygrad.grad, atol=1e-4, rtol=1e-4)
-
-    nn_loss.null_gradients()
-    assert scores_nn.grad is None
+@backprop_test_factory(
+    mygrad_func=softmax_focal_loss,
+    true_func=numpy_softmax_focal_loss,
+    index_to_arr_shapes={0: hnp.array_shapes(min_dims=2, max_dims=2)},
+    index_to_bnds={0: (1e-14, 1)},
+    num_arrays=1,
+    kwargs=dict(
+        targets=lambda scores: targets(scores=scores),
+        alpha=lambda scores: st.floats(-2, 2),
+        gamma=lambda scores: st.floats(0, 10),
+    ),
+    vary_each_element=True,
+)
+def test_softmax_focal_bkwd():
+    pass

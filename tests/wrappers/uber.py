@@ -268,9 +268,12 @@ class fwdprop_test_factory:
                         f"instead drew: {kwargs}"
                     )
             else:
-                # set or draw keyword args to be passed to functions
+                # The keyword args to be passed to `self.op`. If any provided argument is callable
+                # it is assumed to by a hypothesis search strategy, and all of the drawn arrays will
+                # be passed to the strategy, in order to draw a value for that keyword argument.
+                # Otherwise the provided value is used as-is.
                 kwargs = {
-                    k: (data.draw(v(*arrs), label=f"kwarg: {f}") if callable(v) else v)
+                    k: (data.draw(v(*arrs), label=f"kwarg: {k}") if callable(v) else v)
                     for k, v in self.kwargs.items()
                 }
 
