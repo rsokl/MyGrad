@@ -159,7 +159,7 @@ def softmax_focal_loss(scores, targets, *, alpha=1, gamma=0, constant=False):
     scores : mygrad.Tensor, shape=(N, C)
         The C class scores for each of the N pieces of data.
 
-    targets : array_like, shape=(N,)
+    targets : Sequence[int], shape=(N,)
         The correct class indices, in [0, C), for each datum.
 
     alpha : Real, optional (default=1)
