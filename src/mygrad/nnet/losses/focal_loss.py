@@ -74,23 +74,27 @@ class FocalLoss(Operation):
         if np.isclose(gamma, 0, atol=1e-15):
             self.back[self.label_locs] -= alpha / pc
             return loss
-        else:
-            # dL/dp = (1 - p)**g / p - g * (1 - p)**(g - 1) * log(p)
-            term1 = one_m_pc_gamma / pc  # (1 - p)**g / p
-            if np.isclose(gamma, 1, rtol=1e-15):
-                term2 = -log_pc
-            elif gamma < 1:
-                # For g < 1 and p -> 1, the 2nd term -> 0 via L'Hôpital's rule
-                term2 = np.zeros(pc.shape, dtype=np.float64)
-                pc_not_1 = ~np.isclose(one_m_pc, 0, atol=1e-15)
-                term2[pc_not_1] = (
-                    -gamma * one_m_pc[pc_not_1] ** (gamma - 1) * log_pc[pc_not_1]
-                )
-            else:
-                term2 = -gamma * one_m_pc ** (gamma - 1) * log_pc
 
-            self.back[self.label_locs] -= alpha * (term1 + term2)
-            return loss
+        # dL/dp = -alpha * ( (1 - p)**g / p - g * (1 - p)**(g - 1) * log(p) )
+        #
+        # term 1: (1 - p)**g / p
+        term1 = one_m_pc_gamma / pc  # (1 - p)**g / p
+
+        # term 2: - g * (1 - p)**(g - 1) * log(p)
+        if np.isclose(gamma, 1, rtol=1e-15):
+            term2 = -log_pc
+        elif gamma < 1:
+            # For g < 1 and p -> 1, the 2nd term -> 0 via L'Hôpital's rule
+            term2 = np.zeros(pc.shape, dtype=np.float64)
+            pc_not_1 = ~np.isclose(one_m_pc, 0, atol=1e-15)
+            term2[pc_not_1] = (
+                -gamma * one_m_pc[pc_not_1] ** (gamma - 1) * log_pc[pc_not_1]
+            )
+        else:
+            term2 = -gamma * one_m_pc ** (gamma - 1) * log_pc
+
+        self.back[self.label_locs] -= alpha * (term1 + term2)
+        return loss
 
     def backward_var(self, grad, index, **kwargs):
         self.back[self.label_locs] *= grad
