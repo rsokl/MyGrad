@@ -73,7 +73,7 @@ class GetItem(Operation):
         a = self.variables[index]
         inds = self.index
 
-        if self._used_distinct_indices:
+        if self._used_distinct_indices or grad.size == 0:
             out = np.zeros_like(a.data)
             out[inds] += grad
         else:
@@ -88,7 +88,7 @@ class GetItem(Operation):
             ell_ind = -1
 
             # used to determine whether all integer array indices are next to one another or not
-            # and if not, where indices must be inserted for broadcast compatability
+            # and if not, where indices must be inserted for broadcast compatibility
             pos_int_arr = []
 
             # tally objects
@@ -114,33 +114,42 @@ class GetItem(Operation):
                     )
                     pos_int_arr.append(j)
 
-            # expand ellipsis or add on omitted trailing slices
-            missing_dims = a.ndim - num_bool_arr - len(inds) + num_none
-            if ell_ind != -1:
-                inds = (
-                    inds[:ell_ind]
-                    + [slice(None)] * (missing_dims + 1)
-                    + inds[ell_ind + 1 :]
-                )
-            elif missing_dims:
-                inds += [slice(None)] * missing_dims
-
             if a.ndim == len(pos_int_arr) + num_int:
                 # all dimensions indexed with integer arrays or integers
                 out_ind = np.ravel_multi_index(inds, a.shape, mode="wrap")
-                out = np.bincount(
-                    out_ind.ravel(), weights=grad.ravel(), minlength=a.size
-                ).reshape(a.shape)
 
             else:
+                # expand ellipsis or add omitted trailing slices
+                missing_dims = a.ndim - num_bool_arr - len(inds) + num_none
+                if ell_ind != -1:
+                    if missing_dims:
+                        # ellipsis must be expanded into >1 slice
+                        inds = (
+                            inds[:ell_ind]
+                            + [slice(None)] * (missing_dims + 1)
+                            + inds[ell_ind + 1 :]
+                        )
+                        pos_int_arr = [
+                            j + missing_dims if j > ell_ind else j
+                            for j in pos_int_arr
+                        ]
+                    else:
+                        # ellipsis acting as a single slice
+                        inds[ell_ind] = slice(None)
+                elif missing_dims:
+                    inds += [slice(None)] * missing_dims
+
                 # whether all integer arrays next to one another or not
                 # determines how new dims added to int array indices
                 if len(pos_int_arr):
                     contig_int_arr = bool(
-                        len(pos_int_arr) == pos_int_arr[-1] - pos_int_arr[0]
+                        len(pos_int_arr) == pos_int_arr[-1] - pos_int_arr[0] + 1
                     )
                     if not contig_int_arr:
-                        diffs = list(zip(pos_int_arr[:-1], pos_int_arr[1:]))
+                        diffs = [
+                            i - j - 1
+                            for i, j in zip(pos_int_arr[1:], pos_int_arr[:-1])
+                        ]
 
                 offset = 0
                 out_ind = []
@@ -159,12 +168,16 @@ class GetItem(Operation):
                         # convert slice to arange for appropriate dimension
                         star = 0 if ind.start is None else ind.start
                         stop = (
-                            a.shape[-len(out_ind) - 1] if ind.stop is None else ind.stop
+                            a.shape[-len(out_ind) - 1]
+                            if ind.stop is None
+                            else ind.stop
                         )
                         step = 1 if ind.step is None else ind.step
 
                         out_ind.append(
-                            np.arange(star, stop, step).reshape((-1,) + (1,) * offset)
+                            np.arange(star, stop, step).reshape(
+                                (-1,) + (1,) * offset
+                            )
                         )
                         offset += 1
 
@@ -175,7 +188,9 @@ class GetItem(Operation):
                             # can simply find the Trues in a boolean array
                             non_zero_bools = np.nonzero(ind)
                             for dim_inds in non_zero_bools:
-                                out_ind.append(dim_inds.reshape((-1,) + (1,) * offset))
+                                out_ind.append(
+                                    dim_inds.reshape((-1,) + (1,) * offset)
+                                )
                                 offset += 1
 
                         else:
@@ -184,37 +199,37 @@ class GetItem(Operation):
                                 # one another, so simply add trailing 1-dims
                                 # can ignore any leading 1-dims, as these will broadcast out
                                 # as needed or be undone in the subsequent ravel
-                                out_ind.append(ind.reshape(ind.shape + (1,) * offset))
-                                if a.ndim - j == pos_int_arr[0]:
+                                out_ind.append(
+                                    ind.reshape(ind.shape + (1,) * offset)
+                                )
+                                if a.ndim - j - 1 == pos_int_arr[0]:
                                     offset += num_int_arr
                             else:
                                 # add trailing indices for integer arrays
-                                ind = ind.reshape(
-                                    ind.shape
-                                    + (1,)
-                                    * (
-                                        a.ndim
-                                        - pos_int_arr[-1]
-                                        - num_bool_arr
-                                        + num_none
-                                        - 1
+                                broadcast_shape = (1,) * (
+                                    a.ndim
+                                    - pos_int_arr[-1]
+                                    - num_bool_arr
+                                    + num_none
+                                    - 1
                                     )
-                                )
-                                if len(diffs) > 0:
-                                    # add 1-dims for each dim between integer arrays
-                                    dims_to_add = tuple()
-                                    for i in diffs[1:]:
-                                        dims_to_add += tuple(range(*i))
-                                    diffs.pop()
-                                    ind = np.expand_dims(ind, dims_to_add)
 
+                                for i, d in zip(ind.shape[::-1], diffs[::-1]):
+                                    # insert 1-dims between dimensions index with int arrays
+                                    broadcast_shape += (i,) + (1,) * d
+
+                                ind = ind.reshape(
+                                    ind.shape[: -len(diffs)]
+                                    + (1,) * (len(inds) - num_none + num_bool_arr)
+                                    + broadcast_shape[::-1]
+                                )
                                 out_ind.append(ind)
                                 offset += 1
-
                 out_ind = np.ravel_multi_index(out_ind[::-1], a.shape, mode="wrap")
-                out = np.bincount(
-                    out_ind.ravel(), weights=grad.ravel(), minlength=a.size
-                ).reshape(a.shape)
+
+            out = np.bincount(
+                out_ind.ravel(), weights=grad.ravel(), minlength=a.size
+            ).reshape(a.shape)
         return out
 
 
