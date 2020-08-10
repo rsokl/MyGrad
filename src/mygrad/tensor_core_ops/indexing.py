@@ -77,29 +77,124 @@ class GetItem(Operation):
             out = np.zeros_like(a.data)
             out[inds] += grad
         else:
-            # used non-boolean advanced indexing
-            if all(isinstance(ind, np.ndarray) or isinstance(ind, int) for ind in inds):
-                # only array or integer indices used
-                if len(inds) != a.ndim:
-                    # trailing dimensions not indexed (filled with empty slices)
-                    ndim_to_add = a.ndim - len(inds)
-                    leading_indices = tuple(
-                        ind.reshape(ind.shape + (1,) * ndim_to_add)
-                        if isinstance(ind, np.ndarray)
-                        else ind
-                        for ind in inds
-                    )
-                    trailing_indices = tuple(
-                        np.arange(dim).reshape((-1,) + (1,) * (ndim_to_add - i - 1))
-                        for i, dim in enumerate(a.shape[len(inds) :])
-                    )
-                    inds = leading_indices + trailing_indices
+            # used non-purely-boolean advanced indexing
+            inds = list(inds)
 
-                inds = np.ravel_multi_index(inds, a.shape, mode="wrap")
+            # tally of how many of each object appear in index
+            num_bool_arr = 0
+            num_int_arr = 0
+            num_none = 0
+            num_int = 0
+            ell_ind = -1
+
+            # used to determine whether all integer array indices are next to one another or not
+            # stores [num int arrs, first int arr index, last int arr index]
+            contig_int_indices = [0, 0, 0]
+
+            # tally objects
+            for j, ind in enumerate(inds):
+                if isinstance(ind, slice):
+                    continue
+                elif isinstance(ind, int):
+                    num_int += 1
+                    continue
+                elif ind is None:
+                    num_none += 1
+                    continue
+                elif isinstance(ind, type(Ellipsis)):
+                    ell_ind = j
+                    continue
+
+                ind_arr = np.asarray(ind)
+                if np.issubdtype(ind_arr.dtype, np.bool_) and ind_arr.ndim > 1:
+                    num_bool_arr += ind_arr.ndim
+                elif np.issubdtype(ind_arr.dtype, np.int_):
+                    num_int_arr = (
+                        ind_arr.ndim if ind_arr.ndim > num_int_arr else num_int_arr
+                    )
+
+                    contig_int_indices[0] += 1
+                    contig_int_indices[1] = (
+                        contig_int_indices[1] if contig_int_indices[1] else j
+                    )
+                    contig_int_indices[2] = j
+
+            # expand ellipsis or add on omitted trailing slices
+            missing_dims = a.ndim - num_bool_arr - len(inds) + num_none
+            if ell_ind != -1:
+                inds = (
+                    inds[:ell_ind]
+                    + [slice(None)] * (missing_dims + 1)
+                    + inds[ell_ind + 1 :]
+                )
+            elif missing_dims:
+                inds += [slice(None)] * missing_dims
+            print(missing_dims, a.ndim, num_bool_arr, len(inds), num_none)
+
+            if a.ndim == contig_int_indices[0] + num_int:
+                # all dimensions indexed with integer arrays or integers
+                out_ind = np.ravel_multi_index(inds, a.shape, mode="wrap")
                 out = np.bincount(
-                    inds.ravel(), weights=grad.ravel(), minlength=a.size
+                    out_ind.ravel(), weights=grad.ravel(), minlength=a.size
                 ).reshape(a.shape)
+
+            elif (
+                contig_int_indices[0]
+                == contig_int_indices[2] - contig_int_indices[1] + 1
+            ):
+                # all integer arrays next to one another
+                offset = 0
+                out_ind = []
+
+                for j, ind in enumerate(inds[::-1]):
+                    if ind is None:
+                        # any newaxis objects can be ignored due to later ravel
+                        pass
+
+                    elif isinstance(ind, int):
+                        # integers will get broadcast out by ravel_multi_index
+                        out_ind.append(ind)
+                        offset += 1
+
+                    elif isinstance(ind, slice):
+                        # convert slice to arange for appropriate dimension
+                        star = 0 if ind.start is None else ind.start
+                        stop = (
+                            a.shape[-len(out_ind) - 1] if ind.stop is None else ind.stop
+                        )
+                        step = 1 if ind.step is None else ind.step
+
+                        out_ind.append(
+                            np.arange(star, stop, step).reshape((-1,) + (1,) * offset)
+                        )
+                        offset += 1
+
+                    else:
+                        ind = np.asarray(ind)
+
+                        if np.issubdtype(ind.dtype, np.bool_):
+                            # can simply find the Trues in a boolean array
+                            non_zero_bools = np.nonzero(ind)
+                            for dim_inds in non_zero_bools:
+                                out_ind.append(dim_inds.reshape((-1,) + (1,) * offset))
+                                offset += 1
+
+                        else:
+                            # integer arrays must already be broadcast compatible with
+                            # one another, so simply add trailing 1-dims
+                            # can ignore any leading 1-dims, as these will broadcast out
+                            # as needed or be undone in the subsequent ravel
+                            out_ind.append(ind.reshape(ind.shape + (1,) * offset))
+                            if a.ndim - j == contig_int_indices[1]:
+                                offset += num_int_arr
+
+                out_ind = np.ravel_multi_index(out_ind[::-1], a.shape, mode="wrap")
+                out = np.bincount(
+                    out_ind.ravel(), weights=grad.ravel(), minlength=a.size
+                ).reshape(a.shape)
+
             else:
+                # not all integer arrays next to one another
                 out = np.zeros_like(a.data)
                 # although `add.at` will work for all cases, it is
                 # a very slow function: https://github.com/numpy/numpy/issues/5922
