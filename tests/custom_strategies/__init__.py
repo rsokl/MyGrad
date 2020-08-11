@@ -494,7 +494,6 @@ def arbitrary_indices(draw, shape):
         index += [(i, slice(None)) for i in shape_inds]
 
     index = sorted(index, key=lambda x: x[0])
-    out_ind = tuple(i[1] for i in index)
 
     # can now randomly add in newaxis objects
     newaxis_pos = sorted(
@@ -502,6 +501,7 @@ def arbitrary_indices(draw, shape):
         reverse=True,
     )
     for i in newaxis_pos:
-        index.insert(i, np.newaxis)
+        index.insert(i, (-1, np.newaxis))
 
+    out_ind = tuple(i[1] for i in index)
     return out_ind
