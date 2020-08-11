@@ -14,7 +14,6 @@ from ..wrappers.uber import backprop_test_factory, fwdprop_test_factory
     a=hnp.arrays(
         shape=hnp.array_shapes(max_side=4, max_dims=10),
         dtype=float,
-        elements=st.floats(-10, 10),
     ),
     data=st.data(),
 )
@@ -248,7 +247,7 @@ def test_getitem_basic_w_adv_bkprop():
     mygrad_func=get_item,
     true_func=get_item,
     num_arrays=1,
-    index_to_arr_shapes={0: hnp.array_shapes(max_side=4, max_dims=10)},
+    index_to_arr_shapes={0: hnp.array_shapes(max_side=4, max_dims=8)},
     kwargs=dict(index=arb_index_wrap),
 )
 def test_getitem_arbitraryindex_fwdprop():
@@ -260,7 +259,7 @@ def test_getitem_arbitraryindex_fwdprop():
     mygrad_func=get_item,
     true_func=get_item,
     num_arrays=1,
-    index_to_arr_shapes={0: hnp.array_shapes(max_side=4, max_dims=10)},
+    index_to_arr_shapes={0: hnp.array_shapes(max_side=4, max_dims=8)},
     kwargs=dict(index=arb_index_wrap),
     vary_each_element=True,
 )
