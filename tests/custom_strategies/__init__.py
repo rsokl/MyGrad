@@ -363,7 +363,7 @@ def valid_shapes(
 
 
 @st.composite
-def arbitrary_indices(draw, shape):
+def arbitrary_indices(draw, shape: Tuple[int]):
     """
     Hypothesis search strategy: Generate a valid index
     for an array of a given shape. The index can contain
@@ -385,6 +385,7 @@ def arbitrary_indices(draw, shape):
     -------
     hypothesis.searchstrategy.SearchStrategy[Tuple[Union[int, slice, Ellipsis, NoneType, numpy.ndarray], ...]]
     """
+
     def group_continuous_integers(ls):
         """
         Given a list of integers, find and group continuous sequences
@@ -408,7 +409,7 @@ def arbitrary_indices(draw, shape):
         ]
 
     shape_inds = list(range(len(shape)))
-    index = []  # stores tuples of (dim, index)
+    index = []  # stores tuples of (dim, indexing object)
 
     # add integers, slices
     basic_inds = sorted(draw(st.lists(st.sampled_from(shape_inds), unique=True)))
@@ -418,15 +419,16 @@ def arbitrary_indices(draw, shape):
 
         # only draw ints and slices
         # will handle possible ellipsis and newaxis objects later
-        # as these can make boolean indices difficult to handle later
+        # as these can make array indices difficult to handle
         basics = draw(hnp.basic_indices(shape=basic_dims, allow_ellipsis=False))
         if not isinstance(basics, tuple):
             basics = (basics,)
 
-        # will not necessarily index all dims from basic_inds as
-        # `basic_indices` can return indices with omitted trailing slices
         index += [tup for tup in zip(basic_inds, basics)]
 
+        # will not necessarily index all dims from basic_inds as
+        # `basic_indices` can return indices with omitted trailing slices
+        # so only remove dimensions directly indexed into
         for i in basic_inds[: len(basics)]:
             shape_inds.pop(shape_inds.index(i))
 
@@ -442,52 +444,60 @@ def arbitrary_indices(draw, shape):
             for i in int_arr_inds:
                 shape_inds.pop(shape_inds.index(i))
 
-        if len(shape_inds) > 0:
-            # add boolean arrays to index
-            bool_inds = sorted(draw(st.lists(st.sampled_from(shape_inds), unique=True)))
+    if len(shape_inds) > 0:
+        # add boolean arrays to index
+        bool_inds = sorted(draw(st.lists(st.sampled_from(shape_inds), unique=True)))
 
-            if len(bool_inds) > 0:
-                grouped_bool_inds = group_continuous_integers(bool_inds)
-                bool_dims = [tuple(shape[i] for i in ind) for ind in grouped_bool_inds]
+        if len(bool_inds) > 0:
+            # boolean arrays can be multi-dimensional, so by grouping all
+            # adjacent indices to make a single boolean array, this can be tested for
+            grouped_bool_inds = group_continuous_integers(bool_inds)
+            bool_dims = [tuple(shape[i] for i in ind) for ind in grouped_bool_inds]
 
-                # if multiple boolean array indices, the number of trues must be the same
-                # such that the output of ind.nonzero() for each index are broadcast compatible
-                # this must also be the same as the trailing index of each integer array, if any used
-                if len(int_arr_inds):
-                    max_trues = max(i.shape[-1] for i in int_arrs)
-                else:
-                    max_trues = st.integers(
-                        min_value=0, max_value=min(bool_dims, key=lambda x: np.prod(x))
-                    )
+            # if multiple boolean array indices, the number of trues must be such that
+            # the output of ind.nonzero() for each index are broadcast compatible
+            # this must also be the same as the trailing index of each integer array, if any used
+            if len(int_arr_inds):
+                max_trues = max(i.shape[-1] for i in int_arrs)
+            else:
+                max_trues = st.integers(
+                    min_value=0, max_value=min(bool_dims, key=lambda x: np.prod(x))
+                )
 
-                index += [
-                    (
-                        i[0],
-                        draw(
-                            hnp.arrays(shape=sh, dtype=bool).filter(
-                                lambda x: x.sum() in (1, max_trues)
-                            )
-                        ),
-                    )
-                    for i, sh in zip(grouped_bool_inds, bool_dims)
-                ]
+            index += [
+                (
+                    i[0],
+                    draw(
+                        hnp.arrays(shape=sh, dtype=bool).filter(
+                            lambda x: x.sum() in (1, max_trues)
+                        )
+                    ),
+                )
+                for i, sh in zip(grouped_bool_inds, bool_dims)
+            ]
 
-                for i in bool_inds:
-                    shape_inds.pop(shape_inds.index(i))
+            for i in bool_inds:
+                shape_inds.pop(shape_inds.index(i))
 
     grouped_shape_inds = group_continuous_integers(sorted(shape_inds))
     if len(grouped_shape_inds) == 1:
         # unused indices form a continuous stretch of dimensions
         # so can replace with an ellipsis
 
-        # to test ellipsis vs omitted slices
-        # randomly select if the unused indices are trailing
+        # to test ellipsis vs omitted slices, randomly
+        # add ellipsis when the unused indices are trailing
         if max(shape_inds) + 1 == len(shape):
             if draw(st.booleans()):
                 index += [(min(shape_inds), Ellipsis)]
         else:
             index += [(min(shape_inds), Ellipsis)]
-
+    elif len(grouped_shape_inds) == 0 and draw(st.booleans()):
+        # all indices filled already
+        # can randomly add ellipsis that expands to 0-d tuple
+        # this can have counter-intuitive behavior
+        # (particularly in conjunction with array indices)
+        i = draw(st.integers(min_value=0, max_value=len(index)))
+        index.insert(i, (i, Ellipsis))
     else:
         # so that current chosen index's work,
         # fill in remaining any gaps with empty slices
