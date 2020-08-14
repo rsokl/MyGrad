@@ -1,29 +1,11 @@
 import hypothesis.extra.numpy as hnp
-import hypothesis.strategies as st
 import numpy as np
-from hypothesis import given, settings
+from hypothesis import settings
 from mygrad.tensor_base import Tensor
 from numpy.testing import assert_allclose
 
 from ..custom_strategies import adv_integer_index, basic_indices, arbitrary_indices
 from ..wrappers.uber import backprop_test_factory, fwdprop_test_factory
-
-
-@settings(deadline=None)
-@given(
-    a=hnp.arrays(
-        shape=hnp.array_shapes(min_side=0, max_side=4, min_dims=0, max_dims=5),
-        dtype=float,
-    ),
-    data=st.data(),
-)
-def test_arbitrary_indices_strategy(a, data):
-    shape = a.shape
-    index = data.draw(arbitrary_indices(shape))
-
-    # if index does not comply with numpy indexing
-    # rules, numpy will raise an error
-    a[index]
 
 
 def test_getitem():
