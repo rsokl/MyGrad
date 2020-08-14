@@ -7,7 +7,7 @@ from ..wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
 # Test https://github.com/rsokl/MyGrad/issues/210
-def test_0d_iter():
+def test_iter_over_0d_raises():
     x = Tensor(3)
     with pytest.raises(TypeError):
         sum(x)
@@ -31,6 +31,7 @@ def _sum(x, constant=False):
     index_to_arr_shapes={0: hnp.array_shapes(min_dims=1, min_side=0)},
 )
 def test_builtin_sum_fwd():
+    """Ensures equivalent iter behavior of tensor and array"""
     pass
 
 
@@ -38,7 +39,8 @@ def test_builtin_sum_fwd():
     mygrad_func=_sum,
     true_func=_sum,
     num_arrays=1,
-    index_to_arr_shapes={0: hnp.array_shapes(min_dims=1, min_side=1)},
+    index_to_arr_shapes={0: hnp.array_shapes(min_dims=1, min_side=0)},
+    assumptions=lambda x: x.shape[0] != 0,  # avoid sum(tensor) = 0 (int)
     vary_each_element=True,
 )
 def test_builtin_sum_bkwd():
