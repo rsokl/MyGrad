@@ -408,6 +408,9 @@ def arbitrary_indices(draw, shape: Tuple[int]):
             for k, g in groupby(enumerate(ls), lambda x: x[0] - x[1])
         ]
 
+    if not shape or 0 in shape:
+        return draw(hnp.basic_indices(shape=shape, allow_newaxis=True))
+
     shape_inds = list(range(len(shape)))
     index = []  # stores tuples of (dim, indexing object)
 
