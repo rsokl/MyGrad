@@ -4,12 +4,13 @@ from typing import List, Tuple
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
-from hypothesis import given, note
+from hypothesis import given, note, settings
 from numpy.testing import assert_array_equal
 
 from tests.custom_strategies import (
     _factors,
     adv_integer_index,
+    arbitrary_indices,
     basic_indices,
     choices,
     integer_index,
@@ -178,3 +179,20 @@ def test_factors(size: int):
 def test_valid_shapes(arr: np.ndarray, data: st.DataObject):
     newshape = data.draw(valid_shapes(arr.size), label="newshape")
     arr.reshape(newshape)
+
+
+@settings(deadline=None)
+@given(
+    a=hnp.arrays(
+        shape=hnp.array_shapes(min_side=0, max_side=4, min_dims=0, max_dims=5),
+        dtype=float,
+    ),
+    data=st.data(),
+)
+def test_arbitrary_indices_strategy(a, data):
+    shape = a.shape
+    index = data.draw(arbitrary_indices(shape))
+
+    # if index does not comply with numpy indexing
+    # rules, numpy will raise an error
+    a[index]

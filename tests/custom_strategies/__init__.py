@@ -14,6 +14,7 @@ from numpy import ndarray
 
 __all__ = [
     "adv_integer_index",
+    "arbitrary_indices",
     "basic_indices",
     "broadcastable_shapes",
     "choices",
@@ -381,6 +382,8 @@ def arbitrary_indices(draw, shape: Tuple[int]):
     `draw` is a parameter reserved by hypothesis, and should not be specified
     by the user.
 
+    When given a shape with a 0-dimensional axis, only a basic index will be returned.
+
     Returns
     -------
     hypothesis.searchstrategy.SearchStrategy[Tuple[Union[int, slice, Ellipsis, NoneType, numpy.ndarray], ...]]
@@ -412,7 +415,7 @@ def arbitrary_indices(draw, shape: Tuple[int]):
         return draw(hnp.basic_indices(shape=shape, allow_newaxis=True))
 
     shape_inds = list(range(len(shape)))
-    index = []  # stores tuples of (dim, indexing object)
+    index = []  # stores tuples of (axis, indexing object)
 
     # add integers, slices
     basic_inds = sorted(draw(st.lists(st.sampled_from(shape_inds), unique=True)))
@@ -429,7 +432,7 @@ def arbitrary_indices(draw, shape: Tuple[int]):
 
         index += [tup for tup in zip(basic_inds, basics)]
 
-        # will not necessarily index all dims from basic_inds as
+        # will not necessarily index all axes from basic_inds as
         # `basic_indices` can return indices with omitted trailing slices
         # so only remove dimensions directly indexed into
         for i in basic_inds[: len(basics)]:
@@ -453,13 +456,13 @@ def arbitrary_indices(draw, shape: Tuple[int]):
 
         if len(bool_inds) > 0:
             # boolean arrays can be multi-dimensional, so by grouping all
-            # adjacent indices to make a single boolean array, this can be tested for
+            # adjacent axes to make a single boolean array, this can be tested for
             grouped_bool_inds = group_continuous_integers(bool_inds)
             bool_dims = [tuple(shape[i] for i in ind) for ind in grouped_bool_inds]
 
             # if multiple boolean array indices, the number of trues must be such that
             # the output of ind.nonzero() for each index are broadcast compatible
-            # this must also be the same as the trailing index of each integer array, if any used
+            # this must also be the same as the trailing dim of each integer array, if any used
             if len(int_arr_inds):
                 max_trues = max(i.shape[-1] for i in int_arrs)
             else:
@@ -488,7 +491,7 @@ def arbitrary_indices(draw, shape: Tuple[int]):
         # so can replace with an ellipsis
 
         # to test ellipsis vs omitted slices, randomly
-        # add ellipsis when the unused indices are trailing
+        # add ellipsis when the unused axes are trailing
         if max(shape_inds) + 1 == len(shape):
             if draw(st.booleans()):
                 index += [(min(shape_inds), Ellipsis)]

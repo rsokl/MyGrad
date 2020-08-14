@@ -1,29 +1,11 @@
 import hypothesis.extra.numpy as hnp
-import hypothesis.strategies as st
 import numpy as np
-from hypothesis import given, settings
+from hypothesis import settings
 from mygrad.tensor_base import Tensor
 from numpy.testing import assert_allclose
 
 from ..custom_strategies import adv_integer_index, basic_indices, arbitrary_indices
 from ..wrappers.uber import backprop_test_factory, fwdprop_test_factory
-
-
-@settings(deadline=None)
-@given(
-    a=hnp.arrays(
-        shape=hnp.array_shapes(min_side=0, max_side=4, min_dims=0, max_dims=5),
-        dtype=float,
-    ),
-    data=st.data(),
-)
-def test_arbitrary_indices_strategy(a, data):
-    shape = a.shape
-    index = data.draw(arbitrary_indices(shape))
-
-    # if index does not comply with numpy indexing
-    # rules, numpy will raise an error
-    a[index]
 
 
 def test_getitem():
@@ -64,6 +46,15 @@ def adv_index_bool_wrap(*arrs):
 
 def arb_index_wrap(*arrs):
     return arbitrary_indices(arrs[0].shape)
+
+
+def test_index_empty():
+    a = Tensor([])
+    assert a[[]].shape == (0,)
+
+    a.sum().backward()
+    # since a is empty, a.grad should be empty and same shape
+    assert np.allclose(a, a.grad)
 
 
 @fwdprop_test_factory(
@@ -247,7 +238,9 @@ def test_getitem_basic_w_adv_bkprop():
     mygrad_func=get_item,
     true_func=get_item,
     num_arrays=1,
-    index_to_arr_shapes={0: hnp.array_shapes(min_side=0, max_side=4, min_dims=0, max_dims=5)},
+    index_to_arr_shapes={
+        0: hnp.array_shapes(min_side=0, max_side=4, min_dims=0, max_dims=5)
+    },
     kwargs=dict(index=arb_index_wrap),
 )
 def test_getitem_arbitraryindex_fwdprop():
@@ -259,7 +252,9 @@ def test_getitem_arbitraryindex_fwdprop():
     mygrad_func=get_item,
     true_func=get_item,
     num_arrays=1,
-    index_to_arr_shapes={0: hnp.array_shapes(min_side=0, max_side=4, min_dims=0, max_dims=5)},
+    index_to_arr_shapes={
+        0: hnp.array_shapes(min_side=0, max_side=4, min_dims=0, max_dims=5)
+    },
     kwargs=dict(index=arb_index_wrap),
     vary_each_element=True,
 )
