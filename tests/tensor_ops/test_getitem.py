@@ -52,12 +52,15 @@ def arb_index_wrap(*arrs):
 
 
 def test_index_empty():
-    a = Tensor([])
-    assert a[[]].shape == (0,)
+    a = mg.Tensor([])
+    b = a[[]]
+    
+    assert b.shape == (0,)
 
-    a.sum().backward()
+    b.sum().backward()
     # since a is empty, a.grad should be empty and same shape
-    assert np.allclose(a, a.grad)
+    assert a.shape == a.grad.shape
+    assert b.shape == b.grad.shape
 
 
 # https://github.com/rsokl/MyGrad/issues/272
