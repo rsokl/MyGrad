@@ -1,11 +1,29 @@
 import hypothesis.extra.numpy as hnp
+import hypothesis.strategies as st
 import numpy as np
-from hypothesis import settings
+from hypothesis import given, settings
 from mygrad.tensor_base import Tensor
 from numpy.testing import assert_allclose
 
 from ..custom_strategies import adv_integer_index, basic_indices, arbitrary_indices
 from ..wrappers.uber import backprop_test_factory, fwdprop_test_factory
+
+
+@settings(deadline=None)
+@given(
+    a=hnp.arrays(
+        shape=hnp.array_shapes(min_side=0, max_side=4, min_dims=0, max_dims=5),
+        dtype=float,
+    ),
+    data=st.data(),
+)
+def test_arbitrary_indices_strategy(a, data):
+    shape = a.shape
+    index = data.draw(arbitrary_indices(shape))
+
+    # if index does not comply with numpy indexing
+    # rules, numpy will raise an error
+    a[index]
 
 
 def test_getitem():
@@ -25,10 +43,13 @@ def test_getitem():
     assert_allclose(x.grad, np.array([2, 3, 4]))
 
 
-def get_item(*arrs, index, constant=False):
-    o = arrs[0][index]
+def get_item(arr, index, constant=False):
+    if not isinstance(arr, Tensor):
+        arr = np.asarray(arr)
+    o = arr[index]
     if isinstance(o, Tensor):
-        o._constant = constant
+        o.constant = constant
+
     return o
 
 
@@ -57,11 +78,19 @@ def test_index_empty():
     assert np.allclose(a, a.grad)
 
 
+# https://github.com/rsokl/MyGrad/issues/272
+def test_index_0d():
+    assert Tensor(3)[None].shape == (1,)
+    assert Tensor(3)[None].item() == 3
+
+
 @fwdprop_test_factory(
     mygrad_func=get_item,
     true_func=get_item,
     num_arrays=1,
-    index_to_arr_shapes={0: hnp.array_shapes(max_side=6, max_dims=4)},
+    index_to_arr_shapes={
+        0: hnp.array_shapes(min_side=0, min_dims=0, max_side=6, max_dims=4)
+    },
     kwargs=dict(index=basic_index_wrap),
 )
 def test_getitem_basicindex_fwdprop():
@@ -73,7 +102,9 @@ def test_getitem_basicindex_fwdprop():
     mygrad_func=get_item,
     true_func=get_item,
     num_arrays=1,
-    index_to_arr_shapes={0: hnp.array_shapes(max_side=6, max_dims=4)},
+    index_to_arr_shapes={
+        0: hnp.array_shapes(min_side=0, min_dims=0, max_side=6, max_dims=4)
+    },
     kwargs=dict(index=basic_index_wrap),
     vary_each_element=True,
 )
