@@ -147,9 +147,9 @@ class Operation:
                         var.grad += backed_grad
                     else:
                         var.grad += _reduction(backed_grad, var.shape)
-        for var in {
+        for var in (
             i for i in self.variables if not i.constant and i.creator is not None
-        }:
+        ):
             var._accum_ops.add(self)
             var._backward(graph=graph)
 
