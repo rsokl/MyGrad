@@ -584,11 +584,14 @@ class Tensor:
         return self.data.__contains__(item)
 
     def __getitem__(self, item):
+        return self._op(GetItem, self, op_args=(item,))
+
+    def __iter__(self):
         # In the same way that numpy doesn't let you iterate over 0-dimensional
         # arrays, don't allow iteration over 0-dimensional arrays.
         if self.ndim == 0:
             raise TypeError("iteration over a 0-d tensor")
-        return self._op(GetItem, self, op_args=(item,))
+        return iter(self[n] for n in range(len(self)))
 
     def _mirror_tensor(self, tensor: "Tensor"):
         """ *Dev use only*
