@@ -979,6 +979,12 @@ class Tensor:
         """
         return self._op(Tensor_Transpose_Property, self)
 
+    def __eq__(self):
+        return np.ndarray.__eq__(x.data, y.data if isinstance(y, Tensor) else y)
+
+    def __ne__(self):
+        return np.ndarray.__ne__(x.data, y.data if isinstance(y, Tensor) else y)
+
 
 # set all comparison operators - mirrors ndarray methods
 def tensor_to_array_wrapper(func):
@@ -989,5 +995,5 @@ def tensor_to_array_wrapper(func):
     return wrapped
 
 
-for op in ("__lt__", "__le__", "__gt__", "__ge__", "__eq__", "__ne__"):
+for op in ("__lt__", "__le__", "__gt__", "__ge__"):
     setattr(Tensor, op, tensor_to_array_wrapper(getattr(np.ndarray, op)))
