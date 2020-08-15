@@ -31,6 +31,12 @@ def test_input_type_checking(data, constant, creator):
         Tensor(data, constant=constant, _creator=creator)
 
 
+@given(constant=everything_except(bool))
+def test_input_constant_checking(constant):
+    with raises(TypeError):
+        Tensor(1.0, constant=constant)
+
+
 @given(
     x=hnp.arrays(
         shape=hnp.array_shapes(min_dims=0, min_side=0), dtype=hnp.floating_dtypes()
@@ -57,16 +63,17 @@ def test_basic_backward(x: np.ndarray, constant: bool, data: st.DataObject):
 @given(
     data=hnp.arrays(shape=hnp.array_shapes(), dtype=hnp.floating_dtypes()),
     constant=st.booleans(),
+    set_constant=st.booleans() | st.none(),
 )
-def test_copy(data, constant):
+def test_copy(data, constant, set_constant):
     x = Tensor(data, constant=constant)
     y = +x
     y.backward()
-    y_copy = y.copy()
+    y_copy = y.copy(set_constant)
 
     assert y.creator is not None
     assert y.dtype == y_copy.dtype
-    assert y_copy.constant is constant
+    assert y_copy.constant is (constant if set_constant is None else set_constant)
     if y.grad is None:
         assert y_copy.grad is None
     else:
@@ -74,17 +81,10 @@ def test_copy(data, constant):
     assert_array_equal(y.data, y_copy.data)
 
 
-@settings(max_examples=10)
-@given(
-    tensor=st.builds(
-        mg.Tensor,
-        x=hnp.arrays(shape=hnp.array_shapes(), dtype=np.float32),
-        constant=st.booleans(),
-    ),
-    constant=everything_except(bool),
-)
-def test_set_constant_validation(tensor, constant):
-    with pytest.raises(TypeError):
+@pytest.mark.parametrize("constant", [True, False])
+def test_cant_set_constant(constant):
+    tensor = Tensor([1.0], constant=constant)
+    with pytest.raises(AttributeError):
         tensor.constant = constant
 
 

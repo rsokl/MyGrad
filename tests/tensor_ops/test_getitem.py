@@ -1,10 +1,11 @@
 import hypothesis.extra.numpy as hnp
 import numpy as np
 from hypothesis import settings
-from mygrad.tensor_base import Tensor
 from numpy.testing import assert_allclose
 
-from ..custom_strategies import adv_integer_index, basic_indices, arbitrary_indices
+from mygrad.tensor_base import Tensor
+
+from ..custom_strategies import adv_integer_index, arbitrary_indices, basic_indices
 from ..wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
@@ -30,7 +31,7 @@ def get_item(arr, index, constant=False):
         arr = np.asarray(arr)
     o = arr[index]
     if isinstance(o, Tensor):
-        o.constant = constant
+        o._constant = constant
 
     return o
 
@@ -54,7 +55,7 @@ def arb_index_wrap(*arrs):
 def test_index_empty():
     a = Tensor([])
     b = a[[]]
-    
+
     assert b.shape == (0,)
 
     b.sum().backward()
