@@ -22,6 +22,7 @@ __all__ = [
     "choices",
     "everything_except",
     "valid_axes",
+    "tensors",
 ]
 
 Shape = Tuple[int, ...]
