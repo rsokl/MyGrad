@@ -52,7 +52,7 @@ def arb_index_wrap(*arrs):
 
 
 def test_index_empty():
-    a = mg.Tensor([])
+    a = Tensor([])
     b = a[[]]
     
     assert b.shape == (0,)
