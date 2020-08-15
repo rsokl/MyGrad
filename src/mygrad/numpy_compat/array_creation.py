@@ -36,15 +36,16 @@ def asarray(a, dtype=None, order=None) -> np.ndarray:
     --------
     Convert a list into an array:
 
+    >>> import mygrad as mg
     >>> a = [1, 2]
-    >>> np.asarray(a)
+    >>> mg.asarray(a)
     array([1, 2])
 
     Convert a tensor into an array. No copy of the
     underlying numpy array is created:
 
     >>> t = mg.Tensor([1, 2.])
-    >>> np.asarray(t)
+    >>> mg.asarray(t)
     array([1., 2.])
     >>> t.data is np.asarray(t))
     True
@@ -52,15 +53,15 @@ def asarray(a, dtype=None, order=None) -> np.ndarray:
     Existing arrays are not copied:
 
     >>> a = np.array([1, 2])
-    >>> np.asarray(a) is a
+    >>> mg.asarray(a) is a
     True
 
     If `dtype` is set, array is copied only if dtype does not match:
 
     >>> a = np.array([1, 2], dtype=np.float32)
-    >>> np.asarray(a, dtype=np.float32) is a
+    >>> mg.asarray(a, dtype=np.float32) is a
     True
-    >>> np.asarray(a, dtype=np.float64) is a
+    >>> mg.asarray(a, dtype=np.float64) is a
     False
 
     Contrary to `asanyarray`, ndarray subclasses are not passed through:
@@ -68,7 +69,7 @@ def asarray(a, dtype=None, order=None) -> np.ndarray:
     >>> issubclass(np.recarray, np.ndarray)
     True
     >>> a = np.array([(1.0, 2), (3.0, 4)], dtype='f4,i4').view(np.recarray)
-    >>> np.asarray(a) is a
+    >>> mg.asarray(a) is a
     False
     >>> np.asanyarray(a) is a
     True
