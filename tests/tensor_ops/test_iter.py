@@ -20,7 +20,7 @@ def _sum(x, constant=False):
             # Hack to deal with summing over an empty tensor.
             # `sum(Tensor([]))` returns 0, which is fine
             out = Tensor(out)
-        out.constant = constant
+        out._constant = constant
     return out
 
 

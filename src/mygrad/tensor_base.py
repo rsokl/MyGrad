@@ -550,14 +550,6 @@ class Tensor:
         """
         return self._constant
 
-    @constant.setter
-    def constant(self, value: bool):
-        if not isinstance(value, bool):
-            raise TypeError(
-                f"`Tensor.constant` must be set with a boolean, got : {type(value)}"
-            )
-        self._constant = value
-
     @property
     def creator(self) -> Union[Operation, BroadcastableOp]:
         """ The ``Operation`` instance that produced ``self``.
@@ -716,19 +708,19 @@ class Tensor:
         -------
         Tensor
         """
-        copy = Tensor(
-            np.copy(self.data),
-            _creator=None,
-            constant=self.constant,
-            _scalar_only=self._scalar_only,
-        )
-        copy.grad = np.copy(self.grad) if self.grad is not None else None
-        return copy
+        return self.copy()
 
-    def copy(self):
+    def copy(self, constant=Optional[None]) -> "Tensor":
         """ Produces a copy of ``self`` with ``copy.creator=None``.
 
         Copies of the underlying numpy data array and gradient array are created.
+
+        No information regarding the tensor's participation in the computational
+        graph are copied.
+
+        Parameters
+        ----------
+        constant : Optional[bool]
 
         Returns
         -------
@@ -748,7 +740,14 @@ class Tensor:
         >>> y_copy.creator is None
         True
         """
-        return self.__copy__()
+        copy = Tensor(
+            np.copy(self.data),
+            _creator=None,
+            constant=(self.constant if constant is None else constant),
+            _scalar_only=self._scalar_only,
+        )
+        copy.grad = np.copy(self.grad) if self.grad is not None else None
+        return copy
 
     def item(self):
         """ Copy an element of a tensor to a standard Python scalar and return it.

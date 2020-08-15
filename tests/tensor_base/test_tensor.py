@@ -12,7 +12,6 @@ from mygrad.errors import InvalidBackprop, InvalidGradient
 from mygrad.linalg.ops import MatMul
 from mygrad.math.arithmetic.ops import Add, Divide, Multiply, Negative, Power, Subtract
 from mygrad.operation_base import Operation
-from tests.custom_strategies import everything_except
 from tests.utils import does_not_raise
 
 
@@ -34,16 +33,17 @@ def test_input_type_checking(data, constant, creator):
 @given(
     data=hnp.arrays(shape=hnp.array_shapes(), dtype=hnp.floating_dtypes()),
     constant=st.booleans(),
+    set_constant=st.booleans() | st.none(),
 )
-def test_copy(data, constant):
+def test_copy(data, constant, set_constant):
     x = Tensor(data, constant=constant)
     y = +x
     y.backward()
-    y_copy = y.copy()
+    y_copy = y.copy(set_constant)
 
     assert y.creator is not None
     assert y.dtype == y_copy.dtype
-    assert y_copy.constant is constant
+    assert y_copy.constant is (constant if set_constant is None else set_constant)
     if y.grad is None:
         assert y_copy.grad is None
     else:
@@ -51,17 +51,10 @@ def test_copy(data, constant):
     assert_array_equal(y.data, y_copy.data)
 
 
-@settings(max_examples=10)
-@given(
-    tensor=st.builds(
-        mg.Tensor,
-        x=hnp.arrays(shape=hnp.array_shapes(), dtype=np.float32),
-        constant=st.booleans(),
-    ),
-    constant=everything_except(bool),
-)
-def test_set_constant_validation(tensor, constant):
-    with pytest.raises(TypeError):
+@pytest.mark.parametrize("constant", [True, False])
+def test_cant_set_constant(constant):
+    tensor = Tensor([1.0], constant=constant)
+    with pytest.raises(AttributeError):
         tensor.constant = constant
 
 

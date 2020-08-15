@@ -31,7 +31,7 @@ def _node_ID_str(num):
     return "v{}".format(num + 1)
 
 
-@settings(max_examples=250, deadline=None)
+@settings(max_examples=125, stateful_step_count=100, deadline=None)
 class GraphCompare(RuleBasedStateMachine):
     def __init__(self):
         super().__init__()
@@ -81,15 +81,6 @@ class GraphCompare(RuleBasedStateMachine):
         n, t = items
         n.null_gradients(clear_graph=clear_graph)
         t.null_gradients(clear_graph=clear_graph)
-
-    @rule(items=nodes, constant=st.booleans())
-    def set_constant(self, items, constant):
-        """
-        Sets `.constant` on a random node
-        """
-        n, t = items
-        n.constant = constant
-        t.constant = constant
 
     @rule(items=nodes)
     def clear_graph(self, items):
