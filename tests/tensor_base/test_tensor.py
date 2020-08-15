@@ -32,6 +32,29 @@ def test_input_type_checking(data, constant, creator):
 
 
 @given(
+    x=hnp.arrays(
+        shape=hnp.array_shapes(min_dims=0, min_side=0), dtype=hnp.floating_dtypes()
+    ),
+    constant=st.booleans(),
+    data=st.data(),
+)
+def test_basic_backward(x: np.ndarray, constant: bool, data: st.DataObject):
+    """Ensure Tensor.backward() sets the expected gradient for general array-shape/dtype"""
+    grad = data.draw(hnp.arrays(shape=x.shape, dtype=x.dtype) | st.none(), label="grad")
+    tensor = Tensor(x, constant=constant)
+    tensor.backward(grad)
+    if tensor.constant:
+        assert tensor.grad is None
+    else:
+        assert_array_equal(
+            tensor.grad, np.ones_like(tensor.data) if grad is None else grad
+        )
+
+    if tensor.grad is not None:
+        assert tensor.dtype == tensor.grad.dtype
+
+
+@given(
     data=hnp.arrays(shape=hnp.array_shapes(), dtype=hnp.floating_dtypes()),
     constant=st.booleans(),
 )
