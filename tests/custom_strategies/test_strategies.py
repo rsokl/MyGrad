@@ -4,6 +4,7 @@ from typing import List, Tuple
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
+import pytest
 from hypothesis import given, note, settings
 from numpy.testing import assert_array_equal
 
@@ -15,6 +16,7 @@ from tests.custom_strategies import (
     choices,
     integer_index,
     slice_index,
+    tensors,
     valid_axes,
     valid_shapes,
 )
@@ -196,3 +198,38 @@ def test_arbitrary_indices_strategy(a, data):
     # if index does not comply with numpy indexing
     # rules, numpy will raise an error
     a[index]
+
+
+@pytest.mark.parametrize("constant", [st.booleans(), None])
+def test_tensors_handles_constant_strat(constant):
+    constants = []
+    kwargs = dict(dtype=np.int8, shape=(2, 3))
+    if constant is not None:
+        kwargs["constant"] = constant
+
+    @given(x=tensors(**kwargs))
+    def f(x):
+        constants.append(x.constant)
+
+    f()
+
+    assert len(set(constants)) > 1
+
+
+@pytest.mark.parametrize("constant", [True, False])
+@given(data=st.data())
+def test_tensors_static_constant(constant: bool, data: st.DataObject):
+    tensor = data.draw(tensors(np.int8, (2, 3), constant=constant), label="tensor")
+    assert tensor.constant is constant
+
+
+@given(data=st.data(), shape=hnp.array_shapes())
+def test_tensors_shape(shape, data: st.DataObject):
+    tensor = data.draw(tensors(np.int8, shape=shape), label="tensor")
+    assert tensor.shape == shape
+
+
+@given(data=st.data(), dtype=hnp.floating_dtypes() | hnp.integer_dtypes())
+def test_tensors_dtype(dtype, data: st.DataObject):
+    tensor = data.draw(tensors(dtype=dtype, shape=(2, 3)), label="tensor")
+    assert tensor.dtype == dtype
