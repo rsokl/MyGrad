@@ -151,8 +151,10 @@ class Operation:
         # these by the node itself, since Tensors are unhashable, but by its `id`.
         visited = set()
         for var in (
-            i for i in self.variables if not i.constant and i.creator is not None and id(i) not in visited
+            i for i in self.variables if not i.constant and i.creator is not None
         ):
+            if id(var) in visited:
+                continue
             visited.add(id(var))
             var._accum_ops.add(self)
             var._backward(graph=graph)
