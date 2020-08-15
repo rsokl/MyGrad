@@ -980,11 +980,11 @@ class Tensor:
         """
         return self._op(Tensor_Transpose_Property, self)
 
-    def __eq__(self):
-        return np.ndarray.__eq__(x.data, y.data if isinstance(y, Tensor) else y)
+    def __eq__(self, other):
+        return np.ndarray.__eq__(self.data, other.data if isinstance(other, Tensor) else other)
 
-    def __ne__(self):
-        return np.ndarray.__ne__(x.data, y.data if isinstance(y, Tensor) else y)
+    def __ne__(self, other):
+        return np.ndarray.__ne__(self.data, other.data if isinstance(other, Tensor) else other)
 
 
 # set all comparison operators - mirrors ndarray methods
