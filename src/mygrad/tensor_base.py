@@ -445,7 +445,7 @@ class Tensor:
         if not clear_graph:
             assert isinstance(seen, set)
 
-            if self in seen:
+            if id(self) in seen:
                 return
 
         creator = self._creator
@@ -454,8 +454,9 @@ class Tensor:
             # marks tensor as "visited" during clear-graph traversal
             self._creator = None
         else:
-            # marks tensor as "visited" during null-gradients graph traversal
-            seen.add(self)
+            # marks tensor as "visited" during null-gradients graph traversal. Tensors are unhashable,
+            # so we use their ids, since we actually want to be relying on their uniqueness.
+            seen.add(id(self))
 
         for var in creator.variables:  # type: Tensor
             if clear_graph:

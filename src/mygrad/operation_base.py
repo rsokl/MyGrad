@@ -147,9 +147,13 @@ class Operation:
                         var.grad += backed_grad
                     else:
                         var.grad += _reduction(backed_grad, var.shape)
+        # Avoid visiting the same node multiple times. Note that we don't store
+        # these by the node itself, since Tensors are unhashable, but by its `id`.
+        visited = set()
         for var in (
-            i for i in self.variables if not i.constant and i.creator is not None
+            i for i in self.variables if not i.constant and i.creator is not None and id(i) not in visited
         ):
+            visited.add(id(var))
             var._accum_ops.add(self)
             var._backward(graph=graph)
 
