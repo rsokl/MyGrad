@@ -12,6 +12,7 @@ from mygrad.errors import InvalidBackprop, InvalidGradient
 from mygrad.linalg.ops import MatMul
 from mygrad.math.arithmetic.ops import Add, Divide, Multiply, Negative, Power, Subtract
 from mygrad.operation_base import Operation
+from tests.custom_strategies import everything_except
 from tests.utils import does_not_raise
 
 
@@ -28,6 +29,12 @@ from tests.utils import does_not_raise
 def test_input_type_checking(data, constant, creator):
     with raises(TypeError):
         Tensor(data, constant=constant, _creator=creator)
+
+
+@given(constant=everything_except(bool))
+def test_input_constant_checking(constant):
+    with raises(TypeError):
+        Tensor(1.0, constant=constant)
 
 
 @given(

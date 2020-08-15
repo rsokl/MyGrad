@@ -141,7 +141,9 @@ class Tensor:
             The operation-instance whose forward pass produced `self`. Should not
             be set manually by users.
         """
-        assert isinstance(constant, bool)
+        if not isinstance(constant, bool):
+            raise TypeError(f"`constant` must be a boolean value, got: {constant}")
+
         self._scalar_only = _scalar_only
         self._creator = _creator  # type: Union[None, Operation]
 
