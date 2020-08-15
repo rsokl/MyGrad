@@ -710,7 +710,7 @@ class Tensor:
         """
         return self.copy()
 
-    def copy(self, constant=Optional[None]) -> "Tensor":
+    def copy(self, constant: Optional[None] = None) -> "Tensor":
         """ Produces a copy of ``self`` with ``copy.creator=None``.
 
         Copies of the underlying numpy data array and gradient array are created.
