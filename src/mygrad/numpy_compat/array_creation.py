@@ -32,24 +32,6 @@ def asarray(a, dtype=None, order=None) -> np.ndarray:
         is already an ndarray with matching dtype and order.  If `a` is a
         subclass of ndarray, a base class ndarray is returned.
 
-    See Also
-    --------
-    asanyarray : Similar function which passes through subclasses.
-
-    ascontiguousarray : Convert input to a contiguous array.
-
-    asfarray : Convert input to a floating point ndarray.
-
-    asfortranarray : Convert input to an ndarray with column-major
-                     memory order.
-
-    asarray_chkfinite : Similar function which checks input for NaNs and Infs.
-
-    fromiter : Create an array from an iterator.
-
-    fromfunction : Construct an array by executing a function on grid
-                   positions.
-
     Examples
     --------
     Convert a list into an array:

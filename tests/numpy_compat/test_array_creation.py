@@ -1,6 +1,8 @@
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
+import numpy as np
 from hypothesis import given
+from numpy.testing import assert_array_equal
 
 import mygrad as mg
 from tests.custom_strategies import tensors
@@ -28,3 +30,34 @@ def test_asarray_no_copy(
         kwargs["order"] = "C"
     array = mg.asarray(tensor, **kwargs)
     assert array is (tensor.data if not as_array else tensor)
+
+
+def _list(x: np.ndarray):
+    return x.tolist()
+
+
+@given(
+    array_data=hnp.arrays(dtype=np.int8, shape=hnp.array_shapes()),
+    convert_input=st.sampled_from([mg.Tensor, lambda x: x, _list]),
+    dtype=hnp.floating_dtypes() | hnp.integer_dtypes() | st.none(),
+    order=st.sampled_from(["C", "F", None]),
+)
+def test_asarray_returns_array_with_expected_data_and_attributes(
+    array_data, convert_input, dtype, order
+):
+    data = convert_input(array_data)
+
+    actual = mg.asarray(data, dtype=dtype, order=order)
+    expected = np.asarray(
+        data if not isinstance(data, mg.Tensor) else data.data, dtype=dtype, order=order
+    )
+
+    assert isinstance(actual, np.ndarray)
+    assert_array_equal(actual, expected)
+    assert actual.dtype == expected.dtype
+    assert actual.shape == expected.shape
+
+    if order is None:
+        order = "C"
+
+    assert actual.flags[f"{order.capitalize()}_CONTIGUOUS"]
