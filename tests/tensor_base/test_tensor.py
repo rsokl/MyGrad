@@ -524,3 +524,14 @@ def test_clear_graph(x, y, z):
 
     with raises(InvalidBackprop):
         g.backward()
+
+# Tensor has its `__eq__` but not its `__hash__` overridden which leads to subtle
+# problems if it ends up being used in a hashable context. See
+# https://hynek.me/articles/hashes-and-equality/
+# for more details. This checks to make sure that anyone who does so will get an
+# error. See also https://github.com/rsokl/MyGrad/pull/276
+def test_no_hash():
+    try:
+        {Tensor(3): 'this should not work'}
+    except TypeError as e:
+        assert str(e) == "unhashable type: 'Tensor'"
