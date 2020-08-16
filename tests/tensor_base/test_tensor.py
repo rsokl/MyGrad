@@ -535,3 +535,15 @@ def test_no_hash():
         {Tensor(3): 'this should not work'}
     except TypeError as e:
         assert str(e) == "unhashable type: 'Tensor'"
+
+def test_mirrors_numpy():
+    an = np.array([3, 4])
+    bn = an
+    an += 1
+
+    at = mg.Tensor([3, 4])
+    bt = at
+    at += 1
+
+    assert_array_equal(an, at.data)
+    assert_array_equal(bn, bt.data)
