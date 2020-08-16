@@ -31,7 +31,7 @@ from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property
 __all__ = ["Tensor"]
 
 
-class Tensor:
+class Tensor(np.lib.mixins.NDArrayOperatorsMixin):
     """ A numpy-array-like object capable of serving as a node in a computational
     graph that supports back-propagation of derivatives via the chain rule.
     See the Examples section of the docstring for more details.
@@ -655,11 +655,19 @@ class Tensor:
     def __radd__(self, other):
         return self._op(Add, other, self)
 
+    def __iadd__(self, other):
+        self._in_place_op(Add, other)
+        return self
+
     def __sub__(self, other):
         return self._op(Subtract, self, other)
 
     def __rsub__(self, other):
         return self._op(Subtract, other, self)
+
+    def __isub__(self, other):
+        self._in_place_op(Subtract, other)
+        return self
 
     def __truediv__(self, other):
         return self._op(Divide, self, other)
@@ -667,11 +675,19 @@ class Tensor:
     def __rtruediv__(self, other):
         return self._op(Divide, other, self)
 
+    def __itruediv__(self, other):
+        self._in_place_op(Divide, other)
+        return self
+
     def __mul__(self, other):
         return self._op(Multiply, self, other)
 
     def __rmul__(self, other):
         return self._op(Multiply, other, self)
+
+    def __imul__(self, other):
+        self._in_place_op(Multiply, other)
+        return self
 
     def __matmul__(self, other):
         return self._op(MatMul, self, other)
@@ -692,6 +708,10 @@ class Tensor:
 
     def __rpow__(self, other):
         return self._op(Power, other, self)
+
+    def __ipow__(self, other):
+        self._in_place_op(Power, other)
+        return self
 
     def __neg__(self):
         return self._op(Negative, self)
