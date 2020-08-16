@@ -147,7 +147,7 @@ class EinSum(BroadcastableOp):
         # cache counts the number of redundant tensor-label pairs
         # fed to einsum. Only one gradient will be computed for a
         # unique tensor-label pair
-        self.cache = Counter(zip(variables, self.in_lbls))
+        self.cache = Counter(zip((id(v) for v in variables), self.in_lbls))
         return np.einsum(
             "->".join((in_lbls, out_lbls)),
             *(var.data for var in self.variables),
@@ -168,7 +168,7 @@ class EinSum(BroadcastableOp):
         original_var_lbl = in_lbls.pop(index)
         var = self.variables[index]
 
-        factor = self.cache[(var, original_var_lbl)]
+        factor = self.cache[(id(var), original_var_lbl)]
         if factor == 0:
             # the gradient for the current tensor-label pair
             # has already been computed, scaled, and back-propped,
@@ -176,7 +176,7 @@ class EinSum(BroadcastableOp):
             raise SkipGradient()
 
         numpy_arrays = tuple(i.data for i in self.variables)
-        self.cache[(var, original_var_lbl)] = 0
+        self.cache[(id(var), original_var_lbl)] = 0
 
         var_lbl = _unique_from_end(original_var_lbl)
         repeat_lbls = len(var_lbl) != len(original_var_lbl)

@@ -447,7 +447,7 @@ class Tensor:
         if not clear_graph:
             assert isinstance(seen, set)
 
-            if self in seen:
+            if id(self) in seen:
                 return
 
         creator = self._creator
@@ -456,8 +456,9 @@ class Tensor:
             # marks tensor as "visited" during clear-graph traversal
             self._creator = None
         else:
-            # marks tensor as "visited" during null-gradients graph traversal
-            seen.add(self)
+            # marks tensor as "visited" during null-gradients graph traversal. Tensors are unhashable,
+            # so we use their ids, since we actually want to be relying on their uniqueness.
+            seen.add(id(self))
 
         for var in creator.variables:  # type: Tensor
             if clear_graph:
@@ -980,6 +981,12 @@ class Tensor:
         """
         return self._op(Tensor_Transpose_Property, self)
 
+    def __eq__(self, other):
+        return np.ndarray.__eq__(self.data, other.data if isinstance(other, Tensor) else other)
+
+    def __ne__(self, other):
+        return np.ndarray.__ne__(self.data, other.data if isinstance(other, Tensor) else other)
+
 
 # set all comparison operators - mirrors ndarray methods
 def tensor_to_array_wrapper(func):
@@ -990,5 +997,5 @@ def tensor_to_array_wrapper(func):
     return wrapped
 
 
-for op in ("__lt__", "__le__", "__gt__", "__ge__", "__eq__", "__ne__"):
+for op in ("__lt__", "__le__", "__gt__", "__ge__"):
     setattr(Tensor, op, tensor_to_array_wrapper(getattr(np.ndarray, op)))
