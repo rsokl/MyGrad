@@ -61,8 +61,6 @@ def test_check_grad():
     y_constant=st.booleans(),
     z=st.floats(min_value=-1e-6, max_value=1e6),
     z_constant=st.booleans(),
-    f_constant=st.just(True),
-    g_constant=st.just(True),
     side_effects=st.booleans(),
 )
 def test_chainrule_scalar(
@@ -72,16 +70,14 @@ def test_chainrule_scalar(
     y_constant: bool,
     z: float,
     z_constant: bool,
-    f_constant: bool,
-    g_constant: bool,
     side_effects,
 ):
     x = Tensor(x, constant=x_constant)
     y = Tensor(y, constant=y_constant)
     z = Tensor(z, constant=z_constant)
 
-    f = mg.add(x * y, z, constant=f_constant)
-    g = mg.add(x, z * f * f, constant=g_constant)
+    f = mg.add(x * y, z)
+    g = mg.add(x, z * f * f)
 
     if side_effects:
         # check side effects
@@ -96,8 +92,8 @@ def test_chainrule_scalar(
     assert y.constant is y_constant
     assert z.constant is z_constant
 
-    assert f.constant is f_constant or (x.constant and y.constant and z.constant)
-    assert g.constant is g_constant or (x.constant and z.constant and f.constant)
+    assert f.constant is (x.constant and y.constant and z.constant)
+    assert g.constant is (x.constant and z.constant and f.constant)
 
     g.backward()
 
