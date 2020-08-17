@@ -1,6 +1,6 @@
 import hypothesis.strategies as st
 import numpy as np
-from hypothesis import given
+from hypothesis import given, note
 from numpy.testing import assert_allclose
 
 import mygrad as mg
@@ -11,7 +11,11 @@ def _check_grad(t, expr):
     if t.constant:
         assert t.grad is None
     else:
-        assert_allclose(t.grad, expr)
+        if expr is None:
+            assert t.grad is None
+        else:
+            assert t.grad is not None
+            assert_allclose(t.grad, expr)
 
 
 @given(
@@ -77,13 +81,14 @@ def test_chainrule_scalar(
     _check_grad(z, f.data ** 2 + z.data * 2 * f.data)
 
 
-def test_identical_inputs():
-    v1 = Tensor(2.0, constant=False)
+@given(st.booleans())
+def test_identical_inputs(constant):
+    v1 = Tensor(2.0, constant=constant)
     v2 = v1 + v1
     v3 = v2 + v2
     v3.backward(1.0)  # v3 = 4 * v1
     assert v3.data.item() == 8.0
-    assert v1.grad.item() == 4.0
+    _check_grad(v1, 4.0)
 
 
 @given(data=st.floats(-10, 10), grad=(st.none() | st.floats(-10, 10)))
@@ -102,3 +107,67 @@ def test_non_broadcastable(data, grad):
     assert_allclose(actual=v3.grad, desired=grad)
     assert_allclose(actual=v2.grad, desired=-np.sin(v2.data) * grad)
     assert_allclose(actual=v1.grad, desired=np.exp(v1.data) * -np.sin(v2.data) * grad)
+
+
+@given(
+    v1_val=st.integers(-2, 2).map(float),
+    v2_val=st.integers(-2, 2).map(float),
+    v1_const=st.booleans(),
+    v2_const=st.booleans(),
+    v3_const=st.booleans(),
+    v4_const=st.booleans(),
+    v5_const=st.booleans(),
+    grad=st.integers(-2, 2).map(float),
+)
+def test_interesting_graph(
+    v1_val: float,
+    v2_val: float,
+    v1_const: bool,
+    v2_const: bool,
+    v3_const: bool,
+    v4_const: bool,
+    v5_const: bool,
+    grad: float,
+):
+    v1 = Tensor(v1_val, constant=v1_const)
+    v2 = Tensor(v2_val, constant=v2_const)
+    v3 = mg.multiply(v1, v1, constant=v3_const)
+    v4 = mg.multiply(v2, v3, constant=v4_const)
+    v5 = mg.multiply(v3, v4, constant=v5_const)
+    v5.backward(grad)
+
+    note(f"v1: {v1}")
+    note(f"v2: {v2}")
+    note(f"v3: {v3}")
+    note(f"v4: {v4}")
+    note(f"v5: {v5}")
+
+    assert v1.constant is v1_const
+    assert v2.constant is v2_const
+    assert v3.constant is v3_const or v1.constant
+    assert v4.constant is v4_const or (v2.constant and v3.constant)
+    assert v5.constant is v5_const or (v3.constant and v4.constant)
+
+    _check_grad(v5, None if v5.constant else grad)
+    _check_grad(v4, None if v5.constant else grad * v3.data)
+
+    v3_grad = (
+        None
+        if v5.constant
+        else (grad * v4.data if v4.constant else 2 * grad * v2.data * v3.data)
+    )
+    _check_grad(v3, v3_grad)
+
+    v2_grad = None if (v5.constant or v4.constant) else grad * v3.data ** 2
+    _check_grad(v2, v2_grad)
+
+    v1_grad = (
+        None
+        if (v5.constant or v3.constant)
+        else (
+            2 * grad * v1.data * v4.data
+            if v4.constant
+            else grad * 4 * v1.data ** 3 * v2.data
+        )
+    )
+    _check_grad(v1, v1_grad)
