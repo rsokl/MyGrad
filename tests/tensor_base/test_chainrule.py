@@ -1,3 +1,5 @@
+from typing import Union
+
 import hypothesis.strategies as st
 import numpy as np
 import pytest
@@ -8,7 +10,7 @@ import mygrad as mg
 from mygrad.tensor_base import Tensor
 
 
-def _check_grad(t, expr):
+def _check_grad(t: mg.Tensor, expr: Union[None, np.ndarray, float]):
     if t.constant:
         assert t.grad is None
     else:
@@ -17,6 +19,39 @@ def _check_grad(t, expr):
         else:
             assert t.grad is not None
             assert_allclose(t.grad, expr)
+
+
+def test_check_grad():
+    # forced grad on constant
+    x = Tensor(1.0, constant=True)
+    x.grad = np.array(1.0)
+
+    # bad: constant tensor should have grad None
+    with pytest.raises(AssertionError):
+        _check_grad(x, 1.0)
+
+    x = Tensor(1.0, constant=False)
+    x.backward()
+
+    # bad: grad is 1. but expects None
+    with pytest.raises(AssertionError):
+        _check_grad(x, None)
+    _check_grad(x, 1.0)
+
+    x = Tensor(1.0, constant=False)
+
+    # bad: grad is None but expects not-None
+    with pytest.raises(AssertionError):
+        _check_grad(x, 1.0)
+    _check_grad(x, None)
+
+    x = Tensor(1.0, constant=False)
+    x.backward(2.0)
+
+    # bad: grad is 1. but expects 2.
+    with pytest.raises(AssertionError):
+        _check_grad(x, 1.0)
+    _check_grad(x, 2.0)
 
 
 @given(
@@ -388,3 +423,128 @@ def test_interesting_graph(
     assert v3.grad is None and not v3._ops and v3.creator is None
     assert v2.grad is None and not v2._ops and v2.creator is None
     assert v1.grad is None and not v1._ops and v1.creator is None
+
+
+@pytest.mark.parametrize("v1_const", [True, False])
+@pytest.mark.parametrize("v2_const", [True, False])
+@pytest.mark.parametrize("v3_const", [True, False])
+@pytest.mark.parametrize("v4_const", [True, False])
+@pytest.mark.parametrize("v5_const", [True, False])
+@given(
+    v1_val=st.integers(-2, 2).map(float),
+    v2_val=st.integers(-2, 2).map(float),
+    grad=st.integers(-2, 2).map(float),
+    dangling_site=st.integers(0, 4).map(
+        lambda x: f"v{5 - x}"
+    ),  # shrink to v5 (simplest pattern)
+    dangling_const=st.booleans(),
+)
+def test_dynamic_interesting_graph(
+    v1_val: float,
+    v2_val: float,
+    v1_const: bool,
+    v2_const: bool,
+    v3_const: bool,
+    v4_const: bool,
+    v5_const: bool,
+    dangling_const: bool,
+    dangling_site: str,
+    grad: float,
+):
+    r"""
+     --------v1------
+     |       /\     |
+     |      ---     |
+     |       |      |
+     |  v2   v3--   | .....
+     |  |    |  |   |     |
+     ---------  |   |    ---
+           |    |   |     |
+           v4   |   |  dangling
+           |    |   |
+           ----------
+                |
+                v5
+
+    For each run of the test, v(1-5) is selected for the "dead_leaf"
+    to branch from it (via the operation 3x(node) ). This dead leaf
+    should have no effect on the rest of the graph - including backprop
+    through it.
+    """
+    v1 = Tensor(v1_val, constant=v1_const)
+    v2 = Tensor(v2_val, constant=v2_const)
+    v3 = mg.multiply(v1, v1, constant=v3_const)
+    v4 = mg.multiply_sequence(v1, v2, v3, constant=v4_const)
+    v5 = mg.multiply_sequence(v1, v3, v4, constant=v5_const)
+
+    dangling_site = locals()[dangling_site]  # type: Tensor
+    dead_leaf = mg.multiply(dangling_site, 3.0, constant=dangling_const)
+    v5.backward(grad)
+
+    note(f"v1: {v1}")
+    note(f"v2: {v2}")
+    note(f"v3: {v3}")
+    note(f"v4: {v4}")
+    note(f"v5: {v5}")
+    note(f"dead_leaf: {dead_leaf}")
+
+    # check fwd-pass produces reliable math
+    assert v3.data == v1_val ** 2
+    assert v4.data == (v1_val * v2_val * v3.data)
+    assert v5.data == (v4.data * v3.data * v1_val)
+    assert dead_leaf.data == dangling_site.data * 3.0
+
+    # check that constant propagates through graph reliably
+    assert v1.constant is v1_const
+    assert v2.constant is v2_const
+    assert v3.constant is v3_const or v1.constant
+    assert v4.constant is v4_const or (v1.constant and v2.constant and v3.constant)
+    assert v5.constant is v5_const or (v1.constant and v3.constant and v4.constant)
+    assert dead_leaf.constant is dangling_const or dangling_site.constant
+
+    # check that gradients are correct
+    _check_grad(v5, grad)
+
+    # dL/d4 = dL/d5 * p5/p4
+    _check_grad(v4, None if v5.constant else grad * v3.data * v1.data)
+
+    v3_grad = (
+        None
+        if v5.constant
+        else grad
+        * v1.data
+        * (v4.data if v4.constant else (2 * v3.data) * v2.data * v1.data)
+    )
+    _check_grad(v3, v3_grad)
+
+    v2_grad = (
+        None if (v5.constant or v4.constant) else grad * v3.data ** 2 * v1.data ** 2
+    )
+    _check_grad(v2, v2_grad)
+
+    v1_grad = None if v5.constant else grad * v4.data * v3.data
+    if not v5.constant and not v4.constant:
+        v1_grad += v4.grad * v2.data * v3.data
+
+    if not v5.constant and not v3.constant:
+        v1_grad += 2 * v3.grad * v1_val
+
+    _check_grad(v1, v1_grad)
+    _check_grad(dead_leaf, None)
+
+    # check that backprop metadata cleared appropriately upon completion of backprop
+    assert not v5._accum_ops and v5.creator is not None
+    assert not v4._accum_ops and v4.creator is not None
+    assert not v3._accum_ops and v3.creator is not None
+    assert not v2._accum_ops and v2.creator is None
+    assert not v1._accum_ops and v1.creator is None
+    assert not dead_leaf._accum_ops and dead_leaf.creator is not None
+
+    # check the null grads & clear graph always propagates through the graph
+    v5.null_gradients(clear_graph=True)
+    assert v5.grad is None and v5.creator is None
+    assert v4.grad is None and not v4._ops and v4.creator is None
+    assert v3.grad is None and not v3._ops and v3.creator is None
+    assert v2.grad is None and not v2._ops and v2.creator is None
+    assert v1.grad is None and not v1._ops and v1.creator is None
+    assert dead_leaf.creator is not None
