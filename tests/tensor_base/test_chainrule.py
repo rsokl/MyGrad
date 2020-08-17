@@ -129,6 +129,21 @@ def test_interesting_graph(
     v5_const: bool,
     grad: float,
 ):
+    """
+             v1
+             /\
+            ---
+             |
+        v2   v3--
+        |    |  |
+        ------  |
+           |    |
+           v4   |
+           |    |
+           ------
+              |
+              v5
+    """
     v1 = Tensor(v1_val, constant=v1_const)
     v2 = Tensor(v2_val, constant=v2_const)
     v3 = mg.multiply(v1, v1, constant=v3_const)
