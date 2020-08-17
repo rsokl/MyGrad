@@ -252,13 +252,13 @@ def test_fanout_graph(
     v1_grad = False
     # dL/d1 = +? dL/d2*p2/p1 +? dL/d3*p3/p1 +? dL/d4*p4/p1
     if not v5_const and not v2.constant:
-        v1_grad += v2.grad * 2 * v1_val
+        v1_grad += grad * (v3.data * v4.data) * 2 * v1_val
 
     if not v5_const and not v3.constant:
-        v1_grad += v3.grad * np.exp(v1_val)
+        v1_grad += grad * (v2.data * v4.data) * np.exp(v1_val)
 
     if not v5_const and not v4.constant:
-        v1_grad += v4.grad * 2
+        v1_grad += grad * (v2.data * v3.data) * 2
 
     if v1_grad is False:
         v1_grad = None
@@ -345,7 +345,7 @@ def test_interesting_graph(
 
     # check that gradients are correct
     # dL/d5
-    _check_grad(v5, None if v5.constant else grad)
+    _check_grad(v5, grad)
 
     # dL/d4 = dL/d5 * p5/p4
     _check_grad(v4, None if v5.constant else grad * v3.data)
