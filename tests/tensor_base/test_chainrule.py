@@ -1,5 +1,6 @@
 import hypothesis.strategies as st
 import numpy as np
+import pytest
 from hypothesis import given, note
 from numpy.testing import assert_allclose
 
@@ -109,14 +110,65 @@ def test_non_broadcastable(data, grad):
     assert_allclose(actual=v1.grad, desired=np.exp(v1.data) * -np.sin(v2.data) * grad)
 
 
+@pytest.mark.parametrize("v1_const", [True, False])
+@pytest.mark.parametrize("v2_const", [True, False])
+@pytest.mark.parametrize("v3_const", [True, False])
+@given(
+    v1_val=st.integers(-2, 2).map(float), grad=st.integers(-2, 2).map(float),
+)
+def test_linear_graph(
+    v1_val: float, v1_const: bool, v2_const: bool, v3_const: bool, grad: float,
+):
+    """
+    v1
+     |
+     v2
+     |
+     v3
+    """
+    v1 = Tensor(v1_val, constant=v1_const)
+    v2 = mg.square(v1, constant=v2_const)
+    v3 = mg.exp(v2, constant=v3_const)
+
+    note(f"v1: {v1}")
+    note(f"v2: {v2}")
+    note(f"v3: {v3}")
+
+    v3.backward(grad)
+
+    assert v2.data == v1_val ** 2
+    assert v3.data == np.exp(v1_val ** 2)
+
+    assert v1.constant is v1_const
+    assert v2.constant is (v2_const or v1.constant)
+    assert v3.constant is (v3_const or v2.constant or v1.constant)
+
+    _check_grad(v3, None if v3.constant else grad)
+    _check_grad(v2, None if v3.constant else grad * np.exp(v2.data))
+    _check_grad(
+        v1,
+        None if (v3.constant or v2.constant) else 2 * grad * v1_val * np.exp(v2.data),
+    )
+
+    assert not v3._accum_ops and v3.creator is not None
+    assert not v2._accum_ops and v2.creator is not None
+    assert not v1._accum_ops and v1.creator is None
+
+    v3.null_gradients(clear_graph=True)
+    assert v3.grad is None and v3.creator is None
+    assert v2.grad is None and not v2._ops and v2.creator is None
+    assert v1.grad is None and not v1._ops and v1.creator is None
+    print(v1.constant, v2.constant, v3.constant)
+
+
+@pytest.mark.parametrize("v1_const", [True, False])
+@pytest.mark.parametrize("v2_const", [True, False])
+@pytest.mark.parametrize("v3_const", [True, False])
+@pytest.mark.parametrize("v4_const", [True, False])
+@pytest.mark.parametrize("v5_const", [True, False])
 @given(
     v1_val=st.integers(-2, 2).map(float),
     v2_val=st.integers(-2, 2).map(float),
-    v1_const=st.booleans(),
-    v2_const=st.booleans(),
-    v3_const=st.booleans(),
-    v4_const=st.booleans(),
-    v5_const=st.booleans(),
     grad=st.integers(-2, 2).map(float),
 )
 def test_interesting_graph(
@@ -162,6 +214,10 @@ def test_interesting_graph(
     assert v3.constant is v3_const or v1.constant
     assert v4.constant is v4_const or (v2.constant and v3.constant)
     assert v5.constant is v5_const or (v3.constant and v4.constant)
+
+    assert v3.data == v1_val ** 2
+    assert v4.data == (v2_val * v3.data)
+    assert v5.data == (v4.data * v3.data)
 
     _check_grad(v5, None if v5.constant else grad)
     _check_grad(v4, None if v5.constant else grad * v3.data)
