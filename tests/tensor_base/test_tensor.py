@@ -297,6 +297,46 @@ def test_special_methods(
         assert tensor_out.creator.variables[1] is x
 
 
+@pytest.mark.parametrize(
+    ("op_name", "op"),
+    [
+        ("iadd", Add),
+        ("isub", Subtract),
+        ("imul", Multiply),
+        ("itruediv", Divide),
+        ("ipow", Power),
+        ("imatmul", MatMul),
+    ],
+)
+@given(constant_x=st.booleans(), constant_y=st.booleans())
+def test_special_methods(
+    op_name: str, op: Operation, constant_x: bool, constant_y: bool
+):
+    op_name = "__" + op_name + "__"
+    x = Tensor([2.0, 8.0, 5.0], constant=constant_x)
+    old_x = x.copy()
+    y = Tensor([1.0, 3.0, 2.0], constant=constant_y)
+
+    constant = constant_x and constant_y
+    assert hasattr(Tensor, op_name)
+    tensor_out = getattr(Tensor, op_name)(x, y)
+    # Numpy doesn't support `imatmul` right now.
+    if op_name == '__imatmul__':
+        # But also the fact that this fails (!) if you use `x` instead of
+        # `old_x` points out that this test is all sorts of wonky, because
+        # we're updating `x` before calling the numpy functions.
+        numpy_out = old_x.data @ y.data
+    else:
+        numpy_out = getattr(np.ndarray, op_name)(x.data, y.data)
+    assert isinstance(tensor_out, Tensor)
+    assert tensor_out.constant is constant
+    assert_equal(tensor_out.data, numpy_out)
+    assert isinstance(tensor_out.creator, op)
+
+    assert_array_equal(tensor_out.creator.variables[0], old_x)
+    assert tensor_out.creator.variables[1] is y
+
+
 @given(
     x=hnp.arrays(shape=hnp.array_shapes(), dtype=hnp.floating_dtypes()),
     constant=st.booleans(),

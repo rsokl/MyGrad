@@ -695,6 +695,10 @@ class Tensor(np.lib.mixins.NDArrayOperatorsMixin):
     def __rmatmul__(self, other):
         return self._op(MatMul, other, self)
 
+    def __imatmul__(self, other):
+        self._in_place_op(MatMul, other)
+        return self
+
     def __pow__(self, other):
         if isinstance(other, Number) or (
             isinstance(other, np.ndarray) and other.ndim == 0
