@@ -171,3 +171,16 @@ def test_interesting_graph(
         )
     )
     _check_grad(v1, v1_grad)
+
+    assert not v5._accum_ops and v5.creator is not None
+    assert not v4._accum_ops and v4.creator is not None
+    assert not v3._accum_ops and v3.creator is not None
+    assert not v2._accum_ops and v2.creator is None
+    assert not v1._accum_ops and v1.creator is None
+
+    v5.null_gradients(clear_graph=True)
+    assert v5.grad is None and v5.creator is None
+    assert v4.grad is None and not v4._ops and v4.creator is None
+    assert v3.grad is None and not v3._ops and v3.creator is None
+    assert v2.grad is None and not v2._ops and v2.creator is None
+    assert v1.grad is None and not v1._ops and v1.creator is None
