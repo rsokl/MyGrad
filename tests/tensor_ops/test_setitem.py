@@ -92,15 +92,15 @@ class set_item_test_factory:
             note("x[index]: {}".format(o))
             y = data.draw(self.value_strat(o), label="y",)
 
-            x0 = np.copy(x)
-            y0 = np.copy(y)
+            numpy_x = np.copy(x)
+            numpy_y = np.copy(y)
 
-            x_arr = Tensor(np.copy(x))
-            y_arr = Tensor(np.copy(y))
-            x1_arr = +x_arr
+            mygrad_x = Tensor(np.copy(x))
+            mygrad_y = Tensor(np.copy(y))
+            mygrad_x1 = +mygrad_x
 
             try:
-                x0[index] = y0  # don't permit invalid set-items
+                numpy_x[index] = numpy_y  # don't permit invalid set-items
             except Exception:
                 assume(False)
                 return
@@ -112,18 +112,48 @@ class set_item_test_factory:
                 label="grad",
             )
 
-            x1_arr[index] = y_arr
-            (x1_arr * grad).sum().backward()
+            mygrad_x1[index] = mygrad_y
+            out = (mygrad_x1 * grad).sum()  # type: Tensor
+            out.backward()
 
-            assert_allclose(x1_arr.data, x0)
-            assert_allclose(y_arr.data, y0)
+            assert_allclose(
+                mygrad_y.data,
+                numpy_y,
+                err_msg="After `x[index] = y`, tensor-y does not match numpy-y",
+            )
 
             dx, dy = numerical_gradient_full(
                 setitem, x, y, back_grad=grad, kwargs=dict(index=index)
             )
 
-            assert_allclose(x_arr.grad, dx)
-            assert_allclose(y_arr.grad, dy)
+            assert_allclose(
+                mygrad_x1.grad,
+                grad,
+                err_msg="After `x[index] = y`, x.grad does not match the expected numerical gradient",
+            )
+            assert_allclose(
+                mygrad_x.grad,
+                dx,
+                err_msg="After `x[index] = y`, x.grad does not match the expected numerical gradient",
+            )
+            assert_allclose(
+                mygrad_y.grad,
+                dy,
+                err_msg="After `x[index] = y`, y.grad does not match the expected numerical gradient",
+            )
+
+            out.null_gradients(clear_graph=True)
+            assert (
+                mygrad_y.grad is None and not mygrad_y._ops and not mygrad_y._accum_ops
+            )
+            assert (
+                mygrad_x.grad is None and not mygrad_x._ops and not mygrad_x._accum_ops
+            )
+            assert (
+                mygrad_x1.grad is None
+                and not mygrad_x1._ops
+                and not mygrad_x1._accum_ops
+            )
 
         return wrapper
 
@@ -158,7 +188,7 @@ def test_setitem_multiple_input():
     assert_array_equal(o.grad, np.array([4.0]))
     assert_array_equal(y.grad, np.array([3.0]))
 
-    f.null_gradients()
+    f.null_gradients(clear_graph=True)
     assert x.grad is None and not x._ops and not x._accum_ops
     assert y.grad is None and not y._ops and not y._accum_ops
     assert o.grad is None and not o._ops and not o._accum_ops
@@ -180,6 +210,9 @@ def test_setitem_sanity_check(x_constant, y_constant, data):
 
     assert isinstance(w, Tensor)
     assert_allclose(w.data, np.array([-1.0, 8.0, 0.0, 16.0]))
+
+    if not x.constant or (as_tensor and not y.constant):
+        assert_allclose(w.grad, np.ones_like(w.data))
     assert w.constant is (x.constant and (not as_tensor or y.constant))
 
     if x.constant:
@@ -193,14 +226,21 @@ def test_setitem_sanity_check(x_constant, y_constant, data):
         else:
             assert_allclose(y.grad, np.array([-1.0, -2.0]))
 
-    w.null_gradients()
-    assert x.grad is None, "null_gradients failed"
+    w.null_gradients(clear_graph=True)
+
+    assert w.grad is None and not w._accum_ops, "null_gradients with clear-graph failed"
+    assert (
+        x.grad is None and not x._ops and not x._accum_ops
+    ), "null_gradients with clear-graph failed"
 
     if as_tensor:
-        assert y.grad is None, "null_gradients failed"
+        assert (
+            y.grad is None and not y._ops and not y._accum_ops
+        ), "null_gradients failed"
 
 
-def test_setitem_sanity_check2():
+def test_setitem_downstream_doesnt_affect_upstream_backprop():
+    """Test that upstream computational graph is not affected by downstream set-item"""
     x = Tensor([1.0, 2.0, 3.0, 4.0])
     y = Tensor([-1.0, -2.0, -3.0, -4.0])
 
@@ -215,13 +255,13 @@ def test_setitem_sanity_check2():
     assert y.grad is None
 
 
-def test_no_mutate():
+def test_setitem_doesnt_mutate_upstream_nodes():
     """ Ensure setitem doesn't mutate variable non-constant tensor"""
     x = Tensor([1.0, 2.0])
     y = Tensor([3.0, 4.0])
-    x + y
+    z = x + y
     y[:] = 0
-    y_old = x._ops.pop().variables[-1]  # version of y that participated in x + y
+    y_old = z.creator.variables[-1]  # version of y that participated in x + y
     assert_allclose(np.array([3.0, 4.0]), y_old.data)
     assert_allclose(np.array([0.0, 0.0]), y.data)
 
