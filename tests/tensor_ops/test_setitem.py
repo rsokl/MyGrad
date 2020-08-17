@@ -239,10 +239,11 @@ def test_setitem_sanity_check(x_constant, y_constant, data):
         ), "null_gradients failed"
 
 
-def test_setitem_downstream_doesnt_affect_upstream_backprop():
+@given(y_constant=st.booleans())
+def test_setitem_downstream_doesnt_affect_upstream_backprop(y_constant: bool):
     """Test that upstream computational graph is not affected by downstream set-item"""
     x = Tensor([1.0, 2.0, 3.0, 4.0])
-    y = Tensor([-1.0, -2.0, -3.0, -4.0])
+    y = Tensor([-1.0, -2.0, -3.0, -4.0], constant=y_constant)
 
     z = x * y
     y[:] = 0
@@ -255,10 +256,11 @@ def test_setitem_downstream_doesnt_affect_upstream_backprop():
     assert y.grad is None
 
 
-def test_setitem_doesnt_mutate_upstream_nodes():
+@given(x_constant=st.booleans(), y_constant=st.booleans())
+def test_setitem_doesnt_mutate_upstream_nodes(x_constant: bool, y_constant: bool):
     """ Ensure setitem doesn't mutate variable non-constant tensor"""
-    x = Tensor([1.0, 2.0])
-    y = Tensor([3.0, 4.0])
+    x = Tensor([1.0, 2.0], constant=x_constant)
+    y = Tensor([3.0, 4.0], constant=y_constant)
     z = x + y
     y[:] = 0
     y_old = z.creator.variables[-1]  # version of y that participated in x + y
