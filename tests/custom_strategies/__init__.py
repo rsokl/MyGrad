@@ -131,6 +131,7 @@ def tensors(
 
     grad_dtype: Optional[Any]
         The datatype of the drawn gradient. Defaults to the dtype of the host tensor.
+        Specifying ``grad_dtype``, while ``include_grad`` is False, will raise an error.
 
     grad_elements_bounds: Optional[Tuple[int, int]]
         The min and max bounds used to draw the gradient's elements.
