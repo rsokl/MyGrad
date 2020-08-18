@@ -7,10 +7,10 @@ import pytest
 from hypothesis import given, settings
 from pytest import raises
 
-import mygrad
+import mygrad as mg
 from mygrad import amax, amin, cumprod, cumsum, mean, prod, std, sum, var
 
-from ...custom_strategies import valid_axes
+from ...custom_strategies import tensors, valid_axes
 from ...wrappers.uber import (
     backprop_test_factory as backprop_test_factory,
     fwdprop_test_factory as fwdprop_test_factory,
@@ -93,8 +93,8 @@ def test_min_bkwd():
 
 
 def test_min_max_aliases():
-    assert mygrad.max == amax
-    assert mygrad.min == amin
+    assert mg.max == amax
+    assert mg.min == amin
 
 
 @fwdprop_test_factory(
@@ -199,33 +199,28 @@ def test_var_bkwd():
 
 
 @given(
-    x=hnp.arrays(
+    x=tensors(
         dtype=np.float,
         shape=hnp.array_shapes(),
         elements=st.floats(allow_infinity=False, allow_nan=False),
     )
 )
-def test_var_no_axis_fwd(x):
-    import mygrad as mg
-
-    x = mg.Tensor(x, constant=False)
+def test_var_no_axis_fwd(x: mg.Tensor):
     o = mg.var(x, axis=())
-    assert np.all(o.data == np.zeros_like(x.data))
+    assert np.all(o == mg.zeros_like(x))
 
 
 @given(
-    x=hnp.arrays(
+    x=tensors(
         dtype=np.float,
         shape=hnp.array_shapes(),
         elements=st.floats(allow_infinity=False, allow_nan=False),
+        constant=False,
     )
 )
-def test_var_no_axis_bkwrd(x):
-    import mygrad as mg
-
-    x = mg.Tensor(x, constant=False)
+def test_var_no_axis_bkwrd(x: mg.Tensor):
     mg.var(x, axis=()).backward()
-    assert np.all(x.grad == np.zeros_like(x.data))
+    assert np.all(x.grad == mg.zeros_like(x))
 
 
 @fwdprop_test_factory(
@@ -295,33 +290,28 @@ def test_std_bkwd():
 
 
 @given(
-    x=hnp.arrays(
+    x=tensors(
         dtype=np.float,
         shape=hnp.array_shapes(),
         elements=st.floats(allow_infinity=False, allow_nan=False),
     )
 )
 def test_std_no_axis_fwd(x):
-    import mygrad as mg
-
-    x = mg.Tensor(x, constant=False)
     o = mg.std(x, axis=())
-    assert np.all(o.data == np.zeros_like(x.data))
+    assert np.all(o == mg.zeros_like(x))
 
 
 @given(
-    x=hnp.arrays(
+    x=tensors(
         dtype=np.float,
         shape=hnp.array_shapes(),
         elements=st.floats(allow_infinity=False, allow_nan=False),
+        constant=False,
     )
 )
 def test_std_no_axis_bkwrd(x):
-    import mygrad as mg
-
-    x = mg.Tensor(x, constant=False)
     mg.std(x, axis=()).backward()
-    assert np.all(x.grad == np.zeros_like(x.data))
+    assert np.all(x.grad == mg.zeros_like(x))
 
 
 @fwdprop_test_factory(
