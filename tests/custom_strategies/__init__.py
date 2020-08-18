@@ -73,7 +73,9 @@ def _check_min_max(min_val, min_dim, max_dim, param_name, max_val=None):
         )
 
 
+@st.composite
 def tensors(
+    draw: Any,
     dtype: Any,
     shape: Union[int, Shape, st.SearchStrategy[Shape]],
     *,
@@ -81,6 +83,9 @@ def tensors(
     fill: Optional[st.SearchStrategy[Any]] = None,
     unique: bool = False,
     constant: Union[bool, st.SearchStrategy[bool]] = st.booleans(),
+    include_grad: bool = False,
+    grad_dtype: Optional[Any] = None,
+    grad_elements_bounds: Optional[Tuple[int, int]] = None,
 ) -> st.SearchStrategy[Tensor]:
     r"""Returns a strategy for generating :class:`mygrad:mygrad.Tensor`\ s.
 
@@ -120,6 +125,16 @@ def tensors(
 
     constant : Union[bool, st.SearchStrategy[bool]]
         Specifies ``tensor.constant``. Default is :func:`~hypothesis.strategies.booleans`
+
+    include_grad: bool, optional (default=False)
+        If True, draw an array to be set to `tensor.grad`
+
+    grad_dtype: Optional[Any]
+        The datatype of the drawn gradient. Defaults to the dtype of the host tensor.
+
+    grad_elements_bounds: Optional[Tuple[int, int]]
+        The min and max bounds used to draw the gradient's elements.
+        Defaults to (-10, 10)
 
     Tensors of specified ``dtype`` and ``shape`` are generated for example
     like this:
@@ -165,15 +180,46 @@ def tensors(
     hundreds or more elements, having a fill value is essential if you want
     your tests to run in reasonable time.
     """
-    return st.builds(
-        Tensor,
-        x=hnp.arrays(
+    x = draw(
+        hnp.arrays(
             dtype=dtype, shape=shape, elements=elements, fill=fill, unique=unique
-        ),
-        constant=constant
-        if isinstance(constant, st.SearchStrategy)
-        else st.just(constant),
-    )
+        )
+    )  # type: np.ndarray
+    constant = draw(constant) if isinstance(constant, st.SearchStrategy) else constant
+
+    tensor = Tensor(x, constant=constant)
+    if include_grad:
+        if grad_dtype is None:
+            grad_dtype = x.dtype
+        else:
+            grad_dtype = np.dtype(grad_dtype)
+
+        if grad_elements_bounds is None:
+            grad_elements_bounds = (-10, 10)
+
+        tensor.grad = draw(
+            hnp.arrays(
+                dtype=grad_dtype,
+                shape=x.shape,
+                elements=st.floats(
+                    *grad_elements_bounds, width=grad_dtype.itemsize * 8
+                ),
+            )
+        )
+
+    else:
+        if grad_dtype is not None:
+            raise ValueError(
+                f"`grad_dtype`(={grad_dtype}) was specified, "
+                f"but `include_grad` is False."
+            )
+        if grad_elements_bounds is not None:
+            raise ValueError(
+                f"`grad_elements_bounds`(={grad_elements_bounds}) was specified, "
+                f"but `include_grad` is False."
+            )
+
+    return tensor
 
 
 def choices(seq, size, replace=True):

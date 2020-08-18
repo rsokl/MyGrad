@@ -223,6 +223,7 @@ def test_tensors_static_constant(constant: bool, data: st.DataObject):
     tensor = data.draw(tensors(np.int8, (2, 3), constant=constant), label="tensor")
     assert isinstance(tensor, Tensor)
     assert tensor.constant is constant
+    assert tensor.grad is None
 
 
 @given(data=st.data(), shape=hnp.array_shapes())
@@ -230,6 +231,7 @@ def test_tensors_shape(shape, data: st.DataObject):
     tensor = data.draw(tensors(np.int8, shape=shape), label="tensor")
     assert isinstance(tensor, Tensor)
     assert tensor.shape == shape
+    assert tensor.grad is None
 
 
 @given(data=st.data(), dtype=hnp.floating_dtypes() | hnp.integer_dtypes())
@@ -237,3 +239,35 @@ def test_tensors_dtype(dtype, data: st.DataObject):
     tensor = data.draw(tensors(dtype=dtype, shape=(2, 3)), label="tensor")
     assert isinstance(tensor, Tensor)
     assert tensor.dtype == dtype
+    assert tensor.grad is None
+
+
+@given(
+    data=st.data(),
+    dtype=hnp.floating_dtypes(),
+    shape=hnp.array_shapes(min_dims=0, min_side=0),
+    grad_dtype=hnp.floating_dtypes() | st.none(),
+    grad_elements_bounds=st.just((100, 200)) | st.none(),
+)
+def test_tensors_with_grad(
+    dtype, data: st.DataObject, shape, grad_dtype, grad_elements_bounds
+):
+    tensor = data.draw(
+        tensors(
+            dtype=dtype,
+            shape=shape,
+            include_grad=True,
+            grad_dtype=grad_dtype,
+            grad_elements_bounds=grad_elements_bounds,
+        ),
+        label="tensor",
+    )
+    assert isinstance(tensor, Tensor)
+    assert tensor.dtype == dtype
+    assert isinstance(tensor.grad, np.ndarray)
+    assert tensor.grad.shape == tensor.shape
+    assert tensor.grad.dtype == (grad_dtype if grad_dtype is not None else tensor.dtype)
+    if grad_elements_bounds is not None:
+        assert np.all((100 <= tensor.grad) & (tensor.grad <= 200))
+    else:
+        assert np.all((-10 <= tensor.grad) & (tensor.grad <= 10))
