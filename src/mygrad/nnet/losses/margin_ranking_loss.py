@@ -3,7 +3,7 @@ from numbers import Real
 import numpy as np
 
 from mygrad.operation_base import Operation
-from mygrad.tensor_base import Tensor
+from mygrad.tensor_base import Tensor, asarray
 
 
 class MarginRanking(Operation):
@@ -88,10 +88,7 @@ def margin_ranking_loss(x1, x2, y, margin, constant=False):
     if not isinstance(margin, Real) or margin < 0:
         raise ValueError("`margin` must be a non-negative scalar")
 
-    if isinstance(y, Tensor):
-        y = y.data
-
-    y = np.asarray(y)
+    y = asarray(y)
 
     if y.size == 1:
         y = np.array(y.item())
