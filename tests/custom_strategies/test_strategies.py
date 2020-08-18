@@ -4,9 +4,11 @@ from typing import List, Tuple
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
+import pytest
 from hypothesis import given, note, settings
 from numpy.testing import assert_array_equal
 
+from mygrad import Tensor
 from tests.custom_strategies import (
     _factors,
     adv_integer_index,
@@ -15,6 +17,7 @@ from tests.custom_strategies import (
     choices,
     integer_index,
     slice_index,
+    tensors,
     valid_axes,
     valid_shapes,
 )
@@ -196,3 +199,75 @@ def test_arbitrary_indices_strategy(a, data):
     # if index does not comply with numpy indexing
     # rules, numpy will raise an error
     a[index]
+
+
+@pytest.mark.parametrize("constant", [st.booleans(), None])
+def test_tensors_handles_constant_strat(constant):
+    constants = []
+    kwargs = dict(dtype=np.int8, shape=(2, 3))
+    if constant is not None:
+        kwargs["constant"] = constant
+
+    @given(x=tensors(**kwargs))
+    def f(x):
+        constants.append(x.constant)
+
+    f()
+
+    assert len(set(constants)) > 1
+
+
+@pytest.mark.parametrize("constant", [True, False])
+@given(data=st.data())
+def test_tensors_static_constant(constant: bool, data: st.DataObject):
+    tensor = data.draw(tensors(np.int8, (2, 3), constant=constant), label="tensor")
+    assert isinstance(tensor, Tensor)
+    assert tensor.constant is constant
+    assert tensor.grad is None
+
+
+@given(data=st.data(), shape=hnp.array_shapes())
+def test_tensors_shape(shape, data: st.DataObject):
+    tensor = data.draw(tensors(np.int8, shape=shape), label="tensor")
+    assert isinstance(tensor, Tensor)
+    assert tensor.shape == shape
+    assert tensor.grad is None
+
+
+@given(data=st.data(), dtype=hnp.floating_dtypes() | hnp.integer_dtypes())
+def test_tensors_dtype(dtype, data: st.DataObject):
+    tensor = data.draw(tensors(dtype=dtype, shape=(2, 3)), label="tensor")
+    assert isinstance(tensor, Tensor)
+    assert tensor.dtype == dtype
+    assert tensor.grad is None
+
+
+@given(
+    data=st.data(),
+    dtype=hnp.floating_dtypes(),
+    shape=hnp.array_shapes(min_dims=0, min_side=0),
+    grad_dtype=hnp.floating_dtypes() | st.none(),
+    grad_elements_bounds=st.just((100, 200)) | st.none(),
+)
+def test_tensors_with_grad(
+    dtype, data: st.DataObject, shape, grad_dtype, grad_elements_bounds
+):
+    tensor = data.draw(
+        tensors(
+            dtype=dtype,
+            shape=shape,
+            include_grad=True,
+            grad_dtype=grad_dtype,
+            grad_elements_bounds=grad_elements_bounds,
+        ),
+        label="tensor",
+    )
+    assert isinstance(tensor, Tensor)
+    assert tensor.dtype == dtype
+    assert isinstance(tensor.grad, np.ndarray)
+    assert tensor.grad.shape == tensor.shape
+    assert tensor.grad.dtype == (grad_dtype if grad_dtype is not None else tensor.dtype)
+    if grad_elements_bounds is not None:
+        assert np.all((100 <= tensor.grad) & (tensor.grad <= 200))
+    else:
+        assert np.all((-10 <= tensor.grad) & (tensor.grad <= 10))

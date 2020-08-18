@@ -12,6 +12,8 @@ import numpy as np
 from hypothesis.extra.numpy import broadcastable_shapes
 from numpy import ndarray
 
+from mygrad import Tensor
+
 __all__ = [
     "adv_integer_index",
     "arbitrary_indices",
@@ -20,6 +22,7 @@ __all__ = [
     "choices",
     "everything_except",
     "valid_axes",
+    "tensors",
 ]
 
 Shape = Tuple[int, ...]
@@ -68,6 +71,157 @@ def _check_min_max(min_val, min_dim, max_dim, param_name, max_val=None):
         raise ValueError(
             f"`min_{param_name}={min_dim}` cannot be larger than max_{param_name}={max_dim}."
         )
+
+
+@st.composite
+def tensors(
+    draw: Any,
+    dtype: Any,
+    shape: Union[int, Shape, st.SearchStrategy[Shape]],
+    *,
+    elements: Optional[st.SearchStrategy[Any]] = None,
+    fill: Optional[st.SearchStrategy[Any]] = None,
+    unique: bool = False,
+    constant: Union[bool, st.SearchStrategy[bool]] = st.booleans(),
+    include_grad: bool = False,
+    grad_dtype: Optional[Any] = None,
+    grad_elements_bounds: Optional[Tuple[int, int]] = None,
+) -> st.SearchStrategy[Tensor]:
+    r"""Returns a strategy for generating :class:`mygrad:mygrad.Tensor`\ s.
+
+    Parameters
+    ----------
+    dtype : Any
+        may be any valid input to :class:`~numpy:numpy.dtype`
+        (this includes :class:`~numpy:numpy.dtype` objects), or a strategy that
+      generates such values.
+
+    shape : Union[int, Shape, st.SearchStrategy[Shape]]
+        may be an integer >= 0, a tuple of such integers, or a
+        strategy that generates such values.
+
+    elements : Optional[st.SearchStrategy[Any]]
+        is a strategy for generating values to put in the array.
+        If it is None a suitable value will be inferred based on the dtype,
+        which may give any legal value (including eg ``NaN`` for floats).
+        If you have more specific requirements, you should supply your own
+        elements strategy.
+
+    fill : Optional[st.SearchStrategy[Any]]
+        is a strategy that may be used to generate a single background
+        value for the array. If None, a suitable default will be inferred
+        based on the other arguments. If set to
+        :func:`~hypothesis.strategies.nothing` then filling
+        behaviour will be disabled entirely and every element will be generated
+        independently.
+
+    unique : bool, optional (default=False)
+        specifies if the elements of the array should all be
+        distinct from one another. Note that in this case multiple NaN values
+        may still be allowed. If fill is also set, the only valid values for
+        it to return are NaN values (anything for which :obj:`numpy:numpy.isnan`
+        returns True. So e.g. for complex numbers (nan+1j) is also a valid fill).
+        Note that if unique is set to True the generated values must be hashable.
+
+    constant : Union[bool, st.SearchStrategy[bool]]
+        Specifies ``tensor.constant``. Default is :func:`~hypothesis.strategies.booleans`
+
+    include_grad: bool, optional (default=False)
+        If True, draw an array to be set to `tensor.grad`
+
+    grad_dtype: Optional[Any]
+        The datatype of the drawn gradient. Defaults to the dtype of the host tensor.
+        Specifying ``grad_dtype``, while ``include_grad`` is False, will raise an error.
+
+    grad_elements_bounds: Optional[Tuple[int, int]]
+        The min and max bounds used to draw the gradient's elements.
+        Defaults to (-10, 10)
+        Specifying ``grad_element_bounds``, while ``include_grad`` is False, will raise an error.
+
+    Tensors of specified ``dtype`` and ``shape`` are generated for example
+    like this:
+
+    .. code-block:: pycon
+
+      >>> import mygrad as mg
+      >>> import numpy as np
+      >>> tensors(np.int8, (2, 3)).example()
+      Tensor([[-8,  6,  3],
+             [-6,  4,  6]], dtype=int8)
+
+
+    .. code-block:: pycon
+
+      >>> import numpy as np
+      >>> from hypothesis.strategies import floats
+      >>> tensors(np.float, 3, elements=floats(0, 1)).example()
+      Tensor([ 0.88974794,  0.77387938,  0.1977879 ])
+
+    Tensor values are generated in two parts:
+
+    1. Some subset of the coordinates of the tensor are populated with a value
+       drawn from the elements strategy (or its inferred form).
+    2. If any coordinates were not assigned in the previous step, a single
+       value is drawn from the fill strategy and is assigned to all remaining
+       places.
+
+    You can set fill to :func:`~hypothesis.strategies.nothing` if you want to
+    disable this behaviour and draw a value for every element.
+
+    If fill is set to None then it will attempt to infer the correct behaviour
+    automatically: If unique is True, no filling will occur by default.
+    Otherwise, if it looks safe to reuse the values of elements across
+    multiple coordinates (this will be the case for any inferred strategy, and
+    for most of the builtins, but is not the case for mutable values or
+    strategies built with flatmap, map, composite, etc) then it will use the
+    elements strategy as the fill, else it will default to having no fill.
+
+    Having a fill helps Hypothesis craft high quality examples, but its
+    main importance is when the tensor generated is large: Hypothesis is
+    primarily designed around testing small examples. If you have tensors with
+    hundreds or more elements, having a fill value is essential if you want
+    your tests to run in reasonable time.
+    """
+    x = draw(
+        hnp.arrays(
+            dtype=dtype, shape=shape, elements=elements, fill=fill, unique=unique
+        )
+    )  # type: np.ndarray
+    constant = draw(constant) if isinstance(constant, st.SearchStrategy) else constant
+
+    tensor = Tensor(x, constant=constant)
+    if include_grad:
+        if grad_dtype is None:
+            grad_dtype = x.dtype
+        else:
+            grad_dtype = np.dtype(grad_dtype)
+
+        if grad_elements_bounds is None:
+            grad_elements_bounds = (-10, 10)
+
+        tensor.grad = draw(
+            hnp.arrays(
+                dtype=grad_dtype,
+                shape=x.shape,
+                elements=st.floats(
+                    *grad_elements_bounds, width=grad_dtype.itemsize * 8
+                ),
+            )
+        )
+
+    else:
+        if grad_dtype is not None:
+            raise ValueError(
+                f"`grad_dtype`(={grad_dtype}) was specified, "
+                f"but `include_grad` is False."
+            )
+        if grad_elements_bounds is not None:
+            raise ValueError(
+                f"`grad_elements_bounds`(={grad_elements_bounds}) was specified, "
+                f"but `include_grad` is False."
+            )
+
+    return tensor
 
 
 def choices(seq, size, replace=True):

@@ -12,12 +12,13 @@ from mygrad.math.sequential.funcs import *
 from mygrad.math.sequential.funcs import max, min
 from mygrad.math.trigonometric.funcs import *
 from mygrad.nnet.layers.utils import sliding_window_view
+from mygrad.numpy_compat import asarray
 from mygrad.tensor_creation.funcs import *
 from mygrad.tensor_manip.array_shape.funcs import *
 from mygrad.tensor_manip.tiling.funcs import *
 from mygrad.tensor_manip.transpose_like.funcs import *
-from . import random
 
+from . import random
 from ._version import get_versions
 
 __version__ = get_versions()["version"]
