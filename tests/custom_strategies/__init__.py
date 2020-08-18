@@ -136,6 +136,7 @@ def tensors(
     grad_elements_bounds: Optional[Tuple[int, int]]
         The min and max bounds used to draw the gradient's elements.
         Defaults to (-10, 10)
+        Specifying ``grad_element_bounds``, while ``include_grad`` is False, will raise an error.
 
     Tensors of specified ``dtype`` and ``shape`` are generated for example
     like this:
