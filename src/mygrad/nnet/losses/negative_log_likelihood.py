@@ -1,6 +1,6 @@
 import numpy as np
 
-from mygrad import Tensor, mean
+from mygrad import Tensor, asarray, mean
 
 from ._utils import check_loss_inputs
 
@@ -63,8 +63,8 @@ def negative_log_likelihood(x, y_true, *, weights=None, constant=False):
 
     if weights is None:
         weights = np.ones(x.shape[1])
-    if isinstance(weights, Tensor):
-        weights = weights.data
+
+    weights = asarray(weights)
 
     if weights.ndim != 1 or weights.shape[0] != x.shape[1]:
         raise ValueError(

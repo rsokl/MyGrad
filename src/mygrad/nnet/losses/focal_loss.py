@@ -2,9 +2,9 @@ from numbers import Real
 
 import numpy as np
 
-from mygrad import Tensor
 from mygrad.nnet.activations import softmax
 from mygrad.operation_base import Operation
+from mygrad.tensor_base import Tensor, asarray
 
 from ._utils import check_loss_inputs
 
@@ -59,11 +59,9 @@ class FocalLoss(Operation):
         check_loss_inputs(class_probs, targets)
 
         self.variables = (class_probs,)
-        if isinstance(class_probs, Tensor):
-            class_probs = class_probs.data
-
         self.label_locs = (range(len(class_probs)), targets)
 
+        class_probs = asarray(class_probs)
         pc = class_probs[self.label_locs]
         one_m_pc = np.clip(1 - pc, a_min=0, a_max=1)
         log_pc = np.log(pc)

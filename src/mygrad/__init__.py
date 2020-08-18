@@ -1,4 +1,4 @@
-from mygrad.tensor_base import Tensor  # isort:skip  # avoid an import cycle
+from mygrad.tensor_base import Tensor, asarray  # isort:skip  # avoid an import cycle
 
 from mygrad.indexing_routines.funcs import *
 from mygrad.linalg.funcs import *
@@ -12,7 +12,6 @@ from mygrad.math.sequential.funcs import *
 from mygrad.math.sequential.funcs import max, min
 from mygrad.math.trigonometric.funcs import *
 from mygrad.nnet.layers.utils import sliding_window_view
-from mygrad.numpy_compat import asarray
 from mygrad.tensor_creation.funcs import *
 from mygrad.tensor_manip.array_shape.funcs import *
 from mygrad.tensor_manip.tiling.funcs import *

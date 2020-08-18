@@ -1,6 +1,6 @@
 import numpy as np
 
-from mygrad.tensor_base import Tensor
+from mygrad import Tensor, asarray
 
 from .ops import Where
 
@@ -88,9 +88,7 @@ def where(condition, x=not_set, y=not_set, constant=False):
             [ 0,  3, -1]])
     """
     if x is not_set and y is not_set:
-        if isinstance(condition, Tensor):
-            condition = condition.data
-        return np.where(condition)
+        return np.where(asarray(condition))
 
     if x is not_set or y is not_set:
         raise ValueError("either both or neither of x and y should be given")

@@ -1,6 +1,6 @@
 import numpy as np
 
-from mygrad.tensor_base import Tensor
+from mygrad.tensor_base import Tensor, asarray
 
 __all__ = [
     "arange",
@@ -101,10 +101,7 @@ def empty_like(other, dtype=None, constant=False):
         Tensor([[-1073741821, -1067949133],
                 [  496041986,    19249760]])                     #random
     """
-    if isinstance(other, Tensor):
-        other = other.data
-
-    return Tensor(np.empty_like(other, dtype), constant=constant)
+    return Tensor(np.empty_like(asarray(other), dtype), constant=constant)
 
 
 def eye(rows, cols=None, diag_idx=0, dtype=np.float32, constant=False):
@@ -268,10 +265,7 @@ def ones_like(other, dtype=None, constant=False):
     >>> mg.ones_like(y)
     Tensor([ 1.,  1.,  1.])
     """
-    if isinstance(other, Tensor):
-        other = other.data
-
-    return Tensor(np.ones_like(other, dtype), constant=constant)
+    return Tensor(np.ones_like(asarray(other), dtype), constant=constant)
 
 
 def zeros(shape, dtype=np.float32, constant=False):
@@ -369,10 +363,7 @@ def zeros_like(other, dtype=None, constant=False):
     >>> mg.zeros_like(y)
     Tensor([ 0.,  0.,  0.])
     """
-    if isinstance(other, Tensor):
-        other = other.data
-
-    return Tensor(np.zeros_like(other, dtype), constant=constant)
+    return Tensor(np.zeros_like(asarray(other), dtype), constant=constant)
 
 
 def full(shape, fill_value, dtype=None, constant=False):
@@ -450,10 +441,7 @@ def full_like(other, fill_value, dtype=None, constant=False):
         >>> mg.full_like(y, 0.1)
         Tensor([ 0.1,  0.1,  0.1,  0.1,  0.1,  0.1])
     """
-    if isinstance(other, Tensor):
-        other = other.data
-
-    return Tensor(np.full_like(other, fill_value, dtype), constant=constant)
+    return Tensor(np.full_like(asarray(other), fill_value, dtype), constant=constant)
 
 
 def arange(stop, start=0, step=1, dtype=None, constant=False):
