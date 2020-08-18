@@ -73,6 +73,17 @@ def _check_min_max(min_val, min_dim, max_dim, param_name, max_val=None):
         )
 
 
+class VerboseTensor(Tensor):
+    def __repr__(self):
+        repr_ = repr(self.data).replace("array", "Tensor").replace("\n", "\n ")
+        replacement = f", constant={self.constant}"
+        if self.grad is not None:
+            replacement += f", grad={repr(self.grad)}"
+        replacement += ")"
+        repr_ = repr_.replace(")", replacement)
+        return repr_
+
+
 @st.composite
 def tensors(
     draw: Any,
@@ -189,7 +200,7 @@ def tensors(
     )  # type: np.ndarray
     constant = draw(constant) if isinstance(constant, st.SearchStrategy) else constant
 
-    tensor = Tensor(x, constant=constant)
+    tensor = VerboseTensor(x, constant=constant)
     if include_grad:
         if grad_dtype is None:
             grad_dtype = x.dtype
@@ -221,6 +232,7 @@ def tensors(
                 f"but `include_grad` is False."
             )
 
+    # setattr(tensor, "__repr__", _verbose_repr)
     return tensor
 
 
