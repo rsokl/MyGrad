@@ -13,7 +13,7 @@ def asarray(a, dtype=None, order=None) -> np.ndarray:
     Parameters
     ----------
     a : array_like
-        Input data, in any form that can be converted to an array.  This
+        Input data, in any form - including a mygrad tensor - that can be converted to an array. This
         includes lists, lists of tuples, tuples, tuples of tuples, tuples
         of lists and ndarrays.
 
