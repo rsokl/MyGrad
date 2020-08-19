@@ -84,7 +84,7 @@ class BatchNorm(Operation):
             N = x.size / x.shape[1]
 
             # all sums carried over non-channel dims
-            # (1/sqrt(var + eps)) * [dl - dl.mean() - (1/N)*x_norm*(x_norm @ dl)
+            # (1/sqrt(var + eps)) * [dL - dL.mean() - (1/N)*x_norm*(x_norm @ dL)
             grad_ = grad - np.mean(grad, axis=normed_dims, keepdims=True)
 
             rterm = self.x_norm * np.reshape(
