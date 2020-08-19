@@ -50,13 +50,14 @@ class BatchNorm(Operation):
         self.variables = tuple(i for i in (x, gamma, beta) if i is not None)
         self.gamma = gamma
         self.beta = beta
+        self.eps = eps
 
         x = x.data
         self.x_norm = None  # required for backprop through gamma
         self.mean = x.mean(axis=normed_dims)
-        self.var = np.einsum(x, range(x.ndim), x, range(x.ndim), [1])
-        self.var /= x.size / x.shape[1]
-        self.var -= self.mean ** 2
+        self.var = x.var(axis=normed_dims)
+        np.clip(self.var, a_min=0, a_max=None, out=self.var)
+
         if eps:
             self.var += eps
 
@@ -83,7 +84,7 @@ class BatchNorm(Operation):
             mean = self.mean.reshape(keepdims_shape)
             var = self.var.reshape(keepdims_shape)
 
-            grad = grad - np.mean(grad, axis=normed_dims, keepdims=True)
+            grad_ = grad - np.mean(grad, axis=normed_dims, keepdims=True)
             x_sub_Ex = x - mean
             rterm = x_sub_Ex / var
             rterm /= x.size / x.shape[1]
@@ -91,14 +92,14 @@ class BatchNorm(Operation):
                 np.einsum(grad, range(x.ndim), x_sub_Ex, range(x.ndim), [1]),
                 keepdims_shape,
             )
-            grad -= rterm
-            grad /= np.sqrt(var)
+            grad_ -= rterm
+            grad_ /= np.sqrt(var)
             if (
                 self.gamma is not None
             ):  # backprop through optional affine transformation
                 gamma = self.gamma.data
-                grad *= gamma.reshape(keepdims_shape)
-            return grad
+                grad_ *= gamma.reshape(keepdims_shape)
+            return grad_
 
         elif index == 1 and self.gamma is not None:  # backprop through gamma
             return np.einsum(grad, range(x.ndim), self.x_norm, range(x.ndim), [1])
