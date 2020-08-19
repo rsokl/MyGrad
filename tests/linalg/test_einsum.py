@@ -8,6 +8,7 @@ import pytest
 from hypothesis import assume, given, settings
 from numpy.testing import assert_allclose
 
+import mygrad as mg
 from mygrad import Tensor
 from mygrad.linalg.funcs import einsum
 
@@ -102,9 +103,9 @@ def test_merge_mappings():
 @given(optimize=bool_strat())
 def test_einsum_static_fwd(optimize):
     """ Check all einsum examples from numpy doc"""
-    a = Tensor(np.arange(25).reshape(5, 5))
-    b = Tensor(np.arange(5))
-    c = Tensor(np.arange(6).reshape(2, 3))
+    a = mg.arange(25).reshape(5, 5)
+    b = mg.arange(5)
+    c = mg.arange(6).reshape(2, 3)
 
     compare_einsum("ii", a, optimize=optimize)
     compare_einsum(a, [0, 0], optimize=optimize)
@@ -227,7 +228,7 @@ def test_redundant_args():
     was added such that einsum will only compute the gradient for such an entry
     once and scale it accordingly.
     """
-    a = Tensor(np.arange(4).reshape(2, 2))
+    a = mg.arange(4).reshape(2, 2)
     a_copy = copy(a)
 
     # check standard summation
@@ -307,7 +308,7 @@ def test_redundant_args():
 
 @given(num=st.integers(1, 10), optimize=bool_strat(), data=st.data())
 def test_einsum_bkwd1(num, optimize, data):
-    x = Tensor(np.random.rand(num))
+    x = mg.random.rand(num)
     y_shape = data.draw(broadcastable_shapes(x.shape, min_dims=1, max_dims=1))
     y = Tensor(np.random.rand(*y_shape))
 
@@ -331,6 +332,9 @@ def test_einsum_bkwd1(num, optimize, data):
     o = einsum("i, i", y, x, optimize=optimize)
     o.backward(grad)
 
+    assert x.grad is not None
+    assert y.grad is not None
+
     dy, dx = numerical_gradient_full(f, y.data, x.data, back_grad=grad)
 
     assert_allclose(x.grad, dx, atol=1e-5, rtol=1e-5)
@@ -345,7 +349,7 @@ def test_einsum_bkwd2(num, optimize, data):
 
     # flip so that leading dim of x is broadcastable with y
     x_shape = data.draw(broadcastable_shapes(y.shape, min_dims=2, max_dims=2))[::-1]
-    x = Tensor(np.random.rand(*x_shape))
+    x = mg.random.rand(*x_shape)
     grad = np.random.rand(x.shape[-1])
 
     o = einsum("ia, i -> a", x, y, optimize=optimize)
@@ -367,17 +371,17 @@ def test_einsum_bkwd2(num, optimize, data):
 )
 def test_einsum_bkwd3(shape, optimize, data):
     script = "ia, ia, i -> a"
-    x = Tensor(np.random.rand(*shape))
+    x = mg.random.rand(*shape)
 
     y_shape = data.draw(
         broadcastable_shapes(shape, min_dims=2, max_dims=2), label="y_shape"
     )
-    y = Tensor(np.random.rand(*y_shape))
+    y = mg.random.rand(*y_shape)
 
     z_shape = data.draw(
         broadcastable_shapes(x.shape[:1], min_dims=1, max_dims=1), label="z_shape"
     )
-    z = Tensor(np.random.rand(*z_shape))
+    z = mg.random.rand(*z_shape)
 
     try:
         o = einsum(script, x, y, z, optimize=optimize)
@@ -406,10 +410,10 @@ def test_einsum_bkwd3(shape, optimize, data):
 def test_einsum_bkwd4(shape, optimize, data):
     script = "ia, i -> "
 
-    x = Tensor(np.random.rand(*shape))
+    x = mg.random.rand(*shape)
 
     y_shape = data.draw(broadcastable_shapes(x.shape[:1], min_dims=1, max_dims=1))
-    y = Tensor(np.random.rand(*y_shape))
+    y = mg.random.rand(*y_shape)
 
     grad = np.random.rand(1).item()
 
@@ -428,8 +432,8 @@ def test_einsum_bkwd4(shape, optimize, data):
 @settings(deadline=2000)
 @given(optimize=bool_strat())
 def test_einsum_bkwd5(optimize):
-    x = Tensor(np.random.rand(5, 3, 4, 6))
-    y = Tensor(np.random.rand(1, 5, 6, 2))
+    x = mg.random.rand(5, 3, 4, 6)
+    y = mg.random.rand(1, 5, 6, 2)
     grad = np.random.rand(1, 3, 4, 2)
 
     def f(x, y):
@@ -448,8 +452,8 @@ def test_einsum_bkwd5(optimize):
 @given(shape=hnp.array_shapes(min_dims=3, max_dims=3), optimize=bool_strat())
 def test_einsum_bkwd6(shape, optimize):
     sig = "ijk, -> j"
-    x = Tensor(np.random.rand(*shape))
-    y = Tensor(np.random.rand(1).item())
+    x = mg.random.rand(*shape)
+    y = mg.random.rand(1)[0]
     grad = np.random.rand(x.shape[1])
 
     o = einsum(sig, x, y, optimize=optimize)
