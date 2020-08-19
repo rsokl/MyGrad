@@ -62,18 +62,18 @@ class BatchNorm(Operation):
             self.var += eps
 
         y = x - self.mean.reshape(keepdims_shape)
-        y /= np.sqrt(self.var).reshape(keepdims_shape)
-
+        self._std = np.sqrt(self.var).reshape(keepdims_shape)  # 1 / sqrt(var + eps)
+        y /= self._std
+        self.x_norm = y
         # optional affine transformation
         if gamma is not None:
-            self.x_norm = y
             gamma = gamma.data
             # must copy `y` to prevent mutation of `self.x_norm`
             y = y * gamma.reshape(keepdims_shape)
 
         if beta is not None:
             beta = beta.data
-            y += beta.reshape(keepdims_shape)
+            y = y + beta.reshape(keepdims_shape)
         return y
 
     def backward_var(self, grad, index, **kwargs):
@@ -81,19 +81,19 @@ class BatchNorm(Operation):
         if index == 0:  # backprop through x
             normed_dims = tuple(i for i in range(x.ndim) if i != 1)
             keepdims_shape = tuple(1 if n != 1 else d for n, d in enumerate(x.shape))
-            mean = self.mean.reshape(keepdims_shape)
-            var = self.var.reshape(keepdims_shape)
+            N = x.size / x.shape[1]
 
+            # all sums carried over non-channel dims
+            # (1/sqrt(var + eps)) * [dl - dl.mean() - (1/N)*x_norm*(x_norm @ dl)
             grad_ = grad - np.mean(grad, axis=normed_dims, keepdims=True)
-            x_sub_Ex = x - mean
-            rterm = x_sub_Ex / var
-            rterm /= x.size / x.shape[1]
-            rterm *= np.reshape(
-                np.einsum(grad, range(x.ndim), x_sub_Ex, range(x.ndim), [1]),
+
+            rterm = self.x_norm * np.reshape(
+                np.einsum(grad, range(x.ndim), self.x_norm, range(x.ndim), [1]),
                 keepdims_shape,
             )
+            rterm /= N
             grad_ -= rterm
-            grad_ /= np.sqrt(var)
+            grad_ /= self._std
             if (
                 self.gamma is not None
             ):  # backprop through optional affine transformation
