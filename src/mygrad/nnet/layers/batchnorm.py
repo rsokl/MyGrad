@@ -62,7 +62,7 @@ class BatchNorm(Operation):
             self.var += eps
 
         y = x - self.mean.reshape(keepdims_shape)
-        self._std = np.sqrt(self.var).reshape(keepdims_shape)  # 1 / sqrt(var + eps)
+        self._std = np.sqrt(self.var).reshape(keepdims_shape)  # sqrt(var + eps)
         y /= self._std
         self.x_norm = y
         # optional affine transformation
@@ -84,7 +84,7 @@ class BatchNorm(Operation):
             N = x.size / x.shape[1]
 
             # all sums carried over non-channel dims
-            # (1/sqrt(var + eps)) * [dL - dL.mean() - (1/N)*x_norm*(x_norm @ dL)
+            # (1/sqrt(var + eps)) * [dL - dL.mean() - (1/N)*x_norm*(x_norm @ dL)]
             grad_ = grad - np.mean(grad, axis=normed_dims, keepdims=True)
 
             rterm = self.x_norm * np.reshape(
