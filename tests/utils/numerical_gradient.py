@@ -172,6 +172,8 @@ def numerical_gradient_full(
     in each variable.
 
     This method requires that `f` be able to operate on complex-valued arrays.
+    Furthermore, `f` must be analytic E.g. any function that uses numpy.abs will
+    not produce the correct numerical derivative.
 
     Parameters
     ----------
