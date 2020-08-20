@@ -10,14 +10,33 @@ from mygrad.nnet.layers.batchnorm import batchnorm
 from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
-def simple_batchnorm(x, eps=None, gamma=None, beta=None):
+def _mean(y, keepdims=False, axis=None, ddof=0):
+    """For use in var"""
+    if isinstance(axis, int):
+        axis = (axis,)
+    N = y.size if axis is None else np.prod([y.shape[i] for i in axis])
+    return y.sum(keepdims=keepdims, axis=axis) / (N - ddof)
+
+
+def _var(x, keepdims=False, axis=None, ddof=0):
+    """Defines variance without using abs. Permits use of
+    complex-step numerical derivative."""
+    return _mean(
+        (x - x.mean(axis=axis, keepdims=True)) ** 2,
+        keepdims=keepdims,
+        axis=axis,
+        ddof=ddof,
+    )
+
+
+def simple_batchnorm(x, gamma=None, beta=None, eps=None):
     axes = [i for i in range(x.ndim)]
     axes.pop(1)  # every axis except 1
     axes = tuple(axes)
     keepdims_shape = tuple(1 if n != 1 else d for n, d in enumerate(x.shape))
 
     mean = mg.mean(x, axis=axes, keepdims=True)
-    var = mg.var(x, axis=axes, keepdims=True)
+    var = _var(x, axis=axes, keepdims=True)
     norm = (x - mean) / mg.sqrt(var + eps)
 
     if gamma is not None:
@@ -119,7 +138,7 @@ def test_batchnorm(x, data):
         assert b2.grad is None
 
 
-def simple_batchnorm_numpy(x, eps, gamma=None, beta=None):
+def simple_batchnorm_numpy(x, gamma=None, beta=None, eps=0):
     return mg.asarray(simple_batchnorm(x, eps=eps, gamma=gamma, beta=beta))
 
 
@@ -128,18 +147,11 @@ def simple_batchnorm_numpy(x, eps, gamma=None, beta=None):
     true_func=simple_batchnorm_numpy,
     num_arrays=1,
     index_to_arr_shapes={0: hnp.array_shapes(min_dims=2, max_dims=4)},
-    kwargs=lambda x: st.fixed_dictionaries(dict(eps=st.floats(1e-20, 1e-8))),
+    kwargs=lambda x: st.fixed_dictionaries(dict(eps=st.floats(1e-20, 1e-1))),
     atol=1e-5,
 )
 def test_batchnorm_fwd():
     pass
-
-
-def f(x, **kwargs):
-    axes = [i for i in range(x.ndim)]
-    axes.pop(1)  # every axis except 1
-    axes = tuple(axes)
-    return np.all(x.var(axes) > 1e-1)
 
 
 @backprop_test_factory(
@@ -147,11 +159,8 @@ def f(x, **kwargs):
     true_func=simple_batchnorm_numpy,
     num_arrays=1,
     index_to_arr_shapes={0: hnp.array_shapes(min_dims=2, max_dims=4)},
-    index_to_bnds={0: (1, 10)},
     kwargs=lambda x: st.fixed_dictionaries(dict(eps=st.floats(1e-10, 1e0))),
-    atol=1,
     vary_each_element=True,
-    assumptions=f,
 )
 def test_batchnorm_bkwd():
     pass
