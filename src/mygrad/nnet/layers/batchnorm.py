@@ -50,7 +50,6 @@ class BatchNorm(Operation):
         self.variables = tuple(i for i in (x, gamma, beta) if i is not None)
         self.gamma = gamma
         self.beta = beta
-        self.eps = eps
 
         x = x.data
         self.x_norm = None  # required for backprop through gamma
