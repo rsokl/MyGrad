@@ -157,7 +157,7 @@ def numerical_gradient(f, *args, back_grad, vary_ind=None, h=1e-20, kwargs=None)
     for n in range(len(args)):
         if vary_ind is not None and n not in vary_ind:
             continue
-        # central difference in variable n
+        # complex-step in variable n
         dvar = f(*gen_fwd_diff(n), **kwargs).imag / h
         grads[n] = reduce_broadcast(back_grad * dvar, args[n].shape)
 
