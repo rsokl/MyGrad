@@ -56,7 +56,6 @@ class BatchNorm(Operation):
         self.x_norm = None  # required for backprop through gamma
         self.mean = x.mean(axis=normed_dims)
         self.var = x.var(axis=normed_dims)
-        np.clip(self.var, a_min=0, a_max=None, out=self.var)
 
         if eps:
             self.var += eps
