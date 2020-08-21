@@ -1,7 +1,7 @@
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
-from hypothesis import given
+from hypothesis import given, settings
 from numpy.testing import assert_allclose, assert_array_equal
 
 import mygrad as mg
@@ -142,24 +142,26 @@ def simple_batchnorm_numpy(x, gamma=None, beta=None, eps=0):
     return mg.asarray(simple_batchnorm(x, eps=eps, gamma=gamma, beta=beta))
 
 
+@settings(deadline=None)
 @fwdprop_test_factory(
     mygrad_func=batchnorm,
     true_func=simple_batchnorm_numpy,
     num_arrays=1,
     index_to_arr_shapes={0: hnp.array_shapes(min_dims=2, max_dims=4)},
-    kwargs=lambda x: st.fixed_dictionaries(dict(eps=st.floats(1e-20, 1e-1))),
+    kwargs=lambda x: st.fixed_dictionaries(dict(eps=st.floats(1e-20, 1e0))),
     atol=1e-5,
 )
 def test_batchnorm_fwd():
     pass
 
 
+@settings(deadline=None)
 @backprop_test_factory(
     mygrad_func=batchnorm,
     true_func=simple_batchnorm_numpy,
     num_arrays=1,
     index_to_arr_shapes={0: hnp.array_shapes(min_dims=2, max_dims=4)},
-    kwargs=lambda x: st.fixed_dictionaries(dict(eps=st.floats(1e-10, 1e0))),
+    kwargs=lambda x: st.fixed_dictionaries(dict(eps=st.floats(1e-20, 1e0))),
     vary_each_element=True,
 )
 def test_batchnorm_bkwd():
