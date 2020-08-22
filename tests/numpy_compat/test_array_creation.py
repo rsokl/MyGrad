@@ -48,9 +48,7 @@ def test_asarray_returns_array_with_expected_data_and_attributes(
     data = convert_input(array_data)
 
     actual = mg.asarray(data, dtype=dtype, order=order)
-    expected = np.asarray(
-        data if not isinstance(data, mg.Tensor) else data.data, dtype=dtype, order=order
-    )
+    expected = np.asarray(data, dtype=dtype, order=order)
 
     assert isinstance(actual, np.ndarray)
     assert_array_equal(actual, expected)
@@ -61,3 +59,14 @@ def test_asarray_returns_array_with_expected_data_and_attributes(
         order = "C"
 
     assert actual.flags[f"{order.capitalize()}_CONTIGUOUS"]
+
+# Test the third example from
+# https://numpy.org/doc/stable/reference/generated/numpy.asarray.html
+def test_asarray_copies_consistently():
+    a = mg.Tensor([1, 2], dtype=np.float32)
+
+    assert np.asarray(a, dtype=np.float32) is a.data
+    assert np.asarray(a, dtype=np.float64) is not a.data
+
+    assert mg.asarray(a, dtype=np.float32) is a.data
+    assert mg.asarray(a, dtype=np.float64) is not a.data
