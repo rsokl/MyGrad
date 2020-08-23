@@ -3,6 +3,9 @@ import mygrad as mg
 import numpy as np
 
 
+# TODO: These tests need to be modified to check that tensor-identity
+# is preserved by the augmented update once #280 is resolved
+# https://github.com/rsokl/MyGrad/pull/280/
 def test_augmented_multiply():
     a = np.arange(9.0).reshape(3, 3)
     expected_grad = np.where(a < 4, 2, 1)
