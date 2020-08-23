@@ -13,6 +13,9 @@ def test_augmented_multiply():
 
     t1 = mg.arange(9.0).reshape(3, 3)
     y = mg.full(t1[t1 < 4].shape, 2.0)
+    # creates a new node in the graph so that `t1` can
+    # effectively mirror `t2` before it was mutated, and
+    # thus store the gradient downstream of the augmented update
     t2 = +t1
     t2[t2 < 4] *= y
     t2.sum().backward()
