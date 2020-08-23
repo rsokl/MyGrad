@@ -100,8 +100,6 @@ def asarray(a, dtype=None, order=None) -> np.ndarray:
     >>> np.asanyarray(a) is a
     True
     """
-    if isinstance(a, Tensor):
-        a = a.data
     return np.asarray(a, dtype=dtype, order=order)
 
 
@@ -1064,6 +1062,9 @@ class Tensor:
         return np.ndarray.__ne__(
             self.data, other.data if isinstance(other, Tensor) else other
         )
+
+    def __array__(self, dtype=None):
+        return np.asarray(self.data, dtype)
 
 
 # set all comparison operators - mirrors ndarray methods
