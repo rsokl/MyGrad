@@ -117,10 +117,10 @@ def test_augmented_power():
 
 def test_augmented_matmul():
     a = np.arange(9.0).reshape(3, 3)
-    t = np.arange(9.0).reshape(3, 3)
+    t = mg.arange(9.0).reshape(3, 3)
 
     try:
         a[a < 4] @= np.arange(4.0)
     except Exception as e:
         with pytest.raises(type(e), match="Use 'a = a @ b' instead of 'a @= b'"):
-            t[a < 4] @= mg.arange(4.0)
+            t[t < 4] @= mg.arange(4.0)
