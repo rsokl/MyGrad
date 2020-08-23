@@ -1063,6 +1063,12 @@ class Tensor:
             self.data, other.data if isinstance(other, Tensor) else other
         )
 
+    def __imatmul__(self, other):
+        raise TypeError(
+            "In-place matrix multiplication is not (yet) supported. "
+            "Use 'a = a @ b' instead of 'a @= b'"
+        )
+
     def __array__(self, dtype=None):
         return np.asarray(self.data, dtype)
 

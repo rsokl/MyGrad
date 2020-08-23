@@ -1,3 +1,4 @@
+import pytest
 from numpy.testing import assert_allclose
 import mygrad as mg
 import numpy as np
@@ -112,3 +113,14 @@ def test_augmented_power():
     assert t2.grad is None and len(t2._ops) == 1 and not t2._accum_ops
     assert t1.grad is None and not t1._ops and not t1._accum_ops
     assert y.grad is None and not y._ops and not y._accum_ops
+
+
+def test_augmented_matmul():
+    a = np.arange(9.0).reshape(3, 3)
+    t = np.arange(9.0).reshape(3, 3)
+
+    try:
+        a[a < 4] @= np.arange(4.0)
+    except Exception as e:
+        with pytest.raises(type(e), match="Use 'a = a @ b' instead of 'a @= b'"):
+            t[a < 4] @= mg.arange(4.0)
