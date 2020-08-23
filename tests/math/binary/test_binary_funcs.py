@@ -1,6 +1,10 @@
 """ Test all binary arithmetic operations, checks for appropriate broadcast behavior"""
+
+import hypothesis.extra.numpy as hnp
+import hypothesis.strategies as st
 import numpy as np
-from hypothesis import settings
+from hypothesis import given, settings
+from numpy.testing import assert_allclose
 
 from mygrad import (
     add,
@@ -12,6 +16,7 @@ from mygrad import (
     power,
     subtract,
 )
+from tests.custom_strategies import tensors
 
 from ...wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
@@ -81,6 +86,36 @@ def test_power_fwd():
 )
 def test_power_bkwd():
     pass
+
+
+@given(
+    t=tensors(
+        dtype=np.float64,
+        shape=hnp.array_shapes(min_dims=0, min_side=0),
+        elements=st.floats(-1e6, 1e6),
+        constant=False,
+    )
+)
+def test_x_pow_0_special_case(t):
+    y = t ** 0
+    y.backward()
+    assert_allclose(y.data, np.ones_like(t))
+    assert_allclose(t.grad, np.zeros_like(t))
+
+
+@given(
+    t=tensors(
+        dtype=np.float64,
+        shape=hnp.array_shapes(min_dims=0, min_side=0),
+        elements=st.floats(1e-10, 1e6),
+        constant=False,
+    )
+)
+def test_0_pow_y_special_case(t):
+    y = 0 ** t
+    y.backward()
+    assert_allclose(y.data, np.zeros_like(t))
+    assert_allclose(t.grad, np.zeros_like(t))
 
 
 @fwdprop_test_factory(mygrad_func=logaddexp, true_func=np.logaddexp, num_arrays=2)
