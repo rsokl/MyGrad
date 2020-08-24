@@ -14,9 +14,13 @@ from mygrad.tensor_core_ops.indexing import (
     _is_bool_array_index,
     _is_int_array_index,
 )
-from tests.custom_strategies import arbitrary_indices
 
-from ..custom_strategies import adv_integer_index, basic_indices, broadcastable_shapes
+from ..custom_strategies import (
+    adv_integer_index,
+    arbitrary_indices,
+    basic_indices,
+    broadcastable_shapes,
+)
 from ..utils.numerical_gradient import numerical_gradient_full
 
 
@@ -74,10 +78,10 @@ class set_item_test_factory:
         self.index_strat = index_strat
         self.value_strat = value_strat
 
-    def __call__(self, f):
-        @given(
-            data=st.data(), x=self.array_strat,
-        )
+    def __call__(self, f: Callable) -> Callable[[], None]:
+        """Wraps an empty function to populate it with the test function"""
+
+        @given(data=st.data(), x=self.array_strat)
         @wraps(f)
         def wrapper(x: np.ndarray, data: st.DataObject):
 
@@ -89,8 +93,8 @@ class set_item_test_factory:
                 assume(False)
                 return
 
-            note("x[index]: {}".format(o))
-            y = data.draw(self.value_strat(o), label="y",)
+            note(f"x[index]: {o}")
+            y = data.draw(self.value_strat(o), label="y")
 
             numpy_x = np.copy(x)
             numpy_y = np.copy(y)
