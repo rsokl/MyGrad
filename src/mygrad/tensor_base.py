@@ -219,11 +219,8 @@ class Tensor:
         self._scalar_only = _scalar_only
         self._creator = _creator  # type: Union[None, Operation]
 
-        if isinstance(x, Tensor):
-            self.data = x.data
-        else:
-            self.data = np.asarray(x, dtype=dtype)
-            self._check_valid_dtype(self.data.dtype)
+        self.data = np.asarray(x, dtype=dtype)
+        self._check_valid_dtype(self.data.dtype)
 
         self.grad = None  # type: Union[None, np.ndarray]
         self._constant = constant

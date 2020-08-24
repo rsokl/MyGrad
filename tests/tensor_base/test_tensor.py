@@ -12,7 +12,7 @@ from mygrad.errors import InvalidBackprop, InvalidGradient
 from mygrad.linalg.ops import MatMul
 from mygrad.math.arithmetic.ops import Add, Divide, Multiply, Negative, Power, Subtract
 from mygrad.operation_base import Operation
-from tests.custom_strategies import everything_except
+from tests.custom_strategies import everything_except, tensors
 from tests.utils import does_not_raise
 
 
@@ -188,7 +188,7 @@ def test_init_data_rand(x):
         elements=st.floats(allow_infinity=False, allow_nan=False),
     )
     | st.floats(allow_infinity=False, allow_nan=False)
-    | st.integers(-100, 100),
+    | st.integers(-100, 100)
 )
 def test_items(x):
     """ verify that tensor.item() mirrors array.item()"""
@@ -235,20 +235,21 @@ def test_init_params(data, creator, constant, scalar_only, dtype, numpy_dtype):
         if np.issubdtype(numpy_dtype, np.floating)
         else st.integers
     )
+    array_strat_args = dict(
+        shape=hnp.array_shapes(max_side=3, max_dims=5),
+        dtype=numpy_dtype,
+        elements=elements(-100, 100),
+    )
     a = data.draw(
-        hnp.arrays(
-            shape=hnp.array_shapes(max_side=3, max_dims=5),
-            dtype=numpy_dtype,
-            elements=elements(-100, 100),
-        ),
+        hnp.arrays(**array_strat_args) | tensors(**array_strat_args),
         label="a",
     )
-    if dtype is not None:
-        a = a.astype(dtype)
 
     tensor = Tensor(
         a, _creator=creator, constant=constant, _scalar_only=scalar_only, dtype=dtype
     )
+
+    a = np.asarray(a, dtype=dtype)
 
     assert tensor.creator is creator
     assert tensor.constant is constant
@@ -525,6 +526,7 @@ def test_clear_graph(x, y, z):
     with raises(InvalidBackprop):
         g.backward()
 
+
 # Tensor has its `__eq__` but not its `__hash__` overridden which leads to subtle
 # problems if it ends up being used in a hashable context. See
 # https://hynek.me/articles/hashes-and-equality/
@@ -532,6 +534,6 @@ def test_clear_graph(x, y, z):
 # error. See also https://github.com/rsokl/MyGrad/pull/276
 def test_no_hash():
     try:
-        {Tensor(3): 'this should not work'}
+        {Tensor(3): "this should not work"}
     except TypeError as e:
         assert str(e) == "unhashable type: 'Tensor'"
