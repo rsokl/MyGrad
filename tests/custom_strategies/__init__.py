@@ -29,6 +29,8 @@ Shape = Tuple[int, ...]
 
 basic_indices = partial(hnp.basic_indices, allow_newaxis=True, allow_ellipsis=True)
 
+array_shapes = hnp.array_shapes
+
 
 def everything_except(
     excluded_types: Union[type, Tuple[type, ...]]
@@ -87,8 +89,10 @@ class VerboseTensor(Tensor):
 @st.composite
 def tensors(
     draw: Any,
-    dtype: Any,
-    shape: Union[int, Shape, st.SearchStrategy[Shape]],
+    dtype: Any = np.float64,
+    shape: Union[int, Shape, st.SearchStrategy[Shape]] = hnp.array_shapes(
+        min_dims=0, min_side=0
+    ),
     *,
     elements: Optional[st.SearchStrategy[Any]] = None,
     fill: Optional[st.SearchStrategy[Any]] = None,
@@ -102,24 +106,25 @@ def tensors(
 
     Parameters
     ----------
-    dtype : Any
-        may be any valid input to :class:`~numpy:numpy.dtype`
+    dtype : Any, optional
+        May be any valid input to :class:`~numpy:numpy.dtype`
         (this includes :class:`~numpy:numpy.dtype` objects), or a strategy that
-      generates such values.
+        generates such values. Default is float64
 
     shape : Union[int, Shape, st.SearchStrategy[Shape]]
-        may be an integer >= 0, a tuple of such integers, or a
-        strategy that generates such values.
+        May be an integer >= 0, a tuple of such integers, or a
+        strategy that generates such values. Default is
+        ``array_shapes(min_dims=0, min_side=0)``.
 
     elements : Optional[st.SearchStrategy[Any]]
-        is a strategy for generating values to put in the array.
+        Is a strategy for generating values to put in the array.
         If it is None a suitable value will be inferred based on the dtype,
         which may give any legal value (including eg ``NaN`` for floats).
         If you have more specific requirements, you should supply your own
         elements strategy.
 
     fill : Optional[st.SearchStrategy[Any]]
-        is a strategy that may be used to generate a single background
+        Is a strategy that may be used to generate a single background
         value for the array. If None, a suitable default will be inferred
         based on the other arguments. If set to
         :func:`~hypothesis.strategies.nothing` then filling
@@ -127,7 +132,7 @@ def tensors(
         independently.
 
     unique : bool, optional (default=False)
-        specifies if the elements of the array should all be
+        Specifies if the elements of the array should all be
         distinct from one another. Note that in this case multiple NaN values
         may still be allowed. If fill is also set, the only valid values for
         it to return are NaN values (anything for which :obj:`numpy:numpy.isnan`
