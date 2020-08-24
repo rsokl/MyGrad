@@ -190,7 +190,7 @@ def test_linear_graph(
 
     # check that gradients are correct
     # dL/d4
-    _check_grad(v4, None if v4.constant else grad)
+    _check_grad(v4, grad)
     # dL/d3 = dL/d4 * d4/d3
     _check_grad(v3, None if v4.constant else grad * 2)
     # dL/d2 = dL/d4 * d4/d3 * d3/d2
