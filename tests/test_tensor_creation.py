@@ -1,9 +1,11 @@
 import hypothesis.strategies as st
 import numpy as np
+from tests.custom_strategies import tensors
+import hypothesis.extra.numpy as hnp
 from hypothesis import given
 from numpy.testing import assert_array_equal
 
-from mygrad import Tensor
+from mygrad import Tensor, astensor
 from mygrad.tensor_creation.funcs import (
     arange,
     empty,
@@ -128,3 +130,16 @@ def test_all_tensor_creation(constant, dtype):
         np.geomspace(3, 7, dtype=dtype),
         constant,
     )
+
+
+@given(t=tensors(dtype=hnp.floating_dtypes(), include_grad=st.booleans()), in_graph=st.booleans())
+def test_astensor_returns_tensor_reference_consistently(t: Tensor, in_graph: bool):
+    if in_graph:
+        t = +t
+    assert astensor(t) is t
+    assert astensor(t).grad is t.grad
+    assert astensor(t).creator is t.creator
+
+    assert astensor(t, dtype=t.dtype) is t
+    assert astensor(t, constant=t.constant) is t
+    assert astensor(t, dtype=t.dtype, constant=t.constant) is t
