@@ -103,6 +103,95 @@ def asarray(a, dtype=None, order=None) -> np.ndarray:
     return np.asarray(a, dtype=dtype, order=order)
 
 
+def astensor(t, dtype=None, constant=None) -> "Tensor":
+    """Convert the input to a tensor.
+
+    A tensor `t` is returned unchanged - its gradient and computational
+    graph state preserved - if dtype and constant are compatible.
+    A copy of the underlying numpy array is created only if dtype is
+    incompatible.
+
+    Parameters
+    ----------
+    t : array_like
+        Input data, in any form that can be converted to a tensor. This
+        includes lists, lists of tuples, tuples, tuples of tuples, tuples
+        of lists and ndarrays.
+
+    dtype : data-type, optional
+        By default, the data-type is inferred from the input data.
+
+    constant : Optional[bool]
+        By default, `constant` is inferred from `t` if `t` is a tensor,
+        otherwise it defaults to `False`.
+
+    Returns
+    -------
+    out : Tensor
+        Tensor interpretation of `a`.  No copy is performed if the input
+        is already a tensor with matching dtype and constant-flag.
+
+    Examples
+    --------
+    Convert a list into an array:
+
+    >>> import mygrad as mg
+    >>> import numpy as np
+    >>> t = [1, 2]
+    >>> mg.astensor(t)
+    Tensor([1, 2])
+
+    Convert an array into a tensor. No copy of the
+    underlying numpy array is created:
+
+    >>> a = np.array([1, 2.])
+    >>> mg.astensor(a)
+    Tensor([1., 2.])
+    >>> a is mg.astensor(a).data
+    True
+
+    Existing tensors are not copied and their gradients and
+    computational graphs are preserved:
+
+    >>> t = 2 * mg.Tensor([1, 2])
+    >>> t2 = mg.astensor(t)
+    >>> t is t2
+    True
+    >>> t.creator is t2.creator
+    True
+
+    If `dtype` is set, a new tensor is created - with copied data - only
+    if dtype does not match:
+
+    >>> t = mg.Tensor([1, 2], dtype=np.float32)
+    >>> mg.astensor(t, dtype=np.float32) is t
+    True
+    >>> mg.astensor(t, dtype=np.float64) is t
+    False
+
+    If `constant` is set, a new tensor is created (with no copy
+    of the underlying data) only if constant doesn't match.
+
+    >>> t = mg.Tensor([1, 2], constant=False)
+    >>> mg.astensor(t, constant=False) is t
+    True
+    >>> mg.astensor(t, constant=True) is t
+    False
+    >>> mg.astensor(t, constant=True).data is t.data
+    True
+    """
+    if (
+        isinstance(t, Tensor)
+        and (constant is None or t.constant is constant)
+        and (dtype is None or (t.dtype == np.dtype(dtype)))
+    ):
+        return t
+    else:
+        if constant is None:
+            constant = t.constant if isinstance(t, Tensor) else False
+        return Tensor(t, dtype=dtype, constant=constant)
+
+
 class Tensor:
     """ A numpy-array-like object capable of serving as a node in a computational
     graph that supports back-propagation of derivatives via the chain rule.
@@ -219,11 +308,8 @@ class Tensor:
         self._scalar_only = _scalar_only
         self._creator = _creator  # type: Union[None, Operation]
 
-        if isinstance(x, Tensor):
-            self.data = x.data
-        else:
-            self.data = np.asarray(x, dtype=dtype)
-            self._check_valid_dtype(self.data.dtype)
+        self.data = np.asarray(x, dtype=dtype)
+        self._check_valid_dtype(self.data.dtype)
 
         self.grad = None  # type: Union[None, np.ndarray]
         self._constant = constant

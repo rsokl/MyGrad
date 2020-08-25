@@ -98,7 +98,7 @@ def tensors(
     fill: Optional[st.SearchStrategy[Any]] = None,
     unique: bool = False,
     constant: Union[bool, st.SearchStrategy[bool]] = st.booleans(),
-    include_grad: bool = False,
+    include_grad: Union[bool, st.SearchStrategy[bool]] = False,
     grad_dtype: Optional[Any] = None,
     grad_elements_bounds: Optional[Tuple[int, int]] = None,
 ) -> st.SearchStrategy[Tensor]:
@@ -206,6 +206,9 @@ def tensors(
     constant = draw(constant) if isinstance(constant, st.SearchStrategy) else constant
 
     tensor = VerboseTensor(x, constant=constant)
+    if isinstance(include_grad, st.SearchStrategy):
+        include_grad = draw(include_grad)
+
     if include_grad:
         if grad_dtype is None:
             grad_dtype = x.dtype

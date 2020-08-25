@@ -1,4 +1,4 @@
-from mygrad.tensor_base import Tensor, asarray  # isort:skip  # avoid an import cycle
+from mygrad.tensor_base import Tensor, asarray, astensor  # isort:skip  # avoid an import cycle
 
 from mygrad.indexing_routines.funcs import *
 from mygrad.linalg.funcs import *
