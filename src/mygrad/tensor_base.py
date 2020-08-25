@@ -108,6 +108,8 @@ def astensor(t, dtype=None, constant=None) -> "Tensor":
 
     A tensor `t` is returned unchanged - its gradient and computational
     graph state preserved - if dtype and constant are compatible.
+    A copy of the underlying numpy array is created only if dtype is
+    incompatible.
 
     Parameters
     ----------
@@ -127,8 +129,7 @@ def astensor(t, dtype=None, constant=None) -> "Tensor":
     -------
     out : Tensor
         Tensor interpretation of `a`.  No copy is performed if the input
-        is already a tensor with matching dtype and constant-flag.  If `a` is a
-        subclass of ndarray, a base class ndarray is returned.
+        is already a tensor with matching dtype and constant-flag.
 
     Examples
     --------
