@@ -8,6 +8,8 @@ Ones and zeros
 .. autosummary::
    :toctree: generated/
 
+   asarray
+   astensor
    ones
    ones_like
    zeros
