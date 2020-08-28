@@ -19,14 +19,10 @@ reliance of a numpy function to produce an array of tensor-scalars will likely p
 Improvements:
 
 - ``x**1`` and ``x**2`` are now special-cased in order to make these common operations more efficient (`#266 <https://github.com/rsokl/MyGrad/pull/266>`_)
-- The derivative of :func:`~mygrad.nnet.losses.focal_loss` was refactored to handle special edge-cases and the
-tests for focal loss were improved to exercise these edge cases (`#269 <https://github.com/rsokl/MyGrad/pull/269>`_)
-- Various improvements to the tests (`#271 <https://github.com/rsokl/MyGrad/pull/271>`_, `#277 <https://github.com/rsokl/MyGrad/pull/277>`_,
-`#290 <https://github.com/rsokl/MyGrad/pull/290>`_, `#284 <https://github.com/rsokl/MyGrad/pull/284>`_, `#289 <https://github.com/rsokl/MyGrad/pull/289>`_,
-`#282 <https://github.com/rsokl/MyGrad/pull/282>`_, `#292 <https://github.com/rsokl/MyGrad/pull/292>`_, `#293 <https://github.com/rsokl/MyGrad/pull/293>`_)
-- The internal mechanism for tracking tensors in computational graph now depends on hashing tensor-IDs instead of hashing tensors directly. The
-fact that tensors could be hashed was due to the fact that its equality specialty methods were being monkey-patched (`#276 <https://github.com/rsokl/MyGrad/pull/276>`_)
-- :func:`~mygrad.nnet.activations.softmax` and :func:`~mygrad.nnet.activations.logsoftmax` now box expose ``axis`` arguments (`#268 <https://github.com/rsokl/MyGrad/pull/268>`_)
+- The derivative of :func:`~mygrad.nnet.losses.focal_loss` was refactored to handle special edge-cases and the tests for focal loss were improved to exercise these edge cases (`#269 <https://github.com/rsokl/MyGrad/pull/269>`_)
+- Various improvements to the tests (`#271 <https://github.com/rsokl/MyGrad/pull/271>`_, `#277 <https://github.com/rsokl/MyGrad/pull/277>`_, `#290 <https://github.com/rsokl/MyGrad/pull/290>`_, `#284 <https://github.com/rsokl/MyGrad/pull/284>`_, `#289 <https://github.com/rsokl/MyGrad/pull/289>`_, `#282 <https://github.com/rsokl/MyGrad/pull/282>`_, `#292 <https://github.com/rsokl/MyGrad/pull/292>`_, `#293 <https://github.com/rsokl/MyGrad/pull/293>`_)
+- The internal mechanism for tracking tensors in computational graph now depends on hashing tensor-IDs instead of hashing tensors directly. The fact that tensors could be hashed was due to the fact that its equality specialty methods were being monkey-patched (`#276 <https://github.com/rsokl/MyGrad/pull/276>`_)
+- :func:`~mygrad.nnet.activations.softmax` and :func:`~mygrad.nnet.activations.logsoftmax` both expose ``axis`` arguments (`#268 <https://github.com/rsokl/MyGrad/pull/268>`_)
 
 Bug fixes:
 
