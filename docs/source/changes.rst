@@ -6,6 +6,41 @@ This is a record of all past mygrad releases and what went into them,
 in reverse chronological order. All previous releases should still be available
 on pip.
 
+.. _v1.9.0:
+
+------------------
+1.9.0 - 2020-08-28
+------------------
+
+The most significant aspect of this release is the implementation of ``Tensor.__array__``, which enables a huge amount
+of cross-compatibility with numpy utilities (`#288 <https://github.com/rsokl/MyGrad/pull/288>`_). Note that any previous
+reliance of a numpy function to produce an array of tensor-scalars will likely produce a standard numpy array instead.
+
+Improvements:
+
+- ``x**1`` and ``x**2`` are now special-cased in order to make these common operations more efficient (`#266 <https://github.com/rsokl/MyGrad/pull/266>`_)
+- The derivative of :func:`~mygrad.nnet.losses.focal_loss` was refactored to handle special edge-cases and the
+tests for focal loss were improved to exercise these edge cases (`#269 <https://github.com/rsokl/MyGrad/pull/269>`_)
+- Various improvements to the tests (`#271 <https://github.com/rsokl/MyGrad/pull/271>`_, `#277 <https://github.com/rsokl/MyGrad/pull/277>`_,
+`#290 <https://github.com/rsokl/MyGrad/pull/290>`_, `#284 <https://github.com/rsokl/MyGrad/pull/284>`_, `#289 <https://github.com/rsokl/MyGrad/pull/289>`_,
+`#282 <https://github.com/rsokl/MyGrad/pull/282>`_, `#292 <https://github.com/rsokl/MyGrad/pull/292>`_, `#293 <https://github.com/rsokl/MyGrad/pull/293>`_)
+- The internal mechanism for tracking tensors in computational graph now depends on hashing tensor-IDs instead of hashing tensors directly. The
+fact that tensors could be hashed was due to the fact that its equality specialty methods were being monkey-patched (`#276 <https://github.com/rsokl/MyGrad/pull/276>`_)
+- :func:`~mygrad.nnet.activations.softmax` and :func:`~mygrad.nnet.activations.logsoftmax` now box expose ``axis`` arguments (`#268 <https://github.com/rsokl/MyGrad/pull/268>`_)
+
+Bug fixes:
+
+-  `0D tensors could not be indexed into <https://github.com/rsokl/MyGrad/issues/272>`_ – e.g. to insert a newaxis (`#273 <https://github.com/rsokl/MyGrad/pull/273>`_)
+- There was a potential numerical instability in :func:`mygrad.nnet.layers.batchnorm` (`#285 <https://github.com/rsokl/MyGrad/pull/285>`_)
+- The ``dtype`` argument in ``Tensor.__init__`` was ignored when the array-like argument, x, was another Tensor-instance (`#294 <https://github.com/rsokl/MyGrad/pull/294>`_)
+
+New features:
+
+- ``Tensor.__array__`` now exposes the tensor's underlying numpy array – this enables a huge amount of cross-compatibility with numpy utilities (`#288 <https://github.com/rsokl/MyGrad/pull/288>`_)
+- Adds :func:`~mygrad.asarray` (`#279 <https://github.com/rsokl/MyGrad/pull/279>`_)
+- Adds :func:`~mygrad.astensor` (`#294 <https://github.com/rsokl/MyGrad/pull/294>`_)
+
+
 .. _v1.8.1:
 
 ------------------
