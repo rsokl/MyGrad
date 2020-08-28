@@ -7,12 +7,13 @@ from typing import Any, Callable, Dict, Optional, Sequence, Tuple, Union
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
-from hypothesis import assume, given
+from hypothesis import assume, given, note
 from hypothesis.strategies import SearchStrategy
 from hypothesis.strategies._internal.lazy import LazyStrategy
 from numpy.testing import assert_allclose, assert_array_equal
 
 from mygrad import Tensor
+from mygrad.operation_base import Operation
 
 from ..utils.numerical_gradient import (
     finite_difference,
@@ -197,7 +198,7 @@ class fwdprop_test_factory:
 
         assert num_arrays > 0
 
-        self.op = mygrad_func
+        self.op = mygrad_func  # type: Operation
         self.true_func = true_func
 
         self.index_to_bnds = index_to_bnds
@@ -305,8 +306,6 @@ class fwdprop_test_factory:
                 **kwargs,
                 constant=constant,
             )
-            tensor_out = o.data
-            true_out = self.true_func(*arrs, **kwargs)
 
             assert isinstance(
                 o, Tensor
@@ -315,6 +314,41 @@ class fwdprop_test_factory:
                 f"`mygrad_func` returned tensor.constant={o.constant}, "
                 f"should be constant={constant or  bool(sum(tensor_constants))}"
             )
+
+            note(f"mygrad output: {o}")
+
+            tensor_out = o.data
+            true_out = self.true_func(*arrs, **kwargs)
+            note(f"numpy output: {repr(true_out)}")
+
+            # check that tensor/array views are consistent
+            for arr in arrs:
+                if np.shares_memory(o, arr):
+                    assert not o.creator.cannot_return_view, (
+                        f"{self.op} returned a view of the input array but "
+                        f"{self.op}.cannot_return_view is True"
+                    )
+                    assert isinstance(
+                        o.base, Tensor
+                    ), f"`output_tensor.base` should be a tensor. Got: {type(o.base)}"
+                    assert o.base.data is arr, (
+                        f"`output_tensor.base` does not point to the correct tensor. "
+                        f"Points to {o.base}, but should point to {Tensor(arr)}"
+                    )
+
+                    assert np.shares_memory(
+                        true_out, arr
+                    ), f"`output_tensor` shares memory with {arr}, but `numpy_out` does not"
+                    break
+            else:
+
+                assert o.base is None, (
+                    f"`output_tensor` is not a view of any inputs thus `output_tensor.base` "
+                    f"should be `None`, got {o.base}"
+                )
+                assert all(
+                    not np.shares_memory(arr, true_out) for arr in arrs
+                ), f"``output_tensor`` does not share memory with any inputs, but `numpy_out` does."
 
             assert_allclose(
                 actual=tensor_out,

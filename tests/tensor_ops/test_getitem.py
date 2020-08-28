@@ -27,8 +27,6 @@ def test_getitem():
 
 
 def get_item(arr, index, constant=False):
-    if not isinstance(arr, Tensor):
-        arr = np.asarray(arr)
     o = arr[index]
     if isinstance(o, Tensor):
         o._constant = constant
@@ -70,6 +68,14 @@ def test_index_0d():
     assert Tensor(3)[None].item() == 3
 
 
+def test_getitem_view_base():
+    x = Tensor(np.asarray(0.0))
+    o = x[(Ellipsis,)]
+    assert o.data.base is o.base.data
+    assert np.shares_memory(o, x.data)
+    assert np.shares_memory(o, x)
+
+
 @fwdprop_test_factory(
     mygrad_func=get_item,
     true_func=get_item,
@@ -78,6 +84,7 @@ def test_index_0d():
         0: hnp.array_shapes(min_side=0, min_dims=0, max_side=6, max_dims=4)
     },
     kwargs=dict(index=basic_index_wrap),
+    permit_0d_array_as_float=False,
 )
 def test_getitem_basicindex_fwdprop():
     pass
@@ -259,6 +266,7 @@ def test_getitem_basic_w_adv_bkprop():
         0: hnp.array_shapes(min_side=0, max_side=4, min_dims=0, max_dims=5)
     },
     kwargs=dict(index=arb_index_wrap),
+    permit_0d_array_as_float=False,
 )
 def test_getitem_arbitraryindex_fwdprop():
     pass

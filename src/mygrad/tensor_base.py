@@ -276,7 +276,14 @@ class Tensor:
     __array_priority__ = 15.0
 
     def __init__(
-        self, x, *, dtype=None, constant=False, _scalar_only=False, _creator=None
+        self,
+        x,
+        *,
+        dtype=None,
+        constant=False,
+        _scalar_only=False,
+        _creator=None,
+        _base: Optional["Tensor"] = None,
     ):
         """
         Parameters
@@ -308,7 +315,7 @@ class Tensor:
         self._scalar_only = _scalar_only
         self._creator = _creator  # type: Union[None, Operation]
 
-        self.data = np.asarray(x, dtype=dtype)
+        self.data = np.asarray(x, dtype=dtype)  # type: np.ndarray
         self._check_valid_dtype(self.data.dtype)
 
         self.grad = None  # type: Union[None, np.ndarray]
@@ -319,6 +326,8 @@ class Tensor:
 
         # track the operations that have contributed to this tensor's gradient during a back-prop
         self._accum_ops = set()  # type: Set[Operation]
+
+        self._base = _base
 
     def astype(
         self, dtype: Union[type, str], *, constant: Optional[bool] = None
@@ -447,7 +456,18 @@ class Tensor:
         for var in tensor_vars:
             scalar_only = scalar_only or (var.scalar_only and not var.constant)
 
-        return cls(op_out, constant=is_const, _creator=f, _scalar_only=scalar_only)
+        if f.cannot_return_view:
+            base = None
+        else:
+            for var in tensor_vars:  # type: Tensor
+                if np.shares_memory(var, op_out):
+                    base = var if var.base is None else var.base
+                    break
+            else:
+                base = None
+        return cls(
+            op_out, constant=is_const, _creator=f, _scalar_only=scalar_only, _base=base
+        )
 
     def backward(self, grad=None):
         """ Compute set or accumulate ``self.grad`` with `grad`, and pass ``self.creator.backward(grad)``.
@@ -970,6 +990,36 @@ class Tensor:
         Tensor([1, 2, 3, 4])
         """
         return Tensor._op(Flatten, self, constant=constant)
+
+    @property
+    def base(self) -> Optional["Tensor"]:
+        """
+        A reference to the base tensor if memory is from other tensor
+
+         Examples
+        --------
+        The base of a tensor that owns its memory is ``None``:
+
+        >>> import mygrad as mg
+        >>> x = mg.arange(5))  # creates a tensor with 3x5x2 (= 30) elements
+        >>> x.base is None
+        True
+
+        Slicing creates a view, whose memory is shared with x:
+
+        >>> y = x[2:]
+        >>> y.base is x
+        True
+        >>> y.data.base is x.base
+        True
+
+        A view of a view has the same base as its "parent"
+
+        >>> z = y[:]
+        >>> z.base is x
+        True
+        """
+        return self._base
 
     @property
     def size(self):
