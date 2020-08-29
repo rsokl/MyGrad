@@ -6,7 +6,7 @@ etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 
 from functools import wraps
 from numbers import Number
-from typing import Optional, Set, Type, Union
+from typing import Optional, Set, Tuple, Type, Union
 
 import numpy as np
 
@@ -386,7 +386,7 @@ class Tensor:
     def _op(
         cls,
         Op: Type[Operation],
-        *input_vars,
+        *input_vars: "Tensor",
         op_args=None,
         op_kwargs=None,
         constant=False,
@@ -465,9 +465,7 @@ class Tensor:
         if f.cannot_return_view:
             base = None
         else:
-            for can_share_mem, var in zip(
-                vars_can_share_mem, tensor_vars
-            ):  # type: Tensor
+            for can_share_mem, var in zip(vars_can_share_mem, tensor_vars):
                 if can_share_mem and np.shares_memory(var, op_out):
                     base = var if var.base is None else var.base
                     break
