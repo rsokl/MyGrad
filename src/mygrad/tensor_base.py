@@ -444,7 +444,7 @@ class Tensor:
                 if var._creator is not None and not var.constant
             )
         )
-        op_out = f(*tensor_vars, *op_args, **op_kwargs)
+        op_out = f(*tensor_vars, *op_args, **op_kwargs)  # type: np.ndarray
 
         if isinstance(f, BroadcastableOp) and not f.scalar_only:
             # if broadcasting occurred: scalar-only -> True
@@ -1019,7 +1019,7 @@ class Tensor:
         >>> y = x[2:]
         >>> y.base is x
         True
-        >>> y.data.base is x.base
+        >>> y.data.base is x.data
         True
 
         A view of a view has the same base as its "parent"
