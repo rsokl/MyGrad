@@ -128,6 +128,5 @@ def test_ranked_margin(
     if isinstance(y, np.ndarray):
         assert_array_equal(y, y_copy, err_msg="`y` was mutated by backward")
 
-    loss_real.null_gradients()
-    assert x1_real.grad is None
-    assert x2_real.grad is None
+    assert not x1_real._ops
+    assert not x2_real._ops
