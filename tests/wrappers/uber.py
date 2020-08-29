@@ -299,13 +299,19 @@ class fwdprop_test_factory:
 
             # execute mygrad and "true" functions. Compare outputs and check mygrad behavior
             tensor_constants = data.draw(
-                st.tuples(*[st.booleans()] * len(arrs)), label="tensor_constants"
+                st.tuples(
+                    *[
+                        st.booleans() if isinstance(a, np.ndarray) else st.just(True)
+                        for a in arrs
+                    ]
+                ),
+                label="tensor_constants",
             )
-            o = self.op(
-                *(Tensor(i, constant=c) for i, c in zip(arrs, tensor_constants)),
-                **kwargs,
-                constant=constant,
+            mygrad_inputs = tuple(
+                Tensor(i, constant=c) if isinstance(i, np.ndarray) else i
+                for i, c in zip(arrs, tensor_constants)
             )
+            o = self.op(*mygrad_inputs, **kwargs, constant=constant,)
 
             assert isinstance(
                 o, Tensor
@@ -314,7 +320,7 @@ class fwdprop_test_factory:
                 f"`mygrad_func` returned tensor.constant={o.constant}, "
                 f"should be constant={constant or  bool(sum(tensor_constants))}"
             )
-
+            note(f"arrs: {arrs}")
             note(f"mygrad output: {o}")
 
             tensor_out = o.data
@@ -322,7 +328,7 @@ class fwdprop_test_factory:
             note(f"numpy output: {repr(true_out)}")
 
             # check that tensor/array views are consistent
-            for arr in arrs:
+            for arr in mygrad_inputs:
                 if np.shares_memory(o, arr):
                     assert not o.creator.cannot_return_view, (
                         f"{self.op} returned a view of the input array but "
@@ -331,7 +337,7 @@ class fwdprop_test_factory:
                     assert isinstance(
                         o.base, Tensor
                     ), f"`output_tensor.base` should be a tensor. Got: {type(o.base)}"
-                    assert o.base.data is arr, (
+                    assert o.base is arr, (
                         f"`output_tensor.base` does not point to the correct tensor. "
                         f"Points to {o.base}, but should point to {Tensor(arr)}"
                     )
