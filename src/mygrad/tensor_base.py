@@ -1012,7 +1012,7 @@ class Tensor:
         The base of a tensor that owns its memory is ``None``:
 
         >>> import mygrad as mg
-        >>> x = mg.arange(5))  # creates a tensor with 3x5x2 (= 30) elements
+        >>> x = mg.arange(5)
         >>> x.base is None
         True
 
