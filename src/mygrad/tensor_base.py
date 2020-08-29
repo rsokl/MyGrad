@@ -422,8 +422,11 @@ class Tensor:
         if op_kwargs is None:
             op_kwargs = dict()
 
+        vars_can_share_mem = (
+            isinstance(var, (np.ndarray, Tensor)) for var in input_vars
+        )
         tensor_vars = tuple(
-            cls(var, constant=True) if not isinstance(var, cls) else var
+            cls(var, constant=True) if not isinstance(var, Tensor) else var
             for var in input_vars
         )
 
@@ -459,8 +462,10 @@ class Tensor:
         if f.cannot_return_view:
             base = None
         else:
-            for var in tensor_vars:  # type: Tensor
-                if np.shares_memory(var, op_out):
+            for can_share_mem, var in zip(
+                vars_can_share_mem, tensor_vars
+            ):  # type: Tensor
+                if can_share_mem and np.shares_memory(var, op_out):
                     base = var if var.base is None else var.base
                     break
             else:
@@ -817,6 +822,8 @@ class Tensor:
             op_kwargs=op_kwargs,
             constant=constant,
         )
+        if out.base is old_tensor:
+            out._base = None
         self._mirror_tensor(out)
 
     def __setitem__(self, key, value):
