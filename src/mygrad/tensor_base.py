@@ -192,6 +192,11 @@ def astensor(t, dtype=None, constant=None) -> "Tensor":
         return Tensor(t, dtype=dtype, constant=constant)
 
 
+def _null_grad(tensor: "Tensor") -> "Tensor":
+    tensor.grad = None
+    return tensor
+
+
 class Tensor:
     """ A numpy-array-like object capable of serving as a node in a computational
     graph that supports back-propagation of derivatives via the chain rule.
@@ -429,7 +434,7 @@ class Tensor:
             isinstance(var, (np.ndarray, Tensor)) for var in input_vars
         )
         tensor_vars = tuple(
-            cls(var, constant=True) if not isinstance(var, Tensor) else var
+            cls(var, constant=True) if not isinstance(var, Tensor) else _null_grad(var)
             for var in input_vars
         )
 
@@ -481,6 +486,9 @@ class Tensor:
         the preceding nodes in the computational graph. Thus a node, ``a``, will have the attribute
         ``self.grad`` return the total derivative `d(self)/da`.
 
+        Once back-propagation is finished, the present tensor is removed from all computational
+        graphs, and the preceding graph is cleared.
+
         Parameters
         ----------
         grad : Optional[array_like]
@@ -511,8 +519,8 @@ class Tensor:
         >>> x.grad # df/dx = df/dw * dw/dx
         array(6.)
         """
-        if self._constant:
-            return
+        if self.constant:
+            self.clear_graph()
 
         if grad is not None:
             self.grad = asarray(grad)
@@ -540,6 +548,8 @@ class Tensor:
 
         if self.creator is not None:
             self._backward(graph=self.creator.graph)
+
+        self.clear_graph()
 
     def _backward(self, *, graph):
         """
@@ -569,14 +579,15 @@ class Tensor:
             f"\ntensor-shape: {self.shape}"
             f"\ngrad-shape: {self.grad.shape}"
         )
-        if self._creator is not None and not bool(
-            graph & (self._ops - self._accum_ops)
-        ):
+        if self.creator is not None and not bool(graph & (self._ops - self._accum_ops)):
             self._accum_ops.clear()
             self._creator.backward(self.grad, graph=graph)
 
     def null_gradients(self, clear_graph=True):
         """
+        Deprecated! Tensors will automatically have their computational graphs cleared during backprop,
+        and involving a tensor in a new computational graph will null its gradient.
+
         Sets the gradient for this tensor and for all preceding tensors in the computation graph
         to ``None``.
 
@@ -610,57 +621,26 @@ class Tensor:
         >>> all(tensor.grad is None for tensor in (f, w , x, y))
         True
         """
-        self._null_gradients(clear_graph=clear_graph, seen=set())
-
-    def _null_gradients(self, *, clear_graph: bool, seen: Set["Tensor"]):
-        """
-        Nulls gradients using depth-first graph traversal
-
-        Parameters
-        ----------
-        clear_graph : bool, optional (default=True)
-            If ``True`` clear the computational graph in addition to nulling the gradients.
-
-        seen : Set[Tensor]
-            The set of all Tensors already visited during null-gradients traversal"""
         self.grad = None
-
-        if self._creator is None:
-            return
-
-        if not clear_graph:
-            assert isinstance(seen, set)
-
-            if id(self) in seen:
-                return
-
-        creator = self._creator
-
-        if clear_graph:
-            # marks tensor as "visited" during clear-graph traversal
-            self._creator = None
-        else:
-            # marks tensor as "visited" during null-gradients graph traversal. Tensors are unhashable,
-            # so we use their ids, since we actually want to be relying on their uniqueness.
-            seen.add(id(self))
-
-        for var in creator.variables:  # type: Tensor
-            if clear_graph:
-                var._ops.clear()
-            var._null_gradients(clear_graph=clear_graph, seen=seen)
+        raise DeprecationWarning("`tensor.null_gradients()` is deprecated")
 
     def clear_graph(self):
         """
-        Clear the computational graph for all of the nodes preceding this tensor.
+        Removes the current tensor – and tensors above it – from their shared
+        computational graph.
+
+        This de-references all operations involved in the graph and the intermediate
+        tensors that were created by it.
         """
-        if self._creator is None:
+        self._ops.clear()
+
+        if self.creator is None:
             return
 
         creator = self._creator
         self._creator = None  # marks tensor as "visited" during graph-traversal
 
         for var in creator.variables:  # type: Tensor
-            var._ops.clear()
             var.clear_graph()
 
     @property
