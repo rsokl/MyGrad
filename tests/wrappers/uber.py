@@ -782,9 +782,9 @@ class backprop_test_factory:
                     arr_i.grad, arr_j.grad
                 ), "two input arrays were propagated views of the same gradient"
 
-            # verify that null_gradients works
-            out.null_gradients()
-            assert all(i.grad is None for i in arrs), "null_gradients failed"
+            # verify that backprop clears the graph
+            assert out.creator is None, "backprop did not clear the graph"
+            assert all(not i._ops for i in arrs), "backprop did not clear the graph"
 
             # check if any of the input-arrays were mutated
             for n, (arr, arr_copy) in enumerate(zip(arrs, arr_copies)):

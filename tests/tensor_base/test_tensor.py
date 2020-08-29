@@ -64,14 +64,17 @@ def test_basic_backward(x: np.ndarray, constant: bool, data: st.DataObject):
     data=hnp.arrays(shape=hnp.array_shapes(), dtype=hnp.floating_dtypes()),
     constant=st.booleans(),
     set_constant=st.booleans() | st.none(),
+    invoke_backward=st.booleans(),
 )
-def test_copy(data, constant, set_constant):
+def test_copy(data, constant, set_constant, invoke_backward):
     x = Tensor(data, constant=constant)
     y = +x
-    y.backward()
+    if invoke_backward:
+        y.backward()
     y_copy = y.copy(set_constant)
 
-    assert y.creator is not None
+    if not invoke_backward:
+        assert y.creator is not None
     assert y.dtype == y_copy.dtype
     assert y_copy.constant is (constant if set_constant is None else set_constant)
     if y.grad is None:
@@ -241,8 +244,7 @@ def test_init_params(data, creator, constant, scalar_only, dtype, numpy_dtype):
         elements=elements(-100, 100),
     )
     a = data.draw(
-        hnp.arrays(**array_strat_args) | tensors(**array_strat_args),
-        label="a",
+        hnp.arrays(**array_strat_args) | tensors(**array_strat_args), label="a",
     )
 
     tensor = Tensor(
@@ -392,67 +394,10 @@ def test_axis_interchange_methods(op: str, constant: bool):
     assert type(method_out.creator) is type(function_out.creator)
 
 
-@given(
-    x=st.floats(min_value=-1e6, max_value=1e6),
-    y=st.floats(min_value=-1e6, max_value=1e6),
-    z=st.floats(min_value=-1e6, max_value=1e6),
-    clear_graph=st.booleans(),
-)
-def test_null_gradients(x, y, z, clear_graph):
-    x = Tensor(x)
-    y = Tensor(y)
-    z = Tensor(z)
-
-    f = x * y + z
-    g = x + z * f * f
-
-    # check side effects
-    unused = 2 * g - f
-    w = 1 * f
-    assert unused is not None
-
-    g.backward()
-    assert x.grad is not None
-    assert y.grad is not None
-    assert z.grad is not None
-    assert f.grad is not None
-    assert g.grad is not None
-    assert len(x._ops) > 0
-    assert len(y._ops) > 0
-    assert len(z._ops) > 0
-    assert len(f._ops) > 0
-    assert len(g._ops) > 0
-    assert w.grad is None
-
-    g.null_gradients(clear_graph=clear_graph)
-    assert x.grad is None
-    assert y.grad is None
-    assert z.grad is None
-    assert f.grad is None
-    assert g.grad is None
-
-    if clear_graph:
-        assert len(x._ops) == 0
-        assert len(y._ops) == 0
-        assert len(z._ops) == 0
-        assert len(f._ops) == 0
-        assert len(g._ops) > 0
-        assert x.creator is None
-        assert y.creator is None
-        assert z.creator is None
-        assert f.creator is None
-        assert g.creator is None
-    else:
-        assert len(x._ops) > 0
-        assert len(y._ops) > 0
-        assert len(z._ops) > 0
-        assert len(f._ops) > 0
-        assert len(g._ops) > 0
-        assert x.creator is None
-        assert y.creator is None
-        assert z.creator is None
-        assert f.creator is not None
-        assert g.creator is not None
+@given(x=tensors(include_grad=st.booleans()), clear_graph=st.booleans())
+def test_null_gradients(x: Tensor, clear_graph: bool):
+    with pytest.raises(DeprecationWarning):
+        x.null_gradients(clear_graph=clear_graph)
 
 
 @settings(deadline=None)
@@ -462,10 +407,6 @@ def test_null_gradients(x, y, z, clear_graph):
     z=st.floats(min_value=-1e-6, max_value=1e6),
 )
 def test_clear_graph(x, y, z):
-    x_orig = x
-    y_orig = y
-    z_orig = z
-
     x = Tensor(x)
     y = Tensor(y)
     z = Tensor(z)
@@ -478,40 +419,8 @@ def test_clear_graph(x, y, z):
     w = 1 * f
     assert unused is not None
 
-    g.backward()
-    assert_allclose(f.grad, 2 * z.data * f.data)
-    assert_allclose(x.grad, 1 + 2 * z.data * f.data * y.data)
-    assert_allclose(y.grad, 2 * z.data * f.data * x.data)
-    assert_allclose(z.grad, f.data ** 2 + z.data * 2 * f.data)
-    assert w.grad is None
-
-    assert_array_equal(x.data, x_orig, err_msg="x was mutated during the operation")
-    assert_array_equal(y.data, y_orig, err_msg="y was mutated during the operation")
-    assert_array_equal(z.data, z_orig, err_msg="z was mutated during the operation")
-
-    # null-gradients without clearing the graph, confirm that backprop still works
-    g.null_gradients(clear_graph=False)
-    g.backward()
-    assert_allclose(f.grad, 2 * z.data * f.data)
-    assert_allclose(x.grad, 1 + 2 * z.data * f.data * y.data)
-    assert_allclose(y.grad, 2 * z.data * f.data * x.data)
-    assert_allclose(z.grad, f.data ** 2 + z.data * 2 * f.data)
-    assert w.grad is None
-
-    assert_array_equal(x.data, x_orig, err_msg="x was mutated during the operation")
-    assert_array_equal(y.data, y_orig, err_msg="y was mutated during the operation")
-    assert_array_equal(z.data, z_orig, err_msg="z was mutated during the operation")
-
-    g.null_gradients(clear_graph=False)
-    w.backward()
-    assert_allclose(x.grad, y.data)
-    assert_allclose(y.grad, x.data)
-    assert_allclose(z.grad, np.array(1.0))
-
     w.clear_graph()
-    assert_allclose(x.grad, y.data)
-    assert_allclose(y.grad, x.data)
-    assert_allclose(z.grad, np.array(1.0))
+
     assert len(g._ops) > 0
     assert g.creator is not None
     assert len(x._ops) == 0
