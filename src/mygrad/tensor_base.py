@@ -305,9 +305,12 @@ class Tensor:
             Signals that self.backward() can only be invoked if self.ndim == 0.
             Should not be set manually by users.
 
-        _creator: Optional[mygrad.Operation]
+        _creator : Optional[mygrad.Operation]
             The operation-instance whose forward pass produced `self`. Should not
             be set manually by users.
+
+        _base : Optional[Tensor]
+            Sets the base tensor that ``self`` is a view of
         """
         if not isinstance(constant, bool):
             raise TypeError(f"`constant` must be a boolean value, got: {constant}")
@@ -1025,6 +1028,16 @@ class Tensor:
 
         >>> z = y[:]
         >>> z.base is x
+        True
+
+        The behavior of ``Tensor.base`` departs from that of ``ndarray.base`` in that
+        mygrad will never create an "internal" tensor to serve as a base; e.g.
+
+        >>> import numpy as np
+        >>> np.reshape(2., (1,)).base
+        array(2.)
+
+        >>> mg.reshape(2., (1,)).base is None
         True
         """
         return self._base
