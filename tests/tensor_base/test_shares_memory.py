@@ -51,3 +51,8 @@ def test_tensor_base_matches_ndarray_base():
     a3 = arr + 1
     assert t3.base is None
     assert a3.base is None
+
+
+def test_views_of_non_arrays_leave_no_base():
+    assert mg.reshape(2.0, (1,)).base is None
+    assert mg.reshape(list(range(9)), (3, 3)).base is None
