@@ -622,7 +622,7 @@ class Tensor:
         >>> all(tensor.grad is None for tensor in (f, w , x, y))
         True
         """
-        self.grad = None
+        # TODO: changes this to a soft warning
         raise DeprecationWarning("`tensor.null_gradients()` is deprecated")
 
     def clear_graph(self):
