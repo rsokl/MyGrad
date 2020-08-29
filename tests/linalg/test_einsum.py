@@ -12,7 +12,7 @@ import mygrad as mg
 from mygrad import Tensor
 from mygrad.linalg.funcs import einsum
 
-from ..custom_strategies import broadcastable_shapes
+from ..custom_strategies import array_shapes, broadcastable_shapes, tensors
 from ..utils.numerical_gradient import numerical_gradient_full
 
 
@@ -466,3 +466,11 @@ def test_einsum_bkwd6(shape, optimize):
 
     assert_allclose(x.grad, dx, atol=1e-6)
     assert_allclose(y.grad, dy, atol=1e-6)
+
+
+@given(
+    x=tensors(shape=st.integers(1, 10).map(lambda x: (x, x))), optimize=st.booleans()
+)
+def test_einsum_can_produce_view(x: Tensor, optimize: bool):
+    y = mg.einsum("ii -> i", x, optimize=optimize)
+    assert y.base is x
