@@ -37,6 +37,7 @@ def test_pow_uses_special_case(power, op):
     true_func=custom_pow,
     num_arrays=1,
     kwargs={"p": partial(any_scalar, p=1)},
+    permit_0d_array_as_float=False,
 )
 def test_pow_1_fwd():
     pass
@@ -56,6 +57,7 @@ def test_pow_1_bkwd():
     mygrad_func=custom_pow,
     true_func=custom_pow,
     num_arrays=1,
+    permit_0d_array_as_float=False,
     kwargs={"p": partial(any_scalar, p=2)},
 )
 def test_pow_2_fwd():
