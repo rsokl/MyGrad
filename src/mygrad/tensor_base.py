@@ -801,6 +801,7 @@ class Tensor:
             constant=self.constant,
             _scalar_only=self._scalar_only,
             _creator=self.creator,
+            _base=self._base,
         )
         old_tensor._ops = self._ops
         old_tensor._accum_ops = self._accum_ops
