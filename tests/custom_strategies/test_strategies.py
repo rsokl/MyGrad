@@ -180,7 +180,7 @@ def test_factors(size: int):
     data=st.data(),
 )
 def test_valid_shapes(arr: np.ndarray, data: st.DataObject):
-    newshape = data.draw(valid_shapes(arr.size), label="newshape")
+    newshape = data.draw(valid_shapes(arr.size, min_len=0), label="newshape")
     arr.reshape(newshape)
 
 
