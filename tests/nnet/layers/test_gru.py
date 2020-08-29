@@ -240,9 +240,9 @@ def test_gru_fwd(X, D, dropout, dtypes, data: st.DataObject):
 
     assert_allclose(X.data, X2.data, **tolerances)
 
-    ls.null_gradients()
+    ls.clear_graph()
     for x in [s, Wz, Wr, Wh, bz, br, bh, X, Uz, Ur, Uh, V]:
-        assert x.grad is None
+        assert not x._ops
 
 
 # There is an occasional overflow in the oracle sigmoid
@@ -372,7 +372,6 @@ def test_gru_backward(
     )
     o = matmul(s[1:], V)
     ls = o.sum()
-    ls.backward()
 
     stt = s2
     all_s = [s0.data]
@@ -404,6 +403,8 @@ def test_gru_backward(
         all_s.append(stt)
         o = matmul(stt, V2)
         ls2 += o.sum()
+
+    ls.backward()
     ls2.backward()
 
     rec_s_grad = np.stack([i.grad for i in all_s[1:]])
@@ -468,8 +469,8 @@ def test_gru_backward(
     else:
         assert X.grad is None
 
-    ls.null_gradients()
-    ls2.null_gradients()
+    ls.clear_graph()
+    ls2.clear_graph()
 
     for x in [s, Wz, Wr, Wh, bz, br, bh, X, Uz, Ur, Uh, V]:
-        assert x.grad is None
+        assert not x._ops

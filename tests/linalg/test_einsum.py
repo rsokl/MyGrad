@@ -324,9 +324,8 @@ def test_einsum_bkwd1(num, optimize, data):
     assert_allclose(x.grad, dx, atol=1e-5, rtol=1e-5)
     assert_allclose(y.grad, dy, atol=1e-5, rtol=1e-5)
 
-    o.null_gradients()
-    assert x.grad is None
-    assert y.grad is None
+    assert not x._ops
+    assert not y._ops
 
     # test broadcasting in reverse direction
     o = einsum("i, i", y, x, optimize=optimize)
@@ -339,8 +338,6 @@ def test_einsum_bkwd1(num, optimize, data):
 
     assert_allclose(x.grad, dx, atol=1e-5, rtol=1e-5)
     assert_allclose(y.grad, dy, atol=1e-5, rtol=1e-5)
-
-    o.null_gradients()
 
 
 @given(num=st.integers(1, 10), optimize=bool_strat(), data=st.data())
