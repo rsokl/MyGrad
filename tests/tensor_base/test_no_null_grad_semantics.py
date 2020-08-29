@@ -47,6 +47,10 @@ def test_backprop_clears_graph(x: Tensor):
             assert_array_equal(
                 x.grad, 2 + 2 * x.data, err_msg="x.grad is not the expected value"
             )
+        else:
+            assert f.grad is None
+            assert y.grad is None
+            assert x.grad is None
         assert not f._ops
         assert not f._accum_ops
         assert f.creator is None

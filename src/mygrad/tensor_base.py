@@ -521,6 +521,7 @@ class Tensor:
         """
         if self.constant:
             self.clear_graph()
+            return
 
         if grad is not None:
             self.grad = asarray(grad)
