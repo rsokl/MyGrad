@@ -12,7 +12,7 @@ import mygrad as mg
 from mygrad import Tensor
 from mygrad.linalg.funcs import einsum
 
-from ..custom_strategies import array_shapes, broadcastable_shapes, tensors
+from ..custom_strategies import broadcastable_shapes, tensors
 from ..utils.numerical_gradient import numerical_gradient_full
 
 
