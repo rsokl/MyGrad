@@ -47,6 +47,10 @@ class Operation:
     # the computational graph up to and including the present operation
     graph = None  # type: Optional[Set[Operation]]
 
+    # can be set to true if the operation is guaranteed to not returns a view
+    # this will reduce some overhead on checking for shared memory
+    cannot_return_view = False  # type: bool
+
     def __call__(self, *input_vars, **kwargs):  # pragma: no cover
         """ Performs a forward pass, f, of this Operation::
 

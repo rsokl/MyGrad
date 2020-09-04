@@ -519,6 +519,8 @@ def valid_shapes(
     if not isinstance(size, int) or size < 0:
         raise ValueError(f"size={size} must be a non-negative integer")
 
+    if min_len == 0 and 1 < size:
+        min_len = 1
     shape_length = draw(st.integers(min_len, max_len))  # type: int
     shape = []  # type: List[int]
     rem = int(size / np.prod(shape))

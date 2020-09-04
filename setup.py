@@ -23,7 +23,7 @@ CLASSIFIERS = [
 ]
 
 INSTALL_REQUIRES = ["numpy >= 1.12"]
-TESTS_REQUIRE = ["pytest >= 3.8", "hypothesis >= 4.53.2", "scipy"]
+TESTS_REQUIRE = ["pytest >= 3.8", "hypothesis >= 5.32.0", "scipy"]
 
 DESCRIPTION = "A sleek auto-differentiation library that wraps numpy."
 LONG_DESCRIPTION = """

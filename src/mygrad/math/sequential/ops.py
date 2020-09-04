@@ -42,7 +42,7 @@ class MaxMin(Operation):
         self.variables = (a,)
 
         if a.ndim == 0:
-            return a.data
+            return np.array(a.data)  # np.max does not permit views -> copy
 
         if hasattr(axis, "__iter__"):
             assert isinstance(axis, tuple)

@@ -20,6 +20,8 @@ __all__ = [
 
 
 class Add(BroadcastableOp):
+    cannot_return_view = True
+
     def __call__(self, a, b):
         """ Performs 'add' forward-pass: f(a,b) -> a + b
 
@@ -41,6 +43,8 @@ class Add(BroadcastableOp):
 
 
 class Subtract(BroadcastableOp):
+    cannot_return_view = True
+
     def __call__(self, a, b):
         """ f(a,b) -> a - b
 
@@ -64,6 +68,8 @@ class Subtract(BroadcastableOp):
 
 
 class Multiply(BroadcastableOp):
+    cannot_return_view = True
+
     def __call__(self, a, b):
         """ Parameters
             ----------
@@ -82,6 +88,8 @@ class Multiply(BroadcastableOp):
 
 
 class Divide(BroadcastableOp):
+    cannot_return_view = True
+
     def __call__(self, a, b):
         """ f(a, b) -> a / b"""
         self.variables = (a, b)
@@ -97,6 +105,8 @@ class Divide(BroadcastableOp):
 
 
 class Reciprocal(BroadcastableOp):
+    cannot_return_view = True
+
     def __call__(self, a):
         """ f(a) -> 1 / a"""
         self.variables = (a,)
@@ -108,6 +118,8 @@ class Reciprocal(BroadcastableOp):
 
 
 class Power(BroadcastableOp):
+    cannot_return_view = True
+
     def __call__(self, a, b):
         """ f(a, b) -> a ** b
 
@@ -129,6 +141,8 @@ class Power(BroadcastableOp):
 
 
 class Square(Operation):
+    cannot_return_view = True
+
     def __call__(self, a):
         """ f(a) -> a ** 2
 
@@ -144,6 +158,8 @@ class Square(Operation):
 
 class Positive(Operation):
     """ f(a) = +a """
+
+    cannot_return_view = True
 
     def __call__(self, a, where=True):
         """
@@ -164,6 +180,8 @@ class Positive(Operation):
 
 class Negative(Operation):
     """ f(a) = -a """
+
+    cannot_return_view = True
 
     def __call__(self, a, where=True):
         """

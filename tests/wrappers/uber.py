@@ -7,12 +7,13 @@ from typing import Any, Callable, Dict, Optional, Sequence, Tuple, Union
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
-from hypothesis import assume, given
+from hypothesis import assume, given, note
 from hypothesis.strategies import SearchStrategy
 from hypothesis.strategies._internal.lazy import LazyStrategy
 from numpy.testing import assert_allclose, assert_array_equal
 
 from mygrad import Tensor
+from mygrad.operation_base import Operation
 
 from ..utils.numerical_gradient import (
     finite_difference,
@@ -197,7 +198,7 @@ class fwdprop_test_factory:
 
         assert num_arrays > 0
 
-        self.op = mygrad_func
+        self.op = mygrad_func  # type: Operation
         self.true_func = true_func
 
         self.index_to_bnds = index_to_bnds
@@ -298,27 +299,58 @@ class fwdprop_test_factory:
 
             # execute mygrad and "true" functions. Compare outputs and check mygrad behavior
             tensor_constants = data.draw(
-                st.tuples(*[st.booleans()] * len(arrs)), label="tensor_constants"
+                st.tuples(
+                    *[
+                        st.booleans() if isinstance(a, np.ndarray) else st.just(True)
+                        for a in arrs
+                    ]
+                ),
+                label="tensor_constants",
             )
-            o = self.op(
-                *(Tensor(i, constant=c) for i, c in zip(arrs, tensor_constants)),
-                **kwargs,
-                constant=constant,
+            mygrad_inputs = tuple(
+                Tensor(i, constant=c) if isinstance(i, np.ndarray) else i
+                for i, c in zip(arrs, tensor_constants)
             )
-            tensor_out = o.data
-            true_out = self.true_func(*arrs, **kwargs)
+            output_tensor = self.op(*mygrad_inputs, **kwargs, constant=constant,)
+
+            note(f"arrs: {arrs}")
+            note(f"mygrad output: {output_tensor}")
+            note(f"mygrad output.base: {output_tensor.base}")
 
             assert isinstance(
-                o, Tensor
-            ), f"`mygrad_func` returned type {type(o)}, should return `mygrad.Tensor`"
-            assert o.constant is constant or bool(sum(tensor_constants)), (
-                f"`mygrad_func` returned tensor.constant={o.constant}, "
+                output_tensor, Tensor
+            ), f"`mygrad_func` returned type {type(output_tensor)}, should return `mygrad.Tensor`"
+            assert output_tensor.constant is constant or bool(sum(tensor_constants)), (
+                f"`mygrad_func` returned tensor.constant={output_tensor.constant}, "
                 f"should be constant={constant or  bool(sum(tensor_constants))}"
             )
 
+            output_array = self.true_func(*arrs, **kwargs)
+            note(f"numpy output: {repr(output_array)}")
+            note(f"numpy output.base: {repr(output_array.base)}")
+
+            assert isinstance(output_tensor.base, (Tensor, type(None)))
+
+            if output_array.base is None is None:
+                assert output_tensor.base is None
+
+            # check that tensor/array views are consistent
+            for input_ind, (tens, arr) in enumerate(zip(mygrad_inputs, arrs)):
+                arr_share = np.shares_memory(output_array, arr)
+                tens_share = np.shares_memory(output_tensor, tens)
+                assert arr_share is tens_share, f"input-{input_ind}"
+
+                if tens_share:
+                    # op returned view of input
+                    assert (output_array.base is arr) is (
+                        output_tensor.base is tens
+                    ), f"input-{input_ind}"
+                    assert output_tensor.base.data is tens.data, f"input-{input_ind}"
+                    assert not output_tensor.creator.cannot_return_view
+
             assert_allclose(
-                actual=tensor_out,
-                desired=true_out,
+                actual=output_tensor,
+                desired=output_array,
                 err_msg="`mygrad_func(x)` and `true_func(x)` produce different results",
                 **self.tolerances,
             )

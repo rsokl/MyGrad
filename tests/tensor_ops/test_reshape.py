@@ -1,13 +1,16 @@
 from functools import partial
 from numbers import Number
 
+import hypothesis.strategies as st
 import numpy as np
 import pytest
+from hypothesis import assume, given
+from numpy.testing import assert_array_equal
 
 from mygrad import reshape
 from mygrad.tensor_base import Tensor
 
-from ..custom_strategies import valid_shapes
+from ..custom_strategies import tensors, valid_shapes
 from ..wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
@@ -20,17 +23,12 @@ def keyword_reshape(arr, newshape, reshaper, **kwargs):
 
 
 def method_tuple_reshape(arr, newshape, reshaper, **kwargs):
-    to_array = np.asarray if reshaper is np.reshape else Tensor
-    if isinstance(arr, Number):
-        arr = to_array(arr)
     return arr.reshape(newshape, **kwargs)
 
 
 def method_unpacked_reshape(arr, newshape, reshaper, **kwargs):
-    to_array = np.asarray if reshaper is np.reshape else Tensor
-    if isinstance(arr, Number):
-        arr = to_array(arr)
-
+    if newshape == tuple():
+        newshape = ((),)
     return (
         arr.reshape(*newshape, **kwargs)
         if isinstance(newshape, tuple)
@@ -51,15 +49,49 @@ def in_place_reshape(arr, newshape, reshaper, **kwargs):
     return arr
 
 
+@given(
+    tensor=tensors(), data=st.data(),
+)
+def test_in_place_reshape(tensor: Tensor, data: st.DataObject):
+    assume(tensor.size)
+
+    array = tensor.data.copy()
+    newshape = data.draw(valid_shapes(tensor.size, min_len=0), label="newshape")
+
+    tensor.shape = newshape
+
+    array.shape = newshape
+    assert_array_equal(array, tensor)
+
+    assert array.base is None
+    assert tensor.base is None
+
+
+@given(
+    tensor=tensors(), data=st.data(),
+)
+def test_in_place_reshape_post_view(tensor: Tensor, data: st.DataObject):
+    assume(tensor.size)
+
+    array = tensor.data.copy()
+    newshape = data.draw(valid_shapes(tensor.size, min_len=0), label="newshape")
+
+    t1 = tensor[...]
+    t1.shape = newshape
+
+    a1 = array[...]
+    a1.shape = newshape
+    assert_array_equal(array, tensor)
+    assert_array_equal(a1, t1)
+
+    assert array.base is None
+    assert tensor.base is None
+    assert a1.base is array
+    assert t1.base is tensor
+
+
 @pytest.mark.parametrize(
-    "reshape_type",
-    [
-        positional_reshape,
-        keyword_reshape,
-        method_tuple_reshape,
-        method_unpacked_reshape,
-        in_place_reshape,
-    ],
+    "reshape_type", [positional_reshape, keyword_reshape],
 )
 def test_reshape_fwd(reshape_type):
     @fwdprop_test_factory(
@@ -68,10 +100,27 @@ def test_reshape_fwd(reshape_type):
         num_arrays=1,
         kwargs=dict(newshape=lambda arrs: valid_shapes(arrs.size)),
     )
-    def test_fwd():
+    def run_fwd():
         pass
 
-    test_fwd()
+    run_fwd()
+
+
+@pytest.mark.parametrize(
+    "reshape_type", [method_tuple_reshape, method_unpacked_reshape],
+)
+def test_method_reshape_fwd(reshape_type):
+    @fwdprop_test_factory(
+        mygrad_func=partial(reshape_type, reshaper=reshape),
+        true_func=partial(reshape_type, reshaper=np.reshape),
+        num_arrays=1,
+        kwargs=dict(newshape=lambda arrs: valid_shapes(arrs.size)),
+        permit_0d_array_as_float=False,
+    )
+    def run_fwd():
+        pass
+
+    run_fwd()
 
 
 @pytest.mark.parametrize(
@@ -89,13 +138,13 @@ def test_reshape_bkwd(reshape_type):
         mygrad_func=partial(reshape_type, reshaper=reshape),
         true_func=partial(reshape_type, reshaper=np.reshape),
         num_arrays=1,
-        kwargs=dict(newshape=lambda arrs: valid_shapes(arrs.size)),
+        kwargs=dict(newshape=lambda arrs: valid_shapes(arrs.size, min_len=0)),
         vary_each_element=True,
     )
-    def test_bkwd():
+    def run_bkwd():
         pass
 
-    test_bkwd()
+    run_bkwd()
 
 
 @pytest.mark.parametrize(

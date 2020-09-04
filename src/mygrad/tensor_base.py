@@ -6,7 +6,7 @@ etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 
 from functools import wraps
 from numbers import Number
-from typing import Optional, Set, Type, Union
+from typing import Optional, Set, Tuple, Type, Union
 
 import numpy as np
 
@@ -276,7 +276,14 @@ class Tensor:
     __array_priority__ = 15.0
 
     def __init__(
-        self, x, *, dtype=None, constant=False, _scalar_only=False, _creator=None
+        self,
+        x,
+        *,
+        dtype=None,
+        constant=False,
+        _scalar_only=False,
+        _creator=None,
+        _base: Optional["Tensor"] = None,
     ):
         """
         Parameters
@@ -298,9 +305,12 @@ class Tensor:
             Signals that self.backward() can only be invoked if self.ndim == 0.
             Should not be set manually by users.
 
-        _creator: Optional[mygrad.Operation]
+        _creator : Optional[mygrad.Operation]
             The operation-instance whose forward pass produced `self`. Should not
             be set manually by users.
+
+        _base : Optional[Tensor]
+            Sets the base tensor that ``self`` is a view of
         """
         if not isinstance(constant, bool):
             raise TypeError(f"`constant` must be a boolean value, got: {constant}")
@@ -308,7 +318,7 @@ class Tensor:
         self._scalar_only = _scalar_only
         self._creator = _creator  # type: Union[None, Operation]
 
-        self.data = np.asarray(x, dtype=dtype)
+        self.data = np.asarray(x, dtype=dtype)  # type: np.ndarray
         self._check_valid_dtype(self.data.dtype)
 
         self.grad = None  # type: Union[None, np.ndarray]
@@ -319,6 +329,8 @@ class Tensor:
 
         # track the operations that have contributed to this tensor's gradient during a back-prop
         self._accum_ops = set()  # type: Set[Operation]
+
+        self._base = _base
 
     def astype(
         self, dtype: Union[type, str], *, constant: Optional[bool] = None
@@ -374,7 +386,7 @@ class Tensor:
     def _op(
         cls,
         Op: Type[Operation],
-        *input_vars,
+        *input_vars: "Tensor",
         op_args=None,
         op_kwargs=None,
         constant=False,
@@ -413,8 +425,11 @@ class Tensor:
         if op_kwargs is None:
             op_kwargs = dict()
 
+        vars_can_share_mem = (
+            isinstance(var, (np.ndarray, Tensor)) for var in input_vars
+        )
         tensor_vars = tuple(
-            cls(var, constant=True) if not isinstance(var, cls) else var
+            cls(var, constant=True) if not isinstance(var, Tensor) else var
             for var in input_vars
         )
 
@@ -429,7 +444,7 @@ class Tensor:
                 if var._creator is not None and not var.constant
             )
         )
-        op_out = f(*tensor_vars, *op_args, **op_kwargs)
+        op_out = f(*tensor_vars, *op_args, **op_kwargs)  # type: np.ndarray
 
         if isinstance(f, BroadcastableOp) and not f.scalar_only:
             # if broadcasting occurred: scalar-only -> True
@@ -447,7 +462,18 @@ class Tensor:
         for var in tensor_vars:
             scalar_only = scalar_only or (var.scalar_only and not var.constant)
 
-        return cls(op_out, constant=is_const, _creator=f, _scalar_only=scalar_only)
+        if f.cannot_return_view:
+            base = None
+        else:
+            for can_share_mem, var in zip(vars_can_share_mem, tensor_vars):
+                if can_share_mem and np.shares_memory(var, op_out):
+                    base = var if var.base is None else var.base
+                    break
+            else:
+                base = None
+        return cls(
+            op_out, constant=is_const, _creator=f, _scalar_only=scalar_only, _base=base
+        )
 
     def backward(self, grad=None):
         """ Compute set or accumulate ``self.grad`` with `grad`, and pass ``self.creator.backward(grad)``.
@@ -776,6 +802,7 @@ class Tensor:
             constant=self.constant,
             _scalar_only=self._scalar_only,
             _creator=self.creator,
+            _base=self._base,
         )
         old_tensor._ops = self._ops
         old_tensor._accum_ops = self._accum_ops
@@ -797,6 +824,8 @@ class Tensor:
             op_kwargs=op_kwargs,
             constant=constant,
         )
+        if out.base is old_tensor:
+            out._base = None
         self._mirror_tensor(out)
 
     def __setitem__(self, key, value):
@@ -970,6 +999,46 @@ class Tensor:
         Tensor([1, 2, 3, 4])
         """
         return Tensor._op(Flatten, self, constant=constant)
+
+    @property
+    def base(self) -> Optional["Tensor"]:
+        """
+        A reference to the base tensor if memory is from other tensor
+
+         Examples
+        --------
+        The base of a tensor that owns its memory is ``None``:
+
+        >>> import mygrad as mg
+        >>> x = mg.arange(5)
+        >>> x.base is None
+        True
+
+        Slicing creates a view, whose memory is shared with x:
+
+        >>> y = x[2:]
+        >>> y.base is x
+        True
+        >>> y.data.base is x.data
+        True
+
+        A view of a view has the same base as its "parent"
+
+        >>> z = y[:]
+        >>> z.base is x
+        True
+
+        The behavior of ``Tensor.base`` departs from that of ``ndarray.base`` in that
+        mygrad will never create an "internal" tensor to serve as a base; e.g.
+
+        >>> import numpy as np
+        >>> np.reshape(2., (1,)).base
+        array(2.)
+
+        >>> mg.reshape(2., (1,)).base is None
+        True
+        """
+        return self._base
 
     @property
     def size(self):
