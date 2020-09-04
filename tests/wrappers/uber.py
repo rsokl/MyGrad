@@ -311,54 +311,46 @@ class fwdprop_test_factory:
                 Tensor(i, constant=c) if isinstance(i, np.ndarray) else i
                 for i, c in zip(arrs, tensor_constants)
             )
-            o = self.op(*mygrad_inputs, **kwargs, constant=constant,)
+            output_tensor = self.op(*mygrad_inputs, **kwargs, constant=constant,)
+
+            note(f"arrs: {arrs}")
+            note(f"mygrad output: {output_tensor}")
+            note(f"mygrad output.base: {output_tensor.base}")
 
             assert isinstance(
-                o, Tensor
-            ), f"`mygrad_func` returned type {type(o)}, should return `mygrad.Tensor`"
-            assert o.constant is constant or bool(sum(tensor_constants)), (
-                f"`mygrad_func` returned tensor.constant={o.constant}, "
+                output_tensor, Tensor
+            ), f"`mygrad_func` returned type {type(output_tensor)}, should return `mygrad.Tensor`"
+            assert output_tensor.constant is constant or bool(sum(tensor_constants)), (
+                f"`mygrad_func` returned tensor.constant={output_tensor.constant}, "
                 f"should be constant={constant or  bool(sum(tensor_constants))}"
             )
-            note(f"arrs: {arrs}")
-            note(f"mygrad output: {o}")
 
-            tensor_out = o.data
-            true_out = self.true_func(*arrs, **kwargs)
-            note(f"numpy output: {repr(true_out)}")
+            output_array = self.true_func(*arrs, **kwargs)
+            note(f"numpy output: {repr(output_array)}")
+            note(f"numpy output.base: {repr(output_array.base)}")
+
+            assert isinstance(output_tensor.base, (Tensor, type(None)))
+
+            if output_array.base is None is None:
+                assert output_tensor.base is None
 
             # check that tensor/array views are consistent
-            for arr in mygrad_inputs:
-                if np.shares_memory(o, arr):
-                    assert not o.creator.cannot_return_view, (
-                        f"{self.op} returned a view of the input array but "
-                        f"{self.op}.cannot_return_view is True"
-                    )
-                    assert isinstance(
-                        o.base, Tensor
-                    ), f"`output_tensor.base` should be a tensor. Got: {type(o.base)}"
-                    assert o.base is arr, (
-                        f"`output_tensor.base` does not point to the correct tensor. "
-                        f"Points to {o.base}, but should point to {Tensor(arr)}"
-                    )
+            for input_ind, (tens, arr) in enumerate(zip(mygrad_inputs, arrs)):
+                arr_share = np.shares_memory(output_array, arr)
+                tens_share = np.shares_memory(output_tensor, tens)
+                assert arr_share is tens_share, f"input-{input_ind}"
 
-                    assert np.shares_memory(
-                        true_out, arr
-                    ), f"`output_tensor` shares memory with {arr}, but `numpy_out` does not"
-                    break
-            else:
-
-                assert o.base is None, (
-                    f"`output_tensor` is not a view of any inputs thus `output_tensor.base` "
-                    f"should be `None`, got {o.base}"
-                )
-                assert all(
-                    not np.shares_memory(arr, true_out) for arr in arrs
-                ), f"``output_tensor`` does not share memory with any inputs, but `numpy_out` does."
+                if tens_share:
+                    # op returned view of input
+                    assert (output_array.base is arr) is (
+                        output_tensor.base is tens
+                    ), f"input-{input_ind}"
+                    assert output_tensor.base.data is tens.data, f"input-{input_ind}"
+                    assert not output_tensor.creator.cannot_return_view
 
             assert_allclose(
-                actual=tensor_out,
-                desired=true_out,
+                actual=output_tensor,
+                desired=output_array,
                 err_msg="`mygrad_func(x)` and `true_func(x)` produce different results",
                 **self.tolerances,
             )

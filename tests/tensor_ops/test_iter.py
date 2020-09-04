@@ -1,4 +1,5 @@
 import hypothesis.extra.numpy as hnp
+import numpy as np
 import pytest
 
 from mygrad.tensor_base import Tensor
@@ -21,6 +22,8 @@ def _sum(x, constant=False):
             # `sum(Tensor([]))` returns 0, which is fine
             out = Tensor(out)
         out._constant = constant
+    else:
+        out = np.asarray(out)  # ensure numpy-output is array
     return out
 
 
