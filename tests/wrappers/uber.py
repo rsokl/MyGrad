@@ -311,19 +311,12 @@ class fwdprop_test_factory:
                 Tensor(i, constant=c) if isinstance(i, np.ndarray) else i
                 for i, c in zip(arrs, tensor_constants)
             )
+
             output_tensor = self.op(*mygrad_inputs, **kwargs, constant=constant,)
 
             note(f"arrs: {arrs}")
             note(f"mygrad output: {output_tensor}")
             note(f"mygrad output.base: {output_tensor.base}")
-
-            assert isinstance(
-                output_tensor, Tensor
-            ), f"`mygrad_func` returned type {type(output_tensor)}, should return `mygrad.Tensor`"
-            assert output_tensor.constant is constant or bool(sum(tensor_constants)), (
-                f"`mygrad_func` returned tensor.constant={output_tensor.constant}, "
-                f"should be constant={constant or  bool(sum(tensor_constants))}"
-            )
 
             output_array = self.true_func(*arrs, **kwargs)
             note(f"numpy output: {repr(output_array)}")
