@@ -271,3 +271,9 @@ def test_tensors_with_grad(
         assert np.all((100 <= tensor.grad) & (tensor.grad <= 200))
     else:
         assert np.all((-10 <= tensor.grad) & (tensor.grad <= 10))
+
+
+@given(t=tensors())
+def test_tensor_owns_memory(t: Tensor):
+    assert t.base is None
+    assert t.data.base is None
