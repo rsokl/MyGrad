@@ -1010,11 +1010,7 @@ class Tensor:
         The base of a tensor that owns its memory is ``None``:
 
         >>> import mygrad as mg
-<<<<<<< HEAD
         >>> x = mg.arange(5)
-=======
-        >>> x = mg.arange(5))  # creates a tensor with 3x5x2 (= 30) elements
->>>>>>> 7d8b7d1... implement Tensor.base
         >>> x.base is None
         True
 
@@ -1023,11 +1019,7 @@ class Tensor:
         >>> y = x[2:]
         >>> y.base is x
         True
-<<<<<<< HEAD
         >>> y.data.base is x.data
-=======
-        >>> y.data.base is x.base
->>>>>>> 7d8b7d1... implement Tensor.base
         True
 
         A view of a view has the same base as its "parent"
@@ -1035,7 +1027,6 @@ class Tensor:
         >>> z = y[:]
         >>> z.base is x
         True
-<<<<<<< HEAD
 
         The behavior of ``Tensor.base`` departs from that of ``ndarray.base`` in that
         mygrad will never create an "internal" tensor to serve as a base; e.g.
@@ -1046,8 +1037,6 @@ class Tensor:
 
         >>> mg.reshape(2., (1,)).base is None
         True
-=======
->>>>>>> 7d8b7d1... implement Tensor.base
         """
         return self._base
 
