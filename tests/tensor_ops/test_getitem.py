@@ -1,11 +1,16 @@
 import hypothesis.extra.numpy as hnp
 import numpy as np
-from hypothesis import settings
+from hypothesis import given, settings
 from numpy.testing import assert_allclose
 
 from mygrad.tensor_base import Tensor
 
-from ..custom_strategies import adv_integer_index, arbitrary_indices, basic_indices
+from ..custom_strategies import (
+    adv_integer_index,
+    arbitrary_indices,
+    basic_indices,
+    tensors,
+)
 from ..wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
@@ -26,9 +31,15 @@ def test_getitem():
     assert_allclose(x.grad, np.array([2, 3, 4]))
 
 
+@given(x=tensors())
+def test_get_item_propagate_constant(x: Tensor):
+    y = x[...]
+    assert y.constant is x.constant
+
+
 def get_item(arr, index, constant=False):
     o = arr[index]
-    if isinstance(o, Tensor):
+    if isinstance(o, Tensor) and constant:
         o._constant = constant
 
     return o
