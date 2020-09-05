@@ -6,7 +6,7 @@ etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 
 from functools import wraps
 from numbers import Number
-from typing import Optional, Set, Tuple, Type, Union
+from typing import Optional, Set, Type, Union
 
 import numpy as np
 
@@ -251,7 +251,7 @@ class Tensor:
     >>> f.grad
     array(1.0)  # df/df
 
-    Once the gradient is computed, the computational graph containing ``x``,
+    Once the gradients are computed, the computational graph containing ``x``,
     ``y``, and ``f`` is cleared automatically. Additionally, involving any
     of these tensors in a new computational graph will automatically null
     their gradients.
