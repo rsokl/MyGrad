@@ -186,7 +186,6 @@ def test_bad_constant_propagation():
             constant = True
         return mg.multiply_sequence(x, y, z, constant=constant)
 
-    # fwd-uber had weird logic for
     @settings(deadline=None, max_examples=5)
     @fwdprop_test_factory(
         num_arrays=3,
@@ -211,14 +210,13 @@ def test_catches_incorrect_op_gradient():
             a = self.variables[index]
             return grad * np.ones_like(a)  # should be: grad * 2 * np.ones_like(a)
 
-    def mul2(x, constant=False):
+    def mul2_wrong_grad(x, constant=False):
         return Tensor._op(Mul2, x, constant=constant)
 
-    def mul2_numpy(x):
-        return 2 * np.asarray(x)
-
     @settings(deadline=None, max_examples=5)
-    @backprop_test_factory(num_arrays=1, mygrad_func=mul2, true_func=mul2_numpy)
+    @backprop_test_factory(
+        num_arrays=1, mygrad_func=mul2_wrong_grad, true_func=lambda x: 2 * x
+    )
     def should_catch_error():
         pass
 
@@ -236,14 +234,15 @@ def test_catches_op_didnt_propagate_grad():
             a = self.variables[index]
             return 2 * np.ones_like(a)  # should be: grad * 2 * np.ones_like(a)
 
-    def mul2(x, constant=False):
+    def mul2_doesnt_prop_incoming_grad(x, constant=False):
         return Tensor._op(Mul2, x, constant=constant)
 
-    def mul2_numpy(x):
-        return 2 * np.asarray(x)
-
     @settings(deadline=None, max_examples=5)
-    @backprop_test_factory(num_arrays=1, mygrad_func=mul2, true_func=mul2_numpy)
+    @backprop_test_factory(
+        num_arrays=1,
+        mygrad_func=mul2_doesnt_prop_incoming_grad,
+        true_func=lambda x: 2 * x,
+    )
     def should_catch_error():
         pass
 
@@ -262,14 +261,13 @@ def test_catches_mutated_gradient():
             grad *= 2 * np.ones_like(a)
             return grad
 
-    def mul2(x, constant=False):
+    def mul2_backprop_mutates_grad(x, constant=False):
         return Tensor._op(Mul2, x, constant=constant)
 
-    def mul2_numpy(x):
-        return 2 * np.asarray(x)
-
     @settings(deadline=None, max_examples=5)
-    @backprop_test_factory(num_arrays=1, mygrad_func=mul2, true_func=mul2_numpy)
+    @backprop_test_factory(
+        num_arrays=1, mygrad_func=mul2_backprop_mutates_grad, true_func=lambda x: 2 * x
+    )
     def should_catch_error():
         pass
 
@@ -288,14 +286,13 @@ def test_catches_backprop_mutated_input():
             a.data *= 3
             return grad * 2 * np.ones_like(a)
 
-    def mul2(x, constant=False):
+    def mul2_backprop_mutates_input(x, constant=False):
         return Tensor._op(Mul2, x, constant=constant)
 
-    def mul2_numpy(x):
-        return 2 * np.asarray(x)
-
     @settings(deadline=None, max_examples=5)
-    @backprop_test_factory(num_arrays=1, mygrad_func=mul2, true_func=mul2_numpy)
+    @backprop_test_factory(
+        num_arrays=1, mygrad_func=mul2_backprop_mutates_input, true_func=lambda x: 2 * x
+    )
     def should_catch_error():
         pass
 
