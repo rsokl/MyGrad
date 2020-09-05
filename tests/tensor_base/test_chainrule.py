@@ -431,9 +431,8 @@ def test_interesting_graph(
     v1_val=st.integers(-2, 2).map(float),
     v2_val=st.integers(-2, 2).map(float),
     grad=st.integers(-2, 2).map(float),
-    dangling_site=st.integers(0, 4).map(
-        lambda x: f"v{5 - x}"
-    ),  # shrink to v5 (simplest pattern)
+    # shrink to v5 (simplest pattern)
+    dangling_site=st.integers(0, 4).map(lambda x: f"v{5 - x}"),
     dangling_const=st.booleans(),
 )
 def test_dynamic_interesting_graph(
