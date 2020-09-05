@@ -292,6 +292,7 @@ class Tensor:
         _scalar_only=False,
         _creator=None,
         _base: Optional["Tensor"] = None,
+        _copy_data: bool = None,
     ):
         """
         Parameters
@@ -326,7 +327,11 @@ class Tensor:
         self._scalar_only = _scalar_only
         self._creator = _creator  # type: Union[None, Operation]
 
-        self.data = np.asarray(x, dtype=dtype)  # type: np.ndarray
+        if _copy_data is None:
+            _copy_data = not constant
+
+        to_array = np.array if _copy_data else np.asarray
+        self.data = to_array(x, dtype=dtype)  # type: np.ndarray
         self._check_valid_dtype(self.data.dtype)
 
         self.grad = None  # type: Union[None, np.ndarray]
@@ -480,7 +485,12 @@ class Tensor:
             else:
                 base = None
         return cls(
-            op_out, constant=is_const, _creator=f, _scalar_only=scalar_only, _base=base
+            op_out,
+            constant=is_const,
+            _creator=f,
+            _scalar_only=scalar_only,
+            _base=base,
+            _copy_data=False,
         )
 
     def backward(self, grad=None):
@@ -812,6 +822,7 @@ class Tensor:
         update the computational graph. The benefit lies purely in convenience
         for the user.
         """
+        # TODO: make sure that a failed in-place op doesn't corrupt the graph
         # old_tensor is the tensor pre-setitem
         old_tensor = Tensor(
             self,
@@ -1240,7 +1251,7 @@ class Tensor:
             "Use 'a = a @ b' instead of 'a @= b'"
         )
 
-    def __array__(self, dtype=None):
+    def __array__(self, dtype=None) -> np.ndarray:
         return np.asarray(self.data, dtype)
 
 

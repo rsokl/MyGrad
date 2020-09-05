@@ -4,7 +4,7 @@ from typing import Union
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
-from hypothesis import given, assume
+from hypothesis import assume, given
 from numpy.testing import assert_array_equal
 
 from mygrad import Tensor, astensor
@@ -143,9 +143,6 @@ def test_astensor_returns_tensor_reference_consistently(t: Tensor, in_graph: boo
     if in_graph:
         t = +t
     assert astensor(t) is t
-    assert astensor(t).grad is t.grad
-    assert astensor(t).creator is t.creator
-
     assert astensor(t, dtype=t.dtype) is t
     assert astensor(t, constant=t.constant) is t
     assert astensor(t, dtype=t.dtype, constant=t.constant) is t
@@ -163,13 +160,13 @@ def test_astensor_with_incompat_constant_still_passes_array_ref(
 
     t2 = astensor(t, constant=not t.constant)
     assert t2 is not t
-    assert t2.data is t.data
+    assert (t2.data is t.data) is t2.constant  # data copied if constant=False
     assert t2.creator is None
 
-    t2 = astensor(t, dtype=t.dtype, constant=not t.constant)
-    assert t2 is not t
-    assert t2.data is t.data
-    assert t2.creator is None
+    t3 = astensor(t, dtype=t.dtype, constant=not t.constant)
+    assert t3 is not t
+    assert (t3.data is t.data) is t3.constant  # data copied if constant=False
+    assert t3.creator is None
 
 
 @given(
