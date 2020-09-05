@@ -320,9 +320,9 @@ class fwdprop_test_factory:
             assert isinstance(
                 output_tensor, Tensor
             ), f"`mygrad_func` returned type {type(output_tensor)}, should return `mygrad.Tensor`"
-            assert output_tensor.constant is constant or bool(sum(tensor_constants)), (
+            assert output_tensor.constant is (constant or all(tensor_constants)), (
                 f"`mygrad_func` returned tensor.constant={output_tensor.constant}, "
-                f"should be constant={constant or  bool(sum(tensor_constants))}"
+                f"should be constant={constant or all(tensor_constants)}"
             )
 
             output_array = self.true_func(*arrs, **kwargs)
