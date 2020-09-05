@@ -41,7 +41,6 @@ def test_maximum_bkwd_equal():
 
     assert_allclose(x.grad, [0.0, 0.0, 1])
     assert_allclose(y.grad, [1.0, 0.0, 0])
-    o.null_gradients()
 
     # ensure branch covered for equal scalars
     x = Tensor(1.0)
@@ -52,7 +51,6 @@ def test_maximum_bkwd_equal():
 
     assert_allclose(x.grad, 0.0)
     assert_allclose(y.grad, 0.0)
-    o.null_gradients()
 
 
 @fwdprop_test_factory(mygrad_func=minimum, true_func=np.minimum, num_arrays=2)
@@ -79,7 +77,6 @@ def test_minimum_bkwd_equal():
 
     assert_allclose(x.grad, [1.0, 0.0, 0.0])
     assert_allclose(y.grad, [0.0, 0.0, 1.0])
-    o.null_gradients()
 
     # ensure branch covered for equal scalars
     x = Tensor(1.0)
@@ -90,7 +87,6 @@ def test_minimum_bkwd_equal():
 
     assert_allclose(x.grad, 0.0)
     assert_allclose(y.grad, 0.0)
-    o.null_gradients()
 
 
 def to_min_max(arr: np.ndarray) -> st.SearchStrategy:

@@ -23,6 +23,7 @@ from numpy.testing import assert_allclose, assert_equal
 from pytest import raises
 
 from mygrad import Tensor, add, multiply
+from mygrad.errors import InvalidBackprop
 
 from .simple_graph import Node, _add, _multiply
 
@@ -64,30 +65,20 @@ class GraphCompare(RuleBasedStateMachine):
         """
         Combine any pair of nodes (tensors) using either addition or multiplication, producing
         a new node (tensor)"""
-        n_a, t_a = a
-        n_b, t_b = b
+        n_a, t_a = a  # type: Node, Tensor
+        n_b, t_b = b  # type: Node, Tensor
         n_op = self.str_to_node_op[op]
         t_op = self.str_to_tensor_op[op]
         out = (n_op(n_a, n_b, constant=constant), t_op(t_a, t_b, constant=constant))
         self.node_list.append(out)
         return out
 
-    @rule(items=nodes, clear_graph=st.booleans())
-    def null_gradients(self, items, clear_graph):
-        """
-        Invoke `null_gradients` on the computational graph (naive and mygrad), with
-        `clear_graph=True` specified optionally.
-        """
-        n, t = items
-        n.null_gradients(clear_graph=clear_graph)
-        t.null_gradients(clear_graph=clear_graph)
-
     @rule(items=nodes)
     def clear_graph(self, items):
         """
         Invoke `clear_graph` on the computational graph (naive and mygrad)
         """
-        n, t = items
+        n, t = items  # type: Node, Tensor
         n.clear_graph()
         t.clear_graph()
 
@@ -99,13 +90,11 @@ class GraphCompare(RuleBasedStateMachine):
 
         An exception should be raised if `clear_graph` is invoked anywhere prior to the invoking node.
         """
-        n, t = items
-        n.null_gradients(clear_graph=False)
-        t.null_gradients(clear_graph=False)
+        n, t = items  # type: Node, Tensor
         try:
             n.backward(grad, terminal_node=True)
-        except Exception:
-            with raises(Exception):
+        except InvalidBackprop:
+            with raises(InvalidBackprop):
                 t.backward(grad)
             self.raised = True
         else:

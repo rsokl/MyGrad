@@ -74,6 +74,4 @@ def test_sequential_arithmetic(
             err_msg="tensor-{}".format(n),
         )
 
-    f.null_gradients()
-    assert all(x.grad is None for x in tensors)
     assert all(not x._ops for x in tensors)

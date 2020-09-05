@@ -21,6 +21,10 @@ def _check_grad(t: mg.Tensor, expr: Union[None, np.ndarray, float]):
             assert_allclose(t.grad, expr)
 
 
+def _check_cleared_node(t: mg.Tensor):
+    assert not t._ops and t.creator is None
+
+
 def test_check_grad():
     # forced grad on constant
     x = Tensor(1.0, constant=True)
@@ -206,17 +210,16 @@ def test_linear_graph(
     )
 
     # check that backprop metadata cleared appropriately upon completion of backprop
-    assert not v4._accum_ops and v4.creator is not None
-    assert not v3._accum_ops and v3.creator is not None
-    assert not v2._accum_ops and v2.creator is not None
-    assert not v1._accum_ops and v1.creator is None
+    assert not v4._accum_ops
+    assert not v3._accum_ops
+    assert not v2._accum_ops
+    assert not v1._accum_ops
 
-    # check the null grads & clear graph always propagates through the graph
-    v4.null_gradients(clear_graph=True)
-    assert v4.grad is None and v4.creator is None
-    assert v3.grad is None and not v3._ops and v3.creator is None
-    assert v2.grad is None and not v2._ops and v2.creator is None
-    assert v1.grad is None and not v1._ops and v1.creator is None
+    # check the backprop clears graph & clear graph always propagates through the graph
+    _check_cleared_node(v4)
+    _check_cleared_node(v3)
+    _check_cleared_node(v2)
+    _check_cleared_node(v1)
 
 
 @pytest.mark.parametrize("v1_const", [True, False])
@@ -299,19 +302,18 @@ def test_fanout_graph(
     )
 
     # check that backprop metadata cleared appropriately upon completion of backprop
-    assert not v5._accum_ops and v5.creator is not None
-    assert not v4._accum_ops and v4.creator is not None
-    assert not v3._accum_ops and v3.creator is not None
-    assert not v2._accum_ops and v2.creator is not None
-    assert not v1._accum_ops and v1.creator is None
+    assert not v5._accum_ops
+    assert not v4._accum_ops
+    assert not v3._accum_ops
+    assert not v2._accum_ops
+    assert not v1._accum_ops
 
     # check the null grads & clear graph always propagates through the graph
-    v5.null_gradients(clear_graph=True)
-    assert v5.grad is None and v5.creator is None
-    assert v4.grad is None and not v4._ops and v4.creator is None
-    assert v3.grad is None and not v3._ops and v3.creator is None
-    assert v2.grad is None and not v2._ops and v2.creator is None
-    assert v1.grad is None and not v1._ops and v1.creator is None
+    _check_cleared_node(v5)
+    _check_cleared_node(v4)
+    _check_cleared_node(v3)
+    _check_cleared_node(v2)
+    _check_cleared_node(v1)
 
 
 @pytest.mark.parametrize("v1_const", [True, False])
@@ -406,19 +408,18 @@ def test_interesting_graph(
     _check_grad(v1, v1_grad)
 
     # check that backprop metadata cleared appropriately upon completion of backprop
-    assert not v5._accum_ops and v5.creator is not None
-    assert not v4._accum_ops and v4.creator is not None
-    assert not v3._accum_ops and v3.creator is not None
-    assert not v2._accum_ops and v2.creator is None
-    assert not v1._accum_ops and v1.creator is None
+    assert not v5._accum_ops
+    assert not v4._accum_ops
+    assert not v3._accum_ops
+    assert not v2._accum_ops
+    assert not v1._accum_ops
 
     # check the null grads & clear graph always propagates through the graph
-    v5.null_gradients(clear_graph=True)
-    assert v5.grad is None and v5.creator is None
-    assert v4.grad is None and not v4._ops and v4.creator is None
-    assert v3.grad is None and not v3._ops and v3.creator is None
-    assert v2.grad is None and not v2._ops and v2.creator is None
-    assert v1.grad is None and not v1._ops and v1.creator is None
+    _check_cleared_node(v5)
+    _check_cleared_node(v4)
+    _check_cleared_node(v3)
+    _check_cleared_node(v2)
+    _check_cleared_node(v1)
 
 
 @pytest.mark.parametrize("v1_const", [True, False])
@@ -430,9 +431,8 @@ def test_interesting_graph(
     v1_val=st.integers(-2, 2).map(float),
     v2_val=st.integers(-2, 2).map(float),
     grad=st.integers(-2, 2).map(float),
-    dangling_site=st.integers(0, 4).map(
-        lambda x: f"v{5 - x}"
-    ),  # shrink to v5 (simplest pattern)
+    # shrink to v5 (simplest pattern)
+    dangling_site=st.integers(0, 4).map(lambda x: f"v{5 - x}"),
     dangling_const=st.booleans(),
 )
 def test_dynamic_interesting_graph(
@@ -529,18 +529,17 @@ def test_dynamic_interesting_graph(
     _check_grad(dead_leaf, None)
 
     # check that backprop metadata cleared appropriately upon completion of backprop
-    assert not v5._accum_ops and v5.creator is not None
-    assert not v4._accum_ops and v4.creator is not None
-    assert not v3._accum_ops and v3.creator is not None
-    assert not v2._accum_ops and v2.creator is None
-    assert not v1._accum_ops and v1.creator is None
+    assert not v5._accum_ops
+    assert not v4._accum_ops
+    assert not v3._accum_ops
+    assert not v2._accum_ops
+    assert not v1._accum_ops
     assert not dead_leaf._accum_ops and dead_leaf.creator is not None
 
     # check the null grads & clear graph always propagates through the graph
-    v5.null_gradients(clear_graph=True)
-    assert v5.grad is None and v5.creator is None
-    assert v4.grad is None and not v4._ops and v4.creator is None
-    assert v3.grad is None and not v3._ops and v3.creator is None
-    assert v2.grad is None and not v2._ops and v2.creator is None
-    assert v1.grad is None and not v1._ops and v1.creator is None
+    _check_cleared_node(v5)
+    _check_cleared_node(v4)
+    _check_cleared_node(v3)
+    _check_cleared_node(v2)
+    _check_cleared_node(v1)
     assert dead_leaf.creator is not None
