@@ -192,11 +192,6 @@ def astensor(t, dtype=None, constant=None) -> "Tensor":
         return Tensor(t, dtype=dtype, constant=constant)
 
 
-def _null_grad(tensor: "Tensor") -> "Tensor":
-    tensor.grad = None
-    return tensor
-
-
 class Tensor:
     """ A numpy-array-like object capable of serving as a node in a computational
     graph that supports back-propagation of derivatives via the chain rule.
@@ -256,13 +251,21 @@ class Tensor:
     >>> f.grad
     array(1.0)  # df/df
 
-    Before utilizing ``x`` and ``y`` in a new computational graph, you must
-    'clear' their stored derivative values. ``f.null_gradients()`` signals
-    ``f`` and all preceding tensors in its computational graph to clear their
-    derivatives.
+    Once the gradient is computed, the computational graph containing ``x``,
+    ``y``, and ``f`` is cleared automatically. Additionally, involving any
+    of these tensors in a new computational graph will automatically null
+    their gradients.
 
-    >>> f.null_gradients()
-    >>> x.grad is None and y.grad is None and f.grad is None
+    >>> 2 * x
+    >>> x.grad is None
+    True
+
+    Or, you can use the ``tensor.null_grad()`` method to manually clear a
+    tensor's gradient
+
+    >>> y.null_grad()
+    Tensor(2.)
+    >>> y.grad is None
     True
 
     Accessing the Underlying NumPy Array
@@ -434,7 +437,7 @@ class Tensor:
             isinstance(var, (np.ndarray, Tensor)) for var in input_vars
         )
         tensor_vars = tuple(
-            cls(var, constant=True) if not isinstance(var, Tensor) else _null_grad(var)
+            cls(var, constant=True) if not isinstance(var, Tensor) else var.null_grad()
             for var in input_vars
         )
 
@@ -584,10 +587,34 @@ class Tensor:
             self._accum_ops.clear()
             self._creator.backward(self.grad, graph=graph)
 
+    def null_grad(self) -> "Tensor":
+        """Sets this tensor's gradient to be ``None``.
+
+        This operation is performed in-place, but a reference to the
+        tensor is returned in order to permit mapping semantics.
+
+        Returns
+        -------
+        self
+
+        Examples
+        --------
+        >>> import  mygrad as mg
+        >>> x = mg.Tensor(2.)
+        >>> (x ** 2).backward()
+        >>> x.grad
+        array(4.)
+        >>> x.null_grad()  # returns a reference of `x`
+        Tensor(2.0)
+        >>> x.grad is None
+        True"""
+        self.grad = None
+        return self
+
     def null_gradients(self, clear_graph=True):
         """
-        Deprecated! Tensors will automatically have their computational graphs cleared during backprop,
-        and involving a tensor in a new computational graph will null its gradient.
+        **Deprecated: Tensors will automatically have their computational graphs cleared during backprop.
+        Simply involving a tensor in a new computational graph will null its gradient.**
 
         Sets the gradient for this tensor and for all preceding tensors in the computation graph
         to ``None``.
@@ -622,8 +649,16 @@ class Tensor:
         >>> all(tensor.grad is None for tensor in (f, w , x, y))
         True
         """
-        # TODO: changes this to a soft warning
-        raise DeprecationWarning("`tensor.null_gradients()` is deprecated")
+        import warnings
+
+        warnings.warn(
+            "`tensor.null_gradients()` is deprecated. A tensor will automatically "
+            "have its gradient nulled if you use it in a new computational graph.",
+            DeprecationWarning,
+        )
+        if clear_graph:  # pragma: no cover
+            self.clear_graph()
+        return None
 
     def clear_graph(self):
         """
