@@ -292,7 +292,7 @@ class Tensor:
         _scalar_only=False,
         _creator=None,
         _base: Optional["Tensor"] = None,
-        _copy_data: bool = None,
+        _copy_data: Optional[bool] = None,
     ):
         """
         Parameters
@@ -320,6 +320,9 @@ class Tensor:
 
         _base : Optional[Tensor]
             Sets the base tensor that ``self`` is a view of
+
+        _copy_data : Optional[bool]
+            Determines if the incoming array-data will be copied
         """
         if not isinstance(constant, bool):
             raise TypeError(f"`constant` must be a boolean value, got: {constant}")
