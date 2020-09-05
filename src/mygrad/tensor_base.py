@@ -109,7 +109,7 @@ def astensor(t, dtype=None, constant=None) -> "Tensor":
     A tensor `t` is returned unchanged - its gradient and computational
     graph state preserved - if dtype and constant are compatible.
     A copy of the underlying numpy array is created only if dtype is
-    incompatible.
+    incompatible or if a non-constant tensor is being created from a constant.
 
     Parameters
     ----------
@@ -169,8 +169,15 @@ def astensor(t, dtype=None, constant=None) -> "Tensor":
     >>> mg.astensor(t, dtype=np.float64) is t
     False
 
-    If `constant` is set, a new tensor is created (with no copy
-    of the underlying data) only if constant doesn't match.
+    Creating a non-constant tensor from a constant tensor will copy
+    the underlying data.
+
+    >>> t = mg.Tensor([1, 2], constant=True)
+    >>> mg.astensor(t, constant=False).data is t.data
+    False
+
+    Otherwise, if `constant` is set, a new tensor is created (with
+    no copy of the underlying data) only if constant doesn't match.
 
     >>> t = mg.Tensor([1, 2], constant=False)
     >>> mg.astensor(t, constant=False) is t
@@ -223,6 +230,19 @@ class Tensor:
     >>> mg.arange(4)    # using numpy-style tensor creation functions
     Tensor([0, 1, 2, 3])
 
+    Creating a non-constant tensor will copy array data:
+
+    >>> import numpy as np
+    >>> arr = np.arange(10.)
+    >>> t_var = Tensor(arr, constant=False)
+    >>> np.shares_memory(arr, t_var)
+    False
+
+    Creating constant tensor will not make a copy of the array data:
+
+    >>> t_const = Tensor(arr, constant=True)
+    >>> np.shares_memory(arr, t_const)
+    True
 
     Forward and Back-Propagation
     ----------------------------
