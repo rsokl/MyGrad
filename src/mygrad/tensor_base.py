@@ -347,6 +347,11 @@ class Tensor:
         if not isinstance(constant, bool):
             raise TypeError(f"`constant` must be a boolean value, got: {constant}")
 
+        assert isinstance(_scalar_only, bool)
+        assert isinstance(_creator, (Operation, type(None)))
+        assert isinstance(_base, (Tensor, type(None)))
+        assert isinstance(_copy_data, (bool, type(None)))
+
         self._scalar_only = _scalar_only
         self._creator = _creator  # type: Union[None, Operation]
 
