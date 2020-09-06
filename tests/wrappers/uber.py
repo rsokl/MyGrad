@@ -311,7 +311,7 @@ class fwdprop_test_factory:
                 Tensor(i, constant=c) if isinstance(i, np.ndarray) else i
                 for i, c in zip(arrs, tensor_constants)
             )
-            output_tensor = self.op(*mygrad_inputs, **kwargs, constant=constant,)
+            output_tensor = self.op(*mygrad_inputs, **kwargs, constant=constant)
 
             note(f"arrs: {arrs}")
             note(f"mygrad output: {output_tensor}")
