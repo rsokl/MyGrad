@@ -2,7 +2,7 @@ from copy import copy
 from functools import wraps
 from itertools import combinations
 from numbers import Real
-from typing import Any, Callable, Dict, Optional, Sequence, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
@@ -664,7 +664,7 @@ class backprop_test_factory:
                     )
                 ).map(list),
                 label="arrays",
-            )
+            )  # type: List[Tensor]
 
             if callable(self.kwargs):
                 kwargs = data.draw(self.kwargs(*arrs), label="kwargs")
@@ -701,7 +701,7 @@ class backprop_test_factory:
 
                 arrs.insert(arr_id, Tensor(v))
 
-            arrs = tuple(arrs)
+            arrs = tuple(arrs)  # type: Tuple[Tensor, ...]
 
             arr_copies = tuple(copy(arr) for arr in arrs)
 
@@ -714,8 +714,20 @@ class backprop_test_factory:
                 for value in self.index_to_no_go.get(i, ()):
                     assume(np.all(arr != value))
 
+            # tracks writeability of tensors prior to involvement in op
+            tensor_writeability = tuple(
+                a.data.flags.writeable for a in arrs
+            )  # type: Tuple[bool, ...]
+
             # forward pass of the function
-            out = self.op(*arrs, **kwargs)
+            out = self.op(*arrs, **kwargs)  # type: Tensor
+
+            assert all(
+                a.data.flags.writeable is False for a in arrs
+            ), "input array memory is not locked by op"
+            assert (
+                out.data.flags.writeable is False
+            ), "output array memory is not locked by op"
 
             # gradient to be backpropped through this operation
             grad = data.draw(
@@ -749,8 +761,12 @@ class backprop_test_factory:
 
             else:
                 numerical_grad = finite_difference
+
+            numpy_arrs = tuple(i.data.copy() for i in arrs)
+            note(f"arrays are writeable: {[a.flags.writeable for a in numpy_arrs]}")
+            note(f"grad is writeable: {grad.flags.writeable}")
             grads_numerical = numerical_grad(
-                self.true_func, *(i.data for i in arrs), back_grad=grad, kwargs=kwargs
+                self.true_func, *numpy_arrs, back_grad=grad, kwargs=kwargs
             )
 
             # check that the analytic and numeric derivatives match
@@ -790,6 +806,13 @@ class backprop_test_factory:
             assert_array_equal(
                 grad, grad_copy, err_msg="`grad` was mutated during backward prop"
             )
+
+            assert tensor_writeability == tuple(
+                a.data.flags.writeable for a in arrs
+            ), "input array memory writeability is not restored after clear-graph"
+            assert (
+                out.data.flags.writeable is True
+            ), "output array memory writeability is not restored after clear-graph"
 
         wrapper._hypothesis_internal_add_digest = get_hypothesis_db_key(
             self,

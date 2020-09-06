@@ -371,7 +371,53 @@ class Tensor:
         # track the operations that have contributed to this tensor's gradient during a back-prop
         self._accum_ops = set()  # type: Set[Operation]
 
-        self._base = _base
+        self._base = _base  # type: Optional[Tensor]
+
+        # used to track original 'writeable' statuses of array data
+        self._data_was_writeable = None  # type: Optional[bool]
+        self._base_data_was_writeable = None  # type: Optional[bool]
+
+    def _lock_writeability(self) -> "Tensor":
+        """Sets the underlying numpy-array (and its base) to be read-only.
+
+        The initial writeability flags of all involved arrays are recorded so
+        that they can be restored via ``self._restore_writeability()``"""
+        if self._data_was_writeable is not None or self.base is not None:
+            return self
+
+        self._data_was_writeable = self.data.flags.writeable
+        self.data.flags.writeable = False
+
+        if self.data.base is not None:
+            self._base_data_was_writeable = self.data.base.flags.writeable
+            self.data.base.flags.writeable = False
+
+        return self
+
+    def _restore_writeability(self):
+        """Restores the writeability flag for the underlying numpy array (and its base)"""
+        if self.base is not None:
+            # A view of an array inherits the writeability of its parent;
+            # however, the writeability of the view is independent of that
+            # of its parent. I.e. toggling the parent's writeability does
+            # not affect the view's writeability.
+            #
+            # Furthermore, the parent's writeability must be restored before
+            # restoring the view's writeability
+            self.base._restore_writeability()
+            self.data.flags.writeable = self.base.data.flags.writeable
+            return
+
+        if self._data_was_writeable is None:
+            return
+
+        # the base-data's writeability must be restored before that of its view's
+        if self._base_data_was_writeable is not None:
+            self.data.base.flags.writeable = self._base_data_was_writeable
+            self._base_data_was_writeable = None
+
+        self.data.flags.writeable = self._data_was_writeable
+        self._data_was_writeable = None
 
     def astype(
         self, dtype: Union[type, str], *, constant: Optional[bool] = None
@@ -470,7 +516,11 @@ class Tensor:
             isinstance(var, (np.ndarray, Tensor)) for var in input_vars
         )
         tensor_vars = tuple(
-            cls(var, constant=True) if not isinstance(var, Tensor) else var.null_grad()
+            (
+                cls(var, constant=True)
+                if not isinstance(var, Tensor)
+                else var.null_grad()
+            )._lock_writeability()
             for var in input_vars
         )
 
@@ -525,7 +575,7 @@ class Tensor:
             _scalar_only=scalar_only,
             _base=base,
             _copy_data=False,
-        )
+        )._lock_writeability()
 
     def backward(self, grad=None):
         """ Compute set or accumulate ``self.grad`` with `grad`, and pass ``self.creator.backward(grad)``.
@@ -712,6 +762,7 @@ class Tensor:
         This de-references all operations involved in the graph and the intermediate
         tensors that were created by it.
         """
+        self._restore_writeability()
         self._ops.clear()
 
         if self.creator is None:

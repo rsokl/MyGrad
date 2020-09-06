@@ -124,9 +124,11 @@ def test_catches_bad_constant_propagation():
 
 def test_catches_mutation_error():
     class Mul2_Mutate(Operation):
-        def __call__(self, tensor):
+        def __call__(self, tensor: Tensor):
             self.variables = (tensor,)
+            tensor.data.flags.writeable = True
             tensor.data *= 2
+            tensor.data.flags.writeable = False
             return tensor.data * 2
 
     def mul2_mutate(x, constant=False):
@@ -282,8 +284,10 @@ def test_catches_backprop_mutated_input():
             return tensor.data * 2
 
         def backward_var(self, grad, index, **kwargs):
-            a = self.variables[index]
+            a = self.variables[index]  # type: Tensor
+            a.data.flags.writeable = True
             a.data *= 3
+            a.data.flags.writeable = False
             return grad * 2 * np.ones_like(a)
 
     def mul2_backprop_mutates_input(x, constant=False):
@@ -292,6 +296,59 @@ def test_catches_backprop_mutated_input():
     @settings(deadline=None, max_examples=5)
     @backprop_test_factory(
         num_arrays=1, mygrad_func=mul2_backprop_mutates_input, true_func=lambda x: 2 * x
+    )
+    def should_catch_error():
+        pass
+
+    with pytest.raises(AssertionError):
+        should_catch_error()
+
+
+def tests_catches_input_tensors_memory_not_locked_by_op():
+    def mul_releases_input_lock(x, y, constant=False):
+        out = mg.multiply(x, y, constant=constant)
+        x._restore_writeability()
+        return out
+
+    @settings(deadline=None, max_examples=5)
+    @backprop_test_factory(
+        num_arrays=2, mygrad_func=mul_releases_input_lock, true_func=lambda x, y: x * y
+    )
+    def should_catch_error():
+        pass
+
+    with pytest.raises(AssertionError):
+        should_catch_error()
+
+
+def tests_catches_output_tensors_memory_not_locked_by_op():
+    def mul_releases_output_lock(x, y, constant=False):
+        out = mg.multiply(x, y, constant=constant)
+        out._restore_writeability()
+        return out
+
+    @settings(deadline=None, max_examples=5)
+    @backprop_test_factory(
+        num_arrays=2, mygrad_func=mul_releases_output_lock, true_func=lambda x, y: x * y
+    )
+    def should_catch_error():
+        pass
+
+    with pytest.raises(AssertionError):
+        should_catch_error()
+
+
+def tests_catches_tensors_memory_writeability_not_restored_after_clear_graph():
+    def mul_deletes_writeability_history_lock(x: Tensor, y: Tensor, constant=False):
+        out = mg.multiply(x, y, constant=constant)
+        x._data_was_writeable = None
+        return out
+
+    @settings(deadline=None, max_examples=5)
+    @backprop_test_factory(
+        num_arrays=2,
+        mygrad_func=mul_deletes_writeability_history_lock,
+        true_func=lambda x, y: x * y,
     )
     def should_catch_error():
         pass
