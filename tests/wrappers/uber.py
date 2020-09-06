@@ -347,10 +347,17 @@ class fwdprop_test_factory:
                 else:
                     assert output_tensor.base is None
 
+            if not all(arr.base is None for arr in arrs):
+                raise ValueError(
+                    "PROBLEM WITH TEST: The arrays drawn for the uber test do not own their "
+                    "own memory. They must own their own memory in order for view-validation "
+                    "to be valid"
+                )
+
             # check that tensor/array views are consistent
             for input_ind, (tens, arr) in enumerate(zip(mygrad_inputs, arrs)):
-                arr_share = np.shares_memory(output_array, arr)
-                tens_share = np.shares_memory(output_tensor, tens)
+                arr_share = output_array.base is arr
+                tens_share = output_tensor.base is tens
                 assert arr_share is tens_share, f"input-{input_ind}"
 
                 if tens_share:

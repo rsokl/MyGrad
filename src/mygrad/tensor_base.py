@@ -31,6 +31,15 @@ from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property
 __all__ = ["Tensor", "asarray"]
 
 
+def _is_view_of(parent: "Tensor", child: np.ndarray) -> bool:
+    if np.shares_memory(parent, child):
+        return True
+    elif child.size == 0 and child.base is not None:
+        if (child.base is parent.data) or (child.base is parent.data.base):
+            return True
+    return False
+
+
 def asarray(a, dtype=None, order=None) -> np.ndarray:
     """Convert the input to an array.
 
@@ -558,7 +567,7 @@ class Tensor:
             base = None
         else:
             for can_share_mem, var in zip(vars_can_share_mem, tensor_vars):
-                if can_share_mem and np.shares_memory(var, op_out):
+                if can_share_mem and _is_view_of(parent=var, child=op_out):
                     base = var if var.base is None else var.base
                     assert not f.cannot_return_view, (
                         f"{f} is marked as being unable to return a view, "

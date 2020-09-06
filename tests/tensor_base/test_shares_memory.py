@@ -56,3 +56,24 @@ def test_tensor_base_matches_ndarray_base():
 def test_views_of_non_arrays_leave_no_base():
     assert mg.reshape(2.0, (1,)).base is None
     assert mg.reshape(list(range(9)), (3, 3)).base is None
+
+
+def test_no_share_memory_view_is_still_view():
+    # an empty array can be a view without sharing memory
+    array = np.array([])
+    array_view = array[tuple()]
+    assert array_view.base is array, "expected numpy behavior does not hold"
+
+    array_view_of_view = array_view[tuple()]
+    assert (
+        array_view_of_view.base is not array_view
+    ), "expected numpy behavior does not hold"
+    assert array_view_of_view.base is array, "expected numpy behavior does not hold"
+
+    tensor = mg.Tensor([])
+    tensor_view = tensor[tuple()]
+    assert tensor_view.base is tensor
+
+    tensor_view_of_view = tensor_view[tuple()]
+    assert tensor_view_of_view.base is not tensor_view
+    assert tensor_view_of_view.base is tensor
