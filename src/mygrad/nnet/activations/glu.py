@@ -40,9 +40,9 @@ def glu(x, axis=-1, constant=False):
     --------
     >>> import mygrad as mg
     >>> from mygrad.nnet.activations import glu
-    >>> x = mg.arange(-5, 5)
+    >>> x = mg.arange(-5., 5.)
     >>> x
-    Tensor([-5, -4, -3, -2, -1,  0,  1,  2,  3,  4])
+    Tensor([-5., -4., -3., -2., -1.,  0.,  1.,  2.,  3.,  4.])
     >>> y = glu(x); y
     Tensor([-2.5       , -2.92423431, -2.64239123, -1.90514825, -0.98201379])
     >>> y.backward()
