@@ -503,15 +503,21 @@ class Tensor:
         for var in tensor_vars:
             scalar_only = scalar_only or (var.scalar_only and not var.constant)
 
+        # determine whether or not op was a view
         if f.cannot_return_view:
             base = None
         else:
             for can_share_mem, var in zip(vars_can_share_mem, tensor_vars):
                 if can_share_mem and np.shares_memory(var, op_out):
                     base = var if var.base is None else var.base
+                    assert not f.cannot_return_view, (
+                        f"{f} is marked as being unable to return a view, "
+                        f"however its output is a view of one of its inputs"
+                    )
                     break
             else:
                 base = None
+
         return cls(
             op_out,
             constant=is_const,
