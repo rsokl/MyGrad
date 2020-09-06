@@ -503,11 +503,9 @@ def multi_matmul(tensors, constant=False):
     # and last arrays
     if ndim_first == 1 and ndim_last == 1:
         result = result[0, 0]
-        result._base = None  # result is only a view of an internal tensor
         return result
     elif ndim_first == 1 or ndim_last == 1:
         result = result.reshape(-1)
-        result._base = None  # result is only a view of an internal tensor
         return result
     else:
         return result

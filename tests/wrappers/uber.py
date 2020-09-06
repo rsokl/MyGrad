@@ -113,6 +113,7 @@ class fwdprop_test_factory:
         rtol: float = 1e-7,
         assumptions: Optional[Callable[..., bool]] = None,
         permit_0d_array_as_float: bool = True,
+        internal_view_is_ok: bool = False,
     ):
         """
         Parameters
@@ -163,7 +164,15 @@ class fwdprop_test_factory:
 
         permit_0d_array_as_float : bool, optional (default=True)
             If True, drawn 0D arrays will potentially be cast to numpy-floats.
+
+        internal_view_is_ok : bool, optional (default=False)
+            If True, it is acceptable for ``tensor_out.base`` to point to an
+            internally-generated Tensor instead of being ``None``. This is useful
+            if a mygrad function needs to take views of tensors.
         """
+        assert isinstance(permit_0d_array_as_float, bool)
+        assert isinstance(internal_view_is_ok, bool)
+
         self.tolerances = dict(atol=atol, rtol=rtol)
         index_to_bnds = _to_dict(index_to_bnds)
         index_to_no_go = _to_dict(index_to_no_go)
@@ -210,6 +219,7 @@ class fwdprop_test_factory:
         self.shapes = shapes
         self.assumptions = assumptions
         self.permit_0d_array_as_float = permit_0d_array_as_float
+        self.internal_view_is_ok = internal_view_is_ok
 
         # stores the indices of the unspecified array shapes
         self.missing_shapes = set(range(self.num_arrays)) - set(
@@ -332,7 +342,10 @@ class fwdprop_test_factory:
             assert isinstance(output_tensor.base, (Tensor, type(None)))
 
             if output_array.base is None is None:
-                assert output_tensor.base is None
+                if self.internal_view_is_ok:
+                    assert all(t is not output_tensor.base for t in mygrad_inputs)
+                else:
+                    assert output_tensor.base is None
 
             # check that tensor/array views are consistent
             for input_ind, (tens, arr) in enumerate(zip(mygrad_inputs, arrs)):
@@ -721,6 +734,10 @@ class backprop_test_factory:
 
             # forward pass of the function
             out = self.op(*arrs, **kwargs)  # type: Tensor
+            look_to = out.base if out.base is not None else out
+            output_was_writeable = bool(
+                look_to._data_was_writeable or look_to._base_data_was_writeable
+            )
 
             assert all(
                 a.data.flags.writeable is False for a in arrs
@@ -763,8 +780,7 @@ class backprop_test_factory:
                 numerical_grad = finite_difference
 
             numpy_arrs = tuple(i.data.copy() for i in arrs)
-            note(f"arrays are writeable: {[a.flags.writeable for a in numpy_arrs]}")
-            note(f"grad is writeable: {grad.flags.writeable}")
+
             grads_numerical = numerical_grad(
                 self.true_func, *numpy_arrs, back_grad=grad, kwargs=kwargs
             )
@@ -811,7 +827,7 @@ class backprop_test_factory:
                 a.data.flags.writeable for a in arrs
             ), "input array memory writeability is not restored after clear-graph"
             assert (
-                out.data.flags.writeable is True
+                out.data.flags.writeable is output_was_writeable
             ), "output array memory writeability is not restored after clear-graph"
 
         wrapper._hypothesis_internal_add_digest = get_hypothesis_db_key(

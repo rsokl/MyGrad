@@ -7,6 +7,7 @@ from numpy.testing import assert_allclose, assert_array_equal
 import mygrad as mg
 from mygrad import Tensor
 from mygrad.nnet.layers.batchnorm import batchnorm
+from tests import as_numpy
 from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
@@ -138,7 +139,7 @@ def test_batchnorm(x, data):
 
 
 def simple_batchnorm_numpy(x, gamma=None, beta=None, eps=0):
-    return mg.asarray(simple_batchnorm(x, eps=eps, gamma=gamma, beta=beta))
+    return as_numpy(simple_batchnorm(x, eps=eps, gamma=gamma, beta=beta))
 
 
 @settings(deadline=None)

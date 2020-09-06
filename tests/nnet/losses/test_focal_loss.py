@@ -7,6 +7,7 @@ from hypothesis import given
 import mygrad as mg
 from mygrad.nnet.activations import softmax
 from mygrad.nnet.losses import focal_loss, softmax_focal_loss
+from tests import as_numpy
 from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
@@ -23,7 +24,7 @@ def numpy_softmax_focal_loss(
     scores: np.ndarray, targets: np.ndarray, alpha: float, gamma: float
 ) -> np.ndarray:
     targets = mg.asarray(targets)
-    scores = softmax(scores).data
+    scores = as_numpy(softmax(scores))
     rows = np.arange(len(scores))
     pc = scores[rows, targets]
     return -alpha * np.clip(1 - pc, a_min=0, a_max=1) ** gamma * np.log(pc)
