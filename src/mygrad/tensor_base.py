@@ -414,7 +414,8 @@ class Tensor:
             # Furthermore, the parent's writeability must be restored before
             # restoring the view's writeability
             self.base._restore_writeability()
-            self.data.flags.writeable = self.base.data.flags.writeable
+            if self.base.data.flags.writeable:
+                self.data.flags.writeable = self.base.data.flags.writeable
             return
 
         if self._data_was_writeable is None:
@@ -422,10 +423,12 @@ class Tensor:
 
         # the base-data's writeability must be restored before that of its view's
         if self._base_data_was_writeable is not None:
-            self.data.base.flags.writeable = self._base_data_was_writeable
+            if self._base_data_was_writeable:
+                self.data.base.flags.writeable = self._base_data_was_writeable
             self._base_data_was_writeable = None
 
-        self.data.flags.writeable = self._data_was_writeable
+        if self._data_was_writeable:
+            self.data.flags.writeable = self._data_was_writeable
         self._data_was_writeable = None
 
     def astype(
