@@ -347,7 +347,9 @@ class fwdprop_test_factory:
                 else:
                     assert output_tensor.base is None
 
-            if not all(arr.base is None for arr in arrs):
+            if not all(
+                not isinstance(arr, np.ndarray) or arr.base is None for arr in arrs
+            ):
                 raise ValueError(
                     "PROBLEM WITH TEST: The arrays drawn for the uber test do not own their "
                     "own memory. They must own their own memory in order for view-validation "
