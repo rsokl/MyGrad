@@ -1,10 +1,22 @@
 import hypothesis.strategies as st
 import numpy as np
+import pytest
 from hypothesis import given
 
 from mygrad import Tensor
 from tests.custom_strategies import tensors
 from tests.utils import flags_to_dict
+
+
+def test_memory_locks_during_graph():
+    x = Tensor([1.0, 2.0])
+    assert x.data.flags.writeable
+
+    y = +x  # should lock memory
+    with pytest.raises(ValueError):
+        x.data *= 1
+    y.backward()  # should release memory
+    x.data *= 1
 
 
 @given(tensor=tensors(shape=(2,), read_only=st.booleans(), constant=False),)
