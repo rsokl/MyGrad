@@ -418,7 +418,7 @@ def test_axis_interchange_methods(op: str, constant: bool):
 
 @given(x=tensors(include_grad=st.booleans()), clear_graph=st.booleans())
 def test_null_gradients(x: Tensor, clear_graph: bool):
-    with pytest.deprecated_call():
+    with pytest.warns(FutureWarning):
         x.null_gradients(clear_graph=clear_graph)
 
 

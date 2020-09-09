@@ -756,13 +756,13 @@ class Tensor:
         import warnings
 
         warnings.warn(
-            "`tensor.null_gradients()` is deprecated. A tensor will automatically "
-            "have its gradient nulled if you use it in a new computational graph.",
-            DeprecationWarning,
+            "`tensor.null_gradients()` is deprecated. Calling it will raise an error "
+            "in future versions of MyGrad. A tensor will automatically "
+            "have its gradient nulled if you use it in a new computational graph. "
+            "Or, you can call `tensor.null_grad()` to null that individual tensor's "
+            "gradient.",
+            FutureWarning,
         )
-        if clear_graph:  # pragma: no cover
-            self.clear_graph()
-        return None
 
     def clear_graph(self):
         """
