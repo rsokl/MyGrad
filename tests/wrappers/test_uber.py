@@ -61,7 +61,7 @@ def test_arr_from_kwargs(args_as_kwargs):
 
         return a * b * c
 
-    @settings(deadline=None, max_examples=5)
+    @settings(deadline=None, max_examples=20)
     @backprop_test_factory(
         mygrad_func=sentinel,
         true_func=sentinel,
@@ -87,7 +87,7 @@ def test_catches_bad_fwd_pass():
     def mul3(x):
         return 3 * np.asarray(x)
 
-    @settings(deadline=None, max_examples=5)
+    @settings(deadline=None, max_examples=20)
     @fwdprop_test_factory(num_arrays=1, mygrad_func=mul2, true_func=mul3)
     def should_catch_error():
         pass
@@ -100,7 +100,7 @@ def test_catches_output_not_tensor():
     def mul2(x, constant=False):
         return np.asarray(mg.multiply(x, 2, constant=constant))
 
-    @settings(deadline=None, max_examples=5)
+    @settings(deadline=None, max_examples=20)
     @fwdprop_test_factory(num_arrays=1, mygrad_func=mul2, true_func=mul2)
     def should_catch_error():
         pass
@@ -113,7 +113,7 @@ def test_catches_bad_constant_propagation():
     def mul2(x, constant=False):
         return mg.multiply(x, 2, constant=False)
 
-    @settings(deadline=None, max_examples=5)
+    @settings(deadline=None, max_examples=20)
     @fwdprop_test_factory(num_arrays=1, mygrad_func=mul2, true_func=mul2)
     def should_catch_error():
         pass
@@ -137,7 +137,7 @@ def test_catches_mutation_error():
     def mul2(x):
         return 2 * np.asarray(x)
 
-    @settings(deadline=None, max_examples=5)
+    @settings(deadline=None, max_examples=20)
     @fwdprop_test_factory(num_arrays=1, mygrad_func=mul2_mutate, true_func=mul2)
     def should_catch_error():
         pass
@@ -153,7 +153,7 @@ def test_catches_numpy_view_mygrad_copy():
     def view(x):
         return np.reshape(x, x.shape)
 
-    @settings(deadline=None, max_examples=5)
+    @settings(deadline=None, max_examples=20)
     @fwdprop_test_factory(
         num_arrays=1, mygrad_func=copy, true_func=view, permit_0d_array_as_float=False,
     )
@@ -171,7 +171,7 @@ def test_catches_numpy_copy_mygrad_view():
     def view(x):
         return np.reshape(x, x.shape).copy()
 
-    @settings(deadline=None, max_examples=5)
+    @settings(deadline=None, max_examples=20)
     @fwdprop_test_factory(
         num_arrays=1, mygrad_func=copy, true_func=view, permit_0d_array_as_float=False,
     )
@@ -188,7 +188,7 @@ def test_bad_constant_propagation():
             constant = True
         return mg.multiply_sequence(x, y, z, constant=constant)
 
-    @settings(deadline=None, max_examples=5)
+    @settings(deadline=None, max_examples=20)
     @fwdprop_test_factory(
         num_arrays=3,
         mygrad_func=bad_const_prop,
@@ -215,7 +215,7 @@ def test_catches_incorrect_op_gradient():
     def mul2_wrong_grad(x, constant=False):
         return Tensor._op(Mul2, x, constant=constant)
 
-    @settings(deadline=None, max_examples=5)
+    @settings(deadline=None, max_examples=20)
     @backprop_test_factory(
         num_arrays=1, mygrad_func=mul2_wrong_grad, true_func=lambda x: 2 * x
     )
@@ -239,7 +239,7 @@ def test_catches_op_didnt_propagate_grad():
     def mul2_doesnt_prop_incoming_grad(x, constant=False):
         return Tensor._op(Mul2, x, constant=constant)
 
-    @settings(deadline=None, max_examples=5)
+    @settings(deadline=None, max_examples=20)
     @backprop_test_factory(
         num_arrays=1,
         mygrad_func=mul2_doesnt_prop_incoming_grad,
@@ -266,7 +266,7 @@ def test_catches_mutated_gradient():
     def mul2_backprop_mutates_grad(x, constant=False):
         return Tensor._op(Mul2, x, constant=constant)
 
-    @settings(deadline=None, max_examples=5)
+    @settings(deadline=None, max_examples=20)
     @backprop_test_factory(
         num_arrays=1, mygrad_func=mul2_backprop_mutates_grad, true_func=lambda x: 2 * x
     )
@@ -293,7 +293,7 @@ def test_catches_backprop_mutated_input():
     def mul2_backprop_mutates_input(x, constant=False):
         return Tensor._op(Mul2, x, constant=constant)
 
-    @settings(deadline=None, max_examples=5)
+    @settings(deadline=None, max_examples=20)
     @backprop_test_factory(
         num_arrays=1, mygrad_func=mul2_backprop_mutates_input, true_func=lambda x: 2 * x
     )
@@ -310,7 +310,7 @@ def tests_catches_input_tensors_memory_not_locked_by_op():
         x._restore_writeability()
         return out
 
-    @settings(deadline=None, max_examples=5)
+    @settings(deadline=None, max_examples=20)
     @backprop_test_factory(
         num_arrays=2, mygrad_func=mul_releases_input_lock, true_func=lambda x, y: x * y
     )
@@ -327,7 +327,7 @@ def tests_catches_output_tensors_memory_not_locked_by_op():
         out._restore_writeability()
         return out
 
-    @settings(deadline=None, max_examples=5)
+    @settings(deadline=None, max_examples=20)
     @backprop_test_factory(
         num_arrays=2, mygrad_func=mul_releases_output_lock, true_func=lambda x, y: x * y
     )
@@ -344,7 +344,7 @@ def tests_catches_tensors_memory_writeability_not_restored_after_clear_graph():
         x._data_was_writeable = None
         return out
 
-    @settings(deadline=None, max_examples=5)
+    @settings(deadline=None, max_examples=20)
     @backprop_test_factory(
         num_arrays=2,
         mygrad_func=mul_deletes_writeability_history_lock,
