@@ -50,11 +50,11 @@ class Node:
         f = Op()
         op_out = f(*tensor_vars)
         is_const = constant or all(var.constant for var in tensor_vars)
-        if not is_const:
-            # record that a variable participated in that op
-            for var in tensor_vars:
-                if not var.constant:
-                    var._ops.append(f)
+
+        # record that a variable participated in that op
+        for var in tensor_vars:
+            var._ops.append(f)
+
         return cls(op_out, constant=is_const, _creator=f)
 
     def backward(self, grad=None, terminal_node=False):

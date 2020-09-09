@@ -17,19 +17,17 @@ def dummy(a, b, constant=False):
     return Tensor._op(Dummy, a, b, constant=constant)
 
 
-def test_constant_arg():
+@pytest.mark.parametrize("x_const", [True, False])
+@pytest.mark.parametrize("y_const", [True, False])
+@pytest.mark.parametrize("op_const", [True, False])
+def test_constant_arg(x_const: bool, y_const: bool, op_const: bool):
     """ test that the `constant` arg works as intended in Tensor._op"""
-    a = Tensor(1)
-    b = Tensor(1)
-    o_true = dummy(a, b, constant=True)
-    assert o_true.constant is True
-    assert a._ops == set()
-    assert b._ops == set()
-
-    o_false = dummy(a, b, constant=False)
-    assert o_false.constant is False
-    assert a._ops == {o_false.creator}
-    assert b._ops == {o_false.creator}
+    x = Tensor(1, constant=x_const)
+    y = Tensor(1, constant=y_const)
+    out = dummy(x, y, constant=op_const)
+    assert out.constant is op_const or (x_const and y_const)
+    assert x._ops == {out.creator}
+    assert y._ops == {out.creator}
 
 
 @pytest.mark.parametrize("x_const", [True, False])

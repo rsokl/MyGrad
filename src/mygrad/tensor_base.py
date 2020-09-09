@@ -555,11 +555,9 @@ class Tensor:
                 op_out.shape != i.shape for i in tensor_vars if not i.constant
             )
 
-        if not is_const:
-            # record that a variable participated in that op
-            for var in tensor_vars:
-                if not var.constant:
-                    var._ops.add(f)
+        # record that a variable participated in that op
+        for var in tensor_vars:
+            var._ops.add(f)
 
         scalar_only = f.scalar_only and not is_const
         for var in tensor_vars:
@@ -787,7 +785,7 @@ class Tensor:
             var.clear_graph()
 
     @property
-    def scalar_only(self):
+    def scalar_only(self) -> bool:
         """ Indicates whether or not `self.ndim` must be 0 in order to invoke `self.backward()`.
 
         E.g. a computational graph that involves a broadcast-multiplication of a non-constant
@@ -953,11 +951,6 @@ class Tensor:
         self._mirror_tensor(out)
 
     def __setitem__(self, key, value):
-        if self.constant and (not isinstance(value, Tensor) or value.constant):
-            self.data[key] = value.data if isinstance(value, Tensor) else value
-            return None
-
-        # self becomes the tensor post-setitem
         self._in_place_op(SetItem, value, op_args=(key,))
 
     def __add__(self, other):
@@ -1056,9 +1049,7 @@ class Tensor:
         """
         copy = Tensor(
             np.copy(self.data),
-            _creator=None,
             constant=(self.constant if constant is None else constant),
-            _scalar_only=self._scalar_only,
         )
         copy.grad = np.copy(self.grad) if self.grad is not None else None
         return copy

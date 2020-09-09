@@ -243,15 +243,17 @@ def test_setitem_downstream_doesnt_affect_upstream_backprop():
     assert y.grad is None
 
 
-def test_setitem_doesnt_mutate_upstream_nodes():
+@pytest.mark.parametrize("x_constant", [True, False])
+@pytest.mark.parametrize("y_constant", [True, False])
+def test_setitem_doesnt_mutate_upstream_nodes(x_constant: bool, y_constant: bool):
     """ Ensure setitem doesn't mutate variable non-constant tensor"""
-    x = Tensor([1.0, 2.0])
-    y = Tensor([3.0, 4.0])
+    x = Tensor([1.0, 2.0], constant=x_constant)
+    y = Tensor([3.0, 4.0], constant=y_constant)
     z = x + y
     y[:] = 0
     y_old = z.creator.variables[-1]  # version of y that participated in x + y
-    assert_allclose(np.array([3.0, 4.0]), y_old.data)
-    assert_allclose(np.array([0.0, 0.0]), y.data)
+    assert_allclose(np.array([3.0, 4.0]), y_old)
+    assert_allclose(np.array([0.0, 0.0]), y)
 
 
 @settings(deadline=None, max_examples=1000)
