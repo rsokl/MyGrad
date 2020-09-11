@@ -1,5 +1,4 @@
 """ Test conv fwd-prop and back-prop for ND convs"""
-
 from typing import Tuple
 
 import hypothesis.extra.numpy as hnp
@@ -13,6 +12,7 @@ from pytest import raises
 import mygrad as mg
 from mygrad import Tensor
 from mygrad.nnet.layers import conv_nd
+from tests import as_numpy
 
 from ...utils.numerical_gradient import numerical_gradient_full
 from ...wrappers.uber import backprop_test_factory, fwdprop_test_factory
@@ -291,15 +291,15 @@ def test_conv_1d_fwd():
     behavior with `constant` arg, etc."""
 
 
-def _conv_nd(x, w, stride, dilation=1, padding=0):
+def _conv_nd(x, w, stride, dilation=1, padding=0) -> np.ndarray:
     """ use mygrad-conv_nd forward pass for numerical derivative
 
-        Returns
-        -------
-        numpy.ndarray"""
-    return conv_nd(
-        x, w, stride=stride, dilation=dilation, padding=padding, constant=True
-    ).data
+    Returns
+    -------
+    numpy.ndarray"""
+    return as_numpy(
+        conv_nd(x, w, stride=stride, dilation=dilation, padding=padding, constant=True)
+    )
 
 
 @settings(deadline=None)

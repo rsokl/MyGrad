@@ -99,6 +99,9 @@ class GraphCompare(RuleBasedStateMachine):
             self.raised = True
         else:
             t.backward(grad)
+            assert not t._accum_ops
+            assert not t._ops
+            assert not t.creator
 
     @precondition(lambda self: not self.raised)
     @invariant()

@@ -52,6 +52,7 @@ def test_matmul_fwd(signature):
         default_bnds=(-10, 10),
         atol=1e-5,
         rtol=1e-5,
+        internal_view_is_ok=True,
     )
     def test_runner():
         pass

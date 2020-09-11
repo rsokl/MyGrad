@@ -101,6 +101,7 @@ def tensors(
     include_grad: Union[bool, st.SearchStrategy[bool]] = False,
     grad_dtype: Optional[Any] = None,
     grad_elements_bounds: Optional[Tuple[int, int]] = None,
+    read_only: Union[bool, st.SearchStrategy[bool]] = False,
 ) -> st.SearchStrategy[Tensor]:
     r"""Returns a strategy for generating :class:`mygrad:mygrad.Tensor`\ s.
 
@@ -154,6 +155,13 @@ def tensors(
         Defaults to (-10, 10)
         Specifying ``grad_element_bounds``, while ``include_grad`` is False, will raise an error.
 
+    read_only: Union[bool, st.SearchStrategy[bool]]
+        If True, the underlying numpy array is marked as not-writeable.
+
+    Returns
+    -------
+    st.SearchStrategy[Tensor]
+
     Tensors of specified ``dtype`` and ``shape`` are generated for example
     like this:
 
@@ -198,14 +206,21 @@ def tensors(
     hundreds or more elements, having a fill value is essential if you want
     your tests to run in reasonable time.
     """
+    assert isinstance(read_only, (bool, st.SearchStrategy))
+    if isinstance(read_only, st.SearchStrategy):
+        read_only = draw(read_only)
+
     x = draw(
         hnp.arrays(
             dtype=dtype, shape=shape, elements=elements, fill=fill, unique=unique
         )
     )  # type: np.ndarray
+
+    x.flags.writeable = not read_only
+
     constant = draw(constant) if isinstance(constant, st.SearchStrategy) else constant
 
-    tensor = VerboseTensor(x, constant=constant)
+    tensor = VerboseTensor(x, constant=constant, _copy_data=False)
     if isinstance(include_grad, st.SearchStrategy):
         include_grad = draw(include_grad)
 

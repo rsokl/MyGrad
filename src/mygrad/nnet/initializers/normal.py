@@ -1,4 +1,5 @@
 import numpy as np
+
 from mygrad import Tensor
 
 
@@ -55,4 +56,9 @@ def normal(*shape, mean=0, std=1, dtype=np.float32, constant=False):
     if isinstance(std, Tensor):
         std = std.item()
 
-    return Tensor(np.random.normal(mean, std, shape), dtype=dtype, constant=constant)
+    return Tensor(
+        np.random.normal(mean, std, shape),
+        dtype=dtype,
+        constant=constant,
+        _copy_data=False,
+    )

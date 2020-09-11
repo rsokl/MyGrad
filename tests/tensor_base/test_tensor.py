@@ -3,7 +3,7 @@ import hypothesis.strategies as st
 import numpy as np
 import pytest
 from hypothesis import assume, given, settings
-from numpy.testing import assert_allclose, assert_array_equal, assert_equal
+from numpy.testing import assert_array_equal, assert_equal
 from pytest import raises
 
 import mygrad as mg
@@ -179,15 +179,37 @@ def test_init_data():
         )
 
 
-@given(x=hnp.arrays(dtype=float, shape=hnp.array_shapes(min_dims=1, max_dims=4)))
-def test_init_data_rand(x):
+@given(
+    arr=hnp.arrays(
+        dtype=hnp.floating_dtypes(), shape=hnp.array_shapes(min_side=1, min_dims=1)
+    ),
+    as_tensor=st.booleans(),
+)
+def test_copy_on_init_behavior(arr: np.ndarray, as_tensor: bool):
+    x = Tensor(arr, _copy_data=False) if as_tensor else arr
+    t_no_constant = Tensor(x)
+    assert not np.shares_memory(t_no_constant, arr)
+
+    t_constant = Tensor(x, constant=True)
+    assert np.shares_memory(t_constant, arr)
+
+    t_not_constant = Tensor(x, constant=False)
+    assert not np.shares_memory(t_not_constant, arr)
+
+
+@given(
+    x=hnp.arrays(
+        dtype=hnp.floating_dtypes(), shape=hnp.array_shapes(min_side=0, min_dims=0)
+    )
+)
+def test_init_data_rand(x: np.ndarray):
     assert_equal(actual=Tensor(x).data, desired=x)
 
 
 @given(
     x=hnp.arrays(
         dtype=float,
-        shape=hnp.array_shapes(),
+        shape=hnp.array_shapes(min_dims=0, min_side=0),
         elements=st.floats(allow_infinity=False, allow_nan=False),
     )
     | st.floats(allow_infinity=False, allow_nan=False)
@@ -396,7 +418,7 @@ def test_axis_interchange_methods(op: str, constant: bool):
 
 @given(x=tensors(include_grad=st.booleans()), clear_graph=st.booleans())
 def test_null_gradients(x: Tensor, clear_graph: bool):
-    with pytest.deprecated_call():
+    with pytest.warns(FutureWarning):
         x.null_gradients(clear_graph=clear_graph)
 
 

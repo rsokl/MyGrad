@@ -20,8 +20,9 @@ def _sum(x, constant=False):
         if not isinstance(out, Tensor):
             # Hack to deal with summing over an empty tensor.
             # `sum(Tensor([]))` returns 0, which is fine
-            out = Tensor(out)
-        out._constant = constant
+            out = Tensor(out, constant=constant or x.constant)
+        if constant:
+            out._constant = constant
     else:
         out = np.asarray(out)  # ensure numpy-output is array
     return out

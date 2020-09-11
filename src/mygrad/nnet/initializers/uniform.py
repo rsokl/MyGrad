@@ -1,4 +1,5 @@
 import numpy as np
+
 from mygrad import Tensor
 
 
@@ -55,4 +56,9 @@ def uniform(*shape, lower_bound=0, upper_bound=1, dtype=np.float32, constant=Fal
     if isinstance(upper_bound, Tensor):
         upper_bound = upper_bound.item()
 
-    return Tensor(np.random.uniform(lower_bound, upper_bound, shape), dtype=dtype, constant=constant)
+    return Tensor(
+        np.random.uniform(lower_bound, upper_bound, shape),
+        dtype=dtype,
+        constant=constant,
+        _copy_data=False,
+    )

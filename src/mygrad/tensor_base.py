@@ -6,7 +6,7 @@ etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 
 from functools import wraps
 from numbers import Number
-from typing import Optional, Set, Tuple, Type, Union
+from typing import Optional, Set, Type, Union
 
 import numpy as np
 
@@ -29,6 +29,15 @@ from mygrad.tensor_manip.array_shape.ops import Flatten, Reshape
 from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property
 
 __all__ = ["Tensor", "asarray"]
+
+
+def _is_view_of(parent: "Tensor", child: np.ndarray) -> bool:
+    if np.shares_memory(parent, child):
+        return True
+    elif child.size == 0 and child.base is not None:
+        if (child.base is parent.data) or (child.base is parent.data.base):
+            return True
+    return False
 
 
 def asarray(a, dtype=None, order=None) -> np.ndarray:
@@ -109,7 +118,7 @@ def astensor(t, dtype=None, constant=None) -> "Tensor":
     A tensor `t` is returned unchanged - its gradient and computational
     graph state preserved - if dtype and constant are compatible.
     A copy of the underlying numpy array is created only if dtype is
-    incompatible.
+    incompatible or if a non-constant tensor is being created from a constant.
 
     Parameters
     ----------
@@ -169,8 +178,15 @@ def astensor(t, dtype=None, constant=None) -> "Tensor":
     >>> mg.astensor(t, dtype=np.float64) is t
     False
 
-    If `constant` is set, a new tensor is created (with no copy
-    of the underlying data) only if constant doesn't match.
+    Creating a non-constant tensor from a constant tensor will copy
+    the underlying data.
+
+    >>> t = mg.Tensor([1, 2], constant=True)
+    >>> mg.astensor(t, constant=False).data is t.data
+    False
+
+    Otherwise, if `constant` is set, a new tensor is created (with
+    no copy of the underlying data) only if constant doesn't match.
 
     >>> t = mg.Tensor([1, 2], constant=False)
     >>> mg.astensor(t, constant=False) is t
@@ -223,6 +239,19 @@ class Tensor:
     >>> mg.arange(4)    # using numpy-style tensor creation functions
     Tensor([0, 1, 2, 3])
 
+    Creating a non-constant tensor will copy array data:
+
+    >>> import numpy as np
+    >>> arr = np.arange(10.)
+    >>> t_var = Tensor(arr, constant=False)
+    >>> np.shares_memory(arr, t_var)
+    False
+
+    Creating constant tensor will not make a copy of the array data:
+
+    >>> t_const = Tensor(arr, constant=True)
+    >>> np.shares_memory(arr, t_const)
+    True
 
     Forward and Back-Propagation
     ----------------------------
@@ -251,7 +280,7 @@ class Tensor:
     >>> f.grad
     array(1.0)  # df/df
 
-    Once the gradient is computed, the computational graph containing ``x``,
+    Once the gradients are computed, the computational graph containing ``x``,
     ``y``, and ``f`` is cleared automatically. Additionally, involving any
     of these tensors in a new computational graph will automatically null
     their gradients.
@@ -292,6 +321,7 @@ class Tensor:
         _scalar_only=False,
         _creator=None,
         _base: Optional["Tensor"] = None,
+        _copy_data: Optional[bool] = None,
     ):
         """
         Parameters
@@ -319,14 +349,26 @@ class Tensor:
 
         _base : Optional[Tensor]
             Sets the base tensor that ``self`` is a view of
+
+        _copy_data : Optional[bool]
+            Determines if the incoming array-data will be copied
         """
         if not isinstance(constant, bool):
             raise TypeError(f"`constant` must be a boolean value, got: {constant}")
 
+        assert isinstance(_scalar_only, bool)
+        assert isinstance(_creator, (Operation, type(None)))
+        assert isinstance(_base, (Tensor, type(None)))
+        assert isinstance(_copy_data, (bool, type(None)))
+
         self._scalar_only = _scalar_only
         self._creator = _creator  # type: Union[None, Operation]
 
-        self.data = np.asarray(x, dtype=dtype)  # type: np.ndarray
+        if _copy_data is None:
+            _copy_data = not constant
+
+        to_array = np.array if _copy_data else np.asarray
+        self.data = to_array(x, dtype=dtype)  # type: np.ndarray
         self._check_valid_dtype(self.data.dtype)
 
         self.grad = None  # type: Union[None, np.ndarray]
@@ -338,7 +380,56 @@ class Tensor:
         # track the operations that have contributed to this tensor's gradient during a back-prop
         self._accum_ops = set()  # type: Set[Operation]
 
-        self._base = _base
+        self._base = _base  # type: Optional[Tensor]
+
+        # used to track original 'writeable' statuses of array data
+        self._data_was_writeable = None  # type: Optional[bool]
+        self._base_data_was_writeable = None  # type: Optional[bool]
+
+    def _lock_writeability(self) -> "Tensor":
+        """Sets the underlying numpy-array (and its base) to be read-only.
+
+        The initial writeability flags of all involved arrays are recorded so
+        that they can be restored via ``self._restore_writeability()``"""
+        if self._data_was_writeable is not None or self.base is not None:
+            return self
+
+        self._data_was_writeable = self.data.flags.writeable
+        self.data.flags.writeable = False
+
+        if self.data.base is not None:
+            self._base_data_was_writeable = self.data.base.flags.writeable
+            self.data.base.flags.writeable = False
+
+        return self
+
+    def _restore_writeability(self):
+        """Restores the writeability flag for the underlying numpy array (and its base)"""
+        if self.base is not None:
+            # A view of an array inherits the writeability of its parent;
+            # however, the writeability of the view is independent of that
+            # of its parent. I.e. toggling the parent's writeability does
+            # not affect the view's writeability.
+            #
+            # Furthermore, the parent's writeability must be restored before
+            # restoring the view's writeability
+            self.base._restore_writeability()
+            if self.base.data.flags.writeable:
+                self.data.flags.writeable = self.base.data.flags.writeable
+            return
+
+        if self._data_was_writeable is None:
+            return
+
+        # the base-data's writeability must be restored before that of its view's
+        if self._base_data_was_writeable is not None:
+            if self._base_data_was_writeable:
+                self.data.base.flags.writeable = self._base_data_was_writeable
+            self._base_data_was_writeable = None
+
+        if self._data_was_writeable:
+            self.data.flags.writeable = self._data_was_writeable
+        self._data_was_writeable = None
 
     def astype(
         self, dtype: Union[type, str], *, constant: Optional[bool] = None
@@ -437,7 +528,11 @@ class Tensor:
             isinstance(var, (np.ndarray, Tensor)) for var in input_vars
         )
         tensor_vars = tuple(
-            cls(var, constant=True) if not isinstance(var, Tensor) else var.null_grad()
+            (
+                cls(var, constant=True)
+                if not isinstance(var, Tensor)
+                else var.null_grad()
+            )._lock_writeability()
             for var in input_vars
         )
 
@@ -460,28 +555,37 @@ class Tensor:
                 op_out.shape != i.shape for i in tensor_vars if not i.constant
             )
 
-        if not is_const:
-            # record that a variable participated in that op
-            for var in tensor_vars:
-                if not var.constant:
-                    var._ops.add(f)
+        # record that a variable participated in that op
+        for var in tensor_vars:
+            var._ops.add(f)
 
         scalar_only = f.scalar_only and not is_const
         for var in tensor_vars:
             scalar_only = scalar_only or (var.scalar_only and not var.constant)
 
+        # determine whether or not op was a view
         if f.cannot_return_view:
             base = None
         else:
             for can_share_mem, var in zip(vars_can_share_mem, tensor_vars):
-                if can_share_mem and np.shares_memory(var, op_out):
+                if can_share_mem and _is_view_of(parent=var, child=op_out):
                     base = var if var.base is None else var.base
+                    assert not f.cannot_return_view, (
+                        f"{f} is marked as being unable to return a view, "
+                        f"however its output is a view of one of its inputs"
+                    )
                     break
             else:
                 base = None
+
         return cls(
-            op_out, constant=is_const, _creator=f, _scalar_only=scalar_only, _base=base
-        )
+            op_out,
+            constant=is_const,
+            _creator=f,
+            _scalar_only=scalar_only,
+            _base=base,
+            _copy_data=False,
+        )._lock_writeability()
 
     def backward(self, grad=None):
         """ Compute set or accumulate ``self.grad`` with `grad`, and pass ``self.creator.backward(grad)``.
@@ -652,13 +756,13 @@ class Tensor:
         import warnings
 
         warnings.warn(
-            "`tensor.null_gradients()` is deprecated. A tensor will automatically "
-            "have its gradient nulled if you use it in a new computational graph.",
-            DeprecationWarning,
+            "`tensor.null_gradients()` is deprecated. Calling it will raise an error "
+            "in future versions of MyGrad. A tensor will automatically "
+            "have its gradient nulled if you use it in a new computational graph. "
+            "Or, you can call `tensor.null_grad()` to null that individual tensor's "
+            "gradient.",
+            FutureWarning,
         )
-        if clear_graph:  # pragma: no cover
-            self.clear_graph()
-        return None
 
     def clear_graph(self):
         """
@@ -668,6 +772,7 @@ class Tensor:
         This de-references all operations involved in the graph and the intermediate
         tensors that were created by it.
         """
+        self._restore_writeability()
         self._ops.clear()
 
         if self.creator is None:
@@ -680,7 +785,7 @@ class Tensor:
             var.clear_graph()
 
     @property
-    def scalar_only(self):
+    def scalar_only(self) -> bool:
         """ Indicates whether or not `self.ndim` must be 0 in order to invoke `self.backward()`.
 
         E.g. a computational graph that involves a broadcast-multiplication of a non-constant
@@ -812,6 +917,7 @@ class Tensor:
         update the computational graph. The benefit lies purely in convenience
         for the user.
         """
+        # TODO: make sure that a failed in-place op doesn't corrupt the graph
         # old_tensor is the tensor pre-setitem
         old_tensor = Tensor(
             self,
@@ -845,11 +951,6 @@ class Tensor:
         self._mirror_tensor(out)
 
     def __setitem__(self, key, value):
-        if self.constant and (not isinstance(value, Tensor) or value.constant):
-            self.data[key] = value.data if isinstance(value, Tensor) else value
-            return None
-
-        # self becomes the tensor post-setitem
         self._in_place_op(SetItem, value, op_args=(key,))
 
     def __add__(self, other):
@@ -948,9 +1049,7 @@ class Tensor:
         """
         copy = Tensor(
             np.copy(self.data),
-            _creator=None,
             constant=(self.constant if constant is None else constant),
-            _scalar_only=self._scalar_only,
         )
         copy.grad = np.copy(self.grad) if self.grad is not None else None
         return copy
@@ -1240,7 +1339,7 @@ class Tensor:
             "Use 'a = a @ b' instead of 'a @= b'"
         )
 
-    def __array__(self, dtype=None):
+    def __array__(self, dtype=None) -> np.ndarray:
         return np.asarray(self.data, dtype)
 
 

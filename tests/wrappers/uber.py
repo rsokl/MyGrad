@@ -2,7 +2,7 @@ from copy import copy
 from functools import wraps
 from itertools import combinations
 from numbers import Real
-from typing import Any, Callable, Dict, Optional, Sequence, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
@@ -113,6 +113,7 @@ class fwdprop_test_factory:
         rtol: float = 1e-7,
         assumptions: Optional[Callable[..., bool]] = None,
         permit_0d_array_as_float: bool = True,
+        internal_view_is_ok: bool = False,
     ):
         """
         Parameters
@@ -163,7 +164,15 @@ class fwdprop_test_factory:
 
         permit_0d_array_as_float : bool, optional (default=True)
             If True, drawn 0D arrays will potentially be cast to numpy-floats.
+
+        internal_view_is_ok : bool, optional (default=False)
+            If True, it is acceptable for ``tensor_out.base`` to point to an
+            internally-generated Tensor instead of being ``None``. This is useful
+            if a mygrad function needs to take views of tensors.
         """
+        assert isinstance(permit_0d_array_as_float, bool)
+        assert isinstance(internal_view_is_ok, bool)
+
         self.tolerances = dict(atol=atol, rtol=rtol)
         index_to_bnds = _to_dict(index_to_bnds)
         index_to_no_go = _to_dict(index_to_no_go)
@@ -210,6 +219,7 @@ class fwdprop_test_factory:
         self.shapes = shapes
         self.assumptions = assumptions
         self.permit_0d_array_as_float = permit_0d_array_as_float
+        self.internal_view_is_ok = internal_view_is_ok
 
         # stores the indices of the unspecified array shapes
         self.missing_shapes = set(range(self.num_arrays)) - set(
@@ -311,7 +321,7 @@ class fwdprop_test_factory:
                 Tensor(i, constant=c) if isinstance(i, np.ndarray) else i
                 for i, c in zip(arrs, tensor_constants)
             )
-            output_tensor = self.op(*mygrad_inputs, **kwargs, constant=constant,)
+            output_tensor = self.op(*mygrad_inputs, **kwargs, constant=constant)
 
             note(f"arrs: {arrs}")
             note(f"mygrad output: {output_tensor}")
@@ -320,9 +330,9 @@ class fwdprop_test_factory:
             assert isinstance(
                 output_tensor, Tensor
             ), f"`mygrad_func` returned type {type(output_tensor)}, should return `mygrad.Tensor`"
-            assert output_tensor.constant is constant or bool(sum(tensor_constants)), (
+            assert output_tensor.constant is (constant or all(tensor_constants)), (
                 f"`mygrad_func` returned tensor.constant={output_tensor.constant}, "
-                f"should be constant={constant or  bool(sum(tensor_constants))}"
+                f"should be constant={constant or all(tensor_constants)}"
             )
 
             output_array = self.true_func(*arrs, **kwargs)
@@ -332,12 +342,24 @@ class fwdprop_test_factory:
             assert isinstance(output_tensor.base, (Tensor, type(None)))
 
             if output_array.base is None is None:
-                assert output_tensor.base is None
+                if self.internal_view_is_ok:
+                    assert all(t is not output_tensor.base for t in mygrad_inputs)
+                else:
+                    assert output_tensor.base is None
+
+            if not all(
+                not isinstance(arr, np.ndarray) or arr.base is None for arr in arrs
+            ):
+                raise ValueError(
+                    "PROBLEM WITH TEST: The arrays drawn for the uber test do not own their "
+                    "own memory. They must own their own memory in order for view-validation "
+                    "to be valid"
+                )
 
             # check that tensor/array views are consistent
             for input_ind, (tens, arr) in enumerate(zip(mygrad_inputs, arrs)):
-                arr_share = np.shares_memory(output_array, arr)
-                tens_share = np.shares_memory(output_tensor, tens)
+                arr_share = output_array.base is arr
+                tens_share = output_tensor.base is tens
                 assert arr_share is tens_share, f"input-{input_ind}"
 
                 if tens_share:
@@ -664,7 +686,7 @@ class backprop_test_factory:
                     )
                 ).map(list),
                 label="arrays",
-            )
+            )  # type: List[Tensor]
 
             if callable(self.kwargs):
                 kwargs = data.draw(self.kwargs(*arrs), label="kwargs")
@@ -701,7 +723,7 @@ class backprop_test_factory:
 
                 arrs.insert(arr_id, Tensor(v))
 
-            arrs = tuple(arrs)
+            arrs = tuple(arrs)  # type: Tuple[Tensor, ...]
 
             arr_copies = tuple(copy(arr) for arr in arrs)
 
@@ -714,8 +736,24 @@ class backprop_test_factory:
                 for value in self.index_to_no_go.get(i, ()):
                     assume(np.all(arr != value))
 
+            # tracks writeability of tensors prior to involvement in op
+            tensor_writeability = tuple(
+                a.data.flags.writeable for a in arrs
+            )  # type: Tuple[bool, ...]
+
             # forward pass of the function
-            out = self.op(*arrs, **kwargs)
+            out = self.op(*arrs, **kwargs)  # type: Tensor
+            look_to = out.base if out.base is not None else out
+            output_was_writeable = bool(
+                look_to._data_was_writeable or look_to._base_data_was_writeable
+            )
+
+            assert all(
+                a.data.flags.writeable is False for a in arrs
+            ), "input array memory is not locked by op"
+            assert (
+                out.data.flags.writeable is False
+            ), "output array memory is not locked by op"
 
             # gradient to be backpropped through this operation
             grad = data.draw(
@@ -749,8 +787,11 @@ class backprop_test_factory:
 
             else:
                 numerical_grad = finite_difference
+
+            numpy_arrs = tuple(i.data.copy() for i in arrs)
+
             grads_numerical = numerical_grad(
-                self.true_func, *(i.data for i in arrs), back_grad=grad, kwargs=kwargs
+                self.true_func, *numpy_arrs, back_grad=grad, kwargs=kwargs
             )
 
             # check that the analytic and numeric derivatives match
@@ -790,6 +831,13 @@ class backprop_test_factory:
             assert_array_equal(
                 grad, grad_copy, err_msg="`grad` was mutated during backward prop"
             )
+
+            assert tensor_writeability == tuple(
+                a.data.flags.writeable for a in arrs
+            ), "input array memory writeability is not restored after clear-graph"
+            assert (
+                out.data.flags.writeable is output_was_writeable
+            ), "output array memory writeability is not restored after clear-graph"
 
         wrapper._hypothesis_internal_add_digest = get_hypothesis_db_key(
             self,

@@ -22,7 +22,7 @@ def _check_grad(t: mg.Tensor, expr: Union[None, np.ndarray, float]):
 
 
 def _check_cleared_node(t: mg.Tensor):
-    assert not t._ops and t.creator is None
+    assert not t._ops and not t._accum_ops and t.creator is None
 
 
 def test_check_grad():

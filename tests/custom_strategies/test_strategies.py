@@ -277,3 +277,15 @@ def test_tensors_with_grad(
 def test_tensor_owns_memory(t: Tensor):
     assert t.base is None
     assert t.data.base is None
+
+
+@given(tensor=tensors())
+def test_tensor_read_only_default(tensor: Tensor):
+    assert tensor.data.flags.writeable is True
+
+
+@pytest.mark.parametrize("read_only", [True, False])
+@given(data=st.data())
+def test_tensor_read_only(data: st.DataObject, read_only: bool):
+    tensor = data.draw(tensors(read_only=read_only))
+    assert tensor.data.flags.writeable is not read_only
