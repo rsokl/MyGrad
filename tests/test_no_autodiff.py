@@ -6,7 +6,7 @@ from hypothesis import given
 from numpy.testing import assert_array_equal
 
 import mygrad._graph_tracking as _tracking
-from mygrad import Tensor, no_autodiff
+from mygrad import Tensor, amax, no_autodiff
 from tests.custom_strategies import tensors
 
 
@@ -94,3 +94,11 @@ def test_decorator_is_transparent_to_function_information():
     assert inspect.signature(undecorated) == inspect.signature(decorated)
     assert undecorated.__doc__ == decorated.__doc__
     assert undecorated.__name__ == decorated.__name__
+
+
+@given(tensors(shape=(3, 2, 4)).map(np.asarray))
+def test_to_numpy_returns_numpy_array(x: np.asarray):
+    numpy_max = np.max(x, axis=-1)
+    mygrad_max = no_autodiff(amax, to_numpy=True)(x, axis=-1)
+    assert isinstance(mygrad_max, np.ndarray)
+    assert_array_equal(numpy_max, mygrad_max)
