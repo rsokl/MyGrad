@@ -19,16 +19,18 @@ def test_no_autodiff_context_manager(x: Tensor):
 
     with no_autodiff:
         y = +x
-        y.backward()
+
+        assert y.creator is None
+        assert y.data.flags.writeable
+
+        assert not x._ops
+        assert x.data.flags.writeable
+
+        y.backward()  # should be no-op
 
     assert y.constant
-    assert y.creator is None
     assert y.grad is None
-    assert y.data.flags.writeable
-
-    assert not x._ops
     assert x.grad is None
-    assert x.data.flags.writeable
 
     # check that standard behavior is restored
     y = 2 * x
