@@ -1,5 +1,6 @@
 import inspect
 
+import hypothesis.strategies as st
 import numpy as np
 import pytest
 from hypothesis import given
@@ -14,7 +15,7 @@ def test_graph_tracking_is_on_by_default():
     assert _tracking.TRACK_GRAPH is True
 
 
-@given(x=tensors(shape=(1,)))
+@given(x=tensors(shape=(1,), elements=st.floats(-100, 100)))
 def test_no_autodiff_context_manager(x: Tensor):
 
     with no_autodiff:
@@ -48,7 +49,7 @@ def test_no_autodiff_context_manager(x: Tensor):
         assert_array_equal(x.grad, np.full_like(x, 2.0))
 
 
-@given(old_x=tensors(shape=(2,), constant=False))
+@given(old_x=tensors(shape=(2,), constant=False, elements=st.floats(-100, 100)))
 def test_no_tracking_for_inplace_op(old_x: Tensor):
     expected = old_x.copy()
     expected[0] = -1
@@ -115,7 +116,7 @@ def test_decorator_is_transparent_to_function_information():
     assert undecorated.__name__ == decorated.__name__
 
 
-@given(tensors(shape=(3, 2, 4)).map(np.asarray))
+@given(tensors(shape=(3, 2, 4), elements=st.floats(-100, 100)).map(np.asarray))
 def test_to_numpy_returns_numpy_array(x: np.asarray):
     numpy_max = np.max(x, axis=-1)
     mygrad_max = no_autodiff(amax, to_numpy=True)(x, axis=-1)
