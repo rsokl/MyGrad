@@ -11,6 +11,45 @@ from mygrad import log
 from mygrad.nnet.activations import softmax
 from mygrad.nnet.losses import softmax_crossentropy
 from mygrad.tensor_base import Tensor
+from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
+
+
+@st.composite
+def targets(draw, scores):
+    as_tensor = draw(st.booleans())
+    out = draw(
+        st.lists(
+            st.integers(0, scores.shape[1] - 1),
+            min_size=len(scores),
+            max_size=len(scores),
+        )
+    )
+    return mg.Tensor(out) if as_tensor else np.array(out)
+
+
+@fwdprop_test_factory(
+    mygrad_func=softmax_crossentropy,
+    true_func=mg.no_autodiff(softmax_crossentropy),
+    index_to_arr_shapes={0: hnp.array_shapes(min_dims=2, max_dims=2)},
+    index_to_bnds={0: (1e-14, 100)},
+    num_arrays=1,
+    kwargs=dict(y_true=lambda scores: targets(scores=scores),),
+)
+def test_softmax_crossentropy_fwd():
+    pass
+
+
+@backprop_test_factory(
+    mygrad_func=softmax_crossentropy,
+    true_func=mg.no_autodiff(softmax_crossentropy, to_numpy=True),
+    index_to_arr_shapes={0: hnp.array_shapes(min_dims=2, max_dims=2)},
+    index_to_bnds={0: (1e-14, 100)},
+    num_arrays=1,
+    kwargs=dict(y_true=lambda scores: targets(scores=scores),),
+    vary_each_element=True,
+)
+def test_softmax_crossentropy_bkwd():
+    pass
 
 
 @pytest.mark.parametrize(
@@ -28,7 +67,9 @@ def test_input_validation(data, labels):
 
 
 @given(data=st.data(), labels_as_tensor=st.booleans())
-def test_softmax_crossentropy(data: st.DataObject, labels_as_tensor: bool):
+def test_softmax_crossentropy_via_mygrad_ops(
+    data: st.DataObject, labels_as_tensor: bool
+):
     s = data.draw(
         hnp.arrays(
             shape=hnp.array_shapes(max_side=10, min_dims=2, max_dims=2),

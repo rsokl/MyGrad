@@ -79,6 +79,22 @@ def test_focal_fwd():
     pass
 
 
+@fwdprop_test_factory(
+    mygrad_func=focal_loss,
+    true_func=mg.no_autodiff(focal_loss),
+    index_to_arr_shapes={0: hnp.array_shapes(min_dims=2, max_dims=2)},
+    index_to_bnds={0: (1e-14, 100)},
+    num_arrays=1,
+    kwargs=dict(
+        targets=lambda scores: targets(scores=scores),
+        alpha=lambda scores: st.floats(-2, 2),
+        gamma=lambda scores: st.floats(0, 10),
+    ),
+)
+def test_focal_no_graph_fwd():
+    pass
+
+
 @backprop_test_factory(
     mygrad_func=focal_loss,
     true_func=numpy_focal_loss,

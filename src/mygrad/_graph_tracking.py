@@ -1,9 +1,10 @@
 """
 Provides user interface for suspending computational graph tracking and back-propagation
 """
-
 from functools import wraps
 from typing import Callable
+
+import numpy as np
 
 __all__ = ["no_autodiff"]
 
@@ -26,14 +27,24 @@ class NoAutoDiff:
         global TRACK_GRAPH
         TRACK_GRAPH = True
 
-    def __call__(self, func: Callable) -> Callable:
-        """A decorated function will have graph-tracking suspended
-        during its execution."""
+    def __call__(self, func: Callable, to_numpy: bool = False) -> Callable:
+        """Decorates a function so that it will have graph-tracking suspended
+        during its execution.
+
+        Parameters
+        ----------
+        func : Callable
+            The function to be decorated
+
+        to_numpy : bool, optional (default=False)
+            If true, the output is assumed to be array-like and
+            will be cast to a numpy array"""
 
         @wraps(func)
         def wrapper(*args, **kwargs):
             with self:
-                return func(*args, **kwargs)
+                out = func(*args, **kwargs)
+            return out if not to_numpy else np.asarray(out)
 
         return wrapper
 

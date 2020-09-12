@@ -2,6 +2,7 @@ from numbers import Real
 
 import numpy as np
 
+import mygrad._graph_tracking as _tracking
 from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor, asarray
 
@@ -35,10 +36,10 @@ class MarginRanking(Operation):
         not_thresh = M <= 0
         loss = M
         loss[not_thresh] = 0.0
-
-        self._grad = np.ones_like(M)
-        self._grad[not_thresh] = 0.0
-        self._grad /= M.size
+        if _tracking.TRACK_GRAPH:
+            self._grad = np.ones_like(M)
+            self._grad[not_thresh] = 0.0
+            self._grad /= M.size
         return np.mean(loss)
 
     def backward_var(self, grad, index, **kwargs):
