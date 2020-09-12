@@ -4,6 +4,7 @@ from typing import Any
 
 import numpy as np
 
+import mygrad._graph_tracking as _tracking
 from mygrad.operation_base import Operation
 
 __all__ = ["MaxMin", "Sum", "Mean", "Prod", "CumProd", "CumSum", "Variance", "StdDev"]
@@ -34,8 +35,14 @@ class MaxMin(Operation):
             amax : ndarray
                 Maximum (minimum) of `a`. If `axis` is None, the result is a 0-D array."""
         assert maxmin in ("max", "min"), "Invalid keyword argument"
+
+        if not _tracking.TRACK_GRAPH:
+            op = np.max if maxmin == "max" else np.min
+            return op(np.asarray(a), axis=axis, keepdims=keepdims)
+
         op = np.argmax if maxmin == "max" else np.argmin
 
+        # TODO: optimize this
         # let numpy handle error checking
         np.amax(np.empty([1] * a.ndim), axis=axis, keepdims=keepdims)
 

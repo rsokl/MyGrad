@@ -56,6 +56,19 @@ def test_max_fwd():
     pass
 
 
+@fwdprop_test_factory(
+    mygrad_func=amax,
+    true_func=mg.no_autodiff(mg.max, to_numpy=True),
+    num_arrays=1,
+    kwargs=dict(axis=axis_arg, keepdims=keepdims_arg),
+)
+def test_max_no_graph_track_fwd():
+    """tests no-graph mode transitively
+    mg.max == np.max
+    mg.max == mg.max(no-grad)"""
+    pass
+
+
 @backprop_test_factory(
     mygrad_func=amax,
     true_func=np.amax,
@@ -76,6 +89,19 @@ def test_max_bkwd():
     kwargs=dict(axis=axis_arg, keepdims=keepdims_arg),
 )
 def test_min_fwd():
+    pass
+
+
+@fwdprop_test_factory(
+    mygrad_func=amin,
+    true_func=mg.no_autodiff(mg.min, to_numpy=True),
+    num_arrays=1,
+    kwargs=dict(axis=axis_arg, keepdims=keepdims_arg),
+)
+def test_min_no_graph_track_fwd():
+    """tests no-graph mode transitively
+    mg.min == np.min
+    mg.min == mg.min(no-grad)"""
     pass
 
 
