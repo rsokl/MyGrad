@@ -7,8 +7,8 @@ from .leaky_relu import leaky_relu
 from .relu import relu
 from .selu import selu
 from .sigmoid import sigmoid
-from .softmax import logsoftmax, softmax
 from .soft_sign import soft_sign
+from .softmax import logsoftmax, softmax
 
 __all__ = [
     "elu",

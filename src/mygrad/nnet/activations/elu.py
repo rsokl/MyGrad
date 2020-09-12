@@ -1,6 +1,7 @@
 from numbers import Real
 
 import numpy as np
+
 from mygrad import Tensor
 from mygrad.operation_base import Operation
 

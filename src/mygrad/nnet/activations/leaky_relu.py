@@ -5,7 +5,6 @@ from numpy import ndarray
 from mygrad import maximum, minimum
 from mygrad.tensor_base import Tensor
 
-
 __all__ = ["leaky_relu"]
 
 
