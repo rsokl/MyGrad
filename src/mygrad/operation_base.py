@@ -119,8 +119,10 @@ class Operation:
             if not var.constant:
                 if not var._ops:
                     raise InvalidBackprop(
-                        "Part of the computational graph containing "
-                        "this tensor was 'cleared' prior to backprop."
+                        f"Part of the computational graph containing "
+                        f"this tensor, {var}, was 'cleared' prior to backprop.\n"
+                        f"It is recommended that you clear all computational graphs "
+                        f"and restart your computation."
                     )
 
                 try:
