@@ -6,10 +6,11 @@ etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 
 from functools import wraps
 from numbers import Number
-from typing import Optional, Set, Type, Union
+from typing import Callable, Optional, Set, Type, Union
 
 import numpy as np
 
+import mygrad._graph_tracking as _track
 from mygrad._utils import is_invalid_gradient
 from mygrad.errors import InvalidBackprop, InvalidGradient
 from mygrad.linalg.ops import MatMul
@@ -527,41 +528,26 @@ class Tensor:
         vars_can_share_mem = (
             isinstance(var, (np.ndarray, Tensor)) for var in input_vars
         )
-        tensor_vars = tuple(
-            (
-                cls(var, constant=True)
-                if not isinstance(var, Tensor)
-                else var.null_grad()
-            )._lock_writeability()
-            for var in input_vars
-        )
-
-        is_const = constant or all(var.constant for var in tensor_vars)
 
         f = Op()
-        f.graph = {f}
-        f.graph.update(
-            *(
-                var._creator.graph
-                for var in tensor_vars
-                if var._creator is not None and not var.constant
+
+        if _track.TRACK_GRAPH:
+
+            tensor_vars = tuple(
+                (
+                    cls(var, constant=True)
+                    if not isinstance(var, Tensor)
+                    else var.null_grad()
+                )._lock_writeability()
+                for var in input_vars
             )
-        )
+        else:
+            tensor_vars = tuple(
+                cls(var, constant=True) if not isinstance(var, Tensor) else var
+                for var in input_vars
+            )
+
         op_out = f(*tensor_vars, *op_args, **op_kwargs)  # type: np.ndarray
-
-        if isinstance(f, BroadcastableOp) and not f.scalar_only:
-            # if broadcasting occurred: scalar-only -> True
-            f.scalar_only = any(
-                op_out.shape != i.shape for i in tensor_vars if not i.constant
-            )
-
-        # record that a variable participated in that op
-        for var in tensor_vars:
-            var._ops.add(f)
-
-        scalar_only = f.scalar_only and not is_const
-        for var in tensor_vars:
-            scalar_only = scalar_only or (var.scalar_only and not var.constant)
 
         # determine whether or not op was a view
         if f.cannot_return_view:
@@ -577,6 +563,42 @@ class Tensor:
                     break
             else:
                 base = None
+
+        if not _track.TRACK_GRAPH:
+            return cls(
+                op_out,
+                constant=True,
+                _creator=None,
+                _scalar_only=False,
+                _base=base,
+                _copy_data=False,
+            )
+
+        # record graph information
+        is_const = constant or all(var.constant for var in tensor_vars)
+
+        f.graph = {f}
+        f.graph.update(
+            *(
+                var._creator.graph
+                for var in tensor_vars
+                if var._creator is not None and not var.constant
+            )
+        )
+
+        if isinstance(f, BroadcastableOp) and not f.scalar_only:
+            # if broadcasting occurred: scalar-only -> True
+            f.scalar_only = any(
+                op_out.shape != i.shape for i in tensor_vars if not i.constant
+            )
+
+        # record that a variable participated in that op
+        for var in tensor_vars:
+            var._ops.add(f)
+
+        scalar_only = f.scalar_only and not is_const
+        for var in tensor_vars:
+            scalar_only = scalar_only or (var.scalar_only and not var.constant)
 
         return cls(
             op_out,
@@ -626,6 +648,9 @@ class Tensor:
         >>> x.grad # df/dx = df/dw * dw/dx
         array(6.)
         """
+        if not _track.TRACK_GRAPH:
+            return
+
         if self.constant:
             self.clear_graph()
             return
