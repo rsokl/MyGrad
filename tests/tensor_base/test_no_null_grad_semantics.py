@@ -29,7 +29,7 @@ def test_involving_a_tensor_in_a_graph_nulls_its_gradient(
     assert x._ops is not None
 
 
-@given(x=tensors(include_grad=st.booleans()))
+@given(x=tensors(elements=st.floats(-100, 100), include_grad=st.booleans()))
 def test_backprop_clears_graph(x: Tensor):
     for num_fwd_pass in range(2):
         note(f"Forward-pass iteration: {num_fwd_pass}")
