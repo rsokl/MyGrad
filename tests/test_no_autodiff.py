@@ -19,14 +19,31 @@ def test_no_autodiff_context_manager(x: Tensor):
 
     with no_autodiff:
         y = +x
+        y.backward()
 
     assert y.constant
     assert y.creator is None
-    assert not y._ops
-    assert x.data.flags.writeable
+    assert y.grad is None
+    assert y.data.flags.writeable
 
     assert not x._ops
+    assert x.grad is None
     assert x.data.flags.writeable
+
+    # check that standard behavior is restored
+    y = 2 * x
+
+    assert y.constant is x.constant
+    assert y.creator is not None
+    assert not y.data.flags.writeable
+
+    assert x._ops
+    assert not x.data.flags.writeable
+
+    if not y.constant:
+        y.backward()
+        assert_array_equal(y.grad, np.full_like(y, 1.0))
+        assert_array_equal(x.grad, np.full_like(x, 2.0))
 
 
 @given(old_x=tensors(shape=(2,), constant=False))
