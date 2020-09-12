@@ -11,14 +11,8 @@ any permutation of test states (i.e. permutations of the aforementioned rules)""
 from typing import List, Tuple
 
 import hypothesis.strategies as st
-from hypothesis import settings
-from hypothesis.stateful import (
-    Bundle,
-    RuleBasedStateMachine,
-    invariant,
-    precondition,
-    rule,
-)
+from hypothesis import assume, settings
+from hypothesis.stateful import Bundle, RuleBasedStateMachine, invariant, rule
 from numpy.testing import assert_allclose, assert_equal
 from pytest import raises
 
@@ -97,13 +91,13 @@ class GraphCompare(RuleBasedStateMachine):
             with raises(InvalidBackprop):
                 t.backward(grad)
             self.raised = True
+            assume(False)
         else:
             t.backward(grad)
             assert not t._accum_ops
             assert not t._ops
             assert not t.creator
 
-    @precondition(lambda self: not self.raised)
     @invariant()
     def check_tensor_mirror(self):
         """
@@ -123,13 +117,17 @@ class GraphCompare(RuleBasedStateMachine):
             assert t.ndim == mirror.ndim, _node_ID_str(num)
             assert t.creator is mirror.creator, _node_ID_str(num)
 
-    @precondition(lambda self: not self.raised)
     @invariant()
     def all_agree(self):
         """
         Ensure that all corresponding nodes/tensors have matching data and gradients
         across the respective graphs.
         """
+        assert not self.raised, (
+            "there is a problem with the state machine: "
+            "invalid-backprop should be marked as 'assumed false' "
+            "by Hypothesis"
+        )
         for num, (n, t) in enumerate(self.node_list):
             assert bool(n._ops) is bool(t._ops), _node_ID_str(num)
             assert_equal(n.data, t.data, err_msg=_node_ID_str(num))
