@@ -13,19 +13,24 @@ __all__ = ["no_autodiff"]
 TRACK_GRAPH = True  # type: bool
 
 
-class NoAutoDiff:
+class _NoAutoDiff:
     """ Serves as a context manager and decorator for suspending
     all computational graph tracking."""
+
+    depth = 0
 
     def __enter__(self):
         """Suspends graph-tracking"""
         global TRACK_GRAPH
+        self.depth += 1
         TRACK_GRAPH = False
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Restores graph-tracking"""
         global TRACK_GRAPH
-        TRACK_GRAPH = True
+        self.depth -= 1
+
+        TRACK_GRAPH = self.depth == 0
 
     def __call__(self, func: Callable, to_numpy: bool = False) -> Callable:
         """Decorates a function so that it will have graph-tracking suspended
@@ -49,4 +54,4 @@ class NoAutoDiff:
         return wrapper
 
 
-no_autodiff = NoAutoDiff()
+no_autodiff = _NoAutoDiff()
