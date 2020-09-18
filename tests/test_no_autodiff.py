@@ -73,7 +73,7 @@ def test_no_autodiff_context_manager_restores_state():
             assert not _tracking.TRACK_GRAPH
             raise ValueError()
 
-    assert _tracking.TRACK_GRAPH
+    assert _tracking.TRACK_GRAPH is True
 
 
 @given(x=tensors(shape=(1,)))
@@ -92,16 +92,16 @@ def test_no_autodiff_decorator(x: Tensor):
     assert x.data.flags.writeable
 
 
-def test_no_autodiff_decorator_restores_state():
+def test_no_autodiff_decorator_restores_state_via_finally():
     @no_autodiff
     def func():
         assert not _tracking.TRACK_GRAPH
-        raise ValueError()
+        raise ValueError()  # state should be restored despite error
 
     with pytest.raises(ValueError):
         func()
 
-    assert _tracking.TRACK_GRAPH
+    assert _tracking.TRACK_GRAPH is True
 
 
 def test_decorator_is_transparent_to_function_information():
@@ -152,16 +152,16 @@ def test_graph_tracking_through_multiple_context_depths(depth: int):
     depth_tracker = dict(cnt=0)
 
     def check_graph_tracking(func):
-        @no_autodiff
         def wrapper(*args, **kwargs):
             depth_tracker["cnt"] += 1
+            track_state = _tracking.TRACK_GRAPH
+
+            out = no_autodiff(func)(*args, **kwargs)
+
             assert (
-                _tracking.TRACK_GRAPH is False
-            ), f"(before) depth: {depth_tracker['cnt']}"
-            out = func(*args, **kwargs)
-            assert (
-                _tracking.TRACK_GRAPH is False
+                _tracking.TRACK_GRAPH is track_state
             ), f"(after) depth: {depth_tracker['cnt']}"
+
             return out
 
         return wrapper
@@ -171,4 +171,7 @@ def test_graph_tracking_through_multiple_context_depths(depth: int):
         return +x
 
     f = compose(check_graph_tracking for _ in range(depth))(func)
+
+    assert _tracking.TRACK_GRAPH is True
     f(Tensor([1.0]))
+    assert _tracking.TRACK_GRAPH is True
