@@ -549,10 +549,11 @@ class Tensor:
 
         op_out = f(*tensor_vars, *op_args, **op_kwargs)  # type: np.ndarray
 
-        # determine whether or not op was a view
-        if f.cannot_return_view:
-            base = None
-        else:
+        # determine whether or not op was a view; if so, `base`
+        # points to parent Tensor
+        base = None  # type: Optional[Tensor]
+
+        if not f.cannot_return_view:
             vars_can_share_mem = (
                 isinstance(var, (np.ndarray, Tensor)) for var in input_vars
             )
@@ -560,8 +561,6 @@ class Tensor:
                 if can_share_mem and _is_view_of(parent=var, child=op_out):
                     base = var if var.base is None else var.base
                     break
-            else:
-                base = None
 
         if not _track.TRACK_GRAPH:
             # execute operation without tracking creator or any graph
