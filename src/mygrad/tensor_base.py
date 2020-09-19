@@ -567,7 +567,7 @@ class Tensor:
             # information
             return cls(
                 op_out,
-                constant=True,
+                constant=constant,  # constant not determined by graph info
                 _creator=None,
                 _scalar_only=False,
                 _base=base,

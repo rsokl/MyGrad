@@ -8,6 +8,7 @@ from numpy.testing import assert_array_equal
 
 import mygrad._graph_tracking as _tracking
 from mygrad import Tensor, amax, no_autodiff
+from mygrad.nnet.activations import soft_sign
 from tests.custom_strategies import tensors
 
 
@@ -15,12 +16,15 @@ def test_graph_tracking_is_on_by_default():
     assert _tracking.TRACK_GRAPH is True
 
 
-@given(x=tensors(shape=(1,), elements=st.floats(-100, 100)))
-def test_no_autodiff_context_manager(x: Tensor):
+@given(x=tensors(shape=(1,), elements=st.floats(-100, 100)), constant=st.booleans())
+def test_no_autodiff_context_manager(x: Tensor, constant: bool):
 
     with no_autodiff:
-        y = +x
+        # test soft_sign so that we pass through multi-node
+        # graph
+        y = soft_sign(x, constant=constant)
 
+        assert y.constant is constant
         assert y.creator is None
         assert y.data.flags.writeable
 
@@ -29,7 +33,6 @@ def test_no_autodiff_context_manager(x: Tensor):
 
         y.backward()  # should be no-op
 
-    assert y.constant
     assert y.grad is None
     assert x.grad is None
 
@@ -66,24 +69,25 @@ def test_no_tracking_for_inplace_op(old_x: Tensor):
     assert_array_equal(old_x.grad, np.full_like(old_x, 2.0))
 
 
-def test_no_autodiff_context_manager_restores_state():
+def test_no_autodiff_context_manager_restores_state_via_finally_clause():
 
     with pytest.raises(ValueError):
         with no_autodiff:
             assert not _tracking.TRACK_GRAPH
-            raise ValueError()
+            raise ValueError()  # we should restore graph track despite raise
 
     assert _tracking.TRACK_GRAPH is True
 
 
-@given(x=tensors(shape=(1,)))
-def test_no_autodiff_decorator(x: Tensor):
+@given(x=tensors(shape=(1,), elements=st.floats(-100, 100)), constant=st.booleans())
+def test_no_autodiff_decorator(x: Tensor, constant: bool):
     @no_autodiff
-    def func(x):
-        return +x
+    def func(x, constant=False):
+        return soft_sign(x, constant=constant)
 
-    y = func(x)
-    assert y.constant
+    y = func(x, constant=constant)
+
+    assert y.constant is constant
     assert y.creator is None
     assert not y._ops
     assert y.data.flags.writeable
