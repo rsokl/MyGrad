@@ -154,6 +154,7 @@ def test_graph_tracking_through_multiple_context_depths(depth: int):
     def check_graph_tracking(func):
         def wrapper(*args, **kwargs):
             depth_tracker["cnt"] += 1
+            note(f"depth: {depth_tracker}")
             track_state = _tracking.TRACK_GRAPH
 
             out = no_autodiff(func)(*args, **kwargs)
@@ -170,7 +171,7 @@ def test_graph_tracking_through_multiple_context_depths(depth: int):
         assert _tracking.TRACK_GRAPH is False
         return +x
 
-    f = compose(check_graph_tracking for _ in range(depth))(func)
+    f = compose([check_graph_tracking] * depth + [func])
 
     assert _tracking.TRACK_GRAPH is True
     f(Tensor([1.0]))
