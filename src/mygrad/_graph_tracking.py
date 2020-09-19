@@ -17,20 +17,21 @@ class _NoAutoDiff:
     """ Serves as a context manager and decorator for suspending
     all computational graph tracking."""
 
-    depth = 0
+    # tracks context depth
+    _depth = 0  # type: int
 
     def __enter__(self):
         """Suspends graph-tracking"""
         global TRACK_GRAPH
-        self.depth += 1
+        self._depth += 1
         TRACK_GRAPH = False
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """Restores graph-tracking"""
+        """Restores graph-tracking when context depth returns to 0"""
         global TRACK_GRAPH
-        self.depth -= 1
+        self._depth -= 1
 
-        TRACK_GRAPH = self.depth == 0
+        TRACK_GRAPH = self._depth == 0
 
     def __call__(self, func: Callable, to_numpy: bool = False) -> Callable:
         """Decorates a function so that it will have graph-tracking suspended
@@ -43,7 +44,11 @@ class _NoAutoDiff:
 
         to_numpy : bool, optional (default=False)
             If true, the output is assumed to be array-like and
-            will be cast to a numpy array"""
+            will be cast to a numpy array
+
+        Returns
+        -------
+        decorated_func : Callable"""
 
         @wraps(func)
         def wrapper(*args, **kwargs):
