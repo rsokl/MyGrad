@@ -7,7 +7,6 @@ from hypothesis import given
 import mygrad as mg
 from mygrad.nnet.activations import softmax
 from mygrad.nnet.losses import focal_loss, softmax_focal_loss
-from tests import as_numpy
 from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
@@ -24,7 +23,7 @@ def numpy_softmax_focal_loss(
     scores: np.ndarray, targets: np.ndarray, alpha: float, gamma: float
 ) -> np.ndarray:
     targets = mg.asarray(targets)
-    scores = as_numpy(softmax(scores))
+    scores = mg.asarray(mg.no_autodiff(softmax)(scores))
     rows = np.arange(len(scores))
     pc = scores[rows, targets]
     return -alpha * np.clip(1 - pc, a_min=0, a_max=1) ** gamma * np.log(pc)
@@ -77,6 +76,22 @@ def test_raises_on_bad_gamma(gamma: float):
     ),
 )
 def test_focal_fwd():
+    pass
+
+
+@fwdprop_test_factory(
+    mygrad_func=focal_loss,
+    true_func=mg.no_autodiff(focal_loss),
+    index_to_arr_shapes={0: hnp.array_shapes(min_dims=2, max_dims=2)},
+    index_to_bnds={0: (1e-14, 100)},
+    num_arrays=1,
+    kwargs=dict(
+        targets=lambda scores: targets(scores=scores),
+        alpha=lambda scores: st.floats(-2, 2),
+        gamma=lambda scores: st.floats(0, 10),
+    ),
+)
+def test_focal_no_graph_fwd():
     pass
 
 

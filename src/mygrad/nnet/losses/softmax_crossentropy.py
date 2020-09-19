@@ -1,5 +1,6 @@
 import numpy as np
 
+import mygrad._graph_tracking as _tracking
 from mygrad.math._special import logsumexp
 from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor
@@ -36,9 +37,10 @@ class SoftmaxCrossEntropy(Operation):
         label_locs = (range(len(scores)), y_true)
         loss = -np.sum(log_softmax[label_locs]) / scores.shape[0]
 
-        self.back = np.exp(log_softmax)
-        self.back[label_locs] -= 1.0
-        self.back /= scores.shape[0]
+        if _tracking.TRACK_GRAPH:
+            self.back = np.exp(log_softmax)
+            self.back[label_locs] -= 1.0
+            self.back /= scores.shape[0]
         return loss
 
     def backward_var(self, grad, index, **kwargs):

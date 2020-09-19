@@ -2,6 +2,7 @@ from numbers import Real
 
 import numpy as np
 
+import mygrad._graph_tracking as _tracking
 from mygrad.nnet.activations import softmax
 from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor, asarray
@@ -68,6 +69,9 @@ class FocalLoss(Operation):
 
         one_m_pc_gamma = one_m_pc ** gamma
         loss = -(alpha * one_m_pc_gamma * log_pc)
+
+        if not _tracking.TRACK_GRAPH:
+            return loss
 
         self.back = np.zeros(class_probs.shape, dtype=np.float64)
 

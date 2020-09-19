@@ -23,7 +23,7 @@ def any_scalar(*args, p):
     return st.sampled_from([int(p), float(p), np.array(p)])
 
 
-@given(x=tensors(), p=st.sampled_from([2, 3]))
+@given(x=tensors(elements=st.floats(-10, 10)), p=st.sampled_from([2, 3]))
 def test_special_pow_propagate_constant(x, p):
     y = x ** p
     assert y.constant is x.constant

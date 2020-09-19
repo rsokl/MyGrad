@@ -25,12 +25,12 @@ class Softmax(Operation):
         x = a.data
 
         self._kw = dict(axis=axis, keepdims=True)
-
-        return _softmax(x, self._kw)
+        self._cached_output = _softmax(x, self._kw)
+        return self._cached_output
 
     def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
-        soft = _softmax(a.data, self._kw)
+        _ = self.variables[index]  # check index error
+        soft = self._cached_output
         sg = soft * grad
         return sg - soft * np.sum(sg, **self._kw)
 

@@ -1,5 +1,9 @@
-from mygrad.tensor_base import Tensor, asarray, astensor  # isort:skip  # avoid an import cycle
-
+from mygrad.tensor_base import (  # isort:skip  # avoid an import cycle
+    Tensor,
+    asarray,
+    astensor,
+)
+from mygrad._graph_tracking import no_autodiff
 from mygrad.indexing_routines.funcs import *
 from mygrad.linalg.funcs import *
 from mygrad.math.arithmetic.funcs import *

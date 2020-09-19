@@ -1,5 +1,6 @@
 import numpy as np
 
+import mygrad._graph_tracking as _tracking
 from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor
 
@@ -42,13 +43,13 @@ class MulticlassHinge(Operation):
         Lij = M
         Lij[not_thresh] = 0
         Lij[correct_labels] = 0
-
-        TMP = np.ones(M.shape, dtype=float)
-        TMP[not_thresh] = 0
-        TMP[correct_labels] = 0  # NxC; 1 where margin > 0
-        TMP[correct_labels] = -1 * TMP.sum(axis=-1)
-        self.back = TMP
-        self.back /= scores.shape[0]
+        if _tracking.TRACK_GRAPH:
+            TMP = np.ones(M.shape, dtype=float)
+            TMP[not_thresh] = 0
+            TMP[correct_labels] = 0  # NxC; 1 where margin > 0
+            TMP[correct_labels] = -1 * TMP.sum(axis=-1)
+            self.back = TMP
+            self.back /= scores.shape[0]
         return np.sum(Lij) / scores.shape[0]
 
     def backward_var(self, grad, index, **kwargs):

@@ -6,10 +6,11 @@ etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 
 from functools import wraps
 from numbers import Number
-from typing import Optional, Set, Type, Union
+from typing import Callable, Optional, Set, Type, Union
 
 import numpy as np
 
+import mygrad._graph_tracking as _track
 from mygrad._utils import is_invalid_gradient
 from mygrad.errors import InvalidBackprop, InvalidGradient
 from mygrad.linalg.ops import MatMul
@@ -518,27 +519,64 @@ class Tensor:
         mygrad.Tensor
             The tensor-result of the operation's forward-pass."""
 
+        # cast all input-vars to tensors
+        if _track.TRACK_GRAPH:
+            # lock memory of array data and clear any tensor
+            # gradients
+            tensor_vars = tuple(
+                (
+                    cls(var, constant=True)
+                    if not isinstance(var, Tensor)
+                    else var.null_grad()
+                )._lock_writeability()
+                for var in input_vars
+            )
+        else:
+            # operations are not being tracked - make all tensors
+            # constant
+            tensor_vars = tuple(
+                cls(var, constant=True) if not isinstance(var, Tensor) else var
+                for var in input_vars
+            )
+
         if op_args is None:
             op_args = tuple()
 
         if op_kwargs is None:
             op_kwargs = dict()
 
-        vars_can_share_mem = (
-            isinstance(var, (np.ndarray, Tensor)) for var in input_vars
-        )
-        tensor_vars = tuple(
-            (
-                cls(var, constant=True)
-                if not isinstance(var, Tensor)
-                else var.null_grad()
-            )._lock_writeability()
-            for var in input_vars
-        )
+        f = Op()
 
+        op_out = f(*tensor_vars, *op_args, **op_kwargs)  # type: np.ndarray
+
+        # determine whether or not op was a view; if so, `base`
+        # points to parent Tensor
+        base = None  # type: Optional[Tensor]
+
+        if not f.cannot_return_view:
+            vars_can_share_mem = (
+                isinstance(var, (np.ndarray, Tensor)) for var in input_vars
+            )
+            for can_share_mem, var in zip(vars_can_share_mem, tensor_vars):
+                if can_share_mem and _is_view_of(parent=var, child=op_out):
+                    base = var if var.base is None else var.base
+                    break
+
+        if not _track.TRACK_GRAPH:
+            # execute operation without tracking creator or any graph
+            # information
+            return cls(
+                op_out,
+                constant=constant,  # constant not determined by graph info
+                _creator=None,
+                _scalar_only=False,
+                _base=base,
+                _copy_data=False,
+            )
+
+        # record graph information
         is_const = constant or all(var.constant for var in tensor_vars)
 
-        f = Op()
         f.graph = {f}
         f.graph.update(
             *(
@@ -547,7 +585,6 @@ class Tensor:
                 if var._creator is not None and not var.constant
             )
         )
-        op_out = f(*tensor_vars, *op_args, **op_kwargs)  # type: np.ndarray
 
         if isinstance(f, BroadcastableOp) and not f.scalar_only:
             # if broadcasting occurred: scalar-only -> True
@@ -559,24 +596,11 @@ class Tensor:
         for var in tensor_vars:
             var._ops.add(f)
 
-        scalar_only = f.scalar_only and not is_const
-        for var in tensor_vars:
-            scalar_only = scalar_only or (var.scalar_only and not var.constant)
-
-        # determine whether or not op was a view
-        if f.cannot_return_view:
-            base = None
-        else:
-            for can_share_mem, var in zip(vars_can_share_mem, tensor_vars):
-                if can_share_mem and _is_view_of(parent=var, child=op_out):
-                    base = var if var.base is None else var.base
-                    assert not f.cannot_return_view, (
-                        f"{f} is marked as being unable to return a view, "
-                        f"however its output is a view of one of its inputs"
-                    )
-                    break
-            else:
-                base = None
+        # determine if node only supports backprop from a scalar
+        # terminus
+        scalar_only = (f.scalar_only and not is_const) or any(
+            var.scalar_only for var in tensor_vars if not var.constant
+        )
 
         return cls(
             op_out,
@@ -626,6 +650,9 @@ class Tensor:
         >>> x.grad # df/dx = df/dw * dw/dx
         array(6.)
         """
+        if not _track.TRACK_GRAPH:
+            return
+
         if self.constant:
             self.clear_graph()
             return
