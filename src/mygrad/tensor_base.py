@@ -6,7 +6,7 @@ etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 
 from functools import wraps
 from numbers import Number
-from typing import Callable, Optional, Set, Type, Union
+from typing import List, Optional, Set, Type, Union
 
 import numpy as np
 
@@ -381,7 +381,11 @@ class Tensor:
         # track the operations that have contributed to this tensor's gradient during a back-prop
         self._accum_ops = set()  # type: Set[Operation]
 
+        # base points to the initial tensor that owns the memory of this
+        # tensor
         self._base = _base  # type: Optional[Tensor]
+        # stores all of the tensors that are a view of this tensor
+        self._view_children = []  # type: List[Tensor]
 
         # used to track original 'writeable' statuses of array data
         self._data_was_writeable = None  # type: Optional[bool]
@@ -549,9 +553,12 @@ class Tensor:
 
         op_out = f(*tensor_vars, *op_args, **op_kwargs)  # type: np.ndarray
 
-        # determine whether or not op was a view; if so, `base`
+        # Determine whether or not op was a view; if so, `base`
         # points to parent Tensor
         base = None  # type: Optional[Tensor]
+        # If output of op is a view - tracks the tensor var that is
+        # the parent of the view
+        parent_var = None  # type: Optional[Tensor]
 
         if not f.cannot_return_view:
             vars_can_share_mem = (
@@ -560,6 +567,7 @@ class Tensor:
             for can_share_mem, var in zip(vars_can_share_mem, tensor_vars):
                 if can_share_mem and _is_view_of(parent=var, child=op_out):
                     base = var if var.base is None else var.base
+                    parent_var = var
                     break
 
         if not _track.TRACK_GRAPH:
@@ -602,7 +610,7 @@ class Tensor:
             var.scalar_only for var in tensor_vars if not var.constant
         )
 
-        return cls(
+        out = cls(
             op_out,
             constant=is_const,
             _creator=f,
@@ -610,6 +618,11 @@ class Tensor:
             _base=base,
             _copy_data=False,
         )._lock_writeability()
+
+        if parent_var is not None:
+            parent_var._view_children.append(out)
+
+        return out
 
     def backward(self, grad=None):
         """ Compute set or accumulate ``self.grad`` with `grad`, and pass ``self.creator.backward(grad)``.

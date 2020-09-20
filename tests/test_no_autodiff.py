@@ -52,6 +52,14 @@ def test_no_autodiff_context_manager(x: Tensor, constant: bool):
         assert_array_equal(x.grad, np.full_like(x, 2.0))
 
 
+@given(tensors())
+def test_no_track_view_children(x: Tensor):
+    with no_autodiff:
+        _ = x[...]
+
+    assert not x._view_children
+
+
 @given(old_x=tensors(shape=(2,), constant=False, elements=st.floats(-100, 100)))
 def test_no_tracking_for_inplace_op(old_x: Tensor):
     expected = old_x.copy()
