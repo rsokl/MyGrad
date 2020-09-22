@@ -583,6 +583,8 @@ class Tensor:
             )
 
         if base is not None:
+            # we need to be able to replay view-ops for doing in-place operations
+            # on graphs with views
             f.replay_args = op_args
             f.replay_kwargs = op_kwargs
             f.replay_force_constant = constant
