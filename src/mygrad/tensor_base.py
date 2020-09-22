@@ -582,6 +582,11 @@ class Tensor:
                 _copy_data=False,
             )
 
+        if base is not None:
+            f.replay_args = op_args
+            f.replay_kwargs = op_kwargs
+            f.replay_force_constant = constant
+
         # record graph information
         is_const = constant or all(var.constant for var in tensor_vars)
 
@@ -623,6 +628,24 @@ class Tensor:
             parent_var._view_children.append(out)
 
         return out
+
+    def _replay_op(self, *input_vars) -> "Tensor":
+        """ *dev use only*
+
+        Replays the op that produced `self` - called on the specified
+        input vars"""
+        if self.creator is None:
+            raise ValueError(
+                "``Tensor._replay_op(...)`` was called on a tensor without a creator."
+                "\nPlease report this error at: https://github.com/rsokl/MyGrad/issues"
+            )
+        return self._op(
+            type(self.creator),
+            *input_vars,
+            op_args=self.creator.replay_args,
+            op_kwargs=self.creator.replay_kwargs,
+            constant=self.creator.replay_force_constant,
+        )
 
     def backward(self, grad=None):
         """ Compute set or accumulate ``self.grad`` with `grad`, and pass ``self.creator.backward(grad)``.

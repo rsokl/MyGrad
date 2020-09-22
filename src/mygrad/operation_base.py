@@ -2,7 +2,7 @@
 Defines the base class for mathematical operations capable of back-propagating
 gradients to their input tensors."""
 
-from typing import Optional, Set
+from typing import Any, Dict, Optional, Set, Tuple
 
 import numpy as np
 
@@ -50,6 +50,13 @@ class Operation:
     # can be set to true if the operation is guaranteed to not returns a view
     # this will reduce some overhead on checking for shared memory
     cannot_return_view = False  # type: bool
+
+    # Stores positional and keyword arguments used to call op.
+    # Can be set optionally - only if op needs to be "replayed",
+    # e.g. with a view
+    replay_args: Optional[Tuple[Any, ...]] = None
+    replay_kwargs: Optional[Dict[str, Any]] = None
+    replay_force_constant: Optional[bool] = None
 
     def __call__(self, *input_vars, **kwargs):  # pragma: no cover
         """ Performs a forward pass, f, of this Operation::

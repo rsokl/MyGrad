@@ -21,6 +21,7 @@ __all__ = [
     "broadcastable_shapes",
     "choices",
     "everything_except",
+    "valid_shapes",
     "valid_axes",
     "tensors",
 ]
