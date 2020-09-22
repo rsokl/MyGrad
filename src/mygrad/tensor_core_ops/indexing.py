@@ -2,6 +2,7 @@ from numbers import Number
 
 import numpy as np
 
+import mygrad._graph_tracking as _tracking
 from mygrad.operation_base import BroadcastableOp, Operation
 
 __all__ = ["GetItem", "SetItem"]
@@ -63,11 +64,15 @@ class GetItem(Operation):
         out = a.data[index]
 
         self._used_distinct_indices = (
-            np.shares_memory(a.data, out)
-            or isinstance(out, Number)
-            or _is_bool_array_index(self.index)
+            (
+                np.shares_memory(a.data, out)
+                or isinstance(out, Number)
+                or _is_bool_array_index(self.index)
+            )
+            if _tracking.TRACK_GRAPH
+            else None
         )
-        return a.data[index]
+        return out
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
