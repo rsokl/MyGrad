@@ -536,8 +536,7 @@ class Tensor:
                 for var in input_vars
             )
         else:
-            # operations are not being tracked - make all tensors
-            # constant
+            # operations are not being tracked - don't lock memory or null grads
             tensor_vars = tuple(
                 cls(var, constant=True) if not isinstance(var, Tensor) else var
                 for var in input_vars
@@ -967,6 +966,26 @@ class Tensor:
         """
         self.__dict__ = tensor.__dict__
 
+    def _make_placeholder_copy(self):
+        placeholder = Tensor(
+            self,
+            constant=self.constant,
+            _scalar_only=self._scalar_only,
+            _creator=self.creator,
+            _base=self._base,
+            _copy_data=True,
+        )
+        placeholder._ops = self._ops
+        placeholder._accum_ops = self._accum_ops
+
+        # point all ops involving `self` to old_tensor instead
+        for op in placeholder._ops:
+            op.variables = tuple(
+                var_ if var_ is not self else placeholder for var_ in op.variables
+            )
+
+        return placeholder
+
     def _in_place_op(
         self,
         inplace_op: Type[Operation],
@@ -984,23 +1003,7 @@ class Tensor:
         """
         # TODO: make sure that a failed in-place op doesn't corrupt the graph
         # old_tensor is the tensor pre-setitem
-        old_tensor = Tensor(
-            self,
-            constant=self.constant,
-            _scalar_only=self._scalar_only,
-            _creator=self.creator,
-            _base=self._base,
-        )
-        old_tensor._ops = self._ops
-        old_tensor._accum_ops = self._accum_ops
-
-        # point all ops involving `self` to old_tensor instead
-        for op in old_tensor._ops:
-            for i in range(len(op.variables)):
-                if op.variables[i] is self:
-                    op.variables = (
-                        op.variables[:i] + (old_tensor,) + op.variables[i + 1 :]
-                    )
+        old_tensor = self._make_placeholder_copy()
 
         # self becomes the tensor post-setitem
         out = self._op(
@@ -1417,5 +1420,5 @@ def tensor_to_array_wrapper(func):
     return wrapped
 
 
-for op in ("__lt__", "__le__", "__gt__", "__ge__"):
-    setattr(Tensor, op, tensor_to_array_wrapper(getattr(np.ndarray, op)))
+for _op in ("__lt__", "__le__", "__gt__", "__ge__"):
+    setattr(Tensor, _op, tensor_to_array_wrapper(getattr(np.ndarray, _op)))
