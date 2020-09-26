@@ -118,6 +118,10 @@ class GraphDuplicationCompare(RuleBasedStateMachine):
         self.parent_child_pairs.add((id(parent), id(out)))
         return out
 
+    @rule(parent=nodes)
+    def create_non_view_node(self, parent: Tensor):
+        return 2 * parent  # this shouldn't affect the view graph
+
     def teardown(self):
         graph = _DuplicatingGraph(self.base)
         iter_nodes: Tuple[_Node, ...] = tuple(graph)
