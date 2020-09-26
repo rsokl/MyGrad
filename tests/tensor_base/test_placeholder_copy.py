@@ -9,12 +9,16 @@ from tests.custom_strategies import choices, tensors
 
 
 @given(
-    x=tensors(elements=st.floats(-100, 100)), data=st.data(), make_copy=st.booleans()
+    x=tensors(elements=st.floats(-100, 100), read_only=st.booleans()),
+    data=st.data(),
+    make_copy=st.booleans(),
 )
-def test_placeholder_tenosre(x: mg.Tensor, data: st.DataObject, make_copy: bool):
+def test_placeholder_tensor(x: mg.Tensor, data: st.DataObject, make_copy: bool):
     """
     Ensure the backpropagation is properly rerouted through placeholder tensor
     """
+    was_writeable = x.data.flags.writeable
+
     y = mg.ones_like(x)
     # shuffle order
     # note that one of the entries is 2*x, which exercises the
@@ -25,13 +29,18 @@ def test_placeholder_tenosre(x: mg.Tensor, data: st.DataObject, make_copy: bool)
     out = multiply_sequence(*seq).sum()
     placeholder = x._make_placeholder_tensor(copy_data=make_copy)
 
+    assert placeholder is not x
     assert_array_equal(x, placeholder)
     assert placeholder.constant is x.constant
+    assert placeholder.data.flags.writeable is x.data.flags.writeable
 
     if x.size:
         assert np.shares_memory(x, placeholder) is not make_copy
 
     out.backward()
+
+    # note that writeability of `x` is not restored
+    assert placeholder.data.flags.writeable is was_writeable
 
     assert x.grad is None
 

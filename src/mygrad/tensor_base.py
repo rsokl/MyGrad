@@ -964,7 +964,7 @@ class Tensor:
         ``tensor`` so that they reference all of the same data structures.
         This is used to facilitate "in-place" operations.
         """
-        self.__dict__ = tensor.__dict__
+        self.__dict__ = tensor.__dict__.copy()
 
     def _make_placeholder_tensor(
         self, *, copy_data: bool, base: Optional["Tensor"] = None
@@ -995,15 +995,14 @@ class Tensor:
             not self._accum_ops
         ), "A placeholder copy cannot be created during backprop"
 
-        placeholder = Tensor(
-            self,
-            constant=self.constant,
-            _scalar_only=self._scalar_only,
-            _creator=self.creator,
-            _base=base,
-            _copy_data=copy_data,
-        )
-        placeholder._ops = self._ops
+        placeholder = Tensor([])
+        placeholder._mirror_tensor(self)
+        if copy_data:
+            was_writeable = placeholder.data.flags.writeable
+            placeholder.data = np.copy(placeholder.data)
+            placeholder.data.flags.writeable = was_writeable
+
+        placeholder._base = base
 
         # point all ops involving `self` to old_tensor instead
         for op in placeholder._ops:
