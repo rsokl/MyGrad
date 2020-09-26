@@ -11,10 +11,17 @@ from tests.custom_strategies import choices, tensors
 @given(
     x=tensors(elements=st.floats(-100, 100)), data=st.data(), make_copy=st.booleans()
 )
-def test_placeholder_copy(x: mg.Tensor, data: st.DataObject, make_copy: bool):
+def test_placeholder_tenosre(x: mg.Tensor, data: st.DataObject, make_copy: bool):
+    """
+    Ensure the backpropagation is properly rerouted through placeholder tensor
+    """
     y = mg.ones_like(x)
     # shuffle order
-    seq = data.draw(choices([x, x, y, y], size=4, replace=False), label="sequence")
+    # note that one of the entries is 2*x, which exercises the
+    # process of rerouting the tensor for multiple ops
+    seq = data.draw(
+        choices([x, x, 2 * x, y, y], size=5, replace=False), label="sequence"
+    )
     out = multiply_sequence(*seq).sum()
     placeholder = x._make_placeholder_tensor(copy_data=make_copy)
 
@@ -29,7 +36,7 @@ def test_placeholder_copy(x: mg.Tensor, data: st.DataObject, make_copy: bool):
     assert x.grad is None
 
     if not y.constant:
-        assert_allclose(y.grad, 2 * x.data ** 2, atol=1e-7)
+        assert_allclose(y.grad, 4 * x.data ** 3, atol=1e-7)
 
     if not placeholder.constant:
-        assert_allclose(placeholder.grad, 2 * x.data)
+        assert_allclose(placeholder.grad, 6 * x.data ** 2)
