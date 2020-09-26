@@ -6,7 +6,7 @@ etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 
 from functools import wraps
 from numbers import Number
-from typing import List, Optional, Set, Type, Union
+from typing import Dict, Iterator, List, NamedTuple, Optional, Set, Type, Union
 
 import numpy as np
 
@@ -1448,3 +1448,83 @@ def tensor_to_array_wrapper(func):
 
 for _op in ("__lt__", "__le__", "__gt__", "__ge__"):
     setattr(Tensor, _op, tensor_to_array_wrapper(getattr(np.ndarray, _op)))
+
+
+class _Node(NamedTuple):
+    tensor: Tensor
+    placeholder: Tensor
+    parent: Optional[Tensor] = None
+
+
+class _DuplicatingGraph:
+    """Traces through the graph of all views of the base tensor and
+    creates a corresponding graph of 'placeholders', used to permit
+    a future in-place operation without mutating the current tensor
+    graph.
+
+    Provides the information needed to recreate a view-graph after
+    an in-place operation has been performed on the base tensor.
+
+    Upon initialization, this class mutates the graph downstream of the
+    base tensor.
+    """
+
+    def _duplicate_graph(self, tensor: Tensor):
+        """Recursively creates placeholders for all views downstream of `tensor`"""
+        if not tensor._view_children:
+            self.leafs.add(id(tensor))
+            return
+
+        for child in tensor._view_children:
+            self[child] = _Node(
+                tensor=child,
+                placeholder=child._make_placeholder_tensor(
+                    copy_data=False, base=self.base.placeholder
+                ),
+                parent=tensor,
+            )
+            self._duplicate_graph(child)
+
+        self[tensor].placeholder._view_children = [
+            self[t].placeholder for t in tensor._view_children
+        ]
+
+    def __init__(self, base: Tensor):
+        assert base.base is None
+        self.base = _Node(
+            tensor=base, placeholder=base._make_placeholder_tensor(copy_data=False)
+        )
+        self.mappings: Dict[int, _Node] = {id(base): self.base}
+        self.leafs: Set[int] = set()
+        # creates placeholders for each node in the view graph
+        self._duplicate_graph(base)
+
+    def __getitem__(self, item: Tensor) -> _Node:
+        """Returns a node associated with a tensor"""
+        return self.mappings[id(item)]
+
+    def __setitem__(self, key: Tensor, value: _Node):
+        self.mappings[id(key)] = value
+
+    def _yield_children(self, tensor: Tensor) -> Iterator[_Node]:
+        """Recursive helper function for DFS iteration"""
+        yield self[tensor]
+        for child in tensor._view_children:
+            yield from self._yield_children(child)
+
+    def __iter__(self) -> Iterator[_Node]:
+        """Returns all nodes in graph using DFS.
+
+        Note that each node can only have one input edge,
+        so no visitor information need be recorded"""
+        yield from self._yield_children(self.base.tensor)
+
+    def get_path_to_base(self, tensor: Tensor) -> List[_Node]:
+        """ Returns [leaf, (parent), ..., base]"""
+        path = []
+        node = self[tensor]
+        while node.parent is not None:
+            path.append(node)
+            node = self[node.parent]
+        path.append(self.base)
+        return path
