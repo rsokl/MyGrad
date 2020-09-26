@@ -966,17 +966,44 @@ class Tensor:
         """
         self.__dict__ = tensor.__dict__
 
-    def _make_placeholder_copy(self):
+    def _make_placeholder_tensor(
+        self, *, copy_data: bool, base: Optional["Tensor"] = None
+    ) -> "Tensor":
+        """
+        Creates a tensor that stands in the place of `self` in the computational graph.
+
+        The resulting tensor should never be exposed to the user; it is used to accommodate
+        in-place operations.
+
+        Parameters
+        ----------
+        copy_data : bool
+            If True the placeholder holds a copy of the original data
+
+        base : Optional[Tensor]
+            Points the placeholder to the base tensor.
+
+        Returns
+        -------
+        placeholder : Tensor
+        """
+        assert (
+            self.grad is None
+        ), "A placeholder copy can not be created for a tensor with a gradient"
+
+        assert (
+            not self._accum_ops
+        ), "A placeholder copy cannot be created during backprop"
+
         placeholder = Tensor(
             self,
             constant=self.constant,
             _scalar_only=self._scalar_only,
             _creator=self.creator,
-            _base=self._base,
-            _copy_data=True,
+            _base=base,
+            _copy_data=copy_data,
         )
         placeholder._ops = self._ops
-        placeholder._accum_ops = self._accum_ops
 
         # point all ops involving `self` to old_tensor instead
         for op in placeholder._ops:
@@ -1003,7 +1030,7 @@ class Tensor:
         """
         # TODO: make sure that a failed in-place op doesn't corrupt the graph
         # old_tensor is the tensor pre-setitem
-        old_tensor = self._make_placeholder_copy()
+        old_tensor = self._make_placeholder_tensor(copy_data=True, base=self.base)
 
         # self becomes the tensor post-setitem
         out = self._op(
