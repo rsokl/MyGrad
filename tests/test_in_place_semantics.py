@@ -1,10 +1,12 @@
 from typing import Callable
 
 import pytest
+from hypothesis import given
 from numpy.testing import assert_array_equal
 
 import mygrad as mg
 from mygrad import Tensor
+from tests.custom_strategies import tensors
 
 
 @pytest.mark.parametrize("constant", [True, False])
@@ -13,7 +15,7 @@ def test_in_place_op_propagates_to_views(constant: bool):
     y = +x
 
     view1 = y[...]
-    view2 = view1[...]  # view-of-view
+    view2 = view1[...]  # view of view
     y[:2] = -1  # should mutate all views
     assert y.base is None
     assert view1.base is y
@@ -60,3 +62,26 @@ def test_writing_a_view_with_a_view(
     assert_array_equal(y, dangling_view)
     assert dangling_view.base is y
     assert dangling_view.grad is None
+
+
+@pytest.mark.parametrize("constant", [True, False])
+def test_sets_and_restores_writeability(constant: bool):
+    x = mg.arange(1.0, 5.0, constant=constant)
+    y = +x
+    y[...] = 0
+    assert x.data.flags.writeable is False
+    assert y.data.flags.writeable is False
+    y.backward()
+    assert x.data.flags.writeable is True
+    assert y.data.flags.writeable is True
+
+
+@pytest.mark.parametrize("as_view", [True, False])
+@given(x=tensors(read_only=True))
+def test_respects_original_writeability(x: Tensor, as_view: bool):
+    assert x.data.flags.writeable is False
+    if as_view:
+        x = x[...]
+
+    with pytest.raises(ValueError):
+        x[...] = 0

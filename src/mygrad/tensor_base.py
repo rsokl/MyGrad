@@ -1085,6 +1085,8 @@ class Tensor:
 
         assert in_place_target.data.flags.writeable
 
+        data_must_stay_locked = not graph.base.tensor._data_was_writeable
+
         out = self._op(
             inplace_op,
             in_place_target,  # tensor will be mutated
@@ -1094,10 +1096,10 @@ class Tensor:
             op_args=op_args,
             op_kwargs=op_kwargs,
             constant=constant,
-            _lock_data=False,
+            _lock_data=data_must_stay_locked,  # will raise if original data not writeable
         )
-        # memory was left unlocked so that in-place operation could occur
 
+        # memory was left unlocked so that in-place operation could occur
         for tensor in out.creator.variables:
             tensor._lock_writeability()
 
@@ -1118,6 +1120,10 @@ class Tensor:
             graph.base.placeholder._ops.add(out.creator)
             graph.base.tensor._mirror_tensor(out)
             out._reroute_to(graph.base.tensor)
+
+            # this doesn't get set by _op due to `_lock_data=False`
+            # but this must be true by manifestation of the op succeeding
+            graph.base.tensor._data_was_writeable = True
 
         else:
             # in-place operation occurs on a view; must connect mutated base
