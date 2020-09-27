@@ -1066,6 +1066,9 @@ class Tensor:
                 constant=constant,
             )
 
+        # Replace base and all of its views with "placeholder" tensors;
+        # there will serve as internal references to all tensors pre-mutation
+        # and will preserve ops relying on the un-mutated tensors
         graph = _DuplicatingGraph(self if self.base is None else self.base)
 
         # Create copy of base so that mutation has no impact on the
