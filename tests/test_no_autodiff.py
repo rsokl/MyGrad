@@ -60,21 +60,34 @@ def test_no_track_view_children(x: Tensor):
     assert not x._view_children
 
 
-@given(old_x=tensors(shape=(2,), constant=False, elements=st.floats(-100, 100)))
-def test_no_tracking_for_inplace_op(old_x: Tensor):
-    expected = old_x.copy()
-    expected[0] = -1
-
+@given(old_x=tensors(read_only=st.booleans()))
+def test_no_autodiff_does_not_unlock_memory(old_x: Tensor):
     x = +old_x
-    y = 2 * x
 
+    with pytest.raises(ValueError):  # data is read-only
+        with no_autodiff:
+            x[...] = -1
+
+
+@given(old_x=tensors())
+def test_no_autodiff_on_in_place_op(old_x: Tensor):
     with no_autodiff:
-        x[0] = -1
+        x = old_x[...]
+        x[...] = 0
 
-    assert_array_equal(x, expected)
+    assert_array_equal(x, np.zeros_like(x))
+    assert_array_equal(old_x, np.zeros_like(x))
+    assert old_x.data.flags.writeable is True
+    assert x.data.flags.writeable is True
 
-    y.backward()
-    assert_array_equal(old_x.grad, np.full_like(old_x, 2.0))
+    assert x.constant is False  # constant doesn't propagate through graph
+
+    assert x.base is None
+    assert x.creator is None
+    assert not old_x._ops
+    assert not old_x._view_children
+    if x.size:
+        assert np.shares_memory(x, old_x)
 
 
 def test_no_autodiff_context_manager_restores_state_via_finally_clause():

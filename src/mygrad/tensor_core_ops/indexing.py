@@ -76,7 +76,7 @@ class GetItem(Operation):
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        out = np.zeros_like(a.data)
+        out = np.zeros_like(a.data)  # TODO: ensure ints are promoted to floats
         if self._used_distinct_indices:
             out[self.index] += grad
         else:

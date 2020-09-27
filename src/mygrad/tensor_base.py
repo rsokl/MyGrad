@@ -6,7 +6,7 @@ etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 
 from functools import wraps
 from numbers import Number
-from typing import Dict, Iterator, List, NamedTuple, Optional, Set, Type, Union
+from typing import Dict, Iterator, List, NamedTuple, Optional, Set, Type, TypeVar, Union
 
 import numpy as np
 
@@ -30,6 +30,9 @@ from mygrad.tensor_manip.array_shape.ops import Flatten, Reshape
 from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property
 
 __all__ = ["Tensor", "asarray"]
+
+
+T = TypeVar("T")
 
 
 def _is_view_of(parent: "Tensor", child: np.ndarray) -> bool:
@@ -554,6 +557,18 @@ class Tensor:
 
         op_out = f(*tensor_vars, *op_args, **op_kwargs)  # type: np.ndarray
 
+        if not _track.TRACK_GRAPH:
+            # execute operation without tracking creator or any graph
+            # information
+            return cls(
+                op_out,
+                constant=constant,  # constant not determined by graph info
+                _creator=None,
+                _scalar_only=False,
+                _base=None,
+                _copy_data=False,
+            )
+
         # Determine whether or not op was a view; if so, `base`
         # points to parent Tensor
         base = None  # type: Optional[Tensor]
@@ -570,18 +585,6 @@ class Tensor:
                     base = var if var.base is None else var.base
                     parent_var = var
                     break
-
-        if not _track.TRACK_GRAPH:
-            # execute operation without tracking creator or any graph
-            # information
-            return cls(
-                op_out,
-                constant=constant,  # constant not determined by graph info
-                _creator=None,
-                _scalar_only=False,
-                _base=base,
-                _copy_data=False,
-            )
 
         if base is not None:
             # we need to be able to replay view-ops for doing in-place operations
@@ -968,6 +971,12 @@ class Tensor:
         """
         self.__dict__ = tensor.__dict__.copy()
 
+    def _reroute_to(self, placeholder: "Tensor"):
+        for op in self._ops:
+            op.variables = tuple(
+                var_ if var_ is not self else placeholder for var_ in op.variables
+            )
+
     def _make_placeholder_tensor(
         self, *, copy_data: bool, base: Optional["Tensor"] = None
     ) -> "Tensor":
@@ -1007,12 +1016,37 @@ class Tensor:
         placeholder._base = base
 
         # point all ops involving `self` to old_tensor instead
-        for op in placeholder._ops:
-            op.variables = tuple(
-                var_ if var_ is not self else placeholder for var_ in op.variables
-            )
-
+        self._reroute_to(placeholder)
         return placeholder
+
+    def _replace_tensor_op(
+        self,
+        inplace_op: Type[Operation],
+        *input_vars,
+        op_args=None,
+        op_kwargs=None,
+        constant=False,
+    ):
+        """ This is meant for ops that replace `self` "in-place" without actually
+        mutating the underlying tensor. I.e. the op will not affect views of
+        `self` nor a view-parent of `self`.
+        """
+
+        old_tensor = self._make_placeholder_tensor(copy_data=True, base=self.base)
+
+        new_tensor = self._op(
+            inplace_op,
+            old_tensor,
+            *input_vars,
+            op_args=op_args,
+            op_kwargs=op_kwargs,
+            constant=constant,
+        )
+        if new_tensor.base is old_tensor:
+            # old_tensor is internally-facing only - base
+            # should not point to it
+            new_tensor._base = None
+        self._mirror_tensor(new_tensor)
 
     def _in_place_op(
         self,
@@ -1022,29 +1056,68 @@ class Tensor:
         op_kwargs=None,
         constant=False,
     ):
-        """ A substitute for ``self._op``, to facilitate in-place operations.
+        if _track.TRACK_GRAPH is False:
+            return self._op(
+                inplace_op,
+                self,
+                *input_vars,
+                op_args=op_args,
+                op_kwargs=op_kwargs,
+                constant=constant,
+            )
 
-        Note that in-place operations are generally less efficient than their
-        counterparts due to the additional bookkeeping that is required to
-        update the computational graph. The benefit lies purely in convenience
-        for the user.
-        """
-        # TODO: make sure that a failed in-place op doesn't corrupt the graph
-        # old_tensor is the tensor pre-setitem
-        old_tensor = self._make_placeholder_tensor(copy_data=True, base=self.base)
+        graph = _DuplicatingGraph(self if self.base is None else self.base)
+        base = graph.base.tensor.copy()
+        leaf = base
 
-        # self becomes the tensor post-setitem
+        with _track.no_autodiff:
+            for node in graph.get_path_to_base(self)[::-1][1:]:  # skip base
+                leaf = node.tensor._replay_op(leaf)
+        if leaf.size:
+            assert np.shares_memory(leaf, base)
+        assert leaf.data.flags.writeable
+
         out = self._op(
             inplace_op,
-            old_tensor,
-            *input_vars,
+            leaf,  # leaf will be mutated
+            # we need to accommodate case where inplace operation is writing
+            # *from* a view - redirect view to placeholder
+            *(graph.get_placeholder_if_exists(t) for t in input_vars),
             op_args=op_args,
             op_kwargs=op_kwargs,
             constant=constant,
+            _lock_data=False,
         )
-        if out.base is old_tensor:
+        # memory was left unlocked so that in-place operation could occur
+
+        for tensor in out.creator.variables:
+            tensor._lock_writeability()
+
+        assert out.data.flags.writeable is False
+
+        if out.base is leaf:
             out._base = None
-        self._mirror_tensor(out)
+
+        if self.base is None:
+
+            variables = tuple(
+                var if var is not leaf else graph.base.placeholder
+                for var in out.creator.variables
+            )
+            out.creator.variables = variables
+            graph.base.placeholder._ops.add(out.creator)
+            graph.base.tensor._mirror_tensor(out)
+            out._reroute_to(graph.base.tensor)
+
+        else:
+            raise NotImplementedError()
+
+        for node in graph:
+            if node.parent is None:
+                continue
+            view = node.tensor._replay_op(node.parent)
+            node.tensor._mirror_tensor(view)
+            view._reroute_to(node.tensor)
 
     def __setitem__(self, key, value):
         self._in_place_op(SetItem, value, op_args=(key,))
@@ -1345,10 +1418,7 @@ class Tensor:
 
     @shape.setter
     def shape(self, newshape):
-        if self.constant:
-            self.data.shape = newshape
-            return
-        self._in_place_op(Reshape, op_args=(newshape,), constant=self.constant)
+        self._replace_tensor_op(Reshape, op_args=(newshape,), constant=self.constant)
 
     def reshape(self, *newshape, constant=False):
         """ Returns a tensor with a new shape, without changing its data.
@@ -1535,6 +1605,18 @@ class _DuplicatingGraph:
         yield self[tensor]
         for child in tensor._view_children:
             yield from self._yield_children(child)
+
+    def __contains__(self, item):
+        if isinstance(item, Tensor):
+            item = id(item)
+            return item in self.mappings
+        return False
+
+    def get_placeholder_if_exists(self, tensor: T) -> T:
+        if tensor in self:
+            return self[tensor].placeholder
+        else:
+            return tensor
 
     def __iter__(self) -> Iterator[_Node]:
         """Returns all nodes in graph using DFS.

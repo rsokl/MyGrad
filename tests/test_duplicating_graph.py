@@ -20,6 +20,15 @@ def test_duplating_graph_input_validation(x: Tensor):
 
 
 @given(x=tensors(read_only=st.booleans()))
+def test_contains_method(x: Tensor):
+    view = x[...]
+    graph = _DuplicatingGraph(x)
+    assert (x in graph) is True
+    assert (view in graph) is True
+    assert (mg.asarray(x) in graph) is False
+
+
+@given(x=tensors(read_only=st.booleans()))
 def test_basic_duplicating_graph_info(x: Tensor):
     y = x[...]
     graph = _DuplicatingGraph(x)
