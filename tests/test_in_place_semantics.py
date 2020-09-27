@@ -26,21 +26,33 @@ def test_in_place_op_propagates_to_views(constant: bool):
 
 
 @pytest.mark.parametrize(
-    "identity_op",
+    "target_op",
     [
         lambda x: x,  # backprop directly post-setitem var
         lambda x: +x,  # backprop from downstream node
         lambda x: x[...],  # backprop from downstream view
     ],
 )
-def test_writing_a_view_with_a_view(identity_op: Callable[[Tensor], Tensor]):
+@pytest.mark.parametrize(
+    "source_op",
+    [
+        lambda x: x,  # direct view
+        lambda x: +x,  # downstream of view
+        lambda x: x[...],  # view of view
+    ],
+)
+def test_writing_a_view_with_a_view(
+    target_op: Callable[[Tensor], Tensor], source_op: Callable[[Tensor], Tensor]
+):
     x = mg.arange(1.0, 5.0)
     y = +x
     dangling_view = y[...]
-    y[:2] = y[-2:]  # y = [3, 4, 3, 4]
-    proxy_y = identity_op(y)
-    # -1 x2 + 2 x3 + -3 x2 + 4 x3 -> -4 x2 + 6 x3
+    y[:2] = source_op(y[-2:])  # y = [3, 4, 3, 4]
+    proxy_y = target_op(y)
+
+    # output: -1 x2 + 2 x3 + -3 x2 + 4 x3 -> -4 x2 + 6 x3
     ([-1, 2, -3, 4] * proxy_y).sum().backward()
+
     assert_array_equal(proxy_y.grad, [-1.0, 2.0, -3.0, 4.0])
     assert_array_equal(y.grad, [-1.0, 2.0, -3.0, 4.0])
     assert_array_equal(x.grad, [0.0, 0.0, -4.0, 6.0])
