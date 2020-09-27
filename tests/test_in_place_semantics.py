@@ -1,5 +1,6 @@
 from typing import Callable
 
+import hypothesis.strategies as st
 import pytest
 from hypothesis import given
 from numpy.testing import assert_array_equal
@@ -43,13 +44,21 @@ def test_in_place_op_propagates_to_views(constant: bool):
         lambda x: x[...],  # view of view
     ],
 )
+@given(num_in_place_updates=st.integers(1, 3))
 def test_writing_a_view_with_a_view(
-    target_op: Callable[[Tensor], Tensor], source_op: Callable[[Tensor], Tensor]
+    target_op: Callable[[Tensor], Tensor],
+    source_op: Callable[[Tensor], Tensor],
+    num_in_place_updates: int,
 ):
     x = mg.arange(1.0, 5.0)
     y = +x
     dangling_view = y[...]
-    y[:2] = source_op(y[-2:])  # y = [3, 4, 3, 4]
+
+    for _ in range(num_in_place_updates):
+        # after the first in-place update, any additional
+        # should have no further effect
+        y[:2] = source_op(y[-2:])  # y = [3, 4, 3, 4]
+
     proxy_y = target_op(y)
 
     # output: -1 x2 + 2 x3 + -3 x2 + 4 x3 -> -4 x2 + 6 x3
