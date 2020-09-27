@@ -130,7 +130,7 @@ class SetItem(BroadcastableOp):
             `index` contains any integer-valued arrays, to accommodate for the scenario
             in which a single element is set multiple times."""
 
-        out = np.copy(a.data)
+        out = a.data
         self.variables = (a, b)
         self.index = index if isinstance(index, tuple) else (index,)
         out[index] = b.data
