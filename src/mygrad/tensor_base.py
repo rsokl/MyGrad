@@ -1033,7 +1033,7 @@ class Tensor:
         """
 
         old_tensor = self._make_placeholder_tensor(copy_data=True, base=self.base)
-
+        # TODO: restore state if something goes wrong
         new_tensor = self._op(
             inplace_op,
             old_tensor,
@@ -1090,6 +1090,7 @@ class Tensor:
 
         data_must_stay_locked = not graph.base.tensor._data_was_writeable
 
+        # TODO: restore state if something goes wrong
         out = self._op(
             inplace_op,
             in_place_target,  # tensor will be mutated
@@ -1125,7 +1126,7 @@ class Tensor:
             out._reroute_to(graph.base.tensor)
 
             # this doesn't get set by _op due to `_lock_data=False`
-            # but this must be true by manifestation of the op succeeding
+            # but this must be true since the op succeeding
             graph.base.tensor._data_was_writeable = True
 
         else:
