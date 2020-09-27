@@ -70,7 +70,7 @@ def test_no_autodiff_does_not_unlock_memory(old_x: Tensor):
 
 
 @given(old_x=tensors())
-def test_no_autodiff_on_in_place_op(old_x: Tensor):
+def test_no_autodiff_on_in_place_op_does_not_track_graph(old_x: Tensor):
     with no_autodiff:
         x = old_x[...]
         x[...] = 0

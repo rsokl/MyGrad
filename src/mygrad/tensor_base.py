@@ -1110,6 +1110,8 @@ class Tensor:
             out._reroute_to(graph.base.tensor)
 
         else:
+            # in-place operation occurs on a view; must connect mutated base
+            # to graph and then reproduce downstream views
             raise NotImplementedError()
 
         for node in graph:
