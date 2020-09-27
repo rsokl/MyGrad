@@ -1033,15 +1033,19 @@ class Tensor:
         """
 
         old_tensor = self._make_placeholder_tensor(copy_data=True, base=self.base)
-        # TODO: restore state if something goes wrong
-        new_tensor = self._op(
-            inplace_op,
-            old_tensor,
-            *input_vars,
-            op_args=op_args,
-            op_kwargs=op_kwargs,
-            constant=constant,
-        )
+        try:
+            new_tensor = self._op(
+                inplace_op,
+                old_tensor,
+                *input_vars,
+                op_args=op_args,
+                op_kwargs=op_kwargs,
+                constant=constant,
+            )
+        except Exception as e:
+            old_tensor._reroute_to(self)
+            raise e
+
         if new_tensor.base is old_tensor:
             # old_tensor is internally-facing only - base
             # should not point to it
@@ -1090,18 +1094,21 @@ class Tensor:
 
         data_must_stay_locked = not graph.base.tensor._data_was_writeable
 
-        # TODO: restore state if something goes wrong
-        out = self._op(
-            inplace_op,
-            in_place_target,  # tensor will be mutated
-            # we need to accommodate case where inplace operation is writing
-            # *from* a view - redirect view to placeholder
-            *(graph.get_placeholder_if_exists(t) for t in input_vars),
-            op_args=op_args,
-            op_kwargs=op_kwargs,
-            constant=constant,
-            _lock_data=data_must_stay_locked,  # will raise if original data not writeable
-        )
+        try:
+            out = self._op(
+                inplace_op,
+                in_place_target,  # tensor will be mutated
+                # we need to accommodate case where inplace operation is writing
+                # *from* a view - redirect view to placeholder
+                *(graph.get_placeholder_if_exists(t) for t in input_vars),
+                op_args=op_args,
+                op_kwargs=op_kwargs,
+                constant=constant,
+                _lock_data=data_must_stay_locked,  # will raise if original data not writeable
+            )
+        except Exception as e:
+            graph.restore_old_graph()
+            raise e
 
         # memory was left unlocked so that in-place operation could occur
         for tensor in out.creator.variables:
@@ -1665,3 +1672,10 @@ class _DuplicatingGraph:
             node = self[node.parent]
         path.append(self.base)
         return path
+
+    def restore_old_graph(self):
+        """ Reroute graph back to original tensors."""
+        # call tuple to ensure iteration is completed
+        # before information gets deleted / mutated
+        for node in tuple(self):
+            node.placeholder._reroute_to(node.tensor)

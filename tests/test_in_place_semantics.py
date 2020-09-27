@@ -11,6 +11,22 @@ from mygrad import Tensor
 from tests.custom_strategies import tensors
 
 
+def test_raising_during_in_place_op_doesnt_corrupt_graph():
+    x = mg.arange(1.0, 5.0)
+    y = 2 * x
+    w = y[...]
+    with pytest.raises(ValueError):
+        y[:2] = y  # shape mismatch
+
+    (2 * w).backward()
+    assert y.base is None
+    assert w.base is y
+    assert np.shares_memory(w, y)
+    assert_allclose(w.grad, 2 * np.ones_like(y))
+    assert_allclose(y.grad, 2 * np.ones_like(y))
+    assert_allclose(x.grad, 4 * np.ones_like(y))
+
+
 @pytest.mark.parametrize("constant", [True, False])
 def test_in_place_op_propagates_to_views(constant: bool):
     x = mg.arange(1.0, 5.0, constant=constant)

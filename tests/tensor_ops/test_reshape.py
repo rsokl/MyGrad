@@ -7,6 +7,7 @@ import pytest
 from hypothesis import assume, given
 from numpy.testing import assert_array_equal
 
+import mygrad as mg
 from mygrad import reshape
 from mygrad.tensor_base import Tensor
 
@@ -47,6 +48,18 @@ def in_place_reshape(arr, newshape, reshaper, **kwargs):
     if isinstance(arr, Tensor) and kwargs.get("constant", False):
         arr._constant = True
     return arr
+
+
+def test_raising_during_inplace_reshape_doesnt_corrupt_graph():
+    x = mg.arange(5.0)
+    y = +x
+    w = 2 * y
+    with pytest.raises(ValueError):
+        y.shape = (2, 3)
+    w.backward()
+    assert_array_equal(w.grad, np.ones_like(w))
+    assert_array_equal(y.grad, 2 * np.ones_like(y))
+    assert_array_equal(x.grad, 2 * np.ones_like(y))
 
 
 @given(
