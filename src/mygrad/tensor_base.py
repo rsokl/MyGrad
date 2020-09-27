@@ -1067,19 +1067,27 @@ class Tensor:
             )
 
         graph = _DuplicatingGraph(self if self.base is None else self.base)
-        base = graph.base.tensor.copy()
-        leaf = base
 
+        # Create copy of base so that mutation has no impact on the
+        # state of any ops depending on it or its views
+        base = graph.base.tensor.copy()
+
+        # Create view of base in correspondence to relationship
+        # that `self` has to base. Mutating this view will mutate
+        # base appropriately
+        in_place_target = base
         with _track.no_autodiff:
             for node in graph.get_path_to_base(self)[::-1][1:]:  # skip base
-                leaf = node.tensor._replay_op(leaf)
-        if leaf.size:
-            assert np.shares_memory(leaf, base)
-        assert leaf.data.flags.writeable
+                in_place_target = node.tensor._replay_op(in_place_target)
+
+        if in_place_target.size:
+            assert np.shares_memory(in_place_target, base)
+
+        assert in_place_target.data.flags.writeable
 
         out = self._op(
             inplace_op,
-            leaf,  # leaf will be mutated
+            in_place_target,  # tensor will be mutated
             # we need to accommodate case where inplace operation is writing
             # *from* a view - redirect view to placeholder
             *(graph.get_placeholder_if_exists(t) for t in input_vars),
@@ -1095,13 +1103,15 @@ class Tensor:
 
         assert out.data.flags.writeable is False
 
-        if out.base is leaf:
+        if out.base is in_place_target:
             out._base = None
 
+        # base has been mutated; it must be "connected" to the graph
+        # that produced it
         if self.base is None:
 
             variables = tuple(
-                var if var is not leaf else graph.base.placeholder
+                var if var is not in_place_target else graph.base.placeholder
                 for var in out.creator.variables
             )
             out.creator.variables = variables
@@ -1114,6 +1124,12 @@ class Tensor:
             # to graph and then reproduce downstream views
             raise NotImplementedError()
 
+        # Now that the base-tensor has been incorporated into the graph,
+        # recreate the view-graph and reroute all tensors from previous
+        # graph to their downstream counterparts
+        #
+        # Note that iterating in a topologically-ordered way is critical
+        # here: each parent is updated before creating one of its children
         for node in graph:
             if node.parent is None:
                 continue
