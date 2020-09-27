@@ -1,5 +1,6 @@
 from typing import Callable
 
+import numpy as np
 import pytest
 from numpy.testing import assert_array_equal
 
@@ -36,9 +37,15 @@ def test_in_place_op_propagates_to_views(constant: bool):
 def test_writing_a_view_with_a_view(identity_op: Callable[[Tensor], Tensor]):
     x = mg.arange(1.0, 5.0)
     y = +x
+    dangling_view = y[...]
     y[:2] = y[-2:]  # y = [3, 4, 3, 4]
     proxy_y = identity_op(y)
     # -1 x2 + 2 x3 + -3 x2 + 4 x3 -> -4 x2 + 6 x3
     ([-1, 2, -3, 4] * proxy_y).sum().backward()
+    assert_array_equal(proxy_y.grad, [-1.0, 2.0, -3.0, 4.0])
     assert_array_equal(y.grad, [-1.0, 2.0, -3.0, 4.0])
     assert_array_equal(x.grad, [0.0, 0.0, -4.0, 6.0])
+
+    assert_array_equal(y, dangling_view)
+    assert dangling_view.base is y
+    assert dangling_view.grad is None

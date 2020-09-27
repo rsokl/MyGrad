@@ -76,6 +76,25 @@ def test_path_to_base(x0: Tensor):
         )
 
 
+@given(base=tensors(read_only=st.booleans()))
+def test_graph_iteration_is_depth_first(base: Tensor):
+    a1 = base[...]
+    b1 = base[...]
+    a2 = a1[...]
+    a3_1 = a2[...]
+    a3_2 = a2[...]
+    a4_2 = a3_2[...]
+
+    b2 = b1[...]
+
+    c1 = base[...]
+    graph = _DuplicatingGraph(base)
+    expected_order = [base, a1, a2, a3_1, a3_2, a4_2, b1, b2, c1]
+
+    for actual, expected in zip((i.tensor for i in graph), expected_order):
+        assert actual is expected
+
+
 @given(x0=tensors(read_only=st.booleans()), num_views=st.integers(0, 3))
 def test_memory_locking(x0: Tensor, num_views: int):
     was_writeable = x0.data.flags.writeable
@@ -140,6 +159,12 @@ class GraphDuplicationCompare(RuleBasedStateMachine):
         iter_nodes: Tuple[_Node, ...] = tuple(graph)
 
         assert sorted(id(t.tensor) for t in iter_nodes) == sorted(self.node_list)
+
+        # test that iteration obeys topological ordering
+        visited = {id(graph.base.tensor)}
+        for prev_node, node in zip(iter_nodes[:-1], iter_nodes[1:]):
+            assert (node.parent is prev_node.tensor) or (id(node.parent) in visited)
+            visited.add(id(node.tensor))
 
         for node in iter_nodes:
 
