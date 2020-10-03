@@ -4,7 +4,13 @@ from weakref import ReferenceType
 
 import numpy as np
 
-__all__ = ["is_invalid_gradient", "reduce_broadcast", "SkipGradient", "WeakRef"]
+__all__ = [
+    "is_invalid_gradient",
+    "reduce_broadcast",
+    "SkipGradient",
+    "WeakRef",
+    "WeakRefList",
+]
 
 
 T = TypeVar("T")
@@ -26,7 +32,7 @@ class WeakRefList(Generic[T]):
             self.data: List[WeakRef[T]] = list(WeakRef(x) for x in data)
 
     def __len__(self) -> int:
-        return len(self.data)
+        return sum(1 for _ in self)
 
     def __getitem__(self, item: int) -> T:
         return self.data[item]()

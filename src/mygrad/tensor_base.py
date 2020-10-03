@@ -12,7 +12,7 @@ from weakref import WeakSet
 import numpy as np
 
 import mygrad._graph_tracking as _track
-from mygrad._utils import WeakRef, WeakRefList, is_invalid_gradient
+from mygrad._utils import WeakRefList, is_invalid_gradient
 from mygrad.errors import InvalidBackprop, InvalidGradient
 from mygrad.linalg.ops import MatMul
 from mygrad.math.arithmetic.ops import (
@@ -601,14 +601,6 @@ class Tensor:
         for var in tensor_vars:
             if var._creator is not None and not var.constant:
                 f.graph.update(var._creator.graph)
-
-        # f.graph.update(
-        #     *(
-        #         var._creator.graph
-        #         for var in tensor_vars
-        #         if var._creator is not None and not var.constant
-        #     )
-        # )
 
         if isinstance(f, BroadcastableOp) and not f.scalar_only:
             # if broadcasting occurred: scalar-only -> True
