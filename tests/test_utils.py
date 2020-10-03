@@ -1,5 +1,6 @@
+import weakref
 from numbers import Real
-from typing import Tuple
+from typing import List, Tuple
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
@@ -9,8 +10,28 @@ from hypothesis import HealthCheck, given, settings
 from numpy.testing import assert_allclose
 from pytest import raises
 
-from mygrad._utils import is_invalid_gradient, reduce_broadcast
+from mygrad._utils import (
+    WeakRef,
+    is_invalid_gradient,
+    iterate_weak_refs,
+    reduce_broadcast,
+)
 from tests.custom_strategies import broadcastable_shapes, everything_except
+
+
+def test_iterate_weakrefs():
+    class A:
+        pass
+
+    a = A()
+    b = A()
+    c = A()
+    items = [WeakRef(i) for i in [a, b, c]]
+    del b  # weakref to b returns None now
+    a_val, c_val = iterate_weak_refs(items)
+
+    assert a_val is a
+    assert c_val is c
 
 
 @pytest.mark.parametrize(

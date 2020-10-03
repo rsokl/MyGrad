@@ -1,9 +1,31 @@
 from numbers import Real
-from typing import Any
+from typing import Any, Generator, Generic, Iterable, TypeVar, Union
+from weakref import ReferenceType
 
 import numpy as np
 
-__all__ = ["is_invalid_gradient", "reduce_broadcast", "SkipGradient"]
+__all__ = ["is_invalid_gradient", "reduce_broadcast", "SkipGradient", "WeakRef"]
+
+
+T = TypeVar("T")
+
+
+class WeakRef(ReferenceType, Generic[T]):
+    def __init__(self, ob: T, callback=None, **annotations):
+        super(WeakRef, self).__init__(ob, callback)
+
+    def __call__(self) -> Union[None, T]:
+        return super().__call__()
+
+
+def iterate_weak_refs(weak_refs: Iterable[WeakRef[T]]) -> Generator[T, None, None]:
+    """
+    Yields the object associated with each weakref if that object is still alive
+    """
+    for ref in weak_refs:
+        item = ref.__call__()  # use __call__ to help type checker..
+        if item is not None:
+            yield item
 
 
 class SkipGradient(Exception):
