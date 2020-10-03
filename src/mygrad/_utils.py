@@ -9,7 +9,7 @@ __all__ = [
     "reduce_broadcast",
     "SkipGradient",
     "WeakRef",
-    "WeakRefList",
+    "WeakRefIterable",
 ]
 
 
@@ -24,7 +24,7 @@ class WeakRef(ReferenceType, Generic[T]):
         return super().__call__()
 
 
-class WeakRefList(Generic[T]):
+class WeakRefIterable(Generic[T]):
     def __init__(self, data: Optional[Iterable[T]] = None):
         self.data: List[WeakRef[T]] = []
 
@@ -33,9 +33,6 @@ class WeakRefList(Generic[T]):
 
     def __len__(self) -> int:
         return sum(1 for _ in self)
-
-    def __getitem__(self, item: int) -> T:
-        return self.data[item]()
 
     def append(self, item: T):
         self.data.append(WeakRef(item))

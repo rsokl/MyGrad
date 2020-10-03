@@ -12,7 +12,7 @@ from weakref import WeakSet
 import numpy as np
 
 import mygrad._graph_tracking as _track
-from mygrad._utils import WeakRefList, is_invalid_gradient
+from mygrad._utils import WeakRefIterable, is_invalid_gradient
 from mygrad.errors import InvalidBackprop, InvalidGradient
 from mygrad.linalg.ops import MatMul
 from mygrad.math.arithmetic.ops import (
@@ -389,7 +389,7 @@ class Tensor:
         # tensor
         self._base = _base  # type: Optional[Tensor]
         # stores all of the tensors that are a view of this tensor
-        self._view_children = WeakRefList()  # type: WeakRefList[Tensor]
+        self._view_children = WeakRefIterable()  # type: WeakRefIterable[Tensor]
 
         # used to track original 'writeable' statuses of array data
         self._data_was_writeable = None  # type: Optional[bool]
@@ -1591,7 +1591,7 @@ class _DuplicatingGraph:
 
             self._duplicate_graph(child)
 
-        self[tensor].placeholder._view_children = WeakRefList(
+        self[tensor].placeholder._view_children = WeakRefIterable(
             [self[t].placeholder for t in tensor._view_children]
         )
 

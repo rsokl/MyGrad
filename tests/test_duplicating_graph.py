@@ -50,7 +50,7 @@ def test_basic_duplicating_graph_info(x: Tensor):
     assert _y.base is _x
 
     assert _y.creator.variables[0] is _x
-    assert _x._view_children[0] is _y
+    assert tuple(_x._view_children)[0] is _y
 
     node1, node2 = graph
     assert node1.tensor is x

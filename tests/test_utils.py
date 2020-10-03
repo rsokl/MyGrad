@@ -10,7 +10,12 @@ from hypothesis import HealthCheck, given, settings
 from numpy.testing import assert_allclose
 from pytest import raises
 
-from mygrad._utils import WeakRef, WeakRefList, is_invalid_gradient, reduce_broadcast
+from mygrad._utils import (
+    WeakRef,
+    WeakRefIterable,
+    is_invalid_gradient,
+    reduce_broadcast,
+)
 from tests.custom_strategies import broadcastable_shapes, everything_except
 
 
@@ -21,7 +26,7 @@ def test_weakrefs_list():
     a = A()
     b = A()
     c = A()
-    items = WeakRefList([a, b, c])
+    items = WeakRefIterable([a, b, c])
     assert len(items) == 3
     del b  # weakref to b returns None now
     a_val, c_val = items
