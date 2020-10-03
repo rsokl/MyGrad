@@ -1,8 +1,8 @@
 """
 Defines the base class for mathematical operations capable of back-propagating
 gradients to their input tensors."""
-
 from typing import Any, Dict, Optional, Set, Tuple
+from weakref import WeakSet
 
 import numpy as np
 
@@ -43,20 +43,21 @@ class Operation:
     # requires that backpropagation be invoked from a scalar
     scalar_only = False  # type: bool
 
-    # stores a set of all the operation-instances that participate in
-    # the computational graph up to and including the present operation
-    graph = None  # type: Optional[Set[Operation]]
-
     # can be set to true if the operation is guaranteed to not returns a view
     # this will reduce some overhead on checking for shared memory
     cannot_return_view = False  # type: bool
 
-    # Stores positional and keyword arguments used to call op.
-    # Can be set optionally - only if op needs to be "replayed",
-    # e.g. with a view
-    replay_args: Optional[Tuple[Any, ...]] = None
-    replay_kwargs: Optional[Dict[str, Any]] = None
-    replay_force_constant: Optional[bool] = None
+    def __init__(self):
+        # stores a set of all the operation-instances that participate in
+        # the computational graph up to and including the present operation
+        self.graph = WeakSet()  # type: WeakSet[Operation]
+
+        # Stores positional and keyword arguments used to call op.
+        # Can be set optionally - only if op needs to be "replayed",
+        # e.g. with a view
+        self.replay_args: Optional[Tuple[Any, ...]] = None
+        self.replay_kwargs: Optional[Dict[str, Any]] = None
+        self.replay_force_constant: Optional[bool] = None
 
     def __call__(self, *input_vars, **kwargs):  # pragma: no cover
         """ Performs a forward pass, f, of this Operation::

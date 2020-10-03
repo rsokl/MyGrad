@@ -26,8 +26,8 @@ def test_constant_arg(x_const: bool, y_const: bool, op_const: bool):
     y = Tensor(1, constant=y_const)
     out = dummy(x, y, constant=op_const)
     assert out.constant is op_const or (x_const and y_const)
-    assert x._ops == {out.creator}
-    assert y._ops == {out.creator}
+    assert set(x._ops) == {out.creator}
+    assert set(y._ops) == {out.creator}
 
 
 @pytest.mark.parametrize("x_const", [True, False])

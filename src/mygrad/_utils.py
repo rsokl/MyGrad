@@ -1,5 +1,5 @@
 from numbers import Real
-from typing import Any, Generator, Generic, Iterable, TypeVar, Union
+from typing import Any, Generator, Generic, Iterable, List, Optional, TypeVar, Union
 from weakref import ReferenceType
 
 import numpy as np
@@ -18,14 +18,27 @@ class WeakRef(ReferenceType, Generic[T]):
         return super().__call__()
 
 
-def iterate_weak_refs(weak_refs: Iterable[WeakRef[T]]) -> Generator[T, None, None]:
-    """
-    Yields the object associated with each weakref if that object is still alive
-    """
-    for ref in weak_refs:
-        item = ref.__call__()  # use __call__ to help type checker..
-        if item is not None:
-            yield item
+class WeakRefList(Generic[T]):
+    def __init__(self, data: Optional[Iterable[T]] = None):
+        self.data: List[WeakRef[T]] = []
+
+        if data is not None:
+            self.data: List[WeakRef[T]] = list(WeakRef(x) for x in data)
+
+    def __len__(self) -> int:
+        return len(self.data)
+
+    def __getitem__(self, item: int) -> T:
+        return self.data[item]()
+
+    def append(self, item: T):
+        self.data.append(WeakRef(item))
+
+    def __iter__(self) -> Generator[T, None, None]:
+        for ref in self.data:
+            item = ref.__call__()  # use __call__ to help type checker..
+            if item is not None:
+                yield item
 
 
 class SkipGradient(Exception):

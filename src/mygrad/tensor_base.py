@@ -7,11 +7,12 @@ etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 from functools import wraps
 from numbers import Number
 from typing import Dict, Iterator, List, NamedTuple, Optional, Set, Type, TypeVar, Union
+from weakref import WeakSet
 
 import numpy as np
 
 import mygrad._graph_tracking as _track
-from mygrad._utils import is_invalid_gradient
+from mygrad._utils import WeakRef, WeakRefList, is_invalid_gradient
 from mygrad.errors import InvalidBackprop, InvalidGradient
 from mygrad.linalg.ops import MatMul
 from mygrad.math.arithmetic.ops import (
@@ -379,16 +380,16 @@ class Tensor:
         self._constant = constant
 
         # track all operations that this tensor participates in
-        self._ops = set()  # type: Set[Operation]
+        self._ops = WeakSet()  # type: WeakSet[Operation]
 
         # track the operations that have contributed to this tensor's gradient during a back-prop
-        self._accum_ops = set()  # type: Set[Operation]
+        self._accum_ops = WeakSet()  # type: WeakSet[Operation]
 
         # base points to the initial tensor that owns the memory of this
         # tensor
         self._base = _base  # type: Optional[Tensor]
         # stores all of the tensors that are a view of this tensor
-        self._view_children = []  # type: List[Tensor]
+        self._view_children = WeakRefList()  # type: WeakRefList[Tensor]
 
         # used to track original 'writeable' statuses of array data
         self._data_was_writeable = None  # type: Optional[bool]
@@ -596,14 +597,18 @@ class Tensor:
         # record graph information
         is_const = constant or all(var.constant for var in tensor_vars)
 
-        f.graph = {f}
-        f.graph.update(
-            *(
-                var._creator.graph
-                for var in tensor_vars
-                if var._creator is not None and not var.constant
-            )
-        )
+        f.graph.add(f)
+        for var in tensor_vars:
+            if var._creator is not None and not var.constant:
+                f.graph.update(var._creator.graph)
+
+        # f.graph.update(
+        #     *(
+        #         var._creator.graph
+        #         for var in tensor_vars
+        #         if var._creator is not None and not var.constant
+        #     )
+        # )
 
         if isinstance(f, BroadcastableOp) and not f.scalar_only:
             # if broadcasting occurred: scalar-only -> True
@@ -972,7 +977,7 @@ class Tensor:
         self.__dict__ = tensor.__dict__.copy()
 
     def _reroute_to(self, placeholder: "Tensor"):
-        for op in self._ops:
+        for op in self._ops:  # type: Operation
             op.variables = tuple(
                 var_ if var_ is not self else placeholder for var_ in op.variables
             )
@@ -1594,9 +1599,9 @@ class _DuplicatingGraph:
 
             self._duplicate_graph(child)
 
-        self[tensor].placeholder._view_children = [
-            self[t].placeholder for t in tensor._view_children
-        ]
+        self[tensor].placeholder._view_children = WeakRefList(
+            [self[t].placeholder for t in tensor._view_children]
+        )
 
     def __init__(self, base: Tensor):
         self.mappings: Dict[int, _Node] = {}
