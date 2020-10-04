@@ -12,6 +12,7 @@ from weakref import WeakSet, finalize
 import numpy as np
 
 import mygrad._graph_tracking as _track
+import mygrad.memory_management as _mem
 from mygrad._utils import WeakRef, WeakRefIterable, is_invalid_gradient
 from mygrad.errors import InvalidBackprop, InvalidGradient
 from mygrad.linalg.ops import MatMul
@@ -408,6 +409,7 @@ class Tensor:
 
         The initial writeability flags of all involved arrays are recorded so
         that they can be restored via ``self._restore_writeability()``"""
+        return
         if self._data_was_writeable is not None or self.base is not None:
             return self
 
@@ -425,6 +427,7 @@ class Tensor:
 
     def _restore_writeability(self):
         """Restores the writeability flag for the underlying numpy array (and its base)"""
+        return
         if self.base is not None:
             # A view of an array inherits the writeability of its parent;
             # however, the writeability of the view is independent of that
@@ -550,8 +553,8 @@ class Tensor:
                 for var in input_vars
             )
             if _lock_data:
-                for t in tensor_vars:
-                    t._lock_writeability()
+                _mem.lock_array_and_base_memories(t.data for t in tensor_vars)
+
         else:
             # operations are not being tracked - don't lock memory or null grads
             tensor_vars = tuple(
@@ -636,11 +639,16 @@ class Tensor:
             _scalar_only=scalar_only,
             _base=base,
             _copy_data=False,
-        )._lock_writeability()
+        )
 
         if parent_var is not None:
             parent_var._view_children.append(out)
 
+        if _lock_data:
+            _mem.lock_arr_memory(out.data, force_lock=True)
+            tensor_refs = WeakRefIterable(t.data for t in tensor_vars)
+            tensor_refs.append(out.data)
+            finalize(f, _mem.release_op_memory, tensor_refs)
         return out
 
     def _replay_op(self, *input_vars) -> "Tensor":
@@ -985,7 +993,7 @@ class Tensor:
                 var_ if var_ is not self else placeholder for var_ in op.variables
             )
 
-    def _make_placeholder_tensor(
+    def _make_placeholder_tensor(  # TODO: copy-data doesnt work here!!
         self, *, copy_data: bool, base: Optional["Tensor"] = None
     ) -> "Tensor":
         """
@@ -1100,7 +1108,10 @@ class Tensor:
 
         assert in_place_target.data.flags.writeable
 
-        data_must_stay_locked = not graph.base.tensor._data_was_writeable
+        data_must_stay_locked = (
+            id(graph.base.tensor.data) not in _mem._array_tracker
+            and not graph.base.tensor.data.flags.writeable
+        )
 
         try:
             out = self._op(
@@ -1137,13 +1148,17 @@ class Tensor:
 
             # re-lock data associated with base; de-referencing `out`
             # unlocked it
-            graph.base.tensor._data_was_writeable = None
-            graph.base.tensor._lock_writeability()
-            assert graph.base.tensor.data.flags.writeable is False
+            _mem.lock_array_and_base_memories(
+                t.data for t in graph.base.tensor.creator.variables
+            )
+            _mem.lock_arr_memory(graph.base.tensor.data, force_lock=True)
+            tensor_refs = WeakRefIterable(
+                t.data for t in graph.base.tensor.creator.variables
+            )
+            tensor_refs.append(graph.base.tensor.data)
+            finalize(graph.base.tensor.creator, _mem.release_op_memory, tensor_refs)
 
-            # memory was left unlocked so that in-place operation could occur
-            for tensor in graph.base.tensor.creator.variables:
-                tensor._lock_writeability()
+            assert graph.base.tensor.data.flags.writeable is False
 
         else:
             # in-place operation occurs on a view; must connect mutated base

@@ -1,15 +1,15 @@
-import hypothesis.strategies as st
+from typing import Callable
+
 import numpy as np
 import pytest
-from hypothesis import given
 
+import mygrad as mg
 from mygrad import Tensor
-from tests.custom_strategies import tensors
-from tests.utils import flags_to_dict
 
 
-def test_memory_locks_during_graph():
-    x = Tensor([1.0, 2.0])
+@pytest.mark.parametrize("constant", [True, False])
+def test_memory_locks_during_graph(constant: bool):
+    x = Tensor([1.0, 2.0], constant=constant)
     assert x.data.flags.writeable
 
     y = +x  # should lock memory
@@ -19,69 +19,71 @@ def test_memory_locks_during_graph():
     x.data *= 1
 
 
-@given(tensor=tensors(shape=(2,), read_only=st.booleans(), constant=False),)
-def test_lock_restore_writeability_roundtrip(tensor: Tensor,):
-    original_flags = flags_to_dict(tensor)
+@pytest.mark.parametrize("constant", [True, False])
+def test_unreferenced_op_does_not_lock_data(constant: bool):
+    x = mg.arange(10.0, constant=constant)
+    y = np.arange(10.0)
+    assert y.flags.writeable is True
 
-    tensor._lock_writeability()
+    # participating in unreferenced op should not
+    # lock y's writeability
+    y * x
 
-    assert not tensor.data.flags.writeable
-
-    tensor._restore_writeability()
-
-    restored_flags = flags_to_dict(tensor)
-
-    assert tensor._data_was_writeable is None
-    assert tensor._base_data_was_writeable is None
-    assert original_flags == restored_flags
+    assert y.flags.writeable is True
 
 
-@given(read_only=st.booleans())
-def test_lock_restore_writeability_with_base_roundtrip(read_only: bool):
-    base_arr = np.array([1.0, 2.0])
-    base_arr.flags.writeable = not read_only
-    view = base_arr[...]
+@pytest.mark.parametrize("func", [lambda x: +x, lambda x: x[...]], ids=["+x", "x[:]"])
+@pytest.mark.parametrize("constant", [True, False])
+def test_dereferencing_tensor_restores_data_writeability(
+    constant: bool, func: Callable[[Tensor], Tensor]
+):
+    x = mg.arange(2.0, constant=constant)
+    data = x.data
 
-    original_flags = flags_to_dict(base_arr)
-    view_flags = flags_to_dict(view)
+    y = +x
 
-    tensor = Tensor(view, _copy_data=False)
+    assert data.flags.writeable is False
+    del y
 
-    tensor._lock_writeability()
-
-    assert not base_arr.flags.writeable
-    assert not view.flags.writeable
-
-    tensor._restore_writeability()
-
-    restored_flags = flags_to_dict(base_arr)
-    restored_view_flags = flags_to_dict(view)
-
-    assert tensor._data_was_writeable is None
-    assert tensor._base_data_was_writeable is None
-    assert original_flags == restored_flags
-    assert view_flags == restored_view_flags
+    assert data.flags.writeable is True, (
+        "x is no longer participating in a graph; its memory should be" "writeable"
+    )
 
 
-@given(tensor=tensors(shape=(2,), read_only=st.booleans(), constant=False),)
-def test_lock_restore_writeability_roundtrip_of_view(tensor: Tensor):
-    original_flags = flags_to_dict(tensor)
+@pytest.mark.parametrize("constant", [True, False])
+def test_only_final_dereference_restores_writeability(constant: bool):
+    x = mg.arange(10.0, constant=constant)
+    y = np.arange(10.0)
+    assert y.flags.writeable is True
 
-    view = tensor[...]
+    w = y[...] * x
+    z = y * x[...]
 
-    view._lock_writeability()
+    del w
+    assert y.flags.writeable is False, (
+        "`y` is still involved with `z` and `x`; "
+        "its writeability should not be restored"
+    )
+    assert x.data.flags.writeable is False, (
+        "`x` is still involved with `z` and `y`; "
+        "its writeability should not be restored"
+    )
+    del z
+    assert y.flags.writeable is True
+    assert x.data.flags.writeable is True
 
-    assert not tensor.data.flags.writeable
-    assert not view.data.flags.writeable
 
-    view._restore_writeability()
+def test_touching_data_in_local_scope_doesnt_leave_it_locked():
+    z = np.arange(10.0)
+    assert z.flags.writeable is True
 
-    restored_flags = flags_to_dict(tensor)
+    def f(x: np.ndarray):
+        for _ in range(4):
+            # do a series of operations to ensure
+            # "extensive" graphs get garbage collected
+            x = mg.ones_like(x) * x
+        assert x.data.flags.writeable is False
+        return None
 
-    assert tensor._data_was_writeable is None
-    assert tensor._base_data_was_writeable is None
-    assert original_flags == restored_flags
-
-    assert view._data_was_writeable is None
-    assert view._base_data_was_writeable is None
-    assert view.data.flags.writeable is original_flags["WRITEABLE"]
+    f(z)
+    assert z.flags.writeable is True
