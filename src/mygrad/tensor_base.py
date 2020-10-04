@@ -7,12 +7,12 @@ etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 from functools import wraps
 from numbers import Number
 from typing import Dict, Iterator, List, NamedTuple, Optional, Set, Type, TypeVar, Union
-from weakref import WeakSet
+from weakref import WeakSet, finalize
 
 import numpy as np
 
 import mygrad._graph_tracking as _track
-from mygrad._utils import WeakRefIterable, is_invalid_gradient
+from mygrad._utils import WeakRef, WeakRefIterable, is_invalid_gradient
 from mygrad.errors import InvalidBackprop, InvalidGradient
 from mygrad.linalg.ops import MatMul
 from mygrad.math.arithmetic.ops import (
@@ -213,6 +213,14 @@ def astensor(t, dtype=None, constant=None) -> "Tensor":
         return Tensor(t, dtype=dtype, constant=constant)
 
 
+def _restore_writeability(arr_ref: WeakRef[np.ndarray], flag: bool):
+    arr = arr_ref.__call__()
+    if arr is None:
+        return
+
+    arr.flags.writeable = flag
+
+
 class Tensor:
     """ A numpy-array-like object capable of serving as a node in a computational
     graph that supports back-propagation of derivatives via the chain rule.
@@ -410,6 +418,9 @@ class Tensor:
             self._base_data_was_writeable = self.data.base.flags.writeable
             self.data.base.flags.writeable = False
 
+        finalize(
+            self, _restore_writeability, WeakRef(self.data), self._data_was_writeable
+        )
         return self
 
     def _restore_writeability(self):
@@ -1107,12 +1118,6 @@ class Tensor:
             graph.restore_old_graph()
             raise e
 
-        # memory was left unlocked so that in-place operation could occur
-        for tensor in out.creator.variables:
-            tensor._lock_writeability()
-
-        assert out.data.flags.writeable is False
-
         if out.base is in_place_target:
             out._base = None
 
@@ -1128,10 +1133,17 @@ class Tensor:
             graph.base.placeholder._ops.add(out.creator)
             graph.base.tensor._mirror_tensor(out)
             out._reroute_to(graph.base.tensor)
+            del out  # remove reference so we can re-lock data
 
-            # this doesn't get set by _op due to `_lock_data=False`
-            # but this must be true since the op succeeding
-            graph.base.tensor._data_was_writeable = True
+            # re-lock data associated with base; de-referencing `out`
+            # unlocked it
+            graph.base.tensor._data_was_writeable = None
+            graph.base.tensor._lock_writeability()
+            assert graph.base.tensor.data.flags.writeable is False
+
+            # memory was left unlocked so that in-place operation could occur
+            for tensor in graph.base.tensor.creator.variables:
+                tensor._lock_writeability()
 
         else:
             # in-place operation occurs on a view; must connect mutated base
