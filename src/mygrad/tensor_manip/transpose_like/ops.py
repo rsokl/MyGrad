@@ -41,7 +41,7 @@ class MoveAxis(Operation):
         self.variables = (a,)
         self.source = source
         self.destination = destination
-        return np.moveaxis(a, source, destination)
+        return np.moveaxis(a.data, source, destination)
 
     def backward_var(self, grad, index, **kwargs):
         if not index == 0:  # pragma: no cover
