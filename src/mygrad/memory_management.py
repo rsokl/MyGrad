@@ -8,6 +8,7 @@ from mygrad._utils import WeakRefIterable
 
 _array_counter = Counter()
 _array_tracker = WeakValueDictionary()
+_views_waiting_for_unlock = WeakValueDictionary()
 
 __all__ = ["lock_array_and_base_memories", "release_op_memory"]
 
@@ -18,6 +19,8 @@ def lock_arr_memory(arr: np.ndarray, force_lock: bool = False):
         if not force_lock and not arr.flags.writeable:
             # array is natively read-only; don't do anything
             return
+        # keeps track of array so we can clean up the array
+        # counter when tracked arrays fall out of scope
         _array_tracker[arr_id] = arr
         _array_counter[arr_id] = 1
     else:
@@ -52,19 +55,37 @@ def lock_array_and_base_memories(arrs: Iterable[np.ndarray]):
 
 def _release_arr_memory(arr: np.ndarray):
     arr_id = id(arr)
-    _array_counter[arr_id] -= 1
-    # assert _array_counter[arr_id] >= 0
-    if _array_counter[arr_id] == 0:
-        _array_counter.pop(arr_id)
-        _array_tracker.pop(arr_id)
+
+    if arr_id in _array_counter:
+        _array_counter[arr_id] -= 1
+
+    assert _array_counter[arr_id] >= 0  # TODO: remove this
+
+    if arr_id in _array_counter and _array_counter[arr_id] == 0:
+        _array_counter.pop(arr_id, None)
+        _array_tracker.pop(arr_id, None)
+
         if not arr.flags.writeable:
-            arr.flags.writeable = True
+
+            if arr.base is not None and arr.base.flags.writeable is False:
+                _views_waiting_for_unlock[id(arr.base)] = arr
+            else:
+                arr.flags.writeable = True
+
+    if arr.base is None and (arr_id in _views_waiting_for_unlock):
+        view_arr = _views_waiting_for_unlock[arr_id]
+        view_arr_id = id(view_arr)
+
+        if view_arr_id not in _array_counter:
+            view_arr.flags.writeable = True
+            _views_waiting_for_unlock.pop(arr_id)
 
 
 def release_op_memory(arr_refs: WeakRefIterable[np.ndarray]):
-    cnt = 0
-    weak_ref_cnt = len(arr_refs.data)
+    cnt = 0  # counts number of living references
+    weak_ref_cnt = len(arr_refs.data)  # gives total num weak-references
     for arr in _unique_arrs_and_bases(arr_refs):
+        cnt += 1
         _release_arr_memory(arr)
 
     if cnt != weak_ref_cnt:

@@ -44,7 +44,6 @@ def test_dereferencing_tensor_restores_data_writeability(
 
     assert data.flags.writeable is False
     del y
-
     assert data.flags.writeable is True, (
         "x is no longer participating in a graph; its memory should be" "writeable"
     )
@@ -71,6 +70,29 @@ def test_only_final_dereference_restores_writeability(constant: bool):
     del z
     assert y.flags.writeable is True
     assert x.data.flags.writeable is True
+
+
+@pytest.mark.parametrize("constant", [True, False])
+def test_view_becomes_writeable_after_base_is_made_writeable(constant: bool):
+    x = mg.arange(10.0, constant=constant)
+    y = np.arange(10.0)
+    assert y.flags.writeable is True
+
+    view_y = y[...]
+    w = y * x
+    z = x * view_y
+
+    del z  # normally would make `view-y` writeable, but `view-y` depends on y
+    assert x.data.flags.writeable is False
+    assert y.flags.writeable is False
+    assert (
+        view_y.flags.writeable is False
+    ), "view-y can't be made writeable until y is made writeable"
+
+    del w
+    assert x.data.flags.writeable is True
+    assert y.flags.writeable is True
+    assert view_y.flags.writeable is True
 
 
 def test_touching_data_in_local_scope_doesnt_leave_it_locked():
