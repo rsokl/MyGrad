@@ -553,7 +553,7 @@ class Tensor:
                 for var in input_vars
             )
             if _lock_data:
-                _mem.lock_array_and_base_memories(t.data for t in tensor_vars)
+                _mem.lock_array_and_base_writeability(t.data for t in tensor_vars)
 
         else:
             # operations are not being tracked - don't lock memory or null grads
@@ -648,7 +648,7 @@ class Tensor:
             _mem.lock_arr_memory(out.data, force_lock=True)
             tensor_refs = WeakRefIterable(t.data for t in tensor_vars)
             tensor_refs.append(out.data)
-            finalize(f, _mem.release_op_memory, tensor_refs)
+            finalize(f, _mem.release_writeability_lock_on_op, tensor_refs)
         return out
 
     def _replay_op(self, *input_vars) -> "Tensor":
@@ -1148,7 +1148,7 @@ class Tensor:
 
             # re-lock data associated with base; de-referencing `out`
             # unlocked it
-            _mem.lock_array_and_base_memories(
+            _mem.lock_array_and_base_writeability(
                 t.data for t in graph.base.tensor.creator.variables
             )
             _mem.lock_arr_memory(graph.base.tensor.data, force_lock=True)
@@ -1156,7 +1156,11 @@ class Tensor:
                 t.data for t in graph.base.tensor.creator.variables
             )
             tensor_refs.append(graph.base.tensor.data)
-            finalize(graph.base.tensor.creator, _mem.release_op_memory, tensor_refs)
+            finalize(
+                graph.base.tensor.creator,
+                _mem.release_writeability_lock_on_op,
+                tensor_refs,
+            )
 
             assert graph.base.tensor.data.flags.writeable is False
 

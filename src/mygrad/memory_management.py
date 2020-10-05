@@ -1,5 +1,5 @@
 from collections import Counter
-from typing import Iterable
+from typing import Generator, Iterable
 from weakref import WeakValueDictionary
 
 import numpy as np
@@ -10,7 +10,7 @@ _array_counter = Counter()
 _array_tracker = WeakValueDictionary()
 _views_waiting_for_unlock = WeakValueDictionary()
 
-__all__ = ["lock_array_and_base_memories", "release_op_memory"]
+__all__ = ["lock_array_and_base_writeability", "release_writeability_lock_on_op"]
 
 
 def lock_arr_memory(arr: np.ndarray, force_lock: bool = False):
@@ -29,7 +29,14 @@ def lock_arr_memory(arr: np.ndarray, force_lock: bool = False):
         arr.flags.writeable = False
 
 
-def _unique_arrs_and_bases(arrs: Iterable[np.ndarray]):
+def _unique_arrs_and_bases(
+    arrs: Iterable[np.ndarray],
+) -> Generator[np.ndarray, None, None]:
+    """
+    Yields unique (by-ID) arrays from an iterable. If an array
+    has a base, the base is yielded first (assuming that base
+    object has not already been yielded).
+    """
     seen = set()
     for arr in arrs:
         arr_id = id(arr)
@@ -48,31 +55,35 @@ def _unique_arrs_and_bases(arrs: Iterable[np.ndarray]):
             yield arr
 
 
-def lock_array_and_base_memories(arrs: Iterable[np.ndarray]):
+def lock_array_and_base_writeability(arrs: Iterable[np.ndarray]):
     for arr in _unique_arrs_and_bases(arrs):
         lock_arr_memory(arr)
 
 
-def _release_arr_memory(arr: np.ndarray):
+def _release_lock_on_arr_writeability(arr: np.ndarray):
     arr_id = id(arr)
 
     if arr_id in _array_counter:
         _array_counter[arr_id] -= 1
 
-    assert _array_counter[arr_id] >= 0  # TODO: remove this
+        assert _array_counter[arr_id] >= 0  # TODO: remove this
 
-    if arr_id in _array_counter and _array_counter[arr_id] == 0:
-        _array_counter.pop(arr_id, None)
-        _array_tracker.pop(arr_id, None)
+        if _array_counter[arr_id] == 0:
+            _array_counter.pop(arr_id, None)
+            _array_tracker.pop(arr_id, None)
 
-        if not arr.flags.writeable:
+            if not arr.flags.writeable:
 
-            if arr.base is not None and arr.base.flags.writeable is False:
-                _views_waiting_for_unlock[id(arr.base)] = arr
-            else:
-                arr.flags.writeable = True
+                if arr.base is not None and arr.base.flags.writeable is False:
+                    _views_waiting_for_unlock[id(arr.base)] = arr
+                else:
+                    arr.flags.writeable = True
 
-    if arr.base is None and (arr_id in _views_waiting_for_unlock):
+    if (
+        arr.base is None
+        and arr.flags.writeable
+        and (arr_id in _views_waiting_for_unlock)
+    ):
         view_arr = _views_waiting_for_unlock[arr_id]
         view_arr_id = id(view_arr)
 
@@ -81,12 +92,12 @@ def _release_arr_memory(arr: np.ndarray):
             _views_waiting_for_unlock.pop(arr_id)
 
 
-def release_op_memory(arr_refs: WeakRefIterable[np.ndarray]):
+def release_writeability_lock_on_op(arr_refs: WeakRefIterable[np.ndarray]):
     cnt = 0  # counts number of living references
     weak_ref_cnt = len(arr_refs.data)  # gives total num weak-references
     for arr in _unique_arrs_and_bases(arr_refs):
         cnt += 1
-        _release_arr_memory(arr)
+        _release_lock_on_arr_writeability(arr)
 
     if cnt != weak_ref_cnt:
         for item in set(_array_counter) - set(_array_tracker):
