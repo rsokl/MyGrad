@@ -1,3 +1,6 @@
+"""
+Provides utilities responsible for locking/releasing array writeability.
+"""
 from collections import Counter
 from typing import Generator, Iterable
 from weakref import WeakValueDictionary
@@ -13,7 +16,7 @@ _views_waiting_for_unlock = WeakValueDictionary()
 __all__ = ["lock_array_and_base_writeability", "release_writeability_lock_on_op"]
 
 
-def lock_arr_memory(arr: np.ndarray, force_lock: bool = False):
+def lock_arr_writeability(arr: np.ndarray, force_lock: bool = False):
     arr_id = id(arr)
     if arr_id not in _array_tracker:
         if not force_lock and not arr.flags.writeable:
@@ -57,7 +60,7 @@ def _unique_arrs_and_bases(
 
 def lock_array_and_base_writeability(arrs: Iterable[np.ndarray]):
     for arr in _unique_arrs_and_bases(arrs):
-        lock_arr_memory(arr)
+        lock_arr_writeability(arr)
 
 
 def _release_lock_on_arr_writeability(arr: np.ndarray):
@@ -75,6 +78,8 @@ def _release_lock_on_arr_writeability(arr: np.ndarray):
             if not arr.flags.writeable:
 
                 if arr.base is not None and arr.base.flags.writeable is False:
+                    # array is view and must wait until its base is released
+                    # before it can be unlocked
                     _views_waiting_for_unlock[id(arr.base)] = arr
                 else:
                     arr.flags.writeable = True
@@ -84,6 +89,8 @@ def _release_lock_on_arr_writeability(arr: np.ndarray):
         and arr.flags.writeable
         and (arr_id in _views_waiting_for_unlock)
     ):
+        # array was base of view waiting to be unlocked..
+        # unlock the view
         view_arr = _views_waiting_for_unlock[arr_id]
         view_arr_id = id(view_arr)
 

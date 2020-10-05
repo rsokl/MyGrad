@@ -12,7 +12,7 @@ from hypothesis.strategies import SearchStrategy
 from hypothesis.strategies._internal.lazy import LazyStrategy
 from numpy.testing import assert_allclose, assert_array_equal
 
-import mygrad.memory_management as mem
+import mygrad._lock_utils as mem
 from mygrad import Tensor
 from mygrad.operation_base import Operation
 

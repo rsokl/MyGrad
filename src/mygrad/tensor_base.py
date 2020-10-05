@@ -12,7 +12,7 @@ from weakref import WeakSet, finalize
 import numpy as np
 
 import mygrad._graph_tracking as _track
-import mygrad.memory_management as _mem
+import mygrad._lock_utils as _mem
 from mygrad._utils import WeakRef, WeakRefIterable, is_invalid_gradient
 from mygrad.errors import InvalidBackprop, InvalidGradient
 from mygrad.linalg.ops import MatMul
@@ -645,7 +645,7 @@ class Tensor:
             parent_var._view_children.append(out)
 
         if _lock_data:
-            _mem.lock_arr_memory(out.data, force_lock=True)
+            _mem.lock_arr_writeability(out.data, force_lock=True)
             tensor_refs = WeakRefIterable(t.data for t in tensor_vars)
             tensor_refs.append(out.data)
             finalize(f, _mem.release_writeability_lock_on_op, tensor_refs)
@@ -1151,7 +1151,7 @@ class Tensor:
             _mem.lock_array_and_base_writeability(
                 t.data for t in graph.base.tensor.creator.variables
             )
-            _mem.lock_arr_memory(graph.base.tensor.data, force_lock=True)
+            _mem.lock_arr_writeability(graph.base.tensor.data, force_lock=True)
             tensor_refs = WeakRefIterable(
                 t.data for t in graph.base.tensor.creator.variables
             )
