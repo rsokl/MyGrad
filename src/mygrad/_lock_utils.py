@@ -13,7 +13,11 @@ _array_counter = Counter()
 _array_tracker = WeakValueDictionary()
 _views_waiting_for_unlock = WeakValueDictionary()
 
-__all__ = ["lock_array_and_base_writeability", "release_writeability_lock_on_op"]
+__all__ = [
+    "lock_array_and_base_writeability",
+    "lock_arr_writeability",
+    "release_writeability_lock_on_op",
+]
 
 
 def lock_arr_writeability(arr: np.ndarray, force_lock: bool = False):
@@ -59,6 +63,18 @@ def _unique_arrs_and_bases(
 
 
 def lock_array_and_base_writeability(arrs: Iterable[np.ndarray]):
+    """Adds a lock on each of the provided arrays.
+
+    If an array is a view, then its base also has a lock
+    placed on it.
+
+    Parameters
+    ----------
+    arrs : Iterable[ndarray]
+        The arrays to be locked. Only one lock is placed
+        on each array, even if the same array occurs
+        multiple times in the iterable.
+    """
     for arr in _unique_arrs_and_bases(arrs):
         lock_arr_writeability(arr)
 
@@ -100,6 +116,18 @@ def _release_lock_on_arr_writeability(arr: np.ndarray):
 
 
 def release_writeability_lock_on_op(arr_refs: WeakRefIterable[np.ndarray]):
+    """Marks each array (and for a view, its base) to have its
+    writeability lock released.
+
+    An array is made writeable only once all of its locks
+    have been released.
+
+    Parameters
+    ----------
+    arr_refs : WeakRefIterable[np.ndarray]
+        The arrays to be unlocked. Only one lock is released
+        on each array, even if the same array occurs
+        multiple times in the iterable."""
     cnt = 0  # counts number of living references
     weak_ref_cnt = len(arr_refs.data)  # gives total num weak-references
     for arr in _unique_arrs_and_bases(arr_refs):
