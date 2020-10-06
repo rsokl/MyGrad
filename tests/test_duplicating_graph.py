@@ -1,3 +1,4 @@
+import gc
 from typing import Callable, List, Tuple
 
 import hypothesis.strategies as st
@@ -97,18 +98,28 @@ def test_graph_iteration_is_depth_first(base: Tensor):
 
 @given(x0=tensors(read_only=st.booleans()), num_views=st.integers(0, 3))
 def test_memory_locking(x0: Tensor, num_views: int):
+    """
+    Ensure graph created among placeholders locks and frees memory
+    as expected
+    """
     was_writeable = x0.data.flags.writeable
     x = x0
     for _ in range(num_views):
         x = x[...]
 
     graph = _DuplicatingGraph(x0)
-    for node in graph.get_path_to_base(x):
-        assert not node.placeholder.data.flags.writeable or num_views == 0
+    nodes = tuple(n.placeholder for n in graph.get_path_to_base(x))
 
-    graph[x].placeholder.backward()
-    for node in graph.get_path_to_base(x):
-        assert node.placeholder.data.flags.writeable is was_writeable
+    # delete spurious references to ops involving placeholders
+    del graph, x, x0
+
+    for node in nodes:
+        assert not node.data.flags.writeable or num_views == 0
+
+    nodes[0].backward()
+
+    for node in nodes:
+        assert node.data.flags.writeable is was_writeable
 
 
 def view(x):
