@@ -13,13 +13,6 @@ from mygrad._utils.duplicating_graph import DuplicatingGraph, Node
 from tests.custom_strategies import tensors
 
 
-@given(x=tensors())
-def test_duplating_graph_input_validation(x: Tensor):
-    view = x[...]
-    with pytest.raises(AssertionError):
-        DuplicatingGraph(view)
-
-
 @given(x=tensors(read_only=st.booleans()))
 def test_contains_method(x: Tensor):
     view = x[...]

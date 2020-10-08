@@ -1034,7 +1034,7 @@ class Tensor:
             out.creator.variables = variables
 
             graph.base.placeholder._ops.add(out.creator)
-            _dup.mirror_tensor(target=graph.base.tensor, source=out)
+            _dup.mirror_tensor(source=out, target=graph.base.tensor)
             _dup.reroute_ops_through(source=out, target=graph.base.tensor)
             del out  # remove reference so we can re-lock data
 
@@ -1071,6 +1071,105 @@ class Tensor:
             if node.parent is None:
                 continue
             view = node.tensor._replay_op(node.parent)
+            _dup.mirror_tensor(source=view, target=node.tensor)
+            _dup.reroute_ops_through(source=view, target=node.tensor)
+
+    @property
+    def shape(self):
+        """ Tuple of tensor dimension-sizes.
+
+        Sizes are reported in row-major order.
+
+        Returns
+        -------
+        Tuple[int, ...]
+
+        Examples
+        --------
+        >>> import mygrad as mg
+        >>> x = mg.Tensor([1, 2, 3, 4])  # axis-0 has size 4
+        >>> x.shape
+        (4,)
+        >>> y = mg.Tensor([[1, 2, 3],    # axis-0 has size 2, axis-1 has size 3
+        ...                [4, 5, 6]])
+        >>> y.shape
+        (2, 3)
+
+        See Also
+        --------
+        mygrad.reshape : similar function
+        Tensor.reshape : similar method"""
+        return self.data.shape
+
+    @shape.setter
+    def shape(self, newshape):
+        # Even though this op cannot mutate views, we still must
+        # do graph-replaying here so that views can still reference
+        # this tensor, but with the proper reshaping mediating them.
+        #
+        # E.g.
+        # x = arange(10)   # shape-(10,)
+        # y = x[:6]        # shape-(6,)
+        # x.shape = (2, 5) # shape-(2, 5)
+        #
+        # y.base points to the shape-(2,5) array
+        # even though y is a view of the flat array
+        #
+        # thus we need to play this graph as
+        #   (history)
+        #       |
+        #   placeholder   shape-(10,)
+        #       |-reshape
+        #       x         shape-(2,5)
+        #       |-reshape
+        #   placeholder   shape-(10,)
+        #       |-getitem
+        #       y         shape-(4,)
+
+        if newshape == self.shape:
+            return
+
+        old_shape = self.shape
+
+        # raise here if the shape is not compatible
+        self.data.shape = newshape
+        self.data.shape = old_shape
+
+        # create placeholders for self and all of its view-children
+        graph = _dup.DuplicatingGraph(self)
+        # need to iterate over all nodes now before we tinker
+        # with the view children
+        nodes = tuple(graph)
+
+        # reshape placeholder of self
+        out = graph.base.placeholder.reshape(newshape)
+
+        out._base = graph.base.placeholder.base
+        _dup.mirror_tensor(source=out, target=self)
+        _dup.reroute_ops_through(source=out, target=self)
+        del out
+
+        graph.base.placeholder._view_children.append(self)
+
+        base = graph.base.placeholder.base
+
+        if base is not None:
+            creator = graph.base.placeholder.creator.variables[0]
+            creator._view_children = WeakRefIterable(
+                [
+                    w if w is not self else graph.base.placeholder
+                    for w in graph.base.placeholder._view_children
+                ]
+            )
+
+        unshaped = self.reshape(old_shape)
+
+        for node in nodes:
+            if node.parent is None:
+                continue
+            view = node.tensor._replay_op(
+                node.parent if node.parent is not self else unshaped
+            )
             _dup.mirror_tensor(source=view, target=node.tensor)
             _dup.reroute_ops_through(source=view, target=node.tensor)
 
@@ -1343,37 +1442,6 @@ class Tensor:
         >>> type(x.dtype)
         <type 'numpy.dtype'>"""
         return self.data.dtype
-
-    @property
-    def shape(self):
-        """ Tuple of tensor dimension-sizes.
-
-        Sizes are reported in row-major order.
-
-        Returns
-        -------
-        Tuple[int, ...]
-
-        Examples
-        --------
-        >>> import mygrad as mg
-        >>> x = mg.Tensor([1, 2, 3, 4])  # axis-0 has size 4
-        >>> x.shape
-        (4,)
-        >>> y = mg.Tensor([[1, 2, 3],    # axis-0 has size 2, axis-1 has size 3
-        ...                [4, 5, 6]])
-        >>> y.shape
-        (2, 3)
-
-        See Also
-        --------
-        mygrad.reshape : similar function
-        Tensor.reshape : similar method"""
-        return self.data.shape
-
-    @shape.setter
-    def shape(self, newshape):
-        self._replace_tensor_op(Reshape, op_args=(newshape,), constant=self.constant)
 
     def reshape(self, *newshape, constant=False):
         """ Returns a tensor with a new shape, without changing its data.

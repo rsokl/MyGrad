@@ -110,9 +110,9 @@ class DuplicatingGraph:
     def __init__(self, base: "Tensor"):
         self.mappings: Dict[int, Node] = {}
 
-        assert base.base is None
-
-        self._record_mapping(original=base, placeholder=make_placeholder_tensor(base))
+        self._record_mapping(
+            original=base, placeholder=make_placeholder_tensor(base, base=base.base)
+        )
         self.base = self[base]
 
         self.leafs: Set[int] = set()

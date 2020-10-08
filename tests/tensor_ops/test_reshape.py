@@ -62,12 +62,32 @@ def test_raising_during_inplace_reshape_doesnt_corrupt_graph():
     assert_array_equal(x.grad, 2 * np.ones_like(y))
 
 
-# def test_inplace_reshape_():
-#     x = mg.arange(10.)
-#     y = x[...]
-#     x.shape = (2, 5)
-#     y.backward()
-#     assert_array_equal(x.grad, np.ones_like(x))
+def test_inplace_reshape_1():
+    x = mg.arange(10.0)
+    y = x[...]
+    x.shape = (2, 5)
+    assert x.shape == (2, 5)
+    assert y.shape == (10,)
+    y.backward()
+    assert_array_equal(x.grad, np.ones_like(x))
+
+
+def test_inplace_reshape_2():
+    x0 = mg.arange(10.0)
+    x = +x0
+    y = x[:6]
+    x[-6:] = y
+    y.shape = (3, 2)
+    y.shape = (1, 6)
+    x.shape = (2, 5)
+
+    (2 * y).sum().backward()
+
+    # assert x.shape == (2, 5)
+    x_grad = np.zeros(10, dtype=x.dtype)
+    x_grad[:6] = 2.0
+    assert_array_equal(x.grad, x_grad.reshape(x.shape))
+    assert_array_equal(y.grad, 2 * np.ones_like(y))
 
 
 @given(
