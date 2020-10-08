@@ -570,5 +570,9 @@ def gru(
         op_kwargs=dict(s0=s0, bp_lim=bp_lim, dropout=dropout),
         constant=constant,
     )
-    s.creator._hidden_seq = s
+    try:
+        s.creator._hidden_seq = s
+    except AttributeError:  # pragma: no cover
+        # `no-autodiff` mode does not record creator
+        pass
     return s
