@@ -9,7 +9,7 @@ from numpy.testing import assert_array_equal
 
 import mygrad as mg
 from mygrad import Tensor
-from mygrad.tensor_base import _DuplicatingGraph, _Node
+from mygrad._utils.duplicating_graph import DuplicatingGraph, Node
 from tests.custom_strategies import tensors
 
 
@@ -17,13 +17,13 @@ from tests.custom_strategies import tensors
 def test_duplating_graph_input_validation(x: Tensor):
     view = x[...]
     with pytest.raises(AssertionError):
-        _DuplicatingGraph(view)
+        DuplicatingGraph(view)
 
 
 @given(x=tensors(read_only=st.booleans()))
 def test_contains_method(x: Tensor):
     view = x[...]
-    graph = _DuplicatingGraph(x)
+    graph = DuplicatingGraph(x)
     assert (x in graph) is True
     assert (view in graph) is True
     assert (mg.asarray(x) in graph) is False
@@ -32,7 +32,7 @@ def test_contains_method(x: Tensor):
 @given(x=tensors(read_only=st.booleans()))
 def test_basic_duplicating_graph_info(x: Tensor):
     y = x[...]
-    graph = _DuplicatingGraph(x)
+    graph = DuplicatingGraph(x)
     _x = graph[x].placeholder
     _y = graph[y].placeholder
 
@@ -69,7 +69,7 @@ def test_path_to_base(x0: Tensor):
     x2 = x1[...]
     _ = x2[...]
 
-    graph = _DuplicatingGraph(x0)
+    graph = DuplicatingGraph(x0)
     for tensor, expected_path in zip([x2, x1, x0], [[x2, x1, x0], [x1, x0], [x0]]):
         assert all(
             actual.tensor is expected
@@ -89,7 +89,7 @@ def test_graph_iteration_is_depth_first(base: Tensor):
     b2 = b1[...]
 
     c1 = base[...]
-    graph = _DuplicatingGraph(base)
+    graph = DuplicatingGraph(base)
     expected_order = [base, a1, a2, a3_1, a3_2, a4_2, b1, b2, c1]
 
     for actual, expected in zip((i.tensor for i in graph), expected_order):
@@ -107,7 +107,7 @@ def test_memory_locking(x0: Tensor, num_views: int):
     for _ in range(num_views):
         x = x[...]
 
-    graph = _DuplicatingGraph(x0)
+    graph = DuplicatingGraph(x0)
     nodes = tuple(n.placeholder for n in graph.get_path_to_base(x))
 
     # delete spurious references to ops involving placeholders
@@ -133,7 +133,7 @@ def flip(x):
 @settings(deadline=None)
 class GraphDuplicationCompare(RuleBasedStateMachine):
     """Creates a random view graph from a single 'base' tensor and
-    checks the logic of _DuplicatingGraph"""
+    checks the logic of DuplicatingGraph"""
 
     def __init__(self):
         super().__init__()
@@ -166,8 +166,8 @@ class GraphDuplicationCompare(RuleBasedStateMachine):
         return 2 * parent  # this shouldn't affect the view graph
 
     def teardown(self):
-        graph = _DuplicatingGraph(self.base)
-        iter_nodes: Tuple[_Node, ...] = tuple(graph)
+        graph = DuplicatingGraph(self.base)
+        iter_nodes: Tuple[Node, ...] = tuple(graph)
 
         assert sorted(id(t.tensor) for t in iter_nodes) == sorted(self.node_list)
 

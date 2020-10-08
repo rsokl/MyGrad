@@ -12,7 +12,8 @@ from weakref import WeakSet, finalize
 import numpy as np
 
 import mygrad._graph_tracking as _track
-import mygrad._lock_utils as _mem
+import mygrad._utils.duplicating_graph as _dup
+import mygrad._utils.lock_management as _mem
 from mygrad._utils import WeakRef, WeakRefIterable, is_invalid_gradient
 from mygrad.errors import InvalidBackprop, InvalidGradient
 from mygrad.linalg.ops import MatMul
@@ -32,9 +33,6 @@ from mygrad.tensor_manip.array_shape.ops import Flatten, Reshape
 from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property
 
 __all__ = ["Tensor", "asarray"]
-
-
-T = TypeVar("T")
 
 
 def _is_view_of(parent: "Tensor", child: np.ndarray) -> bool:
@@ -403,56 +401,6 @@ class Tensor:
         # used to track original 'writeable' statuses of array data
         self._data_was_writeable = None  # type: Optional[bool]
         self._base_data_was_writeable = None  # type: Optional[bool]
-
-    def _lock_writeability(self) -> "Tensor":
-        """Sets the underlying numpy-array (and its base) to be read-only.
-
-        The initial writeability flags of all involved arrays are recorded so
-        that they can be restored via ``self._restore_writeability()``"""
-        return
-        if self._data_was_writeable is not None or self.base is not None:
-            return self
-
-        self._data_was_writeable = self.data.flags.writeable
-        self.data.flags.writeable = False
-
-        if self.data.base is not None:
-            self._base_data_was_writeable = self.data.base.flags.writeable
-            self.data.base.flags.writeable = False
-
-        finalize(
-            self, _restore_writeability, WeakRef(self.data), self._data_was_writeable
-        )
-        return self
-
-    def _restore_writeability(self):
-        """Restores the writeability flag for the underlying numpy array (and its base)"""
-        return
-        if self.base is not None:
-            # A view of an array inherits the writeability of its parent;
-            # however, the writeability of the view is independent of that
-            # of its parent. I.e. toggling the parent's writeability does
-            # not affect the view's writeability.
-            #
-            # Furthermore, the parent's writeability must be restored before
-            # restoring the view's writeability
-            self.base._restore_writeability()
-            if self.base.data.flags.writeable:
-                self.data.flags.writeable = self.base.data.flags.writeable
-            return
-
-        if self._data_was_writeable is None:
-            return
-
-        # the base-data's writeability must be restored before that of its view's
-        if self._base_data_was_writeable is not None:
-            if self._base_data_was_writeable:
-                self.data.base.flags.writeable = self._base_data_was_writeable
-            self._base_data_was_writeable = None
-
-        if self._data_was_writeable:
-            self.data.flags.writeable = self._data_was_writeable
-        self._data_was_writeable = None
 
     def astype(
         self, dtype: Union[type, str], *, constant: Optional[bool] = None
@@ -857,7 +805,6 @@ class Tensor:
         This de-references all operations involved in the graph and the intermediate
         tensors that were created by it.
         """
-        self._restore_writeability()
         self._ops.clear()
 
         if self.creator is None:
@@ -1089,7 +1036,7 @@ class Tensor:
         # Replace base and all of its views with "placeholder" tensors;
         # there will serve as internal references to all tensors pre-mutation
         # and will preserve ops relying on the un-mutated tensors
-        graph = _DuplicatingGraph(self if self.base is None else self.base)
+        graph = _dup.DuplicatingGraph(self if self.base is None else self.base)
 
         # Create copy of base so that mutation has no impact on the
         # state of any ops depending on it or its views
@@ -1583,127 +1530,3 @@ def tensor_to_array_wrapper(func):
 
 for _op in ("__lt__", "__le__", "__gt__", "__ge__"):
     setattr(Tensor, _op, tensor_to_array_wrapper(getattr(np.ndarray, _op)))
-
-
-class _Node(NamedTuple):
-    tensor: Tensor
-    placeholder: Tensor
-    parent: Optional[Tensor] = None
-
-
-class _DuplicatingGraph:
-    """Traces through the graph of all views of the base tensor and
-    creates a corresponding graph of 'placeholders', used to permit
-    a future in-place operation without mutating the current tensor
-    graph.
-
-    Provides the information needed to recreate a view-graph after
-    an in-place operation has been performed on the base tensor.
-
-    Upon initialization, this class mutates the graph downstream of the
-    base tensor.
-    """
-
-    def _duplicate_graph(self, tensor: Tensor):
-        """Recursively creates placeholders for all views downstream of `tensor`"""
-        if not tensor._view_children:
-            self.leafs.add(id(tensor))
-            return
-
-        for child in tensor._view_children:
-
-            self._record_mapping(
-                original=child,
-                placeholder=child._make_placeholder_tensor(
-                    copy_data=False, base=self.base.placeholder
-                ),
-                parent=tensor,
-            )
-
-            self._duplicate_graph(child)
-
-        self[tensor].placeholder._view_children = WeakRefIterable(
-            [self[t].placeholder for t in tensor._view_children]
-        )
-
-    def __init__(self, base: Tensor):
-        self.mappings: Dict[int, _Node] = {}
-
-        assert base.base is None
-
-        self._record_mapping(
-            original=base, placeholder=base._make_placeholder_tensor(copy_data=False)
-        )
-        self.base = self[base]
-
-        self.leafs: Set[int] = set()
-        # creates placeholders for each node in the view graph
-        self._duplicate_graph(base)
-
-    def __getitem__(self, item: Tensor) -> _Node:
-        """Returns a node associated with a tensor"""
-        return self.mappings[id(item)]
-
-    def _record_mapping(
-        self, original: Tensor, placeholder: Tensor, parent: Optional[Tensor] = None
-    ):
-        """
-        Parameters
-        ----------
-        original : Tensor
-            A tensor that will be involved in a mutated graph
-
-        placeholder : Tensor
-            Takes the place of the original in the computational graph
-
-        parent : Optional[Tensor]
-            The tensor of which ``original`` is a direct view
-        """
-        node = _Node(tensor=original, placeholder=placeholder, parent=parent)
-        self.mappings[id(node.tensor)] = node
-        self.mappings[id(node.placeholder)] = node
-
-    def _yield_children(self, tensor: Tensor) -> Iterator[_Node]:
-        """Recursive helper function for DFS iteration"""
-        yield self[tensor]
-        for child in tensor._view_children:
-            yield from self._yield_children(child)
-
-    def __contains__(self, item):
-        if isinstance(item, Tensor):
-            item = id(item)
-            return item in self.mappings
-        return False
-
-    def get_placeholder_if_exists(self, tensor: T) -> T:
-        if tensor in self:
-            return self[tensor].placeholder
-        else:
-            return tensor
-
-    def __iter__(self) -> Iterator[_Node]:
-        """Returns all nodes in graph using DFS.
-
-        Note that each node can only have one input edge, so no visitor
-        information need be recorded
-
-        We iterate based off of the placeholders' graph information
-        since they will never be mutated."""
-        yield from self._yield_children(self.base.placeholder)
-
-    def get_path_to_base(self, tensor: Tensor) -> List[_Node]:
-        """ Returns [leaf, (parent), ..., base]"""
-        path = []
-        node = self[tensor]
-        while node.parent is not None:
-            path.append(node)
-            node = self[node.parent]
-        path.append(self.base)
-        return path
-
-    def restore_old_graph(self):
-        """ Reroute graph back to original tensors."""
-        # call tuple to ensure iteration is completed
-        # before information gets deleted / mutated
-        for node in tuple(self):
-            node.placeholder._reroute_to(node.tensor)

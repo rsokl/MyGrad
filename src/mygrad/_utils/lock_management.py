@@ -134,6 +134,7 @@ def release_writeability_lock_on_op(arr_refs: WeakRefIterable[np.ndarray]):
         cnt += 1
         _release_lock_on_arr_writeability(arr)
 
+    # TODO: This is inefficient!
     if cnt != weak_ref_cnt:
         for item in set(_array_counter) - set(_array_tracker):
             _array_counter.pop(item)
