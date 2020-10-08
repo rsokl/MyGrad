@@ -8,12 +8,6 @@ if typing.TYPE_CHECKING:
     from mygrad import Tensor
 
 
-class Node(NamedTuple):
-    tensor: "Tensor"
-    placeholder: "Tensor"
-    parent: Optional["Tensor"] = None
-
-
 T = TypeVar("T")
 
 
@@ -69,6 +63,13 @@ def make_placeholder_tensor(
     # point all ops involving `self` to old_tensor instead
     reroute_ops_through(target=placeholder, source=original)
     return placeholder
+
+
+class Node(NamedTuple):
+    tensor: "Tensor"
+    placeholder: "Tensor"
+    # `tensor` is a view of `parent`
+    parent: Optional["Tensor"] = None
 
 
 class DuplicatingGraph:
