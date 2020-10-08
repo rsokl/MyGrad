@@ -62,6 +62,14 @@ def test_raising_during_inplace_reshape_doesnt_corrupt_graph():
     assert_array_equal(x.grad, 2 * np.ones_like(y))
 
 
+# def test_inplace_reshape_():
+#     x = mg.arange(10.)
+#     y = x[...]
+#     x.shape = (2, 5)
+#     y.backward()
+#     assert_array_equal(x.grad, np.ones_like(x))
+
+
 @given(
     tensor=tensors(), data=st.data(),
 )

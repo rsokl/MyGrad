@@ -5,15 +5,14 @@ from numpy.testing import assert_allclose, assert_array_equal
 
 import mygrad as mg
 from mygrad import multiply_sequence
+from mygrad._utils.duplicating_graph import make_placeholder_tensor
 from tests.custom_strategies import choices, tensors
 
 
 @given(
-    x=tensors(elements=st.floats(-100, 100), read_only=st.booleans()),
-    data=st.data(),
-    make_copy=st.booleans(),
+    x=tensors(elements=st.floats(-100, 100), read_only=st.booleans()), data=st.data(),
 )
-def test_placeholder_tensor(x: mg.Tensor, data: st.DataObject, make_copy: bool):
+def test_placeholder_tensor(x: mg.Tensor, data: st.DataObject):
     """
     Ensure the backpropagation is properly rerouted through placeholder tensor
     """
@@ -27,7 +26,7 @@ def test_placeholder_tensor(x: mg.Tensor, data: st.DataObject, make_copy: bool):
         choices([x, x, 2 * x, y, y], size=5, replace=False), label="sequence"
     )
     out = multiply_sequence(*seq).sum()
-    placeholder = x._make_placeholder_tensor(copy_data=make_copy)
+    placeholder = make_placeholder_tensor(x)
 
     assert placeholder is not x
     assert_array_equal(x, placeholder)
@@ -35,7 +34,7 @@ def test_placeholder_tensor(x: mg.Tensor, data: st.DataObject, make_copy: bool):
     assert placeholder.data.flags.writeable is x.data.flags.writeable
 
     if x.size:
-        assert np.shares_memory(x, placeholder) is not make_copy
+        assert np.shares_memory(x, placeholder)
 
     out.backward()
 

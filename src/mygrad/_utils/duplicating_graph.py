@@ -2,6 +2,7 @@ import typing
 from typing import Dict, Iterator, List, NamedTuple, Optional, Set, TypeVar
 
 from mygrad._utils import WeakRefIterable
+from mygrad.operation_base import Operation
 
 if typing.TYPE_CHECKING:
     from mygrad import Tensor
@@ -14,6 +15,60 @@ class Node(NamedTuple):
 
 
 T = TypeVar("T")
+
+
+def mirror_tensor(*, target: "Tensor", source: "Tensor"):
+    """ *Dev use only*
+
+    Points all of the attributes of ``self`` to those of
+    ``tensor`` so that they reference all of the same data structures.
+    This is used to facilitate "in-place" operations.
+    """
+    target.__dict__ = source.__dict__.copy()
+
+
+def reroute_ops_through(*, target: "Tensor", source: "Tensor"):
+    for op in source._ops:  # type: Operation
+        op.variables = tuple(
+            var_ if var_ is not source else target for var_ in op.variables
+        )
+
+
+def make_placeholder_tensor(
+    original: "Tensor", *, base: Optional["Tensor"] = None
+) -> "Tensor":
+    """
+    Creates a tensor that stands in the place of `original` in the computational graph.
+
+    The resulting tensor should never be exposed to the user; it is used to accommodate
+    in-place operations.
+
+    Parameters
+    ----------
+    original : bool
+        If True the placeholder holds a copy of the original data
+
+    base : Optional[Tensor]
+        Points the placeholder to the base tensor.
+
+    Returns
+    -------
+    placeholder : Tensor
+    """
+    assert (
+        original.grad is None
+    ), "A placeholder copy can not be created for a tensor with a gradient"
+
+    assert (
+        not original._accum_ops
+    ), "A placeholder copy cannot be created during backprop"
+
+    placeholder = type(original)([])
+    mirror_tensor(target=placeholder, source=original)
+    placeholder._base = base
+    # point all ops involving `self` to old_tensor instead
+    reroute_ops_through(target=placeholder, source=original)
+    return placeholder
 
 
 class DuplicatingGraph:
@@ -39,8 +94,8 @@ class DuplicatingGraph:
 
             self._record_mapping(
                 original=child,
-                placeholder=child._make_placeholder_tensor(
-                    copy_data=False, base=self.base.placeholder
+                placeholder=make_placeholder_tensor(
+                    original=child, base=self.base.placeholder
                 ),
                 parent=tensor,
             )
@@ -56,9 +111,7 @@ class DuplicatingGraph:
 
         assert base.base is None
 
-        self._record_mapping(
-            original=base, placeholder=base._make_placeholder_tensor(copy_data=False)
-        )
+        self._record_mapping(original=base, placeholder=make_placeholder_tensor(base))
         self.base = self[base]
 
         self.leafs: Set[int] = set()
@@ -131,4 +184,4 @@ class DuplicatingGraph:
         # call tuple to ensure iteration is completed
         # before information gets deleted / mutated
         for node in tuple(self):
-            node.placeholder._reroute_to(node.tensor)
+            reroute_ops_through(target=node.tensor, source=node.placeholder)

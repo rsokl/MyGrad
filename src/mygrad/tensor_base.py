@@ -6,7 +6,7 @@ etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 
 from functools import wraps
 from numbers import Number
-from typing import Dict, Iterator, List, NamedTuple, Optional, Set, Type, TypeVar, Union
+from typing import Dict, Optional, Set, Type, Union
 from weakref import WeakSet, finalize
 
 import numpy as np
@@ -925,63 +925,6 @@ class Tensor:
             raise TypeError("iteration over a 0-d tensor")
         return iter(self[n] for n in range(len(self)))
 
-    def _mirror_tensor(self, tensor: "Tensor"):
-        """ *Dev use only*
-
-        Points all of the attributes of ``self`` to those of
-        ``tensor`` so that they reference all of the same data structures.
-        This is used to facilitate "in-place" operations.
-        """
-        self.__dict__ = tensor.__dict__.copy()
-
-    def _reroute_to(self, placeholder: "Tensor"):
-        for op in self._ops:  # type: Operation
-            op.variables = tuple(
-                var_ if var_ is not self else placeholder for var_ in op.variables
-            )
-
-    def _make_placeholder_tensor(  # TODO: copy-data doesnt work here!!
-        self, *, copy_data: bool, base: Optional["Tensor"] = None
-    ) -> "Tensor":
-        """
-        Creates a tensor that stands in the place of `self` in the computational graph.
-
-        The resulting tensor should never be exposed to the user; it is used to accommodate
-        in-place operations.
-
-        Parameters
-        ----------
-        copy_data : bool
-            If True the placeholder holds a copy of the original data
-
-        base : Optional[Tensor]
-            Points the placeholder to the base tensor.
-
-        Returns
-        -------
-        placeholder : Tensor
-        """
-        assert (
-            self.grad is None
-        ), "A placeholder copy can not be created for a tensor with a gradient"
-
-        assert (
-            not self._accum_ops
-        ), "A placeholder copy cannot be created during backprop"
-
-        placeholder = Tensor([])
-        placeholder._mirror_tensor(self)
-        if copy_data:
-            was_writeable = placeholder.data.flags.writeable
-            placeholder.data = np.copy(placeholder.data)
-            placeholder.data.flags.writeable = was_writeable
-
-        placeholder._base = base
-
-        # point all ops involving `self` to old_tensor instead
-        self._reroute_to(placeholder)
-        return placeholder
-
     def _replace_tensor_op(
         self,
         inplace_op: Type[Operation],
@@ -995,7 +938,7 @@ class Tensor:
         `self` nor a view-parent of `self`.
         """
 
-        old_tensor = self._make_placeholder_tensor(copy_data=True, base=self.base)
+        old_tensor = _dup.make_placeholder_tensor(original=self, base=self.base)
         try:
             new_tensor = self._op(
                 inplace_op,
@@ -1006,14 +949,15 @@ class Tensor:
                 constant=constant,
             )
         except Exception as e:
-            old_tensor._reroute_to(self)
+            _dup.reroute_ops_through(source=old_tensor, target=self)
             raise e
 
         if new_tensor.base is old_tensor:
             # old_tensor is internally-facing only - base
             # should not point to it
             new_tensor._base = None
-        self._mirror_tensor(new_tensor)
+
+        _dup.mirror_tensor(target=self, source=new_tensor)
 
     def _in_place_op(
         self,
@@ -1088,9 +1032,10 @@ class Tensor:
                 for var in out.creator.variables
             )
             out.creator.variables = variables
+
             graph.base.placeholder._ops.add(out.creator)
-            graph.base.tensor._mirror_tensor(out)
-            out._reroute_to(graph.base.tensor)
+            _dup.mirror_tensor(target=graph.base.tensor, source=out)
+            _dup.reroute_ops_through(source=out, target=graph.base.tensor)
             del out  # remove reference so we can re-lock data
 
             # re-lock data associated with base; de-referencing `out`
@@ -1126,8 +1071,8 @@ class Tensor:
             if node.parent is None:
                 continue
             view = node.tensor._replay_op(node.parent)
-            node.tensor._mirror_tensor(view)
-            view._reroute_to(node.tensor)
+            _dup.mirror_tensor(source=view, target=node.tensor)
+            _dup.reroute_ops_through(source=view, target=node.tensor)
 
     def __setitem__(self, key, value):
         self._in_place_op(SetItem, value, op_args=(key,))
