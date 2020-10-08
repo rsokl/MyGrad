@@ -147,3 +147,14 @@ def test_writing_a_view_with_a_view(
     assert_array_equal(y, dangling_view)
     assert dangling_view.base is y
     assert dangling_view.grad is None
+
+
+def test_setitem_preserves_view_children():
+    x = mg.arange(10.0)
+    y = x[...]
+    (view_child,) = x._view_children
+    assert view_child is y
+
+    x[...] = y
+    (view_child,) = x._view_children
+    assert view_child is y

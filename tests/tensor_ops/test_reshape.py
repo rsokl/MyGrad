@@ -90,6 +90,15 @@ def test_inplace_reshape_2():
     assert_array_equal(y.grad, 2 * np.ones_like(y))
 
 
+def test_inplace_reshape_3():
+    x0 = mg.arange(10.0)
+    x = +x0
+    y = x[:5]
+    x.shape = (2, 5)
+    x[:1] = y[::-1]
+    assert_array_equal(x[0], y)
+
+
 @given(
     tensor=tensors(), data=st.data(),
 )

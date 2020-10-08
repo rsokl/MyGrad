@@ -1055,7 +1055,7 @@ class Tensor:
             )
 
             assert graph.base.tensor.data.flags.writeable is False
-
+            # TODO: Attach view children to self
         else:
             # in-place operation occurs on a view; must connect mutated base
             # to graph and then reproduce downstream views
@@ -1073,6 +1073,7 @@ class Tensor:
             view = node.tensor._replay_op(node.parent)
             _dup.mirror_tensor(source=view, target=node.tensor)
             _dup.reroute_ops_through(source=view, target=node.tensor)
+            node.parent._view_children.append(node.tensor)
 
     @property
     def shape(self):
@@ -1144,16 +1145,22 @@ class Tensor:
         # reshape placeholder of self
         out = graph.base.placeholder.reshape(newshape)
 
+        # Store contents of `out` in `self` and replace `out` in
+        # graph with `self`
         out._base = graph.base.placeholder.base
         _dup.mirror_tensor(source=out, target=self)
         _dup.reroute_ops_through(source=out, target=self)
         del out
 
+        # although `self` is a view of placeholder, placeholder
+        # is stricly an internal tensor, we won't expose it as
+        # base
         graph.base.placeholder._view_children.append(self)
-
         base = graph.base.placeholder.base
 
         if base is not None:
+            # if `self` was a view, we need to update that parent's
+            # view children so that it points to the placeholder
             creator = graph.base.placeholder.creator.variables[0]
             creator._view_children = WeakRefIterable(
                 [
@@ -1162,16 +1169,21 @@ class Tensor:
                 ]
             )
 
+        # Undo the reshape, and place this as the tensor joining
+        # the reshaped `self` with the views of unshaped `self`
         unshaped = self.reshape(old_shape)
 
         for node in nodes:
             if node.parent is None:
                 continue
-            view = node.tensor._replay_op(
-                node.parent if node.parent is not self else unshaped
-            )
+            # direct what would be views of `self` to be views of `unshaped`,
+            # which translates the mutated shape of `self` to the original
+            # shape used to create the views
+            parent = node.parent if node.parent is not self else unshaped
+            view = node.tensor._replay_op(parent)
             _dup.mirror_tensor(source=view, target=node.tensor)
             _dup.reroute_ops_through(source=view, target=node.tensor)
+            parent._view_children.append(node.tensor)
 
     def __setitem__(self, key, value):
         self._in_place_op(SetItem, value, op_args=(key,))
