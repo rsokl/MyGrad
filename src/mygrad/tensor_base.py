@@ -118,6 +118,8 @@ def asarray(a, dtype=None, order=None) -> np.ndarray:
     >>> np.asanyarray(a) is a
     True
     """
+    if isinstance(a, Tensor):
+        a = a.data  # faster than passing the tensor directly
     return np.asarray(a, dtype=dtype, order=order)
 
 
@@ -374,18 +376,13 @@ class Tensor:
         if not isinstance(constant, bool):
             raise TypeError(f"`constant` must be a boolean value, got: {constant}")
 
-        assert isinstance(_scalar_only, bool)
-        assert isinstance(_creator, (Operation, type(None)))
-        assert isinstance(_base, (Tensor, type(None)))
-        assert isinstance(_copy_data, (bool, type(None)))
-
         self._scalar_only = _scalar_only
         self._creator = _creator  # type: Union[None, Operation]
 
         if _copy_data is None:
             _copy_data = not constant
 
-        to_array = np.array if _copy_data else np.asarray
+        to_array = np.array if _copy_data else asarray
         self.data = to_array(x, dtype=dtype)  # type: np.ndarray
 
         if _check_dtype:
