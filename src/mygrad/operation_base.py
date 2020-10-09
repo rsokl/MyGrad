@@ -1,12 +1,13 @@
 """
 Defines the base class for mathematical operations capable of back-propagating
 gradients to their input tensors."""
+from numbers import Real
 from typing import Any, Dict, Optional, Set, Tuple
-from weakref import ReferenceType, WeakSet
+from weakref import ReferenceType
 
 import numpy as np
 
-from mygrad._utils import SkipGradient, is_invalid_gradient, reduce_broadcast
+from mygrad._utils import SkipGradient, reduce_broadcast
 from mygrad.errors import InvalidBackprop, InvalidGradient
 
 __all__ = ["Operation", "BroadcastableOp"]
@@ -134,7 +135,7 @@ class Operation:
                 except SkipGradient:
                     continue
 
-                if is_invalid_gradient(backed_grad):
+                if not isinstance(backed_grad, (np.ndarray, np.number, Real)):
                     raise InvalidGradient(
                         f"An invalid gradient-value was passed to:"
                         f"\n\t`{type(self).__name__}.backward_var(<gradient>, index={index})`"
