@@ -96,7 +96,21 @@ def test_inplace_reshape_3():
     y = x[:5]
     x.shape = (2, 5)
     x[:1] = y[::-1]
-    assert_array_equal(x[0], y)
+    assert_array_equal(x0, mg.arange(10.0))
+    assert_array_equal(
+        x, np.array([[4.0, 3.0, 2.0, 1.0, 0.0], [5.0, 6.0, 7.0, 8.0, 9.0]])
+    )
+    assert_array_equal(y, np.array([4.0, 3.0, 2.0, 1.0, 0.0]))
+
+    (x[0] * y).sum().backward()
+
+    assert_array_equal(
+        x0.grad, np.array([0.0, 2.0, 4.0, 6.0, 8.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+    )
+    assert_array_equal(
+        x.grad, np.array([[8.0, 6.0, 4.0, 2.0, 0.0], [0.0, 0.0, 0.0, 0.0, 0.0]])
+    )
+    assert_array_equal(y.grad, np.array([4.0, 3.0, 2.0, 1.0, 0.0]))
 
 
 @given(
