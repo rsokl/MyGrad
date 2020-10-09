@@ -6,6 +6,8 @@ __all__ = ["Reshape", "Flatten", "Squeeze", "Ravel", "ExpandDims", "BroadcastTo"
 
 
 class Reshape(Operation):
+    can_return_view = True
+
     def __call__(self, a, newshape):
         """
         Parameters
@@ -27,6 +29,8 @@ class Reshape(Operation):
 
 
 class Squeeze(Operation):
+    can_return_view = True
+
     def __call__(self, a, axis):
         """ Parameters
             ----------
@@ -53,6 +57,8 @@ class Flatten(Operation):
 
 
 class Ravel(Operation):
+    can_return_view = True
+
     def __call__(self, a):
         """ Parameters
             ----------
@@ -66,6 +72,8 @@ class Ravel(Operation):
 
 
 class ExpandDims(Operation):
+    can_return_view = True
+
     def __call__(self, a, axis):
         """ Parameters
             ----------
@@ -80,6 +88,8 @@ class ExpandDims(Operation):
 
 
 class BroadcastTo(BroadcastableOp):
+    can_return_view = True
+
     def __call__(self, a, shape):
         """ Parameters
             ----------

@@ -42,6 +42,8 @@ class GetItem(Operation):
 
         Supports back-propagation through all valid numpy-indexing (basic, advanced, mixed, etc.)"""
 
+    can_return_view = True
+
     def __call__(self, a, index):
         """ ``a[index]``
 
@@ -106,6 +108,8 @@ class SetItem(BroadcastableOp):
 
         Supports back-propagation through all valid numpy-indexing (basic, advanced, mixed, etc.),
         as well as """
+
+    can_return_view = True
 
     def __call__(self, a, b, index):
         """ a[index] = b

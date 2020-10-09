@@ -45,7 +45,7 @@ class Operation:
 
     # can be set to true if the operation is guaranteed to not returns a view
     # this will reduce some overhead on checking for shared memory
-    cannot_return_view = False  # type: bool
+    can_return_view = False  # type: bool
 
     def __init__(self):
         # Stores positional and keyword arguments used to call op.

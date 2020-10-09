@@ -21,6 +21,8 @@ class Tensor_Transpose_Property(Operation):
 
 
 class Transpose(Operation):
+    can_return_view = True
+
     def __call__(self, a, axes=None):
         self.variables = (a,)
         if axes is not None:
@@ -37,6 +39,8 @@ class Transpose(Operation):
 
 
 class MoveAxis(Operation):
+    can_return_view = True
+
     def __call__(self, a, source, destination):
         self.variables = (a,)
         self.source = source
@@ -50,6 +54,8 @@ class MoveAxis(Operation):
 
 
 class SwapAxes(Operation):
+    can_return_view = True
+
     def __call__(self, a, axis1, axis2):
         self.variables = (a,)
         self.axis1 = axis1

@@ -544,7 +544,7 @@ class Tensor:
         # the parent of the view
         parent_var = None  # type: Optional[Tensor]
 
-        if not f.cannot_return_view:
+        if f.can_return_view:
             vars_can_share_mem = (
                 isinstance(var, (np.ndarray, Tensor)) for var in input_vars
             )
@@ -811,7 +811,7 @@ class Tensor:
         This de-references all operations involved in the graph and the intermediate
         tensors that were created by it.
         """
-        self._ops.clear()
+        self._ops = WeakSet()
 
         if self.creator is None:
             return
