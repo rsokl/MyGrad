@@ -490,6 +490,7 @@ class Tensor:
         -------
         mygrad.Tensor
             The tensor-result of the operation's forward-pass."""
+        _uniques_bases_then_arrs = ()
 
         # cast all input-vars to tensors
         if _track.TRACK_GRAPH:
@@ -502,7 +503,10 @@ class Tensor:
                 for var in input_vars
             )
             if _lock_data:
-                _mem.lock_array_and_base_writeability(t.data for t in tensor_vars)
+                _uniques_bases_then_arrs = tuple(
+                    _mem.lock_arr_writeability(x)
+                    for x in _mem.unique_arrs_and_bases(tensor_vars)
+                )
 
         else:
             # operations are not being tracked - don't lock memory or null grads
@@ -593,7 +597,7 @@ class Tensor:
 
         if _lock_data:
             _mem.lock_arr_writeability(out.data, force_lock=True)
-            tensor_refs = WeakRefIterable(t.data for t in tensor_vars)
+            tensor_refs = WeakRefIterable(_uniques_bases_then_arrs)
             tensor_refs.append(out.data)
             finalize(f, _mem.release_writeability_lock_on_op, tensor_refs)
         return out
@@ -1046,13 +1050,14 @@ class Tensor:
 
             # re-lock data associated with base; de-referencing `out`
             # unlocked it
-            _mem.lock_array_and_base_writeability(
-                t.data for t in graph.base.tensor.creator.variables
+            unique_arrs = tuple(
+                _mem.lock_arr_writeability(arr)
+                for arr in _mem.unique_arrs_and_bases(
+                    graph.base.tensor.creator.variables
+                )
             )
             _mem.lock_arr_writeability(graph.base.tensor.data, force_lock=True)
-            tensor_refs = WeakRefIterable(
-                t.data for t in graph.base.tensor.creator.variables
-            )
+            tensor_refs = WeakRefIterable(unique_arrs)
             tensor_refs.append(graph.base.tensor.data)
             finalize(
                 graph.base.tensor.creator,

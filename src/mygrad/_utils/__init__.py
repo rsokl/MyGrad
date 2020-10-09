@@ -40,7 +40,7 @@ def collect_all_operations(t: "Tensor", seen: Set["WeakRef[Operation]"]):
     if t.creator is None or t.constant:
         return
 
-    c = ReferenceType(t.creator)
+    c = ReferenceType(t.creator)  # type: WeakRef[Operation]
 
     if c in seen:
         return
@@ -68,13 +68,13 @@ class WeakRefIterable(Generic[T]):
         self.data: List[WeakRef[T]] = []
 
         if data is not None:
-            self.data: List[WeakRef[T]] = list(WeakRef(x) for x in data)
+            self.data: List[WeakRef[T]] = list(ReferenceType(x) for x in data)
 
     def __len__(self) -> int:
         return sum(1 for _ in self)
 
     def append(self, item: T):
-        self.data.append(WeakRef(item))
+        self.data.append(ReferenceType(item))
 
     def __iter__(self) -> Generator[T, None, None]:
         for ref in self.data:

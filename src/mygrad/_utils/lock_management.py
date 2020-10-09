@@ -2,19 +2,21 @@
 Provides utilities responsible for locking/releasing array writeability.
 """
 from collections import Counter
-from typing import Generator, Iterable
+from typing import TYPE_CHECKING, Generator, Iterable
 from weakref import WeakValueDictionary
 
 import numpy as np
 
 from mygrad._utils import WeakRefIterable
 
+if TYPE_CHECKING:
+    from mygrad import Tensor
+
 _array_counter = Counter()
 _array_tracker = WeakValueDictionary()
 _views_waiting_for_unlock = WeakValueDictionary()
 
 __all__ = [
-    "lock_array_and_base_writeability",
     "lock_arr_writeability",
     "release_writeability_lock_on_op",
 ]
@@ -25,7 +27,7 @@ def lock_arr_writeability(arr: np.ndarray, force_lock: bool = False):
     if arr_id not in _array_tracker:
         if not force_lock and not arr.flags.writeable:
             # array is natively read-only; don't do anything
-            return
+            return arr
         # keeps track of array so we can clean up the array
         # counter when tracked arrays fall out of scope
         _array_tracker[arr_id] = arr
@@ -34,10 +36,11 @@ def lock_arr_writeability(arr: np.ndarray, force_lock: bool = False):
         _array_counter[arr_id] += 1
     if arr.flags.writeable is True:
         arr.flags.writeable = False
+    return arr
 
 
-def _unique_arrs_and_bases(
-    arrs: Iterable[np.ndarray],
+def unique_arrs_and_bases(
+    tensors: Iterable["Tensor"],
 ) -> Generator[np.ndarray, None, None]:
     """
     Yields unique (by-ID) arrays from an iterable. If an array
@@ -45,7 +48,8 @@ def _unique_arrs_and_bases(
     object has not already been yielded).
     """
     seen = set()
-    for arr in arrs:
+    for t in tensors:
+        arr = t.data
         arr_id = id(arr)
         if arr_id not in seen:
 
@@ -62,30 +66,11 @@ def _unique_arrs_and_bases(
             yield arr
 
 
-def lock_array_and_base_writeability(arrs: Iterable[np.ndarray]):
-    """Adds a lock on each of the provided arrays.
-
-    If an array is a view, then its base also has a lock
-    placed on it.
-
-    Parameters
-    ----------
-    arrs : Iterable[ndarray]
-        The arrays to be locked. Only one lock is placed
-        on each array, even if the same array occurs
-        multiple times in the iterable.
-    """
-    for arr in _unique_arrs_and_bases(arrs):
-        lock_arr_writeability(arr)
-
-
 def _release_lock_on_arr_writeability(arr: np.ndarray):
     arr_id = id(arr)
 
     if arr_id in _array_counter:
         _array_counter[arr_id] -= 1
-
-        assert _array_counter[arr_id] >= 0  # TODO: remove this
 
         if _array_counter[arr_id] == 0:
             _array_counter.pop(arr_id, None)
@@ -130,7 +115,7 @@ def release_writeability_lock_on_op(arr_refs: WeakRefIterable[np.ndarray]):
         multiple times in the iterable."""
     cnt = 0  # counts number of living references
     weak_ref_cnt = len(arr_refs.data)  # gives total num weak-references
-    for arr in _unique_arrs_and_bases(arr_refs):
+    for arr in arr_refs:
         cnt += 1
         _release_lock_on_arr_writeability(arr)
 
