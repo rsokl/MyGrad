@@ -7,7 +7,7 @@ etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 from functools import wraps
 from numbers import Number
 from typing import Dict, Optional, Set, Type, Union
-from weakref import WeakSet, finalize
+from weakref import ReferenceType, finalize
 
 import numpy as np
 
@@ -392,10 +392,10 @@ class Tensor:
         self._constant = constant
 
         # track all operations that this tensor participates in
-        self._ops = WeakSet()  # type: WeakSet[Operation]
+        self._ops = set()  # type: Set[WeakRef[Operation]]
 
         # track the operations that have contributed to this tensor's gradient during a back-prop
-        self._accum_ops = WeakSet()  # type: WeakSet[Operation]
+        self._accum_ops = set()  # type: Set[WeakRef[Operation]]
 
         # base points to the initial tensor that owns the memory of this
         # tensor
@@ -568,8 +568,9 @@ class Tensor:
             )
 
         # record that a variable participated in that op
+        ref_f = ReferenceType(f)  # type: WeakRef[Operation]
         for var in tensor_vars:
-            var._ops.add(f)
+            var._ops.add(ref_f)
 
         # determine if node only supports backprop from a scalar
         # terminus
@@ -686,7 +687,7 @@ class Tensor:
             )
 
         if self.creator is not None:
-            graph = WeakSet()
+            graph = set()  # type: Set[WeakRef[Operation]]
 
             # stores a set of all the operation-instances that participate in
             # the computational graph up to and including the present operation
@@ -695,7 +696,7 @@ class Tensor:
 
         self.clear_graph()
 
-    def _backward(self, *, graph: WeakSet):
+    def _backward(self, *, graph: Set[WeakRef[Operation]]):
         """
         **For dev-use only**
 
@@ -723,9 +724,9 @@ class Tensor:
             f"\ntensor-shape: {self.shape}"
             f"\ngrad-shape: {self.grad.shape}"
         )
-        self._ops.data.difference_update(self._accum_ops.data)
+        self._ops.difference_update(self._accum_ops)
         self._accum_ops.clear()
-        if self.creator is not None and self._ops.data.isdisjoint(graph.data):
+        if self.creator is not None and self._ops.isdisjoint(graph):
             self._creator.backward(self.grad, graph=graph)
 
     def null_grad(self) -> "Tensor":
@@ -810,7 +811,7 @@ class Tensor:
         This de-references all operations involved in the graph and the intermediate
         tensors that were created by it.
         """
-        self._ops = WeakSet()
+        self._ops = set()
 
         if self.creator is None:
             return
@@ -1038,7 +1039,7 @@ class Tensor:
             )
             out.creator.variables = variables
 
-            graph.base.placeholder._ops.add(out.creator)
+            graph.base.placeholder._ops.add(ReferenceType(out.creator))
             _dup.mirror_tensor(source=out, target=graph.base.tensor)
             _dup.reroute_ops_through(source=out, target=graph.base.tensor)
             del out  # remove reference so we can re-lock data

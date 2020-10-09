@@ -31,7 +31,7 @@ __all__ = [
 T = TypeVar("T")
 
 
-def collect_all_operations(t: "Tensor", seen: Set["Operation"]):
+def collect_all_operations(t: "Tensor", seen: Set["WeakRef[Operation]"]):
     """Recursively accumulates in `seen` all operations involved
     in creating `t`.
 
@@ -40,7 +40,7 @@ def collect_all_operations(t: "Tensor", seen: Set["Operation"]):
     if t.creator is None or t.constant:
         return
 
-    c = t.creator
+    c = ReferenceType(t.creator)
 
     if c in seen:
         return

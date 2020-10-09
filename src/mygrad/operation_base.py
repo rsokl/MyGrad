@@ -2,7 +2,7 @@
 Defines the base class for mathematical operations capable of back-propagating
 gradients to their input tensors."""
 from typing import Any, Dict, Optional, Set, Tuple
-from weakref import WeakSet
+from weakref import ReferenceType, WeakSet
 
 import numpy as np
 
@@ -166,7 +166,7 @@ class Operation:
             if id(var) in visited:
                 continue
             visited.add(id(var))
-            var._accum_ops.add(self)
+            var._accum_ops.add(ReferenceType(self))
             var._backward(graph=graph)
 
 

@@ -1,7 +1,7 @@
 import typing
 from typing import Dict, Iterator, List, NamedTuple, Optional, Set, TypeVar
 
-from mygrad._utils import WeakRefIterable
+from mygrad._utils import WeakRef, WeakRefIterable
 from mygrad.operation_base import Operation
 
 if typing.TYPE_CHECKING:
@@ -22,7 +22,11 @@ def mirror_tensor(*, target: "Tensor", source: "Tensor"):
 
 
 def reroute_ops_through(*, target: "Tensor", source: "Tensor"):
-    for op in source._ops:  # type: Operation
+    for op in source._ops:
+        op = op()
+        if op is None:
+            continue
+
         op.variables = tuple(
             var_ if var_ is not source else target for var_ in op.variables
         )
