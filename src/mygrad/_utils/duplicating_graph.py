@@ -1,8 +1,7 @@
 import typing
 from typing import Dict, Iterator, List, NamedTuple, Optional, Set, TypeVar
 
-from mygrad._utils import WeakRef, WeakRefIterable
-from mygrad.operation_base import Operation
+from mygrad._utils import WeakRefIterable
 
 if typing.TYPE_CHECKING:
     from mygrad import Tensor

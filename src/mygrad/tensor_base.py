@@ -219,14 +219,6 @@ def astensor(t, dtype=None, constant=None) -> "Tensor":
         return Tensor(t, dtype=dtype, constant=constant)
 
 
-def _restore_writeability(arr_ref: WeakRef[np.ndarray], flag: bool):
-    arr = arr_ref.__call__()
-    if arr is None:
-        return
-
-    arr.flags.writeable = flag
-
-
 class Tensor:
     """ A numpy-array-like object capable of serving as a node in a computational
     graph that supports back-propagation of derivatives via the chain rule.
