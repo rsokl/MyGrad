@@ -50,6 +50,14 @@ def in_place_reshape(arr, newshape, reshaper, **kwargs):
     return arr
 
 
+def test_in_place_reshape_no_autodiff():
+    x = mg.arange(10.0)
+    with mg.no_autodiff:
+        x.shape = (5, 2)
+    assert x.shape == (5, 2)
+    assert x.creator is None
+
+
 def test_raising_during_inplace_reshape_doesnt_corrupt_graph():
     x = mg.arange(5.0)
     y = +x

@@ -935,40 +935,6 @@ class Tensor:
             raise TypeError("iteration over a 0-d tensor")
         return iter(self[n] for n in range(len(self)))
 
-    def _replace_tensor_op(
-        self,
-        inplace_op: Type[Operation],
-        *input_vars,
-        op_args=None,
-        op_kwargs=None,
-        constant=False,
-    ):
-        """ This is meant for ops that replace `self` "in-place" without actually
-        mutating the underlying tensor. I.e. the op will not affect views of
-        `self` nor a view-parent of `self`.
-        """
-
-        old_tensor = _dup.make_placeholder_tensor(original=self, base=self.base)
-        try:
-            new_tensor = self._op(
-                inplace_op,
-                old_tensor,
-                *input_vars,
-                op_args=op_args,
-                op_kwargs=op_kwargs,
-                constant=constant,
-            )
-        except Exception as e:
-            _dup.reroute_ops_through(source=old_tensor, target=self)
-            raise e
-
-        if new_tensor.base is old_tensor:
-            # old_tensor is internally-facing only - base
-            # should not point to it
-            new_tensor._base = None
-
-        _dup.mirror_tensor(target=self, source=new_tensor)
-
     def _in_place_op(
         self,
         inplace_op: Type[Operation],
@@ -1137,6 +1103,10 @@ class Tensor:
         #   placeholder   shape-(10,)
         #       |-getitem
         #       y         shape-(4,)
+
+        if not _track.TRACK_GRAPH:
+            self.data.shape = newshape
+            return
 
         if newshape == self.shape:
             return
