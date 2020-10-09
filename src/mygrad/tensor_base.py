@@ -339,6 +339,7 @@ class Tensor:
         _creator=None,
         _base: Optional["Tensor"] = None,
         _copy_data: Optional[bool] = None,
+        _check_dtype=True,
     ):
         """
         Parameters
@@ -386,7 +387,9 @@ class Tensor:
 
         to_array = np.array if _copy_data else np.asarray
         self.data = to_array(x, dtype=dtype)  # type: np.ndarray
-        self._check_valid_dtype(self.data.dtype)
+
+        if _check_dtype:
+            self._check_valid_dtype(self.data.dtype)
 
         self.grad = None  # type: Union[None, np.ndarray]
         self._constant = constant
@@ -402,10 +405,6 @@ class Tensor:
         self._base = _base  # type: Optional[Tensor]
         # stores all of the tensors that are a view of this tensor
         self._view_children = WeakRefIterable()  # type: WeakRefIterable[Tensor]
-
-        # used to track original 'writeable' statuses of array data
-        self._data_was_writeable = None  # type: Optional[bool]
-        self._base_data_was_writeable = None  # type: Optional[bool]
 
     def astype(
         self, dtype: Union[type, str], *, constant: Optional[bool] = None
@@ -535,6 +534,7 @@ class Tensor:
                 _scalar_only=False,
                 _base=None,
                 _copy_data=False,
+                _check_dtype=False,
             )
 
         # Determine whether or not op was a view; if so, `base`
@@ -587,6 +587,7 @@ class Tensor:
             _scalar_only=scalar_only,
             _base=base,
             _copy_data=False,
+            _check_dtype=False,
         )
 
         if parent_var is not None:
@@ -751,7 +752,8 @@ class Tensor:
         Tensor(2.0)
         >>> x.grad is None
         True"""
-        self.grad = None
+        if self.grad is not None:
+            self.grad = None
         return self
 
     def null_gradients(self, clear_graph=True):
