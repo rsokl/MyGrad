@@ -68,22 +68,24 @@ def unique_arrs_and_bases(
 
 def _release_lock_on_arr_writeability(arr: np.ndarray):
     arr_id = id(arr)
+    num_active_ops = _array_counter[arr_id]
 
-    if arr_id in _array_counter:
-        _array_counter[arr_id] -= 1
+    if num_active_ops == 1:
+        # final active op involving array is being de-referenced:
+        # okay to unlock array
+        del _array_counter[arr_id]
 
-        if _array_counter[arr_id] == 0:
-            _array_counter.pop(arr_id)
-
-            if arr.base is not None and arr.base.flags.writeable is False:
-                # Array is view and must wait until its base is released
-                # before it can be unlocked
-                # Thus we are still tracking this array
-                _views_waiting_for_unlock[id(arr.base)] = arr_id
-            else:
-                # we no longer need to track the array
-                arr.flags.writeable = True
-                _array_tracker.pop(arr_id, None)
+        if arr.base is not None and arr.base.flags.writeable is False:
+            # Array is view and must wait until its base is released
+            # before it can be unlocked
+            # Thus we are still tracking this array
+            _views_waiting_for_unlock[id(arr.base)] = arr_id
+        else:
+            # we no longer need to track the array
+            arr.flags.writeable = True
+            _array_tracker.pop(arr_id, None)
+    elif num_active_ops > 0:
+        _array_counter[arr_id] = num_active_ops - 1
 
     if (
         arr.base is None
@@ -99,7 +101,7 @@ def _release_lock_on_arr_writeability(arr: np.ndarray):
         # under all conditions view will no longer be waiting to be unlocked
         view_arr_id = _views_waiting_for_unlock.pop(arr_id)
 
-        if view_arr_id in _array_counter:
+        if _array_counter[view_arr_id] > 0:
             # view involved in new op
             return
 
