@@ -697,7 +697,7 @@ class Tensor:
 
         self.clear_graph()
 
-    def _backward(self, *, graph):
+    def _backward(self, *, graph: WeakSet):
         """
         **For dev-use only**
 
@@ -725,8 +725,9 @@ class Tensor:
             f"\ntensor-shape: {self.shape}"
             f"\ngrad-shape: {self.grad.shape}"
         )
-        if self.creator is not None and not bool(graph & (self._ops - self._accum_ops)):
-            self._accum_ops.clear()
+        self._ops.data.difference_update(self._accum_ops.data)
+        self._accum_ops.clear()
+        if self.creator is not None and self._ops.data.isdisjoint(graph.data):
             self._creator.backward(self.grad, graph=graph)
 
     def null_grad(self) -> "Tensor":
