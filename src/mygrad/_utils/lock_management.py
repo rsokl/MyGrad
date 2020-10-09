@@ -2,7 +2,7 @@
 Provides utilities responsible for locking/releasing array writeability.
 """
 from collections import Counter
-from typing import TYPE_CHECKING, Generator, Iterable
+from typing import TYPE_CHECKING, Dict, Generator, Iterable
 from weakref import WeakValueDictionary
 
 import numpy as np
@@ -13,8 +13,8 @@ if TYPE_CHECKING:
     from mygrad import Tensor
 
 _array_counter = Counter()
-_array_tracker = WeakValueDictionary()
-_views_waiting_for_unlock = WeakValueDictionary()
+_array_tracker = WeakValueDictionary()  # type: WeakValueDictionary[int, np.ndarray]
+_views_waiting_for_unlock: Dict[int, int] = dict()  # base-id -> view-id
 
 __all__ = [
     "lock_arr_writeability",
@@ -73,17 +73,17 @@ def _release_lock_on_arr_writeability(arr: np.ndarray):
         _array_counter[arr_id] -= 1
 
         if _array_counter[arr_id] == 0:
-            _array_counter.pop(arr_id, None)
-            _array_tracker.pop(arr_id, None)
+            _array_counter.pop(arr_id)
 
-            if not arr.flags.writeable:
-
-                if arr.base is not None and arr.base.flags.writeable is False:
-                    # array is view and must wait until its base is released
-                    # before it can be unlocked
-                    _views_waiting_for_unlock[id(arr.base)] = arr
-                else:
-                    arr.flags.writeable = True
+            if arr.base is not None and arr.base.flags.writeable is False:
+                # Array is view and must wait until its base is released
+                # before it can be unlocked
+                # Thus we are still tracking this array
+                _views_waiting_for_unlock[id(arr.base)] = arr_id
+            else:
+                # we no longer need to track the array
+                arr.flags.writeable = True
+                _array_tracker.pop(arr_id, None)
 
     if (
         arr.base is None
@@ -91,13 +91,25 @@ def _release_lock_on_arr_writeability(arr: np.ndarray):
         and (arr_id in _views_waiting_for_unlock)
     ):
         # array was base of view waiting to be unlocked..
-        # unlock the view
-        view_arr = _views_waiting_for_unlock[arr_id]
-        view_arr_id = id(view_arr)
+        #
+        # Either:
+        #    view no longer exists
+        #    or view is involved in new op
+        #    or view can now get unlocked
+        # under all conditions view will no longer be waiting to be unlocked
+        view_arr_id = _views_waiting_for_unlock.pop(arr_id)
 
-        if view_arr_id not in _array_counter:
-            view_arr.flags.writeable = True
-            _views_waiting_for_unlock.pop(arr_id)
+        if view_arr_id in _array_counter:
+            # view involved in new op
+            return
+
+        try:
+            view_arr = _array_tracker.pop(view_arr_id)
+        except KeyError:
+            # view array is no longer available for unlocking
+            return
+
+        view_arr.flags.writeable = True
 
 
 def release_writeability_lock_on_op(arr_refs: WeakRefIterable[np.ndarray]):
