@@ -14,7 +14,12 @@ import numpy as np
 import mygrad._graph_tracking as _track
 import mygrad._utils.duplicating_graph as _dup
 import mygrad._utils.lock_management as _mem
-from mygrad._utils import WeakRef, WeakRefIterable, is_invalid_gradient
+from mygrad._utils import (
+    WeakRef,
+    WeakRefIterable,
+    collect_all_operations,
+    is_invalid_gradient,
+)
 from mygrad.errors import InvalidBackprop, InvalidGradient
 from mygrad.linalg.ops import MatMul
 from mygrad.math.arithmetic.ops import (
@@ -559,11 +564,6 @@ class Tensor:
         # record graph information
         is_const = constant or all(var.constant for var in tensor_vars)
 
-        f.graph.add(f)
-        for var in tensor_vars:
-            if var._creator is not None and not var.constant:
-                f.graph.update(var._creator.graph)
-
         if isinstance(f, BroadcastableOp) and not f.scalar_only:
             # if broadcasting occurred: scalar-only -> True
             f.scalar_only = any(
@@ -688,7 +688,12 @@ class Tensor:
             )
 
         if self.creator is not None:
-            self._backward(graph=self.creator.graph)
+            graph = WeakSet()
+
+            # stores a set of all the operation-instances that participate in
+            # the computational graph up to and including the present operation
+            collect_all_operations(self, seen=graph)
+            self._backward(graph=graph)
 
         self.clear_graph()
 

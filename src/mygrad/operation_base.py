@@ -48,10 +48,6 @@ class Operation:
     cannot_return_view = False  # type: bool
 
     def __init__(self):
-        # stores a set of all the operation-instances that participate in
-        # the computational graph up to and including the present operation
-        self.graph = WeakSet()  # type: WeakSet[Operation]
-
         # Stores positional and keyword arguments used to call op.
         # Can be set optionally - only if op needs to be "replayed",
         # e.g. with a view
