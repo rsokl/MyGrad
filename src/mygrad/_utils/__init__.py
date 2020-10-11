@@ -51,14 +51,14 @@ def collect_all_operations(t: "Tensor", seen: Set["WeakRef[Operation]"]):
         collect_all_operations(t, seen)
 
 
-class WeakRef(ReferenceType, Generic[T]):
+class WeakRef(Generic[T]):
     __slots__ = ()
 
     def __init__(self, ob: T, callback=None, **annotations):
-        super(WeakRef, self).__init__(ob, callback)
+        ...
 
     def __call__(self) -> Union[None, T]:
-        return super().__call__()
+        ...
 
 
 class WeakRefIterable(Generic[T]):
