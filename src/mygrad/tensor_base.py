@@ -515,7 +515,14 @@ class Tensor:
 
         f = Op()
 
-        op_out = f(*tensor_vars, *op_args, **op_kwargs)  # type: np.ndarray
+        try:
+            op_out = f(*tensor_vars, *op_args, **op_kwargs)  # type: np.ndarray
+        except Exception as e:
+            if _track.TRACK_GRAPH and _lock_data:
+                _mem.release_writeability_lock_on_op(
+                    WeakRefIterable(_uniques_bases_then_arrs)
+                )
+            raise e
 
         if not _track.TRACK_GRAPH:
             # execute operation without tracking creator or any graph

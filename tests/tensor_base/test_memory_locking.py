@@ -1,10 +1,13 @@
 from typing import Callable
 
+import hypothesis.strategies as st
 import numpy as np
 import pytest
+from hypothesis import given
 
 import mygrad as mg
 from mygrad import Tensor
+from tests.custom_strategies import tensors
 
 
 @pytest.mark.parametrize("constant", [True, False])
@@ -109,3 +112,15 @@ def test_touching_data_in_local_scope_doesnt_leave_it_locked():
 
     f(z)
     assert z.flags.writeable is True
+
+
+@given(
+    t1=tensors(shape=(2, 3), fill=st.just(0)), t2=tensors(shape=(4, 4), fill=st.just(0))
+)
+def test_that_errored_op_doesnt_leave_inputs_locked(t1: Tensor, t2: Tensor):
+    t1_was_writeable = t1.data.flags.writeable
+    t2_was_writeable = t2.data.flags.writeable
+    with pytest.raises(ValueError):
+        mg.add(t1, t2)  # shape mismatch
+    assert t1.data.flags.writeable is t1_was_writeable
+    assert t2.data.flags.writeable is t2_was_writeable
