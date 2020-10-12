@@ -495,7 +495,7 @@ class Tensor:
                 for var in input_vars
             )
             if _lock_data:
-                _uniques_bases_then_arrs = tuple(
+                _uniques_bases_then_arrs = WeakRefIterable(
                     _mem.lock_arr_writeability(x)
                     for x in _mem.unique_arrs_and_bases(tensor_vars)
                 )
@@ -519,9 +519,7 @@ class Tensor:
             op_out = f(*tensor_vars, *op_args, **op_kwargs)  # type: np.ndarray
         except Exception as e:
             if _track.TRACK_GRAPH and _lock_data:
-                _mem.release_writeability_lock_on_op(
-                    WeakRefIterable(_uniques_bases_then_arrs)
-                )
+                _mem.release_writeability_lock_on_op(_uniques_bases_then_arrs)
             raise e
 
         if not _track.TRACK_GRAPH:
@@ -596,7 +594,7 @@ class Tensor:
 
         if _lock_data:
             _mem.lock_arr_writeability(out.data, force_lock=True)
-            tensor_refs = WeakRefIterable(_uniques_bases_then_arrs)
+            tensor_refs = _uniques_bases_then_arrs
             tensor_refs.append(out.data)
             finalize(f, _mem.release_writeability_lock_on_op, tensor_refs)
         return out
