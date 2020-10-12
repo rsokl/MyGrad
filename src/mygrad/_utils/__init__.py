@@ -15,7 +15,7 @@ from weakref import ReferenceType
 
 import numpy as np
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from mygrad import Tensor
     from mygrad.operation_base import Operation
 
@@ -54,10 +54,10 @@ def collect_all_operations(t: "Tensor", seen: Set["WeakRef[Operation]"]):
 class WeakRef(Generic[T]):
     __slots__ = ()
 
-    def __init__(self, ob: T, callback=None, **annotations):
+    def __init__(self, ob: T, callback=None, **annotations):  # pragma: no cover
         ...
 
-    def __call__(self) -> Union[None, T]:
+    def __call__(self) -> Union[None, T]:  # pragma: no cover
         ...
 
 

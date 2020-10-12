@@ -1030,7 +1030,7 @@ class Tensor:
 
             assert graph.base.tensor.data.flags.writeable is False
             # TODO: Attach view children to self
-        else:
+        else:  # pragma: no cover
             # in-place operation occurs on a view; must connect mutated base
             # to graph and then reproduce downstream views
             raise NotImplementedError()

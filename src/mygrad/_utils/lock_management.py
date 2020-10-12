@@ -9,7 +9,7 @@ import numpy as np
 
 from mygrad._utils import WeakRefIterable
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from mygrad import Tensor
     from mygrad._utils import WeakRef
 

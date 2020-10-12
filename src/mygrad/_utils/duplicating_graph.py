@@ -3,7 +3,7 @@ from typing import Dict, Iterator, List, NamedTuple, Optional, Set, TypeVar
 
 from mygrad._utils import WeakRefIterable
 
-if typing.TYPE_CHECKING:
+if typing.TYPE_CHECKING:  # pragma: no cover
     from mygrad import Tensor
 
 
