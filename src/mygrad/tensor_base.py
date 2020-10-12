@@ -968,8 +968,8 @@ class Tensor:
         assert in_place_target.data.flags.writeable
 
         data_must_stay_locked = (
-            id(graph.base.tensor.data) not in _mem._array_tracker
-            and not graph.base.tensor.data.flags.writeable
+            not graph.base.tensor.data.flags.writeable
+            and not _mem.array_is_tracked(graph.base.tensor.data)
         )
 
         try:

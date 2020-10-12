@@ -150,24 +150,28 @@ class Operation:
 
                     var.grad = (
                         np.copy(tmp_grad)
-                        if np.shares_memory(tmp_grad, grad)
+                        if np.may_share_memory(tmp_grad, grad)
                         else tmp_grad
                     )
                 else:
-                    if _reduction is None:
-                        var.grad += backed_grad
-                    else:
-                        var.grad += _reduction(backed_grad, var.shape)
+
+                    if _reduction is not None:
+                        backed_grad = _reduction(backed_grad, var.shape)
+                    var.grad += backed_grad
+
         # Avoid visiting the same node multiple times. Note that we don't store
         # these by the node itself, since Tensors are unhashable, but by its `id`.
         visited = set()
+        ref_op = ReferenceType(self)
+
         for var in (
             i for i in self.variables if not i.constant and i.creator is not None
         ):
-            if id(var) in visited:
+            var_id = id(var)
+            if var_id in visited:
                 continue
-            visited.add(id(var))
-            var._accum_ops.add(ReferenceType(self))
+            visited.add(var_id)
+            var._accum_ops.add(ref_op)
             var._backward(graph=graph)
 
 

@@ -3,7 +3,7 @@ Provides utilities responsible for locking/releasing array writeability.
 """
 from collections import Counter
 from typing import TYPE_CHECKING, Dict, Generator, Iterable
-from weakref import WeakValueDictionary
+from weakref import ref
 
 import numpy as np
 
@@ -11,10 +11,17 @@ from mygrad._utils import WeakRefIterable
 
 if TYPE_CHECKING:
     from mygrad import Tensor
+    from mygrad._utils import WeakRef
 
+# arr-id -> num active ops involving arr
 _array_counter = Counter()
-_array_tracker = WeakValueDictionary()  # type: WeakValueDictionary[int, np.ndarray]
-_views_waiting_for_unlock: Dict[int, int] = dict()  # base-id -> view-id
+
+# arr-id -> weak-ref of arr, for arrays participating in live ops
+_array_tracker = dict()  # type: Dict[int, WeakRef[Tensor]]
+
+# maps base-array ID to ID of view that can't be unlocked until
+# base is unlocked
+_views_waiting_for_unlock = dict()  # type: Dict[int, int] # base-id -> view-id
 
 __all__ = [
     "lock_arr_writeability",
@@ -22,15 +29,37 @@ __all__ = [
 ]
 
 
-def lock_arr_writeability(arr: np.ndarray, force_lock: bool = False):
+def array_is_tracked(arr: np.ndarray) -> bool:
+    """Returns True if the provided array, or a view of it, is currently
+    involved in one or more mygrad operation."""
     arr_id = id(arr)
-    if arr_id not in _array_tracker:
+    return arr_id in _array_tracker and _array_tracker[arr_id]() is not None
+
+
+def lock_arr_writeability(arr: np.ndarray, force_lock: bool = False) -> np.ndarray:
+    """Increments the count of active ops that an array is involved in
+    and makes the array read-only
+
+    Parameters
+    ----------
+    arr : numpy.ndarray
+
+    force_lock : bool, optional (default=False)
+        If True, and array that is already read-only will be tracked
+        for unlocking
+
+    Returns
+    -------
+    numpy.ndarray
+        The locked array"""
+    arr_id = id(arr)
+    if not array_is_tracked(arr):
         if not force_lock and not arr.flags.writeable:
             # array is natively read-only; don't do anything
             return arr
         # keeps track of array so we can clean up the array
         # counter when tracked arrays fall out of scope
-        _array_tracker[arr_id] = arr
+        _array_tracker[arr_id] = ref(arr)
         _array_counter[arr_id] = 1
     else:
         _array_counter[arr_id] += 1
@@ -106,7 +135,9 @@ def _release_lock_on_arr_writeability(arr: np.ndarray):
             return
 
         try:
-            view_arr = _array_tracker.pop(view_arr_id)
+            view_arr = _array_tracker.pop(view_arr_id)()
+            if view_arr is None:
+                return
         except KeyError:
             # view array is no longer available for unlocking
             return
@@ -127,13 +158,5 @@ def release_writeability_lock_on_op(arr_refs: WeakRefIterable[np.ndarray]):
         The arrays to be unlocked. Only one lock is released
         on each array, even if the same array occurs
         multiple times in the iterable."""
-    cnt = 0  # counts number of living references
-    weak_ref_cnt = len(arr_refs.data)  # gives total num weak-references
     for arr in arr_refs:
-        cnt += 1
         _release_lock_on_arr_writeability(arr)
-
-    # TODO: This is inefficient!
-    if cnt != weak_ref_cnt:
-        for item in set(_array_counter) - set(_array_tracker):
-            _array_counter.pop(item)
