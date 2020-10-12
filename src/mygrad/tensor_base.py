@@ -1426,14 +1426,14 @@ class Tensor:
         >>> x.ndim
         1
         >>> x[0]  # a single index identifies an element in `x`
-        Tensor(0)
+        Tensor(1)
 
         >>> y = mg.Tensor([[1, 2, 3],
         ...                [4, 5, 6]])
         >>> y.ndim
         2
         >>> y[0, 0]  # two indices are required to identify an element in `x`
-        Tensor(0)"""
+        Tensor(1)"""
         return self.data.ndim
 
     @property
