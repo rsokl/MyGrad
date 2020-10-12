@@ -2,7 +2,7 @@ from numbers import Number
 
 import numpy as np
 
-import mygrad._graph_tracking as _tracking
+import mygrad._utils.graph_tracking as _tracking
 from mygrad.operation_base import BroadcastableOp, Operation
 
 __all__ = ["GetItem", "SetItem"]
@@ -41,6 +41,8 @@ class GetItem(Operation):
     """ Defines the __getitem__ interface for a Tensor, supporting back-propagation
 
         Supports back-propagation through all valid numpy-indexing (basic, advanced, mixed, etc.)"""
+
+    can_return_view = True
 
     def __call__(self, a, index):
         """ ``a[index]``
@@ -106,6 +108,8 @@ class SetItem(BroadcastableOp):
 
         Supports back-propagation through all valid numpy-indexing (basic, advanced, mixed, etc.),
         as well as """
+
+    can_return_view = True
 
     def __call__(self, a, b, index):
         """ a[index] = b

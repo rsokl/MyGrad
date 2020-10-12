@@ -1,12 +1,13 @@
 """
 Defines the base class for mathematical operations capable of back-propagating
 gradients to their input tensors."""
+from numbers import Real
 from typing import Any, Dict, Optional, Set, Tuple
-from weakref import WeakSet
+from weakref import ReferenceType
 
 import numpy as np
 
-from mygrad._utils import SkipGradient, is_invalid_gradient, reduce_broadcast
+from mygrad._utils import SkipGradient, reduce_broadcast
 from mygrad.errors import InvalidBackprop, InvalidGradient
 
 __all__ = ["Operation", "BroadcastableOp"]
@@ -45,13 +46,9 @@ class Operation:
 
     # can be set to true if the operation is guaranteed to not returns a view
     # this will reduce some overhead on checking for shared memory
-    cannot_return_view = False  # type: bool
+    can_return_view = False  # type: bool
 
     def __init__(self):
-        # stores a set of all the operation-instances that participate in
-        # the computational graph up to and including the present operation
-        self.graph = WeakSet()  # type: WeakSet[Operation]
-
         # Stores positional and keyword arguments used to call op.
         # Can be set optionally - only if op needs to be "replayed",
         # e.g. with a view
@@ -138,7 +135,7 @@ class Operation:
                 except SkipGradient:
                     continue
 
-                if is_invalid_gradient(backed_grad):
+                if not isinstance(backed_grad, (np.ndarray, np.number, Real)):
                     raise InvalidGradient(
                         f"An invalid gradient-value was passed to:"
                         f"\n\t`{type(self).__name__}.backward_var(<gradient>, index={index})`"
@@ -153,24 +150,28 @@ class Operation:
 
                     var.grad = (
                         np.copy(tmp_grad)
-                        if np.shares_memory(tmp_grad, grad)
+                        if np.may_share_memory(tmp_grad, grad)
                         else tmp_grad
                     )
                 else:
-                    if _reduction is None:
-                        var.grad += backed_grad
-                    else:
-                        var.grad += _reduction(backed_grad, var.shape)
+
+                    if _reduction is not None:
+                        backed_grad = _reduction(backed_grad, var.shape)
+                    var.grad += backed_grad
+
         # Avoid visiting the same node multiple times. Note that we don't store
         # these by the node itself, since Tensors are unhashable, but by its `id`.
         visited = set()
+        ref_op = ReferenceType(self)
+
         for var in (
             i for i in self.variables if not i.constant and i.creator is not None
         ):
-            if id(var) in visited:
+            var_id = id(var)
+            if var_id in visited:
                 continue
-            visited.add(id(var))
-            var._accum_ops.add(self)
+            visited.add(var_id)
+            var._accum_ops.add(ref_op)
             var._backward(graph=graph)
 
 

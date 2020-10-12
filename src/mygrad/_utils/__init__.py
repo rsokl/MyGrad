@@ -1,8 +1,23 @@
 from numbers import Real
-from typing import Any, Generator, Generic, Iterable, List, Optional, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Generator,
+    Generic,
+    Iterable,
+    List,
+    Optional,
+    Set,
+    TypeVar,
+    Union,
+)
 from weakref import ReferenceType
 
 import numpy as np
+
+if TYPE_CHECKING:
+    from mygrad import Tensor
+    from mygrad.operation_base import Operation
 
 __all__ = [
     "is_invalid_gradient",
@@ -16,26 +31,50 @@ __all__ = [
 T = TypeVar("T")
 
 
-class WeakRef(ReferenceType, Generic[T]):
+def collect_all_operations(t: "Tensor", seen: Set["WeakRef[Operation]"]):
+    """Recursively accumulates in `seen` all operations involved
+    in creating `t`.
+
+    `seen` is updated in-place
+    """
+    if t.creator is None or t.constant:
+        return
+
+    c = ReferenceType(t.creator)  # type: WeakRef[Operation]
+
+    if c in seen:
+        return
+
+    seen.add(c)
+
+    for t in t.creator.variables:
+        collect_all_operations(t, seen)
+
+
+class WeakRef(Generic[T]):
+    __slots__ = ()
+
     def __init__(self, ob: T, callback=None, **annotations):
-        super(WeakRef, self).__init__(ob, callback)
+        ...
 
     def __call__(self) -> Union[None, T]:
-        return super().__call__()
+        ...
 
 
 class WeakRefIterable(Generic[T]):
+    __slots__ = ("data",)
+
     def __init__(self, data: Optional[Iterable[T]] = None):
         self.data: List[WeakRef[T]] = []
 
         if data is not None:
-            self.data: List[WeakRef[T]] = list(WeakRef(x) for x in data)
+            self.data: List[WeakRef[T]] = list(ReferenceType(x) for x in data)
 
     def __len__(self) -> int:
         return sum(1 for _ in self)
 
     def append(self, item: T):
-        self.data.append(WeakRef(item))
+        self.data.append(ReferenceType(item))
 
     def __iter__(self) -> Generator[T, None, None]:
         for ref in self.data:

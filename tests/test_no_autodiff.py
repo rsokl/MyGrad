@@ -6,7 +6,7 @@ import pytest
 from hypothesis import given, note
 from numpy.testing import assert_array_equal
 
-import mygrad._graph_tracking as _tracking
+import mygrad._utils.graph_tracking as _tracking
 from mygrad import Tensor, amax, no_autodiff
 from mygrad.nnet.activations import soft_sign
 from tests.custom_strategies import tensors
