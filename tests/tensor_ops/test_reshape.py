@@ -50,6 +50,14 @@ def in_place_reshape(arr, newshape, reshaper, **kwargs):
     return arr
 
 
+def test_in_place_reshape_no_autodiff():
+    x = mg.arange(10.0)
+    with mg.no_autodiff:
+        x.shape = (5, 2)
+    assert x.shape == (5, 2)
+    assert x.creator is None
+
+
 def test_raising_during_inplace_reshape_doesnt_corrupt_graph():
     x = mg.arange(5.0)
     y = +x
@@ -96,7 +104,21 @@ def test_inplace_reshape_3():
     y = x[:5]
     x.shape = (2, 5)
     x[:1] = y[::-1]
-    assert_array_equal(x[0], y)
+    assert_array_equal(x0, mg.arange(10.0))
+    assert_array_equal(
+        x, np.array([[4.0, 3.0, 2.0, 1.0, 0.0], [5.0, 6.0, 7.0, 8.0, 9.0]])
+    )
+    assert_array_equal(y, np.array([4.0, 3.0, 2.0, 1.0, 0.0]))
+
+    (x[0] * y).sum().backward()
+
+    assert_array_equal(
+        x0.grad, np.array([0.0, 2.0, 4.0, 6.0, 8.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+    )
+    assert_array_equal(
+        x.grad, np.array([[8.0, 6.0, 4.0, 2.0, 0.0], [0.0, 0.0, 0.0, 0.0, 0.0]])
+    )
+    assert_array_equal(y.grad, np.array([4.0, 3.0, 2.0, 1.0, 0.0]))
 
 
 @given(

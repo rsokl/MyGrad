@@ -269,6 +269,7 @@ def test_getitem_basic_w_adv_bkprop():
     pass
 
 
+@settings(deadline=None, max_examples=500)
 @fwdprop_test_factory(
     mygrad_func=get_item,
     true_func=get_item,

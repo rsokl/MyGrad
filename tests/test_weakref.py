@@ -19,7 +19,7 @@ def test_refs_that_point_forward_in_graph_are_weak(
     # op doesn't produce any references
     # thus `x` shouldn't record any ops
     func(x)
-    assert len(x._ops) == 0
+    assert all(i() is None for i in x._ops)
     assert len(x._view_children) == 0
 
 

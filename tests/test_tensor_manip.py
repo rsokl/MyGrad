@@ -172,6 +172,35 @@ def _valid_moveaxis_args(*arrs, **kwargs):
     return len(kwargs["source"]) == len(kwargs["destination"])
 
 
+def _transpose(x, axes, constant=False):
+    return transpose(x, axes, constant=constant)
+
+
+def _np_transpose(x, axes):
+    return np.transpose(x, axes)
+
+
+@fwdprop_test_factory(
+    mygrad_func=_transpose,
+    true_func=_np_transpose,
+    num_arrays=1,
+    kwargs=dict(axes=lambda x: valid_axes(x.ndim, min_dim=x.ndim, max_dim=x.ndim)),
+)
+def test_transpose_fwd():
+    pass
+
+
+@backprop_test_factory(
+    mygrad_func=_transpose,
+    true_func=_np_transpose,
+    num_arrays=1,
+    kwargs=dict(axes=lambda x: valid_axes(x.ndim, min_dim=x.ndim, max_dim=x.ndim)),
+    vary_each_element=True,
+)
+def test_transpose_bkwd():
+    pass
+
+
 @fwdprop_test_factory(
     mygrad_func=expand_dims,
     true_func=np.expand_dims,

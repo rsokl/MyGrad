@@ -369,7 +369,7 @@ class fwdprop_test_factory:
                         output_tensor.base is tens
                     ), f"input-{input_ind}"
                     assert output_tensor.base.data is tens.data, f"input-{input_ind}"
-                    assert not output_tensor.creator.cannot_return_view
+                    assert output_tensor.creator.can_return_view
 
             assert_allclose(
                 actual=output_tensor,

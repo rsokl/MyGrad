@@ -7,14 +7,19 @@ etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 from functools import wraps
 from numbers import Number
 from typing import Dict, Optional, Set, Type, Union
-from weakref import WeakSet, finalize
+from weakref import ReferenceType, finalize
 
 import numpy as np
 
-import mygrad._graph_tracking as _track
 import mygrad._utils.duplicating_graph as _dup
+import mygrad._utils.graph_tracking as _track
 import mygrad._utils.lock_management as _mem
-from mygrad._utils import WeakRef, WeakRefIterable, is_invalid_gradient
+from mygrad._utils import (
+    WeakRef,
+    WeakRefIterable,
+    collect_all_operations,
+    is_invalid_gradient,
+)
 from mygrad.errors import InvalidBackprop, InvalidGradient
 from mygrad.linalg.ops import MatMul
 from mygrad.math.arithmetic.ops import (
@@ -113,6 +118,8 @@ def asarray(a, dtype=None, order=None) -> np.ndarray:
     >>> np.asanyarray(a) is a
     True
     """
+    if isinstance(a, Tensor):
+        a = a.data  # faster than passing the tensor directly
     return np.asarray(a, dtype=dtype, order=order)
 
 
@@ -210,14 +217,6 @@ def astensor(t, dtype=None, constant=None) -> "Tensor":
         if constant is None:
             constant = t.constant if isinstance(t, Tensor) else False
         return Tensor(t, dtype=dtype, constant=constant)
-
-
-def _restore_writeability(arr_ref: WeakRef[np.ndarray], flag: bool):
-    arr = arr_ref.__call__()
-    if arr is None:
-        return
-
-    arr.flags.writeable = flag
 
 
 class Tensor:
@@ -334,6 +333,7 @@ class Tensor:
         _creator=None,
         _base: Optional["Tensor"] = None,
         _copy_data: Optional[bool] = None,
+        _check_dtype=True,
     ):
         """
         Parameters
@@ -368,39 +368,32 @@ class Tensor:
         if not isinstance(constant, bool):
             raise TypeError(f"`constant` must be a boolean value, got: {constant}")
 
-        assert isinstance(_scalar_only, bool)
-        assert isinstance(_creator, (Operation, type(None)))
-        assert isinstance(_base, (Tensor, type(None)))
-        assert isinstance(_copy_data, (bool, type(None)))
-
         self._scalar_only = _scalar_only
         self._creator = _creator  # type: Union[None, Operation]
 
         if _copy_data is None:
             _copy_data = not constant
 
-        to_array = np.array if _copy_data else np.asarray
+        to_array = np.array if _copy_data else asarray
         self.data = to_array(x, dtype=dtype)  # type: np.ndarray
-        self._check_valid_dtype(self.data.dtype)
+
+        if _check_dtype:
+            self._check_valid_dtype(self.data.dtype)
 
         self.grad = None  # type: Union[None, np.ndarray]
         self._constant = constant
 
         # track all operations that this tensor participates in
-        self._ops = WeakSet()  # type: WeakSet[Operation]
+        self._ops = set()  # type: Set[WeakRef[Operation]]
 
         # track the operations that have contributed to this tensor's gradient during a back-prop
-        self._accum_ops = WeakSet()  # type: WeakSet[Operation]
+        self._accum_ops = set()  # type: Set[WeakRef[Operation]]
 
         # base points to the initial tensor that owns the memory of this
         # tensor
         self._base = _base  # type: Optional[Tensor]
         # stores all of the tensors that are a view of this tensor
         self._view_children = WeakRefIterable()  # type: WeakRefIterable[Tensor]
-
-        # used to track original 'writeable' statuses of array data
-        self._data_was_writeable = None  # type: Optional[bool]
-        self._base_data_was_writeable = None  # type: Optional[bool]
 
     def astype(
         self, dtype: Union[type, str], *, constant: Optional[bool] = None
@@ -489,6 +482,7 @@ class Tensor:
         -------
         mygrad.Tensor
             The tensor-result of the operation's forward-pass."""
+        _uniques_bases_then_arrs = ()
 
         # cast all input-vars to tensors
         if _track.TRACK_GRAPH:
@@ -501,7 +495,10 @@ class Tensor:
                 for var in input_vars
             )
             if _lock_data:
-                _mem.lock_array_and_base_writeability(t.data for t in tensor_vars)
+                _uniques_bases_then_arrs = WeakRefIterable(
+                    _mem.lock_arr_writeability(x)
+                    for x in _mem.unique_arrs_and_bases(tensor_vars)
+                )
 
         else:
             # operations are not being tracked - don't lock memory or null grads
@@ -518,7 +515,12 @@ class Tensor:
 
         f = Op()
 
-        op_out = f(*tensor_vars, *op_args, **op_kwargs)  # type: np.ndarray
+        try:
+            op_out = f(*tensor_vars, *op_args, **op_kwargs)  # type: np.ndarray
+        except Exception as e:
+            if _track.TRACK_GRAPH and _lock_data:
+                _mem.release_writeability_lock_on_op(_uniques_bases_then_arrs)
+            raise e
 
         if not _track.TRACK_GRAPH:
             # execute operation without tracking creator or any graph
@@ -530,6 +532,7 @@ class Tensor:
                 _scalar_only=False,
                 _base=None,
                 _copy_data=False,
+                _check_dtype=False,
             )
 
         # Determine whether or not op was a view; if so, `base`
@@ -539,7 +542,7 @@ class Tensor:
         # the parent of the view
         parent_var = None  # type: Optional[Tensor]
 
-        if not f.cannot_return_view:
+        if f.can_return_view:
             vars_can_share_mem = (
                 isinstance(var, (np.ndarray, Tensor)) for var in input_vars
             )
@@ -559,11 +562,6 @@ class Tensor:
         # record graph information
         is_const = constant or all(var.constant for var in tensor_vars)
 
-        f.graph.add(f)
-        for var in tensor_vars:
-            if var._creator is not None and not var.constant:
-                f.graph.update(var._creator.graph)
-
         if isinstance(f, BroadcastableOp) and not f.scalar_only:
             # if broadcasting occurred: scalar-only -> True
             f.scalar_only = any(
@@ -571,8 +569,9 @@ class Tensor:
             )
 
         # record that a variable participated in that op
+        ref_f = ReferenceType(f)  # type: WeakRef[Operation]
         for var in tensor_vars:
-            var._ops.add(f)
+            var._ops.add(ref_f)
 
         # determine if node only supports backprop from a scalar
         # terminus
@@ -587,6 +586,7 @@ class Tensor:
             _scalar_only=scalar_only,
             _base=base,
             _copy_data=False,
+            _check_dtype=False,
         )
 
         if parent_var is not None:
@@ -594,7 +594,7 @@ class Tensor:
 
         if _lock_data:
             _mem.lock_arr_writeability(out.data, force_lock=True)
-            tensor_refs = WeakRefIterable(t.data for t in tensor_vars)
+            tensor_refs = _uniques_bases_then_arrs
             tensor_refs.append(out.data)
             finalize(f, _mem.release_writeability_lock_on_op, tensor_refs)
         return out
@@ -688,11 +688,16 @@ class Tensor:
             )
 
         if self.creator is not None:
-            self._backward(graph=self.creator.graph)
+            graph = set()  # type: Set[WeakRef[Operation]]
+
+            # stores a set of all the operation-instances that participate in
+            # the computational graph up to and including the present operation
+            collect_all_operations(self, seen=graph)
+            self._backward(graph=graph)
 
         self.clear_graph()
 
-    def _backward(self, *, graph):
+    def _backward(self, *, graph: Set[WeakRef[Operation]]):
         """
         **For dev-use only**
 
@@ -720,8 +725,9 @@ class Tensor:
             f"\ntensor-shape: {self.shape}"
             f"\ngrad-shape: {self.grad.shape}"
         )
-        if self.creator is not None and not bool(graph & (self._ops - self._accum_ops)):
-            self._accum_ops.clear()
+        self._ops.difference_update(self._accum_ops)
+        self._accum_ops.clear()
+        if self.creator is not None and self._ops.isdisjoint(graph):
             self._creator.backward(self.grad, graph=graph)
 
     def null_grad(self) -> "Tensor":
@@ -745,7 +751,8 @@ class Tensor:
         Tensor(2.0)
         >>> x.grad is None
         True"""
-        self.grad = None
+        if self.grad is not None:
+            self.grad = None
         return self
 
     def null_gradients(self, clear_graph=True):
@@ -805,7 +812,7 @@ class Tensor:
         This de-references all operations involved in the graph and the intermediate
         tensors that were created by it.
         """
-        self._ops.clear()
+        self._ops = set()
 
         if self.creator is None:
             return
@@ -925,40 +932,6 @@ class Tensor:
             raise TypeError("iteration over a 0-d tensor")
         return iter(self[n] for n in range(len(self)))
 
-    def _replace_tensor_op(
-        self,
-        inplace_op: Type[Operation],
-        *input_vars,
-        op_args=None,
-        op_kwargs=None,
-        constant=False,
-    ):
-        """ This is meant for ops that replace `self` "in-place" without actually
-        mutating the underlying tensor. I.e. the op will not affect views of
-        `self` nor a view-parent of `self`.
-        """
-
-        old_tensor = _dup.make_placeholder_tensor(original=self, base=self.base)
-        try:
-            new_tensor = self._op(
-                inplace_op,
-                old_tensor,
-                *input_vars,
-                op_args=op_args,
-                op_kwargs=op_kwargs,
-                constant=constant,
-            )
-        except Exception as e:
-            _dup.reroute_ops_through(source=old_tensor, target=self)
-            raise e
-
-        if new_tensor.base is old_tensor:
-            # old_tensor is internally-facing only - base
-            # should not point to it
-            new_tensor._base = None
-
-        _dup.mirror_tensor(target=self, source=new_tensor)
-
     def _in_place_op(
         self,
         inplace_op: Type[Operation],
@@ -1000,8 +973,8 @@ class Tensor:
         assert in_place_target.data.flags.writeable
 
         data_must_stay_locked = (
-            id(graph.base.tensor.data) not in _mem._array_tracker
-            and not graph.base.tensor.data.flags.writeable
+            not graph.base.tensor.data.flags.writeable
+            and not _mem.array_is_tracked(graph.base.tensor.data)
         )
 
         try:
@@ -1033,20 +1006,21 @@ class Tensor:
             )
             out.creator.variables = variables
 
-            graph.base.placeholder._ops.add(out.creator)
+            graph.base.placeholder._ops.add(ReferenceType(out.creator))
             _dup.mirror_tensor(source=out, target=graph.base.tensor)
             _dup.reroute_ops_through(source=out, target=graph.base.tensor)
             del out  # remove reference so we can re-lock data
 
             # re-lock data associated with base; de-referencing `out`
             # unlocked it
-            _mem.lock_array_and_base_writeability(
-                t.data for t in graph.base.tensor.creator.variables
+            unique_arrs = tuple(
+                _mem.lock_arr_writeability(arr)
+                for arr in _mem.unique_arrs_and_bases(
+                    graph.base.tensor.creator.variables
+                )
             )
             _mem.lock_arr_writeability(graph.base.tensor.data, force_lock=True)
-            tensor_refs = WeakRefIterable(
-                t.data for t in graph.base.tensor.creator.variables
-            )
+            tensor_refs = WeakRefIterable(unique_arrs)
             tensor_refs.append(graph.base.tensor.data)
             finalize(
                 graph.base.tensor.creator,
@@ -1126,6 +1100,10 @@ class Tensor:
         #   placeholder   shape-(10,)
         #       |-getitem
         #       y         shape-(4,)
+
+        if not _track.TRACK_GRAPH:
+            self.data.shape = newshape
+            return
 
         if newshape == self.shape:
             return
