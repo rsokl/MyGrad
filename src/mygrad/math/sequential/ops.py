@@ -4,7 +4,7 @@ from typing import Any
 
 import numpy as np
 
-import mygrad._graph_tracking as _tracking
+import mygrad._utils.graph_tracking as _tracking
 from mygrad.operation_base import Operation
 
 __all__ = ["MaxMin", "Sum", "Mean", "Prod", "CumProd", "CumSum", "Variance", "StdDev"]

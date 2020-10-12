@@ -11,8 +11,8 @@ from weakref import ReferenceType, finalize
 
 import numpy as np
 
-import mygrad._graph_tracking as _track
 import mygrad._utils.duplicating_graph as _dup
+import mygrad._utils.graph_tracking as _track
 import mygrad._utils.lock_management as _mem
 from mygrad._utils import (
     WeakRef,

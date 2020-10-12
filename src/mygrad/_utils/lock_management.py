@@ -96,6 +96,11 @@ def unique_arrs_and_bases(
 
 
 def _release_lock_on_arr_writeability(arr: np.ndarray):
+    """
+    Decrements the number of active ops the array participates in.
+    An array no longer participating in any ops will have its
+    writeability restored.
+    """
     arr_id = id(arr)
     num_active_ops = _array_counter[arr_id]
 

@@ -3,7 +3,7 @@ from mygrad.tensor_base import (  # isort:skip  # avoid an import cycle
     asarray,
     astensor,
 )
-from mygrad._graph_tracking import no_autodiff
+from mygrad._utils.graph_tracking import no_autodiff
 from mygrad.indexing_routines.funcs import *
 from mygrad.linalg.funcs import *
 from mygrad.math.arithmetic.funcs import *
