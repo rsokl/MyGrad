@@ -1,6 +1,7 @@
 from typing import Callable
 from weakref import WeakValueDictionary
 
+import hypothesis.strategies as st
 import numpy as np
 import pytest
 from hypothesis import given
@@ -24,7 +25,7 @@ def test_refs_that_point_forward_in_graph_are_weak(
 
 
 @pytest.mark.parametrize("func", [lambda x: +x, lambda x: x[...]], ids=["+x", "x[:]"])
-@given(x=tensors(constant=False))
+@given(x=tensors(constant=False, elements=st.floats(-10, 10)))
 def test_derefrencing_tensor_from_upstream_in_graph_doesnt_break_graph(
     x: Tensor, func: Callable[[Tensor], Tensor]
 ):
