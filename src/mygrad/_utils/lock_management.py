@@ -1,20 +1,21 @@
 """
 Provides utilities responsible for locking/releasing array writeability.
 """
+import os
 from collections import Counter
 from typing import TYPE_CHECKING, Dict, Generator, Iterable
 from weakref import ref
 
 import numpy as np
 
-from mygrad._utils import WeakRefIterable
+from mygrad._utils import ContextTracker, WeakRefIterable
 
 if TYPE_CHECKING:  # pragma: no cover
     from mygrad import Tensor
     from mygrad._utils import WeakRef
 
 # arr-id -> num active ops involving arr
-_array_counter = Counter()
+_array_counter = Counter()  # type: Counter[int, int]
 
 # arr-id -> weak-ref of arr, for arrays participating in live ops
 _array_tracker = dict()  # type: Dict[int, WeakRef[Tensor]]
@@ -26,6 +27,9 @@ _views_waiting_for_unlock = dict()  # type: Dict[int, int] # base-id -> view-id
 __all__ = [
     "lock_arr_writeability",
     "release_writeability_lock_on_op",
+    "mem_guard_off",
+    "mem_guard_on",
+    "mem_guard_active",
 ]
 
 
@@ -165,3 +169,196 @@ def release_writeability_lock_on_op(arr_refs: WeakRefIterable[np.ndarray]):
         multiple times in the iterable."""
     for arr in arr_refs:
         _release_lock_on_arr_writeability(arr)
+
+
+MEM_GUARD = os.environ.get("MYGRAD_MEM_GUARD", True)
+
+if MEM_GUARD in {"True", "true", "1", 1, True}:
+    MEM_GUARD = True
+elif MEM_GUARD in {"False", "false", "0", 0, False}:  # pragma: no cover
+    MEM_GUARD = False
+else:  # pragma: no cover
+    from warnings import warn
+
+    warn(
+        f"Environment variable MYGRAD_MEM_GUARD was set to an unknown value {MEM_GUARD}. "
+        f"Proceeding with `MEM_GUARD=True`"
+    )
+    MEM_GUARD = True
+
+
+class MemStateContext(ContextTracker):
+    @property
+    def state(self):
+        return MEM_GUARD
+
+    @state.setter
+    def state(self, value: bool):
+        if not isinstance(value, bool):  # pragma: no cover
+            raise TypeError(
+                f"MEM_GUARD must be set to a boolean value, got {value} (type={type(value)})"
+            )
+
+        global MEM_GUARD
+        MEM_GUARD = value
+
+
+class _NoMemGuard(MemStateContext):
+    """ A context manager used to suspend memory-locking behavior
+
+    Examples
+    --------
+    >>> from mygrad import  mem_guard_off
+    >>> with mem_guard_off:
+    ...     # array-memory locking is turned off
+    ...     pass
+    ... # previous memory-locking behavior is restored
+
+    This can also be used as a decorator
+
+    >>> @mem_guard_off
+    >>> def f():
+    ...     # array-memory locking is turned off within function
+    ...     return
+
+    """
+
+    _enter_set_value = False
+
+
+class _WithMemGuard(MemStateContext):
+    """ A context manager used to enable memory-locking behavior
+
+    Examples
+    --------
+    >>> from mygrad import mem_guard_on
+    >>> with mem_guard_on:
+    ...     # array-memory locking is turned on
+    ...     pass
+    ... # previous memory-locking behavior is restored
+
+    This can also be used as a decorator
+
+    >>> @mem_guard_on
+    >>> def f():
+    ...     # array-memory locking is turned on within function
+    ...     return
+
+    """
+
+    _enter_set_value = True
+
+
+mem_guard_off = _NoMemGuard()
+mem_guard_on = _WithMemGuard()
+
+
+def turn_memory_guarding_off():
+    """ Globally disables all memory-guarding mechanisms, except
+    for in contexts where they are explicitly enabled.
+
+    Notes
+    -----
+    With memory guarding disables, arrays participating in active
+    computational graphs are not protected from being mutated by
+    the user. Mutating such an array will corrupt the derivatives
+    that are computed via back-propagation, and will produce
+    incorrect results.
+
+    This can speed up computations involving many small tensors
+    substantially.
+
+    If you want to disable memory guarding at the system level, you
+    can set the system environment variable MYGRAD_MEM_GUARD=False.
+    NOTE THAT THIS IS NOT RECOMMENDED.
+
+    See Also
+    --------
+    turn_memory_guarding_on : Globally enables all memory-guarding mechanisms
+    mem_guard_off : context manager & decorator for suspending memory guarding
+    mem_guard_on : context manager & decorator for enabling memory guarding
+
+    Examples
+    --------
+    The following demonstrates how one can unwittingly corrupt
+    backpropagation through a computational graph
+
+    >>> import mygrad as mg
+    >>> import numpy as np
+    >>> mg.turn_memory_guarding_off()  # speeds up calculations, but with risks involved..
+    >>> x = np.arange(3.)
+    >>> y = mg.ones_like(x)
+    >>> z = x * y
+    >>> x[:] = 0  # mutates x, corrupting state associated with z
+    >>> z.backward()
+    >>> y.grad  # would be array([0., 1., 2.]) if graph wasn't corrupted
+    array([0., 0., 0.])
+    """
+    global MEM_GUARD
+    MEM_GUARD = False
+
+
+def turn_memory_guarding_on():
+    """ Globally enables all memory-guarding mechanisms, except
+    for in contexts where they are explicitly disabled.
+
+    Notes
+    -----
+    Memory guarding is enabled by default. It ensures that arrays
+    that are participating in computational graphs cannot be mutated
+    (at least unwittingly..), which provides important assurances that
+    the state of the computational graph is not corrupted for
+    back-propagation.
+
+    Memory guarding can slow down computations involving many small tensors.
+    Realistic worst-case benchmarks suggest a ~50% slowdown.
+
+    If performance is important, it is recommended that you test your code leaving
+    memory guarding enabled. Presuming the code runs without any errors regarding
+    writing to read-only arrays, you can proceed to disable memory guarding and
+    enjoy the concomitant speedups.
+
+    Note also that running your code in a `no_autodiff` context will automatically
+    disable memory guarding.
+
+    See Also
+    --------
+    turn_memory_guarding_off : Globally enables all memory-guarding mechanisms
+    mem_guard_off : context manager & decorator for suspending memory guarding
+    mem_guard_on : context manager & decorator for enabling memory guarding
+    no_autodiff : context manager for disabling graph-tracking for back propagation
+
+    Examples
+    --------
+    The following demonstrates how memory guarding prevents one from
+    unwittingly corrupting an active computational graph
+
+    >>> import mygrad as mg
+    >>> import numpy as np
+    >>> # memory guarding is on by default
+    >>> x = np.arange(3.)
+    >>> y = mg.ones_like(x)
+    >>> z = x * y
+    >>> try:
+    ...     x[:] = 0  # raises because `x` is made read-only
+    ... except ValueError:
+    ...     pass
+    >>> z.backward()
+    >>> y.grad  # correct gradient is computed
+    array([0., 1., 2.])
+    """
+    global MEM_GUARD
+    MEM_GUARD = True
+
+
+def mem_guard_active() -> bool:
+    """ Indicates whether or not memory guarding is active.
+
+    See Also
+    --------
+    turn_memory_guarding_on : Globally enables all memory-guarding mechanisms
+    turn_memory_guarding_off : Globally enables all memory-guarding mechanisms
+    mem_guard_off : context manager & decorator for suspending memory guarding
+    mem_guard_on : context manager & decorator for enabling memory guarding
+    """
+    return MEM_GUARD

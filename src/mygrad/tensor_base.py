@@ -453,7 +453,6 @@ class Tensor:
         op_args=None,
         op_kwargs=None,
         constant=False,
-        _lock_data=True,
     ):
         """Wraps operations performed between tensors: f(a, b, ...).
 
@@ -494,7 +493,8 @@ class Tensor:
                 else var.null_grad()
                 for var in input_vars
             )
-            if _lock_data:
+            if _mem.MEM_GUARD:
+
                 _uniques_bases_then_arrs = WeakRefIterable(
                     _mem.lock_arr_writeability(x)
                     for x in _mem.unique_arrs_and_bases(tensor_vars)
@@ -518,7 +518,7 @@ class Tensor:
         try:
             op_out = f(*tensor_vars, *op_args, **op_kwargs)  # type: np.ndarray
         except Exception as e:
-            if _track.TRACK_GRAPH and _lock_data:
+            if _track.TRACK_GRAPH and _mem.MEM_GUARD:
                 _mem.release_writeability_lock_on_op(_uniques_bases_then_arrs)
             raise e
 
@@ -592,7 +592,7 @@ class Tensor:
         if parent_var is not None:
             parent_var._view_children.append(out)
 
-        if _lock_data:
+        if _mem.MEM_GUARD:
             _mem.lock_arr_writeability(out.data, force_lock=True)
             tensor_refs = _uniques_bases_then_arrs
             tensor_refs.append(out.data)
@@ -958,6 +958,10 @@ class Tensor:
         # Create copy of base so that mutation has no impact on the
         # state of any ops depending on it or its views
         base = graph.base.tensor.copy()
+        base.data.flags.writeable = (
+            graph.base.tensor.data.flags.writeable
+            or _mem.array_is_tracked(graph.base.tensor.data)
+        )
 
         # Create view of base in correspondence to relationship
         # that `self` has to base. Mutating this view will mutate
@@ -970,25 +974,18 @@ class Tensor:
         if in_place_target.size:
             assert np.shares_memory(in_place_target, base)
 
-        assert in_place_target.data.flags.writeable
-
-        data_must_stay_locked = (
-            not graph.base.tensor.data.flags.writeable
-            and not _mem.array_is_tracked(graph.base.tensor.data)
-        )
-
         try:
-            out = self._op(
-                inplace_op,
-                in_place_target,  # tensor will be mutated
-                # we need to accommodate case where inplace operation is writing
-                # *from* a view - redirect view to placeholder
-                *(graph.get_placeholder_if_exists(t) for t in input_vars),
-                op_args=op_args,
-                op_kwargs=op_kwargs,
-                constant=constant,
-                _lock_data=data_must_stay_locked,  # will raise if original data not writeable
-            )
+            with _mem.mem_guard_off:
+                out = self._op(  # will raise if original data not writeable
+                    inplace_op,
+                    in_place_target,  # tensor will be mutated
+                    # we need to accommodate case where inplace operation is writing
+                    # *from* a view - redirect view to placeholder
+                    *(graph.get_placeholder_if_exists(t) for t in input_vars),
+                    op_args=op_args,
+                    op_kwargs=op_kwargs,
+                    constant=constant,
+                )
         except Exception as e:
             graph.restore_old_graph()
             raise e

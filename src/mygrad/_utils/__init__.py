@@ -1,7 +1,10 @@
+from functools import wraps
 from numbers import Real
 from typing import (
     TYPE_CHECKING,
     Any,
+    Callable,
+    Dict,
     Generator,
     Generic,
     Iterable,
@@ -25,6 +28,7 @@ __all__ = [
     "SkipGradient",
     "WeakRef",
     "WeakRefIterable",
+    "ContextTracker",
 ]
 
 
@@ -142,3 +146,60 @@ def is_invalid_gradient(grad: Any) -> bool:
     return not isinstance(grad, (np.ndarray, Real)) or not np.issubdtype(
         np.asarray(grad).dtype, np.number
     )
+
+
+class ContextTracker:
+    """ A context manager and decorator for managing a boolean
+    global state"""
+
+    # tracks context depth
+    _depth = 0  # type: int
+
+    # the value that the state is set to upon entering the context
+    _enter_set_value: Optional[bool] = None
+
+    @property
+    def state(self):
+        raise NotImplementedError()
+
+    @state.setter
+    def state(self, value: bool):
+        raise NotImplementedError()
+
+    def __init__(self):
+        # keeps track of what MemGuard was at a given depth
+        self._depth_tracker: Dict[int, bool] = dict()
+
+    def __bool__(self):  # pragma: no cover
+        return self.state
+
+    def __enter__(self):
+        """Suspends graph-tracking"""
+        self._depth_tracker[self._depth] = self.state
+        self._depth += 1
+        self.state = self._enter_set_value
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Restores graph-tracking when context depth returns to 0"""
+        self._depth -= 1
+        self.state = self._depth_tracker.pop(self._depth)
+
+    def __call__(self, func: Callable) -> Callable:
+        """Decorates a function so that it will have graph-tracking suspended
+        during its execution.
+
+        Parameters
+        ----------
+        func : Callable
+            The function to be decorated
+
+        Returns
+        -------
+        decorated_func : Callable"""
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            with self:
+                return func(*args, **kwargs)
+
+        return wrapper

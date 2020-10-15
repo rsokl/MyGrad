@@ -12,10 +12,12 @@ from mygrad.nnet.activations import soft_sign
 from tests.custom_strategies import tensors
 
 
+@pytest.mark.usefixtures("seal_graph_tracking")
 def test_graph_tracking_is_on_by_default():
     assert _tracking.TRACK_GRAPH is True
 
 
+@pytest.mark.usefixtures("seal_graph_tracking")
 @given(x=tensors(shape=(1,), elements=st.floats(-100, 100)), constant=st.booleans())
 def test_no_autodiff_context_manager(x: Tensor, constant: bool):
 
@@ -52,6 +54,7 @@ def test_no_autodiff_context_manager(x: Tensor, constant: bool):
         assert_array_equal(x.grad, np.full_like(x, 2.0))
 
 
+@pytest.mark.usefixtures("seal_graph_tracking")
 @given(tensors())
 def test_no_track_view_children(x: Tensor):
     with no_autodiff:
@@ -60,6 +63,7 @@ def test_no_track_view_children(x: Tensor):
     assert not x._view_children
 
 
+@pytest.mark.usefixtures("seal_graph_tracking")
 @given(old_x=tensors(read_only=st.booleans()))
 def test_no_autodiff_does_not_unlock_memory(old_x: Tensor):
     x = +old_x
@@ -69,6 +73,7 @@ def test_no_autodiff_does_not_unlock_memory(old_x: Tensor):
             x[...] = -1
 
 
+@pytest.mark.usefixtures("seal_graph_tracking")
 @given(old_x=tensors())
 def test_no_autodiff_on_in_place_op_does_not_track_graph(old_x: Tensor):
     with no_autodiff:
@@ -90,6 +95,7 @@ def test_no_autodiff_on_in_place_op_does_not_track_graph(old_x: Tensor):
         assert np.shares_memory(x, old_x)
 
 
+@pytest.mark.usefixtures("seal_graph_tracking")
 def test_no_autodiff_context_manager_restores_state_via_finally_clause():
 
     with pytest.raises(ValueError):
@@ -100,6 +106,7 @@ def test_no_autodiff_context_manager_restores_state_via_finally_clause():
     assert _tracking.TRACK_GRAPH is True
 
 
+@pytest.mark.usefixtures("seal_graph_tracking")
 @given(x=tensors(shape=(1,), elements=st.floats(-100, 100)), constant=st.booleans())
 def test_no_autodiff_decorator(x: Tensor, constant: bool):
     @no_autodiff
@@ -117,6 +124,7 @@ def test_no_autodiff_decorator(x: Tensor, constant: bool):
     assert x.data.flags.writeable
 
 
+@pytest.mark.usefixtures("seal_graph_tracking")
 def test_no_autodiff_decorator_restores_state_via_finally():
     @no_autodiff
     def func():
@@ -129,6 +137,7 @@ def test_no_autodiff_decorator_restores_state_via_finally():
     assert _tracking.TRACK_GRAPH is True
 
 
+@pytest.mark.usefixtures("seal_graph_tracking")
 def test_decorator_is_transparent_to_function_information():
     def undecorated(x, y, z=None, *, kwarg, **kwargs):
         """a very special docstring"""
@@ -141,6 +150,7 @@ def test_decorator_is_transparent_to_function_information():
     assert undecorated.__name__ == decorated.__name__
 
 
+@pytest.mark.usefixtures("seal_graph_tracking")
 @given(tensors(shape=(3, 2, 4), elements=st.floats(-100, 100)).map(np.asarray))
 def test_to_numpy_returns_numpy_array(x: np.asarray):
     numpy_max = np.max(x, axis=-1)
@@ -149,6 +159,7 @@ def test_to_numpy_returns_numpy_array(x: np.asarray):
     assert_array_equal(numpy_max, mygrad_max)
 
 
+@pytest.mark.usefixtures("seal_graph_tracking")
 def test_nested_context():
     assert _tracking.TRACK_GRAPH, "before all"
 
@@ -172,6 +183,7 @@ def compose(iter_of_funcs):
     return f
 
 
+@pytest.mark.usefixtures("seal_graph_tracking")
 @given(depth=st.integers(1, 10))
 def test_graph_tracking_through_multiple_context_depths(depth: int):
     depth_tracker = dict(cnt=0)
