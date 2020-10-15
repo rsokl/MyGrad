@@ -90,7 +90,7 @@ def test_only_final_dereference_restores_writeability(constant: bool):
 
 
 @pytest.mark.parametrize("y_writeable", [True, False])
-@given(x=tensors(read_only=st.booleans(), shape=(3,)))
+@given(x=tensors(read_only=st.booleans(), elements=st.floats(-10, 10), shape=(3,)))
 def test_view_becomes_writeable_after_base_is_made_writeable(
     x: Tensor, y_writeable: bool
 ):

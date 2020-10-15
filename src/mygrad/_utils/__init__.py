@@ -95,24 +95,24 @@ class SkipGradient(Exception):
 def reduce_broadcast(grad, var_shape):
     """ Sum-reduce axes of `grad` so its shape matches `var_shape.
 
-        This the appropriate mechanism for backpropagating a gradient
-        through an operation in which broadcasting occurred for the
-        given variable.
+    This the appropriate mechanism for backpropagating a gradient
+    through an operation in which broadcasting occurred for the
+    given variable.
 
-        Parameters
-        ----------
-        grad : numpy.ndarray
-        var_shape : Tuple[int, ...]
+    Parameters
+    ----------
+    grad : numpy.ndarray
+    var_shape : Tuple[int, ...]
 
-        Returns
-        -------
-        numpy.ndarray
+    Returns
+    -------
+    numpy.ndarray
 
-        Raises
-        ------
-        ValueError
-            The dimensionality of the gradient cannot be less than
-            that of its associated variable."""
+    Raises
+    ------
+    ValueError
+        The dimensionality of the gradient cannot be less than
+        that of its associated variable."""
     if grad.shape == var_shape:
         return grad
 
@@ -159,11 +159,11 @@ class ContextTracker:
     _enter_set_value: Optional[bool] = None
 
     @property
-    def state(self):
+    def state(self):  # pragma: no cover
         raise NotImplementedError()
 
     @state.setter
-    def state(self, value: bool):
+    def state(self, value: bool):  # pragma: no cover
         raise NotImplementedError()
 
     def __init__(self):
