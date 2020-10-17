@@ -261,8 +261,8 @@ class GRUnit(Operation):
 
     def backward(self, grad, *, graph, **kwargs):
         hidden_seq = self._hidden_seq()
-        if hidden_seq is None:
-            assert False
+        if hidden_seq is None:  # pragma: no cover
+            assert False, "should be unreachable"
 
         s = hidden_seq.data[:-1]
         z = self._z.data
