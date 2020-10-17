@@ -163,9 +163,3 @@ def batchnorm(x, *, gamma=None, beta=None, eps, constant=False):
     return Tensor._op(
         BatchNorm, x, gamma, beta, op_kwargs=dict(eps=eps), constant=constant
     )
-
-    # # pass gamma and beta as empty arrays if they are not supplied
-    # tvars = [t for t in (x, gamma, beta) if t is not None]
-    # return Tensor._op(
-    #     BatchNorm, *tvars, op_kwargs=dict(eps=eps), constant=constant
-    # )
