@@ -1,7 +1,9 @@
+import weakref
 from numbers import Integral
 
 import numpy as np
 
+from mygrad._utils import SkipGradient
 from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor
 
@@ -248,16 +250,21 @@ class GRUnit(Operation):
 
         _gru_layer(out, z, r, h, Wz, Wr, Wh)
 
-        self._hidden_seq = Tensor(out, _creator=self)
         self._z = Tensor(z, _creator=self)
         self._r = Tensor(r, _creator=self)
         self._h = Tensor(h, _creator=self)
 
-        return self._hidden_seq
+        return Tensor(out, _creator=self)
+
+    def backward_var(self, grad, index, **kwargs):
+        raise SkipGradient("Gradient computed in GRU.backward()")
 
     def backward(self, grad, *, graph, **kwargs):
+        hidden_seq = self._hidden_seq()
+        if hidden_seq is None:
+            assert False
 
-        s = self._hidden_seq.data[:-1]
+        s = hidden_seq.data[:-1]
         z = self._z.data
         r = self._r.data
         h = self._h.data
@@ -299,7 +306,7 @@ class GRUnit(Operation):
         hgrad = dLds * const["1 - z"]  # dL / dh
         rgrad = dot(const["1 - h**2"] * hgrad, Wh.T) * s  # dL / dr
 
-        self._hidden_seq.grad = dLds
+        hidden_seq.grad = dLds
 
         if not (self.Uz.constant and self.Wz.constant and self.bz.constant):
             dz = zgrad * const["z*(1 - z)"]
@@ -410,21 +417,7 @@ class GRUnit(Operation):
         del self._r
         del self._h
 
-        for x in (
-            self.X,
-            self.Uz,
-            self.Wz,
-            self.bz,
-            self.Ur,
-            self.Wr,
-            self.br,
-            self.Uh,
-            self.Wh,
-            self.bh,
-        ):
-            if not x.constant:
-                x._accum_ops.add(self)
-                x._backward(graph=graph)
+        super().backward(grad, graph=graph)
 
 
 def gru(
@@ -571,7 +564,7 @@ def gru(
         constant=constant,
     )
     try:
-        s.creator._hidden_seq = s
+        s.creator._hidden_seq = weakref.ref(s)
     except AttributeError:  # pragma: no cover
         # `no-autodiff` mode does not record creator
         pass
