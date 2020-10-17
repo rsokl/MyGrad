@@ -23,6 +23,7 @@ def seal_memguard() -> bool:
     yield initial_value
     if lock.MEM_GUARD is not initial_value:
         warnings.warn("test toggled MEM_GUARD value")
+        lock.MEM_GUARD = initial_value
         assert False
 
     lock.MEM_GUARD = initial_value
@@ -36,6 +37,7 @@ def seal_graph_tracking() -> bool:
 
     if track.TRACK_GRAPH is not initial_value:
         warnings.warn("test toggled TRACK_GRAPH value")
+        track.TRACK_GRAPH = initial_value
         assert False
 
     track.TRACK_GRAPH = initial_value
