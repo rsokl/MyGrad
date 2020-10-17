@@ -1,9 +1,9 @@
-from typing import Callable, ContextManager, Union
+from typing import Callable, ContextManager, List, Union
 
 import hypothesis.strategies as st
 import numpy as np
 import pytest
-from hypothesis import given
+from hypothesis import given, note
 from numpy.testing import assert_allclose
 
 import mygrad as mg
@@ -296,19 +296,28 @@ def test_documented_guarding():
     assert_allclose(y.grad, np.array([0.0, 1.0, 2.0]))
 
 
-@pytest.mark.usefixtures("seal_memguard")
-def test_turn_memory_guarding_on_off():
-    assert mem.MEM_GUARD is True
+def mem_off():
     turn_memory_guarding_off()
     assert mem.MEM_GUARD is False
+
+
+def mem_on():
     turn_memory_guarding_on()
     assert mem.MEM_GUARD is True
 
 
 @pytest.mark.usefixtures("seal_memguard")
-def test_mem_guard_active():
-    assert mg.mem_guard_active() is True
-    turn_memory_guarding_off()
-    assert mg.mem_guard_active() is False
+@given(st.lists(st.sampled_from([mem_on, mem_off])))
+def test_turn_memory_guarding_on_off(calls: List[Callable]):
+    """
+    Call arbitrary sequency off mem-guard on/off;
+    Ensure mem_guard_active always matches MEM_GUARD
+    """
+    assert mg.mem_guard_active() is mem.MEM_GUARD
+
+    for n, call in enumerate(calls):
+        note(f"{call}  (call-{n}")
+        call()
+        assert mg.mem_guard_active() is mem.MEM_GUARD
+
     turn_memory_guarding_on()
-    assert mg.mem_guard_active() is True
