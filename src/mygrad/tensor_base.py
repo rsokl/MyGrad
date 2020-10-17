@@ -593,7 +593,7 @@ class Tensor:
             parent_var._view_children.append(out)
 
         if _mem.MEM_GUARD:
-            _mem.lock_arr_writeability(out.data, force_lock=True)
+            _mem.lock_arr_writeability(out.data)
             tensor_refs = _uniques_bases_then_arrs
             tensor_refs.append(out.data)
             finalize(f, _mem.release_writeability_lock_on_op, tensor_refs)
