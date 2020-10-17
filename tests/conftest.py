@@ -6,6 +6,7 @@ from hypothesis import Verbosity, settings
 
 import mygrad._utils.graph_tracking as track
 import mygrad._utils.lock_management as lock
+from tests.utils import clear_all_mem_locking_state
 
 settings.register_profile("ci", deadline=1000)
 settings.register_profile("intense", deadline=None, max_examples=1000)
@@ -36,3 +37,22 @@ def seal_graph_tracking() -> bool:
         warnings.warn("test toggled TRACK_GRAPH value")
 
     track.TRACK_GRAPH = initial_value
+
+
+@pytest.fixture(autouse=True)
+def raise_on_mem_locking_state_leakage() -> bool:
+    """Ensure mem-locking state is isolated to each test, and raise if
+    a test leaks state"""
+    clear_all_mem_locking_state()
+
+    yield None
+
+    if any([lock._views_waiting_for_unlock, lock._array_tracker, lock._array_counter]):
+        warnings.warn(
+            f"leak\nviews waiting:{lock._views_waiting_for_unlock}"
+            f"\narr-tracker:{lock._array_tracker}"
+            f"\narr-counter{lock._array_counter}"
+        )
+        assert False
+
+    clear_all_mem_locking_state()

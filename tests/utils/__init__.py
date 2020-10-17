@@ -3,6 +3,7 @@ from typing import Dict, Union
 
 import numpy as np
 
+import mygrad._utils.lock_management as mem
 from mygrad import Tensor
 
 
@@ -42,3 +43,9 @@ array_flag_fields = (
 def flags_to_dict(x: Union[Tensor, np.ndarray]) -> Dict[str, bool]:
     arr = np.asarray(x)
     return {k: arr.flags[k] for k in array_flag_fields}
+
+
+def clear_all_mem_locking_state():
+    mem._views_waiting_for_unlock.clear()
+    mem._array_tracker.clear()
+    mem._array_counter.clear()
