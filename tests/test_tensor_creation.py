@@ -7,7 +7,7 @@ import numpy as np
 from hypothesis import assume, given
 from numpy.testing import assert_array_equal
 
-from mygrad import Tensor, astensor
+from mygrad import Tensor, astensor, mem_guard_off
 from mygrad.tensor_creation.funcs import (
     arange,
     empty,
@@ -175,6 +175,7 @@ def test_astensor_with_incompat_constant_still_passes_array_ref(
     dtype=st.none() | hnp.floating_dtypes(),
     constant=st.none() | st.booleans(),
 )
+@mem_guard_off
 def test_astensor_doesnt_mutate_input_tensor(
     t: Tensor, in_graph: bool, dtype, constant: bool
 ):
