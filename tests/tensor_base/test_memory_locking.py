@@ -3,7 +3,7 @@ from typing import Callable, ContextManager, List, Union
 import hypothesis.strategies as st
 import numpy as np
 import pytest
-from hypothesis import given, note
+from hypothesis import given, note, settings
 from numpy.testing import assert_allclose
 
 import mygrad as mg
@@ -34,6 +34,70 @@ def test_memory_locks_during_graph(constant: bool):
         x.data *= 1
     y.backward()  # should release memory
     x.data *= 1
+
+
+@settings(deadline=None, max_examples=200)
+@given(
+    x=tensors(shape=(2,), elements=st.just(0), read_only=st.booleans()),
+    y=tensors(shape=(2,), elements=st.just(1), read_only=st.booleans()),
+    num_calls=st.integers(1, 3),
+    data=st.data(),
+)
+def test_memory_locks_with_multiple_inputs(
+    x: Tensor, y: Tensor, num_calls: int, data: st.DataObject
+):
+    """
+    Tests locking mechanics for operation with
+    - multiple identical inputs
+    - tensor inputs or array inputs
+    - views or bases
+    """
+    was_writeable = {id(i.data): writeable(i) for i in [x, y]}
+
+    def writeable_lookup(a: Union[Tensor, np.ndarray]) -> bool:
+        if isinstance(a, Tensor):
+            a = a.data
+        if a.base is not None:
+            a = a.base
+        return was_writeable[id(a)]
+
+    input_seq = data.draw(
+        st.lists(st.sampled_from([x, y, x.data, y.data]), min_size=2), label="input_seq"
+    )
+    ids = set(id(i) for i in input_seq)
+
+    as_view = data.draw(st.tuples(*[st.booleans()] * len(input_seq)), label="as_view",)
+
+    input_seq = [i[...] if view else i for i, view in zip(input_seq, as_view)]
+
+    z = 0
+
+    for _ in range(num_calls):
+        z = z + mg.multiply_sequence(*input_seq)
+
+    if id(x) in ids:
+        assert writeable(x) is False
+
+    if id(y) in ids:
+        assert writeable(y) is False
+
+    z.backward()
+
+    for n, item in enumerate(input_seq):
+        assert writeable_lookup(item) is writeable(item), n
+
+
+@given(x=tensors(shape=(2,), elements=st.just(0), read_only=st.booleans()),)
+def test_view_of_locked_but_tracked_array_gets_unlocked(x: Tensor):
+    x_was_writeable = writeable(x)
+    x_arr = x.data
+    w = +x
+    view_x = x_arr[...]
+    z = w + view_x
+    z.backward()
+
+    assert writeable(x) is x_was_writeable
+    assert writeable(view_x) is x_was_writeable
 
 
 @pytest.mark.parametrize("constant", [True, False])
@@ -91,7 +155,7 @@ def test_only_final_dereference_restores_writeability(constant: bool):
 
 @pytest.mark.parametrize("y_writeable", [True, False])
 @given(x=tensors(read_only=st.booleans(), elements=st.floats(-10, 10), shape=(3,)))
-def test_view_becomes_writeable_after_base_is_made_writeable(
+def test_views_becomes_writeable_after_base_is_made_writeable(
     x: Tensor, y_writeable: bool
 ):
     x_was_writeable = writeable(x)
@@ -99,21 +163,27 @@ def test_view_becomes_writeable_after_base_is_made_writeable(
     y = np.arange(float(len(x)))
     y.flags.writeable = y_writeable
 
-    view_y = y[...]
+    view_y1 = y[...]
+    view_y2 = y[...]
     w = y * x
-    z = x * view_y
+    z1 = mg.multiply_sequence(x, view_y1, view_y2)
 
-    del z  # normally would make `view-y` writeable, but `view-y` depends on y
+    del z1  # normally would make `view-y1` and `view-y2` writeable, but they depend on y
+
     assert writeable(x) is False
     assert writeable(y) is False
     assert (
-        view_y.flags.writeable is False
-    ), "view-y can't be made writeable until y is made writeable"
+        view_y1.flags.writeable is False
+    ), "view-y1 can't be made writeable until y is made writeable"
+    assert (
+        view_y2.flags.writeable is False
+    ), "view-y2 can't be made writeable until y is made writeable"
 
     del w
     assert writeable(x) is x_was_writeable
     assert writeable(y) is y_writeable
-    assert writeable(view_y) is y_writeable
+    assert writeable(view_y1) is y_writeable
+    assert writeable(view_y2) is y_writeable
 
 
 def test_touching_data_in_local_scope_doesnt_leave_it_locked():
