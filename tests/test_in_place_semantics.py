@@ -148,6 +148,12 @@ def test_writing_a_view_with_a_view(
     assert dangling_view.base is y
     assert dangling_view.grad is None
 
+    dangling_view.clear_graph()  # release memory
+
+    assert x.data.flags.writeable
+    assert y.data.flags.writeable
+    assert dangling_view.data.flags.writeable
+
 
 def test_setitem_preserves_view_children():
     x = mg.arange(10.0)
