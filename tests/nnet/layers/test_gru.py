@@ -478,8 +478,5 @@ def test_gru_backward(
     else:
         assert X.grad is None
 
-    # ls.clear_graph()
-    # ls2.clear_graph()
-
     for x in [s, Wz, Wr, Wh, bz, br, bh, X, Uz, Ur, Uh, V]:
         assert not x._ops
