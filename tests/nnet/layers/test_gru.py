@@ -7,7 +7,7 @@ import pytest
 from hypothesis import example, given, settings
 from numpy.testing import assert_allclose
 
-from mygrad import matmul
+from mygrad import matmul, no_autodiff
 from mygrad.nnet.activations import sigmoid, tanh
 from mygrad.nnet.layers import gru
 from mygrad.tensor_base import Tensor
@@ -196,26 +196,30 @@ def test_gru_fwd(X, D, dropout, dtypes, data: st.DataObject):
         Wz2d = Wz2
         Wr2d = Wr2
         Wh2d = Wh2
-    for n, x in enumerate(X2):
-        if not dropout:
-            z = sigmoid(matmul(x, Uz2) + matmul(stt, Wz2d) + bz2)
-            r = sigmoid(matmul(x, Ur2) + matmul(stt, Wr2d) + br2)
-            h = tanh(matmul(x, Uh2) + matmul((r * stt), Wh2d) + bh2)
-        else:
-            z = sigmoid(
-                (s.creator._dropUz[0] * matmul(x, Uz2)) + matmul(stt, Wz2d) + bz2
-            )
-            r = sigmoid(
-                (s.creator._dropUr[0] * matmul(x, Ur2)) + matmul(stt, Wr2d) + br2
-            )
-            h = tanh(
-                (s.creator._dropUh[0] * matmul(x, Uh2)) + matmul((r * stt), Wh2d) + bh2
-            )
 
-        stt = (1 - z) * h + z * stt
-        all_s.append(stt)
-        o = matmul(stt, V2)
-        ls2 += o.sum()
+    with no_autodiff:
+        for n, x in enumerate(X2):
+            if not dropout:
+                z = sigmoid(matmul(x, Uz2) + matmul(stt, Wz2d) + bz2)
+                r = sigmoid(matmul(x, Ur2) + matmul(stt, Wr2d) + br2)
+                h = tanh(matmul(x, Uh2) + matmul((r * stt), Wh2d) + bh2)
+            else:
+                z = sigmoid(
+                    (s.creator._dropUz[0] * matmul(x, Uz2)) + matmul(stt, Wz2d) + bz2
+                )
+                r = sigmoid(
+                    (s.creator._dropUr[0] * matmul(x, Ur2)) + matmul(stt, Wr2d) + br2
+                )
+                h = tanh(
+                    (s.creator._dropUh[0] * matmul(x, Uh2))
+                    + matmul((r * stt), Wh2d)
+                    + bh2
+                )
+
+            stt = (1 - z) * h + z * stt
+            all_s.append(stt)
+            o = matmul(stt, V2)
+            ls2 += o.sum()
 
     tolerances = dict(atol=1e-5, rtol=1e-5)
     rec_s_dat = np.stack([i.data for i in all_s])
@@ -241,6 +245,7 @@ def test_gru_fwd(X, D, dropout, dtypes, data: st.DataObject):
     assert_allclose(X.data, X2.data, **tolerances)
 
     ls.clear_graph()
+
     for x in [s, Wz, Wr, Wh, bz, br, bh, X, Uz, Ur, Uh, V]:
         assert not x._ops
 

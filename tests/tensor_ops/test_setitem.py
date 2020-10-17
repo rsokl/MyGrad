@@ -8,6 +8,7 @@ import pytest
 from hypothesis import assume, given, note, settings
 from numpy.testing import assert_allclose, assert_array_equal
 
+import mygrad as mg
 from mygrad.tensor_base import Tensor
 from mygrad.tensor_core_ops.indexing import (
     _arr,
@@ -20,6 +21,7 @@ from ..custom_strategies import (
     arbitrary_indices,
     basic_indices,
     broadcastable_shapes,
+    tensors,
 )
 from ..utils.numerical_gradient import numerical_gradient_full
 
@@ -28,6 +30,17 @@ from ..utils.numerical_gradient import numerical_gradient_full
 def test_arr_util():
     assert_array_equal(_arr(2, 2), np.arange(4).reshape(2, 2))
     assert_array_equal(_arr(4, 3), np.arange(12).reshape(4, 3))
+
+
+@given(tensors(elements=st.floats(-10, 10)))
+def test_setitem_mutates_input(x: Tensor):
+    assume(x.size)
+    data_copy = np.array(x, copy=True)
+    data_view = np.asarray(x)
+    with mg.no_autodiff:
+        x[...] = 1 + x
+    assert np.all(x == data_view)
+    assert np.all(data_copy != data_view)
 
 
 @pytest.mark.parametrize(

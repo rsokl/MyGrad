@@ -23,6 +23,7 @@ def _check_grad(t: mg.Tensor, expr: Union[None, np.ndarray, float]):
 
 def _check_cleared_node(t: mg.Tensor):
     assert not t._ops and not t._accum_ops and t.creator is None
+    assert t.data.flags.writeable is True
 
 
 def test_check_grad():
@@ -536,10 +537,11 @@ def test_dynamic_interesting_graph(
     assert not v1._accum_ops
     assert not dead_leaf._accum_ops and dead_leaf.creator is not None
 
+    assert dead_leaf.creator is not None
+    del dead_leaf  # pruning the dead leaf should unlock all memory
     # check the null grads & clear graph always propagates through the graph
     _check_cleared_node(v5)
     _check_cleared_node(v4)
     _check_cleared_node(v3)
     _check_cleared_node(v2)
     _check_cleared_node(v1)
-    assert dead_leaf.creator is not None

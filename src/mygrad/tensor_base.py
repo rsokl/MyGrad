@@ -6,12 +6,20 @@ etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 
 from functools import wraps
 from numbers import Number
-from typing import Callable, Optional, Set, Type, Union
+from typing import Dict, Optional, Set, Type, Union
+from weakref import ReferenceType, finalize
 
 import numpy as np
 
-import mygrad._graph_tracking as _track
-from mygrad._utils import is_invalid_gradient
+import mygrad._utils.duplicating_graph as _dup
+import mygrad._utils.graph_tracking as _track
+import mygrad._utils.lock_management as _mem
+from mygrad._utils import (
+    WeakRef,
+    WeakRefIterable,
+    collect_all_operations,
+    is_invalid_gradient,
+)
 from mygrad.errors import InvalidBackprop, InvalidGradient
 from mygrad.linalg.ops import MatMul
 from mygrad.math.arithmetic.ops import (
@@ -110,6 +118,8 @@ def asarray(a, dtype=None, order=None) -> np.ndarray:
     >>> np.asanyarray(a) is a
     True
     """
+    if isinstance(a, Tensor):
+        a = a.data  # faster than passing the tensor directly
     return np.asarray(a, dtype=dtype, order=order)
 
 
@@ -323,6 +333,7 @@ class Tensor:
         _creator=None,
         _base: Optional["Tensor"] = None,
         _copy_data: Optional[bool] = None,
+        _check_dtype=True,
     ):
         """
         Parameters
@@ -357,80 +368,32 @@ class Tensor:
         if not isinstance(constant, bool):
             raise TypeError(f"`constant` must be a boolean value, got: {constant}")
 
-        assert isinstance(_scalar_only, bool)
-        assert isinstance(_creator, (Operation, type(None)))
-        assert isinstance(_base, (Tensor, type(None)))
-        assert isinstance(_copy_data, (bool, type(None)))
-
         self._scalar_only = _scalar_only
         self._creator = _creator  # type: Union[None, Operation]
 
         if _copy_data is None:
             _copy_data = not constant
 
-        to_array = np.array if _copy_data else np.asarray
+        to_array = np.array if _copy_data else asarray
         self.data = to_array(x, dtype=dtype)  # type: np.ndarray
-        self._check_valid_dtype(self.data.dtype)
+
+        if _check_dtype:
+            self._check_valid_dtype(self.data.dtype)
 
         self.grad = None  # type: Union[None, np.ndarray]
         self._constant = constant
 
         # track all operations that this tensor participates in
-        self._ops = set()  # type: Set[Operation]
+        self._ops = set()  # type: Set[WeakRef[Operation]]
 
         # track the operations that have contributed to this tensor's gradient during a back-prop
-        self._accum_ops = set()  # type: Set[Operation]
+        self._accum_ops = set()  # type: Set[WeakRef[Operation]]
 
+        # base points to the initial tensor that owns the memory of this
+        # tensor
         self._base = _base  # type: Optional[Tensor]
-
-        # used to track original 'writeable' statuses of array data
-        self._data_was_writeable = None  # type: Optional[bool]
-        self._base_data_was_writeable = None  # type: Optional[bool]
-
-    def _lock_writeability(self) -> "Tensor":
-        """Sets the underlying numpy-array (and its base) to be read-only.
-
-        The initial writeability flags of all involved arrays are recorded so
-        that they can be restored via ``self._restore_writeability()``"""
-        if self._data_was_writeable is not None or self.base is not None:
-            return self
-
-        self._data_was_writeable = self.data.flags.writeable
-        self.data.flags.writeable = False
-
-        if self.data.base is not None:
-            self._base_data_was_writeable = self.data.base.flags.writeable
-            self.data.base.flags.writeable = False
-
-        return self
-
-    def _restore_writeability(self):
-        """Restores the writeability flag for the underlying numpy array (and its base)"""
-        if self.base is not None:
-            # A view of an array inherits the writeability of its parent;
-            # however, the writeability of the view is independent of that
-            # of its parent. I.e. toggling the parent's writeability does
-            # not affect the view's writeability.
-            #
-            # Furthermore, the parent's writeability must be restored before
-            # restoring the view's writeability
-            self.base._restore_writeability()
-            if self.base.data.flags.writeable:
-                self.data.flags.writeable = self.base.data.flags.writeable
-            return
-
-        if self._data_was_writeable is None:
-            return
-
-        # the base-data's writeability must be restored before that of its view's
-        if self._base_data_was_writeable is not None:
-            if self._base_data_was_writeable:
-                self.data.base.flags.writeable = self._base_data_was_writeable
-            self._base_data_was_writeable = None
-
-        if self._data_was_writeable:
-            self.data.flags.writeable = self._data_was_writeable
-        self._data_was_writeable = None
+        # stores all of the tensors that are a view of this tensor
+        self._view_children = WeakRefIterable()  # type: WeakRefIterable[Tensor]
 
     def astype(
         self, dtype: Union[type, str], *, constant: Optional[bool] = None
@@ -518,22 +481,27 @@ class Tensor:
         -------
         mygrad.Tensor
             The tensor-result of the operation's forward-pass."""
+        _uniques_bases_then_arrs = ()
 
         # cast all input-vars to tensors
         if _track.TRACK_GRAPH:
             # lock memory of array data and clear any tensor
             # gradients
             tensor_vars = tuple(
-                (
-                    cls(var, constant=True)
-                    if not isinstance(var, Tensor)
-                    else var.null_grad()
-                )._lock_writeability()
+                cls(var, constant=True)
+                if not isinstance(var, Tensor)
+                else var.null_grad()
                 for var in input_vars
             )
+            if _mem.MEM_GUARD:
+
+                _uniques_bases_then_arrs = WeakRefIterable(
+                    _mem.lock_arr_writeability(x)
+                    for x in _mem.unique_arrs_and_bases(tensor_vars)
+                )
+
         else:
-            # operations are not being tracked - make all tensors
-            # constant
+            # operations are not being tracked - don't lock memory or null grads
             tensor_vars = tuple(
                 cls(var, constant=True) if not isinstance(var, Tensor) else var
                 for var in input_vars
@@ -547,20 +515,12 @@ class Tensor:
 
         f = Op()
 
-        op_out = f(*tensor_vars, *op_args, **op_kwargs)  # type: np.ndarray
-
-        # determine whether or not op was a view; if so, `base`
-        # points to parent Tensor
-        base = None  # type: Optional[Tensor]
-
-        if not f.cannot_return_view:
-            vars_can_share_mem = (
-                isinstance(var, (np.ndarray, Tensor)) for var in input_vars
-            )
-            for can_share_mem, var in zip(vars_can_share_mem, tensor_vars):
-                if can_share_mem and _is_view_of(parent=var, child=op_out):
-                    base = var if var.base is None else var.base
-                    break
+        try:
+            op_out = f(*tensor_vars, *op_args, **op_kwargs)  # type: np.ndarray
+        except Exception as e:
+            if _track.TRACK_GRAPH and _mem.MEM_GUARD:
+                _mem.release_writeability_lock_on_op(_uniques_bases_then_arrs)
+            raise e
 
         if not _track.TRACK_GRAPH:
             # execute operation without tracking creator or any graph
@@ -570,21 +530,37 @@ class Tensor:
                 constant=constant,  # constant not determined by graph info
                 _creator=None,
                 _scalar_only=False,
-                _base=base,
+                _base=None,
                 _copy_data=False,
+                _check_dtype=False,
             )
+
+        # Determine whether or not op was a view; if so, `base`
+        # points to parent Tensor
+        base = None  # type: Optional[Tensor]
+        # If output of op is a view - tracks the tensor var that is
+        # the parent of the view
+        parent_var = None  # type: Optional[Tensor]
+
+        if f.can_return_view:
+            vars_can_share_mem = (
+                isinstance(var, (np.ndarray, Tensor)) for var in input_vars
+            )
+            for can_share_mem, var in zip(vars_can_share_mem, tensor_vars):
+                if can_share_mem and _is_view_of(parent=var, child=op_out):
+                    base = var if var.base is None else var.base
+                    parent_var = var
+                    break
+
+        if base is not None:
+            # we need to be able to replay view-ops for doing in-place operations
+            # on graphs with views
+            f.replay_args = op_args
+            f.replay_kwargs = op_kwargs
+            f.replay_force_constant = constant
 
         # record graph information
         is_const = constant or all(var.constant for var in tensor_vars)
-
-        f.graph = {f}
-        f.graph.update(
-            *(
-                var._creator.graph
-                for var in tensor_vars
-                if var._creator is not None and not var.constant
-            )
-        )
 
         if isinstance(f, BroadcastableOp) and not f.scalar_only:
             # if broadcasting occurred: scalar-only -> True
@@ -593,8 +569,9 @@ class Tensor:
             )
 
         # record that a variable participated in that op
+        ref_f = ReferenceType(f)  # type: WeakRef[Operation]
         for var in tensor_vars:
-            var._ops.add(f)
+            var._ops.add(ref_f)
 
         # determine if node only supports backprop from a scalar
         # terminus
@@ -602,14 +579,43 @@ class Tensor:
             var.scalar_only for var in tensor_vars if not var.constant
         )
 
-        return cls(
+        out = cls(
             op_out,
             constant=is_const,
             _creator=f,
             _scalar_only=scalar_only,
             _base=base,
             _copy_data=False,
-        )._lock_writeability()
+            _check_dtype=False,
+        )
+
+        if parent_var is not None:
+            parent_var._view_children.append(out)
+
+        if _mem.MEM_GUARD:
+            _mem.lock_arr_writeability(out.data, force_lock=True)
+            tensor_refs = _uniques_bases_then_arrs
+            tensor_refs.append(out.data)
+            finalize(f, _mem.release_writeability_lock_on_op, tensor_refs)
+        return out
+
+    def _replay_op(self, *input_vars) -> "Tensor":
+        """ *dev use only*
+
+        Replays the op that produced `self` - called on the specified
+        input vars"""
+        if self.creator is None:
+            raise ValueError(
+                "``Tensor._replay_op(...)`` was called on a tensor without a creator."
+                "\nPlease report this error at: https://github.com/rsokl/MyGrad/issues"
+            )
+        return self._op(
+            type(self.creator),
+            *input_vars,
+            op_args=self.creator.replay_args,
+            op_kwargs=self.creator.replay_kwargs,
+            constant=self.creator.replay_force_constant,
+        )
 
     def backward(self, grad=None):
         """ Compute set or accumulate ``self.grad`` with `grad`, and pass ``self.creator.backward(grad)``.
@@ -682,11 +688,16 @@ class Tensor:
             )
 
         if self.creator is not None:
-            self._backward(graph=self.creator.graph)
+            graph = set()  # type: Set[WeakRef[Operation]]
+
+            # stores a set of all the operation-instances that participate in
+            # the computational graph up to and including the present operation
+            collect_all_operations(self, seen=graph)
+            self._backward(graph=graph)
 
         self.clear_graph()
 
-    def _backward(self, *, graph):
+    def _backward(self, *, graph: Set[WeakRef[Operation]]):
         """
         **For dev-use only**
 
@@ -714,8 +725,9 @@ class Tensor:
             f"\ntensor-shape: {self.shape}"
             f"\ngrad-shape: {self.grad.shape}"
         )
-        if self.creator is not None and not bool(graph & (self._ops - self._accum_ops)):
-            self._accum_ops.clear()
+        self._ops.difference_update(self._accum_ops)
+        self._accum_ops.clear()
+        if self.creator is not None and self._ops.isdisjoint(graph):
             self._creator.backward(self.grad, graph=graph)
 
     def null_grad(self) -> "Tensor":
@@ -739,7 +751,8 @@ class Tensor:
         Tensor(2.0)
         >>> x.grad is None
         True"""
-        self.grad = None
+        if self.grad is not None:
+            self.grad = None
         return self
 
     def null_gradients(self, clear_graph=True):
@@ -799,8 +812,7 @@ class Tensor:
         This de-references all operations involved in the graph and the intermediate
         tensors that were created by it.
         """
-        self._restore_writeability()
-        self._ops.clear()
+        self._ops = set()
 
         if self.creator is None:
             return
@@ -920,15 +932,6 @@ class Tensor:
             raise TypeError("iteration over a 0-d tensor")
         return iter(self[n] for n in range(len(self)))
 
-    def _mirror_tensor(self, tensor: "Tensor"):
-        """ *Dev use only*
-
-        Points all of the attributes of ``self`` to those of
-        ``tensor`` so that they reference all of the same data structures.
-        This is used to facilitate "in-place" operations.
-        """
-        self.__dict__ = tensor.__dict__
-
     def _in_place_op(
         self,
         inplace_op: Type[Operation],
@@ -937,45 +940,225 @@ class Tensor:
         op_kwargs=None,
         constant=False,
     ):
-        """ A substitute for ``self._op``, to facilitate in-place operations.
+        if _track.TRACK_GRAPH is False:
+            return self._op(
+                inplace_op,
+                self,
+                *input_vars,
+                op_args=op_args,
+                op_kwargs=op_kwargs,
+                constant=constant,
+            )
 
-        Note that in-place operations are generally less efficient than their
-        counterparts due to the additional bookkeeping that is required to
-        update the computational graph. The benefit lies purely in convenience
-        for the user.
-        """
-        # TODO: make sure that a failed in-place op doesn't corrupt the graph
-        # old_tensor is the tensor pre-setitem
-        old_tensor = Tensor(
-            self,
-            constant=self.constant,
-            _scalar_only=self._scalar_only,
-            _creator=self.creator,
-            _base=self._base,
+        # Replace base and all of its views with "placeholder" tensors;
+        # there will serve as internal references to all tensors pre-mutation
+        # and will preserve ops relying on the un-mutated tensors
+        graph = _dup.DuplicatingGraph(self if self.base is None else self.base)
+
+        # Create copy of base so that mutation has no impact on the
+        # state of any ops depending on it or its views
+        base = graph.base.tensor.copy()
+        base.data.flags.writeable = (
+            graph.base.tensor.data.flags.writeable
+            or _mem.array_is_tracked(graph.base.tensor.data)
         )
-        old_tensor._ops = self._ops
-        old_tensor._accum_ops = self._accum_ops
 
-        # point all ops involving `self` to old_tensor instead
-        for op in old_tensor._ops:
-            for i in range(len(op.variables)):
-                if op.variables[i] is self:
-                    op.variables = (
-                        op.variables[:i] + (old_tensor,) + op.variables[i + 1 :]
-                    )
+        # Create view of base in correspondence to relationship
+        # that `self` has to base. Mutating this view will mutate
+        # base appropriately
+        in_place_target = base
+        with _track.no_autodiff:
+            for node in graph.get_path_to_base(self)[::-1][1:]:  # skip base
+                in_place_target = node.tensor._replay_op(in_place_target)
 
-        # self becomes the tensor post-setitem
-        out = self._op(
-            inplace_op,
-            old_tensor,
-            *input_vars,
-            op_args=op_args,
-            op_kwargs=op_kwargs,
-            constant=constant,
-        )
-        if out.base is old_tensor:
+        if in_place_target.size:
+            assert np.shares_memory(in_place_target, base)
+
+        try:
+            with _mem.mem_guard_off:
+                out = self._op(  # will raise if original data not writeable
+                    inplace_op,
+                    in_place_target,  # tensor will be mutated
+                    # we need to accommodate case where inplace operation is writing
+                    # *from* a view - redirect view to placeholder
+                    *(graph.get_placeholder_if_exists(t) for t in input_vars),
+                    op_args=op_args,
+                    op_kwargs=op_kwargs,
+                    constant=constant,
+                )
+        except Exception as e:
+            graph.restore_old_graph()
+            raise e
+
+        if out.base is in_place_target:
             out._base = None
-        self._mirror_tensor(out)
+
+        # base has been mutated; it must be "connected" to the graph
+        # that produced it
+        if self.base is None:
+
+            variables = tuple(
+                var if var is not in_place_target else graph.base.placeholder
+                for var in out.creator.variables
+            )
+            out.creator.variables = variables
+
+            graph.base.placeholder._ops.add(ReferenceType(out.creator))
+            _dup.mirror_tensor(source=out, target=graph.base.tensor)
+            _dup.reroute_ops_through(source=out, target=graph.base.tensor)
+            del out  # remove reference so we can re-lock data
+
+            # re-lock data associated with base; de-referencing `out`
+            # unlocked it
+            unique_arrs = tuple(
+                _mem.lock_arr_writeability(arr)
+                for arr in _mem.unique_arrs_and_bases(
+                    graph.base.tensor.creator.variables
+                )
+            )
+            _mem.lock_arr_writeability(graph.base.tensor.data, force_lock=True)
+            tensor_refs = WeakRefIterable(unique_arrs)
+            tensor_refs.append(graph.base.tensor.data)
+            finalize(
+                graph.base.tensor.creator,
+                _mem.release_writeability_lock_on_op,
+                tensor_refs,
+            )
+
+            assert graph.base.tensor.data.flags.writeable is False
+            # TODO: Attach view children to self
+        else:  # pragma: no cover
+            # in-place operation occurs on a view; must connect mutated base
+            # to graph and then reproduce downstream views
+            raise NotImplementedError()
+
+        # Now that the base-tensor has been incorporated into the graph,
+        # recreate the view-graph and reroute all tensors from previous
+        # graph to their downstream counterparts
+        #
+        # Note that iterating in a topologically-ordered way is critical
+        # here: each parent is updated before creating one of its children
+        for node in graph:
+            if node.parent is None:
+                continue
+            view = node.tensor._replay_op(node.parent)
+            _dup.mirror_tensor(source=view, target=node.tensor)
+            _dup.reroute_ops_through(source=view, target=node.tensor)
+            node.parent._view_children.append(node.tensor)
+
+    @property
+    def shape(self):
+        """ Tuple of tensor dimension-sizes.
+
+        Sizes are reported in row-major order.
+
+        Returns
+        -------
+        Tuple[int, ...]
+
+        Examples
+        --------
+        >>> import mygrad as mg
+        >>> x = mg.Tensor([1, 2, 3, 4])  # axis-0 has size 4
+        >>> x.shape
+        (4,)
+        >>> y = mg.Tensor([[1, 2, 3],    # axis-0 has size 2, axis-1 has size 3
+        ...                [4, 5, 6]])
+        >>> y.shape
+        (2, 3)
+
+        See Also
+        --------
+        mygrad.reshape : similar function
+        Tensor.reshape : similar method"""
+        return self.data.shape
+
+    @shape.setter
+    def shape(self, newshape):
+        # Even though this op cannot mutate views, we still must
+        # do graph-replaying here so that views can still reference
+        # this tensor, but with the proper reshaping mediating them.
+        #
+        # E.g.
+        # x = arange(10)   # shape-(10,)
+        # y = x[:6]        # shape-(6,)
+        # x.shape = (2, 5) # shape-(2, 5)
+        #
+        # y.base points to the shape-(2,5) array
+        # even though y is a view of the flat array
+        #
+        # thus we need to play this graph as
+        #   (history)
+        #       |
+        #   placeholder   shape-(10,)
+        #       |-reshape
+        #       x         shape-(2,5)
+        #       |-reshape
+        #   placeholder   shape-(10,)
+        #       |-getitem
+        #       y         shape-(4,)
+
+        if not _track.TRACK_GRAPH:
+            self.data.shape = newshape
+            return
+
+        if newshape == self.shape:
+            return
+
+        old_shape = self.shape
+
+        # raise here if the shape is not compatible
+        self.data.shape = newshape
+        self.data.shape = old_shape
+
+        # create placeholders for self and all of its view-children
+        graph = _dup.DuplicatingGraph(self)
+        # need to iterate over all nodes now before we tinker
+        # with the view children
+        nodes = tuple(graph)
+
+        # reshape placeholder of self
+        out = graph.base.placeholder.reshape(newshape)
+
+        # Store contents of `out` in `self` and replace `out` in
+        # graph with `self`
+        out._base = graph.base.placeholder.base
+        _dup.mirror_tensor(source=out, target=self)
+        _dup.reroute_ops_through(source=out, target=self)
+        del out
+
+        # although `self` is a view of placeholder, placeholder
+        # is stricly an internal tensor, we won't expose it as
+        # base
+        graph.base.placeholder._view_children.append(self)
+        base = graph.base.placeholder.base
+
+        if base is not None:
+            # if `self` was a view, we need to update that parent's
+            # view children so that it points to the placeholder
+            creator = graph.base.placeholder.creator.variables[0]
+            creator._view_children = WeakRefIterable(
+                [
+                    w if w is not self else graph.base.placeholder
+                    for w in graph.base.placeholder._view_children
+                ]
+            )
+
+        # Undo the reshape, and place this as the tensor joining
+        # the reshaped `self` with the views of unshaped `self`
+        unshaped = self.reshape(old_shape)
+
+        for node in nodes:
+            if node.parent is None:
+                continue
+            # direct what would be views of `self` to be views of `unshaped`,
+            # which translates the mutated shape of `self` to the original
+            # shape used to create the views
+            parent = node.parent if node.parent is not self else unshaped
+            view = node.tensor._replay_op(parent)
+            _dup.mirror_tensor(source=view, target=node.tensor)
+            _dup.reroute_ops_through(source=view, target=node.tensor)
+            parent._view_children.append(node.tensor)
 
     def __setitem__(self, key, value):
         self._in_place_op(SetItem, value, op_args=(key,))
@@ -1218,14 +1401,14 @@ class Tensor:
         >>> x.ndim
         1
         >>> x[0]  # a single index identifies an element in `x`
-        Tensor(0)
+        Tensor(1)
 
         >>> y = mg.Tensor([[1, 2, 3],
         ...                [4, 5, 6]])
         >>> y.ndim
         2
         >>> y[0, 0]  # two indices are required to identify an element in `x`
-        Tensor(0)"""
+        Tensor(1)"""
         return self.data.ndim
 
     @property
@@ -1246,40 +1429,6 @@ class Tensor:
         >>> type(x.dtype)
         <type 'numpy.dtype'>"""
         return self.data.dtype
-
-    @property
-    def shape(self):
-        """ Tuple of tensor dimension-sizes.
-
-        Sizes are reported in row-major order.
-
-        Returns
-        -------
-        Tuple[int, ...]
-
-        Examples
-        --------
-        >>> import mygrad as mg
-        >>> x = mg.Tensor([1, 2, 3, 4])  # axis-0 has size 4
-        >>> x.shape
-        (4,)
-        >>> y = mg.Tensor([[1, 2, 3],    # axis-0 has size 2, axis-1 has size 3
-        ...                [4, 5, 6]])
-        >>> y.shape
-        (2, 3)
-
-        See Also
-        --------
-        mygrad.reshape : similar function
-        Tensor.reshape : similar method"""
-        return self.data.shape
-
-    @shape.setter
-    def shape(self, newshape):
-        if self.constant:
-            self.data.shape = newshape
-            return
-        self._in_place_op(Reshape, op_args=(newshape,), constant=self.constant)
 
     def reshape(self, *newshape, constant=False):
         """ Returns a tensor with a new shape, without changing its data.
@@ -1379,5 +1528,5 @@ def tensor_to_array_wrapper(func):
     return wrapped
 
 
-for op in ("__lt__", "__le__", "__gt__", "__ge__"):
-    setattr(Tensor, op, tensor_to_array_wrapper(getattr(np.ndarray, op)))
+for _op in ("__lt__", "__le__", "__gt__", "__ge__"):
+    setattr(Tensor, _op, tensor_to_array_wrapper(getattr(np.ndarray, _op)))

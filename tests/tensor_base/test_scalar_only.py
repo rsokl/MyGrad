@@ -10,8 +10,7 @@ from mygrad.tensor_base import Tensor
 
 
 class ScalarOnlyOp(BroadcastableOp):
-    def __init__(self):
-        self.scalar_only = True
+    scalar_only = True
 
     def __call__(self, a, b):
         self.variables = (a, b)
@@ -19,8 +18,7 @@ class ScalarOnlyOp(BroadcastableOp):
 
 
 class NotScalarOnlyOp(Operation):
-    def __init__(self):
-        self.scalar_only = False
+    scalar_only = False
 
     def __call__(self, a, b):
         self.variables = (a, b)

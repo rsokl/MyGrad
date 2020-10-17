@@ -21,6 +21,7 @@ __all__ = [
     "broadcastable_shapes",
     "choices",
     "everything_except",
+    "valid_shapes",
     "valid_axes",
     "tensors",
 ]
@@ -78,7 +79,9 @@ def _check_min_max(min_val, min_dim, max_dim, param_name, max_val=None):
 class VerboseTensor(Tensor):
     def __repr__(self):
         repr_ = repr(self.data).replace("array", "Tensor").replace("\n", "\n ")
-        replacement = f", constant={self.constant}"
+        replacement = (
+            f", constant={self.constant}, writeable={self.data.flags.writeable}"
+        )
         if self.grad is not None:
             replacement += f", grad={repr(self.grad)}"
         replacement += ")"

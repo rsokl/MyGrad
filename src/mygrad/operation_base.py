@@ -1,12 +1,13 @@
 """
 Defines the base class for mathematical operations capable of back-propagating
 gradients to their input tensors."""
-
-from typing import Optional, Set
+from numbers import Real
+from typing import Any, Dict, Optional, Set, Tuple
+from weakref import ReferenceType
 
 import numpy as np
 
-from mygrad._utils import SkipGradient, is_invalid_gradient, reduce_broadcast
+from mygrad._utils import SkipGradient, reduce_broadcast
 from mygrad.errors import InvalidBackprop, InvalidGradient
 
 __all__ = ["Operation", "BroadcastableOp"]
@@ -14,42 +15,46 @@ __all__ = ["Operation", "BroadcastableOp"]
 
 class Operation:
     """ Base class for all tensor operations that support back-propagation
-        of gradients.
+    of gradients.
 
-        Consider the Operation-instance ``f``. A forward-pass through ``f`` is defined
-        via ``f.__call__``. Thus, given tensors ``a`` and ``b``, a computational
-        graph is defined ``f.__call__(a, b) -> c``, where the "creator" of tensor ``c``
-        is recorded as ``f``::
+    Consider the Operation-instance ``f``. A forward-pass through ``f`` is defined
+    via ``f.__call__``. Thus, given tensors ``a`` and ``b``, a computational
+    graph is defined ``f.__call__(a, b) -> c``, where the "creator" of tensor ``c``
+    is recorded as ``f``::
 
-              (node: a) --+
-                           -> [operation: f(a, b)] --> (node: c)
-              (node: b) --+
+          (node: a) --+
+                       -> [operation: f(a, b)] --> (node: c)
+          (node: b) --+
 
-        Thus back-propagating through ``c`` will instruct ``f`` to back-propagate
-        the gradient to its inputs, which are recorded as ``a`` and ``b``. Each
-        node then back-propagates to any Operation-instance that is recorded
-        as its creator, and so on.
+    Thus back-propagating through ``c`` will instruct ``f`` to back-propagate
+    the gradient to its inputs, which are recorded as ``a`` and ``b``. Each
+    node then back-propagates to any Operation-instance that is recorded
+    as its creator, and so on.
 
-        If an operation class has `scalar_only=True`, then the terminal node of a
-        computational graph involving that operation can only trigger back-propagation
-        from a 0-dimensional tensor (i.e. a scalar). This is `False` for operations that
-        manifest as trivial element-wise operations over tensors. In such cases, the
-        gradient of the operation can also be treated element-wise, and thus be computed
-        unambiguously.
-        """
+    If an operation class has `scalar_only=True`, then the terminal node of a
+    computational graph involving that operation can only trigger back-propagation
+    from a 0-dimensional tensor (i.e. a scalar). This is `False` for operations that
+    manifest as trivial element-wise operations over tensors. In such cases, the
+    gradient of the operation can also be treated element-wise, and thus be computed
+    unambiguously.
+    """
 
     # tracks if a given operation-instance performs a
     # non-vectorized or broadcasted operation , which
     # requires that backpropagation be invoked from a scalar
     scalar_only = False  # type: bool
 
-    # stores a set of all the operation-instances that participate in
-    # the computational graph up to and including the present operation
-    graph = None  # type: Optional[Set[Operation]]
-
     # can be set to true if the operation is guaranteed to not returns a view
     # this will reduce some overhead on checking for shared memory
-    cannot_return_view = False  # type: bool
+    can_return_view = False  # type: bool
+
+    def __init__(self):
+        # Stores positional and keyword arguments used to call op.
+        # Can be set optionally - only if op needs to be "replayed",
+        # e.g. with a view
+        self.replay_args: Optional[Tuple[Any, ...]] = None
+        self.replay_kwargs: Optional[Dict[str, Any]] = None
+        self.replay_force_constant: Optional[bool] = None
 
     def __call__(self, *input_vars, **kwargs):  # pragma: no cover
         """ Performs a forward pass, f, of this Operation::
@@ -130,7 +135,7 @@ class Operation:
                 except SkipGradient:
                     continue
 
-                if is_invalid_gradient(backed_grad):
+                if not isinstance(backed_grad, (np.ndarray, np.number, Real)):
                     raise InvalidGradient(
                         f"An invalid gradient-value was passed to:"
                         f"\n\t`{type(self).__name__}.backward_var(<gradient>, index={index})`"
@@ -145,24 +150,28 @@ class Operation:
 
                     var.grad = (
                         np.copy(tmp_grad)
-                        if np.shares_memory(tmp_grad, grad)
+                        if np.may_share_memory(tmp_grad, grad)
                         else tmp_grad
                     )
                 else:
-                    if _reduction is None:
-                        var.grad += backed_grad
-                    else:
-                        var.grad += _reduction(backed_grad, var.shape)
+
+                    if _reduction is not None:
+                        backed_grad = _reduction(backed_grad, var.shape)
+                    var.grad += backed_grad
+
         # Avoid visiting the same node multiple times. Note that we don't store
         # these by the node itself, since Tensors are unhashable, but by its `id`.
         visited = set()
+        ref_op = ReferenceType(self)
+
         for var in (
             i for i in self.variables if not i.constant and i.creator is not None
         ):
-            if id(var) in visited:
+            var_id = id(var)
+            if var_id in visited:
                 continue
-            visited.add(id(var))
-            var._accum_ops.add(self)
+            visited.add(var_id)
+            var._accum_ops.add(ref_op)
             var._backward(graph=graph)
 
 

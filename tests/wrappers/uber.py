@@ -12,6 +12,7 @@ from hypothesis.strategies import SearchStrategy
 from hypothesis.strategies._internal.lazy import LazyStrategy
 from numpy.testing import assert_allclose, assert_array_equal
 
+import mygrad._utils.lock_management as mem
 from mygrad import Tensor
 from mygrad.operation_base import Operation
 
@@ -368,7 +369,7 @@ class fwdprop_test_factory:
                         output_tensor.base is tens
                     ), f"input-{input_ind}"
                     assert output_tensor.base.data is tens.data, f"input-{input_ind}"
-                    assert not output_tensor.creator.cannot_return_view
+                    assert output_tensor.creator.can_return_view
 
             assert_allclose(
                 actual=output_tensor,
@@ -744,9 +745,7 @@ class backprop_test_factory:
             # forward pass of the function
             out = self.op(*arrs, **kwargs)  # type: Tensor
             look_to = out.base if out.base is not None else out
-            output_was_writeable = bool(
-                look_to._data_was_writeable or look_to._base_data_was_writeable
-            )
+            output_was_writeable = id(look_to.data) in mem._array_counter
 
             assert all(
                 a.data.flags.writeable is False for a in arrs
@@ -837,7 +836,7 @@ class backprop_test_factory:
             ), "input array memory writeability is not restored after clear-graph"
             assert (
                 out.data.flags.writeable is output_was_writeable
-            ), "output array memory writeability is not restored after clear-graph"
+            ), f"output array memory writeability is not restored after clear-graph: {out.data.flags.writeable, output_was_writeable}"
 
         wrapper._hypothesis_internal_add_digest = get_hypothesis_db_key(
             self,

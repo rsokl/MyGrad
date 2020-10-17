@@ -2,7 +2,7 @@ from numbers import Real
 
 import numpy as np
 
-import mygrad._graph_tracking as _tracking
+import mygrad._utils.graph_tracking as _tracking
 from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor, asarray
 

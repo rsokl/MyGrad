@@ -6,6 +6,8 @@ from typing import Callable
 
 import numpy as np
 
+from mygrad._utils import ContextTracker
+
 __all__ = ["no_autodiff"]
 
 
@@ -13,25 +15,29 @@ __all__ = ["no_autodiff"]
 TRACK_GRAPH = True  # type: bool
 
 
-class _NoAutoDiff:
+class _NoAutoDiff(ContextTracker):
     """ Serves as a context manager and decorator for suspending
-    all computational graph tracking."""
+    all computational graph tracking.
 
-    # tracks context depth
-    _depth = 0  # type: int
+    Note that memory guarding does not occur in the `no_autodiff` context,
+    so there is no need to nest this context with `mem_guard_off`.
+    """
 
-    def __enter__(self):
-        """Suspends graph-tracking"""
+    _enter_set_value = False
+
+    @property
+    def state(self):
+        return TRACK_GRAPH
+
+    @state.setter
+    def state(self, value: bool):
+        if not isinstance(value, bool):  # pragma: no cover
+            raise TypeError(
+                f"TRACK_GRAPH must be set to a boolean value, got {value} (type={type(value)})"
+            )
+
         global TRACK_GRAPH
-        self._depth += 1
-        TRACK_GRAPH = False
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        """Restores graph-tracking when context depth returns to 0"""
-        global TRACK_GRAPH
-        self._depth -= 1
-
-        TRACK_GRAPH = self._depth == 0
+        TRACK_GRAPH = value
 
     def __call__(self, func: Callable, to_numpy: bool = False) -> Callable:
         """Decorates a function so that it will have graph-tracking suspended

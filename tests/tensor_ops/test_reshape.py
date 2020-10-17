@@ -7,6 +7,7 @@ import pytest
 from hypothesis import assume, given
 from numpy.testing import assert_array_equal
 
+import mygrad as mg
 from mygrad import reshape
 from mygrad.tensor_base import Tensor
 
@@ -47,6 +48,77 @@ def in_place_reshape(arr, newshape, reshaper, **kwargs):
     if isinstance(arr, Tensor) and kwargs.get("constant", False):
         arr._constant = True
     return arr
+
+
+def test_in_place_reshape_no_autodiff():
+    x = mg.arange(10.0)
+    with mg.no_autodiff:
+        x.shape = (5, 2)
+    assert x.shape == (5, 2)
+    assert x.creator is None
+
+
+def test_raising_during_inplace_reshape_doesnt_corrupt_graph():
+    x = mg.arange(5.0)
+    y = +x
+    w = 2 * y
+    with pytest.raises(ValueError):
+        y.shape = (2, 3)
+    w.backward()
+    assert_array_equal(w.grad, np.ones_like(w))
+    assert_array_equal(y.grad, 2 * np.ones_like(y))
+    assert_array_equal(x.grad, 2 * np.ones_like(y))
+
+
+def test_inplace_reshape_1():
+    x = mg.arange(10.0)
+    y = x[...]
+    x.shape = (2, 5)
+    assert x.shape == (2, 5)
+    assert y.shape == (10,)
+    y.backward()
+    assert_array_equal(x.grad, np.ones_like(x))
+
+
+def test_inplace_reshape_2():
+    x0 = mg.arange(10.0)
+    x = +x0
+    y = x[:6]
+    x[-6:] = y
+    y.shape = (3, 2)
+    y.shape = (1, 6)
+    x.shape = (2, 5)
+
+    (2 * y).sum().backward()
+
+    # assert x.shape == (2, 5)
+    x_grad = np.zeros(10, dtype=x.dtype)
+    x_grad[:6] = 2.0
+    assert_array_equal(x.grad, x_grad.reshape(x.shape))
+    assert_array_equal(y.grad, 2 * np.ones_like(y))
+
+
+def test_inplace_reshape_3():
+    x0 = mg.arange(10.0)
+    x = +x0
+    y = x[:5]
+    x.shape = (2, 5)
+    x[:1] = y[::-1]
+    assert_array_equal(x0, mg.arange(10.0))
+    assert_array_equal(
+        x, np.array([[4.0, 3.0, 2.0, 1.0, 0.0], [5.0, 6.0, 7.0, 8.0, 9.0]])
+    )
+    assert_array_equal(y, np.array([4.0, 3.0, 2.0, 1.0, 0.0]))
+
+    (x[0] * y).sum().backward()
+
+    assert_array_equal(
+        x0.grad, np.array([0.0, 2.0, 4.0, 6.0, 8.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+    )
+    assert_array_equal(
+        x.grad, np.array([[8.0, 6.0, 4.0, 2.0, 0.0], [0.0, 0.0, 0.0, 0.0, 0.0]])
+    )
+    assert_array_equal(y.grad, np.array([4.0, 3.0, 2.0, 1.0, 0.0]))
 
 
 @given(
