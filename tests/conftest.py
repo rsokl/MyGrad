@@ -15,7 +15,7 @@ settings.register_profile("debug", max_examples=10, verbosity=Verbosity.verbose)
 settings.load_profile(os.getenv("HYPOTHESIS_PROFILE", "default"))
 
 
-@pytest.fixture()
+@pytest.fixture(autouse=True)
 def seal_memguard() -> bool:
     """Ensure test cannot mutate MEM_GUARD value"""
     initial_value = lock.MEM_GUARD
@@ -23,11 +23,12 @@ def seal_memguard() -> bool:
     yield initial_value
     if lock.MEM_GUARD is not initial_value:
         warnings.warn("test toggled MEM_GUARD value")
+        assert False
 
     lock.MEM_GUARD = initial_value
 
 
-@pytest.fixture()
+@pytest.fixture(autouse=True)
 def seal_graph_tracking() -> bool:
     """Ensure test cannot mutate TRACK_GRAPH value"""
     initial_value = track.TRACK_GRAPH
@@ -35,6 +36,7 @@ def seal_graph_tracking() -> bool:
 
     if track.TRACK_GRAPH is not initial_value:
         warnings.warn("test toggled TRACK_GRAPH value")
+        assert False
 
     track.TRACK_GRAPH = initial_value
 
