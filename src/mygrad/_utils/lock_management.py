@@ -130,6 +130,11 @@ def _release_lock_on_arr_writeability(arr: np.ndarray):
             # we no longer need to track the array
             arr.flags.writeable = True
             _array_tracker.pop(arr_id, None)
+            if not _array_tracker and _views_waiting_for_unlock:
+                # If no arrays are being tracked, then there can't
+                # be any views waiting to be unlocked.
+                # Clean up!
+                _views_waiting_for_unlock.clear()
     elif num_active_ops > 0:
         _array_counter[arr_id] = num_active_ops - 1
 
