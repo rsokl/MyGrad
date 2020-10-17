@@ -18,6 +18,7 @@ from pytest import raises
 
 from mygrad import Tensor, add, multiply
 from mygrad.errors import InvalidBackprop
+from tests.utils import clear_all_mem_locking_state
 
 from .simple_graph import Node, _add, _multiply
 
@@ -123,6 +124,9 @@ class GraphCompare(RuleBasedStateMachine):
                     err_msg=_node_ID_str(num),
                 )
             assert not t._accum_ops, _node_ID_str(num)
+
+    def teardown(self):
+        clear_all_mem_locking_state()
 
 
 TestGraphComparison = GraphCompare.TestCase

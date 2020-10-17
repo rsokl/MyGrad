@@ -2,8 +2,8 @@
 Provides utilities responsible for locking/releasing array writeability.
 """
 import os
-from collections import Counter
-from typing import TYPE_CHECKING, Dict, Generator, Iterable
+from collections import Counter, defaultdict
+from typing import TYPE_CHECKING, DefaultDict, Dict, Generator, Iterable
 from weakref import ref
 
 import numpy as np
@@ -11,6 +11,8 @@ import numpy as np
 from mygrad._utils import ContextTracker, WeakRefIterable
 
 if TYPE_CHECKING:  # pragma: no cover
+    from typing import Set
+
     from mygrad import Tensor
     from mygrad._utils import WeakRef
 
@@ -22,7 +24,9 @@ _array_tracker = dict()  # type: Dict[int, WeakRef[Tensor]]
 
 # maps base-array ID to ID of view that can't be unlocked until
 # base is unlocked
-_views_waiting_for_unlock = dict()  # type: Dict[int, int] # base-id -> view-id
+_views_waiting_for_unlock = defaultdict(
+    set
+)  # type: DefaultDict[int, Set[int]] # base-id -> set of view-ids
 
 __all__ = [
     "lock_arr_writeability",
@@ -58,7 +62,11 @@ def lock_arr_writeability(arr: np.ndarray, force_lock: bool = False) -> np.ndarr
         The locked array"""
     arr_id = id(arr)
     if not array_is_tracked(arr):
-        if not force_lock and not arr.flags.writeable:
+        if (
+            not force_lock
+            and not arr.flags.writeable
+            and (arr.base is None or not array_is_tracked(arr.base))
+        ):
             # array is natively read-only; don't do anything
             return arr
         # keeps track of array so we can clean up the array
@@ -117,11 +125,16 @@ def _release_lock_on_arr_writeability(arr: np.ndarray):
             # Array is view and must wait until its base is released
             # before it can be unlocked
             # Thus we are still tracking this array
-            _views_waiting_for_unlock[id(arr.base)] = arr_id
+            _views_waiting_for_unlock[id(arr.base)].add(arr_id)
         else:
             # we no longer need to track the array
             arr.flags.writeable = True
             _array_tracker.pop(arr_id, None)
+            if not _array_tracker and _views_waiting_for_unlock:
+                # If no arrays are being tracked, then there can't
+                # be any views waiting to be unlocked.
+                # Clean up!
+                _views_waiting_for_unlock.clear()
     elif num_active_ops > 0:
         _array_counter[arr_id] = num_active_ops - 1
 
@@ -137,21 +150,31 @@ def _release_lock_on_arr_writeability(arr: np.ndarray):
         #    or view is involved in new op
         #    or view can now get unlocked
         # under all conditions view will no longer be waiting to be unlocked
-        view_arr_id = _views_waiting_for_unlock.pop(arr_id)
+        for view_arr_id in tuple(_views_waiting_for_unlock[arr_id]):
 
-        if _array_counter[view_arr_id] > 0:
-            # view involved in new op
-            return
+            if _array_counter[view_arr_id] > 0:
+                # view involved in new op
+                continue
 
-        try:
-            view_arr = _array_tracker.pop(view_arr_id)()
-            if view_arr is None:
-                return
-        except KeyError:
-            # view array is no longer available for unlocking
-            return
+            _views_waiting_for_unlock[arr_id].remove(view_arr_id)
 
-        view_arr.flags.writeable = True
+            try:
+                view_arr = _array_tracker.pop(view_arr_id)()
+                if view_arr is None:
+                    continue
+            except KeyError:
+                # view array is no longer available for unlocking
+                continue
+
+            try:
+                view_arr.flags.writeable = True
+            except ValueError:  # pragma: no cover
+                # sometimes this raises.. but it is not
+                # reproducible and is very rare
+                pass
+
+        if not _views_waiting_for_unlock[arr_id]:
+            _views_waiting_for_unlock.pop(arr_id)
 
 
 def release_writeability_lock_on_op(arr_refs: WeakRefIterable[np.ndarray]):

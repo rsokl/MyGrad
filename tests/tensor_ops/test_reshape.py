@@ -229,6 +229,12 @@ def test_input_validation(bad_input):
         x.reshape(*bad_input)
 
 
+# This test has really weird behavior
+# Something is preventing the except-clause
+# in Tensor._op to run
+# Turn mem-guard off to prevent the leak caused
+# by this
+@mg.mem_guard_off
 def test_input_validation_matches_numpy():
     try:
         np.reshape(np.array(1), *(1, 1))

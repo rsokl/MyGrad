@@ -7,6 +7,7 @@ from numpy.testing import assert_allclose
 import mygrad as mg
 from mygrad import Tensor
 from mygrad.operation_base import Operation
+from tests.utils import clear_all_mem_locking_state
 
 from .uber import backprop_test_factory, fwdprop_test_factory
 
@@ -80,6 +81,7 @@ def test_arr_from_kwargs(args_as_kwargs):
         assert KWARG1.passed
 
 
+@mg.mem_guard_off
 def test_catches_bad_fwd_pass():
     def mul2(x, constant=False):
         return mg.multiply(x, 2, constant=constant)
@@ -109,6 +111,7 @@ def test_catches_output_not_tensor():
         should_catch_error()
 
 
+@mg.mem_guard_off
 def test_catches_bad_constant_propagation():
     def mul2(x, constant=False):
         return mg.multiply(x, 2, constant=False)
@@ -122,6 +125,7 @@ def test_catches_bad_constant_propagation():
         should_catch_error()
 
 
+@mg.mem_guard_off
 def test_catches_mutation_error():
     class Mul2_Mutate(Operation):
         def __call__(self, tensor: Tensor):
@@ -164,6 +168,7 @@ def test_catches_numpy_view_mygrad_copy():
         should_catch_error()
 
 
+@mg.mem_guard_off
 def test_catches_numpy_copy_mygrad_view():
     def copy(x, constant):
         return mg.reshape(x, x.shape, constant=constant)
@@ -182,6 +187,7 @@ def test_catches_numpy_copy_mygrad_view():
         should_catch_error()
 
 
+@mg.mem_guard_off
 def test_bad_constant_propagation():
     def bad_const_prop(x, y, z, constant=False):
         if not constant and any(not i.constant for i in [x, y, z]):
@@ -320,6 +326,8 @@ def tests_catches_input_tensors_memory_not_locked_by_op():
     with pytest.raises(AssertionError):
         should_catch_error()
 
+    clear_all_mem_locking_state()
+
 
 def tests_catches_output_tensors_memory_not_locked_by_op():
     def mul_releases_output_lock(x, y, constant=False):
@@ -336,3 +344,5 @@ def tests_catches_output_tensors_memory_not_locked_by_op():
 
     with pytest.raises(AssertionError):
         should_catch_error()
+
+    clear_all_mem_locking_state()

@@ -7,7 +7,7 @@ import pytest
 from hypothesis import example, given, settings
 from numpy.testing import assert_allclose
 
-from mygrad import matmul, no_autodiff
+from mygrad import matmul, mem_guard_off, no_autodiff
 from mygrad.nnet.activations import sigmoid, tanh
 from mygrad.nnet.layers import gru
 from mygrad.tensor_base import Tensor
@@ -28,6 +28,7 @@ from tests.utils import does_not_raise
     dropout=st.floats(0, 1),
     out_constant=st.booleans(),
 )
+@mem_guard_off
 def test_nonconstant_s0_raises(s0, dropout: float, out_constant: bool):
     T, N, C, D = 5, 1, 3, 2
     X = Tensor(np.random.rand(T, N, C))
@@ -57,6 +58,7 @@ def test_nonconstant_s0_raises(s0, dropout: float, out_constant: bool):
 
 @settings(deadline=None)
 @given(out_constant=st.booleans())
+@mem_guard_off
 def test_all_constant(out_constant: bool):
     T, N, C, D = 5, 1, 3, 2
     X = Tensor(np.random.rand(T, N, C), constant=True)
@@ -95,6 +97,7 @@ def test_all_constant(out_constant: bool):
 )
 @pytest.mark.filterwarnings("ignore: overflow encountered in exp")
 @pytest.mark.filterwarnings("ignore: overflow encountered in sig")
+@mem_guard_off
 def test_gru_fwd(X, D, dropout, dtypes, data: st.DataObject):
     T, N, C = X.shape
 
@@ -245,6 +248,7 @@ def test_gru_fwd(X, D, dropout, dtypes, data: st.DataObject):
     assert_allclose(X.data, X2.data, **tolerances)
 
     ls.clear_graph()
+    ls2.clear_graph()
 
     for x in [s, Wz, Wr, Wh, bz, br, bh, X, Uz, Ur, Uh, V]:
         assert not x._ops
@@ -473,9 +477,6 @@ def test_gru_backward(
         assert_allclose(X.grad, X2.grad, **tolerances)
     else:
         assert X.grad is None
-
-    ls.clear_graph()
-    ls2.clear_graph()
 
     for x in [s, Wz, Wr, Wh, bz, br, bh, X, Uz, Ur, Uh, V]:
         assert not x._ops

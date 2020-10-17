@@ -1,8 +1,6 @@
-import gc
 from typing import Callable, List, Tuple
 
 import hypothesis.strategies as st
-import pytest
 from hypothesis import given, settings
 from hypothesis.stateful import Bundle, RuleBasedStateMachine, rule
 from numpy.testing import assert_array_equal
@@ -11,6 +9,7 @@ import mygrad as mg
 from mygrad import Tensor
 from mygrad._utils.duplicating_graph import DuplicatingGraph, Node
 from tests.custom_strategies import tensors
+from tests.utils import clear_all_mem_locking_state
 
 
 @given(x=tensors(read_only=st.booleans()))
@@ -203,6 +202,8 @@ class GraphDuplicationCompare(RuleBasedStateMachine):
                 assert (
                     t.creator.variables[0] is node.placeholder
                 ), "graph was not redirected consistently"
+
+        clear_all_mem_locking_state()  # don't leak state into other tests
 
 
 TestGraphComparison = GraphDuplicationCompare.TestCase

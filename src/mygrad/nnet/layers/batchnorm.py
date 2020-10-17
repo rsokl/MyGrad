@@ -42,12 +42,13 @@ class BatchNorm(Operation):
         normed_dims = tuple(i for i in range(x.ndim) if i != 1)
         keepdims_shape = tuple(1 if n != 1 else d for n, d in enumerate(x.shape))
 
+        self.variables = tuple(i for i in (x, gamma, beta))
+
         if gamma.size == 0:
             gamma = None
         if beta.size == 0:
             beta = None
 
-        self.variables = tuple(i for i in (x, gamma, beta) if i is not None)
         self.gamma = gamma
         self.beta = beta
 
