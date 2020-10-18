@@ -250,11 +250,11 @@ class GRUnit(Operation):
 
         _gru_layer(out, z, r, h, Wz, Wr, Wh)
 
-        self._z = Tensor(z, _creator=self)
-        self._r = Tensor(r, _creator=self)
-        self._h = Tensor(h, _creator=self)
+        self._z = z
+        self._r = r
+        self._h = h
 
-        return Tensor(out, _creator=self)
+        return out
 
     def backward_var(self, grad, index, **kwargs):
         raise SkipGradient("Gradient computed in GRU.backward()")
@@ -265,9 +265,9 @@ class GRUnit(Operation):
             assert False, "should be unreachable"
 
         s = hidden_seq.data[:-1]
-        z = self._z.data
-        r = self._r.data
-        h = self._h.data
+        z = self._z
+        r = self._r
+        h = self._h
 
         dLds = grad[1:].astype(self.type, copy=False)
 
