@@ -281,6 +281,8 @@ def test_memguard_decorator(memguard_decorator: Callable, expected_value: bool):
 def assert_nested_contexts_are_consistent():
     initial = mem.MEM_GUARD
     with mem_guard_on:
+        assert mem.MEM_GUARD is True
+
         with mem_guard_off:
             assert mem.MEM_GUARD is False
 
@@ -288,6 +290,8 @@ def assert_nested_contexts_are_consistent():
                 assert mem.MEM_GUARD is True
 
             assert mem.MEM_GUARD is False
+
+        assert mem.MEM_GUARD is True
 
     assert mem.MEM_GUARD is initial
 
@@ -325,7 +329,6 @@ def compose(iter_of_funcs):
     return f
 
 
-@pytest.mark.usefixtures("seal_memguard")
 @given(st.lists(st.sampled_from([mem_guard_on, mem_guard_off]), min_size=0))
 def test_nested_contexts(sequence_of_contexts):
     f = (
@@ -334,6 +337,7 @@ def test_nested_contexts(sequence_of_contexts):
         else assert_nested_contexts_are_consistent
     )
     f()
+    turn_memory_guarding_on()  # make sure to restore global state
 
 
 @pytest.mark.usefixtures("seal_memguard")
@@ -345,7 +349,7 @@ def test_documented_mutation():
     x[:] = 0  # mutates x, corrupting state associated with z
     z.backward()
     assert y.grad.sum() == 0.0
-    turn_memory_guarding_on()
+    turn_memory_guarding_on()  # make sure to restore global state
 
 
 @pytest.mark.usefixtures("seal_memguard")
@@ -390,4 +394,4 @@ def test_turn_memory_guarding_on_off(calls: List[Callable]):
         call()
         assert mg.mem_guard_active() is mem.MEM_GUARD
 
-    turn_memory_guarding_on()
+    turn_memory_guarding_on()  # make sure to restore global state
