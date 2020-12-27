@@ -955,7 +955,68 @@ class Tensor:
         # was participating in. This ensures that the stateful computational graph
         # is not corrupted by this mutation.
         #
-        # Once the placeholders have
+        # Once the placeholders have been created, they have permanently replaced the
+        # rolls of their counterparts within the computational graph. Furthermore, they
+        # exist only internally to the computational graph and thus cannot be the targets
+        # of subsequent views or in-place updates.
+        #
+        # At this point, the "original" tensors merely reserve the publicly-available
+        # Tensor-instances (husks) that the users will access. We eventually need to
+        # populate these husks with the appropriate augmented contents and graph-history.
+        #
+        # Thus this method will compute the in-place operation on a new tensor, and
+        # will create a new, internal computational graph involving the base tensor
+        # affected by the mutation and any of its view-children. These tensors represent
+        # the mutated tensors that the users expect to have access to.
+        #
+        # We must connect this new computational graph to the preceding one – the one
+        # involving the placeholders; this way we can backpropagate appropriately and
+        # through all influencers.
+        #
+        # Finally we mirror each of these new tensors into the husks of the publically
+        # -available tensors and reroute the computational graph through them so that
+        # the user sees that all of the relevant tensors have been augmented, and that
+        # they are connected to the appropriate "history" such that backprop occurs
+        # without error or inaccuracy.
+        #
+        #
+        # For illustration, consider the following graph:
+        #
+        # ... x------[square]-- y = x**2
+        #        \
+        #         ---[slice]-- z = view-x
+        #                              \
+        #                               ---[mul]-- w = 3 * z
+        #
+        # Now suppose that we mutate `x` with `x[:] = 0`. This is a simpler case than
+        # mutating a view of `x`, since `x` is already the base tensor.
+        #  - This should not affect `y` nor backprop through `y`
+        #  - It should affect `view_x` and backprop through `view_x`
+        #  - It should *not* affect `w`, which depends on `view-x`
+        #
+        #
+        # As prescribed above, we will make the placeholders: px and pz, and we
+        # will reroute the operations that statically depend on the old values of x and z
+        # through these placeholders.
+        #
+        # Next we will have `x` point to a mutated version of itself, in accord with the
+        # in-place update being performed, and we will subsequently recreate any
+        # views of x (i.e. z), based off of this mutated tensor.
+        #
+        # The resulting graph is:
+        #
+        #                             ---[slice]-- z = view-x
+        #                            /
+        #        -----[set-item] -- x = px.copy()[:]=0
+        #       /
+        # ... px------[square]-- y = px**2
+        #        \
+        #         ---[slice]-- pz = view-px
+        #                              \
+        #                               ---[mul]-- w = 3 * pz
+        #
+        # Note that px and pz are strictly *internal* tensors; they cannot be accessed for
+        # use in any further operations, whereas `x` and `z` are available for further use.
 
         # Replace base and all of its views with "placeholder" tensors;
         # there will serve as internal references to all tensors pre-mutation
