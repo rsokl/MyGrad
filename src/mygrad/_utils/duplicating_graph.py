@@ -13,8 +13,10 @@ T = TypeVar("T")
 def mirror_tensor(*, target: "Tensor", source: "Tensor"):
     """ *Dev use only*
 
-    Points all of the attributes of ``self`` to those of
-    ``tensor`` so that they reference all of the same data structures.
+    Creates a shallow copy of attribute dictionary of ``self`` and assigns
+    it to``tensor``, so that ``tensor`` has the same state as ``self`` and
+    points to the same array data.
+
     This is used to facilitate "in-place" operations.
     """
     target.__dict__ = source.__dict__.copy()
@@ -36,6 +38,8 @@ def make_placeholder_tensor(
 ) -> "Tensor":
     """
     Creates a tensor that stands in the place of `original` in the computational graph.
+    This does not create a copy of the array-data held by original; the mirrored tensor
+    points to the same data.
 
     The resulting tensor should never be exposed to the user; it is used to accommodate
     in-place operations.
@@ -89,7 +93,10 @@ class DuplicatingGraph:
     """
 
     def _duplicate_graph(self, tensor: "Tensor"):
-        """Recursively creates placeholders for all views downstream of `tensor`"""
+        """Recursively creates placeholders for all views downstream of `tensor`.
+
+        Upon completion, the existing computational graph involves only placeholders.
+        Note that the placeholders and original tensors point to the same array-data."""
         if not tensor._view_children:
             self.leafs.add(id(tensor))
             return
