@@ -973,7 +973,7 @@ class Tensor:
         # involving the placeholders; this way we can backpropagate appropriately and
         # through all influencers.
         #
-        # Finally we mirror each of these new tensors into the husks of the publically
+        # Finally we mirror each of these new tensors into the husks of the publicly
         # -available tensors and reroute the computational graph through them so that
         # the user sees that all of the relevant tensors have been augmented, and that
         # they are connected to the appropriate "history" such that backprop occurs
@@ -990,9 +990,10 @@ class Tensor:
         #
         # Now suppose that we mutate `x` with `x[:] = 0`. This is a simpler case than
         # mutating a view of `x`, since `x` is already the base tensor.
-        #  - This should not affect `y` nor backprop through `y`
-        #  - It should affect `view_x` and backprop through `view_x`
-        #  - It should *not* affect `w`, which depends on `view-x`
+        #  - This should not affect `y`
+        #  - It should affect `view_x`
+        #  - It should *not* affect `w`, which depends on `view_x` in a "static" way.
+        #    I.e. the value for `w` is already resolved and is not a view of z or x.
         #
         #
         # As prescribed above, we will make the placeholders: px and pz, and we
@@ -1062,51 +1063,63 @@ class Tensor:
             raise e
 
         if out.base is in_place_target:
-            # `out` is the result of the in-place update and represents
-            # the augmented base of the graph.
-            #
             # Because `out` and `in_place_target` hold the same ndarray,
             # `out` was marked as a view of `in_place_target`. However,
-            # this relationship
+            # this is not a true "base/view-child" relationship but merely
+            # an edge case not accommodated by `Tensor._op` when determining
+            # base/view relationships. Thus `out` should not be considered a
+            # view under these circumstances.
             out._base = None
             pass
 
-        # base has been mutated; it must be "connected" to the graph
-        # that produced it
+        # The base of the new graph has been mutated; it must be "connected" to
+        # the upstream graph that produced it
         if self.base is None:
+            # The base tensor itself was the target of the in-place operation,
+            # thus we need simply connect the mutated base downstream of the
+            # placeholder base.
 
             # Even though the operation occurred in-place, the computational
-            # graph represents this as `placeholder -(op)-> out`
+            # graph must represent this as `placeholder -[inplace-op]-> mutated-base`
+            # instead of `mutated-base -[inplace-op] -> mutated-base`
+            #
+            # Put placeholder-base as an input variable to InplaceOp
             variables = tuple(
                 var if var is not in_place_target else graph.base.placeholder
                 for var in out.creator.variables
             )
             out.creator.variables = variables
 
+            # Tell placeholder-base that it participated in this op
             graph.base.placeholder._ops.add(ReferenceType(out.creator))
+
+            # The original base now points to the augmented array data
+            # and has the InPlaceOp as its creator
             _dup.mirror_tensor(source=out, target=graph.base.tensor)
-            _dup.reroute_ops_through(source=out, target=graph.base.tensor)
+
+            # The original base is now participating
             del out  # remove reference so we can re-lock data
 
-            # re-lock data associated with base; de-referencing `out`
-            # unlocked it
-            unique_arrs = tuple(
-                _mem.lock_arr_writeability(arr)
-                for arr in _mem.unique_arrs_and_bases(
-                    graph.base.tensor.creator.variables
+            if _mem.MEM_GUARD:
+                # The original base is participating in a new op, which must be
+                # tracked by the array-locking mechanism
+                unique_arrs = tuple(
+                    _mem.lock_arr_writeability(arr)
+                    for arr in _mem.unique_arrs_and_bases(
+                        graph.base.tensor.creator.variables
+                    )
                 )
-            )
-            _mem.lock_arr_writeability(graph.base.tensor.data, force_lock=True)
-            tensor_refs = WeakRefIterable(unique_arrs)
-            tensor_refs.append(graph.base.tensor.data)
-            finalize(
-                graph.base.tensor.creator,
-                _mem.release_writeability_lock_on_op,
-                tensor_refs,
-            )
+                _mem.lock_arr_writeability(graph.base.tensor.data, force_lock=True)
+                tensor_refs = WeakRefIterable(unique_arrs)
+                tensor_refs.append(graph.base.tensor.data)
+                finalize(
+                    graph.base.tensor.creator,
+                    _mem.release_writeability_lock_on_op,
+                    tensor_refs,
+                )
 
-            assert graph.base.tensor.data.flags.writeable is False
-            # TODO: Attach view children to self
+                assert graph.base.tensor.data.flags.writeable is False
+
         else:  # pragma: no cover
             # in-place operation occurs on a view; must connect mutated base
             # to graph and then reproduce downstream views

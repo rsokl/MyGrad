@@ -104,6 +104,19 @@ def test_respects_original_writeability(x: Tensor, as_view: bool):
         x[...] = 0
 
 
+@pytest.mark.parametrize("constant", [True, False])
+def test_respects_disabled_memguard(constant: bool):
+    x = mg.arange(1.0, 5.0, constant=constant)
+    y = +x
+    with mg.mem_guard_off:
+        y[...] = 0
+    assert x.data.flags.writeable is False
+    assert y.data.flags.writeable is True
+    y.backward()
+    assert x.data.flags.writeable is True
+    assert y.data.flags.writeable is True
+
+
 @pytest.mark.parametrize(
     "target_op",
     [
