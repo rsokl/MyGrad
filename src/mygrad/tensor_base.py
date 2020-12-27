@@ -41,7 +41,7 @@ __all__ = ["Tensor", "asarray"]
 
 
 def _is_view_of(parent: "Tensor", child: np.ndarray) -> bool:
-    if np.shares_memory(parent, child):
+    if (parent.data is child) or np.shares_memory(parent.data, child):
         return True
     elif child.size == 0 and child.base is not None:
         if (child.base is parent.data) or (child.base is parent.data.base):
@@ -949,10 +949,20 @@ class Tensor:
                 op_kwargs=op_kwargs,
                 constant=constant,
             )
+        # The way that in-place updates work in MyGrad is that any tensor that
+        # is about to undergo a mutation gets "cloned". Each resulting "placeholder"
+        # is used to represent that tensor in any non-view operations that the tensor
+        # was participating in. This ensures that the stateful computational graph
+        # is not corrupted by this mutation.
+        #
+        # Once the placeholders have
 
         # Replace base and all of its views with "placeholder" tensors;
         # there will serve as internal references to all tensors pre-mutation
-        # and will preserve ops relying on the un-mutated tensors
+        # and will preserve ops relying on the un-mutated tensors.
+        #
+        # These placeholder tensors are never publicly-available and thus cannot
+        # be involved directly in future in-place updates
         graph = _dup.DuplicatingGraph(self if self.base is None else self.base)
 
         # Create copy of base so that mutation has no impact on the
@@ -971,7 +981,7 @@ class Tensor:
             for node in graph.get_path_to_base(self)[::-1][1:]:  # skip base
                 in_place_target = node.tensor._replay_op(in_place_target)
 
-        if in_place_target.size:
+        if in_place_target.size:  # TODO: Remove this check
             assert np.shares_memory(in_place_target, base)
 
         try:
@@ -991,12 +1001,21 @@ class Tensor:
             raise e
 
         if out.base is in_place_target:
+            # `out` is the result of the in-place update and represents
+            # the augmented base of the graph.
+            #
+            # Because `out` and `in_place_target` hold the same ndarray,
+            # `out` was marked as a view of `in_place_target`. However,
+            # this relationship
             out._base = None
+            pass
 
         # base has been mutated; it must be "connected" to the graph
         # that produced it
         if self.base is None:
 
+            # Even though the operation occurred in-place, the computational
+            # graph represents this as `placeholder -(op)-> out`
             variables = tuple(
                 var if var is not in_place_target else graph.base.placeholder
                 for var in out.creator.variables
