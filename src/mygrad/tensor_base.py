@@ -949,6 +949,8 @@ class Tensor:
                 op_kwargs=op_kwargs,
                 constant=constant,
             )
+        #
+        # **********************************************************************************
         # The way that in-place updates work in MyGrad is that any tensor that
         # is about to undergo a mutation gets "cloned". Each resulting "placeholder"
         # is used to represent that tensor in any non-view operations that the tensor
@@ -1018,7 +1020,9 @@ class Tensor:
         #
         # Note that px and pz are strictly *internal* tensors; they cannot be accessed for
         # use in any further operations, whereas `x` and `z` are available for further use.
-
+        #
+        # **********************************************************************************
+        #
         # Replace base and all of its views with "placeholder" tensors;
         # there will serve as internal references to all tensors pre-mutation
         # and will preserve ops relying on the un-mutated tensors.
@@ -1131,6 +1135,9 @@ class Tensor:
         #
         # Note that iterating in a topologically-ordered way is critical
         # here: each parent is updated before creating one of its children
+        #
+        # Iteration is always based off of the placeholders' relative positions
+        # in the graph since this will never be mutated.
         for node in graph:
             if node.parent is None:
                 continue
