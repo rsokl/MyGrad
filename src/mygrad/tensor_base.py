@@ -723,8 +723,14 @@ class Tensor:
             Raises if `_backward` triggered on a tensor with gradient of `None`.
         """
         assert self.grad is not None, (
-            "backprop, post grad-accumulation, was triggered "
-            "on a tensor with no gradient"
+            f"backprop, post grad-accumulation, was triggered "
+            f"on a tensor with no gradient"
+            f"\n{self}"
+            f"\nid {id(self._ops)}"
+            f"\ngrad: {self.grad}"
+            f"\ncreator: {self.creator}"
+            f"\nops: {self._ops}"
+            f"\nbase: {self.base}"
         )
         assert self.grad.shape == self.shape, (
             f"A tensor and its associated gradient must possess the same shape. Got:"
@@ -1030,7 +1036,7 @@ class Tensor:
         # **********************************************************************************
         #
         # Replace base and all of its views with "placeholder" tensors;
-        # there will serve as internal references to all tensors pre-mutation
+        # they serve as internal references to all tensors pre-mutation
         # and will preserve ops relying on the un-mutated tensors.
         #
         # These placeholder tensors are never publicly-available and thus cannot
@@ -1051,16 +1057,15 @@ class Tensor:
         inplace_target = mutant_base
 
         # stores view-fn sequence from base -> in-place target
-        view_fn_sequence: WeakRefIterable[
-            Callable[[np.ndarray], np.ndarray]
-        ] = WeakRefIterable()
+        view_fn_sequence: List[Callable[[np.ndarray], np.ndarray]] = []
 
         with _track.no_autodiff:
             # get view sequence from base -> in-place target
             for node in graph.get_path_to_base(self)[::-1][1:]:  # skip base
-                f = node.tensor._replay_op
+                # need to point to place-holder replay op to avoid creating
+                # forwards references to downstream tensors
+                f = node.placeholder._replay_op
                 if self.base is not None:
-                    pass
                     # need sequence of view-ops
                     view_fn_sequence.append(_track.no_autodiff(f, to_numpy=True))
                 inplace_target = f(inplace_target)
