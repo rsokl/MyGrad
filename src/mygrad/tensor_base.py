@@ -1051,19 +1051,25 @@ class Tensor:
         inplace_target = mutant_base
 
         # stores view-fn sequence from base -> in-place target
-        view_fn_sequence: List[Callable[[np.ndarray], np.ndarray]] = []
+        view_fn_sequence: WeakRefIterable[
+            Callable[[np.ndarray], np.ndarray]
+        ] = WeakRefIterable()
 
         with _track.no_autodiff:
             # get view sequence from base -> in-place target
             for node in graph.get_path_to_base(self)[::-1][1:]:  # skip base
                 f = node.tensor._replay_op
                 if self.base is not None:
+                    pass
                     # need sequence of view-ops
                     view_fn_sequence.append(_track.no_autodiff(f, to_numpy=True))
                 inplace_target = f(inplace_target)
 
         if inplace_target.size:  # TODO: Remove this check
             assert np.shares_memory(inplace_target, mutant_base)
+
+        mutant_base_data = mutant_base.data
+        del mutant_base
 
         try:
             with _mem.mem_guard_off:
@@ -1080,8 +1086,6 @@ class Tensor:
         except Exception as e:
             graph.restore_old_graph()
             raise e
-
-        print(inplace_target, placeholder_mutant_view)
 
         if placeholder_mutant_view.base is inplace_target:
             # Because `out` and `in_place_target` hold the same ndarray,
@@ -1123,7 +1127,6 @@ class Tensor:
             # thus we need simply mirror original base against the mutant placeholder.
             # This effectively connects the original base to the placeholder graph
             mutant_base = placeholder_mutant_view
-            del placeholder_mutant_view  # remove reference so we can re-lock data
 
         else:
             # in-place operation occurred on a view; must connect mutated base
@@ -1148,10 +1151,12 @@ class Tensor:
                 op_kwargs=dict(
                     # Copy to avoid upstream placeholder mutant view sharing memory
                     # with downstream mutant base
-                    mutant_base_data=mutant_base.data.copy(),
+                    mutant_base_data=mutant_base_data,
                     view_fn_sequence=view_fn_sequence,
                 ),
             )
+
+        del placeholder_mutant_view
 
         # The original base now points to the augmented array data
         # and has the InPlaceOp as its creator

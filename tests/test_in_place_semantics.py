@@ -11,38 +11,47 @@ from mygrad import Tensor
 from tests.custom_strategies import tensors
 
 
-def test_raising_during_in_place_op_doesnt_corrupt_graph():
+@pytest.mark.parametrize("inplace_on_view", [True, False])
+def test_raising_during_in_place_op_doesnt_corrupt_graph(inplace_on_view: bool):
     x = mg.arange(1.0, 5.0)
-    y = 2 * x
+    y_base = 2 * x
+
+    y = y_base[...] if inplace_on_view else y_base
+
     w = y[...]
     with pytest.raises(ValueError):
         y[:2] = y  # shape mismatch
 
     (2 * w).backward()
-    assert y.base is None
-    assert w.base is y
+    assert (y.base is y_base) if inplace_on_view else (y.base is None)
+    assert w.base is y_base
     assert np.shares_memory(w, y)
     assert_allclose(w.grad, 2 * np.ones_like(y))
     assert_allclose(y.grad, 2 * np.ones_like(y))
     assert_allclose(x.grad, 4 * np.ones_like(y))
 
 
+@pytest.mark.parametrize("inplace_on_view", [True, False])
 @pytest.mark.parametrize("constant", [True, False])
-def test_in_place_op_propagates_to_views(constant: bool):
+def test_in_place_op_propagates_to_views(constant: bool, inplace_on_view: bool):
     x = mg.arange(1.0, 5.0, constant=constant)
-    y = +x
+    y_base = +x
+    y = y_base[...] if inplace_on_view else y_base
 
     view1 = y[...]
     view2 = view1[...]  # view of view
     y[:2] = -1  # should mutate all views
-    assert y.base is None
-    assert view1.base is y
-    assert view2.base is y
+    assert y_base.base is None
+    if inplace_on_view:
+        assert y.base is y_base
+    assert view1.base is y_base
+    assert view2.base is y_base
     assert_array_equal(x, mg.arange(1.0, 5.0))
 
-    assert_array_equal(y, [-1.0, -1.0, 3.0, 4.0])
-    assert_array_equal(y, view1)
-    assert_array_equal(y, view2)
+    assert_array_equal(y_base, [-1.0, -1.0, 3.0, 4.0])
+    assert_array_equal(y_base, y)
+    assert_array_equal(y_base, view1)
+    assert_array_equal(y_base, view2)
 
 
 @given(tensors(shape=(4,), constant=False))
