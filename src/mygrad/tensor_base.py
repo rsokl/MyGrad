@@ -1,3 +1,5 @@
+# TODO: Implement grad-view semantics
+
 """
 This module defines the base tensor class along with all of its essential
 attributes and special methods. Public math methods, e.g. ``sum``, ``mean``,
