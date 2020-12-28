@@ -67,7 +67,9 @@ class GetItem(Operation):
 
         self._used_distinct_indices = (
             (
-                np.shares_memory(a.data, out)
+                out.base is not None
+                and (out.base is a.data or out.base is a.data.base)
+                or out.ndim == 0
                 or isinstance(out, Number)
                 or _is_bool_array_index(self.index)
             )
@@ -88,17 +90,17 @@ class GetItem(Operation):
         return out
 
 
-def _arr(*shape):
+def _arr(*shape: int) -> np.ndarray:
     """ Construct an array of a specified consisting of values [0, _arr.size)
-        filled in row-major order.
+    filled in row-major order.
 
-        Parameters
-        ----------
-        *shape : int
+    Parameters
+    ----------
+    *shape : int
 
-        Returns
-        -------
-        numpy.ndarray"""
+    Returns
+    -------
+    numpy.ndarray"""
     return np.arange(np.prod(shape)).reshape(shape)
 
 
@@ -114,25 +116,25 @@ class SetItem(BroadcastableOp):
     def __call__(self, a, b, index):
         """ a[index] = b
 
-            Parameters
-            ----------
-            a : mygrad.Tensor
-                The tensor whose entries are being set. A copy of the underlying
-                data is made if `a` is a non-constant tensor.
+        Parameters
+        ----------
+        a : mygrad.Tensor
+            The tensor whose entries are being set. A copy of the underlying
+            data is made if `a` is a non-constant tensor.
 
-            b : mygrad.Tensor
-                `b` must be broadcast-compatible with `a[index]`
+        b : mygrad.Tensor
+            `b` must be broadcast-compatible with `a[index]`
 
-            index : valid-array-index
-                An n-dimensional index for specifying entries or subregions of `a`.
-                All means of numpy-array indexing (basic, advanced, mixed, etc) are
-                supported.
+        index : valid-array-index
+            An n-dimensional index for specifying entries or subregions of `a`.
+            All means of numpy-array indexing (basic, advanced, mixed, etc) are
+            supported.
 
-            Notes
-            -----
-            Additional computational overhead is required for back-propagation when
-            `index` contains any integer-valued arrays, to accommodate for the scenario
-            in which a single element is set multiple times."""
+        Notes
+        -----
+        Additional computational overhead is required for back-propagation when
+        `index` contains any integer-valued arrays, to accommodate for the scenario
+        in which a single element is set multiple times."""
 
         out = a.data
         self.variables = (a, b)
@@ -160,7 +162,7 @@ class SetItem(BroadcastableOp):
             # being set redundantly, and mask out any elements in `grad` corresponding to
             # the elements in `b` that weren't actually set.
             if (
-                not np.shares_memory(grad_sel, grad)
+                (grad_sel.base is None or not np.shares_memory(grad_sel, grad))
                 and grad_sel.size > 0
                 and grad_sel.ndim > 0
                 and not _is_bool_array_index(self.index)
