@@ -10,12 +10,7 @@ from hypothesis import HealthCheck, given, settings
 from numpy.testing import assert_allclose
 from pytest import raises
 
-from mygrad._utils import (
-    WeakRef,
-    WeakRefIterable,
-    is_invalid_gradient,
-    reduce_broadcast,
-)
+from mygrad._utils import WeakRefIterable, is_invalid_gradient, reduce_broadcast
 from tests.custom_strategies import broadcastable_shapes, everything_except
 
 
