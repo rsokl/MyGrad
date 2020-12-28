@@ -150,7 +150,9 @@ class Operation:
 
                     var.grad = (
                         np.copy(tmp_grad)
-                        if np.may_share_memory(tmp_grad, grad)
+                        # tmp-grad is view of grad; we want to be able to
+                        # augment tmp-grad inplace later
+                        if tmp_grad.base is not None or (tmp_grad is grad)
                         else tmp_grad
                     )
                 else:
