@@ -35,6 +35,7 @@ def test_backprop_clears_graph(x: Tensor):
         note(f"Forward-pass iteration: {num_fwd_pass}")
         y = 2 * x
         f = y + x ** 2
+        f[...] = f[...]
         x ** 3  # no-op
         f.backward()
         if not x.constant:

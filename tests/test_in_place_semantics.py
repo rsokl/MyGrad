@@ -201,12 +201,17 @@ def test_writing_a_view_with_a_view(
     assert dangling_view.data.flags.writeable
 
 
-def test_setitem_preserves_view_children():
-    x = mg.arange(10.0)
-    y = x[...]
-    (view_child,) = x._view_children
+@pytest.mark.parametrize("inplace_on_view", [True, False])
+def test_setitem_preserves_view_children(inplace_on_view: bool):
+    x_base = mg.arange(10.0)
+    y = x_base[...]
+    (view_child,) = x_base._view_children
     assert view_child is y
 
+    x = x_base[...] if inplace_on_view else x_base
     x[...] = y
-    (view_child,) = x._view_children
-    assert view_child is y
+    view_children = set(id(i) for i in x_base._view_children)
+    assert id(y) in view_children
+
+    if inplace_on_view:
+        assert id(x) in view_children
