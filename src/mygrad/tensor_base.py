@@ -41,7 +41,11 @@ __all__ = ["Tensor", "asarray"]
 
 
 def _is_view_of(parent: "Tensor", child: np.ndarray) -> bool:
-    if (parent.data is child) or np.shares_memory(parent.data, child):
+    if (
+        (parent.data is child.base)
+        or (parent.data is child)
+        or (child.base is not None and child.base is parent.data.base)
+    ):
         return True
     elif child.size == 0 and child.base is not None:
         if (child.base is parent.data) or (child.base is parent.data.base):
@@ -1075,6 +1079,8 @@ class Tensor:
             graph.restore_old_graph()
             raise e
 
+        print(inplace_target, placeholder_mutant_view)
+
         if placeholder_mutant_view.base is inplace_target:
             # Because `out` and `in_place_target` hold the same ndarray,
             # `out` was marked as a view of `in_place_target`. However,
@@ -1117,7 +1123,7 @@ class Tensor:
             mutant_base = placeholder_mutant_view
             del placeholder_mutant_view  # remove reference so we can re-lock data
 
-        else:  # pragma: no cover
+        else:
             # in-place operation occurred on a view; must connect mutated base
             # to graph and then reproduce downstream views
             #
