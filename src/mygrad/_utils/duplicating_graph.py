@@ -292,7 +292,10 @@ class UnView(BroadcastableOp):
             for fn in self._view_fn_seq:
                 grad_view = fn(grad)
 
-            assert grad_view.shape == placeholder_mutant_view.shape
+            assert (
+                grad_view.shape == placeholder_mutant_view.shape
+            ), f"{(grad_view.shape, placeholder_mutant_view.shape)}"
+
             return grad_view
 
         else:
