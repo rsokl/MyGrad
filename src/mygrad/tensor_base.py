@@ -1076,32 +1076,40 @@ class Tensor:
             out._base = None
             pass
 
-        # The base of the new graph has been mutated; it must be "connected" to
-        # the upstream graph that produced it
+        # (p denotes internal placeholder, y' denotes mutant)
+        # The current graph:
+        #    vp' --> | inplace | --> vp'
+        # Becomes:
+        #    vp --> | inplace | --> vp'
+        # I.e. the placeholder for the target of the inplace-op is placed upstream
+        # of the mutated placeholder.
+        #
+        # Put placeholder of inplace target as an input variable to InplaceOp
+        variables = tuple(
+            var if var is not in_place_target else graph[self].placeholder
+            for var in out.creator.variables
+        )
+        out.creator.variables = variables
+
+        # Tell placeholder of in-place target that it participated in this op
+        graph[self].placeholder._ops.add(ReferenceType(out.creator))
+
+        # Connect public base tensor to placeholder graph via the mutated placeholder
+        # tensor `out`.
         if self.base is None:
-            # The base tensor itself was the target of the in-place operation,
-            # thus we need simply connect the mutated base downstream of the
-            # placeholder base.
-
-            # Even though the operation occurred in-place, the computational
-            # graph must represent this as `placeholder -[inplace-op]-> mutated-base`
-            # instead of `mutated-base -[inplace-op] -> mutated-base`
+            # The current graph:
+            #    base-p --> | inplace | --> vp'
+            # Becomes:
+            #    base-p --> | inplace | --> base'
             #
-            # Put placeholder-base as an input variable to InplaceOp
-            variables = tuple(
-                var if var is not in_place_target else graph.base.placeholder
-                for var in out.creator.variables
-            )
-            out.creator.variables = variables
-
-            # Tell placeholder-base that it participated in this op
-            graph.base.placeholder._ops.add(ReferenceType(out.creator))
+            # The base tensor itself was the target of the in-place operation,
+            # thus we need simply mirror original base against the mutant placeholder.
+            # This effectively connects the original base to the placeholder graph
 
             # The original base now points to the augmented array data
             # and has the InPlaceOp as its creator
             _dup.mirror_tensor(source=out, target=graph.base.tensor)
 
-            # The original base is now participating
             del out  # remove reference so we can re-lock data
 
             if _mem.MEM_GUARD:
@@ -1125,8 +1133,15 @@ class Tensor:
                 assert graph.base.tensor.data.flags.writeable is False
 
         else:  # pragma: no cover
-            # in-place operation occurs on a view; must connect mutated base
+            # in-place operation occurred on a view; must connect mutated base
             # to graph and then reproduce downstream views
+            #
+            # The current graph:
+            #    vp --> | inplace | --> vp'
+            # Becomes:
+            #    vp --> | inplace | --> vp' --> | unview | --> base'
+            # I.e. the mutant placeholder
+            # Put placeholder of inplace target as an input variable to InplaceOp
             raise NotImplementedError()
 
         # Now that the base-tensor has been incorporated into the graph,
