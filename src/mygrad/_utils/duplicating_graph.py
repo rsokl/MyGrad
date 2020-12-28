@@ -224,8 +224,8 @@ class UnView(BroadcastableOp):
 
     def __call__(
         self,
-        placeholder_mutant_view: "Tensor",
         placeholder_base: "Tensor",
+        placeholder_mutant_view: "Tensor",
         mutant_base_data: ndarray,
         view_fn_sequence: Sequence[Callable[[ndarray], ndarray]],
     ):
@@ -279,7 +279,7 @@ class UnView(BroadcastableOp):
             grad = grad.copy()
             grad_view = grad
             for fn in self._view_fn_seq:
-                grad_view = fn(grad)
+                grad_view = fn(grad_view)
 
             # check that grad_view shares memory with grad
             assert grad_view is grad or grad_view.base is not None
@@ -291,6 +291,8 @@ class UnView(BroadcastableOp):
             grad_view = grad
             for fn in self._view_fn_seq:
                 grad_view = fn(grad)
+
+            assert grad_view.shape == placeholder_mutant_view.shape
             return grad_view
 
         else:
