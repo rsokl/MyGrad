@@ -6,7 +6,7 @@ etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 
 from functools import wraps
 from numbers import Number
-from typing import Dict, Optional, Set, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Type, Union
 from weakref import ReferenceType, finalize
 
 import numpy as np
@@ -451,7 +451,7 @@ class Tensor:
         Op: Type[Operation],
         *input_vars: "Tensor",
         op_args=None,
-        op_kwargs=None,
+        op_kwargs: Optional[Dict[str, Any]] = None,
         constant=False,
     ):
         """Wraps operations performed between tensors: f(a, b, ...).
@@ -1033,8 +1033,8 @@ class Tensor:
 
         # Create copy of base so that mutation has no impact on the
         # state of any ops depending on it or its views
-        base = graph.base.tensor.copy()
-        base.data.flags.writeable = (
+        mutant_base = graph.base.tensor.copy()
+        mutant_base.data.flags.writeable = (
             graph.base.tensor.data.flags.writeable
             or _mem.array_is_tracked(graph.base.tensor.data)
         )
@@ -1042,19 +1042,28 @@ class Tensor:
         # Create view of base in correspondence to relationship
         # that `self` has to base. Mutating this view will mutate
         # base appropriately
-        in_place_target = base
-        with _track.no_autodiff:
-            for node in graph.get_path_to_base(self)[::-1][1:]:  # skip base
-                in_place_target = node.tensor._replay_op(in_place_target)
+        inplace_target = mutant_base
 
-        if in_place_target.size:  # TODO: Remove this check
-            assert np.shares_memory(in_place_target, base)
+        # stores view-fn sequence from base -> in-place target
+        view_fn_sequence: List[Callable[[np.ndarray], np.ndarray]] = []
+
+        with _track.no_autodiff:
+            # get view sequence from base -> in-place target
+            for node in graph.get_path_to_base(self)[::-1][1:]:  # skip base
+                f = node.tensor._replay_op
+                if self.base is not None:
+                    # need sequence of view-ops
+                    view_fn_sequence.append(_track.no_autodiff(f, to_numpy=True))
+                inplace_target = f(inplace_target)
+
+        if inplace_target.size:  # TODO: Remove this check
+            assert np.shares_memory(inplace_target, mutant_base)
 
         try:
             with _mem.mem_guard_off:
-                out = self._op(  # will raise if original data not writeable
+                placeholder_mutant_view = self._op(  # will raise if original data not writeable
                     inplace_op,
-                    in_place_target,  # tensor will be mutated
+                    inplace_target,  # tensor will be mutated
                     # we need to accommodate case where inplace operation is writing
                     # *from* a view - redirect view to placeholder
                     *(graph.get_placeholder_if_exists(t) for t in input_vars),
@@ -1066,14 +1075,14 @@ class Tensor:
             graph.restore_old_graph()
             raise e
 
-        if out.base is in_place_target:
+        if placeholder_mutant_view.base is inplace_target:
             # Because `out` and `in_place_target` hold the same ndarray,
             # `out` was marked as a view of `in_place_target`. However,
             # this is not a true "base/view-child" relationship but merely
             # an edge case not accommodated by `Tensor._op` when determining
             # base/view relationships. Thus `out` should not be considered a
             # view under these circumstances.
-            out._base = None
+            placeholder_mutant_view._base = None
             pass
 
         # (p denotes internal placeholder, y' denotes mutant)
@@ -1086,13 +1095,13 @@ class Tensor:
         #
         # Put placeholder of inplace target as an input variable to InplaceOp
         variables = tuple(
-            var if var is not in_place_target else graph[self].placeholder
-            for var in out.creator.variables
+            var if var is not inplace_target else graph[self].placeholder
+            for var in placeholder_mutant_view.creator.variables
         )
-        out.creator.variables = variables
+        placeholder_mutant_view.creator.variables = variables
 
         # Tell placeholder of in-place target that it participated in this op
-        graph[self].placeholder._ops.add(ReferenceType(out.creator))
+        graph[self].placeholder._ops.add(ReferenceType(placeholder_mutant_view.creator))
 
         # Connect public base tensor to placeholder graph via the mutated placeholder
         # tensor `out`.
@@ -1105,32 +1114,8 @@ class Tensor:
             # The base tensor itself was the target of the in-place operation,
             # thus we need simply mirror original base against the mutant placeholder.
             # This effectively connects the original base to the placeholder graph
-
-            # The original base now points to the augmented array data
-            # and has the InPlaceOp as its creator
-            _dup.mirror_tensor(source=out, target=graph.base.tensor)
-
-            del out  # remove reference so we can re-lock data
-
-            if _mem.MEM_GUARD:
-                # The original base is participating in a new op, which must be
-                # tracked by the array-locking mechanism
-                unique_arrs = tuple(
-                    _mem.lock_arr_writeability(arr)
-                    for arr in _mem.unique_arrs_and_bases(
-                        graph.base.tensor.creator.variables
-                    )
-                )
-                _mem.lock_arr_writeability(graph.base.tensor.data, force_lock=True)
-                tensor_refs = WeakRefIterable(unique_arrs)
-                tensor_refs.append(graph.base.tensor.data)
-                finalize(
-                    graph.base.tensor.creator,
-                    _mem.release_writeability_lock_on_op,
-                    tensor_refs,
-                )
-
-                assert graph.base.tensor.data.flags.writeable is False
+            mutant_base = placeholder_mutant_view
+            del placeholder_mutant_view  # remove reference so we can re-lock data
 
         else:  # pragma: no cover
             # in-place operation occurred on a view; must connect mutated base
@@ -1138,12 +1123,53 @@ class Tensor:
             #
             # The current graph:
             #    vp --> | inplace | --> vp'
+            #
             # Becomes:
-            #    vp --> | inplace | --> vp' --> | unview | --> base'
-            # I.e. the mutant placeholder
-            # Put placeholder of inplace target as an input variable to InplaceOp
-            raise NotImplementedError()
+            #
+            #    vp --> | inplace | --> vp' --> |        |
+            #                                   | unview | --> base'
+            #   base-p -----------------------> |        |
+            #
+            # I.e. the mutated base is a combination of the placeholder
+            # base and of the mutant view.
 
+            mutant_base = type(self)._op(
+                _dup.UnView,
+                graph.base.placeholder,
+                placeholder_mutant_view,
+                op_kwargs=dict(
+                    # Copy to avoid upstream placeholder mutant view sharing memory
+                    # with downstream mutant base
+                    mutant_base_data=mutant_base.data.copy(),
+                    view_fn_sequence=view_fn_sequence,
+                ),
+            )
+
+        # The original base now points to the augmented array data
+        # and has the InPlaceOp as its creator
+        _dup.mirror_tensor(source=mutant_base, target=graph.base.tensor)
+
+        del mutant_base  # remove reference so we can re-lock data
+
+        if _mem.MEM_GUARD:
+            # The original base is participating in a new op, which must be
+            # tracked by the array-locking mechanism
+            unique_arrs = tuple(
+                _mem.lock_arr_writeability(arr)
+                for arr in _mem.unique_arrs_and_bases(
+                    graph.base.tensor.creator.variables
+                )
+            )
+            _mem.lock_arr_writeability(graph.base.tensor.data, force_lock=True)
+            tensor_refs = WeakRefIterable(unique_arrs)
+            tensor_refs.append(graph.base.tensor.data)
+            finalize(
+                graph.base.tensor.creator,
+                _mem.release_writeability_lock_on_op,
+                tensor_refs,
+            )
+
+            assert graph.base.tensor.data.flags.writeable is False
         # Now that the base-tensor has been incorporated into the graph,
         # recreate the view-graph and reroute all tensors from previous
         # graph to their downstream counterparts
