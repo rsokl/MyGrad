@@ -8,7 +8,18 @@ etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 
 from functools import wraps
 from numbers import Number
-from typing import Any, Callable, Dict, List, Optional, Set, Type, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    Type,
+    Union,
+)
 from weakref import ReferenceType, finalize
 
 import numpy as np
@@ -129,7 +140,7 @@ def asarray(a, dtype=None, order=None) -> np.ndarray:
     return np.asarray(a, dtype=dtype, order=order)
 
 
-def astensor(t, dtype=None, constant=None) -> "Tensor":
+def astensor(t, dtype=None, constant: bool = None) -> "Tensor":
     """Convert the input to a tensor.
 
     A tensor `t` is returned unchanged - its gradient and computational
@@ -334,12 +345,12 @@ class Tensor:
         x,
         *,
         dtype=None,
-        constant=False,
-        _scalar_only=False,
-        _creator=None,
+        constant: bool = False,
+        _scalar_only: bool = False,
+        _creator: Optional[Operation] = None,
         _base: Optional["Tensor"] = None,
         _copy_data: Optional[bool] = None,
-        _check_dtype=True,
+        _check_dtype: bool = True,
     ):
         """
         Parameters
@@ -456,9 +467,9 @@ class Tensor:
         cls,
         Op: Type[Operation],
         *input_vars: "Tensor",
-        op_args=None,
+        op_args: Optional[Sequence] = None,
         op_kwargs: Optional[Dict[str, Any]] = None,
-        constant=False,
+        constant: bool = False,
     ):
         """Wraps operations performed between tensors: f(a, b, ...).
 
@@ -605,7 +616,7 @@ class Tensor:
             finalize(f, _mem.release_writeability_lock_on_op, tensor_refs)
         return out
 
-    def _replay_op(self, *input_vars) -> "Tensor":
+    def _replay_op(self, *input_vars: "Tensor") -> "Tensor":
         """ *dev use only*
 
         Replays the op that produced `self` - called on the specified
@@ -623,7 +634,7 @@ class Tensor:
             constant=self.creator.replay_force_constant,
         )
 
-    def backward(self, grad=None):
+    def backward(self, grad: Optional[np.ndarray] = None):
         """ Compute set or accumulate ``self.grad`` with `grad`, and pass ``self.creator.backward(grad)``.
         In effect, calling ``self.backward()`` will trigger a "back-propagation" from ``self`` through
         the preceding nodes in the computational graph. Thus a node, ``a``, will have the attribute
@@ -928,13 +939,13 @@ class Tensor:
         """
         return self._creator
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.data)
 
-    def __contains__(self, item):
+    def __contains__(self, item) -> bool:
         return self.data.__contains__(item)
 
-    def __getitem__(self, item):
+    def __getitem__(self, item) -> Union["Tensor", Number]:
         return self._op(GetItem, self, op_args=(item,))
 
     def __iter__(self):
@@ -947,10 +958,10 @@ class Tensor:
     def _in_place_op(
         self,
         inplace_op: Type[Operation],
-        *input_vars,
-        op_args=None,
-        op_kwargs=None,
-        constant=False,
+        *input_vars: "Tensor",
+        op_args: Optional[Sequence] = None,
+        op_kwargs: Optional[Dict] = None,
+        constant: bool = False,
     ):
         if _track.TRACK_GRAPH is False:
             return self._op(
@@ -1207,7 +1218,7 @@ class Tensor:
             node.parent._view_children.append(node.tensor)
 
     @property
-    def shape(self):
+    def shape(self) -> Tuple[int, ...]:
         """ Tuple of tensor dimension-sizes.
 
         Sizes are reported in row-major order.
@@ -1234,7 +1245,7 @@ class Tensor:
         return self.data.shape
 
     @shape.setter
-    def shape(self, newshape):
+    def shape(self, newshape: Tuple[int, ...]):
         # Even though this op cannot mutate views, we still must
         # do graph-replaying here so that views can still reference
         # this tensor, but with the proper reshaping mediating them.
@@ -1323,34 +1334,34 @@ class Tensor:
     def __setitem__(self, key, value):
         self._in_place_op(SetItem, value, op_args=(key,))
 
-    def __add__(self, other):
+    def __add__(self, other) -> "Tensor":
         return self._op(Add, self, other)
 
-    def __radd__(self, other):
+    def __radd__(self, other) -> "Tensor":
         return self._op(Add, other, self)
 
-    def __sub__(self, other):
+    def __sub__(self, other) -> "Tensor":
         return self._op(Subtract, self, other)
 
-    def __rsub__(self, other):
+    def __rsub__(self, other) -> "Tensor":
         return self._op(Subtract, other, self)
 
-    def __truediv__(self, other):
+    def __truediv__(self, other) -> "Tensor":
         return self._op(Divide, self, other)
 
-    def __rtruediv__(self, other):
+    def __rtruediv__(self, other) -> "Tensor":
         return self._op(Divide, other, self)
 
-    def __mul__(self, other):
+    def __mul__(self, other) -> "Tensor":
         return self._op(Multiply, self, other)
 
-    def __rmul__(self, other):
+    def __rmul__(self, other) -> "Tensor":
         return self._op(Multiply, other, self)
 
-    def __matmul__(self, other):
+    def __matmul__(self, other) -> "Tensor":
         return self._op(MatMul, self, other)
 
-    def __rmatmul__(self, other):
+    def __rmatmul__(self, other) -> "Tensor":
         return self._op(MatMul, other, self)
 
     def __pow__(self, other):
@@ -1376,7 +1387,7 @@ class Tensor:
     def __repr__(self):
         return repr(self.data).replace("array", "Tensor").replace("\n", "\n ")
 
-    def __copy__(self):
+    def __copy__(self) -> "Tensor":
         """ Produces a copy of ``self`` with ``copy.creator=None``.
 
         Copies of the underlying numpy data array and gradient array are created.
@@ -1424,7 +1435,7 @@ class Tensor:
         copy.grad = np.copy(self.grad) if self.grad is not None else None
         return copy
 
-    def item(self):
+    def item(self) -> float:
         """ Copy an element of a tensor to a standard Python scalar and return it.
 
         Note that the returned object does not support back-propagation.
@@ -1447,17 +1458,17 @@ class Tensor:
             raise ValueError("can only convert a tensor of size 1 to a Python scalar")
         return self.data.item()
 
-    def __float__(self):
+    def __float__(self) -> float:
         if self.size > 1:
             raise TypeError("can only convert a tensor of size 1 to a Python scalar")
         return float(self.data)
 
-    def __int__(self):
+    def __int__(self) -> int:
         if self.size > 1:
             raise TypeError("can only convert a tensor of size 1 to a Python scalar")
         return int(self.data)
 
-    def flatten(self, constant=False):
+    def flatten(self, constant: bool = False) -> "Tensor":
         """ Return a copy of the tensor collapsed into one dimension.
 
         This docstring was adapted from ``numpy.ndarray.flatten``.
@@ -1526,7 +1537,7 @@ class Tensor:
         return self._base
 
     @property
-    def size(self):
+    def size(self) -> int:
         """
         Number of elements in the tensor. i.e., the product of the tensor's
         dimensions.
@@ -1545,7 +1556,7 @@ class Tensor:
         return self.data.size
 
     @property
-    def ndim(self):
+    def ndim(self) -> int:
         """ Number of tensor dimensions. I.e. the number
         of indices that must be supplied to uniquely specify
         an element in the tensor.
@@ -1590,7 +1601,9 @@ class Tensor:
         <type 'numpy.dtype'>"""
         return self.data.dtype
 
-    def reshape(self, *newshape, constant=False):
+    def reshape(
+        self, *newshape: Union[int, Tuple[int, ...]], constant: bool = False
+    ) -> "Tensor":
         """ Returns a tensor with a new shape, without changing its data.
         This docstring was adapted from ``numpy.reshape``
 
@@ -1639,7 +1652,7 @@ class Tensor:
         return Tensor._op(Reshape, self, op_args=(newshape,), constant=constant)
 
     @property
-    def T(self):
+    def T(self) -> "Tensor":
         """ Same as self.transpose(), except that self is returned if self.ndim < 2 and
         a view of the underlying data is utilized whenever possible.
 
