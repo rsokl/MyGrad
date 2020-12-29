@@ -148,12 +148,24 @@ class EinSum(BroadcastableOp):
         # cache counts the number of redundant tensor-label pairs
         # fed to einsum. Only one gradient will be computed for a
         # unique tensor-label pair
-        self.cache = Counter(zip((id(v) for v in variables), self.in_lbls))
+        self._cache = None
         return np.einsum(
             "->".join((in_lbls, out_lbls)),
             *(var.data for var in self.variables),
             optimize=optimize
         )
+
+    @property
+    def cache(self) -> Counter:
+        if self._cache is None:
+            # This is hacky, but because this caching mechanism depends on the tensor-ids,
+            # we have to build the cache here - in case einsum is used to produce a view
+            # involved in an inplace operations, and placeholder tensors need be replaced.
+            #
+            # Creating the cache in __call__ could create a nasty inconsistency between
+            # tensor ids
+            self._cache = Counter(zip((id(v) for v in self.variables), self.in_lbls))
+        return self._cache
 
     def backward_var(self, grad, index, **kwargs):
         """
