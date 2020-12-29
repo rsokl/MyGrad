@@ -1074,9 +1074,6 @@ class Tensor:
         # It must be inferred from the original tensor
         inplace_target._constant = mutant_base.constant
 
-        if inplace_target.size:  # TODO: Remove this check
-            assert np.shares_memory(inplace_target, mutant_base)
-
         mutant_base_data = mutant_base.data
         del mutant_base
 
