@@ -233,8 +233,24 @@ def test_writing_a_view_with_a_view(
     ),
 )
 def test_backprop_through_writeable_views(x: Tensor, y: Tensor):
-    diag_x = mg.einsum("ii->i", x[...])  # view of diag of x
+    vert_flipped_x = x[::-1]
+    vert_horiz_flipped_x = vert_flipped_x[:, ::-1]
+    horiz_flipped_x = vert_horiz_flipped_x[::-1]
+    view_of_x = horiz_flipped_x[:, ::-1]
+
+    diag_x = mg.einsum("ii->i", view_of_x)  # view of diag of x
     diag_x[...] = y  # set diag of x to be y
+
+    assert_allclose(vert_flipped_x[::-1], x)
+    assert_allclose(vert_horiz_flipped_x[::-1][:, ::-1], x)
+    assert_allclose(horiz_flipped_x[:, ::-1], x)
+    assert_allclose(view_of_x, x)
+
+    assert vert_flipped_x.base is x
+    assert vert_horiz_flipped_x.base is x
+    assert horiz_flipped_x.base is x
+    assert view_of_x.base is x
+    assert x.base is None
 
     assert not x.data.flags.writeable
     assert not diag_x.data.flags.writeable
