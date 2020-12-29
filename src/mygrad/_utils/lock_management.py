@@ -282,7 +282,7 @@ def turn_memory_guarding_off():
 
     Notes
     -----
-    With memory guarding disables, arrays participating in active
+    With memory guarding disabled, arrays participating in active
     computational graphs are not protected from being mutated by
     the user. Mutating such an array will corrupt the derivatives
     that are computed via back-propagation, and will produce
@@ -358,7 +358,9 @@ def turn_memory_guarding_on():
 
     >>> import mygrad as mg
     >>> import numpy as np
-    >>> # memory guarding is on by default
+    >>> # (Note that memory guarding is on by default, so
+    >>> # this call isn't usually needed...)
+    >>> mg.turn_memory_guarding_on()
     >>> x = np.arange(3.)
     >>> y = mg.ones_like(x)
     >>> z = x * y

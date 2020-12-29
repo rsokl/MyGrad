@@ -471,3 +471,31 @@ def test_einsum_bkwd6(shape, optimize):
 def test_einsum_can_produce_view(x: Tensor, optimize: bool):
     y = mg.einsum("ii -> i", x, optimize=optimize)
     assert y.base is x
+
+
+@pytest.mark.parametrize("downstream_of_view", [True, False])
+@given(
+    orig_x=tensors(shape=(3, 3, 3), elements=st.floats(-100, 100), constant=False),
+    optimize=st.booleans(),
+    scalar=tensors(shape=tuple(), elements=st.floats(-100, 100), constant=False),
+)
+def test_backprop_through_inplace_op(
+    orig_x: Tensor, scalar: Tensor, optimize: bool, downstream_of_view: bool
+):
+    x = +orig_x
+
+    if downstream_of_view:
+        x = x[...]
+    diag = mg.einsum("iii -> i", x, optimize=optimize)
+    diag[...] = scalar
+
+    if not downstream_of_view:
+        assert diag.base is x
+
+    x.sum().backward()
+    assert scalar.grad == 3.0
+    assert_allclose(x.grad, np.ones_like(x.data))
+
+    orig_x_grad = np.ones_like(orig_x)
+    np.einsum("iii->i", orig_x_grad)[...] = 0.0
+    assert_allclose(actual=orig_x.grad, desired=orig_x_grad)

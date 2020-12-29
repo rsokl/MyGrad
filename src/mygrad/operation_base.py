@@ -2,13 +2,17 @@
 Defines the base class for mathematical operations capable of back-propagating
 gradients to their input tensors."""
 from numbers import Real
-from typing import Any, Dict, Optional, Set, Tuple
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Set, Tuple
 from weakref import ReferenceType
 
 import numpy as np
 
 from mygrad._utils import SkipGradient, reduce_broadcast
 from mygrad.errors import InvalidBackprop, InvalidGradient
+
+if TYPE_CHECKING:
+    from mygrad import Tensor
+    from mygrad._utils import WeakRef
 
 __all__ = ["Operation", "BroadcastableOp"]
 
@@ -56,7 +60,7 @@ class Operation:
         self.replay_kwargs: Optional[Dict[str, Any]] = None
         self.replay_force_constant: Optional[bool] = None
 
-    def __call__(self, *input_vars, **kwargs):  # pragma: no cover
+    def __call__(self, *input_vars: "Tensor", **kwargs):  # pragma: no cover
         """ Performs a forward pass, f, of this Operation::
 
             f(x1, ...., xn) -> out
@@ -78,7 +82,9 @@ class Operation:
         self.variables = input_vars
         raise NotImplementedError
 
-    def backward_var(self, grad, index, **kwargs):  # pragma: no cover
+    def backward_var(
+        self, grad: np.ndarray, index: int, **kwargs
+    ) -> np.ndarray:  # pragma: no cover
         """ Given ``grad = d(out)/d(f)``, computes ``d(out)/d(var)``, and passes this result
         to ``var.backward()``, where var is the tensor-argument at position ``index``.
 
@@ -91,18 +97,21 @@ class Operation:
         index : int
             The index-location of ``var`` in ``self.variables``
 
-        Other Parameters
-        ----------------
-        _broadcastable : bool, optional (default:False)
-            Devs-only: Indicates whether or not the up-stream operation
-            can utilize broadcasting.
-
         Raises
         ------
         SkipGradient"""
         raise NotImplementedError
 
-    def backward(self, grad, *, graph, _reduction=None, **kwargs):
+    def backward(
+        self,
+        grad: np.ndarray,
+        *,
+        graph: Set["WeakRef[Operation]"],
+        _reduction: Optional[
+            Callable[[np.ndarray, Tuple[int, ...]], np.ndarray]
+        ] = None,
+        **kwargs,
+    ):
         """ Back-propagates the gradient through all of the operation's inputs.
         Constant tensors do not propagate a gradient.
 
@@ -150,7 +159,9 @@ class Operation:
 
                     var.grad = (
                         np.copy(tmp_grad)
-                        if np.may_share_memory(tmp_grad, grad)
+                        # tmp-grad is view of grad; we want to be able to
+                        # augment tmp-grad inplace later
+                        if tmp_grad.base is not None or (tmp_grad is grad)
                         else tmp_grad
                     )
                 else:
@@ -178,5 +189,14 @@ class Operation:
 class BroadcastableOp(Operation):
     """ Signals that an Operation's forward pass can broadcast its tensor arguments."""
 
-    def backward(self, grad, *, graph, _reduction=None, **kwargs):
+    def backward(
+        self,
+        grad: np.ndarray,
+        *,
+        graph: Set["WeakRef[Operation]"],
+        _reduction: Optional[
+            Callable[[np.ndarray, Tuple[int, ...]], np.ndarray]
+        ] = None,
+        **kwargs,
+    ):
         return super().backward(grad, graph=graph, _reduction=reduce_broadcast)

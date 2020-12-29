@@ -1,9 +1,23 @@
-import typing
-from typing import Dict, Iterator, List, NamedTuple, Optional, Set, TypeVar
+from typing import (
+    TYPE_CHECKING,
+    Callable,
+    Dict,
+    Iterator,
+    List,
+    NamedTuple,
+    Optional,
+    Sequence,
+    Set,
+    TypeVar,
+)
+
+import numpy as np
+from numpy import ndarray
 
 from mygrad._utils import WeakRefIterable
+from mygrad.operation_base import BroadcastableOp
 
-if typing.TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:  # pragma: no cover
     from mygrad import Tensor
 
 
@@ -13,8 +27,10 @@ T = TypeVar("T")
 def mirror_tensor(*, target: "Tensor", source: "Tensor"):
     """ *Dev use only*
 
-    Points all of the attributes of ``self`` to those of
-    ``tensor`` so that they reference all of the same data structures.
+    Creates a shallow copy of attribute dictionary of ``self`` and assigns
+    it to``tensor``, so that ``tensor`` has the same state as ``self`` and
+    points to the same array data.
+
     This is used to facilitate "in-place" operations.
     """
     target.__dict__ = source.__dict__.copy()
@@ -36,6 +52,8 @@ def make_placeholder_tensor(
 ) -> "Tensor":
     """
     Creates a tensor that stands in the place of `original` in the computational graph.
+    This does not create a copy of the array-data held by original; the mirrored tensor
+    points to the same data.
 
     The resulting tensor should never be exposed to the user; it is used to accommodate
     in-place operations.
@@ -89,7 +107,10 @@ class DuplicatingGraph:
     """
 
     def _duplicate_graph(self, tensor: "Tensor"):
-        """Recursively creates placeholders for all views downstream of `tensor`"""
+        """Recursively creates placeholders for all views downstream of `tensor`.
+
+        Upon completion, the existing computational graph involves only placeholders.
+        Note that the placeholders and original tensors point to the same array-data."""
         if not tensor._view_children:
             self.leafs.add(id(tensor))
             return
@@ -189,3 +210,90 @@ class DuplicatingGraph:
         # before information gets deleted / mutated
         for node in tuple(self):
             reroute_ops_through(target=node.tensor, source=node.placeholder)
+
+
+class UnView(BroadcastableOp):
+    """
+    Creates an operation that connects a mutant base to
+    the placeholder mutant-view and placeholder base that
+    it is derived from.
+
+    This effectively connects the mutant base to the upstream
+    computational graph.
+    """
+
+    def __call__(
+        self,
+        placeholder_base: "Tensor",
+        placeholder_mutant_view: "Tensor",
+        mutant_base_data: ndarray,
+        view_fn_sequence: Sequence[Callable[[ndarray], ndarray]],
+    ):
+        """
+        Parameters
+        ----------
+        placeholder_mutant_view: Tensor
+            The internal tensor that resulted from the in-place
+            operation.
+
+        placeholder_base: Tensor
+            The placeholder for the base tensor involved in the
+            in-place operation.
+
+        mutant_base_data: ndarray
+            The base tensor that was mutated by the in-place operation,
+            and that will be exposed to the user.
+
+        view_fn_sequence: Sequence[Callable[[ndarray], ndarray]]
+            The sequence of view-functions used to create the
+            view-tensor from the base
+
+        Returns
+        -------
+        mutant_base_data : ndarray
+            The array associated with the mutant base
+        """
+        self.variables = (placeholder_base, placeholder_mutant_view)
+        self._view_fn_seq = view_fn_sequence
+        return mutant_base_data
+
+    def backward_var(self, grad: ndarray, index: int, **kwargs) -> ndarray:
+        placeholder_base, placeholder_mutant_view = self.variables
+
+        # Backprop through upstream base by zeroing out
+        # all regions of `grad` associated with the downstream
+        # view.
+        #
+        # Backprop through upstream view by taking the corresponding
+        # view of the gradient
+        #
+        # E.g.
+        #
+        # base -> [1., 2., 3.]
+        # view = base[:2] -> [1., 2.]
+        # dℒ/d(out) = [g0, g1, g2]
+        #
+        # dℒ/d(base) = [0., 0., g2]
+        # dℒ/d(view) = [g0, g1]
+        if index == 0:  # compute dℒ/d(base)
+            grad = grad.copy()
+            grad_view = grad
+            for fn in self._view_fn_seq:
+                grad_view = fn(grad_view)
+
+            # check that grad_view shares memory with grad
+            assert grad_view is grad or grad_view.base is not None
+            assert grad_view.base is grad or grad_view.base is grad.base
+            grad_view *= 0
+
+            return grad
+
+        elif index == 1:  # compute dℒ/d(view)
+            grad_view = grad
+            for fn in self._view_fn_seq:
+                grad_view = fn(grad)
+
+            return grad_view
+
+        else:
+            raise ValueError(f"UnView: backward_var index: {index}")

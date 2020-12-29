@@ -1,3 +1,5 @@
+# TODO: Implement grad-view semantics
+
 """
 This module defines the base tensor class along with all of its essential
 attributes and special methods. Public math methods, e.g. ``sum``, ``mean``,
@@ -6,7 +8,18 @@ etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 
 from functools import wraps
 from numbers import Number
-from typing import Dict, Optional, Set, Type, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    Type,
+    Union,
+)
 from weakref import ReferenceType, finalize
 
 import numpy as np
@@ -41,7 +54,11 @@ __all__ = ["Tensor", "asarray"]
 
 
 def _is_view_of(parent: "Tensor", child: np.ndarray) -> bool:
-    if np.shares_memory(parent, child):
+    if (
+        (parent.data is child.base)
+        or (parent.data is child)
+        or (child.base is not None and child.base is parent.data.base)
+    ):
         return True
     elif child.size == 0 and child.base is not None:
         if (child.base is parent.data) or (child.base is parent.data.base):
@@ -123,7 +140,7 @@ def asarray(a, dtype=None, order=None) -> np.ndarray:
     return np.asarray(a, dtype=dtype, order=order)
 
 
-def astensor(t, dtype=None, constant=None) -> "Tensor":
+def astensor(t, dtype=None, constant: bool = None) -> "Tensor":
     """Convert the input to a tensor.
 
     A tensor `t` is returned unchanged - its gradient and computational
@@ -328,12 +345,12 @@ class Tensor:
         x,
         *,
         dtype=None,
-        constant=False,
-        _scalar_only=False,
-        _creator=None,
+        constant: bool = False,
+        _scalar_only: bool = False,
+        _creator: Optional[Operation] = None,
         _base: Optional["Tensor"] = None,
         _copy_data: Optional[bool] = None,
-        _check_dtype=True,
+        _check_dtype: bool = True,
     ):
         """
         Parameters
@@ -450,9 +467,9 @@ class Tensor:
         cls,
         Op: Type[Operation],
         *input_vars: "Tensor",
-        op_args=None,
-        op_kwargs=None,
-        constant=False,
+        op_args: Optional[Sequence] = None,
+        op_kwargs: Optional[Dict[str, Any]] = None,
+        constant: bool = False,
     ):
         """Wraps operations performed between tensors: f(a, b, ...).
 
@@ -599,7 +616,7 @@ class Tensor:
             finalize(f, _mem.release_writeability_lock_on_op, tensor_refs)
         return out
 
-    def _replay_op(self, *input_vars) -> "Tensor":
+    def _replay_op(self, *input_vars: "Tensor") -> "Tensor":
         """ *dev use only*
 
         Replays the op that produced `self` - called on the specified
@@ -617,7 +634,7 @@ class Tensor:
             constant=self.creator.replay_force_constant,
         )
 
-    def backward(self, grad=None):
+    def backward(self, grad: Optional[np.ndarray] = None):
         """ Compute set or accumulate ``self.grad`` with `grad`, and pass ``self.creator.backward(grad)``.
         In effect, calling ``self.backward()`` will trigger a "back-propagation" from ``self`` through
         the preceding nodes in the computational graph. Thus a node, ``a``, will have the attribute
@@ -717,8 +734,14 @@ class Tensor:
             Raises if `_backward` triggered on a tensor with gradient of `None`.
         """
         assert self.grad is not None, (
-            "backprop, post grad-accumulation, was triggered "
-            "on a tensor with no gradient"
+            f"backprop, post grad-accumulation, was triggered "
+            f"on a tensor with no gradient"
+            f"\n{self}"
+            f"\nid {id(self._ops)}"
+            f"\ngrad: {self.grad}"
+            f"\ncreator: {self.creator}"
+            f"\nops: {self._ops}"
+            f"\nbase: {self.base}"
         )
         assert self.grad.shape == self.shape, (
             f"A tensor and its associated gradient must possess the same shape. Got:"
@@ -916,13 +939,13 @@ class Tensor:
         """
         return self._creator
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.data)
 
-    def __contains__(self, item):
+    def __contains__(self, item) -> bool:
         return self.data.__contains__(item)
 
-    def __getitem__(self, item):
+    def __getitem__(self, item) -> Union["Tensor", Number]:
         return self._op(GetItem, self, op_args=(item,))
 
     def __iter__(self):
@@ -935,10 +958,10 @@ class Tensor:
     def _in_place_op(
         self,
         inplace_op: Type[Operation],
-        *input_vars,
-        op_args=None,
-        op_kwargs=None,
-        constant=False,
+        *input_vars: "Tensor",
+        op_args: Optional[Sequence] = None,
+        op_kwargs: Optional[Dict] = None,
+        constant: bool = False,
     ):
         if _track.TRACK_GRAPH is False:
             return self._op(
@@ -949,16 +972,92 @@ class Tensor:
                 op_kwargs=op_kwargs,
                 constant=constant,
             )
-
+        #
+        # **********************************************************************************
+        # The way that in-place updates work in MyGrad is that any tensor that
+        # is about to undergo a mutation gets "cloned". Each resulting "placeholder"
+        # is used to represent that tensor in any non-view operations that the tensor
+        # was participating in. This ensures that the stateful computational graph
+        # is not corrupted by this mutation.
+        #
+        # Once the placeholders have been created, they have permanently replaced the
+        # rolls of their counterparts within the computational graph. Furthermore, they
+        # exist only internally to the computational graph and thus cannot be the targets
+        # of subsequent views or in-place updates.
+        #
+        # At this point, the "original" tensors merely reserve the publicly-available
+        # Tensor-instances (husks) that the users will access. We eventually need to
+        # populate these husks with the appropriate augmented contents and graph-history.
+        #
+        # Thus this method will compute the in-place operation on a new tensor, and
+        # will create a new, internal computational graph involving the base tensor
+        # affected by the mutation and any of its view-children. These tensors represent
+        # the mutated tensors that the users expect to have access to.
+        #
+        # We must connect this new computational graph to the preceding one – the one
+        # involving the placeholders; this way we can backpropagate appropriately and
+        # through all influencers.
+        #
+        # Finally we mirror each of these new tensors into the husks of the publicly
+        # -available tensors and reroute the computational graph through them so that
+        # the user sees that all of the relevant tensors have been augmented, and that
+        # they are connected to the appropriate "history" such that backprop occurs
+        # without error or inaccuracy.
+        #
+        #
+        # For illustration, consider the following graph:
+        #
+        # ... x------[square]-- y = x**2
+        #        \
+        #         ---[slice]-- z = view-x
+        #                              \
+        #                               ---[mul]-- w = 3 * z
+        #
+        # Now suppose that we mutate `x` with `x[:] = 0`. This is a simpler case than
+        # mutating a view of `x`, since `x` is already the base tensor.
+        #  - This should not affect `y`
+        #  - It should affect `view_x`
+        #  - It should *not* affect `w`, which depends on `view_x` in a "static" way.
+        #    I.e. the value for `w` is already resolved and is not a view of z or x.
+        #
+        #
+        # As prescribed above, we will make the placeholders: px and pz, and we
+        # will reroute the operations that statically depend on the old values of x and z
+        # through these placeholders.
+        #
+        # Next we will have `x` point to a mutated version of itself, in accord with the
+        # in-place update being performed, and we will subsequently recreate any
+        # views of x (i.e. z), based off of this mutated tensor.
+        #
+        # The resulting graph is:
+        #
+        #                             ---[slice]-- z = view-x
+        #                            /
+        #        -----[set-item] -- x = px.copy()[:]=0
+        #       /
+        # ... px------[square]-- y = px**2
+        #        \
+        #         ---[slice]-- pz = view-px
+        #                              \
+        #                               ---[mul]-- w = 3 * pz
+        #
+        # Note that px and pz are strictly *internal* tensors; they cannot be accessed for
+        # use in any further operations, whereas `x` and `z` are available for further use.
+        #
+        # **********************************************************************************
+        #
         # Replace base and all of its views with "placeholder" tensors;
-        # there will serve as internal references to all tensors pre-mutation
-        # and will preserve ops relying on the un-mutated tensors
+        # they serve as internal references to all tensors pre-mutation
+        # and will preserve ops relying on the un-mutated tensors.
+        #
+        # These placeholder tensors are never publicly-available and thus cannot
+        # be involved directly in future in-place updates
         graph = _dup.DuplicatingGraph(self if self.base is None else self.base)
 
         # Create copy of base so that mutation has no impact on the
         # state of any ops depending on it or its views
-        base = graph.base.tensor.copy()
-        base.data.flags.writeable = (
+        mutant_base = graph.base.tensor.copy()
+        mutant_base.data.flags.writeable = (
             graph.base.tensor.data.flags.writeable
             or _mem.array_is_tracked(graph.base.tensor.data)
         )
@@ -966,19 +1065,34 @@ class Tensor:
         # Create view of base in correspondence to relationship
         # that `self` has to base. Mutating this view will mutate
         # base appropriately
-        in_place_target = base
-        with _track.no_autodiff:
-            for node in graph.get_path_to_base(self)[::-1][1:]:  # skip base
-                in_place_target = node.tensor._replay_op(in_place_target)
+        inplace_target = mutant_base
 
-        if in_place_target.size:
-            assert np.shares_memory(in_place_target, base)
+        # stores view-fn sequence from base -> in-place target
+        view_fn_sequence: List[Callable[[np.ndarray], np.ndarray]] = []
+
+        with _track.no_autodiff:
+            # get view sequence from base -> in-place target
+            for node in graph.get_path_to_base(self)[::-1][1:]:  # skip base
+                # need to point to place-holder replay op to avoid creating
+                # forwards references to downstream tensors
+                f = node.placeholder._replay_op
+                if self.base is not None:
+                    # need sequence of view-ops
+                    view_fn_sequence.append(_track.no_autodiff(f, to_numpy=True))
+                inplace_target = f(inplace_target)
+
+        # Constant info was not propagated through no-autodiff mode.
+        # It must be inferred from the original tensor
+        inplace_target._constant = mutant_base.constant
+
+        mutant_base_data = mutant_base.data
+        del mutant_base
 
         try:
             with _mem.mem_guard_off:
-                out = self._op(  # will raise if original data not writeable
+                placeholder_mutant_view = self._op(  # will raise if original data not writeable
                     inplace_op,
-                    in_place_target,  # tensor will be mutated
+                    inplace_target,  # tensor will be mutated
                     # we need to accommodate case where inplace operation is writing
                     # *from* a view - redirect view to placeholder
                     *(graph.get_placeholder_if_exists(t) for t in input_vars),
@@ -990,26 +1104,86 @@ class Tensor:
             graph.restore_old_graph()
             raise e
 
-        if out.base is in_place_target:
-            out._base = None
+        if placeholder_mutant_view.base is inplace_target:
+            # Because `out` and `in_place_target` hold the same ndarray,
+            # `out` was marked as a view of `in_place_target`. However,
+            # this is not a true "base/view-child" relationship but merely
+            # an edge case not accommodated by `Tensor._op` when determining
+            # base/view relationships. Thus `out` should not be considered a
+            # view under these circumstances.
+            placeholder_mutant_view._base = None
+            pass
 
-        # base has been mutated; it must be "connected" to the graph
-        # that produced it
+        # (p denotes internal placeholder, y' denotes mutant)
+        # The current graph:
+        #    vp' --> | inplace | --> vp'
+        # Becomes:
+        #    vp --> | inplace | --> vp'
+        # I.e. the placeholder for the target of the inplace-op is placed upstream
+        # of the mutated placeholder.
+        #
+        # Put placeholder of inplace target as an input variable to InplaceOp
+        variables = tuple(
+            var if var is not inplace_target else graph[self].placeholder
+            for var in placeholder_mutant_view.creator.variables
+        )
+        placeholder_mutant_view.creator.variables = variables
+
+        # Tell placeholder of in-place target that it participated in this op
+        graph[self].placeholder._ops.add(ReferenceType(placeholder_mutant_view.creator))
+
+        # Connect public base tensor to placeholder graph via the mutated placeholder
+        # tensor `out`.
         if self.base is None:
+            # The current graph:
+            #    base-p --> | inplace | --> vp'
+            # Becomes:
+            #    base-p --> | inplace | --> base'
+            #
+            # The base tensor itself was the target of the in-place operation,
+            # thus we need simply mirror original base against the mutant placeholder.
+            # This effectively connects the original base to the placeholder graph
+            mutant_base = placeholder_mutant_view
 
-            variables = tuple(
-                var if var is not in_place_target else graph.base.placeholder
-                for var in out.creator.variables
+        else:
+            # in-place operation occurred on a view; must connect mutated base
+            # to graph and then reproduce downstream views
+            #
+            # The current graph:
+            #    vp --> | inplace | --> vp'
+            #
+            # Becomes:
+            #
+            #    vp --> | inplace | --> vp' --> |        |
+            #                                   | unview | --> base'
+            #   base-p -----------------------> |        |
+            #
+            # I.e. the mutated base is a combination of the placeholder
+            # base and of the mutant view.
+
+            mutant_base = type(self)._op(
+                _dup.UnView,
+                graph.base.placeholder,
+                placeholder_mutant_view,
+                op_kwargs=dict(
+                    # Copy to avoid upstream placeholder mutant view sharing memory
+                    # with downstream mutant base
+                    mutant_base_data=mutant_base_data,
+                    view_fn_sequence=view_fn_sequence,
+                ),
             )
-            out.creator.variables = variables
 
-            graph.base.placeholder._ops.add(ReferenceType(out.creator))
-            _dup.mirror_tensor(source=out, target=graph.base.tensor)
-            _dup.reroute_ops_through(source=out, target=graph.base.tensor)
-            del out  # remove reference so we can re-lock data
+        del placeholder_mutant_view
 
-            # re-lock data associated with base; de-referencing `out`
-            # unlocked it
+        # The original base now points to the augmented array data
+        # and has the InPlaceOp as its creator
+        _dup.mirror_tensor(source=mutant_base, target=graph.base.tensor)
+
+        del mutant_base  # remove reference so we can re-lock data
+
+        if _mem.MEM_GUARD:
+            # The original base is participating in a new op, which must be
+            # tracked by the array-locking mechanism
             unique_arrs = tuple(
                 _mem.lock_arr_writeability(arr)
                 for arr in _mem.unique_arrs_and_bases(
@@ -1026,18 +1200,15 @@ class Tensor:
             )
 
             assert graph.base.tensor.data.flags.writeable is False
-            # TODO: Attach view children to self
-        else:  # pragma: no cover
-            # in-place operation occurs on a view; must connect mutated base
-            # to graph and then reproduce downstream views
-            raise NotImplementedError()
-
         # Now that the base-tensor has been incorporated into the graph,
         # recreate the view-graph and reroute all tensors from previous
         # graph to their downstream counterparts
         #
         # Note that iterating in a topologically-ordered way is critical
         # here: each parent is updated before creating one of its children
+        #
+        # Iteration is always based off of the placeholders' relative positions
+        # in the graph since this will never be mutated.
         for node in graph:
             if node.parent is None:
                 continue
@@ -1047,7 +1218,7 @@ class Tensor:
             node.parent._view_children.append(node.tensor)
 
     @property
-    def shape(self):
+    def shape(self) -> Tuple[int, ...]:
         """ Tuple of tensor dimension-sizes.
 
         Sizes are reported in row-major order.
@@ -1074,7 +1245,7 @@ class Tensor:
         return self.data.shape
 
     @shape.setter
-    def shape(self, newshape):
+    def shape(self, newshape: Tuple[int, ...]):
         # Even though this op cannot mutate views, we still must
         # do graph-replaying here so that views can still reference
         # this tensor, but with the proper reshaping mediating them.
@@ -1163,34 +1334,34 @@ class Tensor:
     def __setitem__(self, key, value):
         self._in_place_op(SetItem, value, op_args=(key,))
 
-    def __add__(self, other):
+    def __add__(self, other) -> "Tensor":
         return self._op(Add, self, other)
 
-    def __radd__(self, other):
+    def __radd__(self, other) -> "Tensor":
         return self._op(Add, other, self)
 
-    def __sub__(self, other):
+    def __sub__(self, other) -> "Tensor":
         return self._op(Subtract, self, other)
 
-    def __rsub__(self, other):
+    def __rsub__(self, other) -> "Tensor":
         return self._op(Subtract, other, self)
 
-    def __truediv__(self, other):
+    def __truediv__(self, other) -> "Tensor":
         return self._op(Divide, self, other)
 
-    def __rtruediv__(self, other):
+    def __rtruediv__(self, other) -> "Tensor":
         return self._op(Divide, other, self)
 
-    def __mul__(self, other):
+    def __mul__(self, other) -> "Tensor":
         return self._op(Multiply, self, other)
 
-    def __rmul__(self, other):
+    def __rmul__(self, other) -> "Tensor":
         return self._op(Multiply, other, self)
 
-    def __matmul__(self, other):
+    def __matmul__(self, other) -> "Tensor":
         return self._op(MatMul, self, other)
 
-    def __rmatmul__(self, other):
+    def __rmatmul__(self, other) -> "Tensor":
         return self._op(MatMul, other, self)
 
     def __pow__(self, other):
@@ -1216,7 +1387,7 @@ class Tensor:
     def __repr__(self):
         return repr(self.data).replace("array", "Tensor").replace("\n", "\n ")
 
-    def __copy__(self):
+    def __copy__(self) -> "Tensor":
         """ Produces a copy of ``self`` with ``copy.creator=None``.
 
         Copies of the underlying numpy data array and gradient array are created.
@@ -1264,7 +1435,7 @@ class Tensor:
         copy.grad = np.copy(self.grad) if self.grad is not None else None
         return copy
 
-    def item(self):
+    def item(self) -> float:
         """ Copy an element of a tensor to a standard Python scalar and return it.
 
         Note that the returned object does not support back-propagation.
@@ -1287,17 +1458,17 @@ class Tensor:
             raise ValueError("can only convert a tensor of size 1 to a Python scalar")
         return self.data.item()
 
-    def __float__(self):
+    def __float__(self) -> float:
         if self.size > 1:
             raise TypeError("can only convert a tensor of size 1 to a Python scalar")
         return float(self.data)
 
-    def __int__(self):
+    def __int__(self) -> int:
         if self.size > 1:
             raise TypeError("can only convert a tensor of size 1 to a Python scalar")
         return int(self.data)
 
-    def flatten(self, constant=False):
+    def flatten(self, constant: bool = False) -> "Tensor":
         """ Return a copy of the tensor collapsed into one dimension.
 
         This docstring was adapted from ``numpy.ndarray.flatten``.
@@ -1366,7 +1537,7 @@ class Tensor:
         return self._base
 
     @property
-    def size(self):
+    def size(self) -> int:
         """
         Number of elements in the tensor. i.e., the product of the tensor's
         dimensions.
@@ -1385,7 +1556,7 @@ class Tensor:
         return self.data.size
 
     @property
-    def ndim(self):
+    def ndim(self) -> int:
         """ Number of tensor dimensions. I.e. the number
         of indices that must be supplied to uniquely specify
         an element in the tensor.
@@ -1430,7 +1601,9 @@ class Tensor:
         <type 'numpy.dtype'>"""
         return self.data.dtype
 
-    def reshape(self, *newshape, constant=False):
+    def reshape(
+        self, *newshape: Union[int, Tuple[int, ...]], constant: bool = False
+    ) -> "Tensor":
         """ Returns a tensor with a new shape, without changing its data.
         This docstring was adapted from ``numpy.reshape``
 
@@ -1479,7 +1652,7 @@ class Tensor:
         return Tensor._op(Reshape, self, op_args=(newshape,), constant=constant)
 
     @property
-    def T(self):
+    def T(self) -> "Tensor":
         """ Same as self.transpose(), except that self is returned if self.ndim < 2 and
         a view of the underlying data is utilized whenever possible.
 
