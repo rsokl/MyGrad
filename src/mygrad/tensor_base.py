@@ -1070,6 +1070,10 @@ class Tensor:
                     view_fn_sequence.append(_track.no_autodiff(f, to_numpy=True))
                 inplace_target = f(inplace_target)
 
+        # Constant info was not propagated through no-autodiff mode.
+        # It must be inferred from the original tensor
+        inplace_target._constant = mutant_base.constant
+
         if inplace_target.size:  # TODO: Remove this check
             assert np.shares_memory(inplace_target, mutant_base)
 

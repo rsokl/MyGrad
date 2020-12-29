@@ -32,6 +32,28 @@ def test_raising_during_in_place_op_doesnt_corrupt_graph(inplace_on_view: bool):
     assert_allclose(x.grad, 4 * np.ones_like(y))
 
 
+@pytest.mark.parametrize("inplace_on_view", [False, True])
+@pytest.mark.parametrize("x_constant", [False, True])
+@pytest.mark.parametrize("y_constant", [False, True])
+def test_inplace_update_propagates_constant_info(
+    inplace_on_view: bool, x_constant: bool, y_constant: bool
+):
+    x = mg.arange(1.0, 5.0, constant=x_constant)
+    y = mg.zeros_like(x, constant=y_constant)
+
+    if inplace_on_view:
+        x = x[...]
+
+    dangling_view = x[:2]
+    assert x.constant is x_constant
+    assert dangling_view.constant is x_constant
+
+    x[...] = y
+
+    assert x.constant is (x_constant and y_constant)
+    assert dangling_view.constant is x.constant
+
+
 @pytest.mark.parametrize("inplace_on_view", [True, False])
 @pytest.mark.parametrize("constant", [True, False])
 def test_in_place_op_propagates_to_views(constant: bool, inplace_on_view: bool):
@@ -201,17 +223,44 @@ def test_writing_a_view_with_a_view(
     assert dangling_view.data.flags.writeable
 
 
-@pytest.mark.parametrize("inplace_on_view", [True, False])
-def test_setitem_preserves_view_children(inplace_on_view: bool):
-    x_base = mg.arange(10.0)
-    y = x_base[...]
-    (view_child,) = x_base._view_children
-    assert view_child is y
+@given(
+    x=tensors(shape=(3, 3), elements=st.floats(-1e6, 1e6), constant=False),
+    y=tensors(
+        shape=(3,),
+        elements=st.floats(-1e6, 1e6),
+        constant=False,
+        read_only=st.booleans(),
+    ),
+)
+def test_backprop_through_writeable_views(x: Tensor, y: Tensor):
+    diag_x = mg.einsum("ii->i", x[...])  # view of diag of x
+    diag_x[...] = y  # set diag of x to be y
 
-    x = x_base[...] if inplace_on_view else x_base
-    x[...] = y
-    view_children = set(id(i) for i in x_base._view_children)
-    assert id(y) in view_children
+    assert not x.data.flags.writeable
+    assert not diag_x.data.flags.writeable
 
-    if inplace_on_view:
-        assert id(x) in view_children
+    # y0**2 + x01*y1 + x02*y2
+    (diag_x * x[0]).sum().backward()  # diag times top-row
+
+    assert x.data.flags.writeable
+    assert diag_x.data.flags.writeable
+
+    grad_x = np.zeros_like(x)
+
+    # dl/dx =
+    # [2y0, y1, y2]
+    # [0., x01, 0 ]
+    # [0., 0., x02]
+    np.einsum("ii->i", grad_x)[:] = x.data[0]
+    grad_x[0, 0] = 2 * y.data[0]
+    grad_x[0, 1:] = y.data[1:]
+
+    assert_allclose(grad_x, x.grad)
+
+    if not y.constant:
+        # dl/dy = 2y0, x01, x02
+        grad_y = x.data[0]
+        grad_y[0] = grad_y[0] * 2
+        assert_allclose(grad_y, y.grad)
+    else:
+        assert y.grad is None
