@@ -10,7 +10,7 @@ import numpy as np
 from mygrad._utils import SkipGradient, reduce_broadcast
 from mygrad.errors import InvalidBackprop, InvalidGradient
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from mygrad import Tensor
     from mygrad._utils import WeakRef
 
