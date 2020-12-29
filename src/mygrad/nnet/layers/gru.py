@@ -156,9 +156,9 @@ def _gru_bptt(
 def _backprop(var, grad):  # pragma: no cover
     if not var.constant:
         if var.grad is None:
-            var.grad = np.asarray(grad)
+            var._grad = np.asarray(grad)
         else:
-            var.grad += grad
+            var._grad += grad
 
 
 class GRUnit(Operation):
@@ -306,7 +306,7 @@ class GRUnit(Operation):
         hgrad = dLds * const["1 - z"]  # dL / dh
         rgrad = dot(const["1 - h**2"] * hgrad, Wh.T) * s  # dL / dr
 
-        hidden_seq.grad = dLds
+        hidden_seq._grad = dLds
 
         if not (self.Uz.constant and self.Wz.constant and self.bz.constant):
             dz = zgrad * const["z*(1 - z)"]

@@ -157,7 +157,7 @@ class Operation:
                     if _reduction is not None:
                         tmp_grad = _reduction(tmp_grad, var.shape)
 
-                    var.grad = (
+                    var._grad = (
                         np.copy(tmp_grad)
                         # tmp-grad is view of grad; we want to be able to
                         # augment tmp-grad inplace later
@@ -168,7 +168,7 @@ class Operation:
 
                     if _reduction is not None:
                         backed_grad = _reduction(backed_grad, var.shape)
-                    var.grad += backed_grad
+                    var._grad += backed_grad
 
         # Avoid visiting the same node multiple times. Note that we don't store
         # these by the node itself, since Tensors are unhashable, but by its `id`.

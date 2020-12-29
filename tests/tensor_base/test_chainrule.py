@@ -29,7 +29,7 @@ def _check_cleared_node(t: mg.Tensor):
 def test_check_grad():
     # forced grad on constant
     x = Tensor(1.0, constant=True)
-    x.grad = np.array(1.0)
+    x._grad = np.array(1.0)
 
     # bad: constant tensor should have grad None
     with pytest.raises(AssertionError):

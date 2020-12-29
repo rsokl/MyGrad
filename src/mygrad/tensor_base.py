@@ -404,7 +404,7 @@ class Tensor:
         if _check_dtype:
             self._check_valid_dtype(self.data.dtype)
 
-        self.grad = None  # type: Union[None, np.ndarray]
+        self._grad = None  # type: Union[None, np.ndarray]
         self._constant = constant
 
         # track all operations that this tensor participates in
@@ -418,6 +418,10 @@ class Tensor:
         self._base = _base  # type: Optional[Tensor]
         # stores all of the tensors that are a view of this tensor
         self._view_children = WeakRefIterable()  # type: WeakRefIterable[Tensor]
+
+    @property
+    def grad(self) -> Optional[np.ndarray]:
+        return self._grad
 
     def astype(
         self, dtype: Union[type, str], *, constant: Optional[bool] = None
@@ -688,7 +692,7 @@ class Tensor:
             return
 
         if grad is not None:
-            self.grad = asarray(grad)
+            self._grad = asarray(grad)
             if is_invalid_gradient(self.grad):
                 raise InvalidGradient(
                     f"An invalid gradient-value was passed to "
@@ -705,7 +709,7 @@ class Tensor:
                     "graph."
                 )
             dtype = float if np.issubdtype(self.dtype, np.signedinteger) else self.dtype
-            self.grad = (
+            self._grad = (
                 np.ones(self.shape, dtype=dtype)
                 if self.ndim > 0
                 else np.asarray(1.0, dtype=dtype)
@@ -740,7 +744,7 @@ class Tensor:
             Raises if the tensor and its associated gradient possess different shapes.
             Raises if `_backward` triggered on a tensor with gradient of `None`.
         """
-        assert self.grad is not None, (
+        assert self._grad is not None, (
             f"backprop, post grad-accumulation, was triggered "
             f"on a tensor with no gradient"
             f"\n{self}"
@@ -750,15 +754,15 @@ class Tensor:
             f"\nops: {self._ops}"
             f"\nbase: {self.base}"
         )
-        assert self.grad.shape == self.shape, (
+        assert self._grad.shape == self.shape, (
             f"A tensor and its associated gradient must possess the same shape. Got:"
             f"\ntensor-shape: {self.shape}"
-            f"\ngrad-shape: {self.grad.shape}"
+            f"\ngrad-shape: {self._grad.shape}"
         )
         self._ops.difference_update(self._accum_ops)
         self._accum_ops.clear()
         if self.creator is not None and self._ops.isdisjoint(graph):
-            self._creator.backward(self.grad, graph=graph)
+            self._creator.backward(self._grad, graph=graph)
 
     def null_grad(self) -> "Tensor":
         """Sets this tensor's gradient to be ``None``.
@@ -781,8 +785,8 @@ class Tensor:
         Tensor(2.0)
         >>> x.grad is None
         True"""
-        if self.grad is not None:
-            self.grad = None
+        if self._grad is not None:
+            self._grad = None
         return self
 
     def null_gradients(self, clear_graph=True):
@@ -1469,7 +1473,7 @@ class Tensor:
             np.copy(self.data),
             constant=(self.constant if constant is None else constant),
         )
-        copy.grad = np.copy(self.grad) if self.grad is not None else None
+        copy._grad = np.copy(self._grad) if self._grad is not None else None
         return copy
 
     def item(self) -> float:
