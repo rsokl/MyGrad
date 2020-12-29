@@ -11,6 +11,131 @@ from mygrad import Tensor
 from tests.custom_strategies import tensors
 
 
+# Make sure we actually test the correctness of the
+# in-place syntaxes, e.g. `x += y`, and not just
+# `x.__iadd__(y)`
+#
+# Also, make sure that augmented updates on tensors
+# match behavior of numpy
+def test_iadd_mirrors_numpy():
+    an = np.array([3.0, 4.0])
+    at = mg.Tensor(an)
+
+    bn = an
+    vn = an[...]
+    an += 2.0
+
+    bt = at
+    vt = at[...]
+    at += 2.0
+
+    assert_array_equal(an, at)
+    assert_array_equal(bn, bt)
+    assert_array_equal(vn, vt)
+
+
+def test_isub_mirrors_numpy():
+    an = np.array([3.0, 4.0])
+    at = mg.Tensor(an)
+
+    bn = an
+    vn = an[...]
+    an -= 2.0
+
+    bt = at
+    vt = at[...]
+    at -= 2.0
+
+    assert_array_equal(an, at)
+    assert_array_equal(bn, bt)
+    assert_array_equal(vn, vt)
+
+
+def test_imul_mirrors_numpy():
+    an = np.array([3.0, 4.0])
+    at = mg.Tensor(an)
+
+    bn = an
+    vn = an[...]
+    an *= 2.0
+
+    bt = at
+    vt = at[...]
+    at *= 2.0
+
+    assert_array_equal(an, at)
+    assert_array_equal(bn, bt)
+    assert_array_equal(vn, vt)
+
+
+def test_idiv_mirrors_numpy():
+    an = np.array([3.0, 4.0])
+    at = mg.Tensor(an)
+
+    bn = an
+    vn = an[...]
+    an /= 2.0
+
+    bt = at
+    vt = at[...]
+    at /= 2.0
+
+    assert_array_equal(an, at)
+    assert_array_equal(bn, bt)
+    assert_array_equal(vn, vt)
+
+
+def test_ipow_mirrors_numpy():
+    an = np.array([3.0, 4.0])
+    at = mg.Tensor(an)
+
+    bn = an
+    vn = an[...]
+    an **= 2.1
+
+    bt = at
+    vt = at[...]
+    at **= 2.1
+
+    assert_array_equal(an, at)
+    assert_array_equal(bn, bt)
+    assert_array_equal(vn, vt)
+
+
+def test_isqr_mirrors_numpy():
+    an = np.array([3.0, 4.0])
+    at = mg.Tensor(an)
+
+    bn = an
+    vn = an[...]
+    an **= 2
+
+    bt = at
+    vt = at[...]
+    at **= 2
+
+    assert_array_equal(an, at)
+    assert_array_equal(bn, bt)
+    assert_array_equal(vn, vt)
+
+
+def test_ipow_1_mirrors_numpy():
+    an = np.array([3.0, 4.0])
+    at = mg.Tensor(an)
+
+    bn = an
+    vn = an[...]
+    an **= 1
+
+    bt = at
+    vt = at[...]
+    at **= 1
+
+    assert_array_equal(an, at)
+    assert_array_equal(bn, bt)
+    assert_array_equal(vn, vt)
+
+
 @pytest.mark.parametrize("inplace_on_view", [True, False])
 def test_raising_during_in_place_op_doesnt_corrupt_graph(inplace_on_view: bool):
     x = mg.arange(1.0, 5.0)
