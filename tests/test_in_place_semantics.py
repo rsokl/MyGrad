@@ -233,14 +233,16 @@ def test_writing_a_view_with_a_view(
     ),
 )
 def test_backprop_through_writeable_views(x: Tensor, y: Tensor):
+    # this should ultimately leave view_of_x identical to x
     vert_flipped_x = x[::-1]
     vert_horiz_flipped_x = vert_flipped_x[:, ::-1]
     horiz_flipped_x = vert_horiz_flipped_x[::-1]
-    view_of_x = horiz_flipped_x[:, ::-1]
+    view_of_x = horiz_flipped_x[:, ::-1].T.T
 
     diag_x = mg.einsum("ii->i", view_of_x)  # view of diag of x
     diag_x[...] = y  # set diag of x to be y
 
+    # check that update propagated to views of `x`
     assert_allclose(vert_flipped_x[::-1], x)
     assert_allclose(vert_horiz_flipped_x[::-1][:, ::-1], x)
     assert_allclose(horiz_flipped_x[:, ::-1], x)
