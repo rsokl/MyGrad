@@ -1,5 +1,4 @@
 import mygrad
-from mygrad import linalg
 
 # -*- coding: utf-8 -*-
 #

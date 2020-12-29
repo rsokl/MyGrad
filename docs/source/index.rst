@@ -63,6 +63,7 @@ than is suggested here.
    install
    intro
    tensor
+   autodiff_utils
    operation
    tensor_creation
    tensor_manipulation
