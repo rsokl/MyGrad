@@ -285,16 +285,13 @@ class UnView(BroadcastableOp):
             assert grad_view is grad or grad_view.base is not None
             assert grad_view.base is grad or grad_view.base is grad.base
             grad_view *= 0
+
             return grad
 
         elif index == 1:  # compute dℒ/d(view)
             grad_view = grad
             for fn in self._view_fn_seq:
                 grad_view = fn(grad)
-
-            assert (
-                grad_view.shape == placeholder_mutant_view.shape
-            ), f"{(grad_view.shape, placeholder_mutant_view.shape)}"
 
             return grad_view
 

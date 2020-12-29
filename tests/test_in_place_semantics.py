@@ -228,6 +228,53 @@ def test_writing_a_view_with_a_view(
     assert dangling_view.data.flags.writeable
 
 
+@pytest.mark.parametrize("include_upstream_view", [True, False])
+@pytest.mark.parametrize("include_downstream_view", [True, False])
+def test_set_item_with_broadcasting(
+    include_upstream_view: bool, include_downstream_view: bool
+):
+    xo = mg.arange(27.0).reshape(3, 3, 3).copy()
+    x = +xo
+
+    if include_upstream_view:
+        x = x[...]
+
+    y = x[np.newaxis]
+
+    if include_downstream_view:
+        x = x[...]
+
+    x[:2] = xo[:1]
+
+    # fmt: off
+    x_expected = \
+        Tensor([[[0., 1., 2.],
+                 [3., 4., 5.],
+                 [6., 7., 8.]],
+
+                [[0., 1., 2.],
+                 [3., 4., 5.],
+                 [6., 7., 8.]],
+
+                [[18., 19., 20.],
+                 [21., 22., 23.],
+                 [24., 25., 26.]]])
+    # fmt: on
+    assert_array_equal(x, x_expected)
+    assert_array_equal(y, x.data[np.newaxis])
+
+    (y * x).sum().backward()
+
+    x_grad = x.data if include_downstream_view else 2 * x.data
+    assert_array_equal(x.grad, x_grad)
+    assert_array_equal(y.grad, x.data[np.newaxis])
+
+    xo_grad = np.zeros_like(xo)
+    xo_grad[0] += 4 * xo.data[0]
+    xo_grad[2] += 2 * xo.data[2]
+    assert_array_equal(xo.grad, xo_grad)
+
+
 @pytest.mark.parametrize("include_extraneous_ops", [True, False])
 def test_complicated_inplace_pattern(include_extraneous_ops: bool):
     static_x = mg.arange(9.0).reshape(3, 3).copy()
