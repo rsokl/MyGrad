@@ -88,10 +88,12 @@ def test_simple_backprop_from_view_post_upstream_mutation(
     y[:2] = 0  # base is mutated
     # downstream view should carry appropriate info
     # for backprop post-mutation
-    z.backward()
+    w = mg.ones_like(z)
+    (w * z).backward()
 
     assert_array_equal(y, y_base)
     assert_array_equal(z, y_base)
+    assert_array_equal(w.grad, [0.0, 0.0, *y_base.data[-2:]])
     assert_array_equal(z.grad, np.ones_like(y_base))
     assert_array_equal(y_base.grad, np.ones_like(y_base))
     assert_array_equal(y.grad, np.ones_like(y_base))
@@ -203,6 +205,10 @@ def test_writing_a_view_with_a_view(
 
     proxy_y = target_op(y)
 
+    assert_array_equal(y, [3.0, 4.0, 3.0, 4.0])
+    assert_array_equal(proxy_y, [3.0, 4.0, 3.0, 4.0])
+    assert_array_equal(y, dangling_view)
+
     # output: -1 x2 + 2 x3 + -3 x2 + 4 x3 -> -4 x2 + 6 x3
     ([-1, 2, -3, 4] * proxy_y).sum().backward()
 
@@ -211,7 +217,6 @@ def test_writing_a_view_with_a_view(
     assert_array_equal(y.grad, [-1.0, 2.0, -3.0, 4.0])
     assert_array_equal(x.grad, [0.0, 0.0, -4.0, 6.0])
 
-    assert_array_equal(y, dangling_view)
     assert dangling_view.base is y_base
     assert dangling_view.grad is None
 
@@ -223,6 +228,93 @@ def test_writing_a_view_with_a_view(
     assert dangling_view.data.flags.writeable
 
 
+@pytest.mark.parametrize("include_extraneous_ops", [True, False])
+def test_complicated_inplace_pattern(include_extraneous_ops: bool):
+    static_x = mg.arange(9.0).reshape(3, 3).copy()
+    x = +static_x
+    y = mg.arange(4.0)
+    static_row = +x[...][0]  # [0. 1. 2.]
+    view_row = x[...][0]  # view of row-0
+
+    # This is just a complicated way of transposing x in-place
+    x.T[...] = x  # set diag of x to be y
+
+    if include_extraneous_ops:
+        # These line shouldn't have any effect
+        x[::-1] = x[::-1] + 0 * static_x + (x - x).sum() + (0 * y).sum()
+        _ = x.T.sum() + y.sum() + static_x[...].sum()
+
+    # static_x:  (we'll call it xs)
+    # Tensor([[0., 1., 2.],
+    #         [3., 4., 5.],
+    #         [6., 7., 8.]])
+    #
+    # x:  (transpose of static_x)
+    # Tensor([[0., 3., 6.],
+    #         [1., 4., 7.],
+    #         [2., 5., 8.]])
+    #
+    # view_row:
+    # Tensor([[0., 3., 6.])
+    #
+    # y:
+    # Tensor([0., 1., 2., 3.])
+    #
+    #
+    # ℒ =   (static_x00 + ... + static_x22)
+    #     + -3 * (xs00 + xs01 + xs02)
+    #     +  4 * ( x00 +  x01 +  x02) <- (xij -> xsji)
+    #     +  y0 * x11 + y1 * x12 + y2 * x21 + y3 * x22
+    #
+    # dℒ/dy = [x11, x12, x21, x22]
+    #       = [xs11, xs21, xs12, xs22]
+    #
+    # dℒ/dx = [[4. 4. 4.]
+    #          [0. y0 y1]
+    #          [0. y2 y3]
+    #
+    # dℒ/dxs = [[2. -2. -2.]
+    #           [5.  y0  y2]
+    #           [5.  y1  y3]
+    out = (
+        static_x.sum()
+        + -3 * static_row.sum()
+        + 4 * view_row[...].sum()
+        + (x[1:, 1:].ravel() * y).sum()
+    )  # sum of squared diag
+
+    if include_extraneous_ops:
+        out += 0 * (x[...] + static_x[...]).sum()
+
+    out.backward()
+
+    assert_array_equal(
+        static_x, Tensor([[0.0, 1.0, 2.0], [3.0, 4.0, 5.0], [6.0, 7.0, 8.0]])
+    )
+    xs = static_x.data
+    assert_array_equal(x, xs.T)
+    assert_array_equal(static_row, xs[0])
+    assert_array_equal(view_row, xs[:, 0])
+    assert_array_equal(y, mg.arange(4.0))
+
+    y_grad = static_x.data[np.array([1, 2, 1, 2]), np.array([1, 1, 2, 2])]
+    assert_array_equal(y.grad, y_grad)
+
+    x_grad = np.zeros_like(x)
+    x_grad[0] += 4.0
+    x_grad[1:, 1:] += y.data.reshape(2, 2)
+    assert_array_equal(x.grad, x_grad)
+
+    xs_grad = np.ones_like(x)
+    xs_grad[0] -= 3.0
+    xs_grad[:, 0] += 4.0
+    xs_grad[1:, 1:] += y.data.reshape(2, 2).T
+    assert_array_equal(static_x.grad, xs_grad)
+
+    if include_extraneous_ops:
+        del _
+
+
 @given(
     x=tensors(shape=(3, 3), elements=st.floats(-1e6, 1e6), constant=False),
     y=tensors(
@@ -232,7 +324,7 @@ def test_writing_a_view_with_a_view(
         read_only=st.booleans(),
     ),
 )
-def test_backprop_through_writeable_views(x: Tensor, y: Tensor):
+def test_complicated_inplace_pattern2(x: Tensor, y: Tensor):
     # this should ultimately leave view_of_x identical to x
     vert_flipped_x = x[::-1]
     vert_horiz_flipped_x = vert_flipped_x[:, ::-1]
