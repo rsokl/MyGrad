@@ -151,7 +151,7 @@ class Operation:
                         f"\nGradients are expected to be real-valued scalars or "
                         f"numpy arrays, got a gradient of type: {type(backed_grad)}"
                     )
-                if var.grad is None:
+                if var._grad is None:
                     tmp_grad = np.asarray(backed_grad)
 
                     if _reduction is not None:
