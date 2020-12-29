@@ -6,12 +6,19 @@ from mygrad.operation_base import BroadcastableOp, Operation
 
 __all__ = [
     "Add",
+    "IAdd",
     "Subtract",
+    "ISubstract",
     "Multiply",
+    "IMultiply",
     "Divide",
+    "IDivide",
     "Reciprocal",
     "Power",
+    "IPower",
+    "IPow1",
     "Square",
+    "ISquare",
     "Positive",
     "Negative",
     "AddSequence",
@@ -40,6 +47,35 @@ class Add(BroadcastableOp):
         return grad
 
 
+class IAdd(Add):
+    def __call__(self, inplace_target, other) -> np.ndarray:
+        """ Performs a += b
+
+        Parameters
+        ----------
+        inplace_target : mygrad.Tensor
+        other : mygrad.Tensor
+
+        Returns
+        -------
+        inplace_target_data : numpy.ndarray
+
+        Notes
+        -----
+        Note that inplace_target will be replaced with its un-mutated
+        value by ``Tensor._inplace_op`` prior to backprop. Thus we need
+        not worry about caching inplace_targer and rewriting the backprop
+        logic.
+
+        However, also note that using this op outside of the context of
+        `Tensor._inplace_op`` will lead to broken behavior"""
+
+        self.variables = (inplace_target, other)
+        inplace_target = inplace_target.data
+        inplace_target += other.data
+        return inplace_target
+
+
 class Subtract(BroadcastableOp):
     def __call__(self, a, b):
         """ f(a,b) -> a - b
@@ -63,6 +99,35 @@ class Subtract(BroadcastableOp):
             return -grad
 
 
+class ISubstract(Subtract):
+    def __call__(self, inplace_target, other) -> np.ndarray:
+        """ Performs a -= b
+
+        Parameters
+        ----------
+        inplace_target : mygrad.Tensor
+        other : mygrad.Tensor
+
+        Returns
+        -------
+        inplace_target_data : numpy.ndarray
+
+        Notes
+        -----
+        Note that inplace_target will be replaced with its un-mutated
+        value by ``Tensor._inplace_op`` prior to backprop. Thus we need
+        not worry about caching inplace_targer and rewriting the backprop
+        logic.
+
+        However, also note that using this op outside of the context of
+        `Tensor._inplace_op`` will lead to broken behavior"""
+
+        self.variables = (inplace_target, other)
+        inplace_target = inplace_target.data
+        inplace_target -= other.data
+        return inplace_target
+
+
 class Multiply(BroadcastableOp):
     def __call__(self, a, b):
         """ Parameters
@@ -81,6 +146,35 @@ class Multiply(BroadcastableOp):
             return grad * a.data
 
 
+class IMultiply(Multiply):
+    def __call__(self, inplace_target, other) -> np.ndarray:
+        """ Performs a *= b
+
+        Parameters
+        ----------
+        inplace_target : mygrad.Tensor
+        other : mygrad.Tensor
+
+        Returns
+        -------
+        inplace_target_data : numpy.ndarray
+
+        Notes
+        -----
+        Note that inplace_target will be replaced with its un-mutated
+        value by ``Tensor._inplace_op`` prior to backprop. Thus we need
+        not worry about caching inplace_targer and rewriting the backprop
+        logic.
+
+        However, also note that using this op outside of the context of
+        `Tensor._inplace_op`` will lead to broken behavior"""
+
+        self.variables = (inplace_target, other)
+        inplace_target = inplace_target.data
+        inplace_target *= other.data
+        return inplace_target
+
+
 class Divide(BroadcastableOp):
     def __call__(self, a, b):
         """ f(a, b) -> a / b"""
@@ -94,6 +188,35 @@ class Divide(BroadcastableOp):
             return grad / b.data
         else:  # broadcast through b
             return -grad * a.data / (b.data ** 2)
+
+
+class IDivide(Divide):
+    def __call__(self, inplace_target, other) -> np.ndarray:
+        """ Performs a /= b
+
+        Parameters
+        ----------
+        inplace_target : mygrad.Tensor
+        other : mygrad.Tensor
+
+        Returns
+        -------
+        inplace_target_data : numpy.ndarray
+
+        Notes
+        -----
+        Note that inplace_target will be replaced with its un-mutated
+        value by ``Tensor._inplace_op`` prior to backprop. Thus we need
+        not worry about caching inplace_targer and rewriting the backprop
+        logic.
+
+        However, also note that using this op outside of the context of
+        `Tensor._inplace_op`` will lead to broken behavior"""
+
+        self.variables = (inplace_target, other)
+        inplace_target = inplace_target.data
+        inplace_target /= other.data
+        return inplace_target
 
 
 class Reciprocal(BroadcastableOp):
@@ -120,12 +243,41 @@ class Power(BroadcastableOp):
         return out
 
     def backward_var(self, grad, index, **kwargs):
-        a, b = self.variables
-        x, y = a.data, b.data
+        x, y = (i.data for i in self.variables)
+
         if index == 0:
             return grad * y * (x ** np.where(y, (y - 1), 1))
         else:
             return grad * (x ** y) * np.log(np.where(x, x, 1))
+
+
+class IPower(Power):
+    def __call__(self, inplace_target, other) -> np.ndarray:
+        """ Performs a **= b
+
+        Parameters
+        ----------
+        inplace_target : mygrad.Tensor
+        other : mygrad.Tensor
+
+        Returns
+        -------
+        inplace_target_data : numpy.ndarray
+
+        Notes
+        -----
+        Note that inplace_target will be replaced with its un-mutated
+        value by ``Tensor._inplace_op`` prior to backprop. Thus we need
+        not worry about caching inplace_targer and rewriting the backprop
+        logic.
+
+        However, also note that using this op outside of the context of
+        `Tensor._inplace_op`` will lead to broken behavior"""
+
+        self.variables = (inplace_target, other)
+        inplace_target = inplace_target.data
+        inplace_target **= other.data
+        return inplace_target
 
 
 class Square(Operation):
@@ -139,7 +291,57 @@ class Square(Operation):
         return np.square(a.data)
 
     def backward_var(self, grad, index, **kwargs):
-        return grad * 2 * self.variables[index].data
+        grad = 2 * grad
+        grad *= self.variables[index].data
+        return grad
+
+
+class ISquare(Square):
+    def __call__(self, inplace_target) -> np.ndarray:
+        """ Performs a **= 2  (special case)
+
+        Parameters
+        ----------
+        inplace_target : mygrad.Tensor
+
+        Returns
+        -------
+        inplace_target_data : numpy.ndarray
+
+        Notes
+        -----
+        Note that inplace_target will be replaced with its un-mutated
+        value by ``Tensor._inplace_op`` prior to backprop. Thus we need
+        not worry about caching inplace_targer and rewriting the backprop
+        logic.
+
+        However, also note that using this op outside of the context of
+        `Tensor._inplace_op`` will lead to broken behavior"""
+
+        self.variables = (inplace_target,)
+        inplace_target = inplace_target.data
+        inplace_target **= 2
+        return inplace_target
+
+
+class IPow1(Operation):
+    def __call__(self, inplace_target) -> np.ndarray:
+        """ Performs a **= 1  (special case)
+
+        Parameters
+        ----------
+        inplace_target : mygrad.Tensor
+
+        Returns
+        -------
+        inplace_target_data : numpy.ndarray
+        """
+
+        self.variables = (inplace_target,)
+        return inplace_target.data
+
+    def backward_var(self, grad: np.ndarray, index: int, **kwargs) -> np.ndarray:
+        return grad
 
 
 class Positive(Operation):

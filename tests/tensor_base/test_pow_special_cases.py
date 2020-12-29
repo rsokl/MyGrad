@@ -1,5 +1,6 @@
 from functools import partial
 
+import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
 import pytest
@@ -11,9 +12,19 @@ from tests.custom_strategies import tensors
 
 from ..wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
+hnp.mutually_broadcastable_shapes
+
 
 def custom_pow(x, p, constant=False):
     out = x ** p
+    if isinstance(out, mg.Tensor) and constant:
+        out._constant = constant
+    return out
+
+
+def in_place_custom_pow(x, p, constant=False):
+    out = +x
+    out **= p
     if isinstance(out, mg.Tensor) and constant:
         out._constant = constant
     return out
@@ -61,6 +72,27 @@ def test_pow_1_bkwd():
 
 
 @fwdprop_test_factory(
+    mygrad_func=in_place_custom_pow,
+    true_func=in_place_custom_pow,
+    num_arrays=1,
+    kwargs={"p": partial(any_scalar, p=1)},
+    permit_0d_array_as_float=False,
+)
+def test_inplace_pow_1_fwd():
+    pass
+
+
+@backprop_test_factory(
+    mygrad_func=in_place_custom_pow,
+    true_func=in_place_custom_pow,
+    num_arrays=1,
+    kwargs={"p": partial(any_scalar, p=1)},
+)
+def test_inplace_pow_1_bkwd():
+    pass
+
+
+@fwdprop_test_factory(
     mygrad_func=custom_pow,
     true_func=custom_pow,
     num_arrays=1,
@@ -78,4 +110,25 @@ def test_pow_2_fwd():
     kwargs={"p": partial(any_scalar, p=2)},
 )
 def test_pow_2_bkwd():
+    pass
+
+
+@fwdprop_test_factory(
+    mygrad_func=in_place_custom_pow,
+    true_func=in_place_custom_pow,
+    num_arrays=1,
+    kwargs={"p": partial(any_scalar, p=2)},
+    permit_0d_array_as_float=False,
+)
+def test_inplace_pow_2_fwd():
+    pass
+
+
+@backprop_test_factory(
+    mygrad_func=in_place_custom_pow,
+    true_func=in_place_custom_pow,
+    num_arrays=1,
+    kwargs={"p": partial(any_scalar, p=2)},
+)
+def test_inplace_pow_2_bkwd():
     pass

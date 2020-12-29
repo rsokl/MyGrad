@@ -38,6 +38,13 @@ from mygrad.linalg.ops import MatMul
 from mygrad.math.arithmetic.ops import (
     Add,
     Divide,
+    IAdd,
+    IDivide,
+    IMultiply,
+    IPow1,
+    IPower,
+    ISquare,
+    ISubstract,
     Multiply,
     Negative,
     Positive,
@@ -1337,11 +1344,19 @@ class Tensor:
     def __add__(self, other) -> "Tensor":
         return self._op(Add, self, other)
 
+    def __iadd__(self, other) -> "Tensor":
+        self._in_place_op(IAdd, other)
+        return self
+
     def __radd__(self, other) -> "Tensor":
         return self._op(Add, other, self)
 
     def __sub__(self, other) -> "Tensor":
         return self._op(Subtract, self, other)
+
+    def __isub__(self, other) -> "Tensor":
+        self._in_place_op(ISubstract, other)
+        return self
 
     def __rsub__(self, other) -> "Tensor":
         return self._op(Subtract, other, self)
@@ -1352,8 +1367,16 @@ class Tensor:
     def __rtruediv__(self, other) -> "Tensor":
         return self._op(Divide, other, self)
 
+    def __itruediv__(self, other) -> "Tensor":
+        self._in_place_op(IDivide, other)
+        return self
+
     def __mul__(self, other) -> "Tensor":
         return self._op(Multiply, self, other)
+
+    def __imul__(self, other) -> "Tensor":
+        self._in_place_op(IMultiply, other)
+        return self
 
     def __rmul__(self, other) -> "Tensor":
         return self._op(Multiply, other, self)
@@ -1374,6 +1397,20 @@ class Tensor:
                 return self._op(Square, self)
 
         return self._op(Power, self, other)
+
+    def __ipow__(self, other) -> "Tensor":
+        if isinstance(other, Number) or (
+            isinstance(other, np.ndarray) and other.ndim == 0
+        ):
+            if other == 1:
+                self._in_place_op(IPow1)
+                return self
+            elif other == 2:
+                self._in_place_op(ISquare)
+                return self
+
+        self._in_place_op(IPower, other)
+        return self
 
     def __rpow__(self, other):
         return self._op(Power, other, self)
