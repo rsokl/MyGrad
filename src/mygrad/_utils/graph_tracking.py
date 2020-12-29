@@ -43,6 +43,9 @@ class _NoAutoDiff(ContextTracker):
     ...     # the body of this function
     ...     pass
 
+    The following pattern is particularly useful for making a MyGrad-function
+    behave as if it were a pure NumPy function.
+
     >>> @mg.no_autodiff(to_numpy=True)
     ... def func_returns_array():
     ...     # No graph-tracking will occur within

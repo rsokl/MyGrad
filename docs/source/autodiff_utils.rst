@@ -46,6 +46,11 @@ Read the following code to see such a mutation rear its head.
    >>> y.grad  # would be array([0., 1., 2.]) if graph wasn't corrupted
    array([0., 0., 0.])
 
+
+Note that, were ``x`` an instance of :class:`~mygrad.Tensor`, there would not be any issue with the
+above calculation, since MyGrad can track the in-place update on a tensor. MyGrad cannot, on the otherhand
+track such operations involving only NumPy arrays
+
 Thus MyGrad prohibits such mutations with its aforementioned "memory guarding" behavior, however it is
 smart about restoring the writeability of all arrays once they are no longer participating in a computational
 graph (e.g. backpropagation has been performed through the graph).
