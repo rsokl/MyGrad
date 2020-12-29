@@ -180,6 +180,36 @@ def _np_transpose(x, axes):
     return np.transpose(x, axes)
 
 
+def _transpose_property(x, constant=False):
+    if not isinstance(x, Tensor):
+        x = np.asarray(x)
+
+    y = x.T
+    if isinstance(x, Tensor):
+        y._constant = constant or x.constant
+    return y
+
+
+@fwdprop_test_factory(
+    mygrad_func=_transpose_property,
+    true_func=_transpose_property,
+    num_arrays=1,
+    permit_0d_array_as_float=False,
+)
+def test_transpose_property_fwd():
+    pass
+
+
+@backprop_test_factory(
+    mygrad_func=_transpose_property,
+    true_func=_transpose_property,
+    num_arrays=1,
+    vary_each_element=True,
+)
+def test_transpose_property_bkwd():
+    pass
+
+
 @fwdprop_test_factory(
     mygrad_func=_transpose,
     true_func=_np_transpose,
