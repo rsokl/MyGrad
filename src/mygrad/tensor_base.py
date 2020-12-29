@@ -60,7 +60,7 @@ from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property
 __all__ = ["Tensor", "asarray"]
 
 
-def _is_view_of(parent: "Tensor", child: np.ndarray) -> bool:
+def _is_view_of(parent: "Tensor", child: np.ndarray) -> bool:  # pragma: no cover
     if (
         (parent.data is child.base)
         or (parent.data is child)
