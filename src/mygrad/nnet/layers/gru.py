@@ -155,7 +155,7 @@ def _gru_bptt(
 
 def _backprop(var, grad):  # pragma: no cover
     if not var.constant:
-        if var.grad is None:
+        if var._grad is None:
             var._grad = np.asarray(grad)
         else:
             var._grad += grad
