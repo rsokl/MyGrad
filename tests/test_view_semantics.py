@@ -88,13 +88,15 @@ def test_basic_view_relationships(base: mg.Tensor, after_backprop: bool):
 
     if after_backprop:
         # involving any disconnected view in an op
-        # removes its base
+        # removes its base and clears its grad
+        +base
         +view1
         +view2
         +view_of_view
-        assert view1.base is None
-        assert view2.base is None
-        assert view_of_view.base is None
+        assert base.base is None and base.grad is None
+        assert view1.base is None and view1.grad is None
+        assert view2.base is None and view2.grad is None
+        assert view_of_view.base is None and view_of_view.grad is None
 
 
 @given(base=tensors(shape=(3, 3), elements=st.floats(-100, 100), constant=False))
@@ -129,7 +131,11 @@ def test_view_owns_grad_in_correspondence_with_base(base: mg.Tensor):
     assert leaf.grad is None
 
 
-def test_inplace_on_base_after_backprop_through_view():
+@pytest.mark.parametrize("base_inplace", [True, False])
+@pytest.mark.parametrize("view_inplace", [True, False])
+def test_resuming_graph_after_backprop_through_view(
+    base_inplace: bool, view_inplace: bool
+):
     base = mg.arange(4.0)
     view = base[-2:]
     (view * view[...]).backward()
@@ -139,7 +145,10 @@ def test_inplace_on_base_after_backprop_through_view():
     assert_allclose(base.grad, expected_grad)
     assert_allclose(view.grad, base.grad[-2:])
 
-    view *= 3
+    if view_inplace:
+        view *= 3
+    else:
+        view = 3 * view[...]
     assert view.base is None
 
     view.backward()
@@ -148,7 +157,10 @@ def test_inplace_on_base_after_backprop_through_view():
     assert_allclose(base.grad, expected_grad)
     assert_allclose(view.grad, np.ones_like(view))
 
-    base *= 2
+    if base_inplace:
+        base *= 2
+    else:
+        base = 2 * base[...]
     assert base.base is None
 
     base.backward()
