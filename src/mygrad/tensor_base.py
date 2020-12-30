@@ -434,6 +434,8 @@ class Tensor:
             return self._grad
 
         (view_parent,) = self._creator.variables
+
+        # recursively fetches grad from parent
         grad = view_parent.grad
         with _track.no_autodiff:
             self._view_grad = self._replay_op(grad).data if grad is not None else None
