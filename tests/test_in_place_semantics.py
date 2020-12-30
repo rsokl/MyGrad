@@ -548,15 +548,23 @@ def test_complicated_inplace_pattern2(x: Tensor, y: Tensor):
         assert y.grad is None
 
 
-def test_fail_case():
-    xx = mg.arange(9.0).reshape(3, 3).copy()
-    x = +xx
-    y = x[:, 2]
-    y2 = y[...]
+def test_unview_backprop_through_multiple_view_funcs():
+    # caught bug in unview where multiple distinct sequences
+    # of views weren't being exercised through var-1
+    x = mg.arange(9.0).reshape(3, 3).copy()
+    xx = +x
+    y = xx[:, 2]
 
-    y2 *= 2
-    y2.sum().backward()
+    # [x12 x02]
+    y2 = y[:-1][::-1]
 
-    assert_array_equal(
-        xx.grad, np.array([[0.0, 0.0, 2.0], [0.0, 0.0, 2.0], [0.0, 0.0, 2.0]])
-    )
+    y2 *= (2, 3)
+    # [[2x00 2x01 7x02]
+    #  [2x10 2x11 5x12]
+    #  [2x20 2x21 2x22]]
+    coeff = np.array([[2.0, 2.0, 7.0], [2.0, 2.0, 5.0], [2.0, 2.0, 2.0]])
+    out = x.sum() + xx.sum() + y2.sum()
+    assert_allclose(out, (x * coeff).sum())
+    out.backward()
+
+    assert_array_equal(x.grad, coeff)
