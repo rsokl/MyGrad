@@ -6,6 +6,7 @@ from hypothesis import assume, given
 from numpy.testing import assert_array_equal
 
 from mygrad import Tensor, einsum, reshape
+from mygrad.errors import DisconnectedView
 
 from ..custom_strategies import basic_indices, tensors, valid_shapes
 
@@ -117,5 +118,5 @@ def test_view_func_replay_op_mirrors_standard_op(
 
 @given(tensors())
 def test_op_replay_without_creator_raises(x: Tensor):
-    with pytest.raises(ValueError):
+    with pytest.raises(DisconnectedView):
         x._replay_op(x)

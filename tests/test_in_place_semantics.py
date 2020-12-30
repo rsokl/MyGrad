@@ -340,10 +340,10 @@ def test_writing_a_view_with_a_view(
     assert_array_equal(proxy_y.grad, [-1.0, 2.0, -3.0, 4.0])
     assert_array_equal(y_base.grad, [-1.0, 2.0, -3.0, 4.0])
     assert_array_equal(y.grad, [-1.0, 2.0, -3.0, 4.0])
+    assert_array_equal(dangling_view.grad, y_base.grad)
     assert_array_equal(x.grad, [0.0, 0.0, -4.0, 6.0])
 
     assert dangling_view.base is y_base
-    assert dangling_view.grad is None
 
     dangling_view.clear_graph()  # release memory
 
@@ -388,16 +388,17 @@ def test_set_item_with_broadcasting(
     assert_array_equal(x, x_expected)
     assert_array_equal(y, x.data[np.newaxis])
 
+    # equivalent to x ** 2
     (y * x).sum().backward()
-
-    x_grad = x.data if include_downstream_view else 2 * x.data
-    assert_array_equal(x.grad, x_grad)
-    assert_array_equal(y.grad, x.data[np.newaxis])
 
     xo_grad = np.zeros_like(xo)
     xo_grad[0] += 4 * xo.data[0]
     xo_grad[2] += 2 * xo.data[2]
     assert_array_equal(xo.grad, xo_grad)
+
+    x_grad = 2 * x.data
+    assert_array_equal(x.grad, x_grad)
+    assert_array_equal(y.grad, x.grad[np.newaxis])
 
 
 @pytest.mark.parametrize("include_extraneous_ops", [True, False])

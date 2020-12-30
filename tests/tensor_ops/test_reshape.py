@@ -118,7 +118,7 @@ def test_inplace_reshape_3():
     assert_array_equal(
         x.grad, np.array([[8.0, 6.0, 4.0, 2.0, 0.0], [0.0, 0.0, 0.0, 0.0, 0.0]])
     )
-    assert_array_equal(y.grad, np.array([4.0, 3.0, 2.0, 1.0, 0.0]))
+    assert_array_equal(y.grad, x.grad[0])
 
 
 @given(

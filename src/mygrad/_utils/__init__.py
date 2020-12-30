@@ -77,6 +77,12 @@ class WeakRefIterable(Generic[T]):
     def __len__(self) -> int:
         return sum(1 for _ in self)
 
+    def __bool__(self):
+        if len(self.data) == 0:
+            return False
+        else:
+            return any(True for _ in self)
+
     def append(self, item: T):
         self.data.append(ReferenceType(item))
 
