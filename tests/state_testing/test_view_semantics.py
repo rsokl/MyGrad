@@ -36,7 +36,6 @@
 # forces x3's gradient to match its data; it follows from the correspondence stated above
 # that the same should be true for all other  views associated with the base (x1)
 
-from functools import wraps
 from typing import Callable, List, NamedTuple, Optional, Tuple, TypeVar
 
 import hypothesis.strategies as st
@@ -55,18 +54,7 @@ from numpy.testing import assert_equal
 
 import mygrad as mg
 from mygrad import Tensor
-from tests.utils import clear_all_mem_locking_state
-
-
-def clears_mem_state(fn: Callable) -> Callable:
-    @wraps(fn)
-    def wrapper(*args, **kwargs):
-        try:
-            fn(*args, **kwargs)
-        finally:
-            clear_all_mem_locking_state()
-
-    return wrapper
+from tests.utils import clears_mem_state
 
 
 class Pair(NamedTuple):

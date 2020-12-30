@@ -1,5 +1,6 @@
 from contextlib import contextmanager
-from typing import Dict, Union
+from functools import wraps
+from typing import Callable, Dict, Union
 
 import numpy as np
 
@@ -49,3 +50,14 @@ def clear_all_mem_locking_state():
     mem._views_waiting_for_unlock.clear()
     mem._array_tracker.clear()
     mem._array_counter.clear()
+
+
+def clears_mem_state(fn: Callable) -> Callable:
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        try:
+            fn(*args, **kwargs)
+        finally:
+            clear_all_mem_locking_state()
+
+    return wrapper
