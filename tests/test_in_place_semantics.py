@@ -546,3 +546,17 @@ def test_complicated_inplace_pattern2(x: Tensor, y: Tensor):
         assert_allclose(grad_y, y.grad)
     else:
         assert y.grad is None
+
+
+def test_fail_case():
+    xx = mg.arange(9.0).reshape(3, 3).copy()
+    x = +xx
+    y = x[:, 2]
+    y2 = y[...]
+
+    y2 *= 2
+    y2.sum().backward()
+
+    assert_array_equal(
+        xx.grad, np.array([[0.0, 0.0, 2.0], [0.0, 0.0, 2.0], [0.0, 0.0, 2.0]])
+    )
