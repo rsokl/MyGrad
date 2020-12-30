@@ -80,6 +80,9 @@ class WeakRefIterable(Generic[T]):
     def append(self, item: T):
         self.data.append(ReferenceType(item))
 
+    def clear(self):
+        self.data.clear()
+
     def __iter__(self) -> Generator[T, None, None]:
         for ref in self.data:
             item = ref.__call__()  # use __call__ to help type checker..
