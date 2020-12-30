@@ -879,9 +879,9 @@ class Tensor:
             _ = self.grad
 
         self._view_children.clear()
-        self._ops = set()
+        self._ops.clear()
 
-        if self.creator is None:
+        if self._creator is None:
             return
 
         creator = self._creator
