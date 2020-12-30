@@ -1147,6 +1147,8 @@ class Tensor:
                     inplace_target,  # tensor will be mutated
                     # we need to accommodate case where inplace operation is writing
                     # *from* a view - redirect view to placeholder
+                    #
+                    # TODO: Also check if inplace op involves view *data*
                     *(graph.get_placeholder_if_exists(t) for t in input_vars),
                     op_args=op_args,
                     op_kwargs=op_kwargs,
@@ -1267,6 +1269,7 @@ class Tensor:
                     continue
                 view = node.tensor._replay_op(node.parent)
                 _dup.mirror_tensor(source=view, target=node.tensor)
+                # TODO: I think this reroute can be removed
                 _dup.reroute_ops_through(source=view, target=node.tensor)
                 node.parent._view_children.append(node.tensor)
         except DisconnectedView:
