@@ -130,6 +130,36 @@ def test_dereferencing_tensor_restores_data_writeability(
     )
 
 
+@pytest.mark.xfail(reason="documented state leak for edge case")
+def test_document_state_leak_involving_inplace_op():
+    x = mg.arange(4.0)
+    v = x[...]
+    _ = v[...]  # Referred to in comments as `vv`
+
+    # clears view children
+    v.backward()
+
+    # This in-place operation changes the array
+    # that `v` points to. `vv`'s creator no longer
+    # references that array.
+    v += 0
+
+    # This clears the graph, removing any references
+    # to the placeholder array for pre-mutation `v`.
+    # thus the mem-locker skips over the array which
+    # is now a dead ref
+    v.backward()
+
+    # a solution for this is to include:
+    #
+    # if self._view_children.data:
+    #     data = self.data
+    #     for _ in self._view_children:
+    #         _mem._release_lock_on_arr_writeability(data)
+    #
+    # in Tensor.clear_graph
+
+
 @pytest.mark.parametrize("constant", [True, False])
 def test_only_final_dereference_restores_writeability(constant: bool):
     x = mg.arange(10.0, constant=constant)
