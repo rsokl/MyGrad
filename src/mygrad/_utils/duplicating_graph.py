@@ -15,7 +15,7 @@ import numpy as np
 from numpy import ndarray
 
 from mygrad._utils import WeakRefIterable
-from mygrad.operation_base import BroadcastableOp
+from mygrad.operation_base import BroadcastableOp, Operation
 
 if TYPE_CHECKING:  # pragma: no cover
     from mygrad import Tensor
@@ -285,9 +285,9 @@ class UnView(BroadcastableOp):
             for fn in self._view_fn_seq:
                 grad_view = fn(grad_view)
 
+            assert grad_view.shape == self.variables[1].shape
             # check that grad_view shares memory with grad
-            assert grad_view is grad or grad_view.base is not None
-            assert grad_view.base is grad or grad_view.base is grad.base
+            assert grad_view.base is grad
             grad_view *= 0
 
             return grad
@@ -295,8 +295,9 @@ class UnView(BroadcastableOp):
         elif index == 1:  # compute dℒ/d(view)
             grad_view = grad
             for fn in self._view_fn_seq:
-                grad_view = fn(grad)
+                grad_view = fn(grad_view)
 
+            assert grad_view.shape == self.variables[1].shape
             return grad_view
 
         else:
