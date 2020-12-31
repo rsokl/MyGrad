@@ -128,7 +128,7 @@ unary_mutation_ops = {
 
 binary_mutation_ops = {
     "x[...] = y": lambda x, y: x.__setitem__(Ellipsis, y),
-    "x[0] = y[0]": lambda x, y: x.__setitem__(slice(None, None, -1), y),
+    "x[0] = y[0]": lambda x, y: x.__setitem__(0, y[0]),
     "x += y": lambda x, y: x.__iadd__(y),
     "x += (x + y)": lambda x, y: x.__iadd__(x + y),
     "diag(x)[...] = diag(y)": lambda x, y: diagonal(x).__setitem__(
