@@ -127,14 +127,20 @@ def test_grad_is_view_of_base_grad(terminal_node: str, view_type: str):
     "terminal_node", ["base", "downstream_view", "view_of_downstream_view"]
 )
 @pytest.mark.parametrize(
-    "view_type",
-    ["downstream_view", "view_of_downstream_view", "leaf_view", "view_of_leaf_view"],
+    "resume_node",
+    [
+        "base",
+        "downstream_view",
+        "view_of_downstream_view",
+        "leaf_view",
+        "view_of_leaf_view",
+    ],
 )
 @pytest.mark.parametrize(
     "via_inplace_op", [True, False],
 )
 def test_disconnected_views_dissassociate_from_base_upon_entering_new_graph(
-    terminal_node: str, view_type: str, via_inplace_op: bool
+    terminal_node: str, resume_node: str, via_inplace_op: bool
 ):
     # caught mem-lock state leak for:
     # - via_inplace_op: True
@@ -143,7 +149,11 @@ def test_disconnected_views_dissassociate_from_base_upon_entering_new_graph(
     graph = create_view_graph()
     graph[terminal_node].backward()
 
-    t = graph[view_type]
+    # After backprop continue using one of the tensors from
+    # the graph and ensure behavior is okay. At the very least
+    # we don't want any internal errors to raise because of
+    # inplace op weirdness
+    t = graph[resume_node]
     if via_inplace_op:
         t += 0
     else:
@@ -152,7 +162,7 @@ def test_disconnected_views_dissassociate_from_base_upon_entering_new_graph(
     assert t.base is None
     assert t.grad is None
 
-    if len(view_type) <= len(terminal_node) and "leaf" not in view_type:
+    if len(resume_node) <= len(terminal_node) and "leaf" not in resume_node:
         # Ha... this is so hacky, but it turns out that
         # the names get longer as you get further from base
         #
@@ -169,7 +179,7 @@ def test_disconnected_views_dissassociate_from_base_upon_entering_new_graph(
     if (
         via_inplace_op is True
         and terminal_node == "downstream_view"
-        and view_type == "downstream_view"
+        and resume_node == "downstream_view"
     ):
         # documented edge case for mem-guard state
         clear_all_mem_locking_state()

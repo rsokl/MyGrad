@@ -252,5 +252,10 @@ class ViewGraphCompare(RuleBasedStateMachine):
         # change any value
         self.check_all_nodes()
 
+        # touching any of these tensors should null its gradients
+        for tensor in (p.tensor for p in self.pair_list):
+            _ = +tensor
+            assert tensor.grad is None
+
 
 TestGraphComparison = ViewGraphCompare.TestCase
