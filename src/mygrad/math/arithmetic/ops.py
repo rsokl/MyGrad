@@ -64,7 +64,7 @@ class IAdd(Add):
         -----
         Note that inplace_target will be replaced with its un-mutated
         value by ``Tensor._inplace_op`` prior to backprop. Thus we need
-        not worry about caching inplace_targer and rewriting the backprop
+        not worry about caching inplace_target and rewriting the backprop
         logic.
 
         However, also note that using this op outside of the context of
@@ -116,7 +116,7 @@ class ISubstract(Subtract):
         -----
         Note that inplace_target will be replaced with its un-mutated
         value by ``Tensor._inplace_op`` prior to backprop. Thus we need
-        not worry about caching inplace_targer and rewriting the backprop
+        not worry about caching inplace_target and rewriting the backprop
         logic.
 
         However, also note that using this op outside of the context of
@@ -163,7 +163,7 @@ class IMultiply(Multiply):
         -----
         Note that inplace_target will be replaced with its un-mutated
         value by ``Tensor._inplace_op`` prior to backprop. Thus we need
-        not worry about caching inplace_targer and rewriting the backprop
+        not worry about caching inplace_target and rewriting the backprop
         logic.
 
         However, also note that using this op outside of the context of
@@ -207,7 +207,7 @@ class IDivide(Divide):
         -----
         Note that inplace_target will be replaced with its un-mutated
         value by ``Tensor._inplace_op`` prior to backprop. Thus we need
-        not worry about caching inplace_targer and rewriting the backprop
+        not worry about caching inplace_target and rewriting the backprop
         logic.
 
         However, also note that using this op outside of the context of
@@ -268,7 +268,7 @@ class IPower(Power):
         -----
         Note that inplace_target will be replaced with its un-mutated
         value by ``Tensor._inplace_op`` prior to backprop. Thus we need
-        not worry about caching inplace_targer and rewriting the backprop
+        not worry about caching inplace_target and rewriting the backprop
         logic.
 
         However, also note that using this op outside of the context of
@@ -312,7 +312,7 @@ class ISquare(Square):
         -----
         Note that inplace_target will be replaced with its un-mutated
         value by ``Tensor._inplace_op`` prior to backprop. Thus we need
-        not worry about caching inplace_targer and rewriting the backprop
+        not worry about caching inplace_target and rewriting the backprop
         logic.
 
         However, also note that using this op outside of the context of
