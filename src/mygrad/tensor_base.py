@@ -58,16 +58,15 @@ from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property
 __all__ = ["Tensor", "asarray"]
 
 
-def _is_view_of(parent: "Tensor", child: np.ndarray) -> bool:  # pragma: no cover
-    if (
-        (parent.data is child.base)
-        or (parent.data is child)
-        or (child.base is not None and child.base is parent.data.base)
-    ):
+def _is_view_of(parent: np.ndarray, child: np.ndarray) -> bool:
+    child_base = child.base  # avoid redundant attr access
+
+    if child_base is None:
+        return False
+
+    if (child_base is parent) or (child_base is parent.base) or (child is parent):
         return True
-    elif child.size == 0 and child.base is not None:
-        if (child.base is parent.data) or (child.base is parent.data.base):
-            return True
+
     return False
 
 
@@ -593,7 +592,7 @@ class Tensor:
                 isinstance(var, (np.ndarray, Tensor)) for var in input_vars
             )
             for can_share_mem, var in zip(vars_can_share_mem, tensor_vars):
-                if can_share_mem and _is_view_of(parent=var, child=op_out):
+                if can_share_mem and _is_view_of(parent=var.data, child=op_out):
                     base = var if var.base is None else var.base
                     parent_var = var
                     break
