@@ -1,3 +1,5 @@
+from typing import Dict
+
 import hypothesis.strategies as st
 import numpy as np
 import pytest
@@ -5,7 +7,9 @@ from hypothesis import given
 from numpy.testing import assert_allclose
 
 import mygrad as mg
+from mygrad.errors import InvalidBackprop
 from tests.custom_strategies import tensors
+from tests.utils import clear_all_mem_locking_state
 
 
 @pytest.mark.parametrize("constant", [True, False])
@@ -61,6 +65,114 @@ def test_no_share_memory_view_is_still_view(constant: bool):
     tensor_view_of_view = tensor_view[tuple()]
     assert tensor_view_of_view.base is not tensor_view
     assert tensor_view_of_view.base is tensor
+
+
+def create_view_graph(base_constant=False) -> Dict[str, mg.Tensor]:
+    """
+                x ---------------------
+                |                     |
+                |                    leaf
+                |                     |
+            downstream_view      view_of_leaf_view
+                |
+        view_of_downstream_view
+                |
+        (backprop will only occur)
+        (along this branch)
+
+    """
+    x = mg.arange(4.0, constant=base_constant)
+    downstream_v = x[:2]
+    downstream_v_v = downstream_v[...]
+    leaf_view = x[-2:]
+    view_of_leaf_view = leaf_view[...]
+    return dict(
+        base=x,
+        downstream_view=downstream_v,
+        view_of_downstream_view=downstream_v_v,
+        leaf_view=leaf_view,
+        view_of_leaf_view=view_of_leaf_view,
+    )
+
+
+@pytest.mark.parametrize("base_constant", [True, False])
+@pytest.mark.parametrize("view_type", ["downstream_view", "view_of_downstream_view"])
+def test_basic_view_relationship(view_type: str, base_constant: bool):
+    graph = create_view_graph(base_constant)
+    assert graph[view_type].base is graph["base"]
+
+
+@pytest.mark.parametrize("base_constant", [True, False])
+@pytest.mark.parametrize("view_type", ["downstream_view", "view_of_downstream_view"])
+def test_view_propagates_constant(view_type: str, base_constant: bool):
+    graph = create_view_graph(base_constant)
+    assert graph[view_type].constant is graph["base"].constant
+
+
+@pytest.mark.parametrize(
+    "terminal_node", ["base", "downstream_view", "view_of_downstream_view"]
+)
+@pytest.mark.parametrize(
+    "view_type",
+    ["downstream_view", "view_of_downstream_view", "leaf_view", "view_of_leaf_view"],
+)
+def test_grad_is_view_of_base_grad(terminal_node: str, view_type: str):
+    graph = create_view_graph()
+    graph[terminal_node].backward()
+    assert graph[view_type].grad.base is graph["base"].grad
+    assert graph["base"].grad.base is None
+
+
+@pytest.mark.parametrize(
+    "terminal_node", ["base", "downstream_view", "view_of_downstream_view"]
+)
+@pytest.mark.parametrize(
+    "view_type",
+    ["downstream_view", "view_of_downstream_view", "leaf_view", "view_of_leaf_view"],
+)
+@pytest.mark.parametrize(
+    "via_inplace_op", [True, False],
+)
+def test_disconnected_views_dissassociate_from_base_upon_entering_new_graph(
+    terminal_node: str, view_type: str, via_inplace_op: bool
+):
+    # caught mem-lock state leak for:
+    # - via_inplace_op: True
+    # - view_type: downstream_view
+    # - terminal_node: downstream_view
+    graph = create_view_graph()
+    graph[terminal_node].backward()
+
+    t = graph[view_type]
+    if via_inplace_op:
+        t += 0
+    else:
+        t = +t
+
+    assert t.base is None
+    assert t.grad is None
+
+    if len(view_type) <= len(terminal_node) and "leaf" not in view_type:
+        # Ha... this is so hacky, but it turns out that
+        # the names get longer as you get further from base
+        #
+        # Abusing this to predict when there should be an
+        # invalid backprop
+        t.backward()
+        assert_allclose(t.grad, np.ones_like(t))
+    else:
+        # calling backprop from a view downstream from a
+        # disconnected view should raise
+        with pytest.raises(InvalidBackprop):
+            t.backward()
+
+    if (
+        via_inplace_op is True
+        and terminal_node == "downstream_view"
+        and view_type == "downstream_view"
+    ):
+        # documented edge case for mem-guard state
+        clear_all_mem_locking_state()
 
 
 @pytest.mark.parametrize("after_backprop", [True, False])
