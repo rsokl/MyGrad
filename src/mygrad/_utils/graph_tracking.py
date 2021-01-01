@@ -21,6 +21,38 @@ class _NoAutoDiff(ContextTracker):
 
     Note that memory guarding does not occur in the `no_autodiff` context,
     so there is no need to nest this context with `mem_guard_off`.
+
+    Examples
+    --------
+    Demonstrating ``no_autodiff`` as a context-manager
+
+    >>> import mygrad as mg
+    >>> with mg.no_autodiff:
+    >>>     # all computational graph tracking is suspended
+    >>>     # within the context
+    >>>     x = mg.arange(4.)
+    >>>     (4 * x).backward()  # no autodiff will occur
+    >>> x.grad is None
+
+
+    Demonstrating ``no_autodiff`` as a decorator
+
+    >>> @mg.no_autodiff
+    ... def func():
+    ...     # No graph-tracking will occur within
+    ...     # the body of this function
+    ...     pass
+
+    The following pattern is particularly useful for making a MyGrad-function
+    behave as if it were a pure NumPy function.
+
+    >>> @mg.no_autodiff(to_numpy=True)
+    ... def func_returns_array():
+    ...     # No graph-tracking will occur within
+    ...     # the body of this function.
+    ...     # And the output of the function will be
+    ...     # cast to a numpy array
+    ...     pass
     """
 
     _enter_set_value = False
