@@ -402,10 +402,10 @@ class Tensor:
         *,
         dtype=None,
         constant: bool = False,
+        copy_data: Optional[bool] = None,
         _scalar_only: bool = False,
         _creator: Optional[Operation] = None,
         _base: Optional["Tensor"] = None,
-        _copy_data: Optional[bool] = None,
         _check_dtype: bool = True,
     ):
         """
@@ -422,7 +422,11 @@ class Tensor:
 
         constant : bool, optional (default=False)
             If True, this node is treated as a constant, and thus does not facilitate
-            back propagation; `self.grad` will always return `None`.
+            back propagation; `self.grad` will always return ``None``.
+
+        copy_data : Optional[bool]
+            Determines if the incoming array-data will be copied. It ``None``,
+            then the data will be copied of ``constant=False`` is specified.
 
         _scalar_only : bool, optional (default=False)
             Signals that self.backward() can only be invoked if self.ndim == 0.
@@ -435,8 +439,6 @@ class Tensor:
         _base : Optional[Tensor]
             Sets the base tensor that ``self`` is a view of
 
-        _copy_data : Optional[bool]
-            Determines if the incoming array-data will be copied
         """
         if not isinstance(constant, bool):
             raise TypeError(f"`constant` must be a boolean value, got: {constant}")
@@ -444,10 +446,10 @@ class Tensor:
         self._scalar_only = _scalar_only
         self._creator = _creator  # type: Union[None, Operation]
 
-        if _copy_data is None:
-            _copy_data = not constant
+        if copy_data is None:
+            copy_data = not constant
 
-        to_array = np.array if _copy_data else asarray
+        to_array = np.array if copy_data else asarray
         self.data = to_array(x, dtype=dtype)  # type: np.ndarray
 
         if _check_dtype:
@@ -682,10 +684,10 @@ class Tensor:
             return cls(
                 op_out,
                 constant=constant,  # constant not determined by graph info
+                copy_data=False,
                 _creator=None,
                 _scalar_only=False,
                 _base=None,
-                _copy_data=False,
                 _check_dtype=False,
             )
 
@@ -736,10 +738,10 @@ class Tensor:
         out = cls(
             op_out,
             constant=is_const,
+            copy_data=False,
             _creator=f,
             _scalar_only=scalar_only,
             _base=base,
-            _copy_data=False,
             _check_dtype=False,
         )
 

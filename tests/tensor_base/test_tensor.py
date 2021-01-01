@@ -186,7 +186,7 @@ def test_init_data():
     as_tensor=st.booleans(),
 )
 def test_copy_on_init_behavior(arr: np.ndarray, as_tensor: bool):
-    x = Tensor(arr, _copy_data=False) if as_tensor else arr
+    x = Tensor(arr, copy_data=False) if as_tensor else arr
     t_no_constant = Tensor(x)
     assert not np.shares_memory(t_no_constant, arr)
 

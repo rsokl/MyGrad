@@ -58,5 +58,5 @@ def glorot_normal(*shape, gain=1, dtype=np.float32, constant=False):
         np.random.normal(0, std, shape),
         dtype=dtype,
         constant=constant,
-        _copy_data=False,
+        copy_data=False,
     )

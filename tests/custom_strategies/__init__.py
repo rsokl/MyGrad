@@ -223,7 +223,7 @@ def tensors(
 
     constant = draw(constant) if isinstance(constant, st.SearchStrategy) else constant
 
-    tensor = VerboseTensor(x, constant=constant, _copy_data=False)
+    tensor = VerboseTensor(x, constant=constant, copy_data=False)
     if isinstance(include_grad, st.SearchStrategy):
         include_grad = draw(include_grad)
 
