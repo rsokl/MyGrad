@@ -99,6 +99,7 @@ Documentation for mygrad.Tensor
    Tensor
    Tensor.backward
    Tensor.grad
+   Tensor.null_grad
    Tensor.shape
    Tensor.ndim
    Tensor.size

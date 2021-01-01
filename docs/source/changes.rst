@@ -6,6 +6,203 @@ This is a record of all past mygrad releases and what went into them,
 in reverse chronological order. All previous releases should still be available
 on pip.
 
+.. _v2.0.0:
+
+------------------
+2.0.0 - 2021-01-01
+------------------
+
+🎉🎉🎉
+
+This is a compatibility-breaking update to MyGrad, and it's great!
+MyGrad 2.0 represents a major overhaul to this project.
+Its primary feature is that MyGrad now offers the ability to create and augment views of
+tensors.
+This enables a large variety of convenient code patterns that were previously untenable in MyGrad.
+It also creates near parity between the experiences of operating in MyGrad and in NumPy
+(which, in turn, paves the way for injecting autodiff functionality *into* NumPy code via MyGrad!).
+
+Another important, but less exciting feature is that MyGrad now protects users from inadvertently
+corrupting the state of a computational graph by, say, mutating a NumPy array that is participating in
+the graph.
+This is very important to protect people – especially students – from unwittingly poisoning the results
+of their calculations.
+
+Lastly... no more "nulling" gradients! MyGrad will now handle deleting gradients for you in a way that
+is nicely compatible with gradient-based optimization work flows.
+
+New Utilities
+-------------
+
+- :func:`~mygrad.astensor`
+- :func:`~mygrad.asarray`
+- :func:`~mygrad.no_autodiff`
+- :func:`~mygrad.mem_guard_active`
+- :func:`~mygrad.mem_guard_off`
+- :func:`~mygrad.mem_guard_on`
+- :func:`~mygrad.turn_memory_guarding_off`
+- :func:`~mygrad.turn_memory_guarding_on`
+
+
+
+Augmented Updates on Tensors Now Match NumPy's Behavior
+-------------------------------------------------------
+
+Previously, augmented assignment expressions, such as ``tensor *= 2`` behaved merely
+as a shorthand for the simple assignment ``tensor = tensor * 2``.
+This is in stark contrast to the behavior of an augmented assignment on a NumPy array, which
+`mutates the array in-place <https://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/BasicIndexing.html#Augmented-Assignments>`_
+
+This meant that there was a major discrepancy between how these expressions behaved across MyGrad and
+NumPy.
+This has changed in MyGrad 2.0: all augmented assignment expressions operate in-place on tensors and
+mutate their underlying data.
+
++-----------------------------------+-----------------------------------+-----------------------------------+
+| Numpy                             | MyGrad 1.X                        | MyGrad 2.0                        |
++===================================+===================================+===================================+
+| .. code:: python                  | .. code:: python                  | .. code:: python                  |
+|                                   |                                   |                                   |
+|    >>> x = np.array([1., 2.])     |    >>> x = mg.Tensor([1., 2.])    |    >>> x = mg.Tensor([1., 2.])    |
+|    >>> y = x                      |    >>> y = x                      |    >>> y = x                      |
+|    >>> x *= 2                     |    >>> x *= 2                     |    >>> x *= 2                     |
+|    >>> x is y                     |    >>> x is y  # doesn't match!   |    >>> x is y  # matches!         |
+|    True                           |    False                          |    True                           |
++-----------------------------------+-----------------------------------+-----------------------------------+
+
+
+
+Creating and Augmenting Views of Tensors
+----------------------------------------
+
+MyGrad now provides rich support for creating and manipulating views of tensors.
+
+All `basic indexing <https://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/BasicIndexing.html#>`_ operations
+performed on a tensor will produce a view of said tensor.
+This means that these two tensors share memory.
+(While MyGrad 1.X created a view of the underlying NumPy array under the hood for basic indexing, its notion
+of "view" semantics stopped there and could not be leveraged or relied on beyond that.)
+As with NumPy arrays the "parent" of a view can be accessed through the tensor's ``.base``
+attribute
+
++-----------------------------------+-------------------------------------+-----------------------------------+
+| Numpy                             | MyGrad 1.X                          | MyGrad 2.0                        |
++===================================+=====================================+===================================+
+| .. code:: python                  | .. code:: python                    | .. code:: python                  |
+|                                   |                                     |                                   |
+|    >>> x = np.array([1., 2., 3.]) |    >>> x = mg.Tensor([1., 2., 3.])  |    >>> x = mg.Tensor([1., 2., 3.])|
+|    >>> y = x[:2]  # the view      |    >>> y = x[:2]  # the view        |    >>> y = x[:2]  # the view      |
+|    >>> np.shares_memory(x, y)     |    >>> np.shares_memory(x, y)       |    >>> np.shares_memory(x, y)     |
+|    True                           |    True                             |    True                           |
+|    >>> y.base is x                |    >>> y.base is x  # doesn't match!|    >>> y.base is x  # matches!    |
+|    True                           |    <ERROR>                          |    True                           |
++-----------------------------------+-------------------------------------+-----------------------------------+
+
+
+Mutating shared data will propagate through views:
+
+
++-----------------------------------+-------------------------------------+------------------------------------+
+| Numpy                             | MyGrad 1.X                          | MyGrad 2.0                         |
++===================================+=====================================+====================================+
+| .. code:: python                  | .. code:: python                    | .. code:: python                   |
+|                                   |                                     |                                    |
+|    >>> y *= -1                    |    >>> y *= -1                      |    >>> y *= -1                     |
+|    >>> y                          |    >>> y                            |    >>> y                           |
+|    array([-1., -2.])              |    Tensor([-1., -2.])               |    Tensor([-1., -2.])              |
+|    >>> x                          |    >>> x  # doesn't match!          |    >>> x  # matches!               |
+|    array([-1., -2., 3.])          |    Tensor([1., 2., 3.])             |    Tensor([-1., -2., 3.])          |
++-----------------------------------+-------------------------------------+------------------------------------+
+
+
+Furthermore, views of tensors now propagate corresponding gradient information as well!
+This means that if ``y`` is a view of ``x``, then ``y.grad`` will be a corresponding view of ``x.grad``.
+This would be true for all varieties of views, and views of views, of ``x``.
+
+.. code-block:: python
+
+   # Because `y` is a view of `x`, `y.grad` will be
+   # a corresponding view of `x.grad`
+   >>> (x ** 2).backward()
+   >>> x.grad
+   array([-2., -4.,  6.,  8.])
+   >>> y.grad
+   array([-2., -4.])
+   >>> y.grad.base is x.grad
+   True
+
+This rich support for views, augmented assignments, and in-place updates on tensors enables much more sophisticated
+operations on tensors now.
+For example, let's make a shape-(3, 3) tensor and perform and operations involving views of its diagonal and
+its anti-diagonal. (Note that :func:`~mygrad.einsum` is capable of returning a view of a tensor's diagonal,
+and that  MyGrad fully supports backpropagation through all flavors of einsum!)
+
+.. code-block:: python
+
+   >>> x = mg.Tensor([[0., 1., 2.],
+   ...                [3., 4., 5.],
+   ...                [6., 7., 8.]])
+
+   # view of diagonal of `x`
+   >>> diag = mg.einsum("ii->i", x)
+   >>> diag
+   Tensor([0., 4., 8.])
+
+   # view of diagonal of `x`
+   >>> anti_diag = mg.einsum("ii->i", x[:, ::-1])
+   >>> anti_diag
+   Tensor([2., 4., 6.])
+
+   # Compute derivatives of their summed difference
+   >>> (diag - anti_diag).sum().backward()
+   >>> x.grad
+   array([[ 1.,  0., -1.],
+          [ 0.,  0.,  0.],
+          [-1.,  0.,  1.]])
+
+   # The views of `x` have the appropriate corresponding
+   # views of `x.grad`
+   >>> diag.grad
+   array([1., 0., 1.])
+   >>> anti_diag.grad
+   array([-1.,  0., -1.])
+
+
+Bye-Bye Null Gradients!
+-----------------------
+
+Gone are the days of having to manually clear your tensors' gradients and the computational graph that they were
+in; now MyGrad does it for you!
+This means that ``mygrad.Tensor.null_gradients()`` no longer does anything other than emit a deprecation warning.
+In an upcoming minor release, this method will be removed entirely.
+
+In MyGrad 2.0, calling :func:`~mygrad.Tensor.backward` will finish its computation by clearing the computational graph that was involved
+in the backpropagation.
+Thus any internally-referenced tensors associated with that computational graph become free for garbage collection.
+This is very nice behavior to help prevent students from filling up their RAM unwittingly.
+
+And instead of worrying about nulling gradients manually, a tensor will automatically have its gradient cleared any time that it is
+involved in a new mathematical operation.
+This enables the common workflow of:
+
+.. code-block:: python
+
+   for _ in range(num_training_loops):
+       # using `model_params` in a function will automatically
+       # set its gradients to `None`
+       loss = compute_loss(data, model_params)
+       loss.backward()         # compute gradients
+       optimize(model_params)  # do stuff with gradients
+
+
+You can also call :func:`~mygrad.Tensor.null_grad` to manually clear an individual tensor's gradient.
+
+- mem-guard
+- no-autodiff util
+- array interface
+
+
+
 .. _v1.9.0:
 
 ------------------
