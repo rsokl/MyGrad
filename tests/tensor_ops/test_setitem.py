@@ -9,12 +9,12 @@ from hypothesis import assume, given, note, settings
 from numpy.testing import assert_allclose, assert_array_equal
 
 import mygrad as mg
-from mygrad.tensor_base import Tensor
-from mygrad.tensor_core_ops.indexing import (
+from mygrad._tensor_core_ops.indexing import (
     _arr,
     _is_bool_array_index,
     _is_int_array_index,
 )
+from mygrad.tensor_base import Tensor
 
 from ..custom_strategies import (
     adv_integer_index,

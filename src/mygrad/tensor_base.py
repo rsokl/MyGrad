@@ -25,6 +25,7 @@ import numpy as np
 import mygrad._utils.duplicating_graph as _dup
 import mygrad._utils.graph_tracking as _track
 import mygrad._utils.lock_management as _mem
+from mygrad._tensor_core_ops.indexing import GetItem, SetItem
 from mygrad._utils import (
     WeakRef,
     WeakRefIterable,
@@ -36,22 +37,21 @@ from mygrad.linalg.ops import MatMul
 from mygrad.math.arithmetic.ops import (
     Add,
     Divide,
-    IAdd,
-    IDivide,
-    IMultiply,
-    IPow1,
-    IPower,
-    ISquare,
-    ISubstract,
     Multiply,
     Negative,
     Positive,
     Power,
     Square,
     Subtract,
+    _IAdd,
+    _IDivide,
+    _IMultiply,
+    _IPow1,
+    _IPower,
+    _ISquare,
+    _ISubstract,
 )
 from mygrad.operation_base import BroadcastableOp, Operation
-from mygrad.tensor_core_ops.indexing import GetItem, SetItem
 from mygrad.tensor_manip.array_shape.ops import Flatten, Reshape
 from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property
 
@@ -1390,7 +1390,7 @@ class Tensor:
         return self._op(Add, self, other)
 
     def __iadd__(self, other) -> "Tensor":
-        self._in_place_op(IAdd, other)
+        self._in_place_op(_IAdd, other)
         return self
 
     def __radd__(self, other) -> "Tensor":
@@ -1400,7 +1400,7 @@ class Tensor:
         return self._op(Subtract, self, other)
 
     def __isub__(self, other) -> "Tensor":
-        self._in_place_op(ISubstract, other)
+        self._in_place_op(_ISubstract, other)
         return self
 
     def __rsub__(self, other) -> "Tensor":
@@ -1413,14 +1413,14 @@ class Tensor:
         return self._op(Divide, other, self)
 
     def __itruediv__(self, other) -> "Tensor":
-        self._in_place_op(IDivide, other)
+        self._in_place_op(_IDivide, other)
         return self
 
     def __mul__(self, other) -> "Tensor":
         return self._op(Multiply, self, other)
 
     def __imul__(self, other) -> "Tensor":
-        self._in_place_op(IMultiply, other)
+        self._in_place_op(_IMultiply, other)
         return self
 
     def __rmul__(self, other) -> "Tensor":
@@ -1448,13 +1448,13 @@ class Tensor:
             isinstance(other, np.ndarray) and other.ndim == 0
         ):
             if other == 1:
-                self._in_place_op(IPow1)
+                self._in_place_op(_IPow1)
                 return self
             elif other == 2:
-                self._in_place_op(ISquare)
+                self._in_place_op(_ISquare)
                 return self
 
-        self._in_place_op(IPower, other)
+        self._in_place_op(_IPower, other)
         return self
 
     def __rpow__(self, other):
