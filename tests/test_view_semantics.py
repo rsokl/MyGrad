@@ -103,6 +103,16 @@ def create_view_graph(base_constant=False) -> Dict[str, mg.Tensor]:
     ["downstream_view", "view_of_downstream_view", "leaf_view", "view_of_leaf_view"],
 )
 def test_basic_view_relationship(view_type: str, base_constant: bool):
+    # The following graph is created:
+    #
+    # base = mg.arange(4.0, constant=base_constant)
+    #
+    # downstream_v = base[:2]
+    # downstream_v_v = downstream_v[...]
+    #
+    # leaf_view = base[-2:]
+    # view_of_leaf_view = leaf_view[...]
+    #
     graph = create_view_graph(base_constant)
     assert graph[view_type].base is graph["base"]
 
@@ -113,6 +123,16 @@ def test_basic_view_relationship(view_type: str, base_constant: bool):
     ["downstream_view", "view_of_downstream_view", "leaf_view", "view_of_leaf_view"],
 )
 def test_view_propagates_constant(view_type: str, base_constant: bool):
+    # The following graph is created:
+    #
+    # base = mg.arange(4.0, constant=base_constant)
+    #
+    # downstream_v = base[:2]
+    # downstream_v_v = downstream_v[...]
+    #
+    # leaf_view = base[-2:]
+    # view_of_leaf_view = leaf_view[...]
+    #
     graph = create_view_graph(base_constant)
     assert graph[view_type].constant is graph["base"].constant
 
@@ -125,6 +145,16 @@ def test_view_propagates_constant(view_type: str, base_constant: bool):
     ["downstream_view", "view_of_downstream_view", "leaf_view", "view_of_leaf_view"],
 )
 def test_grad_is_view_of_base_grad(terminal_node: str, view_type: str):
+    # The following graph is created:
+    #
+    # base = mg.arange(4.0, constant=base_constant)
+    #
+    # downstream_v = base[:2]
+    # downstream_v_v = downstream_v[...]
+    #
+    # leaf_view = base[-2:]
+    # view_of_leaf_view = leaf_view[...]
+    #
     graph = create_view_graph()
     graph[terminal_node].backward()
     assert graph[view_type].grad.base is graph["base"].grad
