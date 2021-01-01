@@ -1262,24 +1262,12 @@ class Tensor:
         #
         # Iteration is always based off of the placeholders' relative positions
         # in the graph since this will never be mutated.
-        try:
-            for node in graph:
-                if node.parent is None:
-                    continue
-                view = node.tensor._replay_op(node.parent)
-                _dup.mirror_tensor(source=view, target=node.tensor)
-                # TODO: I think this reroute can be removed
-                _dup.reroute_ops_through(source=view, target=node.tensor)
-                node.parent._view_children.append(node.tensor)
-        except DisconnectedView:
-            msg = (
-                f"An inplace update was performed involving the base tensor:\n{graph.base.placeholder}\n\n"
-                f"which has a view-tensor:\n{node.placeholder}\n\nThis view tensor disconnected from its "
-                f"computational graph (this is likely because you back-propped throught it). Please "
-                f"delete all references to this view, or recreate it, before proceeding."
-            )
-            graph.restore_old_graph(remirror=True)
-            raise DisconnectedView(msg)
+        for node in graph:
+            if node.parent is None:
+                continue
+            view = node.tensor._replay_op(node.parent)
+            _dup.mirror_tensor(source=view, target=node.tensor)
+            node.parent._view_children.append(node.tensor)
 
     @property
     def shape(self) -> Tuple[int, ...]:
