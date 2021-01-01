@@ -9,8 +9,34 @@ MyGrad is a simple, NumPy-centric math library that is capable of performing *au
 mathematical functions provided by MyGrad are capable of computing their own derivatives. If you know `how to use NumPy
 <https://www.pythonlikeyoumeanit.com/module_3.html>`_ then you can learn how to use MyGrad in a matter of minutes!
 
-While fantastic auto-differentiation libraries like TensorFlow, PyTorch, and MXNet are available to the same end as
-MyGrad (and far beyond, ultimately), they are industrial-grade tools in both function and form. MyGrad's primary purpose
+Let's use ``mygrad`` to compute the derivative of
+:math:`f(x) = x^2` evaluated at :math:`x = 3` (which is :math:`\frac{df}{dx}\rvert_{x=3} = 2\times 3`).
+
+:class:`~mygrad.Tensor` behaves nearly identically to NumPy's ndarray, in addition to having the machinery needed to
+compute the analytic derivatives of functions. Suppose we want to compute this derivative at ``x = 3``. We can create a
+0-dimensional tensor (a scalar) for x and compute ``f(x)``:
+
+.. code:: pycon
+
+    >>> import mygrad as mg
+    >>> x = mg.Tensor(3.0)
+    >>> f = x ** 2
+    >>> f
+    Tensor(9.0)
+
+
+Invoking :meth:`~mygrad.Tensor.backward` on ``f`` instructs ``mygrad`` to trace through the computational graph that produced ``f`` and compute the
+derivatives of ``f`` with respect to all of its independent variables. Thus, executing ``f.backward()`` will compute :math:`\frac{df}{dx} = 2x` at :math:`x=3`, and will store the resulting value in ``x.grad``:
+
+.. code:: pycon
+
+    >>> f.backward()  # triggers computation of ``df/dx``
+    >>> x.grad  # df/dx = 2x = 6.0
+    array(6.0)
+
+
+While fantastic auto-differentiation libraries like TensorFlow, PyTorch, and JAX are available to the same end as
+MyGrad (and far far beyond, ultimately), they are industrial-grade tools in both function and form. MyGrad's primary purpose
 is to serve as an educational tool. It is simple to install (its only core dependency in NumPy), it is trivial to use
 if you are comfortable with NumPy, and its code base is well-documented and easy to understand. This makes it simple for
 students and teachers alike to use, hack, prototype with, and enhance MyGrad!
@@ -63,6 +89,7 @@ than is suggested here.
    install
    intro
    tensor
+   views
    autodiff_utils
    operation
    tensor_creation
