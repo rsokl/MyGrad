@@ -6,7 +6,7 @@ import hypothesis.strategies as st
 import numpy as np
 import pytest
 from hypothesis import assume, given, settings
-from numpy.testing import assert_allclose
+from numpy.testing import assert_allclose, assert_array_equal
 
 import mygrad as mg
 from mygrad import Tensor
@@ -466,11 +466,25 @@ def test_einsum_bkwd6(shape, optimize):
 
 
 @given(
-    x=tensors(shape=st.integers(1, 10).map(lambda x: (x, x))), optimize=st.booleans()
+    ndim=st.integers(1, 4),
+    side_length=st.integers(1, 4),
+    optimize=st.booleans(),
+    data=st.data(),
 )
-def test_einsum_can_produce_view(x: Tensor, optimize: bool):
-    y = mg.einsum("ii -> i", x, optimize=optimize)
-    assert y.base is x
+def test_einsum_can_produce_diag_view_for_nd_tensor(
+    ndim: int, side_length: int, optimize: bool, data: st.DataObject
+):
+    x = data.draw(tensors(shape=(side_length,) * ndim), label="x")
+
+    diag = mg.einsum(f"{ndim*'i'} -> i", x, optimize=optimize)
+    assert diag.base is x
+
+
+@given(x=tensors().filter(lambda x: x.ndim > 0), optimize=st.booleans())
+def test_einsum_can_produce_full_view(x: Tensor, optimize: bool):
+    view = mg.einsum(f"... -> ...", x, optimize=optimize)
+    assert view.base is x
+    assert_array_equal(x, view)
 
 
 @pytest.mark.parametrize("downstream_of_view", [True, False])

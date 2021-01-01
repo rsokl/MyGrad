@@ -340,10 +340,10 @@ def test_writing_a_view_with_a_view(
     assert_array_equal(proxy_y.grad, [-1.0, 2.0, -3.0, 4.0])
     assert_array_equal(y_base.grad, [-1.0, 2.0, -3.0, 4.0])
     assert_array_equal(y.grad, [-1.0, 2.0, -3.0, 4.0])
+    assert_array_equal(dangling_view.grad, y_base.grad)
     assert_array_equal(x.grad, [0.0, 0.0, -4.0, 6.0])
 
     assert dangling_view.base is y_base
-    assert dangling_view.grad is None
 
     dangling_view.clear_graph()  # release memory
 
@@ -388,16 +388,17 @@ def test_set_item_with_broadcasting(
     assert_array_equal(x, x_expected)
     assert_array_equal(y, x.data[np.newaxis])
 
+    # equivalent to x ** 2
     (y * x).sum().backward()
-
-    x_grad = x.data if include_downstream_view else 2 * x.data
-    assert_array_equal(x.grad, x_grad)
-    assert_array_equal(y.grad, x.data[np.newaxis])
 
     xo_grad = np.zeros_like(xo)
     xo_grad[0] += 4 * xo.data[0]
     xo_grad[2] += 2 * xo.data[2]
     assert_array_equal(xo.grad, xo_grad)
+
+    x_grad = 2 * x.data
+    assert_array_equal(x.grad, x_grad)
+    assert_array_equal(y.grad, x.grad[np.newaxis])
 
 
 @pytest.mark.parametrize("include_extraneous_ops", [True, False])
@@ -546,3 +547,25 @@ def test_complicated_inplace_pattern2(x: Tensor, y: Tensor):
         assert_allclose(grad_y, y.grad)
     else:
         assert y.grad is None
+
+
+def test_unview_backprop_through_multiple_view_funcs():
+    # caught bug in unview where multiple distinct sequences
+    # of views weren't being exercised through var-1
+    x = mg.arange(9.0).reshape(3, 3).copy()
+    xx = +x
+    y = xx[:, 2]
+
+    # [x12 x02]
+    y2 = y[:-1][::-1]
+
+    y2 *= (2, 3)
+    # [[2x00 2x01 7x02]
+    #  [2x10 2x11 5x12]
+    #  [2x20 2x21 2x22]]
+    coeff = np.array([[2.0, 2.0, 7.0], [2.0, 2.0, 5.0], [2.0, 2.0, 2.0]])
+    out = x.sum() + xx.sum() + y2.sum()
+    assert_allclose(out, (x * coeff).sum())
+    out.backward()
+
+    assert_array_equal(x.grad, coeff)

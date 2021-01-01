@@ -20,7 +20,7 @@ if TYPE_CHECKING:  # pragma: no cover
 _array_counter = Counter()  # type: Counter[int, int]
 
 # arr-id -> weak-ref of arr, for arrays participating in live ops
-_array_tracker = dict()  # type: Dict[int, WeakRef[Tensor]]
+_array_tracker = dict()  # type: Dict[int, WeakRef[np.ndarray]]
 
 # maps base-array ID to ID of view that can't be unlocked until
 # base is unlocked

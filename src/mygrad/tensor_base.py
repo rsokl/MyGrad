@@ -1,5 +1,3 @@
-# TODO: Implement grad-view semantics
-
 """
 This module defines the base tensor class along with all of its essential
 attributes and special methods. Public math methods, e.g. ``sum``, ``mean``,
@@ -33,7 +31,7 @@ from mygrad._utils import (
     collect_all_operations,
     is_invalid_gradient,
 )
-from mygrad.errors import InvalidBackprop, InvalidGradient
+from mygrad.errors import DisconnectedView, InvalidBackprop, InvalidGradient
 from mygrad.linalg.ops import MatMul
 from mygrad.math.arithmetic.ops import (
     Add,
@@ -60,16 +58,15 @@ from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property
 __all__ = ["Tensor", "asarray"]
 
 
-def _is_view_of(parent: "Tensor", child: np.ndarray) -> bool:
-    if (
-        (parent.data is child.base)
-        or (parent.data is child)
-        or (child.base is not None and child.base is parent.data.base)
-    ):
+def _is_view_of(parent: np.ndarray, child: np.ndarray) -> bool:
+    child_base = child.base  # avoid redundant attr access
+
+    if child_base is None:
+        return False
+
+    if (child_base is parent) or (child_base is parent.base) or (child is parent):
         return True
-    elif child.size == 0 and child.base is not None:
-        if (child.base is parent.data) or (child.base is parent.data.base):
-            return True
+
     return False
 
 
@@ -404,7 +401,7 @@ class Tensor:
         if _check_dtype:
             self._check_valid_dtype(self.data.dtype)
 
-        self.grad = None  # type: Union[None, np.ndarray]
+        self._grad = None  # type: Union[None, np.ndarray]
         self._constant = constant
 
         # track all operations that this tensor participates in
@@ -418,6 +415,30 @@ class Tensor:
         self._base = _base  # type: Optional[Tensor]
         # stores all of the tensors that are a view of this tensor
         self._view_children = WeakRefIterable()  # type: WeakRefIterable[Tensor]
+        self._view_grad: Optional[np.ndarray] = None
+
+    @property
+    def grad(self) -> Optional[np.ndarray]:
+        if self._base is None:
+            return self._grad
+
+        if self._view_grad is not None:
+            # view grad has been computed already
+            return self._view_grad
+
+        if self._base._grad is None or self._creator is None:
+            #  ``self`` had its graph, connecting it to its base, cleared.
+            #  ``self._view_grad`` can't be computed without this info.
+            #  Defer to ``self.grad`` so that the present tensor
+            return self._grad
+
+        (view_parent,) = self._creator.variables
+
+        # recursively fetches grad from parent
+        grad = view_parent.grad
+        with _track.no_autodiff:
+            self._view_grad = self._replay_op(grad).data if grad is not None else None
+        return self._view_grad
 
     def astype(
         self, dtype: Union[type, str], *, constant: Optional[bool] = None
@@ -514,7 +535,7 @@ class Tensor:
             tensor_vars = tuple(
                 cls(var, constant=True)
                 if not isinstance(var, Tensor)
-                else var.null_grad()
+                else var.null_grad(_clear_view_info=True)
                 for var in input_vars
             )
             if _mem.MEM_GUARD:
@@ -571,7 +592,7 @@ class Tensor:
                 isinstance(var, (np.ndarray, Tensor)) for var in input_vars
             )
             for can_share_mem, var in zip(vars_can_share_mem, tensor_vars):
-                if can_share_mem and _is_view_of(parent=var, child=op_out):
+                if can_share_mem and _is_view_of(parent=var.data, child=op_out):
                     base = var if var.base is None else var.base
                     parent_var = var
                     break
@@ -629,7 +650,7 @@ class Tensor:
         Replays the op that produced `self` - called on the specified
         input vars"""
         if self.creator is None:
-            raise ValueError(
+            raise DisconnectedView(
                 "``Tensor._replay_op(...)`` was called on a tensor without a creator."
                 "\nPlease report this error at: https://github.com/rsokl/MyGrad/issues"
             )
@@ -688,13 +709,14 @@ class Tensor:
             return
 
         if grad is not None:
-            self.grad = asarray(grad)
-            if is_invalid_gradient(self.grad):
+            self._grad = asarray(grad)
+            if is_invalid_gradient(self._grad):
                 raise InvalidGradient(
                     f"An invalid gradient-value was passed to "
                     f"\n\t`{type(self).__name__}.backward(<gradient>)`"
                     f"\nGradients are expected to be real-valued scalars or "
                     f"numpy arrays, got a gradient of type: {type(grad)}"
+                    f"{grad}"
                 )
 
         else:
@@ -705,7 +727,7 @@ class Tensor:
                     "graph."
                 )
             dtype = float if np.issubdtype(self.dtype, np.signedinteger) else self.dtype
-            self.grad = (
+            self._grad = (
                 np.ones(self.shape, dtype=dtype)
                 if self.ndim > 0
                 else np.asarray(1.0, dtype=dtype)
@@ -740,7 +762,7 @@ class Tensor:
             Raises if the tensor and its associated gradient possess different shapes.
             Raises if `_backward` triggered on a tensor with gradient of `None`.
         """
-        assert self.grad is not None, (
+        assert self._grad is not None, (
             f"backprop, post grad-accumulation, was triggered "
             f"on a tensor with no gradient"
             f"\n{self}"
@@ -750,21 +772,23 @@ class Tensor:
             f"\nops: {self._ops}"
             f"\nbase: {self.base}"
         )
-        assert self.grad.shape == self.shape, (
+        assert self._grad.shape == self.shape, (
             f"A tensor and its associated gradient must possess the same shape. Got:"
             f"\ntensor-shape: {self.shape}"
-            f"\ngrad-shape: {self.grad.shape}"
+            f"\ngrad-shape: {self._grad.shape}"
         )
         self._ops.difference_update(self._accum_ops)
         self._accum_ops.clear()
         if self.creator is not None and self._ops.isdisjoint(graph):
-            self._creator.backward(self.grad, graph=graph)
+            self._creator.backward(self._grad, graph=graph)
 
-    def null_grad(self) -> "Tensor":
+    def null_grad(self, *, _clear_view_info: bool = False) -> "Tensor":
         """Sets this tensor's gradient to be ``None``.
 
         This operation is performed in-place, but a reference to the
         tensor is returned in order to permit mapping semantics.
+
+        Also removes any ``base`` reference from disconnected views.
 
         Returns
         -------
@@ -781,8 +805,13 @@ class Tensor:
         Tensor(2.0)
         >>> x.grad is None
         True"""
-        if self.grad is not None:
-            self.grad = None
+        self._view_grad = None
+        self._grad = None
+
+        if _clear_view_info:
+            if self._base is not None and self._creator is None:
+                self._base = None
+
         return self
 
     def null_gradients(self, clear_graph=True):
@@ -842,9 +871,16 @@ class Tensor:
         This de-references all operations involved in the graph and the intermediate
         tensors that were created by it.
         """
-        self._ops = set()
+        if self._base is not None:
+            # "pull" on grad to force views to update their
+            # gradients from upstream before the graph info
+            # gets cleared
+            _ = self.grad
 
-        if self.creator is None:
+        self._view_children.clear()
+        self._ops.clear()
+
+        if self._creator is None:
             return
 
         creator = self._creator
@@ -1059,6 +1095,14 @@ class Tensor:
         #
         # These placeholder tensors are never publicly-available and thus cannot
         # be involved directly in future in-place updates
+
+        # In Tensor._op, any tensor entering an op has its grad/view-info cleared
+        # We must do this here up front since we need to consume information
+        # about ``self``
+        self.null_grad(_clear_view_info=True)
+        if self._base is not None and not self._base._view_children:
+            self._base = None
+
         graph = _dup.DuplicatingGraph(self if self.base is None else self.base)
 
         # Create copy of base so that mutation has no impact on the
@@ -1102,6 +1146,8 @@ class Tensor:
                     inplace_target,  # tensor will be mutated
                     # we need to accommodate case where inplace operation is writing
                     # *from* a view - redirect view to placeholder
+                    #
+                    # TODO: Also check if inplace op involves view *data*
                     *(graph.get_placeholder_if_exists(t) for t in input_vars),
                     op_args=op_args,
                     op_kwargs=op_kwargs,
@@ -1221,7 +1267,6 @@ class Tensor:
                 continue
             view = node.tensor._replay_op(node.parent)
             _dup.mirror_tensor(source=view, target=node.tensor)
-            _dup.reroute_ops_through(source=view, target=node.tensor)
             node.parent._view_children.append(node.tensor)
 
     @property
@@ -1469,7 +1514,7 @@ class Tensor:
             np.copy(self.data),
             constant=(self.constant if constant is None else constant),
         )
-        copy.grad = np.copy(self.grad) if self.grad is not None else None
+        copy._grad = np.copy(self._grad) if self._grad is not None else None
         return copy
 
     def item(self) -> float:

@@ -30,6 +30,22 @@ def test_weakrefs_list():
     assert c_val is c
 
 
+def test_weakrefs_bool():
+    class A:
+        pass
+
+    a = A()
+    b = A()
+    c = A()
+    assert bool(WeakRefIterable([a, b, c])) is True
+    assert bool(WeakRefIterable([])) is False
+
+    weak_list = WeakRefIterable([a])
+    assert bool(weak_list) is True
+    del a
+    assert bool(weak_list) is False
+
+
 @pytest.mark.parametrize(
     ("grad", "is_invalid"),
     [

@@ -236,7 +236,7 @@ def tensors(
         if grad_elements_bounds is None:
             grad_elements_bounds = (-10, 10)
 
-        tensor.grad = draw(
+        tensor._grad = draw(
             hnp.arrays(
                 dtype=grad_dtype,
                 shape=x.shape,
