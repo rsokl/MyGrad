@@ -69,9 +69,11 @@ def test_no_share_memory_view_is_still_view(constant: bool):
 
 def create_view_graph(base_constant=False) -> Dict[str, mg.Tensor]:
     """
+    Creates the following graph:
+
                 x ---------------------
                 |                     |
-                |                    leaf
+                |                 leaf_view
                 |                     |
             downstream_view      view_of_leaf_view
                 |
@@ -96,14 +98,20 @@ def create_view_graph(base_constant=False) -> Dict[str, mg.Tensor]:
 
 
 @pytest.mark.parametrize("base_constant", [True, False])
-@pytest.mark.parametrize("view_type", ["downstream_view", "view_of_downstream_view"])
+@pytest.mark.parametrize(
+    "view_type",
+    ["downstream_view", "view_of_downstream_view", "leaf_view", "view_of_leaf_view"],
+)
 def test_basic_view_relationship(view_type: str, base_constant: bool):
     graph = create_view_graph(base_constant)
     assert graph[view_type].base is graph["base"]
 
 
 @pytest.mark.parametrize("base_constant", [True, False])
-@pytest.mark.parametrize("view_type", ["downstream_view", "view_of_downstream_view"])
+@pytest.mark.parametrize(
+    "view_type",
+    ["downstream_view", "view_of_downstream_view", "leaf_view", "view_of_leaf_view"],
+)
 def test_view_propagates_constant(view_type: str, base_constant: bool):
     graph = create_view_graph(base_constant)
     assert graph[view_type].constant is graph["base"].constant
@@ -181,7 +189,7 @@ def test_disconnected_views_dissassociate_from_base_upon_entering_new_graph(
         and terminal_node == "downstream_view"
         and resume_node == "downstream_view"
     ):
-        # documented edge case for mem-guard state
+        # documented edge case for mem-guard state leakage
         clear_all_mem_locking_state()
 
 
