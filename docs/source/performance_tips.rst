@@ -7,6 +7,13 @@ The following functions provide users with controls for optimizing MyGrad code
 by either suspending its memory-guarding behavior or by disabling automatic differentiation
 altogether. These are important utilities for speeding up your code.
 
+Beyond the points made below, general performance tips for NumPy – e.g. leveraging
+`vectorized operations <https://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/VectorizedOperations.html>`_,
+heeding NumPy's `row-major memory layout for arrays <https://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/ArrayTraversal.html>`_
+when constructing tensors, and using `basic indexing <https://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/BasicIndexing.html>`_
+to create views of arrays instead of copies – apply equally to MyGrad and its tensors.
+After all, MyGrad operates almost entirely in NumPy arrays and NumPy functions under the hood.
+
 
 .. currentmodule:: mygrad
 
@@ -26,7 +33,7 @@ you can use the provided decorator/context-manager for suspending all of MyGrad'
 
    >>> import mygrad as mg
    >>> with mg.no_autodiff:
-   ...     # any mygrad-code in this context will run faster
+   ...     # any mygrad code in this context will run faster
    ...     # but will not produce any gradients
 
 
