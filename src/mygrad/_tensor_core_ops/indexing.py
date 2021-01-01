@@ -11,13 +11,13 @@ __all__ = ["GetItem", "SetItem"]
 def _is_int_array_index(index):
     """ Returns True if `index` contains any array-like integer-valued sequences
 
-        Parameters
-        ----------
-        index : Tuple[Any]
+    Parameters
+    ----------
+    index : Tuple[Any]
 
-        Returns
-        -------
-        bool """
+    Returns
+    -------
+    bool """
     return any(
         np.issubdtype(np.asarray(ind).dtype, np.int_) and np.asarray(ind).ndim
         for ind in index
@@ -27,20 +27,20 @@ def _is_int_array_index(index):
 def _is_bool_array_index(index):
     """ Returns True if `index` solely contains a boolean-valued array
 
-        Parameters
-        ----------
-        index : Tuple[Any]
+    Parameters
+    ----------
+    index : Tuple[Any]
 
-        Returns
-        -------
-        bool """
+    Returns
+    -------
+    bool """
     return len(index) == 1 and np.issubdtype(np.asarray(index[0]).dtype, np.bool_)
 
 
 class GetItem(Operation):
     """ Defines the __getitem__ interface for a Tensor, supporting back-propagation
 
-        Supports back-propagation through all valid numpy-indexing (basic, advanced, mixed, etc.)"""
+    Supports back-propagation through all valid numpy-indexing (basic, advanced, mixed, etc.)"""
 
     can_return_view = True
 

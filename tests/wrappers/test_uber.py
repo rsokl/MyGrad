@@ -135,6 +135,9 @@ def test_catches_mutation_error():
             tensor.data.flags.writeable = False
             return tensor.data * 2
 
+        def backward_var(self, grad: np.ndarray, index: int, **kwargs) -> np.ndarray:
+            raise NotImplementedError()
+
     def mul2_mutate(x, constant=False):
         return Tensor._op(Mul2_Mutate, x, constant=constant)
 

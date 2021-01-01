@@ -1,6 +1,7 @@
 """
 Defines the base class for mathematical operations capable of back-propagating
 gradients to their input tensors."""
+from abc import ABC, abstractmethod
 from numbers import Real
 from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Set, Tuple
 from weakref import ReferenceType
@@ -17,12 +18,12 @@ if TYPE_CHECKING:  # pragma: no cover
 __all__ = ["Operation", "BroadcastableOp"]
 
 
-class Operation:
+class Operation(ABC):
     """ Base class for all tensor operations that support back-propagation
     of gradients.
 
     Consider the Operation-instance ``f``. A forward-pass through ``f`` is defined
-    via ``f.__call__``. Thus, given tensors ``a`` and ``b``, a computational
+    via ``f.__call__(...)``. Thus, given tensors ``a`` and ``b``, a computational
     graph is defined ``f.__call__(a, b) -> c``, where the "creator" of tensor ``c``
     is recorded as ``f``::
 
@@ -30,7 +31,7 @@ class Operation:
                        -> [operation: f(a, b)] --> (node: c)
           (node: b) --+
 
-    Thus back-propagating through ``c`` will instruct ``f`` to back-propagate
+    Back-propagating through ``c`` will instruct ``f`` to back-propagate
     the gradient to its inputs, which are recorded as ``a`` and ``b``. Each
     node then back-propagates to any Operation-instance that is recorded
     as its creator, and so on.
@@ -60,10 +61,11 @@ class Operation:
         self.replay_kwargs: Optional[Dict[str, Any]] = None
         self.replay_force_constant: Optional[bool] = None
 
-    def __call__(self, *input_vars: "Tensor", **kwargs):  # pragma: no cover
+    @abstractmethod
+    def __call__(self, *input_vars: "Tensor", **kwargs) -> np.ndarray:
         """ Performs a forward pass, f, of this Operation::
 
-            f(x1, ...., xn) -> out
+                         f(x1, ...., xn)
 
         Parameters
         ----------
@@ -77,30 +79,42 @@ class Operation:
         Returns
         -------
         numpy.ndarray
-            The output of the forward pass function."""
+            The output of the forward pass function.
 
-        self.variables = input_vars
-        raise NotImplementedError
+        Notes
+        -----
+        This method should set the ``self.variables`` attribute
+        with a tuple storing all of the input tensors of this operations"""
 
-    def backward_var(
-        self, grad: np.ndarray, index: int, **kwargs
-    ) -> np.ndarray:  # pragma: no cover
-        """ Given ``grad = d(out)/d(f)``, computes ``d(out)/d(var)``, and passes this result
-        to ``var.backward()``, where var is the tensor-argument at position ``index``.
+        raise NotImplementedError()  # pragma: no cover
+
+    @abstractmethod
+    def backward_var(self, grad: np.ndarray, index: int, **kwargs) -> np.ndarray:
+        """ Given ``grad = dℒ/df``, computes ``∂ℒ/∂x_{i}``, where ``x_{i}`` is one
+        of ``x1, ...., xn``.
+
+        ``ℒ`` is assumed to be the terminal node from which ``ℒ.backward()`` was
+        called.
 
         Parameters
         ----------
         grad : numpy.ndarray
             The back-propagated total derivative with respect to the present
-            operation (`f`): d(out)/df
+            operation: dℒ/df. This will have the same shape as the result
+            of the forward pass.
 
         index : int
             The index-location of ``var`` in ``self.variables``
 
+        Returns
+        -------
+        numpy.ndarray
+            ∂ℒ/∂x_{i}
+
         Raises
         ------
         SkipGradient"""
-        raise NotImplementedError
+        raise NotImplementedError()  # pragma: no cover
 
     def backward(
         self,
@@ -186,7 +200,7 @@ class Operation:
             var._backward(graph=graph)
 
 
-class BroadcastableOp(Operation):
+class BroadcastableOp(Operation, ABC):
     """ Signals that an Operation's forward pass can broadcast its tensor arguments."""
 
     def backward(

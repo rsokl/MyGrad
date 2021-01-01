@@ -150,7 +150,7 @@ def test_contains(element):
 def test_properties(a, constant, scalar, creator):
     array = np.asarray(a)
     if creator:
-        ref = Operation()
+        ref = Add()
         tensor = Tensor(a, constant=constant, _creator=ref, _scalar_only=scalar)
     else:
         ref = None
@@ -226,7 +226,7 @@ def test_items(x):
             tensor.item()
 
 
-op = Operation()
+op = Add()
 dtype_strat = st.sampled_from(
     (
         None,

@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from functools import wraps
 from numbers import Real
 from typing import (
@@ -66,6 +67,11 @@ class WeakRef(Generic[T]):
 
 
 class WeakRefIterable(Generic[T]):
+    """
+    Stores weakrefs in a list and, upon iteration, yields
+    only living references.
+    """
+
     __slots__ = ("data",)
 
     def __init__(self, data: Optional[Iterable[T]] = None):
@@ -157,7 +163,7 @@ def is_invalid_gradient(grad: Any) -> bool:
     )
 
 
-class ContextTracker:
+class ContextTracker(ABC):
     """ A context manager and decorator for managing a boolean
     global state"""
 
@@ -168,10 +174,12 @@ class ContextTracker:
     _enter_set_value: Optional[bool] = None
 
     @property
-    def state(self):  # pragma: no cover
+    @abstractmethod
+    def state(self) -> bool:  # pragma: no cover
         raise NotImplementedError()
 
     @state.setter
+    @abstractmethod
     def state(self, value: bool):  # pragma: no cover
         raise NotImplementedError()
 
@@ -179,32 +187,20 @@ class ContextTracker:
         # keeps track of what MemGuard was at a given depth
         self._depth_tracker: Dict[int, bool] = dict()
 
-    def __bool__(self):  # pragma: no cover
+    def __bool__(self) -> bool:  # pragma: no cover
         return self.state
 
     def __enter__(self):
-        """Suspends graph-tracking"""
         self._depth_tracker[self._depth] = self.state
         self._depth += 1
         self.state = self._enter_set_value
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """Restores graph-tracking when context depth returns to 0"""
         self._depth -= 1
         self.state = self._depth_tracker.pop(self._depth)
 
     def __call__(self, func: Callable) -> Callable:
-        """Decorates a function so that it will have graph-tracking suspended
-        during its execution.
-
-        Parameters
-        ----------
-        func : Callable
-            The function to be decorated
-
-        Returns
-        -------
-        decorated_func : Callable"""
+        """Decorates a function within the context"""
 
         @wraps(func)
         def wrapper(*args, **kwargs):
