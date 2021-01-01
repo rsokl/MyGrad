@@ -6,19 +6,19 @@ from mygrad.operation_base import BroadcastableOp, Operation
 
 __all__ = [
     "Add",
-    "IAdd",
+    "_IAdd",
     "Subtract",
-    "ISubstract",
+    "_ISubstract",
     "Multiply",
-    "IMultiply",
+    "_IMultiply",
     "Divide",
-    "IDivide",
+    "_IDivide",
     "Reciprocal",
     "Power",
-    "IPower",
-    "IPow1",
+    "_IPower",
+    "_IPow1",
     "Square",
-    "ISquare",
+    "_ISquare",
     "Positive",
     "Negative",
     "AddSequence",
@@ -47,7 +47,7 @@ class Add(BroadcastableOp):
         return grad
 
 
-class IAdd(Add):
+class _IAdd(Add):
     def __call__(self, inplace_target, other) -> np.ndarray:
         """ Performs a += b
 
@@ -99,7 +99,7 @@ class Subtract(BroadcastableOp):
             return -grad
 
 
-class ISubstract(Subtract):
+class _ISubstract(Subtract):
     def __call__(self, inplace_target, other) -> np.ndarray:
         """ Performs a -= b
 
@@ -146,7 +146,7 @@ class Multiply(BroadcastableOp):
             return grad * a.data
 
 
-class IMultiply(Multiply):
+class _IMultiply(Multiply):
     def __call__(self, inplace_target, other) -> np.ndarray:
         """ Performs a *= b
 
@@ -190,7 +190,7 @@ class Divide(BroadcastableOp):
             return -grad * a.data / (b.data ** 2)
 
 
-class IDivide(Divide):
+class _IDivide(Divide):
     def __call__(self, inplace_target, other) -> np.ndarray:
         """ Performs a /= b
 
@@ -251,7 +251,7 @@ class Power(BroadcastableOp):
             return grad * (x ** y) * np.log(np.where(x, x, 1))
 
 
-class IPower(Power):
+class _IPower(Power):
     def __call__(self, inplace_target, other) -> np.ndarray:
         """ Performs a **= b
 
@@ -296,7 +296,7 @@ class Square(Operation):
         return grad
 
 
-class ISquare(Square):
+class _ISquare(Square):
     def __call__(self, inplace_target) -> np.ndarray:
         """ Performs a **= 2  (special case)
 
@@ -324,7 +324,7 @@ class ISquare(Square):
         return inplace_target
 
 
-class IPow1(Operation):
+class _IPow1(Operation):
     def __call__(self, inplace_target) -> np.ndarray:
         """ Performs a **= 1  (special case)
 

@@ -3,6 +3,8 @@ from graphviz import Digraph
 
 from mygrad.tensor_base import Tensor
 
+__all__ = ["build_graph"]
+
 
 def build_graph(
     fin,
