@@ -4,12 +4,92 @@ import hypothesis.strategies as st
 import numpy as np
 import pytest
 from hypothesis import given
-from numpy.testing import assert_allclose
+from numpy.testing import assert_allclose, assert_array_equal
 
 import mygrad as mg
 from mygrad.errors import InvalidBackprop
 from tests.custom_strategies import tensors
-from tests.utils import clear_all_mem_locking_state
+from tests.utils import clear_all_mem_locking_state, clears_mem_state
+
+
+def test_simple_view_grad_reflects_base_grad():
+    base = mg.Tensor([1.0, 2.0, 3.0])
+    view = base[:2]
+    assert view.base is base
+    (base ** 2).backward()
+    assert_array_equal(view.grad, base.grad[:2])
+    assert view.grad.base is base.grad
+
+
+def test_simple_view_grad_reflects_nulled_base_grad():
+    base = mg.Tensor([1.0, 2.0, 3.0])
+    view = base[:2]
+    (base ** 2).backward()
+    # Involving base in new graph should null its gradient
+    # and this should be reflected in its views
+    _ = +base
+    assert base.grad is None
+    assert view.grad is None
+
+
+def test_simple_view_becomes_disconnected_from_base_via_clear_graph():
+    base = mg.Tensor([1.0, 2.0, 3.0])
+    view = base[:2]
+    view.backward()  # disconnects `view` from `base`
+
+    assert view.base is base
+
+    # involving disconnected view in new computational graph
+    # should remove its base information
+    _ = +view
+
+    assert view.base is None
+    assert view.grad is None
+
+
+@pytest.mark.xfail(
+    reason=""
+    "This is a known/documented inconsistency in MyGrad's "
+    "view semantics. It would be expensive to propagate "
+    "information forward this aggressively, and it is almost "
+    "certainly the case that the 'fix' would lead to a "
+    "less-intuitive user experience."
+)
+@clears_mem_state
+def test_known_disagreement_between_view_grad_and_base():
+    base = mg.Tensor([1.0, 2.0, 3.0])
+    view = base[:2]
+    (base ** 2).backward()
+    # pulling on `view.grad` will set its gradient
+    _ = view.grad
+
+    # Involving base in new graph nulls its gradient
+    # and disconnects it from any of its views
+    +base
+
+    assert base.grad is None
+
+    # But this doesn't propagate to `view` because it
+    # would be expensive to do so
+    #
+    # Despite view's base being set, its grad doesn't
+    # reflect the (nulled) grad of its base
+    assert view.base is base
+    assert view.base is None  # This should fail!
+
+
+def test_simple_view_becomes_disconnected_from_base_via_clear_graph2():
+    base = mg.Tensor([1.0, 2.0, 3.0])
+    view = base[:2]
+    (view ** 2).backward()  # disconnects `view` from `base`
+    (base ** 3).backward()
+
+    assert view.base is base
+    assert np.any(view.grad != base.grad[:2])
+
+    +view
+    assert view.base is None
+    assert view.grad is None
 
 
 @pytest.mark.parametrize("constant", [True, False])
