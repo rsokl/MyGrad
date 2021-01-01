@@ -90,7 +90,7 @@ than is suggested here.
    intro
    tensor
    views
-   autodiff_utils
+   performance_tips
    operation
    tensor_creation
    tensor_manipulation

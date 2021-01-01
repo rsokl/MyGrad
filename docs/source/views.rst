@@ -43,7 +43,7 @@ This is because MyGrad has to track the state of tensors that are involved in a 
 graph. Thus a mutated tensor must have its pre-augmented state stored for future reference; this
 defeats the performance benefit of writing to an array's memory in-place. This is especially
 inefficient if you are mutating a tensor involved with multiple views of the same memory(
-By contrast, producing a view of a tensor _is_ efficient as one would expect).
+By contrast, producing a view of a tensor *is* efficient as one would expect).
 
 Thus these NumPy-like in-place semantics are supported by MyGrad not for the same performance
 purposes, but instead to support convenient and familiar code-patterns and to enable one to

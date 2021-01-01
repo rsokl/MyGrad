@@ -86,9 +86,6 @@ a direct reference to the numpy array.
 >>> x.data
 array([1, 2])
 
-**Do not unwittingly modify this underlying array**. Any in-place modifications made to this
-array will not be tracked by any computational graph involving that tensor, thus
-back-propagation through that tensor will likely be incorrect.
 
 
 Documentation for mygrad.Tensor
@@ -100,6 +97,8 @@ Documentation for mygrad.Tensor
    :toctree: generated/
 
    Tensor
+   Tensor.backward
+   Tensor.grad
    Tensor.shape
    Tensor.ndim
    Tensor.size
@@ -108,7 +107,6 @@ Documentation for mygrad.Tensor
    Tensor.item
    Tensor.T
    Tensor.constant
-   Tensor.backward
    Tensor.scalar_only
    Tensor.null_gradients
    Tensor.copy
