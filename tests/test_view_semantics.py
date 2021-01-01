@@ -67,11 +67,11 @@ def test_no_share_memory_view_is_still_view(constant: bool):
     assert tensor_view_of_view.base is tensor
 
 
-def create_view_graph(base_constant=False) -> Dict[str, mg.Tensor]:
+def create_view_graph(base_constant: bool = False) -> Dict[str, mg.Tensor]:
     """
     Creates the following graph:
 
-                x ---------------------
+               base -------------------
                 |                     |
                 |                 leaf_view
                 |                     |
@@ -79,17 +79,17 @@ def create_view_graph(base_constant=False) -> Dict[str, mg.Tensor]:
                 |
         view_of_downstream_view
                 |
-        (backprop will only occur)
-        (along this branch)
+    * Backprop will only occur *
+    * along this branch.       *
 
     """
-    x = mg.arange(4.0, constant=base_constant)
-    downstream_v = x[:2]
+    base = mg.Tensor([0.0, 1.0, 2.0, 3.0], constant=base_constant)
+    downstream_v = base[:2]
     downstream_v_v = downstream_v[...]
-    leaf_view = x[-2:]
+    leaf_view = base[-2:]
     view_of_leaf_view = leaf_view[...]
     return dict(
-        base=x,
+        base=base,
         downstream_view=downstream_v,
         view_of_downstream_view=downstream_v_v,
         leaf_view=leaf_view,
@@ -105,7 +105,7 @@ def create_view_graph(base_constant=False) -> Dict[str, mg.Tensor]:
 def test_basic_view_relationship(view_type: str, base_constant: bool):
     # The following graph is created:
     #
-    # base = mg.arange(4.0, constant=base_constant)
+    # base = mg.Tensor([0., 1., 2., 3.], constant=base_constant)
     #
     # downstream_v = base[:2]
     # downstream_v_v = downstream_v[...]
@@ -125,7 +125,7 @@ def test_basic_view_relationship(view_type: str, base_constant: bool):
 def test_view_propagates_constant(view_type: str, base_constant: bool):
     # The following graph is created:
     #
-    # base = mg.arange(4.0, constant=base_constant)
+    # base = mg.Tensor([0., 1., 2., 3.], constant=base_constant)
     #
     # downstream_v = base[:2]
     # downstream_v_v = downstream_v[...]
@@ -147,7 +147,7 @@ def test_view_propagates_constant(view_type: str, base_constant: bool):
 def test_grad_is_view_of_base_grad(terminal_node: str, view_type: str):
     # The following graph is created:
     #
-    # base = mg.arange(4.0, constant=base_constant)
+    # base = mg.Tensor([0., 1., 2., 3.], constant=base_constant)
     #
     # downstream_v = base[:2]
     # downstream_v_v = downstream_v[...]
