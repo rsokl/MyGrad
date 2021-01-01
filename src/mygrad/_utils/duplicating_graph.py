@@ -203,13 +203,11 @@ class DuplicatingGraph:
         path.append(self.base)
         return path
 
-    def restore_old_graph(self, remirror: bool = False):
+    def restore_old_graph(self):
         """ Reroute graph back to original tensors."""
         # call tuple to ensure iteration is completed
         # before information gets deleted / mutated
         for node in tuple(self):
-            if remirror is True:
-                mirror_tensor(target=node.tensor, source=node.placeholder)
             reroute_ops_through(target=node.tensor, source=node.placeholder)
             if node.placeholder._base is not None:
                 node.tensor._base = self.base.tensor
@@ -299,5 +297,5 @@ class UnView(BroadcastableOp):
             assert grad_view.shape == self.variables[1].shape
             return grad_view
 
-        else:
+        else:  # pragma: no cover
             raise ValueError(f"UnView: backward_var index: {index}")
