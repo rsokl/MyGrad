@@ -55,19 +55,7 @@ from mygrad.operation_base import BroadcastableOp, Operation
 from mygrad.tensor_manip.array_shape.ops import Flatten, Reshape
 from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property
 
-__all__ = ["Tensor", "asarray"]
-
-
-def _is_view_of(parent: np.ndarray, child: np.ndarray) -> bool:
-    child_base = child.base  # avoid redundant attr access
-
-    if child_base is None:
-        return False
-
-    if (child_base is parent) or (child_base is parent.base) or (child is parent):
-        return True
-
-    return False
+__all__ = ["Tensor", "asarray", "astensor"]
 
 
 def asarray(a, dtype=None, order=None) -> np.ndarray:
@@ -612,7 +600,7 @@ class Tensor:
     def _op(
         cls,
         Op: Type[Operation],
-        *input_vars: "Tensor",
+        *input_vars: Union["Tensor", np.ndarray],
         op_args: Optional[Sequence] = None,
         op_kwargs: Optional[Dict[str, Any]] = None,
         constant: bool = False,
@@ -703,17 +691,28 @@ class Tensor:
         base = None  # type: Optional[Tensor]
         # If output of op is a view - tracks the tensor var that is
         # the parent of the view
-        parent_var = None  # type: Optional[Tensor]
+        parent_var: Optional[Tensor] = None
 
-        if f.can_return_view:
+        op_out_base = op_out.base
+        if f.can_return_view and op_out_base is not None:
             vars_can_share_mem = (
                 isinstance(var, (np.ndarray, Tensor)) for var in input_vars
             )
-            for can_share_mem, var in zip(vars_can_share_mem, tensor_vars):
-                if can_share_mem and _is_view_of(parent=var.data, child=op_out):
-                    base = var if var.base is None else var.base
-                    parent_var = var
+            for can_share_mem, parent_var in zip(vars_can_share_mem, tensor_vars):
+                if not can_share_mem:
+                    continue
+                parent_data = parent_var.data
+                parent_data_base = parent_data.base
+
+                if (
+                    (op_out_base is parent_data)
+                    or (op_out_base is parent_data_base)
+                    or (op_out is parent_data)
+                ):
+                    base = parent_var if parent_var.base is None else parent_var.base
                     break
+            else:
+                parent_var = None
 
         if base is not None:
             # we need to be able to replay view-ops for doing in-place operations
