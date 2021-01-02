@@ -26,7 +26,7 @@ a future release!).
 Another important, but less exciting, feature is that MyGrad now protects users from inadvertently
 corrupting the state of a computational graph by, say, mutating a NumPy array that is participating in
 the graph.
-This is very important to protect people – especially students – from unwittingly poisoning the results
+This is very useful for protecting people – especially students – from unwittingly poisoning the results
 of their calculations.
 
 Lastly... no more "nulling" gradients! MyGrad will now handle deleting gradients for you in a way that
@@ -65,7 +65,7 @@ mutate their underlying data.
 |                                   |                                   |                                   |
 |    >>> x = np.array([1., 2.])     |    >>> x = mg.Tensor([1., 2.])    |    >>> x = mg.Tensor([1., 2.])    |
 |    >>> y = x                      |    >>> y = x                      |    >>> y = x                      |
-|    >>> x *= 2                     |    >>> x *= 2                     |    >>> x *= 2                     |
+|    >>> x *= 2                     |    >>> x *= 2  # x = 2 * x        |    >>> x *= 2                     |
 |    >>> x is y                     |    >>> x is y  # doesn't match!   |    >>> x is y  # matches!         |
 |    True                           |    False                          |    True                           |
 +-----------------------------------+-----------------------------------+-----------------------------------+
@@ -91,11 +91,11 @@ attribute
 | .. code:: python                  | .. code:: python                    | .. code:: python                  |
 |                                   |                                     |                                   |
 |    >>> x = np.array([1., 2., 3.]) |    >>> x = mg.Tensor([1., 2., 3.])  |    >>> x = mg.Tensor([1., 2., 3.])|
-|    >>> y = x[:2]  # the view      |    >>> y = x[:2]  # the view        |    >>> y = x[:2]  # the view      |
+|    >>> y = x[:2]                  |    >>> y = x[:2]                    |    >>> y = x[:2]                  |
 |    >>> np.shares_memory(x, y)     |    >>> np.shares_memory(x, y)       |    >>> np.shares_memory(x, y)     |
 |    True                           |    True                             |    True                           |
 |    >>> y.base is x                |    >>> y.base is x  # doesn't match!|    >>> y.base is x  # matches!    |
-|    True                           |    <ERROR>                          |    True                           |
+|    True                           |    <AttributeError>                 |    True                           |
 +-----------------------------------+-------------------------------------+-----------------------------------+
 
 
@@ -190,7 +190,7 @@ This enables the following common workflow for performing gradient-based optimiz
    for _ in range(num_optimization_steps):
        # using `model_params` in a function will automatically
        # set its gradients to `None`
-       loss = compute_loss(data, model_params)
+       loss = compute_loss(data, model_params)  # gradients cleared
        loss.backward()         # compute gradients
        optimize(model_params)  # do stuff with gradients
 
@@ -246,14 +246,21 @@ have its write-ability restored to its original state.
    >>> x
    array([0., 0.])
 
-   >>> x * y  # result is not referenced, thus x and y are immediately released
+   # This result is not referenced, thus
+   # x and y are immediately released by the
+   # memory-guard; no graph-clearing is needed
+   >>> x * y
+   Tensor([0., 0.])
+   >>> x[:] = 1.
+
+
 
 But with great responsibility comes great ...uhh... slowness? This memory-guarding feature can lead to slowdowns
-of **up to 50% for computations involving many small tensors**.
-(It used to be **a lot** worse... like 5x worse. I worked really hard to speed it up! I promise!)
+of **up to 50% for computations involving many small tensors**
+(It used to be **a lot** worse... like 5x worse. I worked really hard to speed it up! I promise!).
 That being said, computations involving beefy tensors (e.g. standard neural networks) will not be significantly
 affected by the overhead associated with the memory guard.
-That being said, please refer to :ref:`performance-tips` for ways to disable this memory-guarding mechanism.
+Please refer to :ref:`performance-tips` for responsible ways to disable this memory-guarding mechanism.
 
 Speaking of optimizations...
 
@@ -274,6 +281,21 @@ for example usage.
 For computations involving many small tensors, this can produce **up to a 3x speedup**! So make sure you
 make keen use of this when you don't actually need to perform autodiff.
 
+
+Is This Code Well-Tested?
+-------------------------
+
+Yes! I consider MyGrad's test suite to be the most important part of the library. It is
+the only reason why I feel comfortable releasing this code for students, teachers, and others to use.
+I leverage thorough `property-based testing <https://increment.com/testing/in-praise-of-property-based-testing/>`_ using the `Hypothesis library <https://hypothesis.readthedocs.io/en/latest/>`_
+to exercise this code as rigorously as I can manage. These tests `even found bugs in NumPy <https://github.com/numpy/numpy/issues/10930>`_!
+
+
+Special Thanks
+--------------
+
+Thanks to Alex Silverstein for nearly-instantaneously finding like five massive ways in which I could improve this project.
+Thanks to Zac Dodds for
 
 .. _v1.9.0:
 
