@@ -44,14 +44,17 @@ class Operation(ABC):
     unambiguously.
     """
 
-    # tracks if a given operation-instance performs a
+    # Tracks if a given operation-instance performs a
     # non-vectorized or broadcasted operation , which
     # requires that backpropagation be invoked from a scalar
     scalar_only = False  # type: bool
 
-    # can be set to true if the operation is guaranteed to not returns a view
+    # Can be set to true if the operation is guaranteed to not returns a view
     # this will reduce some overhead on checking for shared memory
     can_return_view = False  # type: bool
+
+    # Stores the input tensors that the operation will backprop through.
+    variables: Tuple["Tensor", ...]
 
     def __init__(self):
         # Stores positional and keyword arguments used to call op.
