@@ -46,12 +46,14 @@ def negative_log_likelihood(x, y_true, *, weights=None, constant=False):
     >>> negative_log_likelihood(x, y_true)
     Tensor(1.09861229)
 
-    # log-probabilities where the prediction is highly-confident and correct
+    Log-probabilities where the prediction is highly-confident and correct:
+
     >>> x = mg.Tensor([[0, -20, -20]])
     >>> negative_log_likelihood(x, y_true)
     Tensor(0.)
 
-    # adding a class-weighting
+    Adding a class-weighting:
+
     >>> x = mg.Tensor([[-4.6, -4.6, -0.02]])
     >>> weights = mg.Tensor([2, 1, 1])
     >>> negative_log_likelihood(x, y_true, weights=weights)
