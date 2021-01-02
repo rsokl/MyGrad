@@ -18,11 +18,12 @@ This is a compatibility-breaking update to MyGrad, and it's great!
 MyGrad 2.0 represents a major overhaul to this project.
 Its primary feature is that MyGrad now offers the ability to create and augment views of
 tensors.
-This enables a large variety of convenient code patterns that were previously untenable in MyGrad.
-It also creates near parity between the experiences of operating in MyGrad and in NumPy
-(which, in turn, paves the way for injecting autodiff functionality *into* NumPy code via MyGrad!).
+This enables a large variety of convenient code patterns that were impossible in MyGrad 1.X.
+It also creates near parity between the experiences of using MyGrad and using NumPy
+(which, in turn, paves the way for injecting autodiff functionality *into* NumPy code via MyGrad in
+a future release!).
 
-Another important, but less exciting feature is that MyGrad now protects users from inadvertently
+Another important, but less exciting, feature is that MyGrad now protects users from inadvertently
 corrupting the state of a computational graph by, say, mutating a NumPy array that is participating in
 the graph.
 This is very important to protect people – especially students – from unwittingly poisoning the results
@@ -37,7 +38,6 @@ New Utilities
 - :func:`~mygrad.astensor`
 - :func:`~mygrad.asarray`
 - :func:`~mygrad.no_autodiff`
-- :func:`~mygrad.mem_guard_active`
 - :func:`~mygrad.mem_guard_off`
 - :func:`~mygrad.mem_guard_on`
 - :func:`~mygrad.turn_memory_guarding_off`
@@ -48,10 +48,10 @@ New Utilities
 Augmented Updates on Tensors Now Match NumPy's Behavior
 -------------------------------------------------------
 
-Previously, augmented assignment expressions, such as ``tensor *= 2`` behaved merely
+Previously, augmented assignment expressions, such as ``tensor *= 2``, behaved merely
 as a shorthand for the simple assignment ``tensor = tensor * 2``.
 This is in stark contrast to the behavior of an augmented assignment on a NumPy array, which
-`mutates the array in-place <https://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/BasicIndexing.html#Augmented-Assignments>`_
+`mutates the array in-place <https://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/BasicIndexing.html#Augmented-Assignments>`_.
 
 This meant that there was a major discrepancy between how these expressions behaved across MyGrad and
 NumPy.
@@ -79,9 +79,9 @@ MyGrad now provides rich support for creating and manipulating views of tensors.
 
 All `basic indexing <https://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/BasicIndexing.html#>`_ operations
 performed on a tensor will produce a view of said tensor.
-This means that these two tensors share memory.
+This means that these two tensors share memory
 (While MyGrad 1.X created a view of the underlying NumPy array under the hood for basic indexing, its notion
-of "view" semantics stopped there and could not be leveraged or relied on beyond that.)
+of supporting views went no further than that.)
 As with NumPy arrays the "parent" of a view can be accessed through the tensor's ``.base``
 attribute
 
@@ -117,7 +117,7 @@ Mutating shared data will propagate through views:
 
 Furthermore, views of tensors now propagate corresponding gradient information as well!
 This means that if ``y`` is a view of ``x``, then ``y.grad`` will be a corresponding view of ``x.grad``.
-This would be true for all varieties of views, and views of views, of ``x``.
+This is true for all varieties of views, views of views, etc., of ``x``.
 
 .. code-block:: python
 
@@ -148,7 +148,7 @@ and that  MyGrad fully supports backpropagation through all flavors of einsum!)
    >>> diag
    Tensor([0., 4., 8.])
 
-   # view of diagonal of `x`
+   # view of anti-diagonal of `x`
    >>> anti_diag = mg.einsum("ii->i", x[:, ::-1])
    >>> anti_diag
    Tensor([2., 4., 6.])
@@ -173,8 +173,8 @@ Bye-Bye Null Gradients!
 
 Gone are the days of having to manually clear your tensors' gradients and the computational graph that they were
 in; now MyGrad does it for you!
-This means that ``mygrad.Tensor.null_gradients()`` no longer does anything other than emit a deprecation warning.
-In an upcoming minor release, this method will be removed entirely.
+This means that ``Tensor.null_gradients()`` no longer does anything other than emit a deprecation warning.
+In an upcoming minor release this method will be removed entirely.
 
 In MyGrad 2.0, calling :func:`~mygrad.Tensor.backward` will finish its computation by clearing the computational graph that was involved
 in the backpropagation.
@@ -183,11 +183,11 @@ This is very nice behavior to help prevent students from filling up their RAM un
 
 And instead of worrying about nulling gradients manually, a tensor will automatically have its gradient cleared any time that it is
 involved in a new mathematical operation.
-This enables the common workflow of:
+This enables the following common workflow for performing gradient-based optimization:
 
 .. code-block:: python
 
-   for _ in range(num_training_loops):
+   for _ in range(num_optimization_steps):
        # using `model_params` in a function will automatically
        # set its gradients to `None`
        loss = compute_loss(data, model_params)
@@ -197,10 +197,82 @@ This enables the common workflow of:
 
 You can also call :func:`~mygrad.Tensor.null_grad` to manually clear an individual tensor's gradient.
 
-- mem-guard
-- no-autodiff util
-- array interface
 
+
+Safety First: Memory Guarding Behavior in MyGrad 2.0
+----------------------------------------------------
+
+In MyGrad 1.X it was all too easy to unwittingly corrupt the state of a computational graph by mutating
+a NumPy array mid-computation.
+This could lead to incorrect calculations of gradients! This is the stuff of horrifying nightmares.
+
+Now MyGrad tracks all of the arrays that are involved in active computational graphs and locks their memory
+so that they are read-only (except for when the user mutates the array explicitly with a MyGrad operation).
+This means that the sort of mutation that could have lurked silently in the dimly-lit alleyways of bugs-ville will
+now get loudly narc'd on by MyGrad's merciless memory guard!
+
+
++---------------------------------------------+---------------------------------------+
+| MyGrad 1.X                                  | MyGrad 2.0                            |
++=============================================+=======================================+
+| .. code:: python                            | .. code:: python                      |
+|                                             |                                       |
+|    >>> arr = np.array([1., 2.])             |    >>> arr = np.array([1., 2.])       |
+|    >>> tn = mg.Tensor([1. 1.])              |    >>> tn = mg.Tensor([1. 1.])        |
+|    >>> z = x * y                            |    >>> z = x * y                      |
+|    # mutating x will corrupt                |    # mutating x will corrupt          |
+|    # backprop through z...                  |    # backprop through z...            |
+|    >>> x[:] = 0.                            |    >>> x[:] = 0. # you shall not pass!|
+|                                             |    ValueError: read-only!             |
+|    >>> z.backward() # uh oh...              |    >>> z.backward()                   |
+|    >>> tn.grad # should be: (1., 2.)        |    >>> tn.grad                        |
+|    array([0., 0.])                          |    array([1., 2.])                    |
++---------------------------------------------+---------------------------------------+
+
+Any tensor or array that is no longer participating in an active computational graph will automatically
+have its write-ability restored to its original state.
+
+.. code-block:: python
+
+   # memory guarding is released once an array is no
+   # longer involved in an active computational graph
+   >>> import mygrad as mg
+   >>> import numpy as np
+   >>> x = np.array([1., 2.])
+   >>> y = mg.ones_like(x)
+   >>> z = x * y     # x and y are locked
+   >>> z.backward()  # graph cleared; x and y are "released"
+   >>> x[:] = 0      # can write to x
+   >>> x
+   array([0., 0.])
+
+   >>> x * y  # result is not referenced, thus x and y are immediately released
+
+But with great responsibility comes great ...uhh... slowness? This memory-guarding feature can lead to slowdowns
+of **up to 50% for computations involving many small tensors**.
+(It used to be **a lot** worse... like 5x worse. I worked really hard to speed it up! I promise!)
+That being said, computations involving beefy tensors (e.g. standard neural networks) will not be significantly
+affected by the overhead associated with the memory guard.
+That being said, please refer to :ref:`performance-tips` for ways to disable this memory-guarding mechanism.
+
+Speaking of optimizations...
+
+
+Disabling Automatic Differentiation
+-----------------------------------
+
+Sometimes you want to use your MyGrad code to do calculations, but you don't actually need to compute
+any derivatives.
+A common example of this is evaluating the test-time performance of a machine learning model that you are
+in the process of optimizing – you don't actually need to perform backpropagation when you are processing
+the test data.
+
+In these circumstances, you can greatly reduce the overhead cost associated with building a computational
+graph by using the :func:`~mygrad.no_autodiff` decorator / context manager. See the linked documentation
+for example usage.
+
+For computations involving many small tensors, this can produce **up to a 3x speedup**! So make sure you
+make keen use of this when you don't actually need to perform autodiff.
 
 
 .. _v1.9.0:

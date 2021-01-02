@@ -1,4 +1,4 @@
-.. _routines.autodiff_utils:
+.. _performance-tips:
 
 Performance Tips
 ****************
