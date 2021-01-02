@@ -44,37 +44,46 @@ Forward and Back-Propagation
 ----------------------------
 Let's construct a computational graph consisting of two zero-dimensional
 tensors, ``x`` and ``y``, which are used to compute an output tensor,
-``f``. This is a "forward pass imperative" style for creating a computational
+``ℒ``. This is a "forward pass imperative" style for creating a computational
 graph - the graph is constructed as we carry out the forward-pass computation.
 
 >>> x = Tensor(3.0)
 >>> y = Tensor(2.0)
->>> f = 2 * x + y ** 2
+>>> ℒ = 2 * x + y ** 2
 
-Invoking ``f.backward()`` signals the computational graph to
+Invoking ``ℒ.backward()`` signals the computational graph to
 compute the total-derivative of ``f`` with respect to each one of its dependent
-variables. I.e. ``x.grad`` will store ``df/dx`` and ``y.grad`` will store
-``df/dy``. Thus we have back-propagated a gradient from ``f`` through our graph.
+variables. I.e. ``x.grad`` will store ``dℒ/dx`` and ``y.grad`` will store
+``dℒ/dy``. Thus we have back-propagated a gradient from ``f`` through our graph.
 
 Each tensor of derivatives is computed elementwise. That is, if ``x = Tensor(x0, x1, x2)``,
-then df/dx represents ``[df/d(x0), df/d(x1), df/d(x2)]``
+then ``dℒ/dx`` represents ``[dℒ/d(x0), dℒ/d(x1), dℒ/d(x2)]``
 
->>> f.backward()  # computes df/dx and df/dy
+>>> ℒ.backward()  # computes df/dx and df/dy
 >>> x.grad  # df/dx
-array(2.0)
+array(6.0)
 >>> y.grad  # df/dy
 array(4.0)
->>> f.grad
-array(1.0)  # df/df
+>>> ℒ.grad
+array(1.0)  # dℒ/dℒ
 
-Before utilizing ``x`` and ``y`` in a new computational graph, you must
-'clear' their stored derivative values. ``f.null_gradients()`` signals
-``f`` and all preceding tensors in its computational graph to clear their
-derivatives.
+Once the gradients are computed, the computational graph containing ``x``,
+``y``, and ``ℒ`` is cleared automatically. Additionally, involving any
+of these tensors in a new computational graph will automatically null
+their gradients.
 
->>> f.null_gradients()
->>> x.grad is None and y.grad is None and f.grad is Nonw
+>>> 2 * x
+>>> x.grad is None
 True
+
+Or, you can use the :func:`~mygrad.Tensor.null_grad` method to manually clear a
+tensor's gradient
+
+>>> y.null_grad()
+Tensor(2.)
+>>> y.grad is None
+True
+
 
 Accessing the Underlying NumPy Array
 ------------------------------------
@@ -86,7 +95,38 @@ a direct reference to the numpy array.
 >>> x.data
 array([1, 2])
 
+>>> import numpy as np
+>>> np.asarray(x)
+array([1, 2])
 
+Producing a "View" of a Tensor
+------------------------------
+MyGrad's tensors exhibit the same view semantics and memory-sharing relationships
+as NumPy arrays. I.e. any (non-scalar) tensor produced via basic indexing will share
+memory with its parent.
+
+>>> x = mg.Tensor([1., 2., 3., 4.])
+>>> y = x[:2]  # the view: Tensor([1., 2.])
+>>> y.base is x
+True
+>>> np.shares_memory(x, y)
+True
+
+Mutating shared data will propagate through views:
+
+>>> y *= -1
+>>> x
+Tensor([-1., -2.,  3.,  4.])
+>>> y
+Tensor([-1., -2.])
+
+And this view relationship will also manifest between the tensors' gradients
+
+>>> (x ** 2).backward()
+>>> x.grad
+array([-2., -4.,  6.,  8.])
+>>> y.grad
+array([-2., -4.])
 
 Documentation for mygrad.Tensor
 -------------------------------

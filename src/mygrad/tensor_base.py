@@ -474,10 +474,17 @@ class Tensor:
     @property
     def grad(self) -> Optional[np.ndarray]:
         """
-        Returns the derivative associated with this tensor.
+        Returns the derivatives associated with this tensor.
 
         If this tensor is a view of another tensor then their gradients
         will exhibit the same memory-sharing relationship as their data.
+
+        Returns
+        -------
+        dℒ/dx: numpy.ndarray
+            The gradient of the terminal node in a computational graph
+            with respect to this tensor. The shape of this numpy array
+            matches ``self.shape``
 
         Examples
         --------
