@@ -66,7 +66,7 @@ def empty(shape, dtype=np.float32, constant=False):
         Tensor([[-1073741821, -1067949133],
                 [  496041986,    19249760]])                     #random
     """
-    return Tensor(np.empty(shape, dtype), constant=constant, _copy_data=False)
+    return Tensor(np.empty(shape, dtype), constant=constant, copy_data=False)
 
 
 def empty_like(other, dtype=None, constant=False):
@@ -102,7 +102,7 @@ def empty_like(other, dtype=None, constant=False):
                 [  496041986,    19249760]])                     #random
     """
     return Tensor(
-        np.empty_like(asarray(other), dtype), constant=constant, _copy_data=False
+        np.empty_like(asarray(other), dtype), constant=constant, copy_data=False
     )
 
 
@@ -145,7 +145,7 @@ def eye(rows, cols=None, diag_idx=0, dtype=np.float32, constant=False):
                 [ 0.,  0.,  0.]])
     """
     return Tensor(
-        np.eye(rows, cols, diag_idx, dtype), constant=constant, _copy_data=False
+        np.eye(rows, cols, diag_idx, dtype), constant=constant, copy_data=False
     )
 
 
@@ -177,7 +177,7 @@ def identity(n, dtype=np.float32, constant=False):
                 [ 0.,  1.,  0.],
                 [ 0.,  0.,  1.]])
     """
-    return Tensor(np.identity(n, dtype), constant=constant, _copy_data=False)
+    return Tensor(np.identity(n, dtype), constant=constant, copy_data=False)
 
 
 def ones(shape, dtype=np.float32, constant=False):
@@ -226,7 +226,7 @@ def ones(shape, dtype=np.float32, constant=False):
     Tensor([[ 1.,  1.],
             [ 1.,  1.]])
     """
-    return Tensor(np.ones(shape, dtype), constant=constant, _copy_data=False)
+    return Tensor(np.ones(shape, dtype), constant=constant, copy_data=False)
 
 
 def ones_like(other, dtype=None, constant=False):
@@ -270,7 +270,7 @@ def ones_like(other, dtype=None, constant=False):
     Tensor([ 1.,  1.,  1.])
     """
     return Tensor(
-        np.ones_like(asarray(other), dtype), constant=constant, _copy_data=False
+        np.ones_like(asarray(other), dtype), constant=constant, copy_data=False
     )
 
 
@@ -319,7 +319,7 @@ def zeros(shape, dtype=np.float32, constant=False):
     Tensor([[ 0.,  0.],
             [ 0.,  0.]])
     """
-    return Tensor(np.zeros(shape, dtype), constant=constant, _copy_data=False)
+    return Tensor(np.zeros(shape, dtype), constant=constant, copy_data=False)
 
 
 def zeros_like(other, dtype=None, constant=False):
@@ -370,7 +370,7 @@ def zeros_like(other, dtype=None, constant=False):
     Tensor([ 0.,  0.,  0.])
     """
     return Tensor(
-        np.zeros_like(asarray(other), dtype), constant=constant, _copy_data=False
+        np.zeros_like(asarray(other), dtype), constant=constant, copy_data=False
     )
 
 
@@ -409,9 +409,7 @@ def full(shape, fill_value, dtype=None, constant=False):
     Tensor([[10, 10],
             [10, 10]])
     """
-    return Tensor(
-        np.full(shape, fill_value, dtype), constant=constant, _copy_data=False
-    )
+    return Tensor(np.full(shape, fill_value, dtype), constant=constant, copy_data=False)
 
 
 def full_like(other, fill_value, dtype=None, constant=False):
@@ -454,7 +452,7 @@ def full_like(other, fill_value, dtype=None, constant=False):
     return Tensor(
         np.full_like(asarray(other), fill_value, dtype),
         constant=constant,
-        _copy_data=False,
+        copy_data=False,
     )
 
 
@@ -504,7 +502,7 @@ def arange(stop, start=0, step=1, dtype=None, constant=False):
         start = stop
         stop = tmp
     return Tensor(
-        np.arange(start, stop, step, dtype), constant=constant, _copy_data=False
+        np.arange(start, stop, step, dtype), constant=constant, copy_data=False
     )
 
 
@@ -558,7 +556,7 @@ def linspace(start, stop, num=50, include_endpoint=True, dtype=None, constant=Fa
     return Tensor(
         np.linspace(start, stop, num, include_endpoint, dtype=dtype),
         constant=constant,
-        _copy_data=False,
+        copy_data=False,
     )
 
 
@@ -623,7 +621,7 @@ def logspace(
     return Tensor(
         np.logspace(start, stop, num, include_endpoint, base, dtype),
         constant=constant,
-        _copy_data=False,
+        copy_data=False,
     )
 
 
@@ -698,5 +696,5 @@ def geomspace(start, stop, num=50, include_endpoint=True, dtype=None, constant=F
     return Tensor(
         np.geomspace(start, stop, num, include_endpoint, dtype),
         constant=constant,
-        _copy_data=False,
+        copy_data=False,
     )

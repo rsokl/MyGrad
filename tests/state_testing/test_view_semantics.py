@@ -40,6 +40,7 @@ from typing import Callable, List, NamedTuple, Optional, Tuple, TypeVar
 
 import hypothesis.strategies as st
 import numpy as np
+import pytest
 from hypothesis import settings
 from hypothesis.stateful import (
     Bundle,
@@ -259,3 +260,19 @@ class ViewGraphCompare(RuleBasedStateMachine):
 
 
 TestGraphComparison = ViewGraphCompare.TestCase
+
+
+# We also want to check that all of this logic holds up in
+# no-autodiff mode.
+class Tmp(ViewGraphCompare):
+    def pick_terminal_tensor(self, pair: Pair):
+        pass
+
+    @clears_mem_state
+    def teardown(self):
+        pass
+
+
+@pytest.mark.usefixtures("no_autodiff")
+class NoAutoDiffView(Tmp.TestCase):
+    pass

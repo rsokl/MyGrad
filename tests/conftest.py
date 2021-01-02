@@ -4,6 +4,7 @@ import warnings
 import pytest
 from hypothesis import Verbosity, settings
 
+import mygrad as mg
 import mygrad._utils.graph_tracking as track
 import mygrad._utils.lock_management as lock
 from tests.utils import clear_all_mem_locking_state
@@ -27,6 +28,12 @@ def seal_memguard() -> bool:
         assert False
 
     lock.MEM_GUARD = initial_value
+
+
+@pytest.fixture()
+def no_autodiff():
+    with mg.no_autodiff:
+        yield None
 
 
 @pytest.fixture(autouse=True)

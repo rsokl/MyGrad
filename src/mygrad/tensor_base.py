@@ -55,19 +55,7 @@ from mygrad.operation_base import BroadcastableOp, Operation
 from mygrad.tensor_manip.array_shape.ops import Flatten, Reshape
 from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property
 
-__all__ = ["Tensor", "asarray"]
-
-
-def _is_view_of(parent: np.ndarray, child: np.ndarray) -> bool:
-    child_base = child.base  # avoid redundant attr access
-
-    if child_base is None:
-        return False
-
-    if (child_base is parent) or (child_base is parent.base) or (child is parent):
-        return True
-
-    return False
+__all__ = ["Tensor", "asarray", "astensor"]
 
 
 def asarray(a, dtype=None, order=None) -> np.ndarray:
@@ -289,31 +277,31 @@ class Tensor:
     ----------------------------
     Let's construct a computational graph consisting of two zero-dimensional
     tensors, ``x`` and ``y``, which are used to compute an output tensor,
-    ``f``. This is a "forward pass imperative" style for creating a computational
+    ````. This is a "forward pass imperative" style for creating a computational
     graph - the graph is constructed as we carry out the forward-pass computation.
 
     >>> x = Tensor(3.0)
     >>> y = Tensor(2.0)
-    >>> f = 2 * x + y ** 2
+    >>> ℒ = 2 * x + y ** 2
 
-    Invoking ``f.backward()`` signals the computational graph to
+    Invoking ``ℒ.backward()`` signals the computational graph to
     compute the total-derivative of ``f`` with respect to each one of its dependent
-    variables. I.e. ``x.grad`` will store ``df/dx`` and ``y.grad`` will store
-    ``df/dy``. Thus we have back-propagated a gradient from ``f`` through our graph.
+    variables. I.e. ``x.grad`` will store ``dℒ/dx`` and ``y.grad`` will store
+    ``dℒ/dy``. Thus we have back-propagated a gradient from ``f`` through our graph.
 
     Each tensor of derivatives is computed elementwise. That is, if `x = Tensor(x0, x1, x2)`,
-    then df/dx represents `[df/d(x0), df/d(x1), df/d(x2)]`
+    then dℒ/dx represents `[dℒ/d(x0), dℒ/d(x1), dℒ/d(x2)]`
 
-    >>> f.backward()  # computes df/dx and df/dy
+    >>> ℒ.backward()  # computes df/dx and df/dy
     >>> x.grad  # df/dx
     array(6.0)
     >>> y.grad  # df/dy
     array(4.0)
-    >>> f.grad
-    array(1.0)  # df/df
+    >>> ℒ.grad
+    array(1.0)  # dℒ/dℒ
 
     Once the gradients are computed, the computational graph containing ``x``,
-    ``y``, and ``f`` is cleared automatically. Additionally, involving any
+    ``y``, and ``ℒ`` is cleared automatically. Additionally, involving any
     of these tensors in a new computational graph will automatically null
     their gradients.
 
@@ -340,7 +328,59 @@ class Tensor:
 
     **Do not modify this underlying array**. Any in-place modifications made to this
     array will not be tracked by any computational graph involving that tensor, thus
-    back-propagation through that tensor will likely be incorrect."""
+    back-propagation through that tensor will likely be incorrect.
+
+    Producing a "View" of a Tensor
+    ------------------------------
+    MyGrad's tensors exhibit the same view semantics and memory-sharing relationships
+    as NumPy arrays. I.e. any (non-scalar) tensor produced via basic indexing will share
+    memory with its parent.
+
+    >>> x = mg.Tensor([1., 2., 3., 4.])
+    >>> y = x[:2]  # the view: Tensor([1., 2.])
+    >>> y.base is x
+    True
+    >>> np.shares_memory(x, y)
+    True
+
+    Mutating shared data will propagate through views:
+
+    >>> y *= -1
+    >>> x
+    Tensor([-1., -2.,  3.,  4.])
+    >>> y
+    Tensor([-1., -2.])
+
+    And this view relationship will also manifest between the tensors' gradients
+
+    >>> (x ** 2).backward()
+    >>> x.grad
+    array([-2., -4.,  6.,  8.])
+    >>> y.grad
+    array([-2., -4.])
+
+    In-Place Operations are not Efficient
+    =====================================
+    It is important to note that while MyGrad's view semantics promote a rich parity
+    with NumPy, that certain aspects should be avoided in the interest of optimized performance.
+    Namely, performing in-place operations on tensors is generally not more efficient than
+    their non-mutating counterparts.
+
+    This is because MyGrad has to track the state of tensors that are involved in a computational
+    graph. Thus a mutated tensor must have its pre-augmented state stored for future reference; this
+    defeats the performance benefit of writing to an array's memory in-place. This is especially
+    inefficient if you are mutating a tensor involved with multiple views of the same memory(
+    By contrast, producing a view of a tensor _is_ efficient as one would expect).
+
+    Thus these NumPy-like in-place semantics are supported by MyGrad not for the same performance
+    purposes, but instead to support convenient and familiar code-patterns and to enable one to
+    port NumPy code to MyGrad (or, in the future, inject MyGrad tensors into NumPy!!) and get
+    the exact same behavior.
+
+    A final note: MyGrad's in-place operations, when run under :func:`~mygrad.no_autodiff` mode,
+    do not incur the extra costs noted above, and thus your code will benefit from the performance
+    benefits of in-place operations.
+    """
 
     __array_priority__ = 15.0
 
@@ -350,10 +390,10 @@ class Tensor:
         *,
         dtype=None,
         constant: bool = False,
+        copy_data: Optional[bool] = None,
         _scalar_only: bool = False,
         _creator: Optional[Operation] = None,
         _base: Optional["Tensor"] = None,
-        _copy_data: Optional[bool] = None,
         _check_dtype: bool = True,
     ):
         """
@@ -370,7 +410,11 @@ class Tensor:
 
         constant : bool, optional (default=False)
             If True, this node is treated as a constant, and thus does not facilitate
-            back propagation; `self.grad` will always return `None`.
+            back propagation; `self.grad` will always return ``None``.
+
+        copy_data : Optional[bool]
+            Determines if the incoming array-data will be copied. It ``None``,
+            then the data will be copied of ``constant=False`` is specified.
 
         _scalar_only : bool, optional (default=False)
             Signals that self.backward() can only be invoked if self.ndim == 0.
@@ -383,8 +427,6 @@ class Tensor:
         _base : Optional[Tensor]
             Sets the base tensor that ``self`` is a view of
 
-        _copy_data : Optional[bool]
-            Determines if the incoming array-data will be copied
         """
         if not isinstance(constant, bool):
             raise TypeError(f"`constant` must be a boolean value, got: {constant}")
@@ -392,10 +434,10 @@ class Tensor:
         self._scalar_only = _scalar_only
         self._creator = _creator  # type: Union[None, Operation]
 
-        if _copy_data is None:
-            _copy_data = not constant
+        if copy_data is None:
+            copy_data = not constant
 
-        to_array = np.array if _copy_data else asarray
+        to_array = np.array if copy_data else asarray
         self.data = to_array(x, dtype=dtype)  # type: np.ndarray
 
         if _check_dtype:
@@ -419,6 +461,70 @@ class Tensor:
 
     @property
     def grad(self) -> Optional[np.ndarray]:
+        """
+        Returns the derivatives associated with this tensor.
+
+        If this tensor is a view of another tensor then their gradients
+        will exhibit the same memory-sharing relationship as their data.
+
+        Returns
+        -------
+        dℒ/dx: numpy.ndarray
+            The gradient of the terminal node in a computational graph
+            with respect to this tensor. The shape of this numpy array
+            matches ``self.shape``
+
+        Examples
+        --------
+        >>> import mygrad as mg
+        >>> x = mg.Tensor([1.0, 2.0])
+
+        Prior to backpropagation tensors have ``None`` set for their gradients.
+
+        >>> x.grad is None
+        True
+
+        Now we trigger backpropagation...
+
+        >>> f = x ** 2
+        >>> f.backward()
+
+        and we see that ``x.grad`` stores df/dx
+
+        >>> x.grad  # df/dx
+        array([2., 4.])
+
+        Now we will demonstrate the relationship between gradient a view tensor
+        and that of its base.
+
+        >>> base = mg.Tensor([1.0, 2.0, 3.0])
+        >>> view = base[:2]; view
+        Tensor([1., 2.])
+
+        >>> f = base ** 2
+        >>> f.backward()
+
+        Although ``view`` is not directly involved in the computation in ``f``,
+        and thus would not typically store a gradient in due to ``f.backward()``,
+        it shares memory with ``base`` and thus it stores a gradient in correspondence
+        to this "view relationship". I.e. because ``view == base[:2]``, then we expect
+        to find that ``view.grad == base.grad[:2]``.
+
+        >>> base.grad
+        array([2., 4., 6.])
+        >>> view.grad
+        array([2., 4.])
+
+        >>> view.grad.base is base.grad
+        True
+
+        The reasoning here is that, because a base tensor and its view share the same
+        array data, then varying an element in that data implies that both the base
+        tensor and the view will change (assuming the variation occurs specifically in
+        a shared region). It follows that the base tensor's gradient must share the same
+        relationship with the view-tensor since these are measures of "cause and effects"
+        associated with varying elements of data (albeit infinitesmaly).
+        """
         if self._base is None:
             return self._grad
 
@@ -494,7 +600,7 @@ class Tensor:
     def _op(
         cls,
         Op: Type[Operation],
-        *input_vars: "Tensor",
+        *input_vars: Union["Tensor", np.ndarray],
         op_args: Optional[Sequence] = None,
         op_kwargs: Optional[Dict[str, Any]] = None,
         constant: bool = False,
@@ -573,10 +679,10 @@ class Tensor:
             return cls(
                 op_out,
                 constant=constant,  # constant not determined by graph info
+                copy_data=False,
                 _creator=None,
                 _scalar_only=False,
                 _base=None,
-                _copy_data=False,
                 _check_dtype=False,
             )
 
@@ -585,17 +691,28 @@ class Tensor:
         base = None  # type: Optional[Tensor]
         # If output of op is a view - tracks the tensor var that is
         # the parent of the view
-        parent_var = None  # type: Optional[Tensor]
+        parent_var: Optional[Tensor] = None
 
-        if f.can_return_view:
+        op_out_base = op_out.base
+        if f.can_return_view and op_out_base is not None:
             vars_can_share_mem = (
                 isinstance(var, (np.ndarray, Tensor)) for var in input_vars
             )
-            for can_share_mem, var in zip(vars_can_share_mem, tensor_vars):
-                if can_share_mem and _is_view_of(parent=var.data, child=op_out):
-                    base = var if var.base is None else var.base
-                    parent_var = var
+            for can_share_mem, parent_var in zip(vars_can_share_mem, tensor_vars):
+                if not can_share_mem:
+                    continue
+                parent_data = parent_var.data
+                parent_data_base = parent_data.base
+
+                if (
+                    (op_out_base is parent_data)
+                    or (op_out_base is parent_data_base)
+                    or (op_out is parent_data)
+                ):
+                    base = parent_var if parent_var.base is None else parent_var.base
                     break
+            else:
+                parent_var = None
 
         if base is not None:
             # we need to be able to replay view-ops for doing in-place operations
@@ -627,10 +744,10 @@ class Tensor:
         out = cls(
             op_out,
             constant=is_const,
+            copy_data=False,
             _creator=f,
             _scalar_only=scalar_only,
             _base=base,
-            _copy_data=False,
             _check_dtype=False,
         )
 
@@ -663,10 +780,11 @@ class Tensor:
         )
 
     def backward(self, grad: Optional[np.ndarray] = None):
-        """ Compute set or accumulate ``self.grad`` with `grad`, and pass ``self.creator.backward(grad)``.
-        In effect, calling ``self.backward()`` will trigger a "back-propagation" from ``self`` through
-        the preceding nodes in the computational graph. Thus a node, ``a``, will have the attribute
-        ``self.grad`` return the total derivative `d(self)/da`.
+        """ Trigger backpropagation and compute the derivatives of this tensor.
+
+        Designating this tensor as the tensor ℒ, compute dℒ/dx for all (non-constant) tensors
+        that preceded ℒ in its computational graph, and store each of these derivatives in ``x.grad``
+        respectively.
 
         Once back-propagation is finished, the present tensor is removed from all computational
         graphs, and the preceding graph is cleared.
@@ -689,16 +807,16 @@ class Tensor:
         >>> x = mg.Tensor(2)
         >>> y = mg.Tensor(3)
         >>> w = x * y
-        >>> f = 2 * w
-        >>> f.backward()  # computes df/df, df/dw, df/dy, and df/dx
+        >>> ℒ = 2 * w
+        >>> ℒ.backward()  # computes dℒ/dℒ, dℒ/dw, dℒ/dy, and dℒ/dx
 
-        >>> f.grad  # df/df == 1 by identity
+        >>> ℒ.grad  # dℒ/df == 1 by identity
         array(1.)
-        >>> w.grad  # df/dw
+        >>> w.grad  # dℒ/dw
         array(2.)
-        >>> y.grad # df/dy = df/dw * dw/dy
+        >>> y.grad # dℒ/dy = dℒ/dw * dw/dy
         array(4.)
-        >>> x.grad # df/dx = df/dw * dw/dx
+        >>> x.grad # dℒ/dx = dℒ/dw * dw/dx
         array(6.)
         """
         if not _track.TRACK_GRAPH:
@@ -891,7 +1009,7 @@ class Tensor:
 
     @property
     def scalar_only(self) -> bool:
-        """ Indicates whether or not `self.ndim` must be 0 in order to invoke `self.backward()`.
+        """ Indicates whether or not `self.ndim` must be 0 in order to invoke ``self.backward()``.
 
         E.g. a computational graph that involves a broadcast-multiplication of a non-constant
         tensor can only support back-propagation from a scalar. Otherwise the gradient associated

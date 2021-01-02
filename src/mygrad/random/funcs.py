@@ -32,7 +32,7 @@ def rand(*shape, constant=False):
             [0.66029533, 0.79285341, 0.54967228, 0.25178508]])
     """
 
-    return Tensor(np.random.rand(*shape), constant=constant, _copy_data=False)
+    return Tensor(np.random.rand(*shape), constant=constant, copy_data=False)
 
 
 def randint(low, high=None, shape=None, dtype=int, constant=False):
@@ -80,7 +80,7 @@ def randint(low, high=None, shape=None, dtype=int, constant=False):
     """
 
     return Tensor(
-        np.random.randint(low, high, shape, dtype), constant=constant, _copy_data=False
+        np.random.randint(low, high, shape, dtype), constant=constant, copy_data=False
     )
 
 
@@ -120,7 +120,7 @@ def randn(*shape, constant=False):
              [-1.28788909, -1.52525778]]])
     """
 
-    return Tensor(np.random.randn(*shape), constant=constant, _copy_data=False)
+    return Tensor(np.random.randn(*shape), constant=constant, copy_data=False)
 
 
 def random(shape=None, constant=False):
@@ -153,7 +153,7 @@ def random(shape=None, constant=False):
             [0.19780163, 0.51162365, 0.7849505 , 0.47864586]])
     """
 
-    return Tensor(np.random.random(shape), constant=constant, _copy_data=False)
+    return Tensor(np.random.random(shape), constant=constant, copy_data=False)
 
 
 def random_sample(shape=None, constant=False):
@@ -192,7 +192,7 @@ def random_sample(shape=None, constant=False):
     Tensor(0.47644928)
     """
 
-    return Tensor(np.random.random_sample(shape), constant=constant, _copy_data=False)
+    return Tensor(np.random.random_sample(shape), constant=constant, copy_data=False)
 
 
 def ranf(shape=None, constant=False):
@@ -233,7 +233,7 @@ def ranf(shape=None, constant=False):
     Tensor(0.77739196)
     """
 
-    return Tensor(np.random.ranf(shape), constant=constant, _copy_data=False)
+    return Tensor(np.random.ranf(shape), constant=constant, copy_data=False)
 
 
 def sample(shape=None, constant=False):
@@ -270,7 +270,7 @@ def sample(shape=None, constant=False):
     Tensor(0.50690423)
     """
 
-    return Tensor(np.random.sample(shape), constant=constant, _copy_data=False)
+    return Tensor(np.random.sample(shape), constant=constant, copy_data=False)
 
 
 def seed(seed_number):

@@ -88,7 +88,7 @@ Advanced Example
 
 The following is an example of using `mygrad` to compute the `hinge loss <https://en.wikipedia.org/wiki/Hinge_loss>`_ of classification scores and to "back-propagate" through (compute the gradient of) this loss. This example demonstrates some of mygrad's ability to perform back-propagation through broadcasted operations, basic indexing, advanced indexing, and in-place assignments.
 
-.. code::
+.. code:: pycon
 
     >>> from mygrad import Tensor
     >>> import numpy as np

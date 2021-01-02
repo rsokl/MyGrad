@@ -60,5 +60,5 @@ def normal(*shape, mean=0, std=1, dtype=np.float32, constant=False):
         np.random.normal(mean, std, shape),
         dtype=dtype,
         constant=constant,
-        _copy_data=False,
+        copy_data=False,
     )

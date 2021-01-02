@@ -16,6 +16,9 @@ class ScalarOnlyOp(BroadcastableOp):
         self.variables = (a, b)
         return np.array([0])
 
+    def backward_var(self, grad: np.ndarray, index: int, **kwargs) -> np.ndarray:
+        pass
+
 
 class NotScalarOnlyOp(Operation):
     scalar_only = False
@@ -23,6 +26,9 @@ class NotScalarOnlyOp(Operation):
     def __call__(self, a, b):
         self.variables = (a, b)
         return np.array([0])
+
+    def backward_var(self, grad: np.ndarray, index: int, **kwargs) -> np.ndarray:
+        pass
 
 
 @given(
@@ -74,9 +80,6 @@ def test_standard_op(a_const, a_scalar_only, b_const, b_scalar_only):
     else:
         if a.constant and b.constant:
             out.backward()  # a, b, out are const (nothing computed)
-        else:
-            with raises(NotImplementedError):
-                out.backward()
 
 
 @pytest.mark.parametrize("constant", [True, False])

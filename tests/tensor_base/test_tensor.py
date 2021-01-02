@@ -150,7 +150,7 @@ def test_contains(element):
 def test_properties(a, constant, scalar, creator):
     array = np.asarray(a)
     if creator:
-        ref = Operation()
+        ref = Add()
         tensor = Tensor(a, constant=constant, _creator=ref, _scalar_only=scalar)
     else:
         ref = None
@@ -186,7 +186,7 @@ def test_init_data():
     as_tensor=st.booleans(),
 )
 def test_copy_on_init_behavior(arr: np.ndarray, as_tensor: bool):
-    x = Tensor(arr, _copy_data=False) if as_tensor else arr
+    x = Tensor(arr, copy_data=False) if as_tensor else arr
     t_no_constant = Tensor(x)
     assert not np.shares_memory(t_no_constant, arr)
 
@@ -226,7 +226,7 @@ def test_items(x):
             tensor.item()
 
 
-op = Operation()
+op = Add()
 dtype_strat = st.sampled_from(
     (
         None,

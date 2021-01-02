@@ -12,6 +12,9 @@ class Dummy(Operation):
         self.array_out = a.data * b.data
         return self.array_out
 
+    def backward_var(self, grad: np.ndarray, index: int, **kwargs) -> np.ndarray:
+        pass
+
 
 def dummy(a, b, constant=False):
     return Tensor._op(Dummy, a, b, constant=constant)
