@@ -414,8 +414,8 @@ class Tensor:
             back propagation; `self.grad` will always return ``None``.
 
         copy : Optional[bool]
-            Determines if the incoming array-data will be copied. It ``None``,
-            then the data will be copied of ``constant=False`` is specified.
+            Determines if the incoming array-data will be copied. If ``None``,
+            then the data will be copied only if ``constant=False`` is specified.
 
         ndmin : int, optional
             Specifies the minimum number of dimensions that the resulting
