@@ -289,3 +289,17 @@ def test_tensor_read_only_default(tensor: Tensor):
 def test_tensor_read_only(data: st.DataObject, read_only: bool):
     tensor = data.draw(tensors(read_only=read_only))
     assert tensor.data.flags.writeable is not read_only
+
+
+@given(
+    shape=hnp.array_shapes(min_dims=0, min_side=0),
+    ndmin=st.integers(0, 10),
+    data=st.data(),
+)
+def test_tensor_ndmin(shape: Tuple[int, ...], ndmin: int, data: st.DataObject):
+    tensor = data.draw(
+        tensors(shape=shape, ndmin=ndmin, include_grad=True, read_only=st.booleans()),
+        label="tensor",
+    )
+    assert tensor.ndim >= ndmin
+    assert tensor.shape == tensor.grad.shape

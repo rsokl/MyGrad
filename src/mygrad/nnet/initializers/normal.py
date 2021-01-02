@@ -57,8 +57,5 @@ def normal(*shape, mean=0, std=1, dtype=np.float32, constant=False):
         std = std.item()
 
     return Tensor(
-        np.random.normal(mean, std, shape),
-        dtype=dtype,
-        constant=constant,
-        copy_data=False,
+        np.random.normal(mean, std, shape), dtype=dtype, constant=constant, copy=False,
     )
