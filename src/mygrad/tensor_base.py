@@ -1002,6 +1002,16 @@ class Tensor:
         computational graph will have their writeability restored.
 
         Examples
+        --------
+        >>> import mygrad as mg
+        >>> import numpy as np
+        >>> x = np.array([1., 2.])
+        >>> y = mg.multiply(2., x)
+        >>> x.flags.writeable, y.creator
+        (False, <mygrad.math.arithmetic.ops.Multiply at 0x224f89cac48>)
+        >>> y.clear_graph()
+        >>> x.flags.writeable, y.creator
+        (True, None)
         """
         if self._base is not None:
             # "pull" on grad to force views to update their
@@ -1023,7 +1033,7 @@ class Tensor:
 
     @property
     def scalar_only(self) -> bool:
-        """ Indicates whether or not `self.ndim` must be 0 in order to invoke ``self.backward()``.
+        r""" Indicates whether or not `self.ndim` must be 0 in order to invoke ``self.backward()``.
 
         E.g. a computational graph that involves a broadcast-multiplication of a non-constant
         tensor can only support back-propagation from a scalar. Otherwise the gradient associated
@@ -1038,8 +1048,8 @@ class Tensor:
         Notes
         -----
         In the following example, see that, because ``x`` was broadcasted to a
-        shape-(2, 3) tensor, the derivative :math:`df/dx` could not be a shape-(3,) tensor.
-        Each element of ``x`` affects two entries of ``z``, thus :math:`df/dx`
+        shape-(2, 3) tensor, the derivative :math:`d\mathscr{L}/dx` could not be a shape-(3,) tensor.
+        Each element of ``x`` affects two entries of ``z``, thus :math:`d\mathscr{L}/dx`
         would have to be a shape-(2, 3) array. Therefore ``z.scalar_only`` returns ``True``.
 
         Examples
@@ -1048,8 +1058,8 @@ class Tensor:
         >>> x = mg.Tensor([1., 2., 3.])  # shape-(3,)
         >>> y = mg.Tensor([[4., 1., 9.], # shape-(2, 3)
         ...                [0., 2., 8.]])
-        >>> z = x * y  # uses numpy-style broadcasting
-        >>> z.scalar_only
+        >>> ℒ = x * y  # uses numpy-style broadcasting
+        >>> ℒ.scalar_only
         True
         """
         return self._scalar_only
@@ -1421,6 +1431,17 @@ class Tensor:
         ...                [4, 5, 6]])
         >>> y.shape
         (2, 3)
+
+        The shape attribute can also be set to reshape the tensor in-place
+
+        >>> y.shape = (1, 6, 1)
+        >>> y
+        Tensor([[[1],
+                 [2],
+                 [3],
+                 [4],
+                 [5],
+                 [6]]])
 
         See Also
         --------
