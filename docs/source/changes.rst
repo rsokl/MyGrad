@@ -294,8 +294,8 @@ to exercise this code as rigorously as I can manage. These tests `even found bug
 Special Thanks
 --------------
 
-Thanks to Alex Silverstein for nearly-instantaneously finding like five massive ways in which I could improve this project.
-Thanks to Zac Dodds for
+Special thanks to Alex Silverstein, Zac Dodds, and Petar Griggs for all of the fruitful discussions, ideas, and influence that you provided
+throughout this major update.
 
 .. _v1.9.0:
 
