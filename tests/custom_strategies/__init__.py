@@ -97,6 +97,7 @@ def tensors(
         min_dims=0, min_side=0
     ),
     *,
+    ndmin: int = 0,
     elements: Optional[st.SearchStrategy[Any]] = None,
     fill: Optional[st.SearchStrategy[Any]] = None,
     unique: bool = False,
@@ -142,6 +143,11 @@ def tensors(
         it to return are NaN values (anything for which :obj:`numpy:numpy.isnan`
         returns True. So e.g. for complex numbers (nan+1j) is also a valid fill).
         Note that if unique is set to True the generated values must be hashable.
+
+    ndmin : int, optional
+        Specifies the minimum number of dimensions that the resulting
+        array should have.  Ones will be pre-pended to the shape as
+        needed to meet this requirement.
 
     constant : Union[bool, st.SearchStrategy[bool]]
         Specifies ``tensor.constant``. Default is :func:`~hypothesis.strategies.booleans`
@@ -223,7 +229,7 @@ def tensors(
 
     constant = draw(constant) if isinstance(constant, st.SearchStrategy) else constant
 
-    tensor = VerboseTensor(x, constant=constant, copy_data=False)
+    tensor = VerboseTensor(x, constant=constant, copy=False, ndmin=ndmin)
     if isinstance(include_grad, st.SearchStrategy):
         include_grad = draw(include_grad)
 
@@ -239,7 +245,7 @@ def tensors(
         tensor._grad = draw(
             hnp.arrays(
                 dtype=grad_dtype,
-                shape=x.shape,
+                shape=tensor.shape,
                 elements=st.floats(
                     *grad_elements_bounds, width=grad_dtype.itemsize * 8
                 ),

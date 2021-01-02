@@ -390,7 +390,8 @@ class Tensor:
         *,
         dtype=None,
         constant: bool = False,
-        copy_data: Optional[bool] = None,
+        copy: Optional[bool] = None,
+        ndmin: int = 0,
         _scalar_only: bool = False,
         _creator: Optional[Operation] = None,
         _base: Optional["Tensor"] = None,
@@ -412,9 +413,18 @@ class Tensor:
             If True, this node is treated as a constant, and thus does not facilitate
             back propagation; `self.grad` will always return ``None``.
 
-        copy_data : Optional[bool]
-            Determines if the incoming array-data will be copied. It ``None``,
-            then the data will be copied of ``constant=False`` is specified.
+        copy : Optional[bool]
+            Determines if the incoming array-data will be copied. If ``None``,
+            then the data will be copied only if ``constant=False`` is specified.
+
+        ndmin : int, optional
+            Specifies the minimum number of dimensions that the resulting
+            array should have.  Ones will be prepended to the shape as
+            needed to meet this requirement.
+
+        Notes
+        -----
+        The following are parameters reserved only for internal use:
 
         _scalar_only : bool, optional (default=False)
             Signals that self.backward() can only be invoked if self.ndim == 0.
@@ -425,8 +435,7 @@ class Tensor:
             be set manually by users.
 
         _base : Optional[Tensor]
-            Sets the base tensor that ``self`` is a view of
-
+            Points to the tensor that ``self`` shares memory with.
         """
         if not isinstance(constant, bool):
             raise TypeError(f"`constant` must be a boolean value, got: {constant}")
@@ -434,11 +443,10 @@ class Tensor:
         self._scalar_only = _scalar_only
         self._creator = _creator  # type: Union[None, Operation]
 
-        if copy_data is None:
-            copy_data = not constant
+        if copy is None:
+            copy = not constant
 
-        to_array = np.array if copy_data else asarray
-        self.data = to_array(x, dtype=dtype)  # type: np.ndarray
+        self.data = np.array(x, dtype=dtype, copy=copy, ndmin=ndmin)  # type: np.ndarray
 
         if _check_dtype:
             self._check_valid_dtype(self.data.dtype)
@@ -462,7 +470,10 @@ class Tensor:
     @property
     def grad(self) -> Optional[np.ndarray]:
         """
-        Returns the derivatives associated with this tensor.
+        Returns the derivative of ``ℒ`` with respect to this tensor.
+
+        ``ℒ`` is the terminal node in the compuational graph from which
+        ``ℒ.backward()`` was invoked.
 
         If this tensor is a view of another tensor then their gradients
         will exhibit the same memory-sharing relationship as their data.
@@ -486,12 +497,12 @@ class Tensor:
 
         Now we trigger backpropagation...
 
-        >>> f = x ** 2
-        >>> f.backward()
+        >>> ℒ = x ** 2
+        >>> ℒ.backward()
 
-        and we see that ``x.grad`` stores df/dx
+        and we see that ``x.grad`` stores dℒ/dx
 
-        >>> x.grad  # df/dx
+        >>> x.grad  # dℒ/dx
         array([2., 4.])
 
         Now we will demonstrate the relationship between gradient a view tensor
@@ -501,11 +512,11 @@ class Tensor:
         >>> view = base[:2]; view
         Tensor([1., 2.])
 
-        >>> f = base ** 2
-        >>> f.backward()
+        >>> ℒ = base ** 2
+        >>> ℒ.backward()
 
-        Although ``view`` is not directly involved in the computation in ``f``,
-        and thus would not typically store a gradient in due to ``f.backward()``,
+        Although ``view`` is not directly involved in the computation in ``ℒ``,
+        and thus would not typically store a gradient in due to ``ℒ.backward()``,
         it shares memory with ``base`` and thus it stores a gradient in correspondence
         to this "view relationship". I.e. because ``view == base[:2]``, then we expect
         to find that ``view.grad == base.grad[:2]``.
@@ -679,7 +690,7 @@ class Tensor:
             return cls(
                 op_out,
                 constant=constant,  # constant not determined by graph info
-                copy_data=False,
+                copy=False,
                 _creator=None,
                 _scalar_only=False,
                 _base=None,
@@ -744,7 +755,7 @@ class Tensor:
         out = cls(
             op_out,
             constant=is_const,
-            copy_data=False,
+            copy=False,
             _creator=f,
             _scalar_only=scalar_only,
             _base=base,
@@ -798,8 +809,8 @@ class Tensor:
         Raises
         ------
         Exception
-            The configuration of the computational graph is such that ``self`` must be a 0D tensor
-            (i.e. scalar) to invoke ``self.backward()``.
+            The configuration of the computational graph is such that ``ℒ`` must be a 0D tensor
+            (i.e. scalar) to invoke ``ℒ.backward()``.
 
         Examples
         --------
@@ -987,7 +998,20 @@ class Tensor:
         computational graph.
 
         This de-references all operations involved in the graph and the intermediate
-        tensors that were created by it.
+        tensors that were created by it. Arrays whose memory were locked by the
+        computational graph will have their writeability restored.
+
+        Examples
+        --------
+        >>> import mygrad as mg
+        >>> import numpy as np
+        >>> x = np.array([1., 2.])
+        >>> y = mg.multiply(2., x)
+        >>> x.flags.writeable, y.creator
+        (False, <mygrad.math.arithmetic.ops.Multiply at 0x224f89cac48>)
+        >>> y.clear_graph()
+        >>> x.flags.writeable, y.creator
+        (True, None)
         """
         if self._base is not None:
             # "pull" on grad to force views to update their
@@ -1009,7 +1033,7 @@ class Tensor:
 
     @property
     def scalar_only(self) -> bool:
-        """ Indicates whether or not `self.ndim` must be 0 in order to invoke ``self.backward()``.
+        r""" Indicates whether or not `self.ndim` must be 0 in order to invoke ``self.backward()``.
 
         E.g. a computational graph that involves a broadcast-multiplication of a non-constant
         tensor can only support back-propagation from a scalar. Otherwise the gradient associated
@@ -1024,8 +1048,8 @@ class Tensor:
         Notes
         -----
         In the following example, see that, because ``x`` was broadcasted to a
-        shape-(2, 3) tensor, the derivative :math:`df/dx` could not be a shape-(3,) tensor.
-        Each element of ``x`` affects two entries of ``z``, thus :math:`df/dx`
+        shape-(2, 3) tensor, the derivative :math:`d\mathscr{L}/dx` could not be a shape-(3,) tensor.
+        Each element of ``x`` affects two entries of ``z``, thus :math:`d\mathscr{L}/dx`
         would have to be a shape-(2, 3) array. Therefore ``z.scalar_only`` returns ``True``.
 
         Examples
@@ -1034,8 +1058,8 @@ class Tensor:
         >>> x = mg.Tensor([1., 2., 3.])  # shape-(3,)
         >>> y = mg.Tensor([[4., 1., 9.], # shape-(2, 3)
         ...                [0., 2., 8.]])
-        >>> z = x * y  # uses numpy-style broadcasting
-        >>> z.scalar_only
+        >>> ℒ = x * y  # uses numpy-style broadcasting
+        >>> ℒ.scalar_only
         True
         """
         return self._scalar_only
@@ -1408,6 +1432,17 @@ class Tensor:
         >>> y.shape
         (2, 3)
 
+        The shape attribute can also be set to reshape the tensor in-place
+
+        >>> y.shape = (1, 6, 1)
+        >>> y
+        Tensor([[[1],
+                 [2],
+                 [3],
+                 [4],
+                 [5],
+                 [6]]])
+
         See Also
         --------
         mygrad.reshape : similar function
@@ -1699,9 +1734,11 @@ class Tensor:
     @property
     def base(self) -> Optional["Tensor"]:
         """
-        A reference to the base tensor if memory is from other tensor
+        A reference to the base tensor that the present tensor is a view of.
 
-         Examples
+        It this tensor owns its memory, then this returns ``None``.
+
+        Examples
         --------
         The base of a tensor that owns its memory is ``None``:
 

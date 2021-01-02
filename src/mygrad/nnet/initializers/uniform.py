@@ -60,5 +60,5 @@ def uniform(*shape, lower_bound=0, upper_bound=1, dtype=np.float32, constant=Fal
         np.random.uniform(lower_bound, upper_bound, shape),
         dtype=dtype,
         constant=constant,
-        copy_data=False,
+        copy=False,
     )

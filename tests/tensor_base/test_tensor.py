@@ -1,3 +1,5 @@
+from typing import Optional
+
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
@@ -35,6 +37,38 @@ def test_input_type_checking(data, constant, creator):
 def test_input_constant_checking(constant):
     with raises(TypeError):
         Tensor(1.0, constant=constant)
+
+
+@given(
+    x=hnp.arrays(
+        shape=hnp.array_shapes(min_dims=0, min_side=0), dtype=hnp.floating_dtypes()
+    ),
+    dtype=hnp.floating_dtypes(),
+    copy=st.booleans(),
+    ndmin=st.integers(0, 10),
+)
+def test_ndmin(x: np.ndarray, copy: bool, dtype, ndmin: int):
+    """Ensure Tensor(..., ndmin=<val>) mirrors numpy behavior and
+    produces appropriate view behavior"""
+    arr = np.array(x, copy=copy, ndmin=ndmin, dtype=dtype)
+    tensor = Tensor(x, copy=copy, ndmin=ndmin, dtype=dtype)
+    assert_equal(tensor, arr)
+
+    # Specifying array(... , ndmin=val) can create an internal
+    # base that the array points to. We want to be sure that
+    # this behavior doesnt manifest in tensor, which should
+    # bot behave as if it is a view
+
+    # check base behavior
+    assert tensor.data.flags.writeable
+    assert tensor.base is None
+    assert tensor[...].base is tensor
+
+    # check mem-lock behavior
+    z = +tensor
+    assert not tensor.data.flags.writeable
+    del z
+    assert tensor.data.flags.writeable
 
 
 @given(
@@ -186,7 +220,7 @@ def test_init_data():
     as_tensor=st.booleans(),
 )
 def test_copy_on_init_behavior(arr: np.ndarray, as_tensor: bool):
-    x = Tensor(arr, copy_data=False) if as_tensor else arr
+    x = Tensor(arr, copy=False) if as_tensor else arr
     t_no_constant = Tensor(x)
     assert not np.shares_memory(t_no_constant, arr)
 
@@ -253,8 +287,20 @@ dtype_strat_numpy = st.sampled_from(
     scalar_only=st.booleans(),
     dtype=dtype_strat,
     numpy_dtype=dtype_strat_numpy,
+    ndmin=st.integers(0, 10),
+    copy=st.none() | st.booleans(),
 )
-def test_init_params(data, creator, constant, scalar_only, dtype, numpy_dtype):
+def test_init_params(
+    data,
+    creator,
+    constant,
+    scalar_only,
+    dtype,
+    numpy_dtype,
+    ndmin: int,
+    copy: Optional[bool],
+):
+    """Check for bad combinations of init parameters leading to unexpected behavior"""
     elements = (
         (lambda x, y: st.floats(x, y, width=8 * np.dtype(numpy_dtype).itemsize))
         if np.issubdtype(numpy_dtype, np.floating)
@@ -270,10 +316,16 @@ def test_init_params(data, creator, constant, scalar_only, dtype, numpy_dtype):
     )
 
     tensor = Tensor(
-        a, _creator=creator, constant=constant, _scalar_only=scalar_only, dtype=dtype
+        a,
+        _creator=creator,
+        constant=constant,
+        _scalar_only=scalar_only,
+        dtype=dtype,
+        ndmin=ndmin,
+        copy=copy,
     )
 
-    a = np.asarray(a, dtype=dtype)
+    a = np.array(a, dtype=dtype, ndmin=ndmin)
 
     assert tensor.creator is creator
     assert tensor.constant is constant
@@ -281,6 +333,8 @@ def test_init_params(data, creator, constant, scalar_only, dtype, numpy_dtype):
     assert tensor.dtype is a.dtype
     assert_equal(tensor.data, a)
     assert tensor.grad is None
+    assert tensor.base is None
+    assert tensor.ndim >= ndmin
 
 
 @pytest.mark.parametrize(
