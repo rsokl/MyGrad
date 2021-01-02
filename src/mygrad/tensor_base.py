@@ -1734,9 +1734,11 @@ class Tensor:
     @property
     def base(self) -> Optional["Tensor"]:
         """
-        A reference to the base tensor if memory is from other tensor
+        A reference to the base tensor that the present tensor is a view of.
 
-         Examples
+        It this tensor owns its memory, then this returns ``None``.
+
+        Examples
         --------
         The base of a tensor that owns its memory is ``None``:
 

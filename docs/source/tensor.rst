@@ -137,22 +137,23 @@ Documentation for mygrad.Tensor
    :toctree: generated/
 
    Tensor
-   Tensor.backward
-   Tensor.grad
-   Tensor.null_grad
-   Tensor.shape
-   Tensor.ndim
-   Tensor.size
    Tensor.astype
-   Tensor.dtype
-   Tensor.item
-   Tensor.T
-   Tensor.constant
-   Tensor.scalar_only
-   Tensor.null_gradients
-   Tensor.copy
+   Tensor.backward
+   Tensor.base
    Tensor.clear_graph
+   Tensor.constant
+   Tensor.copy
    Tensor.creator
+   Tensor.dtype
+   Tensor.grad
+   Tensor.item
+   Tensor.ndim
+   Tensor.null_grad
+   Tensor.null_gradients
+   Tensor.scalar_only
+   Tensor.shape
+   Tensor.size
+   Tensor.T
 
 
 

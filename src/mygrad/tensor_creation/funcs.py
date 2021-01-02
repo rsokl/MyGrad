@@ -89,15 +89,22 @@ def empty_like(other, dtype=None, constant=False):
         Tensor
             A tensor of uninitialized data whose shape and type match `other`.
 
+        See Also
+        --------
+        empty : Return a new Tensor of the given shape and type, without initializing entries.
+        ones : Return a new tensor setting values to one.
+        zeros : Return a new tensor setting values to zero.
+        full : Return a new tensor of given shape filled with value.
+
         Examples
         --------
         >>> import mygrad as mg
-        >>> x = mg.arange(4).reshape
-        >>> mg.empty(x, constant=True)
+        >>> x = mg.arange(4).reshape(2, 2)
+        >>> mg.empty_like(x, constant=True)
         Tensor([[ -9.74499359e+001,   6.69583040e-309],
                 [  2.13182611e-314,   3.06959433e-309]])         #random
 
-        >>> mg.empty(x, dtype=int)
+        >>> mg.empty_like(x, dtype=int)
         Tensor([[-1073741821, -1067949133],
                 [  496041986,    19249760]])                     #random
     """
