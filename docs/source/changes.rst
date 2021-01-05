@@ -45,7 +45,7 @@ New Utilities
 
 
 
-The Interfaces Between ``mygrad.Tensor` and ``numpy.array`` Match
+The Interfaces Between ``mygrad.Tensor`` and ``numpy.array`` Match
 ------------------------------------------------------------------
 
 You can now control the dimensionality of a tensor and whether or not a tensor copies its data upon initialization, via the 
