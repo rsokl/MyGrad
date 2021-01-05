@@ -45,6 +45,22 @@ New Utilities
 
 
 
+The Interfaces Between ``mygrad.Tensor` and ``numpy.array`` Match
+------------------------------------------------------------------
+
+You can now control the dimensionality of a tensor and whether or not a tensor copies its data upon initialization, via the 
+:class:`~mygrad.Tensor` interface. This mirrors the behavior of :func:`~numpy.array`
+
++-------------------------------------------------------+-------------------------------------------------------+-------------------------------------------------+
+| Numpy                                                 | MyGrad 1.X                                            | MyGrad 2.0                                      |
++=======================================================+=======================================================+=================================================+
+| .. code:: python                                      | .. code:: python                                      | .. code:: python                                |
+|                                                       |                                                       |                                                 |
+|    >>> np.array([1., 2.], copy=True, ndmin=2)         |    >>> mg.Tensor([1., 2.], copy=True, ndmin=2)        |    >>> mg.Tensor([1., 2.], copy=True, ndmin=2)  |
+|    array([[1., 2.]])                                  |    <TypeError>                                        |    Tensor([[1., 2.]])                           |
++-------------------------------------------------------+-------------------------------------------------------+-------------------------------------------------+
+
+
 Augmented Updates on Tensors Now Match NumPy's Behavior
 -------------------------------------------------------
 
