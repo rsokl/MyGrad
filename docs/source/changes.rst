@@ -45,6 +45,22 @@ New Utilities
 
 
 
+The Interfaces Between ``mygrad.Tensor`` and ``numpy.array`` Match
+------------------------------------------------------------------
+
+You can now control the dimensionality of a tensor and whether or not a tensor copies its data upon initialization, via the 
+:class:`~mygrad.Tensor` interface. This mirrors the behavior of :func:`~numpy.array`
+
++-------------------------------------------------------+-------------------------------------------------------+-------------------------------------------------+
+| Numpy                                                 | MyGrad 1.X                                            | MyGrad 2.0                                      |
++=======================================================+=======================================================+=================================================+
+| .. code:: python                                      | .. code:: python                                      | .. code:: python                                |
+|                                                       |                                                       |                                                 |
+|    >>> np.array([1., 2.], copy=True, ndmin=2)         |    >>> mg.Tensor([1., 2.], copy=True, ndmin=2)        |    >>> mg.Tensor([1., 2.], copy=True, ndmin=2)  |
+|    array([[1., 2.]])                                  |    <TypeError>                                        |    Tensor([[1., 2.]])                           |
++-------------------------------------------------------+-------------------------------------------------------+-------------------------------------------------+
+
+
 Augmented Updates on Tensors Now Match NumPy's Behavior
 -------------------------------------------------------
 
@@ -185,6 +201,22 @@ And instead of worrying about nulling gradients manually, a tensor will automati
 involved in a new mathematical operation.
 This enables the following common workflow for performing gradient-based optimization:
 
+
++-------------------------------------+-------------------------------------+
+| MyGrad 1.X                          | MyGrad 2.0                          |
++=====================================+=====================================+
+| .. code:: python                    | .. code:: python                    |
+|                                     |                                     |
+|    >>> x = mg.Tensor([1., 2.])      |    >>> x = mg.Tensor([1., 2.])      |
+|    >>> for _ in range(10):          |    >>> for _ in range(10):          |
+|    ...     y = 3 * x                |    ...     y = 3 * x  # nulls grad  |
+|    ...     assert x.grad is None    |    ...     assert x.grad is None    |
+|    ...     y.backward()             |    ...     y.backward()             | 
+|    ...     assert all(x.grad == 3.) |    ...     assert all(x.grad == 3.) |
+|    ...     y.null_gradients()       |                                     |
++-------------------------------------+-------------------------------------+
+
+
 .. code-block:: python
 
    for _ in range(num_optimization_steps):
@@ -276,7 +308,18 @@ the test data.
 
 In these circumstances, you can greatly reduce the overhead cost associated with building a computational
 graph by using the :func:`~mygrad.no_autodiff` decorator / context manager. See the linked documentation
-for example usage.
+for extensive examples of its usage.
+
+.. code-block:: python
+
+   # demonstrating mygrad in no-autodiff mode
+   >>> import mygrad as mg
+   >>> x = mg.Tensor([1., 2., 3., 4.])
+   >>> with mg.no_autodiff:
+   ...     y = x ** 2  # operation not tracked
+   >>> y.backward()
+   >>> y.grad, x.grad  # x is not "connected" to y
+   (array([1., 1., 1.]), None)
 
 For computations involving many small tensors, this can produce **up to a 3x speedup**! So make sure you
 make keen use of this when you don't actually need to perform autodiff.
