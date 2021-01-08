@@ -35,7 +35,7 @@ __version__ = get_versions()["version"]
 del get_versions
 
 
-for attr in (
+for _attr in (
     sum,
     prod,
     cumprod,
@@ -55,4 +55,6 @@ for attr in (
     matmul,
     any,
 ):
-    setattr(Tensor, attr.__name__, attr)
+    setattr(Tensor, _attr.__name__, _attr)
+
+del _attr
