@@ -330,8 +330,8 @@ Remove Scalar-Only Conditions on Backpropagation
 
 Previously, one could only invoke backpropagation from a non-scalar tensor only if that tensor was
 the culmination of operations that preserved a one-to-one mapping between the elements of an upstream
-tensor with its downstream neighbor. This ensured that ``tensor.grad`` would always be the same shape as
-``tensor``, and not represent a higher-dimensional tensor.
+tensor with its downstream neighbor. Otherwise an error was raised. This ensured that ``tensor.grad``
+would always be the same shape as ``tensor``, and not represent a higher-dimensional tensor.
 
 Now calling ``tensor.backward()`` from a non-scalar tensor will behave as if the tensor was summed prior
 to invoking backpropagation. This is simple, easy-to-understand behavior, which ensures that ``tensor.grad``
