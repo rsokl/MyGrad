@@ -48,7 +48,7 @@ New Utilities
 The Interfaces Between ``mygrad.Tensor`` and ``numpy.array`` Match
 ------------------------------------------------------------------
 
-You can now control the dimensionality of a tensor and whether or not a tensor copies its data upon initialization, via the 
+You can now control the dimensionality of a tensor and whether or not a tensor copies its data upon initialization, via the
 :class:`~mygrad.Tensor` interface. This mirrors the behavior of :func:`~numpy.array`
 
 +-------------------------------------------------------+-------------------------------------------------------+-------------------------------------------------+
@@ -211,7 +211,7 @@ This enables the following common workflow for performing gradient-based optimiz
 |    >>> for _ in range(10):          |    >>> for _ in range(10):          |
 |    ...     y = 3 * x                |    ...     y = 3 * x  # nulls grad  |
 |    ...     assert x.grad is None    |    ...     assert x.grad is None    |
-|    ...     y.backward()             |    ...     y.backward()             | 
+|    ...     y.backward()             |    ...     y.backward()             |
 |    ...     assert all(x.grad == 3.) |    ...     assert all(x.grad == 3.) |
 |    ...     y.null_gradients()       |                                     |
 +-------------------------------------+-------------------------------------+
@@ -323,6 +323,35 @@ for extensive examples of its usage.
 
 For computations involving many small tensors, this can produce **up to a 3x speedup**! So make sure you
 make keen use of this when you don't actually need to perform autodiff.
+
+
+Remove Scalar-Only Conditions on Backpropagation
+------------------------------------------------
+
+Previously, one could only invoke backpropagation from a non-scalar tensor only if that tensor was
+the culmination of operations that preserved a one-to-one mapping between the elements of an upstream
+tensor with its downstream neighbor. This ensured that ``tensor.grad`` would always be the same shape as
+``tensor``, and not represent a higher-dimensional tensor.
+
+Now calling ``tensor.backward()`` from a non-scalar tensor will behave as if the tensor was summed prior
+to invoking backpropagation. This is simple, easy-to-understand behavior, which ensures that ``tensor.grad``
+can always be interpreted as an array of scalar-valued derivatives.
+
++---------------------------------------------+---------------------------------------+
+| MyGrad 1.X                                  | MyGrad 2.0                            |
++=============================================+=======================================+
+| .. code:: python                            | .. code:: python                      |
+|                                             |                                       |
+|    >>> t1 = mg.Tensor([[1., 2.],            |    >>> t1 = mg.Tensor([[1., 2.],      |
+|    ...                 [0., -1]])           |    ...                 [0., -1]])     |
+|    >>> t2 = mg.Tensor([[0., 1.],            |    >>> t2 = mg.Tensor([[0., 1.],      |
+|    ...                 [3., -1]])           |    ...                 [3., -1]])     |
+|    >>> z = t1 @ t2                          |    >>> z = t1 @ t2                    |
+|    >>> z.backward()                         |    >>> z.backward()                   |
+|    <InvalidBackprop: Scalar-only>           |    >>> t1.grad                        |
+|                                             |    array([[1., 2.],                   |
+|                                             |           [1., 2.]])                  |
++---------------------------------------------+---------------------------------------+
 
 
 Is This Code Well-Tested?
