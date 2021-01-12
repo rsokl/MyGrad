@@ -13,8 +13,6 @@ __all__ = ["MatMul", "EinSum"]
 
 
 class MatMul(BroadcastableOp):
-    scalar_only = True
-
     def __call__(self, a, b):
         """ f(a) -> matmul(a, b)
 
@@ -122,7 +120,6 @@ def _get_indices(item, seq):
 
 
 class EinSum(BroadcastableOp):
-    scalar_only = True
     can_return_view = True
 
     def __call__(self, *variables, in_lbls, out_lbls, optimize=False):

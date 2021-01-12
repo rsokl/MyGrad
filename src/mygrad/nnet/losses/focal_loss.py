@@ -31,8 +31,6 @@ class FocalLoss(Operation):
     It is recommended in the paper that you normalize by the number of foreground samples.
     """
 
-    scalar_only = True
-
     def __call__(self, class_probs, targets, alpha, gamma):
         """
         Parameters

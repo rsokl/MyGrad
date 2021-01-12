@@ -10,8 +10,6 @@ __all__ = ["conv_nd"]
 
 
 class ConvND(Operation):
-    scalar_only = True
-
     def __call__(self, x, w, *, stride, padding=0, dilation=1):
         self.variables = (x, w)
         # x ... data:    (N, C, X0, X1, ...)

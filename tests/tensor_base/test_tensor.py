@@ -178,17 +178,16 @@ def test_contains(element):
         elements=st.floats(-100, 100),
     ),
     constant=st.booleans(),
-    scalar=st.booleans(),
     creator=st.booleans(),
 )
-def test_properties(a, constant, scalar, creator):
+def test_properties(a, constant, creator):
     array = np.asarray(a)
     if creator:
         ref = Add()
-        tensor = Tensor(a, constant=constant, _creator=ref, _scalar_only=scalar)
+        tensor = Tensor(a, constant=constant, _creator=ref)
     else:
         ref = None
-        tensor = Tensor(a, constant=constant, _scalar_only=scalar)
+        tensor = Tensor(a, constant=constant)
 
     assert tensor.ndim == array.ndim
     assert tensor.shape == array.shape
@@ -284,21 +283,13 @@ dtype_strat_numpy = st.sampled_from(
     data=st.data(),
     creator=st.sampled_from((None, op)),
     constant=st.booleans(),
-    scalar_only=st.booleans(),
     dtype=dtype_strat,
     numpy_dtype=dtype_strat_numpy,
     ndmin=st.integers(0, 10),
     copy=st.none() | st.booleans(),
 )
 def test_init_params(
-    data,
-    creator,
-    constant,
-    scalar_only,
-    dtype,
-    numpy_dtype,
-    ndmin: int,
-    copy: Optional[bool],
+    data, creator, constant, dtype, numpy_dtype, ndmin: int, copy: Optional[bool],
 ):
     """Check for bad combinations of init parameters leading to unexpected behavior"""
     elements = (
@@ -316,20 +307,13 @@ def test_init_params(
     )
 
     tensor = Tensor(
-        a,
-        _creator=creator,
-        constant=constant,
-        _scalar_only=scalar_only,
-        dtype=dtype,
-        ndmin=ndmin,
-        copy=copy,
+        a, _creator=creator, constant=constant, dtype=dtype, ndmin=ndmin, copy=copy,
     )
 
     a = np.array(a, dtype=dtype, ndmin=ndmin)
 
     assert tensor.creator is creator
     assert tensor.constant is constant
-    assert tensor.scalar_only is scalar_only
     assert tensor.dtype is a.dtype
     assert_equal(tensor.data, a)
     assert tensor.grad is None
