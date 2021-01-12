@@ -35,19 +35,7 @@ class Operation(ABC):
     the gradient to its inputs, which are recorded as ``a`` and ``b``. Each
     node then back-propagates to any Operation-instance that is recorded
     as its creator, and so on.
-
-    If an operation class has `scalar_only=True`, then the terminal node of a
-    computational graph involving that operation can only trigger back-propagation
-    from a 0-dimensional tensor (i.e. a scalar). This is `False` for operations that
-    manifest as trivial element-wise operations over tensors. In such cases, the
-    gradient of the operation can also be treated element-wise, and thus be computed
-    unambiguously.
     """
-
-    # Tracks if a given operation-instance performs a
-    # non-vectorized or broadcasted operation , which
-    # requires that backpropagation be invoked from a scalar
-    scalar_only = False  # type: bool
 
     # Can be set to true if the operation is guaranteed to not returns a view
     # this will reduce some overhead on checking for shared memory

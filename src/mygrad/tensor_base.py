@@ -392,7 +392,6 @@ class Tensor:
         constant: bool = False,
         copy: Optional[bool] = None,
         ndmin: int = 0,
-        _scalar_only: bool = False,
         _creator: Optional[Operation] = None,
         _base: Optional["Tensor"] = None,
         _check_dtype: bool = True,
@@ -426,10 +425,6 @@ class Tensor:
         -----
         The following are parameters reserved only for internal use:
 
-        _scalar_only : bool, optional (default=False)
-            Signals that self.backward() can only be invoked if self.ndim == 0.
-            Should not be set manually by users.
-
         _creator : Optional[mygrad.Operation]
             The operation-instance whose forward pass produced `self`. Should not
             be set manually by users.
@@ -440,7 +435,6 @@ class Tensor:
         if not isinstance(constant, bool):
             raise TypeError(f"`constant` must be a boolean value, got: {constant}")
 
-        self._scalar_only = _scalar_only
         self._creator = _creator  # type: Union[None, Operation]
 
         if copy is None:
@@ -692,7 +686,6 @@ class Tensor:
                 constant=constant,  # constant not determined by graph info
                 copy=False,
                 _creator=None,
-                _scalar_only=False,
                 _base=None,
                 _check_dtype=False,
             )
@@ -735,29 +728,16 @@ class Tensor:
         # record graph information
         is_const = constant or all(var.constant for var in tensor_vars)
 
-        if isinstance(f, BroadcastableOp) and not f.scalar_only:
-            # if broadcasting occurred: scalar-only -> True
-            f.scalar_only = any(
-                op_out.shape != i.shape for i in tensor_vars if not i.constant
-            )
-
         # record that a variable participated in that op
         ref_f = ReferenceType(f)  # type: WeakRef[Operation]
         for var in tensor_vars:
             var._ops.add(ref_f)
-
-        # determine if node only supports backprop from a scalar
-        # terminus
-        scalar_only = (f.scalar_only and not is_const) or any(
-            var.scalar_only for var in tensor_vars if not var.constant
-        )
 
         out = cls(
             op_out,
             constant=is_const,
             copy=False,
             _creator=f,
-            _scalar_only=scalar_only,
             _base=base,
             _check_dtype=False,
         )
@@ -800,6 +780,11 @@ class Tensor:
         Once back-propagation is finished, the present tensor is removed from all computational
         graphs, and the preceding graph is cleared.
 
+        If ℒ is a non-scalar tensor (i.e. ``ℒ.ndim`` is greater than 0), then calling
+        ``ℒ.backward()`` will behave as if ℒ was first reduced to a scalar via summation. I.e. it
+        will behave identically to ``ℒ.sum().backward()``; this ensures that each element of any
+        dℒ/dx will represent a derivative of a scalar function.
+
         Parameters
         ----------
         grad : Optional[array_like]
@@ -829,6 +814,21 @@ class Tensor:
         array(4.)
         >>> x.grad # dℒ/dx = dℒ/dw * dw/dx
         array(6.)
+
+        Calling ``ℒ.backward()`` from a non-scalar tensor is equivalent
+        to first summing that tensor.
+
+        >>> tensor = mg.Tensor([2.0, 4.0, 8.0])
+        >>> ℒ = tensor * tensor[::-1]  # [x0*x2, x1*x1, x2*x0]
+        >>> ℒ.backward()  # behaves like ℒ = x0*x2 + x1*x1 + x2*x0
+        >>> tensor.grad
+        array([16.,  8.,  4.])
+
+        >>> tensor = mg.Tensor([2.0, 4.0, 8.0])
+        >>> ℒ = tensor * tensor[::-1]
+        >>> ℒ.sum().backward()
+        >>> tensor.grad
+        array([16.,  8.,  4.])
         """
         if not _track.TRACK_GRAPH:
             return
@@ -849,12 +849,6 @@ class Tensor:
                 )
 
         else:
-            if self.ndim > 0 and self._scalar_only:
-                raise InvalidBackprop(
-                    "Backpropagation must be invoked from a "
-                    "scalar-tensor (a 0D tensor) for this computational "
-                    "graph."
-                )
             dtype = float if np.issubdtype(self.dtype, np.signedinteger) else self.dtype
             self._grad = (
                 np.ones(self.shape, dtype=dtype)
@@ -1030,39 +1024,6 @@ class Tensor:
 
         for var in creator.variables:  # type: Tensor
             var.clear_graph()
-
-    @property
-    def scalar_only(self) -> bool:
-        r""" Indicates whether or not `self.ndim` must be 0 in order to invoke ``self.backward()``.
-
-        E.g. a computational graph that involves a broadcast-multiplication of a non-constant
-        tensor can only support back-propagation from a scalar. Otherwise the gradient associated
-        with each element of a given tensor would, itself, have to be represented by a high-dimensional
-        tensor. MyGrad only supports computational graphs in which a tensor's gradient has the same
-        shape as the tensor itself.
-
-        Returns
-        -------
-        bool
-
-        Notes
-        -----
-        In the following example, see that, because ``x`` was broadcasted to a
-        shape-(2, 3) tensor, the derivative :math:`d\mathscr{L}/dx` could not be a shape-(3,) tensor.
-        Each element of ``x`` affects two entries of ``z``, thus :math:`d\mathscr{L}/dx`
-        would have to be a shape-(2, 3) array. Therefore ``z.scalar_only`` returns ``True``.
-
-        Examples
-        --------
-        >>> import mygrad as mg
-        >>> x = mg.Tensor([1., 2., 3.])  # shape-(3,)
-        >>> y = mg.Tensor([[4., 1., 9.], # shape-(2, 3)
-        ...                [0., 2., 8.]])
-        >>> ℒ = x * y  # uses numpy-style broadcasting
-        >>> ℒ.scalar_only
-        True
-        """
-        return self._scalar_only
 
     @property
     def constant(self) -> bool:

@@ -18,8 +18,6 @@ def _softmax(x, kwargs):
 
 
 class Softmax(Operation):
-    scalar_only = True
-
     def __call__(self, a, axis=-1):
         self.variables = (a,)
         x = a.data

@@ -20,8 +20,6 @@ class BatchNorm(Operation):
     calling the batch-norm instance.
     """
 
-    scalar_only = True
-
     def __call__(self, x, gamma, beta, *, eps):
         """
         y(x) = (x - E[x]) / sqrt(Var[x} + eps)

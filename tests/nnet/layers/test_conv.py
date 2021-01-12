@@ -193,7 +193,6 @@ def test_convnd_fwd_trivial():
     out = np.array([[[-5.0, -11.0]]])
     assert isinstance(o, Tensor)
     assert o.constant is True
-    assert o.scalar_only is False
     assert_allclose(actual=o.data, desired=out, err_msg="1d trivial test failed")
 
     # trivial by-hand test: 2-dimensional conv
@@ -215,7 +214,6 @@ def test_convnd_fwd_trivial():
     out = np.array([[[[-44.0, -64.0], [-84.0, -104.0]]]])
     assert isinstance(o, Tensor)
     assert o.constant is True
-    assert o.scalar_only is False
     assert_allclose(actual=o.data, desired=out, err_msg="2d trivial test failed")
 
 

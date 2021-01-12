@@ -150,7 +150,6 @@ Documentation for mygrad.Tensor
    Tensor.ndim
    Tensor.null_grad
    Tensor.null_gradients
-   Tensor.scalar_only
    Tensor.shape
    Tensor.size
    Tensor.T

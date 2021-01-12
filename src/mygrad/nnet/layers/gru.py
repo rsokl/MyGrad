@@ -162,8 +162,6 @@ def _backprop(var, grad):  # pragma: no cover
 
 
 class GRUnit(Operation):
-    scalar_only = True
-
     def __call__(
         self, X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None, dropout=0.0
     ):
