@@ -791,12 +791,6 @@ class Tensor:
             The value of the incoming derivative. If self.grad is None, it is set to `grad`,
             otherwise its value is added with `grad`.
 
-        Raises
-        ------
-        Exception
-            The configuration of the computational graph is such that ``ℒ`` must be a 0D tensor
-            (i.e. scalar) to invoke ``ℒ.backward()``.
-
         Examples
         --------
         >>> import mygrad as mg
