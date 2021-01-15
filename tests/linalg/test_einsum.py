@@ -1,11 +1,12 @@
 from copy import copy
 from itertools import chain
+from typing import List
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
 import pytest
-from hypothesis import assume, given, settings
+from hypothesis import assume, given, note, settings
 from numpy.testing import assert_allclose, assert_array_equal
 
 import mygrad as mg
@@ -201,12 +202,17 @@ def test_einsum_static_bkwd(optimize):
 
 
 @settings(deadline=1000)
-@given(optimize=bool_strat())
-def test_traces_bkwd(optimize):
-    a = np.random.rand(5, 2, 2, 5)
-    b = np.random.rand(3, 2, 1)
-    c = np.random.rand(1, 1)
-    d = np.random.rand(5, 5, 5)
+@given(
+    optimize=bool_strat(),
+    i=st.integers(1, 5),
+    j=st.integers(1, 5),
+    k=st.integers(1, 5),
+)
+def test_traces_bkwd(optimize, i: int, j: int, k: int):
+    a = np.random.rand(i, j, j, i)
+    b = np.random.rand(k, j, i)
+    c = np.random.rand(j, j)
+    d = np.random.rand(i, i, i)
     compare_backprop("ijji -> i", a, optimize=optimize)
     compare_backprop(a, [0, 1, 1, 0], [0], optimize=optimize)
 
@@ -220,6 +226,53 @@ def test_traces_bkwd(optimize):
     compare_backprop("ijji,kji,jj-> kj", a, b, c, optimize=optimize)
     compare_backprop("ijji,kji,jj-> ijk", a, b, c, optimize=optimize)
     compare_backprop("ijji,kji,jj-> jk", a, b, c, optimize=optimize)
+
+
+@settings(max_examples=300)
+@given(
+    optimize=bool_strat(),
+    i=st.integers(1, 5),
+    j=st.integers(1, 5),
+    k=st.integers(1, 5),
+    p=st.integers(1, 5),
+    inputs=st.lists(
+        st.integers(min_value=0, max_value=5), min_size=1, max_size=6, unique=True
+    ),
+    data=st.data(),
+)
+def test_adaptive_pattern(
+    optimize: bool,
+    i: int,
+    j: int,
+    k: int,
+    p: int,
+    inputs: List[int],
+    data: st.DataObject,
+):
+    a = (np.random.rand(i, j, j, i) - 0.5) * 10
+    b = (np.random.rand(k, j, i) - 0.5) * 10
+    c = (np.random.rand(j, j) - 0.5) * 10
+    d = (np.random.rand(i, i, i) - 0.5) * 10
+    e = (np.random.rand(p, i) - 0.5) * 10
+    f = (np.random.rand(p) - 0.5) * 10
+
+    scripts = ["ijji", "kji", "jj", "iii", "pi", "p"]
+    arrs = [a, b, c, d, e, f]
+
+    unique_scripts = list(set("".join(scripts[i] for i in inputs)))
+    out = data.draw(
+        st.lists(
+            st.sampled_from(unique_scripts),
+            min_size=0,
+            max_size=len(unique_scripts),
+            unique=True,
+        ).map(lambda x: "".join(x))
+    )
+
+    input_str = f"{','.join([scripts[i] for i in inputs])} -> {out}"
+    note(input_str)
+    compare_einsum(input_str, *(arrs[i] for i in inputs), optimize=optimize)
+    compare_backprop(input_str, *(arrs[i] for i in inputs), optimize=optimize)
 
 
 def test_redundant_args():
