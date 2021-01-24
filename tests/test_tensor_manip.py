@@ -73,7 +73,7 @@ def test_transpose(x, data):
 
 
 def test_transpose_property():
-    dat = np.arange(6).reshape(2, 3)
+    dat = np.arange(6.0).reshape(2, 3)
     x = Tensor(dat)
     f = x.T
     f.backward(dat.T)
@@ -83,7 +83,7 @@ def test_transpose_property():
 
 
 def test_transpose_method():
-    dat = np.arange(24).reshape(2, 3, 4)
+    dat = np.arange(24.0).reshape(2, 3, 4)
 
     for axes in permutations(range(3)):
         # passing tuple of integers
