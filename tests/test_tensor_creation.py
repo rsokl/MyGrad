@@ -34,7 +34,7 @@ def check_tensor_array(tensor, array, constant):
     assert tensor.constant is constant
 
 
-@given(constant=st.booleans(), dtype=st.sampled_from((np.int32, np.float64)))
+@given(constant=st.booleans(), dtype=st.sampled_from((np.float32, np.float64)))
 def test_all_tensor_creation(constant, dtype):
     x = np.array([1, 2, 3])
 
@@ -160,12 +160,12 @@ def test_astensor_with_incompat_constant_still_passes_array_ref(
 
     t2 = astensor(t, constant=not t.constant)
     assert t2 is not t
-    assert (t2.data is t.data) is t2.constant  # data copied if constant=False
+    assert t2.data is t.data
     assert t2.creator is None
 
     t3 = astensor(t, dtype=t.dtype, constant=not t.constant)
     assert t3 is not t
-    assert (t3.data is t.data) is t3.constant  # data copied if constant=False
+    assert t3.data is t.data
     assert t3.creator is None
 
 

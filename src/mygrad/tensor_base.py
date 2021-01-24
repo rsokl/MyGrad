@@ -173,7 +173,7 @@ def astensor(t, dtype=None, constant: bool = None) -> "Tensor":
     Convert an array into a tensor. No copy of the
     underlying numpy array is created:
 
-    >>> a = np.array([1, 2.])
+    >>> a = np.array([1.0, 2.0])
     >>> mg.astensor(a)
     Tensor([1., 2.])
     >>> a is mg.astensor(a).data
@@ -198,13 +198,6 @@ def astensor(t, dtype=None, constant: bool = None) -> "Tensor":
     >>> mg.astensor(t, dtype=np.float64) is t
     False
 
-    Creating a non-constant tensor from a constant tensor will copy
-    the underlying data.
-
-    >>> t = mg.Tensor([1, 2], constant=True)
-    >>> mg.astensor(t, constant=False).data is t.data
-    False
-
     Otherwise, if `constant` is set, a new tensor is created (with
     no copy of the underlying data) only if constant doesn't match.
 
@@ -225,7 +218,8 @@ def astensor(t, dtype=None, constant: bool = None) -> "Tensor":
 
         if constant is None and dtype is None:
             constant = t.constant
-    return Tensor(t, dtype=dtype, constant=constant)
+
+    return Tensor(t, dtype=dtype, constant=constant, copy=False)
 
 
 class Tensor:
