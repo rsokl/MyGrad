@@ -724,3 +724,11 @@ def arbitrary_indices(draw, shape: Tuple[int]):
 
     out_ind = tuple(i[1] for i in index)
     return out_ind
+
+
+@st.composite
+def valid_constant_arg(draw, dtype: np.dtype) -> st.SearchStrategy[Union[None, bool]]:
+    if issubclass(dtype.type, np.floating):
+        return draw(st.none() | st.booleans())
+    else:
+        return draw(st.sampled_from([None, True]))

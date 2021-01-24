@@ -24,7 +24,7 @@ from mygrad.tensor_creation.funcs import (
     zeros,
     zeros_like,
 )
-from tests.custom_strategies import tensors
+from tests.custom_strategies import tensors, valid_constant_arg
 
 
 def check_tensor_array(tensor, array, constant):
@@ -200,16 +200,28 @@ def test_astensor_doesnt_mutate_input_tensor(
     a=hnp.arrays(
         shape=hnp.array_shapes(min_dims=0, min_side=0),
         dtype=hnp.integer_dtypes() | hnp.floating_dtypes(),
+        elements=dict(min_value=0, max_value=0),
     )
-    | tensors(dtype=hnp.floating_dtypes(), include_grad=st.booleans()),
+    | tensors(
+        dtype=hnp.floating_dtypes(),
+        include_grad=st.booleans(),
+        elements=dict(min_value=0, max_value=0),
+    ),
     as_list=st.booleans(),
-    dtype=st.none() | hnp.floating_dtypes(),
-    constant=st.none() | st.booleans(),
+    dtype=st.none() | hnp.integer_dtypes() | hnp.floating_dtypes(),
+    data=st.data(),
 )
-def test_as_tensor(a: Union[np.ndarray, Tensor], as_list: bool, dtype, constant: bool):
+def test_as_tensor(
+    a: Union[np.ndarray, Tensor], as_list: bool, dtype, data: st.DataObject
+):
     """Ensures `astensor` produces a tensor with the expected data, dtype, and constant,
     and that it doesn't mutate the input."""
     assume(~np.any(np.isnan(a)))
+
+    constant = data.draw(
+        valid_constant_arg(np.array(a, dtype=dtype).dtype), label="constant"
+    )
+
     # make copies to check mutations
     if as_list:
         a = np.asarray(a).tolist()
@@ -217,21 +229,14 @@ def test_as_tensor(a: Union[np.ndarray, Tensor], as_list: bool, dtype, constant:
     else:
         original = a.copy()
 
-    expected_dtype = dtype if dtype is not None else np.asarray(a).dtype
-
-    if constant is not None:
-        expected_constant = constant
-    elif isinstance(a, Tensor):
-        expected_constant = a.constant
-    else:
-        expected_constant = False
-
     t = astensor(a, dtype=dtype, constant=constant)
 
+    ref_tensor = a if t is a else Tensor(a, dtype=dtype, constant=constant)
+
     assert isinstance(t, Tensor)
-    assert t.dtype == expected_dtype
-    assert t.constant is expected_constant
-    assert_array_equal(np.asarray(a, dtype=dtype), t.data)
+    assert t.dtype == ref_tensor.dtype
+    assert t.constant is ref_tensor.constant
+    assert_array_equal(ref_tensor.data, t.data)
 
     if as_list:
         assert a == original, "the original array was mutated"

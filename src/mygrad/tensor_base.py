@@ -223,7 +223,7 @@ def astensor(t, dtype=None, constant: bool = None) -> "Tensor":
             # return tensor as-as
             return t
 
-        if constant is None:
+        if constant is None and dtype is None:
             constant = t.constant
     return Tensor(t, dtype=dtype, constant=constant)
 
