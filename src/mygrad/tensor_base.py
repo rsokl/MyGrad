@@ -657,7 +657,7 @@ class Tensor:
             # lock memory of array data and clear any tensor
             # gradients
             tensor_vars = tuple(
-                cls(var, constant=True)
+                cls(var, constant=True, copy=False)
                 if not isinstance(var, Tensor)
                 else var.null_grad(_clear_view_info=True)
                 for var in input_vars
@@ -672,7 +672,9 @@ class Tensor:
         else:
             # operations are not being tracked - don't lock memory or null grads
             tensor_vars = tuple(
-                cls(var, constant=True) if not isinstance(var, Tensor) else var
+                cls(var, constant=True, copy=False)
+                if not isinstance(var, Tensor)
+                else var
                 for var in input_vars
             )
 
