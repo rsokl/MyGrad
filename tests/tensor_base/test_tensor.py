@@ -14,8 +14,13 @@ from mygrad.errors import InvalidBackprop, InvalidGradient
 from mygrad.linalg.ops import MatMul
 from mygrad.math.arithmetic.ops import Add, Divide, Multiply, Negative, Power, Subtract
 from mygrad.operation_base import Operation
-from tests.custom_strategies import everything_except, tensors
+from tests.custom_strategies import everything_except, tensors, valid_constant_arg
 from tests.utils import does_not_raise
+
+
+def test_simple_default_constant_behavior():
+    assert Tensor(1).constant is True
+    assert Tensor(1.0).constant is False
 
 
 @pytest.mark.parametrize(
@@ -25,6 +30,8 @@ from tests.utils import does_not_raise
         np.array(None, dtype="O"),
         np.array([[0], [0, 0]], dtype="O"),
         np.array(1, dtype="O"),
+        0j,
+        np.array(1, dtype=np.complex),
     ],
 )
 @given(constant=st.booleans(), creator=st.none() | st.just(MatMul()))
@@ -33,7 +40,7 @@ def test_input_type_checking(data, constant, creator):
         Tensor(data, constant=constant, _creator=creator)
 
 
-@given(constant=everything_except(bool))
+@given(constant=everything_except((bool, type(None))))
 def test_input_constant_checking(constant):
     with raises(TypeError):
         Tensor(1.0, constant=constant)
@@ -160,7 +167,7 @@ def test_repr(tensor, repr_):
 
 @given(constant=st.booleans())
 def test_invalid_gradient_raises(constant: bool):
-    x = Tensor(3, constant=constant) * 2
+    x = Tensor(3.0, constant=constant) * 2
     with (pytest.raises(InvalidGradient) if not constant else does_not_raise()):
         x.backward("bad")
 
@@ -217,17 +224,15 @@ def test_init_data():
         dtype=hnp.floating_dtypes(), shape=hnp.array_shapes(min_side=1, min_dims=1)
     ),
     as_tensor=st.booleans(),
+    constant=st.booleans(),
 )
-def test_copy_on_init_behavior(arr: np.ndarray, as_tensor: bool):
+def test_tensor_copy_on_init_mirrors_array(
+    arr: np.ndarray, as_tensor: bool, constant: bool
+):
     x = Tensor(arr, copy=False) if as_tensor else arr
-    t_no_constant = Tensor(x)
-    assert not np.shares_memory(t_no_constant, arr)
-
-    t_constant = Tensor(x, constant=True)
-    assert np.shares_memory(t_constant, arr)
-
-    t_not_constant = Tensor(x, constant=False)
-    assert not np.shares_memory(t_not_constant, arr)
+    tensor = Tensor(x, constant=constant)
+    array = np.array(arr)
+    assert np.shares_memory(tensor, arr) is np.shares_memory(array, arr)
 
 
 @given(
@@ -282,14 +287,13 @@ dtype_strat_numpy = st.sampled_from(
 @given(
     data=st.data(),
     creator=st.sampled_from((None, op)),
-    constant=st.booleans(),
     dtype=dtype_strat,
     numpy_dtype=dtype_strat_numpy,
     ndmin=st.integers(0, 10),
     copy=st.none() | st.booleans(),
 )
 def test_init_params(
-    data, creator, constant, dtype, numpy_dtype, ndmin: int, copy: Optional[bool],
+    data, creator, dtype, numpy_dtype, ndmin: int, copy: Optional[bool],
 ):
     """Check for bad combinations of init parameters leading to unexpected behavior"""
     elements = (
@@ -306,16 +310,21 @@ def test_init_params(
         hnp.arrays(**array_strat_args) | tensors(**array_strat_args), label="a",
     )
 
+    arr = np.array(a, dtype=dtype, ndmin=ndmin)
+
+    constant = data.draw(valid_constant_arg(arr.dtype), label="constant")
+
     tensor = Tensor(
         a, _creator=creator, constant=constant, dtype=dtype, ndmin=ndmin, copy=copy,
     )
 
-    a = np.array(a, dtype=dtype, ndmin=ndmin)
+    if constant is None:
+        constant = issubclass(tensor.dtype.type, np.integer)
 
     assert tensor.creator is creator
     assert tensor.constant is constant
-    assert tensor.dtype is a.dtype
-    assert_equal(tensor.data, a)
+    assert tensor.dtype is arr.dtype
+    assert_equal(tensor.data, arr)
     assert tensor.grad is None
     assert tensor.base is None
     assert tensor.ndim >= ndmin

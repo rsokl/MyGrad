@@ -32,7 +32,7 @@ from mygrad._utils import (
     collect_all_operations,
     is_invalid_gradient,
 )
-from mygrad.errors import DisconnectedView, InvalidBackprop, InvalidGradient
+from mygrad.errors import DisconnectedView, InvalidGradient
 from mygrad.linalg.ops import MatMul
 from mygrad.math.arithmetic.ops import (
     Add,
@@ -154,6 +154,11 @@ def astensor(t, dtype=None, constant: bool = None) -> "Tensor":
         By default, `constant` is inferred from `t` if `t` is a tensor,
         otherwise it defaults to `False`.
 
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
+
     Returns
     -------
     out : Tensor
@@ -173,7 +178,7 @@ def astensor(t, dtype=None, constant: bool = None) -> "Tensor":
     Convert an array into a tensor. No copy of the
     underlying numpy array is created:
 
-    >>> a = np.array([1, 2.])
+    >>> a = np.array([1.0, 2.0])
     >>> mg.astensor(a)
     Tensor([1., 2.])
     >>> a is mg.astensor(a).data
@@ -198,13 +203,6 @@ def astensor(t, dtype=None, constant: bool = None) -> "Tensor":
     >>> mg.astensor(t, dtype=np.float64) is t
     False
 
-    Creating a non-constant tensor from a constant tensor will copy
-    the underlying data.
-
-    >>> t = mg.Tensor([1, 2], constant=True)
-    >>> mg.astensor(t, constant=False).data is t.data
-    False
-
     Otherwise, if `constant` is set, a new tensor is created (with
     no copy of the underlying data) only if constant doesn't match.
 
@@ -216,16 +214,14 @@ def astensor(t, dtype=None, constant: bool = None) -> "Tensor":
     >>> mg.astensor(t, constant=True).data is t.data
     True
     """
-    if (
-        isinstance(t, Tensor)
-        and (constant is None or t.constant is constant)
-        and (dtype is None or (t.dtype == np.dtype(dtype)))
-    ):
-        return t
-    else:
-        if constant is None:
-            constant = t.constant if isinstance(t, Tensor) else False
-        return Tensor(t, dtype=dtype, constant=constant)
+    if isinstance(t, Tensor):
+        if (constant is None or t.constant is constant) and (
+            dtype is None or (t.dtype == np.dtype(dtype))
+        ):
+            # return tensor as-as
+            return t
+
+    return Tensor(t, dtype=dtype, constant=constant, copy=False)
 
 
 class Tensor:
@@ -388,13 +384,12 @@ class Tensor:
         self,
         x,
         *,
-        dtype=None,
-        constant: bool = False,
-        copy: Optional[bool] = None,
+        dtype: Optional[Union[str, np.dtype, type]] = None,
+        constant: Optional[bool] = None,
+        copy: bool = True,
         ndmin: int = 0,
         _creator: Optional[Operation] = None,
         _base: Optional["Tensor"] = None,
-        _check_dtype: bool = True,
     ):
         """
         Parameters
@@ -408,13 +403,18 @@ class Tensor:
             `int`, `float`, or a real-valued numpy data type. By default the
             data type is inferred from ``x`` via ``numpy.asarray(x)``.
 
-        constant : bool, optional (default=False)
-            If True, this node is treated as a constant, and thus does not facilitate
-            back propagation; `self.grad` will always return ``None``.
+        constant : Optional[bool]
+            If ``True``, this tensor is treated as a constant, and thus does not
+            facilitate back propagation (i.e. `self.grad` will always return
+            ``None``).
+
+            Defaults to ``False`` for float-type data.
+            Defaults to ``True`` for integer-type data.
+
+            Integer-type tensors must be constant.
 
         copy : Optional[bool]
-            Determines if the incoming array-data will be copied. If ``None``,
-            then the data will be copied only if ``constant=False`` is specified.
+            Determines if the incoming array-data will be copied.
 
         ndmin : int, optional
             Specifies the minimum number of dimensions that the resulting
@@ -432,21 +432,35 @@ class Tensor:
         _base : Optional[Tensor]
             Points to the tensor that ``self`` shares memory with.
         """
-        if not isinstance(constant, bool):
+
+        if constant is not None and not isinstance(constant, bool):
             raise TypeError(f"`constant` must be a boolean value, got: {constant}")
 
         self._creator = _creator  # type: Union[None, Operation]
 
-        if copy is None:
-            copy = not constant
-
         self.data = np.array(x, dtype=dtype, copy=copy, ndmin=ndmin)  # type: np.ndarray
 
-        if _check_dtype:
-            self._check_valid_dtype(self.data.dtype)
+        dtype = self.data.dtype.type
+        is_float = issubclass(dtype, np.floating)  # faster than `numpy.issubdtype`
+        if not is_float and _track.TRACK_GRAPH:
+            # No need to constrain dtypes if we aren't tracking the graph.
+            # Also, it is nice to enable complex arithmetic through mygrad
+            # functions that are wrapped in no_autodiff
+            if not issubclass(dtype, np.integer):
+                raise TypeError(
+                    f"Tensor data must be a integer or floating type, received {dtype}"
+                )
+
+            elif constant is False:
+                raise ValueError("Integer-valued tensors must be treated as constants.")
+        if constant is None:
+            # non-float: default constant -> True
+            # float: default constant -> False
+            constant = not is_float
+
+        self._constant = constant
 
         self._grad = None  # type: Union[None, np.ndarray]
-        self._constant = constant
 
         # track all operations that this tensor participates in
         self._ops = set()  # type: Set[WeakRef[Operation]]
@@ -459,6 +473,10 @@ class Tensor:
         self._base = _base  # type: Optional[Tensor]
         # stores all of the tensors that are a view of this tensor
         self._view_children = WeakRefIterable()  # type: WeakRefIterable[Tensor]
+
+        # Used to reflect the view of the gradient associated with that of `self.base`.
+        # This is a means of distinguishing between the gradient set on `self` as
+        # part of backpropagation and the view of the gradient of its base.
         self._view_grad: Optional[np.ndarray] = None
 
     @property
@@ -554,11 +572,10 @@ class Tensor:
     def astype(
         self, dtype: Union[type, str], *, constant: Optional[bool] = None
     ) -> "Tensor":
-        """Returns a distinct tensor with its data modified to have the specified
-        data type.
+        """Copy of the tensor with the specified dtype.
 
-        The resulting tensor does not belong to any pre-existing computation graph; i.e.
-        it is as if this tensor was created 'from scratch'.
+        The resulting tensor is not involved in any computational graph
+        and has no gradient associated with it.
 
         Parameters
         ----------
@@ -593,13 +610,7 @@ class Tensor:
         >>> x.astype(np.int8, constant=True)
         Tensor([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype=int8)
         """
-        constant = constant if constant is not None else self.constant
-        return type(self)(self.data.astype(dtype), constant=constant)
-
-    @staticmethod
-    def _check_valid_dtype(dtype):
-        if not np.issubdtype(dtype, np.number):
-            raise TypeError(f"Tensor data must be a numeric type, received {dtype}")
+        return type(self)(self.data, dtype=dtype, copy=True, constant=constant)
 
     @classmethod
     def _op(
@@ -644,7 +655,7 @@ class Tensor:
             # lock memory of array data and clear any tensor
             # gradients
             tensor_vars = tuple(
-                cls(var, constant=True)
+                cls(var, constant=True, copy=False)
                 if not isinstance(var, Tensor)
                 else var.null_grad(_clear_view_info=True)
                 for var in input_vars
@@ -659,7 +670,9 @@ class Tensor:
         else:
             # operations are not being tracked - don't lock memory or null grads
             tensor_vars = tuple(
-                cls(var, constant=True) if not isinstance(var, Tensor) else var
+                cls(var, constant=True, copy=False)
+                if not isinstance(var, Tensor)
+                else var
                 for var in input_vars
             )
 
@@ -687,7 +700,6 @@ class Tensor:
                 copy=False,
                 _creator=None,
                 _base=None,
-                _check_dtype=False,
             )
 
         # Determine whether or not op was a view; if so, `base`
@@ -733,14 +745,7 @@ class Tensor:
         for var in tensor_vars:
             var._ops.add(ref_f)
 
-        out = cls(
-            op_out,
-            constant=is_const,
-            copy=False,
-            _creator=f,
-            _base=base,
-            _check_dtype=False,
-        )
+        out = cls(op_out, constant=is_const, copy=False, _creator=f, _base=base,)
 
         if parent_var is not None:
             parent_var._view_children.append(out)
@@ -1026,8 +1031,8 @@ class Tensor:
         Additionally, any tensor that is a descendant of constant tensors will also
         be a constant.
 
-        Python scalars and NumPy arrays are treated as constant tensors when included
-        in MyGrad computational graphs.
+        Integer-valued tesnors, Python scalars and NumPy arrays are treated as constant
+        tensors when included in MyGrad computational graphs.
 
         Returns
         -------
@@ -1056,6 +1061,11 @@ class Tensor:
         >>> y = mg.Tensor([0., 3.], constant=True)
         >>> z = (x + y) ** 2 - np.array([8., 7.])
         >>> z.constant
+        True
+
+        Integer-valued tensors are treated as constants
+
+        >>> mg.Tensor([1, 2]).constant
         True
         """
         return self._constant

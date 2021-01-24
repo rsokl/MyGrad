@@ -23,6 +23,7 @@ __all__ = [
     "everything_except",
     "valid_shapes",
     "valid_axes",
+    "valid_constant_arg",
     "tensors",
 ]
 
@@ -80,7 +81,7 @@ class VerboseTensor(Tensor):
     def __repr__(self):
         repr_ = repr(self.data).replace("array", "Tensor").replace("\n", "\n ")
         replacement = (
-            f", constant={self.constant}, writeable={self.data.flags.writeable}"
+            f", constant={self._constant}, writeable={self.data.flags.writeable}"
         )
         if self.grad is not None:
             replacement += f", grad={repr(self.grad)}"
@@ -228,6 +229,9 @@ def tensors(
     x.flags.writeable = not read_only
 
     constant = draw(constant) if isinstance(constant, st.SearchStrategy) else constant
+
+    if np.issubdtype(x.dtype, np.integer):
+        constant = True
 
     tensor = VerboseTensor(x, constant=constant, copy=False, ndmin=ndmin)
     if isinstance(include_grad, st.SearchStrategy):
@@ -721,3 +725,11 @@ def arbitrary_indices(draw, shape: Tuple[int]):
 
     out_ind = tuple(i[1] for i in index)
     return out_ind
+
+
+@st.composite
+def valid_constant_arg(draw, dtype: np.dtype) -> st.SearchStrategy[Union[None, bool]]:
+    if issubclass(dtype.type, np.floating):
+        return draw(st.none() | st.booleans())
+    else:
+        return draw(st.sampled_from([None, True]))

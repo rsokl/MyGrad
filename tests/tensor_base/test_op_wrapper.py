@@ -25,8 +25,8 @@ def dummy(a, b, constant=False):
 @pytest.mark.parametrize("op_const", [True, False])
 def test_constant_arg(x_const: bool, y_const: bool, op_const: bool):
     """ test that the `constant` arg works as intended in Tensor._op"""
-    x = Tensor(1, constant=x_const)
-    y = Tensor(1, constant=y_const)
+    x = Tensor(1.0, constant=x_const)
+    y = Tensor(1.0, constant=y_const)
     out = dummy(x, y, constant=op_const)
     assert out.constant is op_const or (x_const and y_const)
     assert set(i() for i in x._ops) == {out.creator}

@@ -17,6 +17,14 @@ def test_graph_tracking_is_on_by_default():
     assert _tracking.TRACK_GRAPH is True
 
 
+def test_no_autodiff_doesnt_restrict_tensor_type():
+    with no_autodiff:
+        x = Tensor(1.0, dtype=np.complex64)
+
+    # non-floats should be constant
+    assert x.constant is True
+
+
 @pytest.mark.usefixtures("seal_graph_tracking")
 @given(x=tensors(shape=(1,), elements=st.floats(-100, 100)), constant=st.booleans())
 def test_no_autodiff_context_manager(x: Tensor, constant: bool):

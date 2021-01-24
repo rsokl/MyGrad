@@ -4,6 +4,7 @@ from typing import Union
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
+import pytest
 from hypothesis import assume, given
 from numpy.testing import assert_array_equal
 
@@ -24,115 +25,73 @@ from mygrad.tensor_creation.funcs import (
     zeros,
     zeros_like,
 )
-from tests.custom_strategies import tensors
+from tests.custom_strategies import tensors, valid_constant_arg
 
 
-def check_tensor_array(tensor, array, constant):
+def check_tensor_array(tensor, array, constant, data_compare=True):
+    if constant is None:
+        constant = not np.issubdtype(tensor.dtype, np.floating)
     assert isinstance(tensor, Tensor)
-    assert_array_equal(tensor.data, array)
+    if data_compare:
+        assert_array_equal(tensor.data, array)
     assert tensor.dtype is array.dtype
     assert tensor.constant is constant
 
 
-@given(constant=st.booleans(), dtype=st.sampled_from((np.int32, np.float64)))
-def test_all_tensor_creation(constant, dtype):
-    x = np.array([1, 2, 3])
+ref_arr = np.arange(3)
 
-    e = empty((3, 2), dtype=dtype, constant=constant)
-    assert e.shape == (3, 2)
-    assert e.constant is constant
 
-    e = empty_like(e, dtype=dtype, constant=constant)
-    assert e.shape == (3, 2)
-    assert e.constant is constant
+@pytest.mark.parametrize(
+    "mygrad_func, numpy_func, args",
+    [
+        (empty, np.empty, [(3, 2)]),
+        (empty_like, np.empty_like, [ref_arr]),
+        (eye, np.eye, [3]),
+        (identity, np.identity, [5]),
+        (ones, np.ones, [(4, 3, 2)]),
+        (ones_like, np.ones_like, [ref_arr]),
+        (zeros, np.zeros, [(4, 3, 2)]),
+        (zeros_like, np.zeros_like, [ref_arr]),
+        (full, np.full, [(4, 3, 2), 5.0]),
+        (full_like, np.full_like, [ref_arr, 5.0]),
+        (arange, np.arange, [3, 7]),
+        (linspace, np.linspace, [3, 7]),
+        (geomspace, np.geomspace, [3, 7]),
+        (logspace, np.logspace, [3, 7]),
+    ],
+)
+@given(data=st.data(), dtype=hnp.floating_dtypes() | hnp.integer_dtypes())
+def test_tensor_creation_matches_array_creation(
+    mygrad_func, numpy_func, args, data: st.DataObject, dtype: np.dtype
+):
+    constant = data.draw(valid_constant_arg(dtype), label="constant")
+
+    check_data = mygrad_func not in {empty, empty_like}
+
+    kwargs = {} if dtype is None else dict(dtype=dtype)
 
     check_tensor_array(
-        eye(3, dtype=dtype, constant=constant), np.eye(3, dtype=dtype), constant
-    )
-
-    check_tensor_array(
-        identity(3, dtype=dtype, constant=constant),
-        np.identity(3, dtype=dtype),
+        mygrad_func(*args, constant=constant, **kwargs),
+        numpy_func(*args, **kwargs),
         constant,
+        data_compare=check_data,
     )
 
-    check_tensor_array(
-        ones((4, 5, 6), dtype=dtype, constant=constant),
-        np.ones((4, 5, 6), dtype=dtype),
-        constant,
-    )
 
-    check_tensor_array(
-        ones_like(x, dtype=dtype, constant=constant),
-        np.ones_like(x, dtype=dtype),
-        constant,
-    )
+def test_simple_as_tensor():
+    arr = np.array(1, dtype=np.int8)
+    x = astensor(arr)
+    assert x.constant is True
+    assert x.data.dtype == np.int8
+    assert x.data.item() == 1
+    assert x.data is arr
 
-    check_tensor_array(
-        ones_like(Tensor(x), dtype=dtype, constant=constant),
-        np.ones_like(x, dtype=dtype),
-        constant,
-    )
-
-    check_tensor_array(
-        zeros((4, 5, 6), dtype=dtype, constant=constant),
-        np.zeros((4, 5, 6), dtype=dtype),
-        constant,
-    )
-
-    check_tensor_array(
-        zeros_like(x, dtype=dtype, constant=constant),
-        np.zeros_like(x, dtype=dtype),
-        constant,
-    )
-
-    check_tensor_array(
-        zeros_like(Tensor(x), dtype=dtype, constant=constant),
-        np.zeros_like(x, dtype=dtype),
-        constant,
-    )
-
-    check_tensor_array(
-        full((4, 5, 6), 5.0, dtype=dtype, constant=constant),
-        np.full((4, 5, 6), 5.0, dtype=dtype),
-        constant,
-    )
-
-    check_tensor_array(
-        full_like(x, 5.0, dtype=dtype, constant=constant),
-        np.full_like(x, 5.0, dtype=dtype),
-        constant,
-    )
-
-    check_tensor_array(
-        full_like(Tensor(x), 5.0, dtype=dtype, constant=constant),
-        np.full_like(x, 5.0, dtype=dtype),
-        constant,
-    )
-
-    check_tensor_array(
-        arange(3, 7, dtype=dtype, constant=constant),
-        np.arange(3, 7, dtype=dtype),
-        constant,
-    )
-
-    check_tensor_array(
-        linspace(3, 7, dtype=dtype, constant=constant),
-        np.linspace(3, 7, dtype=dtype),
-        constant,
-    )
-
-    check_tensor_array(
-        logspace(3, 7, dtype=dtype, constant=constant),
-        np.logspace(3, 7, dtype=dtype),
-        constant,
-    )
-
-    check_tensor_array(
-        geomspace(3, 7, dtype=dtype, constant=constant),
-        np.geomspace(3, 7, dtype=dtype),
-        constant,
-    )
+    arr = np.array(1.0, dtype=np.float32)
+    x = astensor(arr)
+    assert x.constant is False
+    assert x.data.dtype == np.float32
+    assert x.data.item() == 1.0
+    assert x.data is arr
 
 
 @given(
@@ -160,12 +119,12 @@ def test_astensor_with_incompat_constant_still_passes_array_ref(
 
     t2 = astensor(t, constant=not t.constant)
     assert t2 is not t
-    assert (t2.data is t.data) is t2.constant  # data copied if constant=False
+    assert t2.data is t.data
     assert t2.creator is None
 
     t3 = astensor(t, dtype=t.dtype, constant=not t.constant)
     assert t3 is not t
-    assert (t3.data is t.data) is t3.constant  # data copied if constant=False
+    assert t3.data is t.data
     assert t3.creator is None
 
 
@@ -200,16 +159,28 @@ def test_astensor_doesnt_mutate_input_tensor(
     a=hnp.arrays(
         shape=hnp.array_shapes(min_dims=0, min_side=0),
         dtype=hnp.integer_dtypes() | hnp.floating_dtypes(),
+        elements=dict(min_value=0, max_value=0),
     )
-    | tensors(dtype=hnp.floating_dtypes(), include_grad=st.booleans()),
+    | tensors(
+        dtype=hnp.floating_dtypes(),
+        include_grad=st.booleans(),
+        elements=dict(min_value=0, max_value=0),
+    ),
     as_list=st.booleans(),
-    dtype=st.none() | hnp.floating_dtypes(),
-    constant=st.none() | st.booleans(),
+    dtype=st.none() | hnp.integer_dtypes() | hnp.floating_dtypes(),
+    data=st.data(),
 )
-def test_as_tensor(a: Union[np.ndarray, Tensor], as_list: bool, dtype, constant: bool):
+def test_as_tensor(
+    a: Union[np.ndarray, Tensor], as_list: bool, dtype, data: st.DataObject
+):
     """Ensures `astensor` produces a tensor with the expected data, dtype, and constant,
     and that it doesn't mutate the input."""
     assume(~np.any(np.isnan(a)))
+
+    constant = data.draw(
+        valid_constant_arg(np.array(a, dtype=dtype).dtype), label="constant"
+    )
+
     # make copies to check mutations
     if as_list:
         a = np.asarray(a).tolist()
@@ -217,21 +188,14 @@ def test_as_tensor(a: Union[np.ndarray, Tensor], as_list: bool, dtype, constant:
     else:
         original = a.copy()
 
-    expected_dtype = dtype if dtype is not None else np.asarray(a).dtype
-
-    if constant is not None:
-        expected_constant = constant
-    elif isinstance(a, Tensor):
-        expected_constant = a.constant
-    else:
-        expected_constant = False
-
     t = astensor(a, dtype=dtype, constant=constant)
 
+    ref_tensor = a if t is a else Tensor(a, dtype=dtype, constant=constant)
+
     assert isinstance(t, Tensor)
-    assert t.dtype == expected_dtype
-    assert t.constant is expected_constant
-    assert_array_equal(np.asarray(a, dtype=dtype), t.data)
+    assert t.dtype == ref_tensor.dtype
+    assert t.constant is ref_tensor.constant
+    assert_array_equal(ref_tensor.data, t.data)
 
     if as_list:
         assert a == original, "the original array was mutated"

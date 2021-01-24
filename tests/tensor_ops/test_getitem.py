@@ -15,7 +15,7 @@ from ..wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
 def test_getitem():
-    x = Tensor([1, 2, 3])
+    x = Tensor([1.0, 2.0, 3.0])
     a, b, c = x
     f = 2 * a + 3 * b + 4 * c
     f.backward()

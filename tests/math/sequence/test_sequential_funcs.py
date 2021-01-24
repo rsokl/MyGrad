@@ -210,17 +210,28 @@ def test_custom_var_fwd():
     pass
 
 
+# test keepdims=True/False explicitly to deal with coverage issues
 @backprop_test_factory(
     mygrad_func=var,
     true_func=_var,
     num_arrays=1,
-    kwargs=dict(
-        axis=partial(axis_arg, min_dim=1), keepdims=keepdims_arg, ddof=ddof_arg
-    ),
+    kwargs=dict(axis=partial(axis_arg, min_dim=1), keepdims=False, ddof=ddof_arg),
     vary_each_element=True,
     index_to_bnds={0: (-10, 10)},
 )
-def test_var_bkwd():
+def test_var_bkwd_without_keepdims():
+    pass
+
+
+@backprop_test_factory(
+    mygrad_func=var,
+    true_func=_var,
+    num_arrays=1,
+    kwargs=dict(axis=partial(axis_arg, min_dim=1), keepdims=True, ddof=ddof_arg),
+    vary_each_element=True,
+    index_to_bnds={0: (-10, 10)},
+)
+def test_var_bkwd_with_keepdims():
     pass
 
 

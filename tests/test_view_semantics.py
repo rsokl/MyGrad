@@ -94,8 +94,8 @@ def test_simple_view_becomes_disconnected_from_base_via_clear_graph2():
 
 @pytest.mark.parametrize("constant", [True, False])
 def test_tensor_base_matches_ndarray_base(constant: bool):
-    tens = mg.arange(10, constant=constant)
-    arr = np.arange(10)
+    tens = mg.arange(10.0, constant=constant)
+    arr = np.arange(10.0)
 
     assert tens.base is None
     assert arr.base is None
