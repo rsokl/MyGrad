@@ -387,7 +387,7 @@ class Tensor:
         self,
         x,
         *,
-        dtype: Optional[Union[str, np.dtype]] = None,
+        dtype: Optional[Union[str, np.dtype, type]] = None,
         constant: Optional[bool] = None,
         copy: bool = True,
         ndmin: int = 0,
@@ -445,9 +445,11 @@ class Tensor:
 
         dtype = self.data.dtype.type
         is_float = issubclass(dtype, np.floating)  # faster than `numpy.issubdtype`
-        if not is_float:
-            is_int = issubclass(dtype, np.integer)
-            if not is_int:
+        if not is_float and _track.TRACK_GRAPH:
+            # No need to constrain dtypes if we aren't tracking the graph.
+            # Also, it is nice to enable complex arithmetic through mygrad
+            # functions that are wrapped in no_autodiff
+            if not issubclass(dtype, np.integer):
                 raise TypeError(
                     f"Tensor data must be a integer or floating type, received {dtype}"
                 )
@@ -459,8 +461,9 @@ class Tensor:
             # float: default constant -> False
             constant = not is_float
 
-        self._grad = None  # type: Union[None, np.ndarray]
         self._constant = constant
+
+        self._grad = None  # type: Union[None, np.ndarray]
 
         # track all operations that this tensor participates in
         self._ops = set()  # type: Set[WeakRef[Operation]]
