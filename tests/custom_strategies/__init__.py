@@ -80,7 +80,7 @@ class VerboseTensor(Tensor):
     def __repr__(self):
         repr_ = repr(self.data).replace("array", "Tensor").replace("\n", "\n ")
         replacement = (
-            f", constant={self.constant}, writeable={self.data.flags.writeable}"
+            f", constant={self._constant}, writeable={self.data.flags.writeable}"
         )
         if self.grad is not None:
             replacement += f", grad={repr(self.grad)}"
@@ -228,6 +228,9 @@ def tensors(
     x.flags.writeable = not read_only
 
     constant = draw(constant) if isinstance(constant, st.SearchStrategy) else constant
+
+    if np.issubdtype(x.dtype, np.integer):
+        constant = True
 
     tensor = VerboseTensor(x, constant=constant, copy=False, ndmin=ndmin)
     if isinstance(include_grad, st.SearchStrategy):

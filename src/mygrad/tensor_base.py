@@ -216,16 +216,16 @@ def astensor(t, dtype=None, constant: bool = None) -> "Tensor":
     >>> mg.astensor(t, constant=True).data is t.data
     True
     """
-    if (
-        isinstance(t, Tensor)
-        and (constant is None or t.constant is constant)
-        and (dtype is None or (t.dtype == np.dtype(dtype)))
-    ):
-        return t
-    else:
+    if isinstance(t, Tensor):
+        if (constant is None or t.constant is constant) and (
+            dtype is None or (t.dtype == np.dtype(dtype))
+        ):
+            # return tensor as-as
+            return t
+
         if constant is None:
-            constant = t.constant if isinstance(t, Tensor) else False
-        return Tensor(t, dtype=dtype, constant=constant)
+            constant = t.constant
+    return Tensor(t, dtype=dtype, constant=constant)
 
 
 class Tensor:
@@ -388,13 +388,12 @@ class Tensor:
         self,
         x,
         *,
-        dtype=None,
-        constant: bool = False,
-        copy: Optional[bool] = None,
+        dtype: Optional[Union[str, np.dtype]] = None,
+        constant: Optional[bool] = None,
+        copy: bool = True,
         ndmin: int = 0,
         _creator: Optional[Operation] = None,
         _base: Optional["Tensor"] = None,
-        _check_dtype: bool = True,
     ):
         """
         Parameters
@@ -408,13 +407,17 @@ class Tensor:
             `int`, `float`, or a real-valued numpy data type. By default the
             data type is inferred from ``x`` via ``numpy.asarray(x)``.
 
-        constant : bool, optional (default=False)
+        constant : Optional[bool]
             If True, this node is treated as a constant, and thus does not facilitate
-            back propagation; `self.grad` will always return ``None``.
+            back propagation (i.e. `self.grad` will always return ``None``).
+
+            Defaults to ``False`` for float-type data.
+            Defaults to ``True`` for integer-type data.
+
+            Integer-type tensors must be constant.
 
         copy : Optional[bool]
-            Determines if the incoming array-data will be copied. If ``None``,
-            then the data will be copied only if ``constant=False`` is specified.
+            Determines if the incoming array-data will be copied.
 
         ndmin : int, optional
             Specifies the minimum number of dimensions that the resulting
@@ -432,18 +435,29 @@ class Tensor:
         _base : Optional[Tensor]
             Points to the tensor that ``self`` shares memory with.
         """
-        if not isinstance(constant, bool):
+
+        if constant not in {None, True, False}:  # faster than `isinstance(x, bool)`
             raise TypeError(f"`constant` must be a boolean value, got: {constant}")
 
         self._creator = _creator  # type: Union[None, Operation]
 
-        if copy is None:
-            copy = not constant
-
         self.data = np.array(x, dtype=dtype, copy=copy, ndmin=ndmin)  # type: np.ndarray
 
-        if _check_dtype:
-            self._check_valid_dtype(self.data.dtype)
+        dtype = self.data.dtype.type
+        is_float = issubclass(dtype, np.floating)  # faster than `numpy.issubdtype`
+        if not is_float:
+            is_int = issubclass(dtype, np.integer)
+            if not is_int:
+                raise TypeError(
+                    f"Tensor data must be a integer or floating type, received {dtype}"
+                )
+
+            elif constant is False:
+                raise ValueError("Integer-valued tensors must be treated as constants.")
+        if constant is None:
+            # int: default constant -> True
+            # float: default constant -> False
+            constant = not is_float
 
         self._grad = None  # type: Union[None, np.ndarray]
         self._constant = constant
@@ -459,6 +473,10 @@ class Tensor:
         self._base = _base  # type: Optional[Tensor]
         # stores all of the tensors that are a view of this tensor
         self._view_children = WeakRefIterable()  # type: WeakRefIterable[Tensor]
+
+        # Used to reflect the view of the gradient associated with that of `self.base`.
+        # This is a means of distinguishing between the gradient set on `self` as
+        # part of backpropagation and the view of the gradient of its base.
         self._view_grad: Optional[np.ndarray] = None
 
     @property
@@ -596,11 +614,6 @@ class Tensor:
         constant = constant if constant is not None else self.constant
         return type(self)(self.data.astype(dtype), constant=constant)
 
-    @staticmethod
-    def _check_valid_dtype(dtype):
-        if not np.issubdtype(dtype, np.number):
-            raise TypeError(f"Tensor data must be a numeric type, received {dtype}")
-
     @classmethod
     def _op(
         cls,
@@ -687,7 +700,6 @@ class Tensor:
                 copy=False,
                 _creator=None,
                 _base=None,
-                _check_dtype=False,
             )
 
         # Determine whether or not op was a view; if so, `base`
@@ -733,14 +745,7 @@ class Tensor:
         for var in tensor_vars:
             var._ops.add(ref_f)
 
-        out = cls(
-            op_out,
-            constant=is_const,
-            copy=False,
-            _creator=f,
-            _base=base,
-            _check_dtype=False,
-        )
+        out = cls(op_out, constant=is_const, copy=False, _creator=f, _base=base,)
 
         if parent_var is not None:
             parent_var._view_children.append(out)

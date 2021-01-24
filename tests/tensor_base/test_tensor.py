@@ -25,6 +25,8 @@ from tests.utils import does_not_raise
         np.array(None, dtype="O"),
         np.array([[0], [0, 0]], dtype="O"),
         np.array(1, dtype="O"),
+        0j,
+        np.array(1, dtype=np.complex),
     ],
 )
 @given(constant=st.booleans(), creator=st.none() | st.just(MatMul()))

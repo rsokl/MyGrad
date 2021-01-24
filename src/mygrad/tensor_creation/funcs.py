@@ -453,7 +453,7 @@ def full_like(other, fill_value, dtype=None, constant=False):
     )
 
 
-def arange(stop, start=0, step=1, dtype=None, constant=False):
+def arange(stop, start=0, step=1, dtype=None, constant=None):
     """ Return a Tensor with evenly-spaced values within a given interval.
 
         Values are generated within [start, stop). Note that for non-integer steps, results may be
