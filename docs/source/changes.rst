@@ -367,7 +367,7 @@ graphs as constants.
 | .. code:: python                            | .. code:: python                                |
 |                                             |                                                 |
 |    >>> t1 = mg.Tensor([[1, 2]).constant     |    >>> t1 = mg.Tensor([[1, 2]]).constant        |
-|    False                                    |    True
+|    False                                    |    True                                         |
 +---------------------------------------------+-------------------------------------------------+
 
 Is This Code Well-Tested?
