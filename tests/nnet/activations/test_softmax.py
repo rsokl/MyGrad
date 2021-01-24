@@ -96,50 +96,6 @@ def test_logsoftmax_bkwd():
     pass
 
 
-# old tests; ensures backwards compatibility at least...
-
-
-def test_static_softmax_integer():
-    # reuse the test cases from below with integer arrays
-    skew = np.array([0.87566484, 0.53596079, 0.85693981, 0.09526036])
-    x = Tensor([0, 1, 2, 3])
-
-    f = (softmax(x, constant=False) * skew).sum()
-
-    out = np.array(0.33911235096116465)
-    assert_allclose(actual=f.data, desired=out)
-
-    f.backward()
-    dx = np.array([0.01720112, 0.01715422, 0.12266443, -0.15701977])
-
-    assert_allclose(x.grad, dx, atol=1e-5, rtol=1e-5)
-
-    skew = np.array(
-        [
-            [0.87566484, 0.53596079, 0.85693981, 0.09526036],
-            [0.32024455, 0.81532148, 0.2480434, 0.85119342],
-            [0.57943085, 0.33958252, 0.95864464, 0.22881712],
-        ]
-    )
-    x = Tensor([[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11]])
-
-    f = (softmax(x, constant=False) * skew).sum()
-
-    out = np.array(1.449875865467131)
-    assert_allclose(actual=f.data, desired=out)
-
-    f.backward()
-    dx = np.array(
-        [
-            [0.01720112, 0.01715422, 0.12266443, -0.15701977],
-            [-0.01179518, 0.01108053, -0.10425844, 0.10497309],
-            [0.00502799, -0.00723393, 0.12698131, -0.12477536],
-        ]
-    )
-
-    assert_allclose(x.grad, dx, atol=1e-5, rtol=1e-5)
-
-
 def test_static_softmax1d():
     # Verified against theano.tensor.softmax
 

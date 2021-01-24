@@ -204,7 +204,7 @@ def test_arbitrary_indices_strategy(a, data):
 @pytest.mark.parametrize("constant", [st.booleans(), None])
 def test_tensors_handles_constant_strat(constant):
     constants = []
-    kwargs = dict(dtype=np.int8, shape=(2, 3))
+    kwargs = dict(dtype=np.float32, shape=(2, 3))
     if constant is not None:
         kwargs["constant"] = constant
 
@@ -220,7 +220,7 @@ def test_tensors_handles_constant_strat(constant):
 @pytest.mark.parametrize("constant", [True, False])
 @given(data=st.data())
 def test_tensors_static_constant(constant: bool, data: st.DataObject):
-    tensor = data.draw(tensors(np.int8, (2, 3), constant=constant), label="tensor")
+    tensor = data.draw(tensors(np.float32, (2, 3), constant=constant), label="tensor")
     assert isinstance(tensor, Tensor)
     assert tensor.constant is constant
     assert tensor.grad is None

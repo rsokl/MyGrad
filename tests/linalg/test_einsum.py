@@ -281,7 +281,7 @@ def test_redundant_args():
     was added such that einsum will only compute the gradient for such an entry
     once and scale it accordingly.
     """
-    a = mg.arange(4).reshape(2, 2)
+    a = mg.arange(4.0).reshape(2, 2)
     a_copy = copy(a)
 
     # check standard summation
@@ -294,7 +294,7 @@ def test_redundant_args():
     o.sum().backward()
     assert_allclose(a.grad, a_copy.grad)
 
-    a = Tensor(np.arange(4).reshape(2, 2))
+    a = Tensor(np.arange(4.0).reshape(2, 2))
     a_copy = copy(a)
 
     # check standard summation using alt signature
@@ -307,7 +307,7 @@ def test_redundant_args():
     o.sum().backward()
     assert_allclose(a.grad, a_copy.grad)
 
-    a = Tensor(np.arange(4).reshape(2, 2))
+    a = Tensor(np.arange(4.0).reshape(2, 2))
     a_copy = copy(a)
 
     # check matmul (no redundant indices)
@@ -319,7 +319,7 @@ def test_redundant_args():
     o.sum().backward()
     assert_allclose(a.grad, a_copy.grad)
 
-    a = Tensor(np.arange(4).reshape(2, 2))
+    a = Tensor(np.arange(4.0).reshape(2, 2))
     a_copy = copy(a)
 
     # check traces
@@ -332,10 +332,10 @@ def test_redundant_args():
     o.sum().backward()
     assert_allclose(a.grad, a_copy.grad)
 
-    a = Tensor(np.arange(4).reshape(2, 2))
+    a = Tensor(np.arange(4.0).reshape(2, 2))
     a_copy = copy(a)
 
-    b = Tensor(-1 * np.arange(2).reshape(2, 1))
+    b = Tensor(-1 * np.arange(2.0).reshape(2, 1))
     b_copy = copy(b)
 
     # check broadcasting and multiply-redundant input tensors

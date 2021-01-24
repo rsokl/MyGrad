@@ -457,7 +457,7 @@ class Tensor:
             elif constant is False:
                 raise ValueError("Integer-valued tensors must be treated as constants.")
         if constant is None:
-            # int: default constant -> True
+            # non-float: default constant -> True
             # float: default constant -> False
             constant = not is_float
 
@@ -1034,8 +1034,8 @@ class Tensor:
         Additionally, any tensor that is a descendant of constant tensors will also
         be a constant.
 
-        Python scalars and NumPy arrays are treated as constant tensors when included
-        in MyGrad computational graphs.
+        Integer-valued tesnors, Python scalars and NumPy arrays are treated as constant
+        tensors when included in MyGrad computational graphs.
 
         Returns
         -------
@@ -1064,6 +1064,11 @@ class Tensor:
         >>> y = mg.Tensor([0., 3.], constant=True)
         >>> z = (x + y) ** 2 - np.array([8., 7.])
         >>> z.constant
+        True
+
+        Integer-valued tensors are treated as constants
+
+        >>> mg.Tensor([1, 2]).constant
         True
         """
         return self._constant

@@ -6,7 +6,6 @@ from hypothesis import given, settings
 from numpy.testing import assert_array_equal
 
 from mygrad import Tensor
-from tests import is_float_arr
 from tests.custom_strategies import tensors, valid_constant_arg
 
 real_types = (
