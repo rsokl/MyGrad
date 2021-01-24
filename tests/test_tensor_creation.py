@@ -78,6 +78,22 @@ def test_tensor_creation_matches_array_creation(
     )
 
 
+def test_simple_as_tensor():
+    arr = np.array(1, dtype=np.int8)
+    x = astensor(arr)
+    assert x.constant is True
+    assert x.data.dtype == np.int8
+    assert x.data.item() == 1
+    assert x.data is arr
+
+    arr = np.array(1.0, dtype=np.float32)
+    x = astensor(arr)
+    assert x.constant is False
+    assert x.data.dtype == np.float32
+    assert x.data.item() == 1.0
+    assert x.data is arr
+
+
 @given(
     t=tensors(dtype=hnp.floating_dtypes(), include_grad=st.booleans()),
     in_graph=st.booleans(),
