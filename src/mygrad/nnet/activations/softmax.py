@@ -6,15 +6,17 @@ from mygrad.tensor_base import Tensor
 
 
 def _softmax(x, kwargs):
-    x = x - x.max(**kwargs)
-    if np.issubdtype(x.dtype, np.integer):
-        x = x.astype(np.float)
-    if x.ndim > 0:
-        np.exp(x, out=x)
-        x /= x.sum(**kwargs)
+
+    if x.ndim > 0 and x.size > 0:
+        x = x - x.max(**kwargs)
+        target = x.astype(np.float) if issubclass(x.dtype.type, np.integer) else x
+
+        target = np.exp(x, out=target)
+        target /= target.sum(**kwargs)
     else:
-        x = np.ones_like(x)
-    return x
+        target = x.astype(np.float) if issubclass(x.dtype.type, np.integer) else x
+        target = np.ones_like(target)
+    return target
 
 
 class Softmax(Operation):

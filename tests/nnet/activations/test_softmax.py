@@ -6,10 +6,41 @@ from numpy.testing import assert_allclose
 
 from mygrad import Tensor
 from mygrad.nnet.activations import logsoftmax, softmax
+from tests import is_float_arr
 from tests.custom_strategies import valid_axes
 from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 log_largest = np.log(np.finfo(np.float64).max)
+
+
+@given(
+    arr=hnp.arrays(
+        shape=hnp.array_shapes(min_dims=0, min_side=0, max_side=0),
+        dtype=hnp.floating_dtypes() | hnp.integer_dtypes(),
+        elements=dict(min_value=-10, max_value=10),
+    ),
+    data=st.data(),
+)
+def test_softmax_on_empty_arrays(arr: np.ndarray, data: st.DataObject):
+    axes = data.draw(valid_axes(arr.ndim))
+    out = softmax(arr, axis=axes)
+    expected_dtype = arr.dtype if is_float_arr(arr) else np.dtype(np.float64)
+    assert out.shape == arr.shape
+    assert out.dtype == expected_dtype
+
+
+@given(
+    hnp.arrays(
+        shape=hnp.array_shapes(min_dims=0, min_side=0),
+        dtype=hnp.integer_dtypes(),
+        elements=dict(min_value=-10, max_value=10),
+    )
+)
+def test_softmax_on_ints(arr: np.ndarray):
+    actual = softmax(arr)
+    desired = softmax(arr.astype(np.float))
+    assert desired.dtype == actual.dtype
+    assert_allclose(desired, actual, atol=1e-3, rtol=1e-3)
 
 
 @given(
