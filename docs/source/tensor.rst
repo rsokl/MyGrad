@@ -39,6 +39,15 @@ Tensor([[1, 2],
 >>> mg.arange(4)    # using numpy-style tensor creation functions
 Tensor([0, 1, 2, 3])
 
+Integer-valued tensors are treated as constants
+
+>>> mg.astensor(1, dtype=np.int8).constant
+True
+
+By default, float-valued tensors are not treated as constants
+
+>>> mg.astensor(1, dtype=np.float32).constant
+False
 
 Forward and Back-Propagation
 ----------------------------

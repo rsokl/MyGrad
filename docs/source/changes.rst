@@ -354,6 +354,22 @@ can always be interpreted as an array of scalar-valued derivatives.
 +---------------------------------------------+---------------------------------------+
 
 
+Integer-valued Tensors Are Treated as Constants
+-----------------------------------------------
+
+Derivatives involving integer-valued tensors are typically ill-defined, and in MyGrad 1.X they
+were generally just wrong. Now integer-valued tensors can only be involved in computational
+graphs as constants.
+
++---------------------------------------------+-------------------------------------------------+
+| MyGrad 1.X                                  | MyGrad 2.0                                      |
++=============================================+=================================================+
+| .. code:: python                            | .. code:: python                                |
+|                                             |                                                 |
+|    >>> t1 = mg.Tensor([[1, 2]).constant     |    >>> t1 = mg.Tensor([[1, 2]]).constant        |
+|    False                                    |    True
++---------------------------------------------+-------------------------------------------------+
+
 Is This Code Well-Tested?
 -------------------------
 
