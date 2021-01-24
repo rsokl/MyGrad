@@ -436,7 +436,7 @@ class Tensor:
             Points to the tensor that ``self`` shares memory with.
         """
 
-        if constant not in {None, True, False}:  # faster than `isinstance(x, bool)`
+        if constant is not None and not isinstance(constant, bool):
             raise TypeError(f"`constant` must be a boolean value, got: {constant}")
 
         self._creator = _creator  # type: Union[None, Operation]
