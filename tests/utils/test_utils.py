@@ -6,6 +6,7 @@ import numpy as np
 from hypothesis import given
 from numpy.testing import assert_allclose
 
+from tests import is_float_arr
 from tests.custom_strategies import tensors
 from tests.utils import flags_to_dict
 from tests.utils.numerical_gradient import (
@@ -13,6 +14,12 @@ from tests.utils.numerical_gradient import (
     numerical_gradient,
     numerical_gradient_full,
 )
+
+
+def test_is_float_arr():
+    assert is_float_arr(np.array(1)) is False
+    assert is_float_arr(np.array([1.0j])) is False
+    assert is_float_arr(np.array(1.0)) is True
 
 
 def unary_func(x):

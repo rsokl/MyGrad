@@ -6,4 +6,4 @@ import mygrad as mg
 
 
 def is_float_arr(arr: Union[np.ndarray, mg.Tensor]) -> bool:
-    return issubclass(arr.dtype.type, np.integer)
+    return issubclass(arr.dtype.type, np.floating)
