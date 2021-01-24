@@ -23,6 +23,7 @@ __all__ = [
     "everything_except",
     "valid_shapes",
     "valid_axes",
+    "valid_constant_arg",
     "tensors",
 ]
 

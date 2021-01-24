@@ -4,6 +4,7 @@ from typing import Union
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
+import pytest
 from hypothesis import assume, given
 from numpy.testing import assert_array_equal
 
@@ -27,111 +28,53 @@ from mygrad.tensor_creation.funcs import (
 from tests.custom_strategies import tensors, valid_constant_arg
 
 
-def check_tensor_array(tensor, array, constant):
+def check_tensor_array(tensor, array, constant, data_compare=True):
+    if constant is None:
+        constant = not np.issubdtype(tensor.dtype, np.floating)
     assert isinstance(tensor, Tensor)
-    assert_array_equal(tensor.data, array)
+    if data_compare:
+        assert_array_equal(tensor.data, array)
     assert tensor.dtype is array.dtype
     assert tensor.constant is constant
 
 
-@given(constant=st.booleans(), dtype=st.sampled_from((np.float32, np.float64)))
-def test_all_tensor_creation(constant, dtype):
-    x = np.array([1, 2, 3])
+ref_arr = np.arange(3)
 
-    e = empty((3, 2), dtype=dtype, constant=constant)
-    assert e.shape == (3, 2)
-    assert e.constant is constant
 
-    e = empty_like(e, dtype=dtype, constant=constant)
-    assert e.shape == (3, 2)
-    assert e.constant is constant
+@pytest.mark.parametrize(
+    "mygrad_func, numpy_func, args",
+    [
+        (empty, np.empty, [(3, 2)]),
+        (empty_like, np.empty_like, [ref_arr]),
+        (eye, np.eye, [3]),
+        (identity, np.identity, [5]),
+        (ones, np.ones, [(4, 3, 2)]),
+        (ones_like, np.ones_like, [ref_arr]),
+        (zeros, np.zeros, [(4, 3, 2)]),
+        (zeros_like, np.zeros_like, [ref_arr]),
+        (full, np.full, [(4, 3, 2), 5.0]),
+        (full_like, np.full_like, [ref_arr, 5.0]),
+        (arange, np.arange, [3, 7]),
+        (linspace, np.linspace, [3, 7]),
+        (geomspace, np.geomspace, [3, 7]),
+        (logspace, np.logspace, [3, 7]),
+    ],
+)
+@given(data=st.data(), dtype=hnp.floating_dtypes() | hnp.integer_dtypes())
+def test_tensor_creation_matches_array_creation(
+    mygrad_func, numpy_func, args, data: st.DataObject, dtype: np.dtype
+):
+    constant = data.draw(valid_constant_arg(dtype), label="constant")
+
+    check_data = mygrad_func not in {empty, empty_like}
+
+    kwargs = {} if dtype is None else dict(dtype=dtype)
 
     check_tensor_array(
-        eye(3, dtype=dtype, constant=constant), np.eye(3, dtype=dtype), constant
-    )
-
-    check_tensor_array(
-        identity(3, dtype=dtype, constant=constant),
-        np.identity(3, dtype=dtype),
+        mygrad_func(*args, constant=constant, **kwargs),
+        numpy_func(*args, **kwargs),
         constant,
-    )
-
-    check_tensor_array(
-        ones((4, 5, 6), dtype=dtype, constant=constant),
-        np.ones((4, 5, 6), dtype=dtype),
-        constant,
-    )
-
-    check_tensor_array(
-        ones_like(x, dtype=dtype, constant=constant),
-        np.ones_like(x, dtype=dtype),
-        constant,
-    )
-
-    check_tensor_array(
-        ones_like(Tensor(x), dtype=dtype, constant=constant),
-        np.ones_like(x, dtype=dtype),
-        constant,
-    )
-
-    check_tensor_array(
-        zeros((4, 5, 6), dtype=dtype, constant=constant),
-        np.zeros((4, 5, 6), dtype=dtype),
-        constant,
-    )
-
-    check_tensor_array(
-        zeros_like(x, dtype=dtype, constant=constant),
-        np.zeros_like(x, dtype=dtype),
-        constant,
-    )
-
-    check_tensor_array(
-        zeros_like(Tensor(x), dtype=dtype, constant=constant),
-        np.zeros_like(x, dtype=dtype),
-        constant,
-    )
-
-    check_tensor_array(
-        full((4, 5, 6), 5.0, dtype=dtype, constant=constant),
-        np.full((4, 5, 6), 5.0, dtype=dtype),
-        constant,
-    )
-
-    check_tensor_array(
-        full_like(x, 5.0, dtype=dtype, constant=constant),
-        np.full_like(x, 5.0, dtype=dtype),
-        constant,
-    )
-
-    check_tensor_array(
-        full_like(Tensor(x), 5.0, dtype=dtype, constant=constant),
-        np.full_like(x, 5.0, dtype=dtype),
-        constant,
-    )
-
-    check_tensor_array(
-        arange(3, 7, dtype=dtype, constant=constant),
-        np.arange(3, 7, dtype=dtype),
-        constant,
-    )
-
-    check_tensor_array(
-        linspace(3, 7, dtype=dtype, constant=constant),
-        np.linspace(3, 7, dtype=dtype),
-        constant,
-    )
-
-    check_tensor_array(
-        logspace(3, 7, dtype=dtype, constant=constant),
-        np.logspace(3, 7, dtype=dtype),
-        constant,
-    )
-
-    check_tensor_array(
-        geomspace(3, 7, dtype=dtype, constant=constant),
-        np.geomspace(3, 7, dtype=dtype),
-        constant,
+        data_compare=check_data,
     )
 
 

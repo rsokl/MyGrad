@@ -154,6 +154,11 @@ def astensor(t, dtype=None, constant: bool = None) -> "Tensor":
         By default, `constant` is inferred from `t` if `t` is a tensor,
         otherwise it defaults to `False`.
 
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
+
     Returns
     -------
     out : Tensor
@@ -402,8 +407,9 @@ class Tensor:
             data type is inferred from ``x`` via ``numpy.asarray(x)``.
 
         constant : Optional[bool]
-            If True, this node is treated as a constant, and thus does not facilitate
-            back propagation (i.e. `self.grad` will always return ``None``).
+            If ``True``, this tensor is treated as a constant, and thus does not
+            facilitate back propagation (i.e. `self.grad` will always return
+            ``None``).
 
             Defaults to ``False`` for float-type data.
             Defaults to ``True`` for integer-type data.
