@@ -35,9 +35,10 @@ def rand(*shape, constant=False):
     return Tensor(np.random.rand(*shape), constant=constant, copy=False)
 
 
-def randint(low, high=None, shape=None, dtype=int, constant=False):
+def randint(low, high=None, shape=None, dtype=int):
     """ Return random integers from the “discrete uniform” distribution of the specified dtype in the
     “half-open” interval [low, high).
+
     If high is None (the default), then results are from [0, low).
 
     Parameters
@@ -57,11 +58,6 @@ def randint(low, high=None, shape=None, dtype=int, constant=False):
     dtype: dtype, optional
         Desired dtype of the result. Byteorder must be native. The default value is int.
 
-    constant : bool, optional (default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient)
-
-
     Returns
     -------
     int or mygrad.Tensor of ints
@@ -79,9 +75,7 @@ def randint(low, high=None, shape=None, dtype=int, constant=False):
     Tensor(57)
     """
 
-    return Tensor(
-        np.random.randint(low, high, shape, dtype), constant=constant, copy=False
-    )
+    return Tensor(np.random.randint(low, high, shape, dtype), copy=False)
 
 
 def randn(*shape, constant=False):
