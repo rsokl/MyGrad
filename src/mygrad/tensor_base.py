@@ -32,7 +32,7 @@ from mygrad._utils import (
     collect_all_operations,
     is_invalid_gradient,
 )
-from mygrad.errors import DisconnectedView, InvalidBackprop, InvalidGradient
+from mygrad.errors import DisconnectedView, InvalidGradient
 from mygrad.linalg.ops import MatMul
 from mygrad.math.arithmetic.ops import (
     Add,
