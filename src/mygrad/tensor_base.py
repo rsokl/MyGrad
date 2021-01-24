@@ -572,11 +572,10 @@ class Tensor:
     def astype(
         self, dtype: Union[type, str], *, constant: Optional[bool] = None
     ) -> "Tensor":
-        """Returns a distinct tensor with its data modified to have the specified
-        data type.
+        """Copy of the tensor with the specified dtype.
 
-        The resulting tensor does not belong to any pre-existing computation graph; i.e.
-        it is as if this tensor was created 'from scratch'.
+        The resulting tensor is not involved in any computational graph
+        and has no gradient associated with it.
 
         Parameters
         ----------
@@ -611,8 +610,7 @@ class Tensor:
         >>> x.astype(np.int8, constant=True)
         Tensor([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype=int8)
         """
-        constant = constant if constant is not None else self.constant
-        return type(self)(self.data.astype(dtype), constant=constant)
+        return type(self)(self.data, dtype=dtype, copy=True, constant=constant)
 
     @classmethod
     def _op(
