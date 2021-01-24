@@ -1,7 +1,7 @@
 [![Tested with Hypothesis](https://img.shields.io/badge/hypothesis-tested-brightgreen.svg)](https://hypothesis.readthedocs.io/)
 [![codecov](https://codecov.io/gh/rsokl/MyGrad/branch/master/graph/badge.svg)](https://codecov.io/gh/rsokl/MyGrad)
 [![Documentation Status](https://readthedocs.org/projects/mygrad/badge/?version=latest)](https://mygrad.readthedocs.io/en/latest/?badge=latest)
-[![Build Status](https://travis-ci.com/rsokl/MyGrad.svg?branch=master)](https://travis-ci.com/rsokl/MyGrad)
+[![Automated tests status](https://github.com/rsokl/MyGrad/workflows/Tests/badge.svg)](https://github.com/rsokl/MyGrad/actions?query=workflow%3ATests+branch%3Amaster)
 [![PyPi version](https://img.shields.io/pypi/v/mygrad.svg)](https://pypi.python.org/pypi/mygrad)
 ![Python version support](https://img.shields.io/badge/python-3.6%20&#8208;%203.8-blue.svg)
 
