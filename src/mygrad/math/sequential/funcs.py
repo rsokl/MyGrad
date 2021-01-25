@@ -476,7 +476,7 @@ def prod(a, axis=None, keepdims=False, constant=False):
 
     >>> mg.prod([[1.,2.],
     ...          [3.,4.]], axis=1)
-    Tensor([  2.,  12.]) """
+    Tensor([  2.,  12.])"""
     return Tensor._op(
         Prod, a, op_kwargs=dict(axis=axis, keepdims=keepdims), constant=constant
     )

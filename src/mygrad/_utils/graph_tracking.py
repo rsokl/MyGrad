@@ -16,7 +16,7 @@ TRACK_GRAPH = True  # type: bool
 
 
 class _NoAutoDiff(ContextTracker):
-    """ Serves as a context manager and decorator for suspending
+    """Serves as a context manager and decorator for suspending
     all computational graph tracking.
 
     Note that memory guarding does not occur in the `no_autodiff` context,

@@ -51,7 +51,10 @@ def test_tensor_backward_produces_grad_of_correct_dtype_and_shape(
         ),
     )
 
-    grad = data.draw(st.none() | arrays_broadcastable_into_tensor, label="grad",)
+    grad = data.draw(
+        st.none() | arrays_broadcastable_into_tensor,
+        label="grad",
+    )
 
     tensor.backward(grad)
     assert tensor.dtype == tensor.grad.dtype

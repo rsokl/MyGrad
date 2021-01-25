@@ -1,6 +1,5 @@
-from setuptools import find_packages, setup
-
 import versioneer
+from setuptools import find_packages, setup
 
 DISTNAME = "mygrad"
 LICENSE = "MIT"

@@ -6,49 +6,49 @@ __all__ = ["argmin", "argmax"]
 
 
 def argmax(a, axis=None, out=None):
-    """ Returns the indices of the maximum values along an axis.
+    """Returns the indices of the maximum values along an axis.
 
-        Parameters
-        ----------
-        a: array_like
-        
-        axis: int, optional
-            By default, the index is into the flattened array, otherwise along the specified axis.
-        
-        out: numpy.array, optional
-            If provided, the result will be inserted into this array. It should be of the appropriate shape and dtype.
-        
-        Returns
-        -------
-        numpy.ndarray[int]"""
+    Parameters
+    ----------
+    a: array_like
+
+    axis: int, optional
+        By default, the index is into the flattened array, otherwise along the specified axis.
+
+    out: numpy.array, optional
+        If provided, the result will be inserted into this array. It should be of the appropriate shape and dtype.
+
+    Returns
+    -------
+    numpy.ndarray[int]"""
 
     a = a.data if isinstance(a, Tensor) else a
     return np.argmax(a, axis, out)
 
 
 def argmin(a, axis=None, out=None):
-    """ Returns the indices of the minimum values along an axis.
+    """Returns the indices of the minimum values along an axis.
 
-        Parameters
-        ----------
-        a: array_like
-        
-        axis: int, optional
-            By default, the index is into the flattened array, otherwise along the specified axis.
-        
-        out: numpy.array, optional
-            If provided, the result will be inserted into this array. It should be of the appropriate shape and dtype.
-        
-        Returns
-        -------
-        numpy.ndarray[int]"""
+    Parameters
+    ----------
+    a: array_like
+
+    axis: int, optional
+        By default, the index is into the flattened array, otherwise along the specified axis.
+
+    out: numpy.array, optional
+        If provided, the result will be inserted into this array. It should be of the appropriate shape and dtype.
+
+    Returns
+    -------
+    numpy.ndarray[int]"""
 
     a = a.data if isinstance(a, Tensor) else a
     return np.argmin(a, axis, out)
 
 
 def any(a, axis=None, out=None, keepdims=False):
-    """ Test whether any array or Tensor element along a given axis evaluates to True.
+    """Test whether any array or Tensor element along a given axis evaluates to True.
 
     Returns single boolean if `axis` is ``None``
 
@@ -57,7 +57,7 @@ def any(a, axis=None, out=None, keepdims=False):
     Parameters
     ----------
     a : array_like
-        
+
     axis : None or int or tuple of ints, optional
         Axis or axes along which a logical OR reduction is performed.
         The default (``axis=None``) is to perform a logical OR over all
@@ -72,7 +72,7 @@ def any(a, axis=None, out=None, keepdims=False):
         (e.g., if it is of type float, then it will remain so, returning
         1.0 for True and 0.0 for False, regardless of the type of `a`).
         See `ufuncs-output-type` for more details.
-    
+
     keepdims : bool, optional
         If this is set to True, the axes which are reduced are left
         in the result as dimensions with size one. With this option,
@@ -82,7 +82,7 @@ def any(a, axis=None, out=None, keepdims=False):
         `ndarray`, however any non-default value will be.  If the
         sub-class' method does not implement `keepdims` any
         exceptions will be raised.
-    
+
     Returns
     -------
     any : bool or ndarray

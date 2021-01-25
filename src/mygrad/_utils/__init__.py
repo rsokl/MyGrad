@@ -1,9 +1,7 @@
 from abc import ABC, abstractmethod
 from functools import wraps
-from numbers import Real
 from typing import (
     TYPE_CHECKING,
-    Any,
     Callable,
     Dict,
     Generator,
@@ -102,12 +100,12 @@ class WeakRefIterable(Generic[T]):
 
 
 class SkipGradient(Exception):
-    """ The gradient for the current tensor-label pair has already
+    """The gradient for the current tensor-label pair has already
     been computed, scaled, and back-propped, skip gradient calculation."""
 
 
 def reduce_broadcast(grad, var_shape):
-    """ Sum-reduce axes of `grad` so its shape matches `var_shape.
+    """Sum-reduce axes of `grad` so its shape matches `var_shape.
 
     This the appropriate mechanism for backpropagating a gradient
     through an operation in which broadcasting occurred for the
@@ -147,7 +145,7 @@ def reduce_broadcast(grad, var_shape):
 
 
 class ContextTracker(ABC):
-    """ A context manager and decorator for managing a boolean
+    """A context manager and decorator for managing a boolean
     global state"""
 
     # tracks context depth

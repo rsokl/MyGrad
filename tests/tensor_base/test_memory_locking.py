@@ -67,7 +67,10 @@ def test_memory_locks_with_multiple_inputs(
     )
     ids = set(id(i) for i in input_seq)
 
-    as_view = data.draw(st.tuples(*[st.booleans()] * len(input_seq)), label="as_view",)
+    as_view = data.draw(
+        st.tuples(*[st.booleans()] * len(input_seq)),
+        label="as_view",
+    )
 
     input_seq = [i[...] if view else i for i, view in zip(input_seq, as_view)]
 
@@ -88,7 +91,9 @@ def test_memory_locks_with_multiple_inputs(
         assert writeable_lookup(item) is writeable(item), n
 
 
-@given(x=tensors(shape=(2,), elements=st.just(0), read_only=st.booleans()),)
+@given(
+    x=tensors(shape=(2,), elements=st.just(0), read_only=st.booleans()),
+)
 def test_view_of_locked_but_tracked_array_gets_unlocked(x: Tensor):
     x_was_writeable = writeable(x)
     x_arr = x.data

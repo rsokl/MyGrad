@@ -9,7 +9,7 @@ from mygrad.tensor_base import Tensor, asarray
 
 class MarginRanking(Operation):
     def __call__(self, x1, x2, y, margin):
-        """ Computes the margin ranking loss between ``x1``
+        """Computes the margin ranking loss between ``x1``
         and ``x2``.
 
         Parameters

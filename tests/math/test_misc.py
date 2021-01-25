@@ -30,8 +30,8 @@ def test_maximum_bkwd():
 
 
 def test_maximum_bkwd_equal():
-    """ regression test for documented behavior of maximum/minimum where
-        x == y"""
+    """regression test for documented behavior of maximum/minimum where
+    x == y"""
 
     x = Tensor([1.0, 0.0, 2.0])
     y = Tensor([2.0, 0.0, 1.0])
@@ -66,8 +66,8 @@ def test_minimum_bkwd():
 
 
 def test_minimum_bkwd_equal():
-    """ regression test for documented behavior of minimum/minimum where
-        x == y"""
+    """regression test for documented behavior of minimum/minimum where
+    x == y"""
 
     x = Tensor([1.0, 0.0, 2.0])
     y = Tensor([2.0, 0.0, 1.0])

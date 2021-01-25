@@ -6,7 +6,7 @@ from .sigmoid import sigmoid
 
 
 def glu(x, axis=-1, constant=False):
-    """ Returns the Gated Linear Unit A * σ(B), where A and B are split from `x`.
+    """Returns the Gated Linear Unit A * σ(B), where A and B are split from `x`.
 
     Parameters
     ----------

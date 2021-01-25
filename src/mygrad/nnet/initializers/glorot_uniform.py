@@ -4,7 +4,7 @@ from mygrad.nnet.initializers.uniform import uniform
 
 
 def glorot_uniform(*shape, gain=1, dtype=np.float32, constant=False):
-    r""" Initialize a `Tensor` according to the uniform initialization procedure
+    r"""Initialize a `Tensor` according to the uniform initialization procedure
     described by Glorot and Bengio.
 
     Parameters

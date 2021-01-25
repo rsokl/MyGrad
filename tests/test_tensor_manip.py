@@ -407,7 +407,10 @@ def gen_int_repeat_args(arr: Tensor) -> st.SearchStrategy[dict]:
     valid_axis = st.none()
     valid_axis |= st.integers(-arr.ndim, arr.ndim - 1) if arr.ndim else st.just(0)
     return st.fixed_dictionaries(
-        dict(repeats=st.integers(min_value=0, max_value=5), axis=valid_axis,)
+        dict(
+            repeats=st.integers(min_value=0, max_value=5),
+            axis=valid_axis,
+        )
     )
 
 
@@ -422,11 +425,17 @@ def gen_tuple_repeat_args(draw: st.DataObject.draw, arr: Tensor):
         arr.shape[valid_axis] if valid_axis is not None and arr.ndim else arr.size
     )
     repeats = draw(st.tuples(*[st.integers(0, 5)] * num_repeats))
-    return dict(repeats=repeats, axis=valid_axis,)
+    return dict(
+        repeats=repeats,
+        axis=valid_axis,
+    )
 
 
 @fwdprop_test_factory(
-    mygrad_func=repeat, true_func=np.repeat, num_arrays=1, kwargs=gen_int_repeat_args,
+    mygrad_func=repeat,
+    true_func=np.repeat,
+    num_arrays=1,
+    kwargs=gen_int_repeat_args,
 )
 def test_repeat_int_repeats_only_fwd():
     pass
@@ -444,7 +453,10 @@ def test_repeat_int_repeats_only_bkwd():
 
 
 @fwdprop_test_factory(
-    mygrad_func=repeat, true_func=np.repeat, num_arrays=1, kwargs=gen_tuple_repeat_args,
+    mygrad_func=repeat,
+    true_func=np.repeat,
+    num_arrays=1,
+    kwargs=gen_tuple_repeat_args,
 )
 def test_repeat_tuple_repeats_only_fwd():
     pass

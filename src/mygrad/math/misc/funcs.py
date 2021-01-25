@@ -6,7 +6,7 @@ __all__ = ["abs", "absolute", "cbrt", "clip", "sqrt", "maximum", "minimum"]
 
 
 def abs(a, constant=False):
-    """ ``f(a) -> abs(a)``
+    """``f(a) -> abs(a)``
 
     Parameters
     ----------
@@ -30,7 +30,7 @@ absolute = abs
 
 
 def sqrt(a, constant=False):
-    """ ``f(a) -> sqrt(a)``
+    """``f(a) -> sqrt(a)``
 
     Parameters
     ----------
@@ -47,7 +47,7 @@ def sqrt(a, constant=False):
 
 
 def cbrt(a, constant=False):
-    """ ``f(a) -> cbrt(a)``
+    """``f(a) -> cbrt(a)``
 
     Parameters
     ----------
@@ -64,7 +64,7 @@ def cbrt(a, constant=False):
 
 
 def maximum(a, b, constant=False):
-    """ Element-wise maximum of array elements.
+    """Element-wise maximum of array elements.
 
     Parameters
     ----------
@@ -88,7 +88,7 @@ def maximum(a, b, constant=False):
 
 
 def minimum(a, b, constant=False):
-    """ Element-wise minimum of array elements.
+    """Element-wise minimum of array elements.
 
     Parameters
     ----------
@@ -112,7 +112,7 @@ def minimum(a, b, constant=False):
 
 
 def clip(a, a_min, a_max, constant=False):
-    """ Clip (limit) the values in an array.
+    """Clip (limit) the values in an array.
 
     Given an interval, values outside the interval are clipped to
     the interval edges.  For example, if an interval of ``[0, 1]``

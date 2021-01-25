@@ -59,7 +59,9 @@ def get_nll_args(*arrs):
         elements=st.integers(min_value=0, max_value=s.shape[1] - 1),
     )
     weights = st.none() | hnp.arrays(
-        shape=(s.shape[1],), dtype=float, elements=st.floats(1e-8, 100),
+        shape=(s.shape[1],),
+        dtype=float,
+        elements=st.floats(1e-8, 100),
     )
     return st.fixed_dictionaries(dict(y_true=y_true, weights=weights))
 
@@ -136,7 +138,11 @@ def test_weighted_negative_log_likelihood_vs_softmax_cross_entropy(
         ).map(Tensor if labels_as_tensor else lambda x: x)
     )
     weights = data.draw(
-        hnp.arrays(shape=(s.shape[1],), dtype=float, elements=st.floats(1e-8, 100),)
+        hnp.arrays(
+            shape=(s.shape[1],),
+            dtype=float,
+            elements=st.floats(1e-8, 100),
+        )
     )
     scores = Tensor(s)
     weights = Tensor(weights)

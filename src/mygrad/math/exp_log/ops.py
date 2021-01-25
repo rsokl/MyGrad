@@ -17,15 +17,15 @@ __all__ = [
 
 class Exp(Operation):
     def __call__(self, a):
-        """ f(a) -> exp(a)
+        """f(a) -> exp(a)
 
-            Parameters
-            ----------
-            a : mygrad.Tensor
+        Parameters
+        ----------
+        a : mygrad.Tensor
 
-            Returns
-            -------
-            numpy.ndarray"""
+        Returns
+        -------
+        numpy.ndarray"""
         self.variables = (a,)
         return np.exp(a.data)
 
@@ -35,15 +35,15 @@ class Exp(Operation):
 
 class Exp2(Operation):
     def __call__(self, a):
-        """ f(a) -> 2^a
+        """f(a) -> 2^a
 
-            Parameters
-            ----------
-            a : mygrad.Tensor
+        Parameters
+        ----------
+        a : mygrad.Tensor
 
-            Returns
-            -------
-            numpy.ndarray"""
+        Returns
+        -------
+        numpy.ndarray"""
         self.variables = (a,)
         return np.exp2(a.data)
 
@@ -52,10 +52,10 @@ class Exp2(Operation):
 
 
 class Expm1(Operation):
-    """ f(a) -> exp(a) - 1
+    """f(a) -> exp(a) - 1
 
-        This function provides greater precision than exp(x) - 1
-        for small values of x."""
+    This function provides greater precision than exp(x) - 1
+    for small values of x."""
 
     def __call__(self, a):
         self.variables = (a,)
@@ -134,10 +134,10 @@ class Log10(Operation):
 
 
 class Log1p(Operation):
-    """ f(a) -> ln(1 + a)
+    """f(a) -> ln(1 + a)
 
-        log1p is accurate for x so small that 1 + x == 1 in
-        floating-point accuracy."""
+    log1p is accurate for x so small that 1 + x == 1 in
+    floating-point accuracy."""
 
     def __call__(self, a):
         self.variables = (a,)

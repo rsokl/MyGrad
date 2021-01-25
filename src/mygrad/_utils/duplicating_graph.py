@@ -24,7 +24,7 @@ T = TypeVar("T")
 
 
 def mirror_tensor(*, target: "Tensor", source: "Tensor"):
-    """ *Dev use only*
+    """*Dev use only*
 
     Creates a shallow copy of attribute dictionary of ``self`` and assigns
     it to``tensor``, so that ``tensor`` has the same state as ``self`` and

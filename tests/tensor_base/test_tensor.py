@@ -294,7 +294,12 @@ dtype_strat_numpy = st.sampled_from(
     copy=st.none() | st.booleans(),
 )
 def test_init_params(
-    data, creator, dtype, numpy_dtype, ndmin: int, copy: Optional[bool],
+    data,
+    creator,
+    dtype,
+    numpy_dtype,
+    ndmin: int,
+    copy: Optional[bool],
 ):
     """Check for bad combinations of init parameters leading to unexpected behavior"""
     elements = (
@@ -308,7 +313,8 @@ def test_init_params(
         elements=elements(-100, 100),
     )
     a = data.draw(
-        hnp.arrays(**array_strat_args) | tensors(**array_strat_args), label="a",
+        hnp.arrays(**array_strat_args) | tensors(**array_strat_args),
+        label="a",
     )
 
     arr = np.array(a, dtype=dtype, ndmin=ndmin)
@@ -316,7 +322,12 @@ def test_init_params(
     constant = data.draw(valid_constant_arg(arr.dtype), label="constant")
 
     tensor = Tensor(
-        a, _creator=creator, constant=constant, dtype=dtype, ndmin=ndmin, copy=copy,
+        a,
+        _creator=creator,
+        constant=constant,
+        dtype=dtype,
+        ndmin=ndmin,
+        copy=copy,
     )
 
     if constant is None:

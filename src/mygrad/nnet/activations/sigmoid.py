@@ -19,7 +19,7 @@ class Sigmoid(Operation):
 
 
 def sigmoid(x, constant=False):
-    """ Applies the sigmoid activation function::
+    """Applies the sigmoid activation function::
 
       f(x) = 1 / (1 + exp(-x))
 

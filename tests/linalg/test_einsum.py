@@ -18,9 +18,9 @@ from ..utils.numerical_gradient import numerical_gradient_full
 
 
 def bool_strat():
-    """ einsum's optimize=True option has bugs prior to version 1.14.5
-        (caught by these very unit tests!), thus we only test `optimize=True`
-        for more recent versions."""
+    """einsum's optimize=True option has bugs prior to version 1.14.5
+    (caught by these very unit tests!), thus we only test `optimize=True`
+    for more recent versions."""
     return st.booleans() if np.__version__ >= "1.14.5" else st.just(False)
 
 
@@ -32,8 +32,8 @@ def compare_einsum(*operands, optimize=False):
 
 
 def compare_backprop(*operands, atol=1e-5, rtol=1e-5, optimize=False):
-    """ Compare back-propagation through mygrad-einsum, and compare
-        against numerical derivative"""
+    """Compare back-propagation through mygrad-einsum, and compare
+    against numerical derivative"""
     if isinstance(operands[0], str):
         # operands form: "ijk, ijk", x, y
         script = operands[0]
@@ -535,7 +535,7 @@ def test_einsum_can_produce_diag_view_for_nd_tensor(
 
 @given(x=tensors().filter(lambda x: x.ndim > 0), optimize=st.booleans())
 def test_einsum_can_produce_full_view(x: Tensor, optimize: bool):
-    view = mg.einsum(f"... -> ...", x, optimize=optimize)
+    view = mg.einsum("... -> ...", x, optimize=optimize)
     assert view.base is x
     assert_array_equal(x, view)
 

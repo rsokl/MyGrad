@@ -14,16 +14,16 @@ __all__ = ["MatMul", "EinSum"]
 
 class MatMul(BroadcastableOp):
     def __call__(self, a, b):
-        """ f(a) -> matmul(a, b)
+        """f(a) -> matmul(a, b)
 
-            Parameters
-            ----------
-            a : mygrad.Tensor
-            b : mygrad.Tensor
+        Parameters
+        ----------
+        a : mygrad.Tensor
+        b : mygrad.Tensor
 
-            Returns
-            -------
-            numpy.ndarray"""
+        Returns
+        -------
+        numpy.ndarray"""
         self.variables = (a, b)
         return np.matmul(a.data, b.data)
 
@@ -62,23 +62,23 @@ class MatMul(BroadcastableOp):
 
 
 def _unique_from_end(in_str):
-    """ Return a string with all redundant characters removed,
-        removing left-most redundant entries
+    """Return a string with all redundant characters removed,
+    removing left-most redundant entries
 
-        i.e. "ijikik" -> "jik"
+    i.e. "ijikik" -> "jik"
 
-        Parameters
-        ----------
-        in_str: str
+    Parameters
+    ----------
+    in_str: str
 
-        Returns
-        -------
-        str
+    Returns
+    -------
+    str
 
-        Examples
-        --------
-        >>> _unique_from_end("ijikik")
-        "jik"
+    Examples
+    --------
+    >>> _unique_from_end("ijikik")
+    "jik"
     """
 
     return reduce(lambda acc, x: acc + x if x not in acc else acc, in_str[::-1], "")[
@@ -87,20 +87,20 @@ def _unique_from_end(in_str):
 
 
 def _merge_max_mappings(*mappings):
-    """ Merge dictionaries based on largest values in key->value.
+    """Merge dictionaries based on largest values in key->value.
 
-        Parameters
-        ----------
-        *mappings : Dict[Any, Any]
+    Parameters
+    ----------
+    *mappings : Dict[Any, Any]
 
-        Returns
-        -------
-        Dict[Any, Any]
+    Returns
+    -------
+    Dict[Any, Any]
 
-        Examples
-        --------
-        >>> _merge_max_mappings({"a":1, "b":4}, {"a":2})
-        {"a":2, "b":4}
+    Examples
+    --------
+    >>> _merge_max_mappings({"a":1, "b":4}, {"a":2})
+    {"a":2, "b":4}
     """
 
     def _merge_max(d1, d2):
@@ -111,11 +111,11 @@ def _merge_max_mappings(*mappings):
 
 
 def _get_indices(item, seq):
-    """ Return the indices where `item` occurs in `seq`
+    """Return the indices where `item` occurs in `seq`
 
-        Returns
-        -------
-        Generator[int]"""
+    Returns
+    -------
+    Generator[int]"""
     return (n for n, x in enumerate(seq) if x == item)
 
 

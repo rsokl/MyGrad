@@ -12,28 +12,28 @@ __all__ = ["MaxMin", "Sum", "Mean", "Prod", "CumProd", "CumSum", "Variance", "St
 
 class MaxMin(Operation):
     def __call__(self, a, axis=None, keepdims=False, maxmin=None):
-        """ Return the maximum (minimum) of a tensor, or along its axes.
+        """Return the maximum (minimum) of a tensor, or along its axes.
 
-            Parameters
-            ----------
-            a : pygrad.Tensor
-                Input data.
+        Parameters
+        ----------
+        a : pygrad.Tensor
+            Input data.
 
-            axis : Optional[int, Tuple[int, ...]]
-                Axis or axes along which to operate. By default, flattened input is used.
+        axis : Optional[int, Tuple[int, ...]]
+            Axis or axes along which to operate. By default, flattened input is used.
 
-            keepdims : bool, optional
-                If this is set to True, the axes which are reduced are left
-                in the result as dimensions with size one. With this option,
-                the result will broadcast correctly against the original `arr`.
+        keepdims : bool, optional
+            If this is set to True, the axes which are reduced are left
+            in the result as dimensions with size one. With this option,
+            the result will broadcast correctly against the original `arr`.
 
-            maxmin : str
-                'max' or 'min'. Selects the operation that is performed
+        maxmin : str
+            'max' or 'min'. Selects the operation that is performed
 
-            Returns
-            -------
-            amax : ndarray
-                Maximum (minimum) of `a`. If `axis` is None, the result is a 0-D array."""
+        Returns
+        -------
+        amax : ndarray
+            Maximum (minimum) of `a`. If `axis` is None, the result is a 0-D array."""
         assert maxmin in ("max", "min"), "Invalid keyword argument"
 
         if not _tracking.TRACK_GRAPH:
@@ -138,9 +138,9 @@ class MaxMin(Operation):
 
 class Sum(Operation):
     def __call__(self, a, axis=None, keepdims=False):
-        """ Parameters
-            ----------
-            a : mygrad.Tensor"""
+        """Parameters
+        ----------
+        a : mygrad.Tensor"""
         self.variables = (a,)
 
         if axis is not None and not hasattr(axis, "__iter__"):
@@ -181,9 +181,9 @@ class Mean(Sum):
 
 class Prod(Operation):
     def __call__(self, a, axis=None, keepdims=False):
-        """ Parameters
-            ----------
-            a : mygrad.Tensor"""
+        """Parameters
+        ----------
+        a : mygrad.Tensor"""
         self.variables = (a,)
         if axis is not None and not hasattr(axis, "__iter__"):
             axis = (axis,)
@@ -247,46 +247,46 @@ def _reverse_cumsum(x, axis=None):  # pragma: no cover
 
 
 def _find_first_zeros_along_axis(x, axis):  # pragma: no cover
-    """ Return the indices at which 0 first occurs in `x` as viewed
-        along the specified axis
+    """Return the indices at which 0 first occurs in `x` as viewed
+    along the specified axis
 
-        Parameters
-        ----------
-        x : numpy.ndarray
-        axis : Union[None, int]
-            The axis along which zeros are looked for. If
-            `None`, then `x` must be a flat-array
+    Parameters
+    ----------
+    x : numpy.ndarray
+    axis : Union[None, int]
+        The axis along which zeros are looked for. If
+        `None`, then `x` must be a flat-array
 
-        Returns
-        -------
-        Tuple[Tuple[int, ...], ...]
-            x.ndim tuple-entries, specifying the corresponding
-            positions where the first 0 is encountered along the
-            given axis.
+    Returns
+    -------
+    Tuple[Tuple[int, ...], ...]
+        x.ndim tuple-entries, specifying the corresponding
+        positions where the first 0 is encountered along the
+        given axis.
 
-        Examples
-        --------
-        >>> import numpy as np
-        >>> x = np.array([[1, 1, 0],
-                          [1, 1, 0],
-                          [1, 1, 0]])
+    Examples
+    --------
+    >>> import numpy as np
+    >>> x = np.array([[1, 1, 0],
+                      [1, 1, 0],
+                      [1, 1, 0]])
 
-        All of the zeros fall along a single column, thus
-        only one is "encountered" when looking across rows
-        within each column for a single zero. It is located
-        at: row-0, col-2
+    All of the zeros fall along a single column, thus
+    only one is "encountered" when looking across rows
+    within each column for a single zero. It is located
+    at: row-0, col-2
 
-        >>> _find_first_zeros_along_axis(x, axis=0)
-        ((0,), (2,))
+    >>> _find_first_zeros_along_axis(x, axis=0)
+    ((0,), (2,))
 
-        Looking along the columns within each row,
-        each of the three zeros are "found", they are
-        located at: row-0, col=2
-                    row-1, col=2
-                    row-2, col=2
+    Looking along the columns within each row,
+    each of the three zeros are "found", they are
+    located at: row-0, col=2
+                row-1, col=2
+                row-2, col=2
 
-        >>> _find_first_zeros_along_axis(x, axis=1)
-        ((0, 1, 2), (2, 2, 2))"""
+    >>> _find_first_zeros_along_axis(x, axis=1)
+    ((0, 1, 2), (2, 2, 2))"""
 
     def add_to_seen(seen, inds):
         if inds[1:] not in (i[1:] for i in seen):

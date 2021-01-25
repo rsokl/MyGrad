@@ -10,7 +10,8 @@ from tests.custom_strategies import choices, tensors
 
 
 @given(
-    x=tensors(elements=st.floats(-100, 100), read_only=st.booleans()), data=st.data(),
+    x=tensors(elements=st.floats(-100, 100), read_only=st.booleans()),
+    data=st.data(),
 )
 def test_placeholder_tensor(x: mg.Tensor, data: st.DataObject):
     """

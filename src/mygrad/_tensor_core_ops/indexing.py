@@ -9,7 +9,7 @@ __all__ = ["GetItem", "SetItem"]
 
 
 def _is_int_array_index(index):
-    """ Returns True if `index` contains any array-like integer-valued sequences
+    """Returns True if `index` contains any array-like integer-valued sequences
 
     Parameters
     ----------
@@ -17,7 +17,7 @@ def _is_int_array_index(index):
 
     Returns
     -------
-    bool """
+    bool"""
     return any(
         np.issubdtype(np.asarray(ind).dtype, np.int_) and np.asarray(ind).ndim
         for ind in index
@@ -25,7 +25,7 @@ def _is_int_array_index(index):
 
 
 def _is_bool_array_index(index):
-    """ Returns True if `index` solely contains a boolean-valued array
+    """Returns True if `index` solely contains a boolean-valued array
 
     Parameters
     ----------
@@ -33,19 +33,19 @@ def _is_bool_array_index(index):
 
     Returns
     -------
-    bool """
+    bool"""
     return len(index) == 1 and np.issubdtype(np.asarray(index[0]).dtype, np.bool_)
 
 
 class GetItem(Operation):
-    """ Defines the __getitem__ interface for a Tensor, supporting back-propagation
+    """Defines the __getitem__ interface for a Tensor, supporting back-propagation
 
     Supports back-propagation through all valid numpy-indexing (basic, advanced, mixed, etc.)"""
 
     can_return_view = True
 
     def __call__(self, a, index):
-        """ ``a[index]``
+        """``a[index]``
 
         Parameters
         ----------
@@ -91,7 +91,7 @@ class GetItem(Operation):
 
 
 def _arr(*shape: int) -> np.ndarray:
-    """ Construct an array of a specified consisting of values [0, _arr.size)
+    """Construct an array of a specified consisting of values [0, _arr.size)
     filled in row-major order.
 
     Parameters
@@ -105,16 +105,16 @@ def _arr(*shape: int) -> np.ndarray:
 
 
 class SetItem(BroadcastableOp):
-    """ Defines the __setitem__ interface for a Tensor, supporting back-propagation through
-        both the tensor being set and the tensor whose .
+    """Defines the __setitem__ interface for a Tensor, supporting back-propagation through
+    both the tensor being set and the tensor whose .
 
-        Supports back-propagation through all valid numpy-indexing (basic, advanced, mixed, etc.),
-        as well as """
+    Supports back-propagation through all valid numpy-indexing (basic, advanced, mixed, etc.),
+    as well as"""
 
     can_return_view = True
 
     def __call__(self, a, b, index):
-        """ a[index] = b
+        """a[index] = b
 
         Parameters
         ----------
@@ -172,9 +172,10 @@ class SetItem(BroadcastableOp):
                 # any redundant elements
                 unique = _arr(*grad.shape)
                 sub_sel = unique[self.index].flat
-                elements, first_inds, = np.unique(
-                    np.flip(sub_sel, axis=0), return_index=True
-                )
+                (
+                    elements,
+                    first_inds,
+                ) = np.unique(np.flip(sub_sel, axis=0), return_index=True)
                 if len(first_inds) < len(sub_sel):
                     # one or more elements were set redundantly, identify the entries in `b`
                     # that actually were set to those elements (the last-most set-item calls

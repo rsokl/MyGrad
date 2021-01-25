@@ -16,7 +16,8 @@ except ImportError:  # pragma: no cover
 
 
 @vectorize(
-    ["float32(float32)", "float64(float64)"], nopython=True,
+    ["float32(float32)", "float64(float64)"],
+    nopython=True,
 )
 def sig(f):  # pragma: no cover
     """
@@ -26,7 +27,8 @@ def sig(f):  # pragma: no cover
 
 
 @vectorize(
-    ["float32(float32)", "float64(float64)"], nopython=True,
+    ["float32(float32)", "float64(float64)"],
+    nopython=True,
 )
 def d_sig(f):  # pragma: no cover
     """
@@ -36,7 +38,8 @@ def d_sig(f):  # pragma: no cover
 
 
 @vectorize(
-    ["float32(float32)", "float64(float64)"], nopython=True,
+    ["float32(float32)", "float64(float64)"],
+    nopython=True,
 )
 def d_tanh(f):  # pragma: no cover
     """
@@ -56,27 +59,27 @@ def dot(a, b):
 
 @njit
 def _gru_layer(s, z, r, h, Wz, Wr, Wh):
-    """ Given:
-            S(t=0)
-            z = X(t) Uz + bz
-            r = X(t) Ur + br
-            h = X(t) Uh + bh
+    """Given:
+        S(t=0)
+        z = X(t) Uz + bz
+        r = X(t) Ur + br
+        h = X(t) Uh + bh
 
-        Compute Z(t), R(t), H(t), S(t) for all 1 <= t <= T
+    Compute Z(t), R(t), H(t), S(t) for all 1 <= t <= T
 
-        Parameters
-        ----------
-        s : numpy.ndarray, shape=(T+1, N, D)
-            Modified in-place
-        z : numpy.ndarray, shape=(T, N, D)
-            Modified in-place
-        r : numpy.ndarray, shape=(T, N, D)
-            Modified in-place
-        h : numpy.ndarray, shape=(T, N, D)
-            Modified in-place
-        Wz : numpy.ndarray, shape=(D, D)
-        Wr : numpy.ndarray, shape=(D, D)
-        Wh : numpy.ndarray, shape=(D, D) """
+    Parameters
+    ----------
+    s : numpy.ndarray, shape=(T+1, N, D)
+        Modified in-place
+    z : numpy.ndarray, shape=(T, N, D)
+        Modified in-place
+    r : numpy.ndarray, shape=(T, N, D)
+        Modified in-place
+    h : numpy.ndarray, shape=(T, N, D)
+        Modified in-place
+    Wz : numpy.ndarray, shape=(D, D)
+    Wr : numpy.ndarray, shape=(D, D)
+    Wh : numpy.ndarray, shape=(D, D)"""
     for n in range(len(s) - 1):
         z[n] += np.dot(s[n], Wz)
         z[n] = sig(z[n])
@@ -434,7 +437,7 @@ def gru(
     dropout=0.0,
     constant=False,
 ):
-    r""" Performs a forward pass of sequential data through a Gated Recurrent Unit layer, returning
+    r"""Performs a forward pass of sequential data through a Gated Recurrent Unit layer, returning
     the 'hidden-descriptors' arrived at by utilizing the trainable parameters as follows::
 
                 Z_{t} = sigmoid(X_{t} Uz + S_{t-1} Wz + bz)
@@ -537,7 +540,7 @@ def gru(
            arXiv:1708.02182v1, 2017.
 
     .. [2] Y. Gal, Z. Ghahramani "A Theoretically Grounded Application of Dropout
-           in Recurrent Neural Networks" arXiv:1512.05287v5, 2016. """
+           in Recurrent Neural Networks" arXiv:1512.05287v5, 2016."""
     if s0 is not None:
         if not isinstance(s0, np.ndarray) and not (
             isinstance(s0, Tensor) and (constant or s0.constant)

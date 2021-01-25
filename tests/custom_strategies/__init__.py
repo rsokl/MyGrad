@@ -320,7 +320,7 @@ def valid_axes(
     min_dim: int = 0,
     max_dim: Optional[int] = None,
 ) -> st.SearchStrategy[Union[None, int, Tuple[int, ...]]]:
-    """ Hypothesis search strategy: Given array dimensionality, generate valid
+    """Hypothesis search strategy: Given array dimensionality, generate valid
     `axis` arguments (including `None`) for numpy's sequential functions.
 
     Examples from this strategy shrink towards an empty tuple of axes.
@@ -384,7 +384,7 @@ def valid_axes(
 
 
 def integer_index(size):
-    """ Generate a valid integer-index for an axis of a given size,
+    """Generate a valid integer-index for an axis of a given size,
     either a positive or negative value: [-size, size).
 
     Examples from this strategy shrink towards 0.
@@ -413,7 +413,7 @@ def slice_index(
     max_step=2,
     negative_step=True,
 ):
-    """ Hypothesis search strategy: Generate a valid slice-index
+    """Hypothesis search strategy: Generate a valid slice-index
     for an axis of a given size. Slices are chosen such that
     most slices will not be empty.
 
@@ -477,7 +477,7 @@ def adv_integer_index(
     min_side: int = 1,
     max_side: int = 3,
 ) -> st.SearchStrategy[Tuple[ndarray, ...]]:
-    """ Hypothesis search strategy: given an array shape, generate a
+    """Hypothesis search strategy: given an array shape, generate a
     a valid index for specifying an element/subarray of that array,
     using advanced indexing with integer-valued arrays.
 
@@ -516,10 +516,10 @@ def adv_integer_index(
 
 @lru_cache(maxsize=1000)
 def _factors(n: int) -> List[int]:
-    """ Returns the divisors of n
+    """Returns the divisors of n
 
-        >>> _factors(4)
-        {1, 2, 4}"""
+    >>> _factors(4)
+    {1, 2, 4}"""
     if not isinstance(n, int) and 0 <= n:
         raise ValueError(f"n={n} must be a non-negative integer")
     gen = ([i, n // i] for i in range(1, int(n ** 0.5) + 1) if n % i == 0)
@@ -530,7 +530,7 @@ def _factors(n: int) -> List[int]:
 def valid_shapes(
     draw, size: int, min_len: int = 1, max_len: int = 6
 ) -> st.SearchStrategy[Union[int, Tuple[int, ...]]]:
-    """ Given an array's size, generate a compatible random shape
+    """Given an array's size, generate a compatible random shape
 
     Parameters
     ----------

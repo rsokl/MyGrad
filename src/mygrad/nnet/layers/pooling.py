@@ -9,7 +9,7 @@ from mygrad.tensor_base import Tensor
 
 class MaxPoolND(Operation):
     def __call__(self, x, pool, stride):
-        """ Perform max-pooling over the last N dimensions of a data batch.
+        """Perform max-pooling over the last N dimensions of a data batch.
 
         Extended Summary
         ----------------
@@ -77,7 +77,7 @@ class MaxPoolND(Operation):
         out_shape = (x_shape - w_shape) / stride + 1
 
         if not all(i.is_integer() and i > 0 for i in out_shape):
-            msg = f"Stride and kernel dimensions are incompatible: \n"
+            msg = "Stride and kernel dimensions are incompatible: \n"
             msg += f"Input dimensions: {(tuple(x_shape))}\n"
             msg += f"Stride dimensions: {(tuple(stride))}\n"
             msg += f"Pooling dimensions: {(tuple(w_shape))}\n"
@@ -96,10 +96,10 @@ class MaxPoolND(Operation):
         return out if out.flags["C_CONTIGUOUS"] else np.ascontiguousarray(out)
 
     def backward_var(self, grad, index, **kwargs):
-        """ Parameters
-            ----------
-            grad : numpy.ndarray, shape=((N0, ...), G0, ...),
-            index : int"""
+        """Parameters
+        ----------
+        grad : numpy.ndarray, shape=((N0, ...), G0, ...),
+        index : int"""
         var = self.variables[index]
         x = var.data
         num_pool = len(self.pool)
@@ -148,7 +148,7 @@ class MaxPoolND(Operation):
 
 
 def max_pool(x, pool, stride, constant=False):
-    """ Perform max-pooling over the last N dimensions of a data batch.
+    """Perform max-pooling over the last N dimensions of a data batch.
 
     Extended Summary
     ----------------

@@ -14,7 +14,9 @@ real_types = (
 
 
 @given(
-    tensor=tensors(dtype=real_types), dest_type=real_types, data=st.data(),
+    tensor=tensors(dtype=real_types),
+    dest_type=real_types,
+    data=st.data(),
 )
 def test_astype(tensor: Tensor, dest_type: np.dtype, data: st.DataObject):
     tensor = +tensor  # give tensor a creator

@@ -149,7 +149,6 @@ def test_no_autodiff_decorator_restores_state_via_finally():
 def test_decorator_is_transparent_to_function_information():
     def undecorated(x, y, z=None, *, kwarg, **kwargs):
         """a very special docstring"""
-        pass
 
     decorated = no_autodiff(undecorated)
 

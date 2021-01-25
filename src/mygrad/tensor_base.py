@@ -220,7 +220,7 @@ def astensor(t, dtype=None, constant: bool = None) -> "Tensor":
 
 
 class Tensor:
-    """ A numpy-array-like object capable of serving as a node in a computational
+    """A numpy-array-like object capable of serving as a node in a computational
     graph that supports back-propagation of derivatives via the chain rule.
     See the Examples section of the docstring for more details.
 
@@ -740,7 +740,13 @@ class Tensor:
         for var in tensor_vars:
             var._ops.add(ref_f)
 
-        out = cls(op_out, constant=is_const, copy=False, _creator=f, _base=base,)
+        out = cls(
+            op_out,
+            constant=is_const,
+            copy=False,
+            _creator=f,
+            _base=base,
+        )
 
         if parent_var is not None:
             parent_var._view_children.append(out)
@@ -753,7 +759,7 @@ class Tensor:
         return out
 
     def _replay_op(self, *input_vars: "Tensor") -> "Tensor":
-        """ *dev use only*
+        """*dev use only*
 
         Replays the op that produced `self` - called on the specified
         input vars"""
@@ -771,7 +777,7 @@ class Tensor:
         )
 
     def backward(self, grad: Optional[np.ndarray] = None):
-        """ Trigger backpropagation and compute the derivatives of this tensor.
+        """Trigger backpropagation and compute the derivatives of this tensor.
 
         Designating this tensor as the tensor ℒ, compute dℒ/dx for all (non-constant) tensors
         that preceded ℒ in its computational graph, and store each of these derivatives in ``x.grad``
@@ -1036,7 +1042,7 @@ class Tensor:
 
     @property
     def constant(self) -> bool:
-        """ If ``True``, this tensor is a constant; it will not propagate any gradient.
+        """If ``True``, this tensor is a constant; it will not propagate any gradient.
 
         Additionally, any tensor that is a descendant of constant tensors will also
         be a constant.
@@ -1082,7 +1088,7 @@ class Tensor:
 
     @property
     def creator(self) -> Union[Operation, BroadcastableOp]:
-        """ The ``Operation`` instance that produced ``self``.
+        """The ``Operation`` instance that produced ``self``.
 
         Returns
         -------
@@ -1282,7 +1288,6 @@ class Tensor:
             # base/view relationships. Thus `out` should not be considered a
             # view under these circumstances.
             placeholder_mutant_view._base = None
-            pass
 
         # (p denotes internal placeholder, y' denotes mutant)
         # The current graph:
@@ -1388,7 +1393,7 @@ class Tensor:
 
     @property
     def shape(self) -> Tuple[int, ...]:
-        """ Tuple of tensor dimension-sizes.
+        """Tuple of tensor dimension-sizes.
 
         Sizes are reported in row-major order.
 
@@ -1598,7 +1603,7 @@ class Tensor:
         return repr(self.data).replace("array", "Tensor").replace("\n", "\n ")
 
     def __copy__(self) -> "Tensor":
-        """ Produces a copy of ``self`` with ``copy.creator=None``.
+        """Produces a copy of ``self`` with ``copy.creator=None``.
 
         Copies of the underlying numpy data array and gradient array are created.
 
@@ -1609,7 +1614,7 @@ class Tensor:
         return self.copy()
 
     def copy(self, constant: Optional[bool] = None) -> "Tensor":
-        """ Produces a copy of ``self`` with ``copy.creator=None``.
+        """Produces a copy of ``self`` with ``copy.creator=None``.
 
         Copies of the underlying numpy data array and gradient array are created.
 
@@ -1646,7 +1651,7 @@ class Tensor:
         return copy
 
     def item(self) -> float:
-        """ Copy an element of a tensor to a standard Python scalar and return it.
+        """Copy an element of a tensor to a standard Python scalar and return it.
 
         Note that the returned object does not support back-propagation.
 
@@ -1663,7 +1668,7 @@ class Tensor:
         >>> x.item()
         22.2
         >>> type(x.item())
-        float """
+        float"""
         if self.size > 1:
             raise ValueError("can only convert a tensor of size 1 to a Python scalar")
         return self.data.item()
@@ -1679,7 +1684,7 @@ class Tensor:
         return int(self.data)
 
     def flatten(self, constant: bool = False) -> "Tensor":
-        """ Return a copy of the tensor collapsed into one dimension.
+        """Return a copy of the tensor collapsed into one dimension.
 
         This docstring was adapted from ``numpy.ndarray.flatten``.
 
@@ -1769,7 +1774,7 @@ class Tensor:
 
     @property
     def ndim(self) -> int:
-        """ Number of tensor dimensions. I.e. the number
+        """Number of tensor dimensions. I.e. the number
         of indices that must be supplied to uniquely specify
         an element in the tensor.
 
@@ -1796,7 +1801,7 @@ class Tensor:
 
     @property
     def dtype(self):
-        """ Data-type of the tensor's elements.
+        """Data-type of the tensor's elements.
 
         Returns
         -------
@@ -1816,7 +1821,7 @@ class Tensor:
     def reshape(
         self, *newshape: Union[int, Tuple[int, ...]], constant: bool = False
     ) -> "Tensor":
-        """ Returns a tensor with a new shape, without changing its data.
+        """Returns a tensor with a new shape, without changing its data.
         This docstring was adapted from ``numpy.reshape``
 
         Parameters
@@ -1853,7 +1858,7 @@ class Tensor:
         Tensor([[1, 2],
                 [3, 4],
                 [5, 6]])
-            """
+        """
 
         if not newshape:
             raise TypeError("reshape() takes at least 1 argument (0 given)")
@@ -1865,7 +1870,7 @@ class Tensor:
 
     @property
     def T(self) -> "Tensor":
-        """ Same as self.transpose(), except that self is returned if self.ndim < 2 and
+        """Same as self.transpose(), except that self is returned if self.ndim < 2 and
         a view of the underlying data is utilized whenever possible.
 
         Returns

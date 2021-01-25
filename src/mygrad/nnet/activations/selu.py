@@ -11,7 +11,7 @@ _SCALE = 1.0507009873554804934193349852946
 
 
 class SELU(Operation):
-    """ Returns the scaled exponential linear activation (SELU) elementwise along x. The SELU is
+    """Returns the scaled exponential linear activation (SELU) elementwise along x. The SELU is
     given by  λɑ(exp(x) - 1) for x < 0 and λx for x ≥ 0.
 
     Notes
@@ -46,7 +46,7 @@ class SELU(Operation):
 
 
 def selu(x, constant=False):
-    """ Returns the scaled exponential linear activation (SELU) elementwise along x.
+    """Returns the scaled exponential linear activation (SELU) elementwise along x.
 
     The SELU is given by  λɑ(exp(x) - 1) for x < 0 and λx for x ≥ 0.
 

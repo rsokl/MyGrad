@@ -33,7 +33,9 @@ def targets(draw, scores):
     index_to_arr_shapes={0: hnp.array_shapes(min_dims=2, max_dims=2)},
     index_to_bnds={0: (1e-14, 100)},
     num_arrays=1,
-    kwargs=dict(y_true=lambda scores: targets(scores=scores),),
+    kwargs=dict(
+        y_true=lambda scores: targets(scores=scores),
+    ),
 )
 def test_softmax_crossentropy_fwd():
     pass
@@ -45,7 +47,9 @@ def test_softmax_crossentropy_fwd():
     index_to_arr_shapes={0: hnp.array_shapes(min_dims=2, max_dims=2)},
     index_to_bnds={0: (1e-14, 100)},
     num_arrays=1,
-    kwargs=dict(y_true=lambda scores: targets(scores=scores),),
+    kwargs=dict(
+        y_true=lambda scores: targets(scores=scores),
+    ),
     vary_each_element=True,
 )
 def test_softmax_crossentropy_bkwd():

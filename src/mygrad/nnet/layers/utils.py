@@ -5,7 +5,7 @@ from numpy.lib.stride_tricks import as_strided
 
 
 def sliding_window_view(arr, window_shape, step, dilation=None):
-    """ Create a sliding window view over the trailing dimensions of an array.
+    """Create a sliding window view over the trailing dimensions of an array.
     No copy is made unless the input array is not contiguous in memory.
 
     The window is applied only to valid regions of ``arr``, but is applied greedily.

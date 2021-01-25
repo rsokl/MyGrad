@@ -13,7 +13,7 @@ __all__ = ["softmax_focal_loss", "focal_loss"]
 
 
 class FocalLoss(Operation):
-    r""" Returns the per-datum focal loss as described in https://arxiv.org/abs/1708.02002
+    r"""Returns the per-datum focal loss as described in https://arxiv.org/abs/1708.02002
     which is given by -ɑ(1-p)ˠlog(p).
 
     Extended Description
@@ -104,7 +104,7 @@ class FocalLoss(Operation):
 
 
 def focal_loss(class_probs, targets, *, alpha=1, gamma=0, constant=False):
-    r""" Return the per-datum focal loss.
+    r"""Return the per-datum focal loss.
 
     Parameters
     ----------
