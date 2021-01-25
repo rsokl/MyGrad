@@ -15,6 +15,7 @@ from mygrad import (
     turn_memory_guarding_off,
     turn_memory_guarding_on,
 )
+from tests.conftest import COVERAGE_MODE
 from tests.custom_strategies import tensors
 
 
@@ -130,7 +131,9 @@ def test_dereferencing_tensor_restores_data_writeability(
     )
 
 
-@pytest.mark.xfail(reason="documented state leak for edge case")
+@pytest.mark.xfail(
+    condition=not COVERAGE_MODE, reason="documented state leak for edge case"
+)
 def test_document_state_leak_involving_inplace_op():
     x = mg.arange(4.0)
     v = x[...]
