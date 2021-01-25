@@ -86,8 +86,7 @@ class VerboseTensor(Tensor):
         if self.grad is not None:
             replacement += f", grad={repr(self.grad)}"
         replacement += ")"
-        repr_ = repr_.replace(")", replacement)
-        return repr_
+        return repr_[:-1] + replacement
 
 
 @st.composite
