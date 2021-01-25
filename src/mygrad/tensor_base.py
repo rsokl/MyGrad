@@ -26,13 +26,8 @@ import mygrad._utils.duplicating_graph as _dup
 import mygrad._utils.graph_tracking as _track
 import mygrad._utils.lock_management as _mem
 from mygrad._tensor_core_ops.indexing import GetItem, SetItem
-from mygrad._utils import (
-    WeakRef,
-    WeakRefIterable,
-    collect_all_operations,
-    is_invalid_gradient,
-)
-from mygrad.errors import DisconnectedView, InvalidGradient
+from mygrad._utils import WeakRef, WeakRefIterable, collect_all_operations
+from mygrad.errors import DisconnectedView
 from mygrad.linalg.ops import MatMul
 from mygrad.math.arithmetic.ops import (
     Add,
@@ -848,14 +843,6 @@ class Tensor:
             # `self` is guaranteed to be a tensor of floats
             # so we can simply cast `grad` to be the same dtype
             self._grad = asarray(grad, dtype=self.dtype)
-            if is_invalid_gradient(self._grad):
-                raise InvalidGradient(
-                    f"An invalid gradient-value was passed to "
-                    f"\n\t`{type(self).__name__}.backward(<gradient>)`"
-                    f"\nGradients are expected to be real-valued scalars or "
-                    f"numpy arrays, got a gradient of type: {type(grad)}"
-                    f"{grad}"
-                )
 
             if self._grad.shape != self.shape:
                 try:
