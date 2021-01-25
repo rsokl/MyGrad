@@ -10,7 +10,7 @@ from pytest import raises
 
 import mygrad as mg
 from mygrad import Tensor
-from mygrad.errors import InvalidBackprop, InvalidGradient
+from mygrad.errors import InvalidBackprop
 from mygrad.linalg.ops import MatMul
 from mygrad.math.arithmetic.ops import Add, Divide, Multiply, Negative, Power, Subtract
 from mygrad.operation_base import Operation
@@ -165,11 +165,12 @@ def test_repr(tensor, repr_):
     assert repr(tensor) == repr_
 
 
+@pytest.mark.parametrize("bad_grads", ["bad", 1.0j])
 @given(constant=st.booleans())
-def test_invalid_gradient_raises(constant: bool):
+def test_invalid_gradient_raises(constant: bool, bad_grads):
     x = Tensor(3.0, constant=constant) * 2
-    with (pytest.raises(InvalidGradient) if not constant else does_not_raise()):
-        x.backward("bad")
+    with (pytest.raises((TypeError, ValueError)) if not constant else does_not_raise()):
+        x.backward(bad_grads)
 
 
 @pytest.mark.parametrize("element", (0, [0, 1, 2]))

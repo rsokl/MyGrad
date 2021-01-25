@@ -26,13 +26,8 @@ import mygrad._utils.duplicating_graph as _dup
 import mygrad._utils.graph_tracking as _track
 import mygrad._utils.lock_management as _mem
 from mygrad._tensor_core_ops.indexing import GetItem, SetItem
-from mygrad._utils import (
-    WeakRef,
-    WeakRefIterable,
-    collect_all_operations,
-    is_invalid_gradient,
-)
-from mygrad.errors import DisconnectedView, InvalidGradient
+from mygrad._utils import WeakRef, WeakRefIterable, collect_all_operations
+from mygrad.errors import DisconnectedView
 from mygrad.linalg.ops import MatMul
 from mygrad.math.arithmetic.ops import (
     Add,
@@ -792,9 +787,10 @@ class Tensor:
 
         Parameters
         ----------
-        grad : Optional[array_like]
-            The value of the incoming derivative. If self.grad is None, it is set to `grad`,
-            otherwise its value is added with `grad`.
+        grad : Optional[array_like], (must be broadcast-compatible with ``self``
+            By default, the present tensor is treated as the terminus of the computational graph (ℒ).
+            Otherwise, one can specify a "downstream" derivative, representing ``dℒ/d(self)``.
+            This can be used to effectively connect otherwise separate computational graphs.
 
         Examples
         --------
@@ -828,6 +824,13 @@ class Tensor:
         >>> ℒ.sum().backward()
         >>> tensor.grad
         array([16.,  8.,  4.])
+
+        Specifying a value for ``grad``
+
+        >>> x = mg.Tensor(1.)
+        >>> x.backward(2.)
+        >>> x.grad  # Would normally be dℒ/dℒ == 1
+        array(2.)
         """
         if not _track.TRACK_GRAPH:
             return
@@ -837,23 +840,30 @@ class Tensor:
             return
 
         if grad is not None:
-            self._grad = asarray(grad)
-            if is_invalid_gradient(self._grad):
-                raise InvalidGradient(
-                    f"An invalid gradient-value was passed to "
-                    f"\n\t`{type(self).__name__}.backward(<gradient>)`"
-                    f"\nGradients are expected to be real-valued scalars or "
-                    f"numpy arrays, got a gradient of type: {type(grad)}"
-                    f"{grad}"
-                )
+            # `self` is guaranteed to be a tensor of floats
+            # so we can simply cast `grad` to be the same dtype
+            self._grad = asarray(grad, dtype=self.dtype)
 
+            if self._grad.shape != self.shape:
+                try:
+                    # See if grad can broadcast to `self`
+                    # raises ValueError if not
+                    self._grad = np.multiply(
+                        np.full_like(self.data, fill_value=1.0),
+                        self._grad,
+                        dtype=self.dtype,
+                    )
+                    if self._grad.shape != self.shape:
+                        # mutual broadcasting occurred
+                        raise ValueError()
+                except ValueError:
+                    raise ValueError(
+                        f"`tensor.backward(grad)` was passed a gradient with an incompatible shape.\n"
+                        f"`grad` must be broadcast-compatible with `tensor.shape={self.shape}`\n"
+                        f"Got `grad.shape={self._grad.shape}`"
+                    )
         else:
-            dtype = float if np.issubdtype(self.dtype, np.signedinteger) else self.dtype
-            self._grad = (
-                np.ones(self.shape, dtype=dtype)
-                if self.ndim > 0
-                else np.asarray(1.0, dtype=dtype)
-            )
+            self._grad = np.full_like(self.data, fill_value=1.0)
 
         if self.creator is not None:
             graph = set()  # type: Set[WeakRef[Operation]]
