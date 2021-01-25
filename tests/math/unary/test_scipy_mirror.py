@@ -14,7 +14,9 @@ from tests.custom_strategies import valid_axes
 @given(
     data=st.data(),
     x=hnp.arrays(
-        shape=hnp.array_shapes(min_dims=0), dtype=np.float, elements=st.floats(),
+        shape=hnp.array_shapes(min_dims=0),
+        dtype=np.float,
+        elements=st.floats(),
     ),
     keepdims=st.booleans(),
 )

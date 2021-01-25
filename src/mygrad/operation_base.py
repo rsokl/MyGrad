@@ -19,7 +19,7 @@ __all__ = ["Operation", "BroadcastableOp"]
 
 
 class Operation(ABC):
-    """ Base class for all tensor operations that support back-propagation
+    """Base class for all tensor operations that support back-propagation
     of gradients.
 
     Consider the Operation-instance ``f``. A forward-pass through ``f`` is defined
@@ -54,7 +54,7 @@ class Operation(ABC):
 
     @abstractmethod
     def __call__(self, *input_vars: "Tensor", **kwargs) -> np.ndarray:
-        """ Performs a forward pass, f, of this Operation::
+        """Performs a forward pass, f, of this Operation::
 
                          f(x1, ...., xn)
 
@@ -81,7 +81,7 @@ class Operation(ABC):
 
     @abstractmethod
     def backward_var(self, grad: np.ndarray, index: int, **kwargs) -> np.ndarray:
-        """ Given ``grad = dℒ/df``, computes ``∂ℒ/∂x_{i}``, where ``x_{i}`` is one
+        """Given ``grad = dℒ/df``, computes ``∂ℒ/∂x_{i}``, where ``x_{i}`` is one
         of ``x1, ...., xn``.
 
         ``ℒ`` is assumed to be the terminal node from which ``ℒ.backward()`` was
@@ -117,7 +117,7 @@ class Operation(ABC):
         ] = None,
         **kwargs,
     ):
-        """ Back-propagates the gradient through all of the operation's inputs.
+        """Back-propagates the gradient through all of the operation's inputs.
         Constant tensors do not propagate a gradient.
 
         Parameters

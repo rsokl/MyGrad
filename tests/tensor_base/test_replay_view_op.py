@@ -86,7 +86,8 @@ simple_tensors = tensors().filter(lambda t: t.size)
     ],
 )
 @given(
-    op_constant=st.booleans(), data=st.data(),
+    op_constant=st.booleans(),
+    data=st.data(),
 )
 def test_view_func_replay_op_mirrors_standard_op(
     func: Callable,

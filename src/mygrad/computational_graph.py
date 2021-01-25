@@ -16,7 +16,7 @@ def build_graph(
     dtypes=False,
     sum_stats=False,
 ):
-    """ Builds and renders a computational graph.
+    """Builds and renders a computational graph.
 
     Parameters
     ----------

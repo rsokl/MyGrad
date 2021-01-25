@@ -392,7 +392,6 @@ index2 = (rows2, columns2)
 )
 def test_setitem_broadcast_bool_index():
     """ index mixes boolean and int-array indexing"""
-    pass
 
 
 @settings(deadline=None)
@@ -409,7 +408,6 @@ def test_setitem_broadcast_bool_index():
 )
 def test_setitem_bool_basic_index():
     """ index mixes boolean and basic indexing"""
-    pass
 
 
 @settings(deadline=None)
@@ -428,7 +426,6 @@ def test_setitem_bool_basic_index():
 )
 def test_setitem_bool_axes_index():
     """ index consists of boolean arrays specified for each axis """
-    pass
 
 
 @settings(deadline=None, max_examples=1000)
@@ -458,4 +455,3 @@ def test_setitem_bool_axes_index():
 )
 def test_setitem_arbitrary_index():
     """ test arbitrary indices"""
-    pass

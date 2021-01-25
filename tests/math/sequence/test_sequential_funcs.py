@@ -26,7 +26,7 @@ def axis_arg(*arrs, min_dim=0):
 
 
 def single_axis_arg(*arrs):
-    """ Wrapper for passing valid-axis (single-value only)
+    """Wrapper for passing valid-axis (single-value only)
     search strategy to test factory"""
     if arrs[0].ndim:
         return valid_axes(arrs[0].ndim, single_axis_only=True)
@@ -40,7 +40,7 @@ def keepdims_arg(*arrs):
 
 
 def ddof_arg(*arrs):
-    """ Wrapper for passing ddof strategy to test factory
+    """Wrapper for passing ddof strategy to test factory
     (argument for var and std)"""
     min_side = min(arrs[0].shape) if arrs[0].shape else 0
     return st.integers(0, min_side - 1) if min_side else st.just(0)
@@ -66,7 +66,6 @@ def test_max_no_graph_track_fwd():
     """tests no-graph mode transitively
     mg.max == np.max
     mg.max == mg.max(no-grad)"""
-    pass
 
 
 @backprop_test_factory(
@@ -102,7 +101,6 @@ def test_min_no_graph_track_fwd():
     """tests no-graph mode transitively
     mg.min == np.min
     mg.min == mg.min(no-grad)"""
-    pass
 
 
 @backprop_test_factory(

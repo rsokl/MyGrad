@@ -28,16 +28,16 @@ __all__ = [
 
 class Add(BroadcastableOp):
     def __call__(self, a, b):
-        """ Performs 'add' forward-pass: f(a,b) -> a + b
+        """Performs 'add' forward-pass: f(a,b) -> a + b
 
-            Parameters
-            ----------
-            a : mygrad.Tensor
-            b : mygrad.Tensor
+        Parameters
+        ----------
+        a : mygrad.Tensor
+        b : mygrad.Tensor
 
-            Returns
-            -------
-            out : numpy.ndarray """
+        Returns
+        -------
+        out : numpy.ndarray"""
 
         self.variables = (a, b)
         out = a.data + b.data
@@ -49,7 +49,7 @@ class Add(BroadcastableOp):
 
 class _IAdd(Add):
     def __call__(self, inplace_target, other) -> np.ndarray:
-        """ Performs a += b
+        """Performs a += b
 
         Parameters
         ----------
@@ -78,16 +78,16 @@ class _IAdd(Add):
 
 class Subtract(BroadcastableOp):
     def __call__(self, a, b):
-        """ f(a,b) -> a - b
+        """f(a,b) -> a - b
 
-            Parameters
-            ----------
-            a : mygrad.Tensor
-            b : mygrad.Tensor
+        Parameters
+        ----------
+        a : mygrad.Tensor
+        b : mygrad.Tensor
 
-            Returns
-            -------
-            out : numpy.ndarray """
+        Returns
+        -------
+        out : numpy.ndarray"""
         self.variables = (a, b)
         out = a.data - b.data
         return out
@@ -101,7 +101,7 @@ class Subtract(BroadcastableOp):
 
 class _ISubstract(Subtract):
     def __call__(self, inplace_target, other) -> np.ndarray:
-        """ Performs a -= b
+        """Performs a -= b
 
         Parameters
         ----------
@@ -130,10 +130,10 @@ class _ISubstract(Subtract):
 
 class Multiply(BroadcastableOp):
     def __call__(self, a, b):
-        """ Parameters
-            ----------
-            a : mygrad.Tensor
-            b : mygrad.Tensor"""
+        """Parameters
+        ----------
+        a : mygrad.Tensor
+        b : mygrad.Tensor"""
         self.variables = (a, b)
         out = a.data * b.data
         return out
@@ -148,7 +148,7 @@ class Multiply(BroadcastableOp):
 
 class _IMultiply(Multiply):
     def __call__(self, inplace_target, other) -> np.ndarray:
-        """ Performs a *= b
+        """Performs a *= b
 
         Parameters
         ----------
@@ -192,7 +192,7 @@ class Divide(BroadcastableOp):
 
 class _IDivide(Divide):
     def __call__(self, inplace_target, other) -> np.ndarray:
-        """ Performs a /= b
+        """Performs a /= b
 
         Parameters
         ----------
@@ -232,12 +232,12 @@ class Reciprocal(BroadcastableOp):
 
 class Power(BroadcastableOp):
     def __call__(self, a, b):
-        """ f(a, b) -> a ** b
+        """f(a, b) -> a ** b
 
-            Parameters
-            ----------
-            a: mygrad.Tensor
-            b: mygrad.Tensor"""
+        Parameters
+        ----------
+        a: mygrad.Tensor
+        b: mygrad.Tensor"""
         self.variables = (a, b)
         out = a.data ** b.data
         return out
@@ -253,7 +253,7 @@ class Power(BroadcastableOp):
 
 class _IPower(Power):
     def __call__(self, inplace_target, other) -> np.ndarray:
-        """ Performs a **= b
+        """Performs a **= b
 
         Parameters
         ----------
@@ -282,11 +282,11 @@ class _IPower(Power):
 
 class Square(Operation):
     def __call__(self, a):
-        """ f(a) -> a ** 2
+        """f(a) -> a ** 2
 
-            Parameters
-            ----------
-            a : mygrad.Tensor"""
+        Parameters
+        ----------
+        a : mygrad.Tensor"""
         self.variables = (a,)
         return np.square(a.data)
 
@@ -298,7 +298,7 @@ class Square(Operation):
 
 class _ISquare(Square):
     def __call__(self, inplace_target) -> np.ndarray:
-        """ Performs a **= 2  (special case)
+        """Performs a **= 2  (special case)
 
         Parameters
         ----------
@@ -326,7 +326,7 @@ class _ISquare(Square):
 
 class _IPow1(Operation):
     def __call__(self, inplace_target) -> np.ndarray:
-        """ Performs a **= 1  (special case)
+        """Performs a **= 1  (special case)
 
         Parameters
         ----------
@@ -409,8 +409,8 @@ class MultiplySequence(BroadcastableOp):
         return out
 
     def backward(self, grad, *, graph, **kwargs):
-        """ Back-propagates the gradient through all of the operation's inputs. This needs to be updated
-            by an operation if that operation takes more than 2 Tensor arguments."""
+        """Back-propagates the gradient through all of the operation's inputs. This needs to be updated
+        by an operation if that operation takes more than 2 Tensor arguments."""
         if not self._iszero:
             self._product = grad * reduce(
                 lambda x, y: x * y, (var.data for n, var in enumerate(self.variables))

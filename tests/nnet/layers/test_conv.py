@@ -55,7 +55,7 @@ def test_input_validation(
 
 
 def get_outshape(x_shape, w_shape, stride, dilation):
-    """ Compute the shape of the output tensor given an input shape, convolutional
+    """Compute the shape of the output tensor given an input shape, convolutional
     filter shape, and stride.
 
     Parameters
@@ -97,7 +97,7 @@ def get_outshape(x_shape, w_shape, stride, dilation):
 
 
 def convolve_numpy(input_image, conv_filter, stride, dilation=None):
-    """ Convolve `input_image` with `conv_filter` at a stride of `stride`.
+    """Convolve `input_image` with `conv_filter` at a stride of `stride`.
 
     Parameters
     ----------
@@ -132,7 +132,7 @@ def convolve_numpy(input_image, conv_filter, stride, dilation=None):
 
 
 def conv_bank(input_images, conv_filters, stride, dilation=None, padding=tuple()):
-    """ Convolve a bank of filters over a stack of images.
+    """Convolve a bank of filters over a stack of images.
 
     Parameters
     ----------
@@ -282,7 +282,7 @@ def test_padding(ndim: int, data: st.DataObject):
     index_to_bnds={0: (-10, 10), 1: (-10, 10)},
 )
 def test_conv_1d_fwd():
-    """ (N=4, C=5, W=7) x (F=2, C=5, Wf=3); stride=1, dilation=1
+    """(N=4, C=5, W=7) x (F=2, C=5, Wf=3); stride=1, dilation=1
 
     Also tests meta properties of conv function - appropriate return type,
     behavior with `constant` arg, etc."""
@@ -290,7 +290,7 @@ def test_conv_1d_fwd():
 
 @mg.no_autodiff
 def _conv_nd(x, w, stride, dilation=1, padding=0) -> np.ndarray:
-    """ use mygrad-conv_nd forward pass for numerical derivative
+    """use mygrad-conv_nd forward pass for numerical derivative
 
     Returns
     -------
@@ -311,7 +311,7 @@ def _conv_nd(x, w, stride, dilation=1, padding=0) -> np.ndarray:
     vary_each_element=True,
 )
 def test_conv_1d_bkwd():
-    """ (N=2, C=1, W=7) x (F=2, C=1, Wf=3); stride=1, dilation=1
+    """(N=2, C=1, W=7) x (F=2, C=1, Wf=3); stride=1, dilation=1
 
     Also tests meta properties of conv-backprop - appropriate return type,
     behavior with `constant` arg, good behavior of null_gradients, etc."""

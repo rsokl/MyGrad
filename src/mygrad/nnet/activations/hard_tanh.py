@@ -9,7 +9,7 @@ __all__ = ["hard_tanh"]
 
 
 def hard_tanh(x, *, lower_bound=-1, upper_bound=1, constant=False):
-    """ Returns the hard hyperbolic tangent function.
+    """Returns the hard hyperbolic tangent function.
 
     The hard_tanh function is `lower_bound` where `x` <= `lower_bound`, `upper_bound` where
     `x` >= `upper_bound`, and `x` where `lower_bound` < `x` < `upper_bound`.

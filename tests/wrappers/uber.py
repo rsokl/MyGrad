@@ -69,7 +69,7 @@ def get_hypothesis_db_key(self, *extras: Any) -> bytes:
 
 
 class fwdprop_test_factory:
-    """ Decorator
+    """Decorator
 
     Randomly draw N arrays x, (...) to verify that a mygrad function,
     `f(x, ..., **kwargs)` returns a correct result through forward-propagation.
@@ -380,7 +380,9 @@ class fwdprop_test_factory:
 
             for n, (arr, arr_copy) in enumerate(zip(arrs, arr_copies)):
                 assert_array_equal(
-                    arr, arr_copy, err_msg=f"arr-{n} was mutated during forward prop",
+                    arr,
+                    arr_copy,
+                    err_msg=f"arr-{n} was mutated during forward prop",
                 )
 
         wrapper._hypothesis_internal_add_digest = get_hypothesis_db_key(
@@ -390,7 +392,7 @@ class fwdprop_test_factory:
 
 
 class backprop_test_factory:
-    """ Decorator
+    """Decorator
 
     Randomly draw arrays x, ... to verify that a binary mygrad function,
     `f(x, ..., **kwargs)` performs back-propagation appropriately.

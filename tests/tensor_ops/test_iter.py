@@ -36,7 +36,6 @@ def _sum(x, constant=False):
 )
 def test_builtin_sum_fwd():
     """Ensures equivalent iter behavior of tensor and array"""
-    pass
 
 
 @backprop_test_factory(

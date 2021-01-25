@@ -2,7 +2,7 @@ from mygrad.tensor_creation.funcs import full
 
 
 def constant(*shape, value=0.0, dtype=None, constant=False):
-    """ Initialize a `Tensor` of shape `shape` with a constant value.
+    """Initialize a `Tensor` of shape `shape` with a constant value.
 
     This function is a thin wrapper around `mygrad.full`.
 

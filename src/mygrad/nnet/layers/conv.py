@@ -101,11 +101,11 @@ class ConvND(Operation):
         return out if out.flags["C_CONTIGUOUS"] else np.ascontiguousarray(out)
 
     def backward_var(self, grad, index, **kwargs):
-        """ Computes dX, where X is the data batch
+        """Computes dX, where X is the data batch
 
-            Parameters
-            ----------
-            grad : numpy.ndarray, shape=(N, F, G0, ...)"""
+        Parameters
+        ----------
+        grad : numpy.ndarray, shape=(N, F, G0, ...)"""
         x, w = (i.data for i in self.variables)
         num_conv_channels = grad.ndim - 2
 
@@ -154,7 +154,7 @@ class ConvND(Operation):
 
 
 def conv_nd(x, filter_bank, *, stride, padding=0, dilation=1, constant=False):
-    """ Use `filter_bank` to perform strided N-dimensional neural network-style
+    """Use `filter_bank` to perform strided N-dimensional neural network-style
     convolutions (see Notes) over `x`.::
 
             f(x, w) -> x ⋆ w

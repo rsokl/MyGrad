@@ -151,7 +151,8 @@ def test_non_broadcastable(data, grad):
 @pytest.mark.parametrize("v3_const", [True, False])
 @pytest.mark.parametrize("v4_const", [True, False])
 @given(
-    v1_val=st.integers(-2, 2).map(float), grad=st.integers(-2, 2).map(float),
+    v1_val=st.integers(-2, 2).map(float),
+    grad=st.integers(-2, 2).map(float),
 )
 def test_linear_graph(
     v1_val: float,
@@ -162,13 +163,13 @@ def test_linear_graph(
     grad: float,
 ):
     r"""
-     v1
-     |
-     v2
-     |
-     v3
-     |
-     v4
+    v1
+    |
+    v2
+    |
+    v3
+    |
+    v4
     """
     v1 = Tensor(v1_val, constant=v1_const)
     v2 = mg.square(v1, constant=v2_const)
@@ -229,7 +230,8 @@ def test_linear_graph(
 @pytest.mark.parametrize("v4_const", [True, False])
 @pytest.mark.parametrize("v5_const", [True, False])
 @given(
-    v1_val=st.integers(-2, 2).map(float), grad=st.integers(-2, 2).map(float),
+    v1_val=st.integers(-2, 2).map(float),
+    grad=st.integers(-2, 2).map(float),
 )
 def test_fanout_graph(
     v1_val: float,

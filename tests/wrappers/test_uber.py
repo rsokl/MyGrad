@@ -162,7 +162,10 @@ def test_catches_numpy_view_mygrad_copy():
 
     @settings(deadline=None, max_examples=20)
     @fwdprop_test_factory(
-        num_arrays=1, mygrad_func=copy, true_func=view, permit_0d_array_as_float=False,
+        num_arrays=1,
+        mygrad_func=copy,
+        true_func=view,
+        permit_0d_array_as_float=False,
     )
     def should_catch_error():
         pass
@@ -181,7 +184,10 @@ def test_catches_numpy_copy_mygrad_view():
 
     @settings(deadline=None, max_examples=20)
     @fwdprop_test_factory(
-        num_arrays=1, mygrad_func=copy, true_func=view, permit_0d_array_as_float=False,
+        num_arrays=1,
+        mygrad_func=copy,
+        true_func=view,
+        permit_0d_array_as_float=False,
     )
     def should_catch_error():
         pass

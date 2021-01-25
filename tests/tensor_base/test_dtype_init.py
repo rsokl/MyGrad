@@ -19,11 +19,13 @@ generic_data = st.sampled_from([0, 0.0, [0], [0.0]]) | arrays_or_tensors(
 )
 
 integer_data = st.sampled_from([0, [0]]) | arrays_or_tensors(
-    dtype=hnp.integer_dtypes(), shape=hnp.array_shapes(min_dims=0, min_side=0),
+    dtype=hnp.integer_dtypes(),
+    shape=hnp.array_shapes(min_dims=0, min_side=0),
 )
 
 float_data = st.sampled_from([0.0, [0.0]]) | arrays_or_tensors(
-    dtype=hnp.floating_dtypes(), shape=hnp.array_shapes(min_dims=0, min_side=0),
+    dtype=hnp.floating_dtypes(),
+    shape=hnp.array_shapes(min_dims=0, min_side=0),
 )
 
 integer_dtypes = st.sampled_from([int, "int32"]) | hnp.integer_dtypes()

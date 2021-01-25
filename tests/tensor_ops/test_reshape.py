@@ -122,7 +122,8 @@ def test_inplace_reshape_3():
 
 
 @given(
-    tensor=tensors(), data=st.data(),
+    tensor=tensors(),
+    data=st.data(),
 )
 def test_in_place_reshape(tensor: Tensor, data: st.DataObject):
     assume(tensor.size)
@@ -140,7 +141,8 @@ def test_in_place_reshape(tensor: Tensor, data: st.DataObject):
 
 
 @given(
-    tensor=tensors(), data=st.data(),
+    tensor=tensors(),
+    data=st.data(),
 )
 def test_in_place_reshape_post_view(tensor: Tensor, data: st.DataObject):
     assume(tensor.size)
@@ -163,7 +165,8 @@ def test_in_place_reshape_post_view(tensor: Tensor, data: st.DataObject):
 
 
 @pytest.mark.parametrize(
-    "reshape_type", [positional_reshape, keyword_reshape],
+    "reshape_type",
+    [positional_reshape, keyword_reshape],
 )
 def test_reshape_fwd(reshape_type):
     @fwdprop_test_factory(
@@ -179,7 +182,8 @@ def test_reshape_fwd(reshape_type):
 
 
 @pytest.mark.parametrize(
-    "reshape_type", [method_tuple_reshape, method_unpacked_reshape],
+    "reshape_type",
+    [method_tuple_reshape, method_unpacked_reshape],
 )
 def test_method_reshape_fwd(reshape_type):
     @fwdprop_test_factory(

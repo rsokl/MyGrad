@@ -34,7 +34,7 @@ def test_Tensor_from_tensorbase_has_makeypatched_attributes(attribute: str):
 
 
 def test_toplevel_Tensor_and_base_Tensor_are_identical():
-    from mygrad.tensor_base import Tensor as Tensor_from_base
     from mygrad import Tensor as Tensor_from_toplevel
+    from mygrad.tensor_base import Tensor as Tensor_from_base
 
     assert Tensor_from_toplevel.__dict__ == Tensor_from_base.__dict__

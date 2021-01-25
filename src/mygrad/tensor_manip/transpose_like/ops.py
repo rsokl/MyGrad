@@ -9,12 +9,12 @@ class Tensor_Transpose_Property(Operation):
     can_return_view = True
 
     def __call__(self, a):
-        """ Same as a.transpose(), except that a is returned if
-            a.ndim < 2.
+        """Same as a.transpose(), except that a is returned if
+        a.ndim < 2.
 
-            Parameters
-            ----------
-            a : mygrad.Tensor"""
+        Parameters
+        ----------
+        a : mygrad.Tensor"""
         self.variables = (a,)
         return a.data.T
 

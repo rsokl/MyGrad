@@ -227,7 +227,7 @@ class MemStateContext(ContextTracker):
 
 
 class _NoMemGuard(MemStateContext):
-    """ A context manager used to suspend memory-locking behavior
+    """A context manager used to suspend memory-locking behavior
 
     Examples
     --------
@@ -250,7 +250,7 @@ class _NoMemGuard(MemStateContext):
 
 
 class _WithMemGuard(MemStateContext):
-    """ A context manager used to enable memory-locking behavior
+    """A context manager used to enable memory-locking behavior
 
     Examples
     --------
@@ -277,7 +277,7 @@ mem_guard_on = _WithMemGuard()
 
 
 def turn_memory_guarding_off():
-    """ Globally disables all memory-guarding mechanisms, except
+    """Globally disables all memory-guarding mechanisms, except
     for in contexts where they are explicitly enabled.
 
     Notes
@@ -322,7 +322,7 @@ def turn_memory_guarding_off():
 
 
 def turn_memory_guarding_on():
-    """ Globally enables all memory-guarding mechanisms, except
+    """Globally enables all memory-guarding mechanisms, except
     for in contexts where they are explicitly disabled.
 
     Notes
@@ -377,7 +377,7 @@ def turn_memory_guarding_on():
 
 
 def mem_guard_active() -> bool:
-    """ Indicates whether or not memory guarding is active.
+    """Indicates whether or not memory guarding is active.
 
     See Also
     --------

@@ -9,7 +9,7 @@ from ._utils import check_loss_inputs
 
 class MulticlassHinge(Operation):
     def __call__(self, a, y, hinge=1.0):
-        """ Computes the average multiclass hinge loss.
+        """Computes the average multiclass hinge loss.
 
         Parameters
         ----------
@@ -57,7 +57,7 @@ class MulticlassHinge(Operation):
 
 
 def multiclass_hinge(x, y_true, hinge=1.0, constant=False):
-    """ Computes the average multiclass hinge loss.
+    """Computes the average multiclass hinge loss.
 
     Parameters
     ----------

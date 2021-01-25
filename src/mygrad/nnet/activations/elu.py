@@ -9,7 +9,7 @@ __all__ = ["elu"]
 
 
 class ELU(Operation):
-    """ Returns the exponential linear activation (ELU) elementwise along x.
+    """Returns the exponential linear activation (ELU) elementwise along x.
 
     The ELU is given by `ɑ(exp(x) - 1) for x < 0 and x for x ≥ 0`.
     """
@@ -42,7 +42,7 @@ class ELU(Operation):
 
 
 def elu(x, alpha, constant=False):
-    """ Returns the exponential linear activation (ELU) elementwise along x.
+    """Returns the exponential linear activation (ELU) elementwise along x.
 
     The ELU is given by  `ɑ(exp(x) - 1) for x < 0 and x for x ≥ 0`.
 

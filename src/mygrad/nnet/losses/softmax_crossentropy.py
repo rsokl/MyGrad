@@ -9,24 +9,24 @@ from ._utils import check_loss_inputs
 
 
 class SoftmaxCrossEntropy(Operation):
-    """ Given the classification scores of C classes for N pieces of data,
-        computes the NxC softmax classification probabilities. The
-        cross entropy is then computed by using the true classification labels.
+    """Given the classification scores of C classes for N pieces of data,
+    computes the NxC softmax classification probabilities. The
+    cross entropy is then computed by using the true classification labels.
 
-        log-softmax is used for improved numerical stability"""
+    log-softmax is used for improved numerical stability"""
 
     def __call__(self, x, y_true):
-        """ Parameters
-            ----------
-            x : mygrad.Tensor, shape=(N, C)
-                The C class scores for each of the N pieces of data.
+        """Parameters
+        ----------
+        x : mygrad.Tensor, shape=(N, C)
+            The C class scores for each of the N pieces of data.
 
-            y_true : Sequence[int]
-                The correct class-indices, in [0, C), for each datum.
+        y_true : Sequence[int]
+            The correct class-indices, in [0, C), for each datum.
 
-            Returns
-            -------
-            The average softmax loss"""
+        Returns
+        -------
+        The average softmax loss"""
         if isinstance(y_true, Tensor):
             y_true = y_true.data
 
@@ -48,7 +48,7 @@ class SoftmaxCrossEntropy(Operation):
 
 
 def softmax_crossentropy(x, y_true, constant=False):
-    r""" Given the classification scores of C classes for N pieces of data,
+    r"""Given the classification scores of C classes for N pieces of data,
 
     computes the NxC softmax classification probabilities. The
     cross entropy is then computed by using the true classification labels.

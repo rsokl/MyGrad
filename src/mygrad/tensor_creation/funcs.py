@@ -21,7 +21,7 @@ __all__ = [
 
 
 def empty(shape, dtype=np.float32, constant=None):
-    """ Return a new Tensor of the given shape and type, without initializing entries.
+    """Return a new Tensor of the given shape and type, without initializing entries.
 
     Parameters
     ----------
@@ -75,7 +75,7 @@ def empty(shape, dtype=np.float32, constant=None):
 
 
 def empty_like(other, dtype=None, constant=None):
-    """ Return a new Tensor of the same shape and type as the given array.
+    """Return a new Tensor of the same shape and type as the given array.
 
     Parameters
     ----------
@@ -122,7 +122,7 @@ def empty_like(other, dtype=None, constant=None):
 
 
 def eye(rows, cols=None, diag_idx=0, dtype=np.float32, constant=None):
-    """ Return a 2D Tensor with ones on the diagonal and zeros elsewhere.
+    """Return a 2D Tensor with ones on the diagonal and zeros elsewhere.
 
     Parameters
     ----------
@@ -168,7 +168,7 @@ def eye(rows, cols=None, diag_idx=0, dtype=np.float32, constant=None):
 
 
 def identity(n, dtype=np.float32, constant=None):
-    """ Return the identity Tensor; a square Tensor with 1s on the main diagonal and 0s elsewhere.
+    """Return the identity Tensor; a square Tensor with 1s on the main diagonal and 0s elsewhere.
 
     Parameters
     ----------
@@ -458,7 +458,7 @@ def full(shape, fill_value, dtype=None, constant=None):
 
 
 def full_like(other, fill_value, dtype=None, constant=None):
-    """ Return a Tensor of the same shape and type as the given, filled with `fill_value`.
+    """Return a Tensor of the same shape and type as the given, filled with `fill_value`.
 
     Parameters
     ----------
@@ -500,12 +500,14 @@ def full_like(other, fill_value, dtype=None, constant=None):
     Tensor([ 0.1,  0.1,  0.1,  0.1,  0.1,  0.1])
     """
     return Tensor(
-        np.full_like(asarray(other), fill_value, dtype), constant=constant, copy=False,
+        np.full_like(asarray(other), fill_value, dtype),
+        constant=constant,
+        copy=False,
     )
 
 
 def arange(stop, start=0, step=1, dtype=None, constant=None):
-    """ Return a Tensor with evenly-spaced values within a given interval.
+    """Return a Tensor with evenly-spaced values within a given interval.
 
     Values are generated within [start, stop). Note that for non-integer steps, results may be
     inconsistent; you are better off using `linspace` instead.
@@ -558,7 +560,7 @@ def arange(stop, start=0, step=1, dtype=None, constant=None):
 
 
 def linspace(start, stop, num=50, include_endpoint=True, dtype=None, constant=None):
-    """ Return a Tensor with evenly-spaced numbers over a specified interval.
+    """Return a Tensor with evenly-spaced numbers over a specified interval.
 
     Values are generated within [start, stop], with the endpoint optionally excluded.
 
@@ -619,7 +621,7 @@ def linspace(start, stop, num=50, include_endpoint=True, dtype=None, constant=No
 def logspace(
     start, stop, num=50, include_endpoint=True, base=10, dtype=None, constant=None
 ):
-    """ Return a Tensor with evenly-spaced numbers over a specified interval on a log scale.
+    """Return a Tensor with evenly-spaced numbers over a specified interval on a log scale.
 
     In linear space, values are generated within [base**start, base**stop], with the endpoint
     optionally excluded.
@@ -687,7 +689,7 @@ def logspace(
 
 
 def geomspace(start, stop, num=50, include_endpoint=True, dtype=None, constant=None):
-    """ Return a Tensor with evenly-spaced values in a geometric progression.
+    """Return a Tensor with evenly-spaced values in a geometric progression.
 
     Each output sample is a constant multiple of the previous output.
 

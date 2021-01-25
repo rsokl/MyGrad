@@ -25,9 +25,9 @@ from tests.custom_strategies import (
 
 @given(seq=st.lists(elements=st.integers()), replace=st.booleans(), data=st.data())
 def test_choices(seq: List[int], replace: bool, data: st.SearchStrategy):
-    """ Ensures that the `choices` strategy:
-        - draws from the provided sequence
-        - respects input parameters"""
+    """Ensures that the `choices` strategy:
+    - draws from the provided sequence
+    - respects input parameters"""
     upper = len(seq) + 10 if replace and seq else len(seq)
     size = data.draw(st.integers(0, upper), label="size")
     chosen = data.draw(choices(seq, size=size, replace=replace), label="choices")

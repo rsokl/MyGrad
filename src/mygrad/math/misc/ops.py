@@ -19,11 +19,11 @@ class Abs(Operation):
 
 class Sqrt(Operation):
     def __call__(self, a):
-        """ f(a) = sqrt(a)
+        """f(a) = sqrt(a)
 
-            Parameters
-            ----------
-            a : mygrad.Tensor"""
+        Parameters
+        ----------
+        a : mygrad.Tensor"""
         self.variables = (a,)
         return np.sqrt(a.data)
 

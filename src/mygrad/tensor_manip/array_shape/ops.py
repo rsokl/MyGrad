@@ -32,9 +32,9 @@ class Squeeze(Operation):
     can_return_view = True
 
     def __call__(self, a, axis):
-        """ Parameters
-            ----------
-            axis : Optional[int, Tuple[int, ...]] """
+        """Parameters
+        ----------
+        axis : Optional[int, Tuple[int, ...]]"""
         self.variables = (a,)
         return np.squeeze(a.data, axis=axis)
 
@@ -45,9 +45,9 @@ class Squeeze(Operation):
 
 class Flatten(Operation):
     def __call__(self, a):
-        """ Parameters
-            ----------
-            a : mygrad.Tensor"""
+        """Parameters
+        ----------
+        a : mygrad.Tensor"""
         self.variables = (a,)
         return a.data.flatten(order="C")
 
@@ -60,9 +60,9 @@ class Ravel(Operation):
     can_return_view = True
 
     def __call__(self, a):
-        """ Parameters
-            ----------
-            a : mygrad.Tensor"""
+        """Parameters
+        ----------
+        a : mygrad.Tensor"""
         self.variables = (a,)
         return np.ravel(a.data, order="C")
 
@@ -75,10 +75,10 @@ class ExpandDims(Operation):
     can_return_view = True
 
     def __call__(self, a, axis):
-        """ Parameters
-            ----------
-            a : mygrad.Tensor
-            axis : int """
+        """Parameters
+        ----------
+        a : mygrad.Tensor
+        axis : int"""
         self.variables = (a,)
         return np.expand_dims(a.data, axis=axis)
 
@@ -91,10 +91,10 @@ class BroadcastTo(BroadcastableOp):
     can_return_view = True
 
     def __call__(self, a, shape):
-        """ Parameters
-            ----------
-            a : mygrad.Tensor
-            shape : Tuple[int, ...]"""
+        """Parameters
+        ----------
+        a : mygrad.Tensor
+        shape : Tuple[int, ...]"""
         self.variables = (a,)
         return np.broadcast_to(a.data, shape=shape)
 

@@ -255,7 +255,8 @@ def test_grad_is_view_of_base_grad(terminal_node: str, view_type: str):
     ],
 )
 @pytest.mark.parametrize(
-    "via_inplace_op", [True, False],
+    "via_inplace_op",
+    [True, False],
 )
 def test_disconnected_views_dissassociate_from_base_upon_entering_new_graph(
     terminal_node: str, resume_node: str, via_inplace_op: bool

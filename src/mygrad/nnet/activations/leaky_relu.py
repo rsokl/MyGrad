@@ -9,7 +9,7 @@ __all__ = ["leaky_relu"]
 
 
 def leaky_relu(x, slope, constant=False):
-    """ Returns the leaky rectified linear activation elementwise along x.
+    """Returns the leaky rectified linear activation elementwise along x.
 
     The leaky ReLU is given by `max(x, 0) + slope*min(x, 0)`.
 

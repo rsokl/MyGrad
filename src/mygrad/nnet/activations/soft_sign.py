@@ -4,7 +4,7 @@ __all__ = ["soft_sign"]
 
 
 def soft_sign(x, constant=False):
-    """ Returns the soft sign function x / (1 + |x|).
+    """Returns the soft sign function x / (1 + |x|).
 
     Parameters
     ----------

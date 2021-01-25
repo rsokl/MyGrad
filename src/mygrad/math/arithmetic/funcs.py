@@ -30,7 +30,7 @@ __all__ = [
 
 
 def add(a, b, constant=False):
-    """ ``f(a, b) -> a + b``
+    """``f(a, b) -> a + b``
 
     Parameters
     ----------
@@ -61,7 +61,7 @@ def add(a, b, constant=False):
 
 
 def subtract(a, b, constant=False):
-    """ ``f(a, b) -> a - b``
+    """``f(a, b) -> a - b``
 
     Parameters
     ----------
@@ -93,7 +93,7 @@ def subtract(a, b, constant=False):
 
 
 def divide(a, b, constant=False):
-    """ ``f(a, b) -> a / b``
+    """``f(a, b) -> a / b``
 
     Parameters
     ----------
@@ -112,7 +112,7 @@ def divide(a, b, constant=False):
 
 
 def square(a, constant=False):
-    """ ``f(a) -> a ** 2``
+    """``f(a) -> a ** 2``
 
     Parameters
     ----------
@@ -129,7 +129,7 @@ def square(a, constant=False):
 
 
 def reciprocal(a, constant=False):
-    """ ``f(a) -> 1 / a``
+    """``f(a) -> 1 / a``
 
     Parameters
     ----------
@@ -146,7 +146,7 @@ def reciprocal(a, constant=False):
 
 
 def power(a, b, constant=False):
-    """ ``f(a, b) -> a ** b``
+    """``f(a, b) -> a ** b``
 
     Parameters
     ----------
@@ -165,7 +165,7 @@ def power(a, b, constant=False):
 
 
 def multiply(a, b, constant=False):
-    """ ``f(a, b) -> a * b``
+    """``f(a, b) -> a * b``
 
     Parameters
     ----------
@@ -184,7 +184,7 @@ def multiply(a, b, constant=False):
 
 
 def multiply_sequence(*variables, constant=False):
-    """  ``f(a, b, ...) -> a * b * ...``
+    """``f(a, b, ...) -> a * b * ...``
 
     Multiply a sequence of N tensors.
 
@@ -213,7 +213,7 @@ def multiply_sequence(*variables, constant=False):
 
 
 def add_sequence(*variables, constant=False):
-    """ ``f(a, b, ...) -> a + b + ...``
+    """``f(a, b, ...) -> a + b + ...``
 
     Add a sequence of N tensors.
 
@@ -242,7 +242,7 @@ def add_sequence(*variables, constant=False):
 
 
 def positive(a, where=True, constant=False):
-    """ ``f(a) -> +a``
+    """``f(a) -> +a``
 
     Creates a new tensor.
 
@@ -267,7 +267,7 @@ def positive(a, where=True, constant=False):
 
 
 def negative(a, where=True, constant=False):
-    """ ``f(a) -> -a``
+    """``f(a) -> -a``
 
     Parameters
     ----------
@@ -286,6 +286,5 @@ def negative(a, where=True, constant=False):
     Returns
     -------
     mygrad.Tensor
-
-"""
+    """
     return Tensor._op(Negative, a, op_kwargs=(dict(where=where)), constant=constant)
