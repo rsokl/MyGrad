@@ -75,7 +75,7 @@ def test_known_disagreement_between_view_grad_and_base():
     # Despite view's base being set, its grad doesn't
     # reflect the (nulled) grad of its base
     assert view.base is base
-    assert view.base is None  # This should fail!
+    assert view.grad is None  # This should fail!
 
 
 def test_simple_view_becomes_disconnected_from_base_via_clear_graph2():
