@@ -1905,8 +1905,8 @@ class Tensor:
             "Use 'a = a @ b' instead of 'a @= b'"
         )
 
-    def __array__(self, dtype=None) -> np.ndarray:
-        return np.asarray(self.data, dtype)
+    def __array__(self) -> np.ndarray:
+        return np.asarray(self.data)
 
 
 # set all comparison operators - mirrors ndarray methods
