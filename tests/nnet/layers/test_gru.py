@@ -9,9 +9,11 @@ from numpy.testing import assert_allclose
 
 from mygrad import matmul, mem_guard_off, no_autodiff
 from mygrad.nnet.activations import sigmoid, tanh
-from mygrad.nnet.layers import gru
 from mygrad.tensor_base import Tensor
 from tests.utils import does_not_raise
+
+gru_module = pytest.importorskip("mygrad.nnet.layers.gru")
+gru = gru_module.gru
 
 
 @settings(deadline=None)
