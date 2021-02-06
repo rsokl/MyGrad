@@ -30,6 +30,8 @@ __all__ = [
     "MultiplySequence",
 ]
 
+# Binary Ops
+
 
 class Add(BinaryArith):
     numpy_ufunc = np.add
@@ -98,14 +100,6 @@ class _IDivide(Divide):
         return super().__call__(x1, x2, out=x1.data, where=where, dtype=dtype)
 
 
-class Reciprocal(UnaryArith):
-    numpy_ufunc = np.reciprocal
-
-    def backward_var(self, grad, index, **kwargs):
-        (a,) = self.variables
-        return -grad * np.reciprocal(a.data ** 2)
-
-
 class Power(BinaryArith):
     numpy_ufunc = np.power
 
@@ -123,6 +117,17 @@ class _IPower(Power):
         self, x1: "Tensor", x2: "Tensor", out=None, *, where=True, dtype=None
     ) -> np.ndarray:
         return super().__call__(x1, x2, out=x1.data, where=where, dtype=dtype)
+
+
+# Unary Ops
+
+
+class Reciprocal(UnaryArith):
+    numpy_ufunc = np.reciprocal
+
+    def backward_var(self, grad, index, **kwargs):
+        (a,) = self.variables
+        return -grad * np.reciprocal(a.data ** 2)
 
 
 class Square(UnaryArith):
