@@ -9,7 +9,7 @@ MyGrad's tensors exhibit the same view semantics and memory-sharing relationship
 as NumPy arrays. I.e. any (non-scalar) tensor produced via basic indexing will share
 memory with its parent.
 
->>> x = mg.Tensor([1., 2., 3., 4.])
+>>> x = mg.tensor([1., 2., 3., 4.])
 >>> y = x[:2]  # the view: Tensor([1., 2.])
 >>> y.base is x
 True

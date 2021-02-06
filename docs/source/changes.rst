@@ -35,6 +35,7 @@ is nicely compatible with gradient-based optimization work flows.
 New Utilities
 -------------
 
+- :func:`~mygrad.tensor`
 - :func:`~mygrad.astensor`
 - :func:`~mygrad.asarray`
 - :func:`~mygrad.no_autodiff`
@@ -49,14 +50,14 @@ The Interfaces Between ``mygrad.Tensor`` and ``numpy.array`` Match
 ------------------------------------------------------------------
 
 You can now control the dimensionality of a tensor and whether or not a tensor copies its data upon initialization, via the
-:class:`~mygrad.Tensor` interface. This mirrors the behavior of :func:`~numpy.array`
+:func:`~mygrad.tensor` interface. This mirrors the behavior of :func:`~numpy.array`
 
 +-------------------------------------------------------+-------------------------------------------------------+-------------------------------------------------+
 | Numpy                                                 | MyGrad 1.X                                            | MyGrad 2.0                                      |
 +=======================================================+=======================================================+=================================================+
 | .. code:: python                                      | .. code:: python                                      | .. code:: python                                |
 |                                                       |                                                       |                                                 |
-|    >>> np.array([1., 2.], copy=True, ndmin=2)         |    >>> mg.Tensor([1., 2.], copy=True, ndmin=2)        |    >>> mg.Tensor([1., 2.], copy=True, ndmin=2)  |
+|    >>> np.array([1., 2.], copy=True, ndmin=2)         |    >>> mg.Tensor([1., 2.], copy=True, ndmin=2)        |    >>> mg.tensor([1., 2.], copy=True, ndmin=2)  |
 |    array([[1., 2.]])                                  |    <TypeError>                                        |    Tensor([[1., 2.]])                           |
 +-------------------------------------------------------+-------------------------------------------------------+-------------------------------------------------+
 
@@ -79,7 +80,7 @@ mutate their underlying data.
 +===================================+===================================+===================================+
 | .. code:: python                  | .. code:: python                  | .. code:: python                  |
 |                                   |                                   |                                   |
-|    >>> x = np.array([1., 2.])     |    >>> x = mg.Tensor([1., 2.])    |    >>> x = mg.Tensor([1., 2.])    |
+|    >>> x = np.array([1., 2.])     |    >>> x = mg.Tensor([1., 2.])    |    >>> x = mg.tensor([1., 2.])    |
 |    >>> y = x                      |    >>> y = x                      |    >>> y = x                      |
 |    >>> x *= 2                     |    >>> x *= 2  # x = 2 * x        |    >>> x *= 2                     |
 |    >>> x is y                     |    >>> x is y  # doesn't match!   |    >>> x is y  # matches!         |
@@ -106,7 +107,7 @@ attribute
 +===================================+=====================================+===================================+
 | .. code:: python                  | .. code:: python                    | .. code:: python                  |
 |                                   |                                     |                                   |
-|    >>> x = np.array([1., 2., 3.]) |    >>> x = mg.Tensor([1., 2., 3.])  |    >>> x = mg.Tensor([1., 2., 3.])|
+|    >>> x = np.array([1., 2., 3.]) |    >>> x = mg.Tensor([1., 2., 3.])  |    >>> x = mg.tensor([1., 2., 3.])|
 |    >>> y = x[:2]                  |    >>> y = x[:2]                    |    >>> y = x[:2]                  |
 |    >>> np.shares_memory(x, y)     |    >>> np.shares_memory(x, y)       |    >>> np.shares_memory(x, y)     |
 |    True                           |    True                             |    True                           |
@@ -155,7 +156,7 @@ and that  MyGrad fully supports backpropagation through all flavors of einsum!)
 
 .. code-block:: python
 
-   >>> x = mg.Tensor([[0., 1., 2.],
+   >>> x = mg.tensor([[0., 1., 2.],
    ...                [3., 4., 5.],
    ...                [6., 7., 8.]])
 
@@ -207,7 +208,7 @@ This enables the following common workflow for performing gradient-based optimiz
 +=====================================+=====================================+
 | .. code:: python                    | .. code:: python                    |
 |                                     |                                     |
-|    >>> x = mg.Tensor([1., 2.])      |    >>> x = mg.Tensor([1., 2.])      |
+|    >>> x = mg.Tensor([1., 2.])      |    >>> x = mg.tensor([1., 2.])      |
 |    >>> for _ in range(10):          |    >>> for _ in range(10):          |
 |    ...     y = 3 * x                |    ...     y = 3 * x  # nulls grad  |
 |    ...     assert x.grad is None    |    ...     assert x.grad is None    |
@@ -250,7 +251,7 @@ now get loudly narc'd on by MyGrad's merciless memory guard!
 | .. code:: python                            | .. code:: python                      |
 |                                             |                                       |
 |    >>> arr = np.array([1., 2.])             |    >>> arr = np.array([1., 2.])       |
-|    >>> tn = mg.Tensor([1. 1.])              |    >>> tn = mg.Tensor([1. 1.])        |
+|    >>> tn = mg.Tensor([1. 1.])              |    >>> tn = mg.tensor([1. 1.])        |
 |    >>> z = x * y                            |    >>> z = x * y                      |
 |    # mutating x will corrupt                |    # mutating x will corrupt          |
 |    # backprop through z...                  |    # backprop through z...            |
