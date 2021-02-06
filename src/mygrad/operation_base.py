@@ -52,6 +52,16 @@ class Operation(ABC):
         self.replay_kwargs: Optional[Dict[str, Any]] = None
         self.replay_force_constant: Optional[bool] = None
 
+    @staticmethod
+    def grad_post_process_fn(
+        grad: np.ndarray, var_shape: Tuple[int, ...]
+    ) -> np.ndarray:
+        # this function gets called all of the time; we can avoid
+        # the extra function call by doing the shape check upfront
+        if grad.shape == var_shape:
+            return grad
+        return reduce_broadcast(grad, var_shape)
+
     @abstractmethod
     def __call__(self, *input_vars: "Tensor", **kwargs) -> np.ndarray:
         """Performs a forward pass, f, of this Operation::
@@ -112,9 +122,6 @@ class Operation(ABC):
         grad: np.ndarray,
         *,
         graph: Set["WeakRef[Operation]"],
-        _reduction: Optional[
-            Callable[[np.ndarray, Tuple[int, ...]], np.ndarray]
-        ] = None,
         **kwargs,
     ):
         """Back-propagates the gradient through all of the operation's inputs.
@@ -129,10 +136,6 @@ class Operation(ABC):
         graph : Set[Operation]
             The set of all operations relevant to the terminal node of the computational graph,
             which triggered back-propagation.
-
-        _reduction : Optional[Callable[[ndarray, Tuple[int, ...]], ndarray]]
-            Developer option-only. A callable used to process the gradient
-            prior to accumulation (e.g. broadcast-reduction)
         """
         for index, var in enumerate(self.variables):
             if not var.constant:
@@ -145,6 +148,8 @@ class Operation(ABC):
                     )
 
                 try:
+                    # don't cast to array here so that we have an easier time
+                    # doing type checking (e.g. avoid `None` -> `array(None, dtype=obj)`
                     backed_grad = self.backward_var(grad, index, **kwargs)
                 except SkipGradient:
                     continue
@@ -156,23 +161,23 @@ class Operation(ABC):
                         f"\nGradients are expected to be real-valued scalars or "
                         f"numpy arrays, got a gradient of type: {type(backed_grad)}"
                     )
+
+                backed_grad = np.array(backed_grad, copy=False)
+                backed_grad = self.grad_post_process_fn(backed_grad, var.shape)
+
                 if var._grad is None:
-                    tmp_grad = np.asarray(backed_grad)
-
-                    if _reduction is not None:
-                        tmp_grad = _reduction(tmp_grad, var.shape)
-
-                    var._grad = (
-                        np.copy(tmp_grad)
-                        # tmp-grad is view of grad; we want to be able to
+                    backed_grad = (
+                        np.copy(backed_grad)
+                        # `backed_grad` is view of grad; we want to be able to
                         # augment tmp-grad inplace later
-                        if tmp_grad.base is not None or (tmp_grad is grad)
-                        else tmp_grad
+                        if backed_grad.base is not None or (backed_grad is grad)
+                        else backed_grad
                     )
-                else:
+                    if backed_grad.dtype != var.dtype:
+                        backed_grad = backed_grad.astype(var.dtype, copy=False)
 
-                    if _reduction is not None:
-                        backed_grad = _reduction(backed_grad, var.shape)
+                    var._grad = backed_grad
+                else:
                     var._grad += backed_grad
 
         # Avoid visiting the same node multiple times. Note that we don't store
@@ -193,15 +198,3 @@ class Operation(ABC):
 
 class BroadcastableOp(Operation, ABC):
     """ Signals that an Operation's forward pass can broadcast its tensor arguments."""
-
-    def backward(
-        self,
-        grad: np.ndarray,
-        *,
-        graph: Set["WeakRef[Operation]"],
-        _reduction: Optional[
-            Callable[[np.ndarray, Tuple[int, ...]], np.ndarray]
-        ] = None,
-        **kwargs,
-    ):
-        return super().backward(grad, graph=graph, _reduction=reduce_broadcast)
