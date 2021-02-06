@@ -858,7 +858,7 @@ class Tensor:
             finalize(f, _mem.release_writeability_lock_on_op, tensor_refs)
         return out
 
-    def _replay_op(self, *input_vars: "Tensor") -> "Tensor":
+    def _replay_op(self, *input_vars: Union[np.ndarray, "Tensor"]) -> "Tensor":
         """*dev use only*
 
         Replays the op that produced `self` - called on the specified
