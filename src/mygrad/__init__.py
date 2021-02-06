@@ -1,7 +1,8 @@
 from mygrad.tensor_base import (  # isort:skip  # avoid an import cycle
-    Tensor,
     asarray,
     astensor,
+    tensor,
+    Tensor,
 )
 from mygrad._utils.graph_tracking import no_autodiff
 from mygrad._utils.lock_management import (

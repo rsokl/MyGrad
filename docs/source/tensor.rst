@@ -29,11 +29,11 @@ and other mygrad-tensors. mygrad also provides familiar numpy-style tensor-creat
 functions (e.g. :func:`~mygrad.arange`, :func:`~mygrad.linspace`, etc.)
 
 >>> import mygrad as mg
->>> mg.Tensor(2.3)  # creating a 0-dimensional tensor
+>>> mg.tensor(2.3)  # creating a 0-dimensional tensor
 Tensor(2.3)
->>> mg.Tensor(np.array([1.2, 3.0]))  # casting a numpy-array to a tensor
+>>> mg.tensor(np.array([1.2, 3.0]))  # casting a numpy-array to a tensor
 Tensor([1.2, 3.0])
->>> mg.Tensor([[1, 2], [3, 4]])  # creating a 2-dimensional tensor from lists
+>>> mg.tensor([[1, 2], [3, 4]])  # creating a 2-dimensional tensor from lists
 Tensor([[1, 2],
        [3, 4]])
 >>> mg.arange(4)    # using numpy-style tensor creation functions
@@ -100,7 +100,7 @@ Accessing the Underlying NumPy Array
 underlying numpy-array can be accessed via ``.data``. This returns
 a direct reference to the numpy array.
 
->>> x = mg.Tensor([1, 2])
+>>> x = mg.tensor([1, 2])
 >>> x.data
 array([1, 2])
 
@@ -114,7 +114,7 @@ MyGrad's tensors exhibit the same view semantics and memory-sharing relationship
 as NumPy arrays. I.e. any (non-scalar) tensor produced via basic indexing will share
 memory with its parent.
 
->>> x = mg.Tensor([1., 2., 3., 4.])
+>>> x = mg.tensor([1., 2., 3., 4.])
 >>> y = x[:2]  # the view: Tensor([1., 2.])
 >>> y.base is x
 True

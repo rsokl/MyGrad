@@ -8,6 +8,7 @@ Array-Like
 .. autosummary::
    :toctree: generated/
 
+   tensor
    asarray
    astensor
 
