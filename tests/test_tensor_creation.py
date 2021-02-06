@@ -224,7 +224,7 @@ not_set = st.just(NotSet)
     copy=not_set | st.booleans(),
     # can't generically test with `constant=False` because of int-dtypes
     constant=st.none() | st.just(True),
-    ndmin=not_set | st.integers(0, 6),
+    ndmin=not_set | st.integers(-6, 6),
 )
 def test_tensor_mirrors_array(arr_like, dtype, copy, constant, ndmin):
     kwargs = {}
@@ -253,3 +253,16 @@ def test_tensor_mirrors_array(arr_like, dtype, copy, constant, ndmin):
     if tens.base is None:
         # sometimes numpy makes internal views; mygrad should never do this
         assert arr.base is not arr_like
+
+
+@given(
+    t=tensors(dtype=hnp.floating_dtypes() | hnp.integer_dtypes()),
+    dtype=st.none() | hnp.floating_dtypes() | hnp.integer_dtypes(),
+    copy=st.booleans(),
+    # can't generically test with `constant=False` because of int-dtypes
+    constant=st.none() | st.just(True),
+    ndmin=st.none() | st.floats(),
+)
+def test_bad_ndmin_raises(t, dtype, copy, constant, ndmin):
+    with pytest.raises(TypeError):
+        mg.tensor(t, dtype=dtype, copy=copy, ndmin=ndmin, constant=constant)

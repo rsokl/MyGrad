@@ -224,9 +224,7 @@ def tensor(
                     f"TypeError: `ndmin` requires a non-negative integer (got type {type(ndmin)})"
                 )
             if ndmin < 0:
-                raise ValueError(
-                    f"TypeError: `ndmin` requires a non-negative integer (got {ndmin})"
-                )
+                ndmin = 0  # numpy does this
             if ndmin > arr_like.ndim:
                 arr_like = arr_like[(*(None for _ in range(ndmin - arr_like.ndim)),)]
             # return tensor as-as
