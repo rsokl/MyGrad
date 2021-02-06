@@ -140,12 +140,17 @@ array([-2., -4.])
 Documentation for mygrad.Tensor
 -------------------------------
 
+.. toctree::
+   :maxdepth: 1
+   :caption: Contents:
+
+   generated/TensorClass
+
 .. currentmodule:: mygrad
 
 .. autosummary::
    :toctree: generated/
 
-   Tensor
    Tensor.astype
    Tensor.backward
    Tensor.base
