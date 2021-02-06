@@ -1,6 +1,6 @@
 import numpy as np
 
-from mygrad.operation_base import BroadcastableOp, Operation
+from mygrad.operation_base import BinaryArith, Operation, UnaryArith
 
 __all__ = [
     "Sin",
@@ -20,15 +20,11 @@ __all__ = [
 ]
 
 
-class Sin(Operation):
-    """ f(a) -> sin(a)"""
-
-    def __call__(self, a):
-        self.variables = (a,)
-        return np.sin(a.data)
+class Sin(UnaryArith):
+    numpy_ufunc = np.sin
 
     def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
+        (a,) = self.variables
         return grad * np.cos(a.data)
 
 
@@ -45,32 +41,24 @@ class Sinc(Operation):
         return np.sinc(a.data)
 
     def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
+        (a,) = self.variables
         x = a.data
         return np.pi * grad * np.piecewise(x, [x == 0, x != 0], [np.zeros_like, _dsinc])
 
 
-class Cos(Operation):
-    """ f(a) -> cos(a)"""
-
-    def __call__(self, a):
-        self.variables = (a,)
-        return np.cos(a.data)
+class Cos(UnaryArith):
+    numpy_ufunc = np.cos
 
     def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
+        (a,) = self.variables
         return grad * -np.sin(a.data)
 
 
-class Tan(Operation):
-    """ f(a) -> tan(a)"""
-
-    def __call__(self, a):
-        self.variables = (a,)
-        return np.tan(a.data)
+class Tan(UnaryArith):
+    numpy_ufunc = np.tan
 
     def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
+        (a,) = self.variables
         return grad / np.cos(a.data) ** 2
 
 
@@ -82,7 +70,7 @@ class Csc(Operation):
         return 1 / np.sin(a.data)
 
     def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
+        (a,) = self.variables
         return grad * -np.cos(a.data) / np.sin(a.data) ** 2
 
 
@@ -94,7 +82,7 @@ class Sec(Operation):
         return 1 / np.cos(a.data)
 
     def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
+        (a,) = self.variables
         return grad * np.sin(a.data) / np.cos(a.data) ** 2
 
 
@@ -106,45 +94,33 @@ class Cot(Operation):
         return 1 / np.tan(a.data)
 
     def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
+        (a,) = self.variables
         return -grad / np.sin(a.data) ** 2
 
 
-class Arcsin(Operation):
-    """ f(a) -> arcsin(a)"""
-
-    def __call__(self, a):
-        self.variables = (a,)
-        return np.arcsin(a.data)
+class Arcsin(UnaryArith):
+    numpy_ufunc = np.arcsin
 
     def backward_var(self, grad, index, **kwargs):
         # d arcsin / dx at x = -1, 1 returns 0, not NaN
-        a = self.variables[index]
+        (a,) = self.variables
         return np.select([np.abs(a.data) != 1], [grad / np.sqrt(1 - a.data ** 2)])
 
 
-class Arccos(Operation):
-    """ f(a) -> arccos(a)"""
-
-    def __call__(self, a):
-        self.variables = (a,)
-        return np.arccos(a.data)
+class Arccos(UnaryArith):
+    numpy_ufunc = np.arccos
 
     def backward_var(self, grad, index, **kwargs):
         # d arccos / dx at x = -1, 1 returns 0, not NaN
-        a = self.variables[index]
+        (a,) = self.variables
         return np.select([np.abs(a.data) != 1], [-grad / np.sqrt(1 - a.data ** 2)])
 
 
-class Arctan(Operation):
-    """ f(a) -> arctan(a)"""
-
-    def __call__(self, a):
-        self.variables = (a,)
-        return np.arctan(a.data)
+class Arctan(UnaryArith):
+    numpy_ufunc = np.arctan
 
     def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
+        (a,) = self.variables
         return grad / (1 + a.data ** 2)
 
 
@@ -157,7 +133,7 @@ class Arccsc(Operation):
 
     def backward_var(self, grad, index, **kwargs):
         # d arccsc / dx at x = -1, 1 returns 0, not NaN
-        a = self.variables[index]
+        (a,) = self.variables
         return np.select(
             [np.abs(a.data) != 1], [-grad / (np.abs(a.data) * np.sqrt(a.data ** 2 - 1))]
         )
@@ -172,7 +148,7 @@ class Arcsec(Operation):
 
     def backward_var(self, grad, index, **kwargs):
         # d arcsec / dx at x = -1, 1 returns 0, not NaN
-        a = self.variables[index]
+        (a,) = self.variables
         return np.select(
             [np.abs(a.data) != 1], [grad / (np.abs(a.data) * np.sqrt(a.data ** 2 - 1))]
         )
@@ -183,25 +159,32 @@ class Arccot(Operation):
 
     def __call__(self, a):
         self.variables = (a,)
+        arr = a.data
+        is_zero = arr == 0
         return np.piecewise(
-            a.data, [a.data == 0, a.data != 0], [np.pi / 2, lambda x: np.arctan(1 / x)]
+            arr,
+            [is_zero, np.logical_not(is_zero)],
+            [np.pi / 2, lambda x: np.arctan(1 / x)],
         )
 
     def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
+        (a,) = self.variables
         return -grad / (1 + a.data ** 2)
 
 
-class Arctan2(BroadcastableOp):
-    """ f(a, b) -> arctan(a/b)"""
+class Arctan2(BinaryArith):
+    numpy_ufunc = np.arctan2
 
-    def __call__(self, a, b):
-        self.variables = (a, b)
-        return np.arctan2(a.data, b.data)
+    def __init__(self):
+        super().__init__()
+        self.cached_denom = None
 
     def backward_var(self, grad, index, **kwargs):
         a, b = self.variables
+        if self.cached_denom is None:
+            self.cached_denom = a.data ** 2 + b.data ** 2
+
         if index == 0:
-            return grad * b.data / (a.data ** 2 + b.data ** 2)
+            return grad * b.data / self.cached_denom
         else:
-            return -1.0 * grad * a.data / (a.data ** 2 + b.data ** 2)
+            return -1.0 * grad * a.data / self.cached_denom
