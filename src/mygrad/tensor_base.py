@@ -44,7 +44,7 @@ from mygrad.math.arithmetic.ops import (
     _IPow1,
     _IPower,
     _ISquare,
-    _ISubstract,
+    _ISubtract,
 )
 from mygrad.operation_base import BroadcastableOp, Operation
 from mygrad.tensor_manip.array_shape.ops import Flatten, Reshape
@@ -1631,7 +1631,7 @@ class Tensor:
         return self._op(Subtract, self, other)
 
     def __isub__(self, other) -> "Tensor":
-        self._in_place_op(_ISubstract, other)
+        self._in_place_op(_ISubtract, other)
         return self
 
     def __rsub__(self, other) -> "Tensor":

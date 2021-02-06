@@ -3,7 +3,7 @@ Defines the base class for mathematical operations capable of back-propagating
 gradients to their input tensors."""
 from abc import ABC, abstractmethod
 from numbers import Real
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Set, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Optional, Set, Tuple, Union
 from weakref import ReferenceType
 
 import numpy as np
@@ -15,7 +15,7 @@ if TYPE_CHECKING:  # pragma: no cover
     from mygrad import Tensor
     from mygrad._utils import WeakRef
 
-__all__ = ["Operation", "BroadcastableOp"]
+__all__ = ["Operation", "BroadcastableOp", "Ufunc"]
 
 
 class Operation(ABC):
@@ -51,6 +51,7 @@ class Operation(ABC):
         self.replay_args: Optional[Tuple[Any, ...]] = None
         self.replay_kwargs: Optional[Dict[str, Any]] = None
         self.replay_force_constant: Optional[bool] = None
+        self.where: Union[bool, np.ndarray] = True
 
     @staticmethod
     def grad_post_process_fn(
@@ -198,3 +199,60 @@ class Operation(ABC):
 
 class BroadcastableOp(Operation, ABC):
     """ Signals that an Operation's forward pass can broadcast its tensor arguments."""
+
+
+class Ufunc(Operation, ABC):
+    numpy_ufunc: np.ufunc
+
+    @property
+    def nin(self) -> int:
+        """The number of inputs."""
+        return self.numpy_ufunc.nin
+
+    @property
+    def nout(self) -> int:
+        """The number of outputs."""
+        return self.numpy_ufunc.nout
+
+    @property
+    def nargs(self) -> int:
+        """The number of arguments."""
+        return self.numpy_ufunc.nargs
+
+    @property
+    def ntypes(self) -> int:
+        """The number of types."""
+        return self.numpy_ufunc.ntypes
+
+    @property
+    def types(self):
+        """Returns a list with types grouped input->output."""
+        return self.numpy_ufunc.types
+
+    @property
+    def identity(self):
+        """The identity value."""
+        return self.numpy_ufunc.identity
+
+    @property
+    def signature(self):
+        """Definition of the core elements a generalized ufunc operates on."""
+        return self.numpy_ufunc.signature
+
+
+class UnaryArith(Ufunc, ABC):
+    def __call__(self, x1: "Tensor", out=None, *, where=True, dtype=None) -> np.ndarray:
+        self.variables = (x1,)
+        if where is not True:
+            self.where = where
+        return self.numpy_ufunc(x1.data, out=out, where=where, dtype=dtype)
+
+
+class BinaryArith(Ufunc, ABC):
+    def __call__(
+        self, x1: "Tensor", x2: "Tensor", out=None, *, where=True, dtype=None
+    ) -> np.ndarray:
+        self.variables = (x1, x2)
+        if where is not True:
+            self.where = where
+        return self.numpy_ufunc(x1.data, x2.data, out=out, where=where, dtype=dtype)
