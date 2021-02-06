@@ -5,7 +5,7 @@ etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 """
 
 from functools import wraps
-from numbers import Number
+from numbers import Integral, Number, Real
 from typing import (
     Any,
     Callable,
@@ -127,7 +127,115 @@ def asarray(a, dtype=None, order=None) -> np.ndarray:
     return np.asarray(a, dtype=dtype, order=order)
 
 
-def astensor(t, dtype=None, constant: bool = None) -> "Tensor":
+def tensor(
+    arr_like,
+    dtype=None,
+    *,
+    constant: Optional[bool] = None,
+    copy: bool = True,
+    ndmin: int = 0,
+) -> "Tensor":
+    """
+    Create a tensor
+
+    This documentation was adapted from that of ``numpy.array`
+
+    Parameters
+    ----------
+    arr_like : array_like
+        A tensor, any object exposing the array interface, an object whose
+        __array__ method returns an tensor, a real number, any (nested) sequence.
+
+    dtype : data-type, optional
+        The desired data-type for the tensor. Restricted to integer and float type.
+        If not specified, then the type will be determined as the minimum type required
+        to hold the objects in the sequence.
+
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. ``constant_tensor.grad`` will always
+        return ``None``).
+
+        If a new tensor is returned:
+         - Defaults to ``False`` for float-type data.
+         - Defaults to ``True`` for integer-type data.
+
+    copy : bool, optional
+        If true (default), or if a copy is needed to satisfy any of the
+        other requirements (``dtype``, ``constant``, etc.) then a new tensor
+        is created from copied data. Otherwise the tensor will be returned
+        unchanged.
+
+    ndmin : int, optional
+        Specifies the minimum number of dimensions that the resulting
+        tensor should have. Ones will be pre-pended to the shape as
+        needed to meet this requirement.
+
+    Returns
+    -------
+    out : Tensor
+        A tensor satisfying the specified requirements.
+
+    See Also
+    --------
+    empty_like : Return an empty tensor with shape and type of input.
+    ones_like : Return an tensor of ones with shape and type of input.
+    zeros_like : Return an tensor of zeros with shape and type of input.
+    full_like : Return a new tensor with shape of input filled with value.
+    empty : Return a new uninitialized tensor.
+    ones : Return a new tensor setting values to one.
+    zeros : Return a new tensor setting values to zero.
+    full : Return a new tensor of given shape filled with value.
+
+    Examples
+    --------
+    >>> import mygrad as mg
+    >>> mg.tensor([1, 2, 3])
+    Tensor([1, 2, 3])
+
+    Upcasting:
+
+    >>> mg.tensor([1, 2, 3.0])
+    Tensor([ 1.,  2.,  3.])
+
+    More than one dimension:
+
+    >>> mg.tensor([[1, 2], [3, 4]])
+    Tensor([[1, 2],
+           [3, 4]])
+
+    Minimum dimensions 2:
+
+    >>> mg.tensor([1, 2, 3], ndmin=2)
+    Tensor([[1, 2, 3]])
+
+    Type provided:
+
+    >>> mg.tensor([1, 2, 3], dtype="float32")
+    Tensor([1., 2., 3.], dtype=float32)
+    """
+
+    if isinstance(arr_like, Tensor) and copy is False:
+        if (constant is None or arr_like.constant is constant) and (
+            dtype is None or (arr_like.dtype == np.dtype(dtype))
+        ):
+            if not isinstance(ndmin, Integral):
+                raise TypeError(
+                    f"TypeError: `ndmin` requires a non-negative integer (got type {type(ndmin)})"
+                )
+            if ndmin < 0:
+                raise ValueError(
+                    f"TypeError: `ndmin` requires a non-negative integer (got {ndmin})"
+                )
+            if ndmin > arr_like.ndim:
+                arr_like = arr_like[(*(None for _ in range(ndmin - arr_like.ndim)),)]
+            # return tensor as-as
+            return arr_like
+
+    return Tensor(arr_like, dtype=dtype, constant=constant, copy=copy, ndmin=ndmin)
+
+
+def astensor(t, dtype=None, *, constant: Optional[bool] = None) -> "Tensor":
     """Convert the input to a tensor.
 
     A tensor `t` is returned unchanged - its gradient and computational
@@ -209,14 +317,7 @@ def astensor(t, dtype=None, constant: bool = None) -> "Tensor":
     >>> mg.astensor(t, constant=True).data is t.data
     True
     """
-    if isinstance(t, Tensor):
-        if (constant is None or t.constant is constant) and (
-            dtype is None or (t.dtype == np.dtype(dtype))
-        ):
-            # return tensor as-as
-            return t
-
-    return Tensor(t, dtype=dtype, constant=constant, copy=False)
+    return tensor(t, dtype=dtype, constant=constant, copy=False, ndmin=0)
 
 
 class Tensor:
@@ -240,9 +341,9 @@ class Tensor:
     functions (e.g. ``mygrad.arange``, ``mygrad.linspace``, etc.)
 
     >>> import mygrad as mg
-    >>> mg.Tensor(2.3)  # creating a 0-dimensional tensor
+    >>> mg.tensor(2.3)  # creating a 0-dimensional tensor
     Tensor(2.3)
-    >>> mg.Tensor(np.array([1.2, 3.0]))  # casting a numpy-array to a tensor
+    >>> mg.tensor(np.array([1.2, 3.0]))  # casting a numpy-array to a tensor
     Tensor([1.2, 3.0])
     >>> mg.Tensor([[1, 2], [3, 4]])  # creating a 2-dimensional tensor
     Tensor([[1, 2],
@@ -254,13 +355,13 @@ class Tensor:
 
     >>> import numpy as np
     >>> arr = np.arange(10.)
-    >>> t_var = Tensor(arr, constant=False)
+    >>> t_var = tensor(arr, constant=False)
     >>> np.shares_memory(arr, t_var)
     False
 
     Creating constant tensor will not make a copy of the array data:
 
-    >>> t_const = Tensor(arr, constant=True)
+    >>> t_const = mg.tensor(arr, constant=True)
     >>> np.shares_memory(arr, t_const)
     True
 
@@ -271,8 +372,8 @@ class Tensor:
     ````. This is a "forward pass imperative" style for creating a computational
     graph - the graph is constructed as we carry out the forward-pass computation.
 
-    >>> x = Tensor(3.0)
-    >>> y = Tensor(2.0)
+    >>> x = mg.tensor(3.0)
+    >>> y = mg.tensor(2.0)
     >>> ℒ = 2 * x + y ** 2
 
     Invoking ``ℒ.backward()`` signals the computational graph to
@@ -443,11 +544,12 @@ class Tensor:
             # functions that are wrapped in no_autodiff
             if not issubclass(dtype, np.integer):
                 raise TypeError(
-                    f"Tensor data must be a integer or floating type, received {dtype}"
+                    f"Tensor data must be of an integer type or floating type, received {dtype}"
                 )
 
             elif constant is False:
                 raise ValueError("Integer-valued tensors must be treated as constants.")
+
         if constant is None:
             # non-float: default constant -> True
             # float: default constant -> False
@@ -1111,7 +1213,7 @@ class Tensor:
     def __contains__(self, item) -> bool:
         return self.data.__contains__(item)
 
-    def __getitem__(self, item) -> Union["Tensor", Number]:
+    def __getitem__(self, item) -> Union["Tensor", Real]:
         return self._op(GetItem, self, op_args=(item,))
 
     def __iter__(self):
@@ -1269,8 +1371,6 @@ class Tensor:
                     inplace_target,  # tensor will be mutated
                     # we need to accommodate case where inplace operation is writing
                     # *from* a view - redirect view to placeholder
-                    #
-                    # TODO: Also check if inplace op involves view *data*
                     *(graph.get_placeholder_if_exists(t) for t in input_vars),
                     op_args=op_args,
                     op_kwargs=op_kwargs,

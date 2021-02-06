@@ -5,9 +5,10 @@ import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
 import pytest
-from hypothesis import assume, given
+from hypothesis import assume, given, settings
 from numpy.testing import assert_array_equal
 
+import mygrad as mg
 from mygrad import Tensor, astensor, mem_guard_off
 from mygrad.tensor_creation.funcs import (
     arange,
@@ -201,3 +202,54 @@ def test_as_tensor(
         assert a == original, "the original array was mutated"
     else:
         assert_array_equal(original, a, err_msg="the original array was mutated")
+
+
+general_arrays = hnp.arrays(
+    shape=hnp.array_shapes(min_side=0, min_dims=0),
+    dtype=hnp.floating_dtypes() | hnp.integer_dtypes(),
+)
+
+
+class NotSet:
+    pass
+
+
+not_set = st.just(NotSet)
+
+
+@settings(max_examples=1000)
+@given(
+    arr_like=general_arrays.map(lambda x: x.tolist()) | general_arrays,
+    dtype=not_set | st.none() | hnp.floating_dtypes() | hnp.integer_dtypes(),
+    copy=not_set | st.booleans(),
+    # can't generically test with `constant=False` because of int-dtypes
+    constant=st.none() | st.just(True),
+    ndmin=not_set | st.integers(0, 6),
+)
+def test_tensor_mirrors_array(arr_like, dtype, copy, constant, ndmin):
+    kwargs = {}
+    for name, var_ in [("dtype", dtype), ("copy", copy), ("ndmin", ndmin)]:
+        if var_ is not NotSet:
+            kwargs[name] = var_
+
+    try:
+        arr = np.array(arr_like, **kwargs)
+    except (ValueError, OverflowError):
+        assume(False)
+
+    tensor_like = (
+        Tensor(arr_like.copy(), constant=constant)
+        if isinstance(arr_like, np.ndarray)
+        else arr_like
+    )
+
+    tens = mg.tensor(tensor_like, constant=constant, **kwargs)
+
+    assert tens.dtype == arr.dtype
+    assert tens.shape == arr.shape
+    assert np.shares_memory(tens, tensor_like) is np.shares_memory(arr, arr_like)
+    assert (tens is tensor_like) is (arr is arr_like)
+    assert (tens.base is tensor_like) is (arr.base is arr_like)
+    if tens.base is None:
+        # sometimes numpy makes internal views; mygrad should never do this
+        assert arr.base is not arr_like
