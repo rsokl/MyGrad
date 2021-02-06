@@ -1,4 +1,5 @@
 from numbers import Number
+from typing import Optional
 
 import numpy as np
 
@@ -113,7 +114,7 @@ class SetItem(BroadcastableOp):
 
     can_return_view = True
 
-    def __call__(self, a, b, index):
+    def __call__(self, a, b, index, out: Optional[np.ndarray] = None):
         """a[index] = b
 
         Parameters
@@ -130,13 +131,20 @@ class SetItem(BroadcastableOp):
             All means of numpy-array indexing (basic, advanced, mixed, etc) are
             supported.
 
+        out : Optional[ndarray]
+            The data to be mutated; defaults to ``a.data``. This argument is
+            included to provide parity with standard ufunc signatures.
+
         Notes
         -----
         Additional computational overhead is required for back-propagation when
         `index` contains any integer-valued arrays, to accommodate for the scenario
         in which a single element is set multiple times."""
 
-        out = a.data
+        if out is None:
+            out = a.data
+
+        assert a.data is out
         self.variables = (a, b)
         self.index = index if isinstance(index, tuple) else (index,)
         out[index] = b.data

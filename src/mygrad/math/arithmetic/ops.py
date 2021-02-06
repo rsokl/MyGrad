@@ -7,23 +7,16 @@ import numpy as np
 if TYPE_CHECKING:  # pragma: no cover
     from mygrad import Tensor
 
-from mygrad.operation_base import BinaryArith, BroadcastableOp, Operation, UnaryArith
+from mygrad.operation_base import BinaryArith, BroadcastableOp, UnaryArith
 
 __all__ = [
     "Add",
-    "_IAdd",
     "Subtract",
-    "_ISubtract",
     "Multiply",
-    "_IMultiply",
     "Divide",
-    "_IDivide",
     "Reciprocal",
     "Power",
-    "_IPower",
-    "_IPow1",
     "Square",
-    "_ISquare",
     "Positive",
     "Negative",
     "AddSequence",
@@ -40,13 +33,6 @@ class Add(BinaryArith):
         return grad
 
 
-class _IAdd(Add):
-    def __call__(
-        self, x1: "Tensor", x2: "Tensor", out=None, *, where=True, dtype=None
-    ) -> np.ndarray:
-        return super().__call__(x1, x2, out=x1.data, dtype=dtype, where=where)
-
-
 class Subtract(BinaryArith):
     numpy_ufunc = np.subtract
 
@@ -55,13 +41,6 @@ class Subtract(BinaryArith):
             return grad
         else:
             return -grad
-
-
-class _ISubtract(Subtract):
-    def __call__(
-        self, x1: "Tensor", x2: "Tensor", out=None, *, where=True, dtype=None
-    ) -> np.ndarray:
-        return super().__call__(x1, x2, out=x1.data, dtype=dtype, where=where)
 
 
 class Multiply(BinaryArith):
@@ -75,13 +54,6 @@ class Multiply(BinaryArith):
             return grad * a.data
 
 
-class _IMultiply(Multiply):
-    def __call__(
-        self, x1: "Tensor", x2: "Tensor", out=None, *, where=True, dtype=None
-    ) -> np.ndarray:
-        return super().__call__(x1, x2, out=x1.data, where=where, dtype=dtype)
-
-
 class Divide(BinaryArith):
     numpy_ufunc = np.divide
 
@@ -91,13 +63,6 @@ class Divide(BinaryArith):
             return grad / b.data
         else:  # broadcast through b
             return -grad * a.data / (b.data ** 2)
-
-
-class _IDivide(Divide):
-    def __call__(
-        self, x1: "Tensor", x2: "Tensor", out=None, *, where=True, dtype=None
-    ) -> np.ndarray:
-        return super().__call__(x1, x2, out=x1.data, where=where, dtype=dtype)
 
 
 class Power(BinaryArith):
@@ -110,13 +75,6 @@ class Power(BinaryArith):
             return grad * y * (x ** np.where(y, (y - 1), 1))
         else:
             return grad * (x ** y) * np.log(np.where(x, x, 1))
-
-
-class _IPower(Power):
-    def __call__(
-        self, x1: "Tensor", x2: "Tensor", out=None, *, where=True, dtype=None
-    ) -> np.ndarray:
-        return super().__call__(x1, x2, out=x1.data, where=where, dtype=dtype)
 
 
 # Unary Ops
@@ -136,31 +94,6 @@ class Square(UnaryArith):
     def backward_var(self, grad, index, **kwargs):
         grad = 2 * grad
         grad *= self.variables[index].data
-        return grad
-
-
-class _ISquare(Square):
-    def __call__(self, x1: "Tensor", out=None, *, where=True, dtype=None) -> np.ndarray:
-        return super().__call__(x1, out=x1.data, where=where, dtype=dtype)
-
-
-class _IPow1(Operation):
-    def __call__(self, inplace_target) -> np.ndarray:
-        """Performs a **= 1  (special case)
-
-        Parameters
-        ----------
-        inplace_target : mygrad.Tensor
-
-        Returns
-        -------
-        inplace_target_data : numpy.ndarray
-        """
-
-        self.variables = (inplace_target,)
-        return inplace_target.data
-
-    def backward_var(self, grad: np.ndarray, index: int, **kwargs) -> np.ndarray:
         return grad
 
 

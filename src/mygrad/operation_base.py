@@ -15,7 +15,13 @@ if TYPE_CHECKING:  # pragma: no cover
     from mygrad import Tensor
     from mygrad._utils import WeakRef
 
-__all__ = ["Operation", "BroadcastableOp", "Ufunc"]
+__all__ = [
+    "Operation",
+    "BroadcastableOp",
+    "Ufunc",
+    "UnaryArith",
+    "BinaryArith",
+]
 
 
 class Operation(ABC):

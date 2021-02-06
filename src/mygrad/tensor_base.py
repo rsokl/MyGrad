@@ -38,13 +38,6 @@ from mygrad.math.arithmetic.ops import (
     Power,
     Square,
     Subtract,
-    _IAdd,
-    _IDivide,
-    _IMultiply,
-    _IPow1,
-    _IPower,
-    _ISquare,
-    _ISubtract,
 )
 from mygrad.operation_base import BroadcastableOp, Operation
 from mygrad.tensor_manip.array_shape.ops import Flatten, Reshape
@@ -715,6 +708,7 @@ class Tensor:
         op_args: Optional[Sequence] = None,
         op_kwargs: Optional[Dict[str, Any]] = None,
         constant: bool = False,
+        out: Optional[Union[np.ndarray, "Tensor"]] = None,
     ):
         """Wraps operations performed between tensors: f(a, b, ...).
 
@@ -739,10 +733,24 @@ class Tensor:
         constant : bool, optional (default=False)
             If True, the resulting Tensor is a constant.
 
+        out: Optional[Union[np.ndarray, "Tensor"]]
+            The target where the output (an ndarray) of the operation will be written.
+            Thus this raises if `out` is read-only.
+
+            There is an exception to this if  a tensor is provided, in which case the
+            operation does not write to its underlying memory but rather triggers "in-place
+            semantics" so that the computational graph behaves as if the tensor was mutated.
+            See  ``Tensor._in_place_op`` for more details.
+
         Returns
         -------
         mygrad.Tensor
             The tensor-result of the operation's forward-pass."""
+        if out is not None and isinstance(out, Tensor):
+            out._in_place_op(
+                Op, *input_vars, op_args=op_args, op_kwargs=op_kwargs, constant=constant
+            )
+
         _uniques_bases_then_arrs = ()
 
         # cast all input-vars to tensors
@@ -780,7 +788,12 @@ class Tensor:
         f = Op()
 
         try:
-            op_out = f(*tensor_vars, *op_args, **op_kwargs)  # type: np.ndarray
+            if out is None:
+                op_out = f(*tensor_vars, *op_args, **op_kwargs)  # type: np.ndarray
+            else:
+                op_out = f(
+                    *tensor_vars, *op_args, **op_kwargs, out=out
+                )  # type: np.ndarray
         except Exception as e:
             if _track.TRACK_GRAPH and _mem.MEM_GUARD:
                 _mem.release_writeability_lock_on_op(_uniques_bases_then_arrs)
@@ -876,7 +889,7 @@ class Tensor:
             constant=self.creator.replay_force_constant,
         )
 
-    def backward(self, grad: Optional[np.ndarray] = None):
+    def backward(self, grad: Optional[Union[Real, np.ndarray]] = None):
         """Trigger backpropagation and compute the derivatives of this tensor.
 
         Designating this tensor as the tensor ℒ, compute dℒ/dx for all (non-constant) tensors
@@ -1237,6 +1250,7 @@ class Tensor:
                 op_args=op_args,
                 op_kwargs=op_kwargs,
                 constant=constant,
+                out=self.data,
             )
         #
         # **********************************************************************************
@@ -1373,6 +1387,7 @@ class Tensor:
                     op_args=op_args,
                     op_kwargs=op_kwargs,
                     constant=constant,
+                    out=inplace_target.data,
                 )
         except Exception as e:
             graph.restore_old_graph()
@@ -1621,7 +1636,7 @@ class Tensor:
         return self._op(Add, self, other)
 
     def __iadd__(self, other) -> "Tensor":
-        self._in_place_op(_IAdd, other)
+        self._in_place_op(Add, other)
         return self
 
     def __radd__(self, other) -> "Tensor":
@@ -1631,7 +1646,7 @@ class Tensor:
         return self._op(Subtract, self, other)
 
     def __isub__(self, other) -> "Tensor":
-        self._in_place_op(_ISubtract, other)
+        self._in_place_op(Subtract, other)
         return self
 
     def __rsub__(self, other) -> "Tensor":
@@ -1644,14 +1659,14 @@ class Tensor:
         return self._op(Divide, other, self)
 
     def __itruediv__(self, other) -> "Tensor":
-        self._in_place_op(_IDivide, other)
+        self._in_place_op(Divide, other)
         return self
 
     def __mul__(self, other) -> "Tensor":
         return self._op(Multiply, self, other)
 
     def __imul__(self, other) -> "Tensor":
-        self._in_place_op(_IMultiply, other)
+        self._in_place_op(Multiply, other)
         return self
 
     def __rmul__(self, other) -> "Tensor":
@@ -1679,13 +1694,13 @@ class Tensor:
             isinstance(other, np.ndarray) and other.ndim == 0
         ):
             if other == 1:
-                self._in_place_op(_IPow1)
+                self._in_place_op(Positive)
                 return self
             elif other == 2:
-                self._in_place_op(_ISquare)
+                self._in_place_op(Square)
                 return self
 
-        self._in_place_op(_IPower, other)
+        self._in_place_op(Power, other)
         return self
 
     def __rpow__(self, other):
