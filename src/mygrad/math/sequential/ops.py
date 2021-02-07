@@ -5,7 +5,7 @@ from typing import Any
 import numpy as np
 
 import mygrad._utils.graph_tracking as _tracking
-from mygrad.operation_base import Operation
+from mygrad.operation_base import Operation, Sequential
 
 __all__ = ["MaxMin", "Sum", "Mean", "Prod", "CumProd", "CumSum", "Variance", "StdDev"]
 
@@ -136,47 +136,33 @@ class MaxMin(Operation):
             return out.reshape(shape).transpose(*self.from_trans)
 
 
-class Sum(Operation):
-    def __call__(self, a, axis=None, keepdims=False):
-        """Parameters
-        ----------
-        a : mygrad.Tensor"""
-        self.variables = (a,)
-
-        if axis is not None and not hasattr(axis, "__iter__"):
-            axis = (axis,)
-        self.axis = axis
-
-        self.keepdims = keepdims
-        out = a.data.sum(axis=axis, keepdims=keepdims)
-        self.outshape = out.shape if isinstance(out, np.ndarray) else None
-        return out
+class Sum(Sequential):
+    numpy_func = staticmethod(np.sum)
 
     def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
-        if self.outshape is None:
-            return np.full(a.shape, grad, dtype=float)
+        (a,) = self.variables
+        if self.axis is None:
+            return np.full(a.shape, grad, dtype=a.dtype)
 
         if not self.keepdims:
             index = [slice(None) for i in range(a.ndim)]
             for i in self.axis:
                 index[i] = np.newaxis
             grad = grad[tuple(index)]
-        return np.broadcast_to(grad, a.data.shape).astype(float)
+        return np.broadcast_to(grad, a.shape).astype(a.dtype, copy=False)
 
 
 class Mean(Sum):
-    def __call__(self, a, axis=None, keepdims=False):
-        out = super().__call__(a, axis, keepdims)
-        self.n = (
+    numpy_func = staticmethod(np.mean)
+
+    def backward_var(self, grad, index, **kwargs):
+        (a,) = self.variables
+        n = (
             a.data.size
             if self.axis is None
             else np.prod([a.shape[i] for i in self.axis])
         )
-        return out / self.n
-
-    def backward_var(self, grad, index, **kwargs):
-        return super().backward_var(grad / self.n, index, **kwargs)
+        return super().backward_var(grad / n, index, **kwargs)
 
 
 class Prod(Operation):

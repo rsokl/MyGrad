@@ -92,7 +92,9 @@ def sum(x, axis=None, keepdims=False, constant=False):
     >>> mg.sum([10], initial=5)
     Tensor(15)
     """
-    return Tensor._op(Sum, x, op_args=(axis, keepdims), constant=constant)
+    return Tensor._op(
+        Sum, x, op_kwargs=dict(axis=axis, keepdims=keepdims), constant=constant
+    )
 
 
 def mean(x, axis=None, keepdims=False, constant=False):
@@ -154,7 +156,9 @@ def mean(x, axis=None, keepdims=False, constant=False):
     >>> mg.mean(a, dtype=np.float64)
     Tensor(0.55000000074505806)
     """
-    return Tensor._op(Mean, x, op_args=(axis, keepdims), constant=constant)
+    return Tensor._op(
+        Mean, x, op_kwargs=dict(axis=axis, keepdims=keepdims), constant=constant
+    )
 
 
 def var(x, axis=None, ddof=0, keepdims=False, constant=False):

@@ -3,7 +3,7 @@ Defines the base class for mathematical operations capable of back-propagating
 gradients to their input tensors."""
 from abc import ABC, abstractmethod
 from numbers import Real
-from typing import TYPE_CHECKING, Any, Dict, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Set, Tuple, Union
 from weakref import ReferenceType
 
 import numpy as np
@@ -247,7 +247,14 @@ class Ufunc(Operation, ABC):
 
 
 class UnaryArith(Ufunc, ABC):
-    def __call__(self, x1: "Tensor", out=None, *, where=True, dtype=None) -> np.ndarray:
+    def __call__(
+        self,
+        x1: "Tensor",
+        out: Optional[np.ndarray] = None,
+        *,
+        where: Union[bool, np.ndarray] = True,
+        dtype=None,
+    ) -> np.ndarray:
         self.variables = (x1,)
         if where is not True:
             self.where = where
@@ -256,9 +263,64 @@ class UnaryArith(Ufunc, ABC):
 
 class BinaryArith(Ufunc, ABC):
     def __call__(
-        self, x1: "Tensor", x2: "Tensor", out=None, *, where=True, dtype=None
+        self,
+        x1: "Tensor",
+        x2: "Tensor",
+        out: Optional[np.ndarray] = None,
+        *,
+        where: Union[bool, np.ndarray] = True,
+        dtype=None,
     ) -> np.ndarray:
         self.variables = (x1, x2)
         if where is not True:
             self.where = where
         return self.numpy_ufunc(x1.data, x2.data, out=out, where=where, dtype=dtype)
+
+
+class Sequential(Operation, ABC):
+    numpy_func: Callable[..., np.ndarray]
+
+    def __init__(self):
+        self.axis = None
+        self.keepdims = None
+        self.initial = None
+        self.out_shape = None
+        super().__init__()
+
+    def __call__(
+        self,
+        a: "Tensor",
+        axis=None,
+        dtype=None,
+        out: Optional[np.ndarray] = None,
+        keepdims=np._NoValue,
+        initial=np._NoValue,
+        *,
+        where=np._NoValue,
+    ) -> np.ndarray:
+        self.variables: Tuple["Tensor"] = (a,)
+
+        if where is not True:
+            self.where = where
+
+        if axis is not None and not hasattr(axis, "__iter__"):
+            axis = (axis,)
+
+        self.axis: Optional[Tuple[int, ...]] = axis
+        self.keepdims = keepdims
+        self.initial = initial
+
+        kwargs = {}
+        if keepdims is not np._NoValue:
+            kwargs["keepdims"] = keepdims
+
+        if initial is not np._NoValue:
+            kwargs["initial"] = initial
+
+        if where is not np._NoValue:
+            kwargs["where"] = where
+
+        out = self.numpy_func(a.data, axis=axis, dtype=dtype, out=out, **kwargs)
+        self.out_shape = out.shape
+
+        return out
