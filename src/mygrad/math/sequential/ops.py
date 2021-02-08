@@ -1,6 +1,6 @@
 from collections.abc import Sequence
 from functools import reduce
-from typing import Any
+from typing import Optional, Tuple
 
 import numpy as np
 
@@ -52,7 +52,6 @@ class MaxMin(Operation):
             return np.array(a.data)  # np.max does not permit views -> copy
 
         if hasattr(axis, "__iter__"):
-            assert isinstance(axis, tuple)
             axis = tuple(ax % a.ndim for ax in axis)
             axis = None if len(axis) == a.ndim else tuple(sorted(axis))
         elif axis is not None:
@@ -165,22 +164,12 @@ class Mean(Sum):
         return super().backward_var(grad / n, index, **kwargs)
 
 
-class Prod(Operation):
-    def __call__(self, a, axis=None, keepdims=False):
-        """Parameters
-        ----------
-        a : mygrad.Tensor"""
-        self.variables = (a,)
-        if axis is not None and not hasattr(axis, "__iter__"):
-            axis = (axis,)
-        self.axis = axis
-        self.keepdims = keepdims
-        return a.data.prod(axis=axis, keepdims=keepdims)
+class Prod(Sequential):
+    numpy_func = staticmethod(np.prod)
 
     def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
+        (a,) = self.variables
         x = a.data
-        grad = np.asarray(grad)
 
         if a.ndim == 0:
             return grad
@@ -225,7 +214,9 @@ class Prod(Operation):
         return grad * dldx
 
 
-def _reverse_cumsum(x, axis=None):  # pragma: no cover
+def _reverse_cumsum(
+    x: np.ndarray, axis: Optional[int] = None
+) -> np.ndarray:  # pragma: no cover
     """ (x0, x1, x2) -> (x0, x0 + x1, x0 + x1 + x2)"""
     if axis is None:
         axis = 0
@@ -298,11 +289,9 @@ def _find_first_zeros_along_axis(x, axis):  # pragma: no cover
     return tuple(zip(*gen_inds))
 
 
-class CumProd(Operation):
-    def __call__(self, a, axis=None):
-        self.variables = (a,)
-        self.axis = axis
-        return np.cumprod(a.data, axis)
+class CumProd(Sequential):
+    numpy_func = staticmethod(np.cumprod)
+    _integer_axis_only = True
 
     def backward_var(self, grad, index, **kwargs):
         x = self.variables[index].data
@@ -355,11 +344,9 @@ class CumProd(Operation):
         return dldx
 
 
-class CumSum(Operation):
-    def __call__(self, a, axis=None):
-        self.variables = (a,)
-        self.axis = axis
-        return np.cumsum(a.data, axis)
+class CumSum(Sequential):
+    _integer_axis_only = True
+    numpy_func = staticmethod(np.cumsum)
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
@@ -369,57 +356,50 @@ class CumSum(Operation):
         return g
 
 
-class Variance(Operation):
-    _method_name = "var"
+class Variance(Sequential):
+    numpy_func = staticmethod(np.var)
 
-    def _grad_preprocess(self, grad: Any) -> np.ndarray:
+    def _grad_preprocess(self, grad: np.ndarray) -> np.ndarray:
         """Helper method provided so that `Variance` and `StdDev` can
         share the same implementation for `backward_var`."""
-        return np.asarray(grad)
-
-    def __call__(self, a, axis=None, keepdims=False, ddof=0):
-        self.variables = (a,)
-
-        if axis is not None and not hasattr(axis, "__iter__"):
-            axis = (axis,)
-
-        self.kwargs = dict(axis=axis, keepdims=keepdims, ddof=ddof)
-        return getattr(a.data, self._method_name)(**self.kwargs)
+        return grad
 
     def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
-        if isinstance(self.kwargs["axis"], Sequence) and len(self.kwargs["axis"]) == 0:
+        (a,) = self.variables
+        axis: Optional[Tuple[int, ...]] = self.axis
+        if isinstance(axis, Sequence) and len(axis) == 0:
             return np.zeros(a.shape, dtype=float)
 
-        N = (
-            a.size
-            if self.kwargs["axis"] is None
-            else np.prod([a.shape[i] for i in self.kwargs["axis"]])
-        )
-        N -= self.kwargs["ddof"]
+        N = a.size if axis is None else np.prod([a.shape[i] for i in axis])
+        N -= self.ddof
 
         grad = self._grad_preprocess(grad)
         if grad.ndim == 0:
+            # keepdims=False and axis=None (or all axes)
             grad = np.full(a.shape, grad, dtype=float)
         else:
-            if not self.kwargs["keepdims"]:
+            axis: Tuple[int, ...]
+            if not self.keepdims:
                 index = [slice(None)] * a.ndim
-                for i in self.kwargs["axis"]:
+                for i in axis:
                     index[i] = np.newaxis
                 grad = grad[tuple(index)]
-        back = (2.0 / N) * (
-            a.data - a.data.mean(axis=self.kwargs["axis"], keepdims=True)
-        )
+        back = (2.0 / N) * (a.data - a.data.mean(axis=axis, keepdims=True))
         return back * grad
 
 
 class StdDev(Variance):
-    _method_name = "std"
+    numpy_func = staticmethod(np.std)
 
-    def _grad_preprocess(self, grad: Any) -> np.ndarray:
+    def _grad_preprocess(self, grad: np.ndarray) -> np.ndarray:
         """Helper method provided so that `Variance` and `StdDev` can
         share the same implementation for `backward_var`.
 
         Includes backpropagation through the sqrt after the variance."""
-        a = self.variables[0]
-        return np.asarray(grad) / (2 * np.sqrt(a.data.var(**self.kwargs)))
+        (a,) = self.variables
+        return grad / (
+            2
+            * np.sqrt(
+                a.data.var(axis=self.axis, ddof=self.ddof, keepdims=self.keepdims)
+            )
+        )

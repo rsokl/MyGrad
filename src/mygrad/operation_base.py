@@ -21,7 +21,31 @@ __all__ = [
     "Ufunc",
     "UnaryArith",
     "BinaryArith",
+    "Sequential",
 ]
+
+
+class _NoValueType:
+    """Special keyword value.
+
+    The instance of this class may be used as the default value assigned to a
+    deprecated keyword in order to check if it has been given a user defined
+    value.
+    """
+
+    __instance = None
+
+    def __new__(cls):
+        # ensure that only one instance exists
+        if not cls.__instance:
+            cls.__instance = super(_NoValueType, cls).__new__(cls)
+        return cls.__instance
+
+    def __repr__(self):
+        return "<no value>"
+
+
+_NoValue = _NoValueType()
 
 
 class Operation(ABC):
@@ -255,7 +279,7 @@ class UnaryArith(Ufunc, ABC):
         where: Union[bool, np.ndarray] = True,
         dtype=None,
     ) -> np.ndarray:
-        self.variables = (x1,)
+        self.variables: Tuple["Tensor"] = (x1,)
         if where is not True:
             self.where = where
         return self.numpy_ufunc(x1.data, out=out, where=where, dtype=dtype)
@@ -271,7 +295,7 @@ class BinaryArith(Ufunc, ABC):
         where: Union[bool, np.ndarray] = True,
         dtype=None,
     ) -> np.ndarray:
-        self.variables = (x1, x2)
+        self.variables: Tuple["Tensor", "Tensor"] = (x1, x2)
         if where is not True:
             self.where = where
         return self.numpy_ufunc(x1.data, x2.data, out=out, where=where, dtype=dtype)
@@ -279,12 +303,13 @@ class BinaryArith(Ufunc, ABC):
 
 class Sequential(Operation, ABC):
     numpy_func: Callable[..., np.ndarray]
+    _integer_axis_only: bool = False
 
     def __init__(self):
-        self.axis = None
-        self.keepdims = None
-        self.initial = None
-        self.out_shape = None
+        self.axis: Optional[Union[int, Tuple[int, ...]]]
+        self.keepdims: Optional[bool]
+        self.initial: Real
+        self.out_shape: Tuple[int, ...]
         super().__init__()
 
     def __call__(
@@ -293,32 +318,45 @@ class Sequential(Operation, ABC):
         axis=None,
         dtype=None,
         out: Optional[np.ndarray] = None,
-        keepdims=np._NoValue,
-        initial=np._NoValue,
+        keepdims: bool = _NoValue,
+        initial: Real = _NoValue,
         *,
-        where=np._NoValue,
+        where: Union[bool, np.ndarray] = _NoValue,
+        ddof: int = _NoValue,
     ) -> np.ndarray:
         self.variables: Tuple["Tensor"] = (a,)
 
         if where is not True:
             self.where = where
 
-        if axis is not None and not hasattr(axis, "__iter__"):
-            axis = (axis,)
-
-        self.axis: Optional[Tuple[int, ...]] = axis
         self.keepdims = keepdims
         self.initial = initial
+        self.ddof = ddof
+
+        # Unless axis is None or the op is integer-axis-only
+        # normalize axis to be a tuple of ints.
+        if (
+            not self._integer_axis_only
+            and axis is not None
+            and not hasattr(axis, "__iter__")
+        ):
+            self.axis = (axis,)
+        else:
+            self.axis = axis
 
         kwargs = {}
-        if keepdims is not np._NoValue:
+
+        if keepdims is not _NoValue:
             kwargs["keepdims"] = keepdims
 
-        if initial is not np._NoValue:
+        if initial is not _NoValue:
             kwargs["initial"] = initial
 
-        if where is not np._NoValue:
+        if where is not _NoValue:
             kwargs["where"] = where
+
+        if ddof is not _NoValue:
+            kwargs["ddof"] = ddof
 
         out = self.numpy_func(a.data, axis=axis, dtype=dtype, out=out, **kwargs)
         self.out_shape = out.shape
