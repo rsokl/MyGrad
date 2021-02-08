@@ -1,7 +1,7 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from functools import reduce
-from typing import Callable, Optional, Tuple
+from typing import Optional, Tuple, Union
 
 import numpy as np
 
@@ -21,8 +21,27 @@ __all__ = [
 
 
 class MaxMin(Sequential, ABC):
-    # argmax or argmin
-    arg_finder: Callable[..., np.ndarray]
+    @staticmethod
+    @abstractmethod
+    def _arg_finder(
+        a: np.ndarray,
+        axis: Optional[Union[int, Tuple[int, ...]]] = None,
+    ) -> np.ndarray:
+        """`numpy.argmax` or `numpy.argmin` - in correspondence with the
+        implementation of `max` or `min`."""
+        raise NotImplementedError()
+
+    @staticmethod
+    @abstractmethod
+    def numpy_func(
+        self,
+        a: np.ndarray,
+        axis: Optional[Union[int, Tuple[int, ...]]] = None,
+        out: Optional[np.ndarray] = None,
+        *args,
+        **kwargs,
+    ) -> np.ndarray:
+        raise NotImplementedError()
 
     def backward_var(self, grad, index, **kwargs):
         (a,) = self.variables
@@ -50,13 +69,13 @@ class MaxMin(Sequential, ABC):
 
         # max(a) -> use argmax
         if axis is None:
-            indices = np.unravel_index(self.arg_finder(a.data), a.shape)
+            indices = np.unravel_index(self._arg_finder(a.data), a.shape)
             out = np.zeros_like(a.data, dtype=grad.dtype)
             out[indices] = grad
             return out
         # max(x, axis=i) -> use argmax with specified axis
         elif len(axis) == 1:
-            op_index = self.arg_finder(a.data, axis=axis[0])
+            op_index = self._arg_finder(a.data, axis=axis[0])
             indices = list(np.indices(op_index.shape))
             indices.insert(axis[0], op_index)
             indices = tuple(indices)
@@ -75,7 +94,7 @@ class MaxMin(Sequential, ABC):
 
         z = a.data.transpose(*to_trans).reshape(*outshape, -1)  # (m, n, ..., i*j*[...])
 
-        k = self.arg_finder(z, axis=-1)
+        k = self._arg_finder(z, axis=-1)
         indices = tuple(i for i in np.indices(k.shape))
         indices += (k,)
         tmp_grad_shape = z.shape
@@ -88,12 +107,12 @@ class MaxMin(Sequential, ABC):
 
 class Max(MaxMin):
     numpy_func = staticmethod(np.max)
-    arg_finder = staticmethod(np.argmax)
+    _arg_finder = staticmethod(np.argmax)
 
 
 class Min(MaxMin):
     numpy_func = staticmethod(np.min)
-    arg_finder = staticmethod(np.argmin)
+    _arg_finder = staticmethod(np.argmin)
 
 
 class Sum(Sequential):

@@ -232,7 +232,10 @@ class BroadcastableOp(Operation, ABC):
 
 
 class Ufunc(Operation, ABC):
-    numpy_ufunc: np.ufunc
+    @property
+    @abstractmethod
+    def numpy_ufunc(self) -> np.ufunc:
+        raise NotImplementedError()
 
     @property
     def nin(self) -> int:
@@ -306,6 +309,19 @@ class BinaryUfunc(Ufunc, ABC):
 class Sequential(Operation, ABC):
     numpy_func: Callable[..., np.ndarray]
     _integer_axis_only: bool = False
+
+    @staticmethod
+    @abstractmethod
+    def numpy_func(
+        self,
+        a: np.ndarray,
+        axis: Optional[Union[int, Tuple[int, ...]]] = None,
+        dtype=None,
+        out: Optional[np.ndarray] = None,
+        *args,
+        **kwargs,
+    ) -> np.ndarray:
+        raise NotImplementedError()
 
     def __init__(self):
         self.axis: Optional[Union[int, Tuple[int, ...]]]

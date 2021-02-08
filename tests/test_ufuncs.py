@@ -13,9 +13,11 @@ def all_subclasses(cls):
     )
 
 
-all_concrete_ufuncs = [
-    ufunc for ufunc in all_subclasses(Ufunc) if not inspect.isabstract(ufunc)
-]
+# names need to be sorted so parallel testing doesn't break
+all_concrete_ufuncs = sorted(
+    (ufunc for ufunc in all_subclasses(Ufunc) if (not inspect.isabstract(ufunc))),
+    key=lambda x: x.__name__,
+)
 
 
 @pytest.mark.parametrize("ufunc", all_concrete_ufuncs)
