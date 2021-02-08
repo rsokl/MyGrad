@@ -1,6 +1,7 @@
 import inspect
 from typing import Type
 
+import numpy as np
 import pytest
 
 from mygrad.operation_base import Ufunc
@@ -33,3 +34,8 @@ all_concrete_ufuncs = [
 def test_ufunc_attributes_match_numpy_counterpart(ufunc: Type[Ufunc], attribute: str):
     ufunc = ufunc()
     assert getattr(ufunc, attribute) == getattr(ufunc.numpy_ufunc, attribute)
+
+
+@pytest.mark.parametrize("ufunc", all_concrete_ufuncs)
+def test_numpy_ufunc_is_actually_a_ufunc(ufunc: Type[Ufunc]):
+    assert isinstance(ufunc.numpy_ufunc, np.ufunc)
