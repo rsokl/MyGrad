@@ -7,7 +7,7 @@ import numpy as np
 if TYPE_CHECKING:  # pragma: no cover
     from mygrad import Tensor
 
-from mygrad.operation_base import BinaryUfunc, BroadcastableOp, UnaryUfunc
+from mygrad.operation_base import BinaryUfunc, Operation, UnaryUfunc
 
 __all__ = [
     "Add",
@@ -111,7 +111,7 @@ class Negative(UnaryUfunc):
         return np.negative(grad, where=self.where)
 
 
-class AddSequence(BroadcastableOp):
+class AddSequence(Operation):
     """Performs f(a, b, ..., z) = a + b + ... + z"""
 
     def __call__(self, *input_vars):
@@ -124,7 +124,7 @@ class AddSequence(BroadcastableOp):
         return grad
 
 
-class MultiplySequence(BroadcastableOp):
+class MultiplySequence(Operation):
     """ Performs f(a, b, ..., z) = a * b * ... * z"""
 
     def __call__(self, *input_vars):
