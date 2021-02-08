@@ -1,55 +1,35 @@
+from abc import ABC
 from collections.abc import Sequence
 from functools import reduce
-from typing import Optional, Tuple
+from typing import Callable, Optional, Tuple
 
 import numpy as np
 
-import mygrad._utils.graph_tracking as _tracking
-from mygrad.operation_base import Operation, Sequential
+from mygrad.operation_base import Sequential
 
-__all__ = ["MaxMin", "Sum", "Mean", "Prod", "CumProd", "CumSum", "Variance", "StdDev"]
+__all__ = [
+    "CumProd",
+    "CumSum",
+    "Max",
+    "Mean",
+    "Min",
+    "Prod",
+    "StdDev",
+    "Sum",
+    "Variance",
+]
 
 
-class MaxMin(Operation):
-    def __call__(self, a, axis=None, keepdims=False, maxmin=None):
-        """Return the maximum (minimum) of a tensor, or along its axes.
+class MaxMin(Sequential, ABC):
+    # argmax or argmin
+    arg_finder: Callable[..., np.ndarray]
 
-        Parameters
-        ----------
-        a : pygrad.Tensor
-            Input data.
-
-        axis : Optional[int, Tuple[int, ...]]
-            Axis or axes along which to operate. By default, flattened input is used.
-
-        keepdims : bool, optional
-            If this is set to True, the axes which are reduced are left
-            in the result as dimensions with size one. With this option,
-            the result will broadcast correctly against the original `arr`.
-
-        maxmin : str
-            'max' or 'min'. Selects the operation that is performed
-
-        Returns
-        -------
-        amax : ndarray
-            Maximum (minimum) of `a`. If `axis` is None, the result is a 0-D array."""
-        assert maxmin in ("max", "min"), "Invalid keyword argument"
-
-        if not _tracking.TRACK_GRAPH:
-            op = np.max if maxmin == "max" else np.min
-            return op(np.asarray(a), axis=axis, keepdims=keepdims)
-
-        op = np.argmax if maxmin == "max" else np.argmin
-
-        # TODO: optimize this
-        # let numpy handle error checking
-        np.amax(np.empty([1] * a.ndim), axis=axis, keepdims=keepdims)
-
-        self.variables = (a,)
+    def backward_var(self, grad, index, **kwargs):
+        (a,) = self.variables
+        axis = self.axis
 
         if a.ndim == 0:
-            return np.array(a.data)  # np.max does not permit views -> copy
+            return grad
 
         if hasattr(axis, "__iter__"):
             axis = tuple(ax % a.ndim for ax in axis)
@@ -57,82 +37,63 @@ class MaxMin(Operation):
         elif axis is not None:
             axis = (axis % a.ndim,)
 
-        self.axis = axis
-        self.keepdims = keepdims
-
-        # max(a) -> use argmax
-        if self.axis is None:
-            self.indices = np.unravel_index(op(a.data), a.shape)
-            dat = a.data[self.indices]
-
-        # max(x, axis=i) -> use argmax with specified axis
-        elif len(self.axis) == 1:  #
-            op_index = op(a.data, axis=self.axis[0])
-            self.indices = list(np.indices(op_index.shape))
-            self.indices.insert(self.axis[0], op_index)
-            self.indices = tuple(self.indices)
-            dat = a.data[self.indices]
-
-        # max(x, axis=(i,j,...) ) -> Reshape data to use argmax along trailing axis
-        else:
-            self.static_ax = tuple(
-                sorted(set(range(a.ndim)) - set(self.axis))
-            )  # non-reduced axes (m, n, ..)
-            self.to_trans = self.static_ax + self.axis  # (m, n, ..., i, j, ...)
-            self.from_trans = tuple(np.argsort(self.to_trans))
-            outshape = tuple(a.shape[i] for i in self.static_ax)
-
-            z = a.data.transpose(*self.to_trans).reshape(
-                *outshape, -1
-            )  # (m, n, ..., i*j*[...])
-
-            k = op(z, axis=-1)
-            self.indices = tuple(i for i in np.indices(k.shape))
-            self.indices += (k,)
-            self.tmp_grad_shape = z.shape
-            z = z[self.indices]
-
-            dat = z.reshape(outshape)  # (m, n, ...)
-
-        if not self.keepdims:
-            return dat
-
-        elif self.axis is None:
-            keep_index = (np.newaxis,) * a.ndim
-        else:
-            keep_index = [slice(None)] * a.ndim
-            for i in self.axis:
-                keep_index[i] = np.newaxis
-            keep_index = tuple(keep_index)
-
-        return np.asarray(dat)[keep_index]
-
-    def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
-        if a.ndim == 0:
-            return grad
-
         # normalize shape of grad to be same as when keepdims=False
         if self.keepdims:
-            if self.axis is not None:
-                reduce = [slice(None)] * a.ndim
-                for i in self.axis:
-                    reduce[i] = 0
-                reduce = tuple(reduce)
+            if axis is not None:
+                reduce_ = [slice(None)] * a.ndim
+                for i in axis:
+                    reduce_[i] = 0
+                reduce_ = tuple(reduce_)
             else:
-                reduce = (0,) * a.ndim
-            grad = grad[reduce]
+                reduce_ = (0,) * a.ndim
+            grad = grad[reduce_]
 
-        # use argmax indices to broadcast grad to correct elements
-        if self.axis is None or len(self.axis) == 1:
-            out = np.zeros_like(a.data, dtype=float)
-            out[self.indices] = grad
+        # max(a) -> use argmax
+        if axis is None:
+            indices = np.unravel_index(self.arg_finder(a.data), a.shape)
+            out = np.zeros_like(a.data, dtype=grad.dtype)
+            out[indices] = grad
             return out
-        else:
-            out = np.zeros(self.tmp_grad_shape, dtype=float)
-            out[self.indices] = grad
-            shape = tuple(a.shape[i] for i in self.to_trans)
-            return out.reshape(shape).transpose(*self.from_trans)
+        # max(x, axis=i) -> use argmax with specified axis
+        elif len(axis) == 1:
+            op_index = self.arg_finder(a.data, axis=axis[0])
+            indices = list(np.indices(op_index.shape))
+            indices.insert(axis[0], op_index)
+            indices = tuple(indices)
+
+            out = np.zeros_like(a.data, dtype=grad.dtype)
+            out[indices] = grad
+            return out
+
+        # max(x, axis=(i,j,...) ) -> Reshape data to use argmax along trailing axis
+        static_ax = tuple(
+            sorted(set(range(a.ndim)) - set(axis))
+        )  # non-reduced axes (m, n, ..)
+        to_trans = static_ax + axis  # (m, n, ..., i, j, ...)
+        from_trans = tuple(np.argsort(to_trans))
+        outshape = tuple(a.shape[i] for i in static_ax)
+
+        z = a.data.transpose(*to_trans).reshape(*outshape, -1)  # (m, n, ..., i*j*[...])
+
+        k = self.arg_finder(z, axis=-1)
+        indices = tuple(i for i in np.indices(k.shape))
+        indices += (k,)
+        tmp_grad_shape = z.shape
+
+        out = np.zeros(tmp_grad_shape, dtype=grad.dtype)
+        out[indices] = grad
+        shape = tuple(a.shape[i] for i in to_trans)
+        return out.reshape(shape).transpose(*from_trans)
+
+
+class Max(MaxMin):
+    numpy_func = staticmethod(np.max)
+    arg_finder = staticmethod(np.argmax)
+
+
+class Min(MaxMin):
+    numpy_func = staticmethod(np.min)
+    arg_finder = staticmethod(np.argmin)
 
 
 class Sum(Sequential):

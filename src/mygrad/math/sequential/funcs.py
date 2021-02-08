@@ -1,3 +1,4 @@
+from mygrad.operation_base import _NoValue
 from mygrad.tensor_base import Tensor
 
 from .ops import *
@@ -370,9 +371,9 @@ def max(x, axis=None, keepdims=False, constant=False):
     Tensor(nan)
     """
     return Tensor._op(
-        MaxMin,
+        Max,
         x,
-        op_kwargs=dict(axis=axis, keepdims=keepdims, maxmin="max"),
+        op_kwargs=dict(axis=axis, keepdims=keepdims, dtype=_NoValue),
         constant=constant,
     )
 
@@ -420,9 +421,9 @@ def min(x, axis=None, keepdims=False, constant=False):
     Tensor(nan)
     """
     return Tensor._op(
-        MaxMin,
+        Min,
         x,
-        op_kwargs=dict(axis=axis, keepdims=keepdims, maxmin="min"),
+        op_kwargs=dict(axis=axis, keepdims=keepdims, dtype=_NoValue),
         constant=constant,
     )
 

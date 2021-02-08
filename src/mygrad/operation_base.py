@@ -358,7 +358,10 @@ class Sequential(Operation, ABC):
         if ddof is not _NoValue:
             kwargs["ddof"] = ddof
 
-        out = self.numpy_func(a.data, axis=axis, dtype=dtype, out=out, **kwargs)
+        if dtype is not _NoValue:
+            kwargs["dtype"] = dtype
+
+        out = self.numpy_func(a.data, axis=axis, out=out, **kwargs)
         self.out_shape = out.shape
 
         return out
