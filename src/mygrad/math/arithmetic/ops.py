@@ -7,7 +7,7 @@ import numpy as np
 if TYPE_CHECKING:  # pragma: no cover
     from mygrad import Tensor
 
-from mygrad.operation_base import BinaryArith, BroadcastableOp, UnaryArith
+from mygrad.operation_base import BinaryUfunc, BroadcastableOp, UnaryUfunc
 
 __all__ = [
     "Add",
@@ -26,14 +26,14 @@ __all__ = [
 # Binary Ops
 
 
-class Add(BinaryArith):
+class Add(BinaryUfunc):
     numpy_ufunc = np.add
 
     def backward_var(self, grad, index, **kwargs):
         return grad
 
 
-class Subtract(BinaryArith):
+class Subtract(BinaryUfunc):
     numpy_ufunc = np.subtract
 
     def backward_var(self, grad, index, **kwargs):
@@ -43,7 +43,7 @@ class Subtract(BinaryArith):
             return -grad
 
 
-class Multiply(BinaryArith):
+class Multiply(BinaryUfunc):
     numpy_ufunc = np.multiply
 
     def backward_var(self, grad, index, **kwargs):
@@ -54,7 +54,7 @@ class Multiply(BinaryArith):
             return grad * a.data
 
 
-class Divide(BinaryArith):
+class Divide(BinaryUfunc):
     numpy_ufunc = np.divide
 
     def backward_var(self, grad, index, **kwargs):
@@ -65,7 +65,7 @@ class Divide(BinaryArith):
             return -grad * a.data / (b.data ** 2)
 
 
-class Power(BinaryArith):
+class Power(BinaryUfunc):
     numpy_ufunc = np.power
 
     def backward_var(self, grad, index, **kwargs):
@@ -80,7 +80,7 @@ class Power(BinaryArith):
 # Unary Ops
 
 
-class Reciprocal(UnaryArith):
+class Reciprocal(UnaryUfunc):
     numpy_ufunc = np.reciprocal
 
     def backward_var(self, grad, index, **kwargs):
@@ -88,7 +88,7 @@ class Reciprocal(UnaryArith):
         return -grad * np.reciprocal(a.data ** 2)
 
 
-class Square(UnaryArith):
+class Square(UnaryUfunc):
     numpy_ufunc = np.square
 
     def backward_var(self, grad, index, **kwargs):
@@ -97,14 +97,14 @@ class Square(UnaryArith):
         return grad
 
 
-class Positive(UnaryArith):
+class Positive(UnaryUfunc):
     numpy_ufunc = np.positive
 
     def backward_var(self, grad, index, **kwargs):
         return np.positive(grad, where=self.where)
 
 
-class Negative(UnaryArith):
+class Negative(UnaryUfunc):
     numpy_ufunc = np.negative
 
     def backward_var(self, grad, index, **kwargs):

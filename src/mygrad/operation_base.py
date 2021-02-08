@@ -19,8 +19,8 @@ __all__ = [
     "Operation",
     "BroadcastableOp",
     "Ufunc",
-    "UnaryArith",
-    "BinaryArith",
+    "UnaryUfunc",
+    "BinaryUfunc",
     "Sequential",
 ]
 
@@ -270,7 +270,7 @@ class Ufunc(Operation, ABC):
         return self.numpy_ufunc.signature
 
 
-class UnaryArith(Ufunc, ABC):
+class UnaryUfunc(Ufunc, ABC):
     def __call__(
         self,
         x1: "Tensor",
@@ -285,20 +285,22 @@ class UnaryArith(Ufunc, ABC):
         return self.numpy_ufunc(x1.data, out=out, where=where, dtype=dtype)
 
 
-class BinaryArith(Ufunc, ABC):
+class BinaryUfunc(Ufunc, ABC):
     def __call__(
         self,
         x1: "Tensor",
         x2: "Tensor",
         out: Optional[np.ndarray] = None,
         *,
-        where: Union[bool, np.ndarray] = True,
+        where: Union[bool, np.ndarray, _NoValueType] = True,
         dtype=None,
     ) -> np.ndarray:
         self.variables: Tuple["Tensor", "Tensor"] = (x1, x2)
-        if where is not True:
+        if where is not True and where is not _NoValue:
             self.where = where
-        return self.numpy_ufunc(x1.data, x2.data, out=out, where=where, dtype=dtype)
+            return self.numpy_ufunc(x1.data, x2.data, out=out, where=where, dtype=dtype)
+        else:
+            return self.numpy_ufunc(x1.data, x2.data, out=out, dtype=dtype)
 
 
 class Sequential(Operation, ABC):

@@ -1,6 +1,6 @@
 import numpy as np
 
-from mygrad.operation_base import BinaryArith, Operation, UnaryArith
+from mygrad.operation_base import BinaryUfunc, Operation, UnaryUfunc
 
 __all__ = [
     "Sin",
@@ -20,7 +20,7 @@ __all__ = [
 ]
 
 
-class Sin(UnaryArith):
+class Sin(UnaryUfunc):
     numpy_ufunc = np.sin
 
     def backward_var(self, grad, index, **kwargs):
@@ -46,7 +46,7 @@ class Sinc(Operation):
         return np.pi * grad * np.piecewise(x, [x == 0, x != 0], [np.zeros_like, _dsinc])
 
 
-class Cos(UnaryArith):
+class Cos(UnaryUfunc):
     numpy_ufunc = np.cos
 
     def backward_var(self, grad, index, **kwargs):
@@ -54,7 +54,7 @@ class Cos(UnaryArith):
         return grad * -np.sin(a.data)
 
 
-class Tan(UnaryArith):
+class Tan(UnaryUfunc):
     numpy_ufunc = np.tan
 
     def backward_var(self, grad, index, **kwargs):
@@ -98,7 +98,7 @@ class Cot(Operation):
         return -grad / np.sin(a.data) ** 2
 
 
-class Arcsin(UnaryArith):
+class Arcsin(UnaryUfunc):
     numpy_ufunc = np.arcsin
 
     def backward_var(self, grad, index, **kwargs):
@@ -107,7 +107,7 @@ class Arcsin(UnaryArith):
         return np.select([np.abs(a.data) != 1], [grad / np.sqrt(1 - a.data ** 2)])
 
 
-class Arccos(UnaryArith):
+class Arccos(UnaryUfunc):
     numpy_ufunc = np.arccos
 
     def backward_var(self, grad, index, **kwargs):
@@ -116,7 +116,7 @@ class Arccos(UnaryArith):
         return np.select([np.abs(a.data) != 1], [-grad / np.sqrt(1 - a.data ** 2)])
 
 
-class Arctan(UnaryArith):
+class Arctan(UnaryUfunc):
     numpy_ufunc = np.arctan
 
     def backward_var(self, grad, index, **kwargs):
@@ -172,7 +172,7 @@ class Arccot(Operation):
         return -grad / (1 + a.data ** 2)
 
 
-class Arctan2(BinaryArith):
+class Arctan2(BinaryUfunc):
     numpy_ufunc = np.arctan2
 
     def __init__(self):

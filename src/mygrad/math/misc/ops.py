@@ -1,11 +1,11 @@
 import numpy as np
 
-from mygrad.operation_base import BinaryArith, UnaryArith
+from mygrad.operation_base import BinaryUfunc, UnaryUfunc
 
 __all__ = ["Abs", "Sqrt", "Cbrt", "Maximum", "Minimum"]
 
 
-class Abs(UnaryArith):
+class Abs(UnaryUfunc):
     numpy_ufunc = np.absolute
 
     def backward_var(self, grad, index, **kwargs):
@@ -15,7 +15,7 @@ class Abs(UnaryArith):
         )
 
 
-class Sqrt(UnaryArith):
+class Sqrt(UnaryUfunc):
     numpy_ufunc = np.sqrt
 
     def backward_var(self, grad, index, **kwargs):
@@ -23,7 +23,7 @@ class Sqrt(UnaryArith):
         return grad / (2 * np.sqrt(a.data))
 
 
-class Cbrt(UnaryArith):
+class Cbrt(UnaryUfunc):
     numpy_ufunc = np.cbrt
 
     def backward_var(self, grad, index, **kwargs):
@@ -31,7 +31,7 @@ class Cbrt(UnaryArith):
         return grad / (3 * np.cbrt(a.data ** 2))
 
 
-class Maximum(BinaryArith):
+class Maximum(BinaryUfunc):
     numpy_ufunc = np.maximum
 
     def __init__(self):
@@ -60,7 +60,7 @@ class Maximum(BinaryArith):
         return mask * grad
 
 
-class Minimum(BinaryArith):
+class Minimum(BinaryUfunc):
     numpy_ufunc = np.minimum
 
     def __init__(self):

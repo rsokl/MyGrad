@@ -1,6 +1,6 @@
 import numpy as np
 
-from mygrad.operation_base import BinaryArith, UnaryArith
+from mygrad.operation_base import BinaryUfunc, UnaryUfunc
 
 __all__ = [
     "Exp",
@@ -15,28 +15,28 @@ __all__ = [
 ]
 
 
-class Exp(UnaryArith):
+class Exp(UnaryUfunc):
     numpy_ufunc = np.exp
 
     def backward_var(self, grad, index, **kwargs):
         return grad * np.exp(self.variables[index].data)
 
 
-class Exp2(UnaryArith):
+class Exp2(UnaryUfunc):
     numpy_ufunc = np.exp2
 
     def backward_var(self, grad, index, **kwargs):
         return grad * np.exp2(self.variables[index].data) * np.log(2)
 
 
-class Expm1(UnaryArith):
+class Expm1(UnaryUfunc):
     numpy_ufunc = np.expm1
 
     def backward_var(self, grad, index, **kwargs):
         return grad * np.exp(self.variables[index].data)
 
 
-class Logaddexp(BinaryArith):
+class Logaddexp(BinaryUfunc):
     numpy_ufunc = np.logaddexp
 
     def backward_var(self, grad, index, **kwargs):
@@ -49,7 +49,7 @@ class Logaddexp(BinaryArith):
             raise IndexError(f"Back-propagation through tensor-{index}")
 
 
-class Logaddexp2(BinaryArith):
+class Logaddexp2(BinaryUfunc):
     numpy_ufunc = np.logaddexp2
 
     def backward_var(self, grad, index, **kwargs):
@@ -62,28 +62,28 @@ class Logaddexp2(BinaryArith):
             raise IndexError(f"Back-propagation through tensor-{index}")
 
 
-class Log(UnaryArith):
+class Log(UnaryUfunc):
     numpy_ufunc = np.log
 
     def backward_var(self, grad, index, **kwargs):
         return grad / self.variables[index].data
 
 
-class Log2(UnaryArith):
+class Log2(UnaryUfunc):
     numpy_ufunc = np.log2
 
     def backward_var(self, grad, index, **kwargs):
         return grad / (self.variables[index].data * np.log(2))
 
 
-class Log10(UnaryArith):
+class Log10(UnaryUfunc):
     numpy_ufunc = np.log10
 
     def backward_var(self, grad, index, **kwargs):
         return grad / (self.variables[index].data * np.log(10))
 
 
-class Log1p(UnaryArith):
+class Log1p(UnaryUfunc):
     numpy_ufunc = np.log1p
 
     def backward_var(self, grad, index, **kwargs):
