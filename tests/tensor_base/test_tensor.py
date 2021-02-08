@@ -31,7 +31,7 @@ def test_simple_default_constant_behavior():
         np.array([[0], [0, 0]], dtype="O"),
         np.array(1, dtype="O"),
         0j,
-        np.array(1, dtype=np.complex),
+        np.array(1, dtype=complex),
     ],
 )
 @given(constant=st.booleans(), creator=st.none() | st.just(MatMul()))

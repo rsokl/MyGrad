@@ -9,12 +9,12 @@ def _softmax(x, kwargs):
 
     if x.ndim > 0 and x.size > 0:
         x = x - x.max(**kwargs)
-        target = x.astype(np.float) if issubclass(x.dtype.type, np.integer) else x
+        target = x.astype(float) if issubclass(x.dtype.type, np.integer) else x
 
         target = np.exp(x, out=target)
         target /= target.sum(**kwargs)
     else:
-        target = x.astype(np.float) if issubclass(x.dtype.type, np.integer) else x
+        target = x.astype(float) if issubclass(x.dtype.type, np.integer) else x
         target = np.ones_like(target)
     return target
 

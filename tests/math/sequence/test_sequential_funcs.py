@@ -235,7 +235,7 @@ def test_var_bkwd_with_keepdims():
 
 @given(
     x=tensors(
-        dtype=np.float,
+        dtype=np.float64,
         shape=hnp.array_shapes(),
         elements=st.floats(allow_infinity=False, allow_nan=False),
     )
@@ -247,7 +247,7 @@ def test_var_no_axis_fwd(x: mg.Tensor):
 
 @given(
     x=tensors(
-        dtype=np.float,
+        dtype=np.float64,
         shape=hnp.array_shapes(),
         elements=st.floats(allow_infinity=False, allow_nan=False),
         constant=False,
@@ -326,7 +326,7 @@ def test_std_bkwd():
 
 @given(
     x=tensors(
-        dtype=np.float,
+        dtype=np.float64,
         shape=hnp.array_shapes(),
         elements=st.floats(allow_infinity=False, allow_nan=False),
     )
@@ -338,7 +338,7 @@ def test_std_no_axis_fwd(x):
 
 @given(
     x=tensors(
-        dtype=np.float,
+        dtype=np.float64,
         shape=hnp.array_shapes(),
         elements=st.floats(allow_infinity=False, allow_nan=False),
         constant=False,

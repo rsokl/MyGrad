@@ -38,7 +38,7 @@ def test_softmax_on_empty_arrays(arr: np.ndarray, data: st.DataObject):
 )
 def test_softmax_on_ints(arr: np.ndarray):
     actual = softmax(arr)
-    desired = softmax(arr.astype(np.float))
+    desired = softmax(arr.astype(np.float64))
     assert desired.dtype == actual.dtype
     assert_allclose(desired, actual, atol=1e-3, rtol=1e-3)
 
