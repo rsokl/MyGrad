@@ -467,6 +467,9 @@ class Tensor:
 
     __array_priority__ = 15.0
 
+    def __array__(self, dtype=None) -> np.ndarray:
+        return np.array(self.data, dtype=dtype, copy=False)
+
     def __init__(
         self,
         x,
@@ -750,6 +753,7 @@ class Tensor:
             out._in_place_op(
                 Op, *input_vars, op_args=op_args, op_kwargs=op_kwargs, constant=constant
             )
+            return out
 
         _uniques_bases_then_arrs = ()
 
@@ -789,11 +793,9 @@ class Tensor:
 
         try:
             if out is None:
-                op_out = f(*tensor_vars, *op_args, **op_kwargs)  # type: np.ndarray
+                op_out: np.ndarray = f(*tensor_vars, *op_args, **op_kwargs)
             else:
-                op_out = f(
-                    *tensor_vars, *op_args, **op_kwargs, out=out
-                )  # type: np.ndarray
+                op_out: np.ndarray = f(*tensor_vars, *op_args, **op_kwargs, out=out)
         except Exception as e:
             if _track.TRACK_GRAPH and _mem.MEM_GUARD:
                 _mem.release_writeability_lock_on_op(_uniques_bases_then_arrs)
@@ -1245,7 +1247,6 @@ class Tensor:
         if _track.TRACK_GRAPH is False:
             return self._op(
                 inplace_op,
-                self,
                 *input_vars,
                 op_args=op_args,
                 op_kwargs=op_kwargs,
@@ -1378,16 +1379,15 @@ class Tensor:
 
         try:
             with _mem.mem_guard_off:
-                placeholder_mutant_view = self._op(  # will raise if original data not writeable
-                    inplace_op,
-                    inplace_target,  # tensor will be mutated
-                    # we need to accommodate case where inplace operation is writing
-                    # *from* a view - redirect view to placeholder
-                    *(graph.get_placeholder_if_exists(t) for t in input_vars),
-                    op_args=op_args,
-                    op_kwargs=op_kwargs,
-                    constant=constant,
-                    out=inplace_target.data,
+                placeholder_mutant_view = (
+                    self._op(  # will raise if original data not writeable
+                        inplace_op,
+                        *(graph.get_placeholder_if_exists(t) for t in input_vars),
+                        op_args=op_args,
+                        op_kwargs=op_kwargs,
+                        constant=constant,
+                        out=inplace_target.data,
+                    )
                 )
         except Exception as e:
             graph.restore_old_graph()
@@ -1401,24 +1401,6 @@ class Tensor:
             # base/view relationships. Thus `out` should not be considered a
             # view under these circumstances.
             placeholder_mutant_view._base = None
-
-        # (p denotes internal placeholder, y' denotes mutant)
-        # The current graph:
-        #    vp' --> | inplace | --> vp'
-        # Becomes:
-        #    vp --> | inplace | --> vp'
-        # I.e. the placeholder for the target of the inplace-op is placed upstream
-        # of the mutated placeholder.
-        #
-        # Put placeholder of inplace target as an input variable to InplaceOp
-        variables = tuple(
-            var if var is not inplace_target else graph[self].placeholder
-            for var in placeholder_mutant_view.creator.variables
-        )
-        placeholder_mutant_view.creator.variables = variables
-
-        # Tell placeholder of in-place target that it participated in this op
-        graph[self].placeholder._ops.add(ReferenceType(placeholder_mutant_view.creator))
 
         # Connect public base tensor to placeholder graph via the mutated placeholder
         # tensor `out`.
@@ -1630,13 +1612,13 @@ class Tensor:
             parent._view_children.append(node.tensor)
 
     def __setitem__(self, key, value):
-        self._in_place_op(SetItem, value, op_args=(key,))
+        self._in_place_op(SetItem, self, value, op_args=(key,))
 
     def __add__(self, other) -> "Tensor":
         return self._op(Add, self, other)
 
     def __iadd__(self, other) -> "Tensor":
-        self._in_place_op(Add, other)
+        self._in_place_op(Add, self, other)
         return self
 
     def __radd__(self, other) -> "Tensor":
@@ -1646,7 +1628,7 @@ class Tensor:
         return self._op(Subtract, self, other)
 
     def __isub__(self, other) -> "Tensor":
-        self._in_place_op(Subtract, other)
+        self._in_place_op(Subtract, self, other)
         return self
 
     def __rsub__(self, other) -> "Tensor":
@@ -1659,14 +1641,14 @@ class Tensor:
         return self._op(Divide, other, self)
 
     def __itruediv__(self, other) -> "Tensor":
-        self._in_place_op(Divide, other)
+        self._in_place_op(Divide, self, other)
         return self
 
     def __mul__(self, other) -> "Tensor":
         return self._op(Multiply, self, other)
 
     def __imul__(self, other) -> "Tensor":
-        self._in_place_op(Multiply, other)
+        self._in_place_op(Multiply, self, other)
         return self
 
     def __rmul__(self, other) -> "Tensor":
@@ -1694,13 +1676,13 @@ class Tensor:
             isinstance(other, np.ndarray) and other.ndim == 0
         ):
             if other == 1:
-                self._in_place_op(Positive)
+                self._in_place_op(Positive, self)
                 return self
             elif other == 2:
-                self._in_place_op(Square)
+                self._in_place_op(Square, self)
                 return self
 
-        self._in_place_op(Power, other)
+        self._in_place_op(Power, self, other)
         return self
 
     def __rpow__(self, other):
@@ -2017,9 +1999,6 @@ class Tensor:
             "In-place matrix multiplication is not (yet) supported. "
             "Use 'a = a @ b' instead of 'a @= b'"
         )
-
-    def __array__(self, dtype=None) -> np.ndarray:
-        return np.asarray(self.data, dtype)
 
 
 # set all comparison operators - mirrors ndarray methods

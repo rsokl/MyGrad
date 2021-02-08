@@ -114,7 +114,7 @@ class SetItem(BroadcastableOp):
 
     can_return_view = True
 
-    def __call__(self, a, b, index, out: Optional[np.ndarray] = None):
+    def __call__(self, a, b, index, *, out: Optional[np.ndarray] = None):
         """a[index] = b
 
         Parameters
@@ -144,7 +144,6 @@ class SetItem(BroadcastableOp):
         if out is None:
             out = a.data
 
-        assert a.data is out
         self.variables = (a, b)
         self.index = index if isinstance(index, tuple) else (index,)
         out[index] = b.data
