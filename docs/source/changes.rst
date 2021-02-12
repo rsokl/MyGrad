@@ -32,8 +32,8 @@ of their calculations.
 Lastly... no more "nulling" gradients! MyGrad will now handle deleting gradients for you in a way that
 is nicely compatible with gradient-based optimization work flows.
 
-New Utilities
--------------
+New Functions and Utilities
+---------------------------
 
 - :func:`~mygrad.tensor`
 - :func:`~mygrad.astensor`
@@ -44,6 +44,13 @@ New Utilities
 - :func:`~mygrad.turn_memory_guarding_off`
 - :func:`~mygrad.turn_memory_guarding_on`
 
+
+Dropping Support for Python 3.6 and Numpy < 1.17
+------------------------------------------------
+MyGrad now abides by the `NEP 29 <https://numpy.org/neps/nep-0029-deprecation_policy.html>`_ recommendation, and adopts
+a common “time window-based” policy for support of Python and NumPy versions.
+
+As such the Python 3.7 and Numpy 1.17 are the minimum versions supported by MyGrad.
 
 
 The Interfaces Between ``mygrad.Tensor`` and ``numpy.array`` Match
@@ -343,9 +350,9 @@ can always be interpreted as an array of scalar-valued derivatives.
 +=============================================+=======================================+
 | .. code:: python                            | .. code:: python                      |
 |                                             |                                       |
-|    >>> t1 = mg.Tensor([[1., 2.],            |    >>> t1 = mg.Tensor([[1., 2.],      |
+|    >>> t1 = mg.Tensor([[1., 2.],            |    >>> t1 = mg.tensor([[1., 2.],      |
 |    ...                 [0., -1]])           |    ...                 [0., -1]])     |
-|    >>> t2 = mg.Tensor([[0., 1.],            |    >>> t2 = mg.Tensor([[0., 1.],      |
+|    >>> t2 = mg.Tensor([[0., 1.],            |    >>> t2 = mg.tensor([[0., 1.],      |
 |    ...                 [3., -1]])           |    ...                 [3., -1]])     |
 |    >>> z = t1 @ t2                          |    >>> z = t1 @ t2                    |
 |    >>> z.backward()                         |    >>> z.backward()                   |
@@ -367,7 +374,7 @@ graphs as constants.
 +=============================================+=================================================+
 | .. code:: python                            | .. code:: python                                |
 |                                             |                                                 |
-|    >>> t1 = mg.Tensor([[1, 2]).constant     |    >>> t1 = mg.Tensor([[1, 2]]).constant        |
+|    >>> t1 = mg.Tensor([[1, 2]).constant     |    >>> t1 = mg.tensor([[1, 2]]).constant        |
 |    False                                    |    True                                         |
 +---------------------------------------------+-------------------------------------------------+
 
