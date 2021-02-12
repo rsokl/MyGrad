@@ -34,7 +34,6 @@ class MaxMin(Sequential, ABC):
     @staticmethod
     @abstractmethod
     def numpy_func(
-        self,
         a: np.ndarray,
         axis: Optional[Union[int, Tuple[int, ...]]] = None,
         out: Optional[np.ndarray] = None,
