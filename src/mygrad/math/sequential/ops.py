@@ -1,200 +1,157 @@
+from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from functools import reduce
-from typing import Any
+from typing import Optional, Tuple, Union
 
 import numpy as np
 
-import mygrad._utils.graph_tracking as _tracking
-from mygrad.operation_base import Operation
+from mygrad.operation_base import Sequential
 
-__all__ = ["MaxMin", "Sum", "Mean", "Prod", "CumProd", "CumSum", "Variance", "StdDev"]
+__all__ = [
+    "CumProd",
+    "CumSum",
+    "Max",
+    "Mean",
+    "Min",
+    "Prod",
+    "StdDev",
+    "Sum",
+    "Variance",
+]
 
 
-class MaxMin(Operation):
-    def __call__(self, a, axis=None, keepdims=False, maxmin=None):
-        """Return the maximum (minimum) of a tensor, or along its axes.
+class MaxMin(Sequential, ABC):
+    """A base class that implements common functionality for back-propping
+    through numpy.max and numpy.min"""
 
-        Parameters
-        ----------
-        a : pygrad.Tensor
-            Input data.
+    @staticmethod
+    @abstractmethod
+    def _arg_finder(
+        a: np.ndarray,
+        axis: Optional[Union[int, Tuple[int, ...]]] = None,
+    ) -> np.ndarray:
+        """`numpy.argmax` or `numpy.argmin` - in correspondence with the
+        implementation of `max` or `min`."""
+        raise NotImplementedError()  # pragma: no cover
 
-        axis : Optional[int, Tuple[int, ...]]
-            Axis or axes along which to operate. By default, flattened input is used.
-
-        keepdims : bool, optional
-            If this is set to True, the axes which are reduced are left
-            in the result as dimensions with size one. With this option,
-            the result will broadcast correctly against the original `arr`.
-
-        maxmin : str
-            'max' or 'min'. Selects the operation that is performed
-
-        Returns
-        -------
-        amax : ndarray
-            Maximum (minimum) of `a`. If `axis` is None, the result is a 0-D array."""
-        assert maxmin in ("max", "min"), "Invalid keyword argument"
-
-        if not _tracking.TRACK_GRAPH:
-            op = np.max if maxmin == "max" else np.min
-            return op(np.asarray(a), axis=axis, keepdims=keepdims)
-
-        op = np.argmax if maxmin == "max" else np.argmin
-
-        # TODO: optimize this
-        # let numpy handle error checking
-        np.amax(np.empty([1] * a.ndim), axis=axis, keepdims=keepdims)
-
-        self.variables = (a,)
-
-        if a.ndim == 0:
-            return np.array(a.data)  # np.max does not permit views -> copy
-
-        if hasattr(axis, "__iter__"):
-            assert isinstance(axis, tuple)
-            axis = tuple(ax % a.ndim for ax in axis)
-            axis = None if len(axis) == a.ndim else tuple(sorted(axis))
-        elif axis is not None:
-            axis = (axis % a.ndim,)
-
-        self.axis = axis
-        self.keepdims = keepdims
-
-        # max(a) -> use argmax
-        if self.axis is None:
-            self.indices = np.unravel_index(op(a.data), a.shape)
-            dat = a.data[self.indices]
-
-        # max(x, axis=i) -> use argmax with specified axis
-        elif len(self.axis) == 1:  #
-            op_index = op(a.data, axis=self.axis[0])
-            self.indices = list(np.indices(op_index.shape))
-            self.indices.insert(self.axis[0], op_index)
-            self.indices = tuple(self.indices)
-            dat = a.data[self.indices]
-
-        # max(x, axis=(i,j,...) ) -> Reshape data to use argmax along trailing axis
-        else:
-            self.static_ax = tuple(
-                sorted(set(range(a.ndim)) - set(self.axis))
-            )  # non-reduced axes (m, n, ..)
-            self.to_trans = self.static_ax + self.axis  # (m, n, ..., i, j, ...)
-            self.from_trans = tuple(np.argsort(self.to_trans))
-            outshape = tuple(a.shape[i] for i in self.static_ax)
-
-            z = a.data.transpose(*self.to_trans).reshape(
-                *outshape, -1
-            )  # (m, n, ..., i*j*[...])
-
-            k = op(z, axis=-1)
-            self.indices = tuple(i for i in np.indices(k.shape))
-            self.indices += (k,)
-            self.tmp_grad_shape = z.shape
-            z = z[self.indices]
-
-            dat = z.reshape(outshape)  # (m, n, ...)
-
-        if not self.keepdims:
-            return dat
-
-        elif self.axis is None:
-            keep_index = (np.newaxis,) * a.ndim
-        else:
-            keep_index = [slice(None)] * a.ndim
-            for i in self.axis:
-                keep_index[i] = np.newaxis
-            keep_index = tuple(keep_index)
-
-        return np.asarray(dat)[keep_index]
+    @staticmethod
+    @abstractmethod
+    def numpy_func(
+        a: np.ndarray,
+        axis: Optional[Union[int, Tuple[int, ...]]] = None,
+        out: Optional[np.ndarray] = None,
+        *args,
+        **kwargs,
+    ) -> np.ndarray:
+        raise NotImplementedError()  # pragma: no cover
 
     def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
+        (a,) = self.variables
+        axis = self.axis
+
         if a.ndim == 0:
             return grad
 
+        if hasattr(axis, "__iter__"):
+            axis = tuple(ax % a.ndim for ax in axis)
+            axis = None if len(axis) == a.ndim else tuple(sorted(axis))
+        elif axis is not None:  # pragma: no cover
+            axis = (axis % a.ndim,)
+
         # normalize shape of grad to be same as when keepdims=False
         if self.keepdims:
-            if self.axis is not None:
-                reduce = [slice(None)] * a.ndim
-                for i in self.axis:
-                    reduce[i] = 0
-                reduce = tuple(reduce)
+            if axis is not None:
+                reduce_ = [slice(None)] * a.ndim
+                for i in axis:
+                    reduce_[i] = 0
+                reduce_ = tuple(reduce_)
             else:
-                reduce = (0,) * a.ndim
-            grad = grad[reduce]
+                reduce_ = (0,) * a.ndim
+            grad = grad[reduce_]
 
-        # use argmax indices to broadcast grad to correct elements
-        if self.axis is None or len(self.axis) == 1:
-            out = np.zeros_like(a.data, dtype=float)
-            out[self.indices] = grad
+        # max(a) -> use argmax
+        if axis is None:
+            indices = np.unravel_index(self._arg_finder(a.data), a.shape)
+            out = np.zeros_like(a.data, dtype=grad.dtype)
+            out[indices] = grad
             return out
-        else:
-            out = np.zeros(self.tmp_grad_shape, dtype=float)
-            out[self.indices] = grad
-            shape = tuple(a.shape[i] for i in self.to_trans)
-            return out.reshape(shape).transpose(*self.from_trans)
+        # max(x, axis=i) -> use argmax with specified axis
+        elif len(axis) == 1:
+            op_index = self._arg_finder(a.data, axis=axis[0])
+            indices = list(np.indices(op_index.shape))
+            indices.insert(axis[0], op_index)
+            indices = tuple(indices)
+
+            out = np.zeros_like(a.data, dtype=grad.dtype)
+            out[indices] = grad
+            return out
+
+        # max(x, axis=(i,j,...) ) -> Reshape data to use argmax along trailing axis
+        static_ax = tuple(
+            sorted(set(range(a.ndim)) - set(axis))
+        )  # non-reduced axes (m, n, ..)
+        to_trans = static_ax + axis  # (m, n, ..., i, j, ...)
+        from_trans = tuple(np.argsort(to_trans))
+        outshape = tuple(a.shape[i] for i in static_ax)
+
+        z = a.data.transpose(*to_trans).reshape(*outshape, -1)  # (m, n, ..., i*j*[...])
+
+        k = self._arg_finder(z, axis=-1)
+        indices = tuple(i for i in np.indices(k.shape))
+        indices += (k,)
+        tmp_grad_shape = z.shape
+
+        out = np.zeros(tmp_grad_shape, dtype=grad.dtype)
+        out[indices] = grad
+        shape = tuple(a.shape[i] for i in to_trans)
+        return out.reshape(shape).transpose(*from_trans)
 
 
-class Sum(Operation):
-    def __call__(self, a, axis=None, keepdims=False):
-        """Parameters
-        ----------
-        a : mygrad.Tensor"""
-        self.variables = (a,)
+class Max(MaxMin):
+    numpy_func = staticmethod(np.max)
+    _arg_finder = staticmethod(np.argmax)
 
-        if axis is not None and not hasattr(axis, "__iter__"):
-            axis = (axis,)
-        self.axis = axis
 
-        self.keepdims = keepdims
-        out = a.data.sum(axis=axis, keepdims=keepdims)
-        self.outshape = out.shape if isinstance(out, np.ndarray) else None
-        return out
+class Min(MaxMin):
+    numpy_func = staticmethod(np.min)
+    _arg_finder = staticmethod(np.argmin)
+
+
+class Sum(Sequential):
+    numpy_func = staticmethod(np.sum)
 
     def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
-        if self.outshape is None:
-            return np.full(a.shape, grad, dtype=float)
+        (a,) = self.variables
+        if self.axis is None:
+            return np.full(a.shape, grad, dtype=a.dtype)
 
         if not self.keepdims:
             index = [slice(None) for i in range(a.ndim)]
             for i in self.axis:
                 index[i] = np.newaxis
             grad = grad[tuple(index)]
-        return np.broadcast_to(grad, a.data.shape).astype(float)
+        return np.broadcast_to(grad, a.shape).astype(a.dtype, copy=False)
 
 
 class Mean(Sum):
-    def __call__(self, a, axis=None, keepdims=False):
-        out = super().__call__(a, axis, keepdims)
-        self.n = (
+    numpy_func = staticmethod(np.mean)
+
+    def backward_var(self, grad, index, **kwargs):
+        (a,) = self.variables
+        n = (
             a.data.size
             if self.axis is None
             else np.prod([a.shape[i] for i in self.axis])
         )
-        return out / self.n
+        return super().backward_var(grad / n, index, **kwargs)
+
+
+class Prod(Sequential):
+    numpy_func = staticmethod(np.prod)
 
     def backward_var(self, grad, index, **kwargs):
-        return super().backward_var(grad / self.n, index, **kwargs)
-
-
-class Prod(Operation):
-    def __call__(self, a, axis=None, keepdims=False):
-        """Parameters
-        ----------
-        a : mygrad.Tensor"""
-        self.variables = (a,)
-        if axis is not None and not hasattr(axis, "__iter__"):
-            axis = (axis,)
-        self.axis = axis
-        self.keepdims = keepdims
-        return a.data.prod(axis=axis, keepdims=keepdims)
-
-    def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
+        (a,) = self.variables
         x = a.data
-        grad = np.asarray(grad)
 
         if a.ndim == 0:
             return grad
@@ -239,7 +196,9 @@ class Prod(Operation):
         return grad * dldx
 
 
-def _reverse_cumsum(x, axis=None):  # pragma: no cover
+def _reverse_cumsum(
+    x: np.ndarray, axis: Optional[int] = None
+) -> np.ndarray:  # pragma: no cover
     """ (x0, x1, x2) -> (x0, x0 + x1, x0 + x1 + x2)"""
     if axis is None:
         axis = 0
@@ -312,11 +271,9 @@ def _find_first_zeros_along_axis(x, axis):  # pragma: no cover
     return tuple(zip(*gen_inds))
 
 
-class CumProd(Operation):
-    def __call__(self, a, axis=None):
-        self.variables = (a,)
-        self.axis = axis
-        return np.cumprod(a.data, axis)
+class CumProd(Sequential):
+    numpy_func = staticmethod(np.cumprod)
+    _integer_axis_only = True
 
     def backward_var(self, grad, index, **kwargs):
         x = self.variables[index].data
@@ -369,11 +326,9 @@ class CumProd(Operation):
         return dldx
 
 
-class CumSum(Operation):
-    def __call__(self, a, axis=None):
-        self.variables = (a,)
-        self.axis = axis
-        return np.cumsum(a.data, axis)
+class CumSum(Sequential):
+    _integer_axis_only = True
+    numpy_func = staticmethod(np.cumsum)
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
@@ -383,57 +338,50 @@ class CumSum(Operation):
         return g
 
 
-class Variance(Operation):
-    _method_name = "var"
+class Variance(Sequential):
+    numpy_func = staticmethod(np.var)
 
-    def _grad_preprocess(self, grad: Any) -> np.ndarray:
+    def _grad_preprocess(self, grad: np.ndarray) -> np.ndarray:
         """Helper method provided so that `Variance` and `StdDev` can
         share the same implementation for `backward_var`."""
-        return np.asarray(grad)
-
-    def __call__(self, a, axis=None, keepdims=False, ddof=0):
-        self.variables = (a,)
-
-        if axis is not None and not hasattr(axis, "__iter__"):
-            axis = (axis,)
-
-        self.kwargs = dict(axis=axis, keepdims=keepdims, ddof=ddof)
-        return getattr(a.data, self._method_name)(**self.kwargs)
+        return grad
 
     def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
-        if isinstance(self.kwargs["axis"], Sequence) and len(self.kwargs["axis"]) == 0:
+        (a,) = self.variables
+        axis: Optional[Tuple[int, ...]] = self.axis
+        if isinstance(axis, Sequence) and len(axis) == 0:
             return np.zeros(a.shape, dtype=float)
 
-        N = (
-            a.size
-            if self.kwargs["axis"] is None
-            else np.prod([a.shape[i] for i in self.kwargs["axis"]])
-        )
-        N -= self.kwargs["ddof"]
+        N = a.size if axis is None else np.prod([a.shape[i] for i in axis])
+        N -= self.ddof
 
         grad = self._grad_preprocess(grad)
         if grad.ndim == 0:
+            # keepdims=False and axis=None (or all axes)
             grad = np.full(a.shape, grad, dtype=float)
         else:
-            if not self.kwargs["keepdims"]:
+            axis: Tuple[int, ...]
+            if not self.keepdims:
                 index = [slice(None)] * a.ndim
-                for i in self.kwargs["axis"]:
+                for i in axis:
                     index[i] = np.newaxis
                 grad = grad[tuple(index)]
-        back = (2.0 / N) * (
-            a.data - a.data.mean(axis=self.kwargs["axis"], keepdims=True)
-        )
+        back = (2.0 / N) * (a.data - a.data.mean(axis=axis, keepdims=True))
         return back * grad
 
 
 class StdDev(Variance):
-    _method_name = "std"
+    numpy_func = staticmethod(np.std)
 
-    def _grad_preprocess(self, grad: Any) -> np.ndarray:
+    def _grad_preprocess(self, grad: np.ndarray) -> np.ndarray:
         """Helper method provided so that `Variance` and `StdDev` can
         share the same implementation for `backward_var`.
 
         Includes backpropagation through the sqrt after the variance."""
-        a = self.variables[0]
-        return np.asarray(grad) / (2 * np.sqrt(a.data.var(**self.kwargs)))
+        (a,) = self.variables
+        return grad / (
+            2
+            * np.sqrt(
+                a.data.var(axis=self.axis, ddof=self.ddof, keepdims=self.keepdims)
+            )
+        )

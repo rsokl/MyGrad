@@ -1,9 +1,10 @@
 from numbers import Number
+from typing import Optional
 
 import numpy as np
 
 import mygrad._utils.graph_tracking as _tracking
-from mygrad.operation_base import BroadcastableOp, Operation
+from mygrad.operation_base import Operation
 
 __all__ = ["GetItem", "SetItem"]
 
@@ -104,7 +105,7 @@ def _arr(*shape: int) -> np.ndarray:
     return np.arange(np.prod(shape)).reshape(shape)
 
 
-class SetItem(BroadcastableOp):
+class SetItem(Operation):
     """Defines the __setitem__ interface for a Tensor, supporting back-propagation through
     both the tensor being set and the tensor whose .
 
@@ -113,7 +114,7 @@ class SetItem(BroadcastableOp):
 
     can_return_view = True
 
-    def __call__(self, a, b, index):
+    def __call__(self, a, b, index, *, out: np.ndarray):
         """a[index] = b
 
         Parameters
@@ -130,13 +131,16 @@ class SetItem(BroadcastableOp):
             All means of numpy-array indexing (basic, advanced, mixed, etc) are
             supported.
 
+        out : ndarray
+            The data to be mutated; defaults to ``a.data``. This argument is
+            included to provide parity with standard ufunc signatures.
+
         Notes
         -----
         Additional computational overhead is required for back-propagation when
         `index` contains any integer-valued arrays, to accommodate for the scenario
         in which a single element is set multiple times."""
 
-        out = a.data
         self.variables = (a, b)
         self.index = index if isinstance(index, tuple) else (index,)
         out[index] = b.data

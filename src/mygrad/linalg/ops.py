@@ -7,28 +7,18 @@ import numpy as np
 from numpy.lib.stride_tricks import as_strided
 
 from mygrad._utils import SkipGradient, reduce_broadcast
-from mygrad.operation_base import BroadcastableOp
+from mygrad.operation_base import BinaryUfunc, Operation
 
 __all__ = ["MatMul", "EinSum"]
 
 
-class MatMul(BroadcastableOp):
-    def __call__(self, a, b):
-        """f(a) -> matmul(a, b)
-
-        Parameters
-        ----------
-        a : mygrad.Tensor
-        b : mygrad.Tensor
-
-        Returns
-        -------
-        numpy.ndarray"""
-        self.variables = (a, b)
-        return np.matmul(a.data, b.data)
+class MatMul(BinaryUfunc):
+    numpy_ufunc = np.matmul
 
     def backward_var(self, grad, index, **kwargs):
-        a, b = (i.data for i in self.variables)
+        a, b = self.variables
+        a = a.data
+        b = b.data
 
         # handle 1D w/ 1D (dot product of vectors)
         if a.ndim == 1 and b.ndim == 1:
@@ -56,6 +46,8 @@ class MatMul(BroadcastableOp):
             else:  # (j,) w/ ([...], j, k)
                 dfdx = a[:, np.newaxis] * np.expand_dims(grad, -2)
             return dfdx
+        else:  # pragma: no cover
+            raise ValueError()
 
 
 # EinSum #
@@ -119,7 +111,7 @@ def _get_indices(item, seq):
     return (n for n, x in enumerate(seq) if x == item)
 
 
-class EinSum(BroadcastableOp):
+class EinSum(Operation):
     can_return_view = True
 
     def __call__(self, *variables, in_lbls, out_lbls, optimize=False):

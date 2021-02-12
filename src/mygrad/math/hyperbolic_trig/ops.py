@@ -1,6 +1,6 @@
 import numpy as np
 
-from mygrad.operation_base import Operation
+from mygrad.operation_base import Operation, UnaryUfunc
 
 __all__ = [
     "Sinh",
@@ -17,39 +17,27 @@ __all__ = [
 ]
 
 
-class Sinh(Operation):
-    """ f(a) -> sinh(a) """
-
-    def __call__(self, a):
-        self.variables = (a,)
-        return np.sinh(a.data)
+class Sinh(UnaryUfunc):
+    numpy_ufunc = np.sinh
 
     def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
+        (a,) = self.variables
         return grad * np.cosh(a.data)
 
 
-class Cosh(Operation):
-    """ f(a) -> cosh(a) """
-
-    def __call__(self, a):
-        self.variables = (a,)
-        return np.cosh(a.data)
+class Cosh(UnaryUfunc):
+    numpy_ufunc = np.cosh
 
     def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
+        (a,) = self.variables
         return grad * np.sinh(a.data)
 
 
-class Tanh(Operation):
-    """ f(a) -> tanh(a) """
-
-    def __call__(self, a):
-        self.variables = (a,)
-        return np.tanh(a.data)
+class Tanh(UnaryUfunc):
+    numpy_ufunc = np.tanh
 
     def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
+        (a,) = self.variables
         return grad * (1 - np.tanh(a.data) ** 2)
 
 
@@ -61,7 +49,7 @@ class Csch(Operation):
         return 1 / np.sinh(a.data)
 
     def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
+        (a,) = self.variables
         return grad * -np.cosh(a.data) / np.sinh(a.data) ** 2
 
 
@@ -73,7 +61,7 @@ class Sech(Operation):
         return 1 / np.cosh(a.data)
 
     def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
+        (a,) = self.variables
         return grad * -np.sinh(a.data) / np.cosh(a.data) ** 2
 
 
@@ -85,43 +73,31 @@ class Coth(Operation):
         return 1 / np.tanh(a.data)
 
     def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
+        (a,) = self.variables
         return grad * -1 / np.sinh(a.data) ** 2
 
 
-class Arcsinh(Operation):
-    """ f(a) -> arcsinh(a) """
-
-    def __call__(self, a):
-        self.variables = (a,)
-        return np.arcsinh(a.data)
+class Arcsinh(UnaryUfunc):
+    numpy_ufunc = np.arcsinh
 
     def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
+        (a,) = self.variables
         return grad / np.sqrt(1 + a.data ** 2)
 
 
-class Arccosh(Operation):
-    """ f(a) -> arccosh(a) """
-
-    def __call__(self, a):
-        self.variables = (a,)
-        return np.arccosh(a.data)
+class Arccosh(UnaryUfunc):
+    numpy_ufunc = np.arccosh
 
     def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
+        (a,) = self.variables
         return grad / np.sqrt(a.data ** 2 - 1)
 
 
-class Arctanh(Operation):
-    """ f(a) -> arctanh(a) """
-
-    def __call__(self, a):
-        self.variables = (a,)
-        return np.arctanh(a.data)
+class Arctanh(UnaryUfunc):
+    numpy_ufunc = np.arctanh
 
     def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
+        (a,) = self.variables
         return grad / (1 - a.data ** 2)
 
 
@@ -133,7 +109,7 @@ class Arccsch(Operation):
         return np.arcsinh(1 / a.data)
 
     def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
+        (a,) = self.variables
         return -grad / (np.abs(a.data) * np.sqrt(1 + a.data ** 2))
 
 
@@ -145,5 +121,5 @@ class Arccoth(Operation):
         return np.arctanh(1 / a.data)
 
     def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
+        (a,) = self.variables
         return grad / (1 - a.data ** 2)

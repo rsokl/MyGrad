@@ -569,3 +569,14 @@ def test_unview_backprop_through_multiple_view_funcs():
     out.backward()
 
     assert_array_equal(x.grad, coeff)
+
+
+def test_op_wrapper_supports_inplace_target():
+    from mygrad.math.arithmetic.ops import Multiply
+
+    x_orig = mg.arange(3.0)
+    x = +x_orig
+    Tensor._op(Multiply, x, x, out=x)
+    assert_allclose(x, mg.arange(3) ** 2)
+    x.backward()
+    assert_allclose(x_orig.grad, 2 * np.arange(3.0))
