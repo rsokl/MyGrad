@@ -4,7 +4,7 @@ from typing import Optional
 import numpy as np
 
 import mygrad._utils.graph_tracking as _tracking
-from mygrad.operation_base import BroadcastableOp, Operation
+from mygrad.operation_base import Operation
 
 __all__ = ["GetItem", "SetItem"]
 
@@ -105,7 +105,7 @@ def _arr(*shape: int) -> np.ndarray:
     return np.arange(np.prod(shape)).reshape(shape)
 
 
-class SetItem(BroadcastableOp):
+class SetItem(Operation):
     """Defines the __setitem__ interface for a Tensor, supporting back-propagation through
     both the tensor being set and the tensor whose .
 

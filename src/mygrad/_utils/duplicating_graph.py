@@ -14,7 +14,7 @@ from typing import (
 from numpy import ndarray
 
 from mygrad._utils import WeakRefIterable
-from mygrad.operation_base import BroadcastableOp, Operation
+from mygrad.operation_base import Operation
 
 if TYPE_CHECKING:  # pragma: no cover
     from mygrad import Tensor
@@ -213,7 +213,7 @@ class DuplicatingGraph:
                 node.tensor._base = self.base.tensor
 
 
-class UnView(BroadcastableOp):
+class UnView(Operation):
     """
     Creates an operation that connects a mutant base to
     the placeholder mutant-view and placeholder base that

@@ -39,7 +39,7 @@ from mygrad.math.arithmetic.ops import (
     Square,
     Subtract,
 )
-from mygrad.operation_base import BroadcastableOp, Operation
+from mygrad.operation_base import Operation
 from mygrad.tensor_manip.array_shape.ops import Flatten, Reshape
 from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property
 
@@ -1202,7 +1202,7 @@ class Tensor:
         return self._constant
 
     @property
-    def creator(self) -> Union[Operation, BroadcastableOp]:
+    def creator(self) -> Operation:
         """The ``Operation`` instance that produced ``self``.
 
         Returns

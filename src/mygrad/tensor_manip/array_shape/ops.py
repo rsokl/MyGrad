@@ -1,6 +1,6 @@
 import numpy as np
 
-from mygrad.operation_base import BroadcastableOp, Operation
+from mygrad.operation_base import Operation
 
 __all__ = ["Reshape", "Flatten", "Squeeze", "Ravel", "ExpandDims", "BroadcastTo"]
 
@@ -87,7 +87,7 @@ class ExpandDims(Operation):
         return grad.reshape(a.shape)
 
 
-class BroadcastTo(BroadcastableOp):
+class BroadcastTo(Operation):
     can_return_view = True
 
     def __call__(self, a, shape):

@@ -17,7 +17,6 @@ if TYPE_CHECKING:  # pragma: no cover
 
 __all__ = [
     "Operation",
-    "BroadcastableOp",
     "Ufunc",
     "UnaryUfunc",
     "BinaryUfunc",
@@ -227,10 +226,6 @@ class Operation(ABC):
             visited.add(var_id)
             var._accum_ops.add(ref_op)
             var._backward(graph=graph)
-
-
-class BroadcastableOp(Operation, ABC):
-    """ Signals that an Operation's forward pass can broadcast its tensor arguments."""
 
 
 class Ufunc(Operation, ABC):
