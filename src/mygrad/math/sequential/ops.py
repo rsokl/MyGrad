@@ -21,6 +21,9 @@ __all__ = [
 
 
 class MaxMin(Sequential, ABC):
+    """A base class that implements common functionality for back-propping
+    through numpy.max and numpy.min"""
+
     @staticmethod
     @abstractmethod
     def _arg_finder(
