@@ -26,5 +26,4 @@ Support for Python and NumPy
 MyGrad abides by the `NEP 29 <https://numpy.org/neps/nep-0029-deprecation_policy.html>`_ recommendation, and adopts
 a common “time window-based” policy for support of Python and NumPy versions.
 
-Accordingly, MyGrad's drop schedule Python and NumPy can be found `here <https://numpy.org/neps/nep-0029-deprecation_policy.html#drop-schedule>`_.
-
+Accordingly, MyGrad's drop schedule for Python and NumPy can be found `here <https://numpy.org/neps/nep-0029-deprecation_policy.html#drop-schedule>`_.
