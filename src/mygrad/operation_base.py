@@ -300,43 +300,42 @@ class UnaryUfunc(Ufunc, ABC):
         where: Union[bool, np.ndarray] = True,
         dtype=None,
     ) -> np.ndarray:
-        """
-        f(x1, out=None, *, where=True, dtype=None)
+        """f(x1, out=None, *, where=True, dtype=None)
 
-                Parameters
-                ----------
-                x1 : Tensor, shape-(...)
-                    The input to the operation.
+        Parameters
+        ----------
+        x1 : Tensor, shape-(...)
+            The input to the operation.
 
-                    This tensor is saved to the state of the operation instance
-                    so that back-prop can be performed through it.
+            This tensor is saved to the state of the operation instance
+            so that back-prop can be performed through it.
 
-                out : Optional[np.ndarray]
-                    A location into which the result is stored. If provided, it must
-                    have a shape that the inputs broadcast to. If not provided or None,
-                    a freshly-allocated array is returned.
+        out : Optional[np.ndarray]
+            A location into which the result is stored. If provided, it must
+            have a shape that the inputs broadcast to. If not provided or None,
+            a freshly-allocated array is returned.
 
-                where: Union[bool, np.ndarray]
-                    Accepts a boolean array which is broadcast together with ``x1``.
-                    Values of True indicate to calculate the ufunc at that position, values
-                    of False indicate to leave the value in the output alone.
+        where: Union[bool, np.ndarray]
+            Accepts a boolean array which is broadcast together with ``x1``.
+            Values of True indicate to calculate the ufunc at that position, values
+            of False indicate to leave the value in the output alone.
 
-                dtype : Optional[numpy.dtype, str, object]
-                    Overrides the dtype of the calculation and output array.
+        dtype : Optional[numpy.dtype, str, object]
+            Overrides the dtype of the calculation and output array.
 
-                Returns
-                -------
-                y : ndarray, shape-(...)
-                    A numpy array of the same shape as ``x1`` with the ufunc applied
-                    elementwise on ``x1``.
+        Returns
+        -------
+        y : ndarray, shape-(...)
+            A numpy array of the same shape as ``x1`` with the ufunc applied
+            elementwise on ``x1``.
 
-                Notes
-                -----
-                This docstring was adapted from numpy's documentation [1]_.
+        Notes
+        -----
+        This docstring was adapted from numpy's documentation [1]_.
 
-                References
-                ----------
-                .. [1] Retrieved from https://numpy.org/doc/stable/reference/generated/numpy.sqrt.html
+        References
+        ----------
+        .. [1] Retrieved from https://numpy.org/doc/stable/reference/generated/numpy.sqrt.html
         """
         self.variables: Tuple["Tensor"] = (x1,)
         if where is not True:
