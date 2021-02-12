@@ -171,6 +171,11 @@ class Operation(ABC):
         """
         for index, var in enumerate(self.variables):
             if not var.constant:
+                if self.where is not True:  # pragma: no cover
+                    raise NotImplementedError(
+                        "Backprop is not supported for operations that "
+                        "were filtered through a `where` boolean mask."
+                    )
                 if not var._ops:
                     raise InvalidBackprop(
                         f"Part of the computational graph containing "
