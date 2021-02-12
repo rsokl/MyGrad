@@ -173,8 +173,8 @@ class Operation(ABC):
             if not var.constant:
                 if self.where is not True:  # pragma: no cover
                     raise NotImplementedError(
-                        "Backprop is not supported for operations that "
-                        "were filtered through a `where` boolean mask."
+                        f"{self} - Backprop is not supported for operations that "
+                        f"were filtered through a `where` ({self.where}) boolean mask."
                     )
                 if not var._ops:
                     raise InvalidBackprop(
@@ -454,7 +454,7 @@ class Sequential(Operation, ABC):
     ) -> np.ndarray:
         self.variables: Tuple["Tensor"] = (a,)
 
-        if where is not True:
+        if where is not True and where is not _NoValue:
             self.where = where
 
         self.keepdims = keepdims
