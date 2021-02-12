@@ -50,7 +50,7 @@ Dropping Support for Python 3.6 and Numpy < 1.17
 MyGrad now abides by the `NEP 29 <https://numpy.org/neps/nep-0029-deprecation_policy.html>`_ recommendation, and adopts
 a common “time window-based” policy for support of Python and NumPy versions.
 
-As such the Python 3.7 and Numpy 1.17 are the minimum versions supported by MyGrad.
+As such the Python 3.7 and Numpy 1.17 are the minimum versions supported by MyGrad 2.0.
 
 
 The Interfaces Between ``mygrad.Tensor`` and ``numpy.array`` Match
