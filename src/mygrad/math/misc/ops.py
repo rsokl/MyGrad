@@ -37,7 +37,9 @@ class Cbrt(UnaryUfunc):
 class _MaxMin(BinaryUfunc, ABC):
     @staticmethod
     @abstractmethod
-    def _comparison(self, x1: np.ndarray, x2: np.ndarray) -> np.ndarray:
+    def _comparison(
+        self, x1: np.ndarray, x2: np.ndarray
+    ) -> np.ndarray:  # pragma: no cover
         """Returns `True` where elements of the output were derived from `x1`.
 
         I.e. max => x1 > x2  ;  min => x1 < x2"""

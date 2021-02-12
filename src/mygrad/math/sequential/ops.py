@@ -32,7 +32,7 @@ class MaxMin(Sequential, ABC):
     ) -> np.ndarray:
         """`numpy.argmax` or `numpy.argmin` - in correspondence with the
         implementation of `max` or `min`."""
-        raise NotImplementedError()
+        raise NotImplementedError()  # pragma: no cover
 
     @staticmethod
     @abstractmethod
@@ -43,7 +43,7 @@ class MaxMin(Sequential, ABC):
         *args,
         **kwargs,
     ) -> np.ndarray:
-        raise NotImplementedError()
+        raise NotImplementedError()  # pragma: no cover
 
     def backward_var(self, grad, index, **kwargs):
         (a,) = self.variables
@@ -55,7 +55,7 @@ class MaxMin(Sequential, ABC):
         if hasattr(axis, "__iter__"):
             axis = tuple(ax % a.ndim for ax in axis)
             axis = None if len(axis) == a.ndim else tuple(sorted(axis))
-        elif axis is not None:
+        elif axis is not None:  # pragma: no cover
             axis = (axis % a.ndim,)
 
         # normalize shape of grad to be same as when keepdims=False

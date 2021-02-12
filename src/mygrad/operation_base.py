@@ -40,7 +40,7 @@ class _NoValueType:
             cls.__instance = super(_NoValueType, cls).__new__(cls)
         return cls.__instance
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         return "<no value>"
 
 
@@ -244,7 +244,7 @@ class Ufunc(Operation, ABC):
     @property
     @abstractmethod
     def numpy_ufunc(self) -> np.ufunc:
-        raise NotImplementedError()
+        raise NotImplementedError()  # pragma: no cover
 
     @property
     def nin(self) -> int:
@@ -426,7 +426,7 @@ class Sequential(Operation, ABC):
         *args,
         **kwargs,
     ) -> np.ndarray:
-        raise NotImplementedError()
+        raise NotImplementedError()  # pragma: no cover
 
     def __init__(self):
         self.axis: Optional[Union[int, Tuple[int, ...]]]
@@ -472,7 +472,7 @@ class Sequential(Operation, ABC):
         if keepdims is not _NoValue:
             kwargs["keepdims"] = keepdims
 
-        if initial is not _NoValue:
+        if initial is not _NoValue:  # pragma: no cover
             kwargs["initial"] = initial
 
         if where is not _NoValue:

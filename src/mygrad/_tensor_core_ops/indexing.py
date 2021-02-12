@@ -114,7 +114,7 @@ class SetItem(Operation):
 
     can_return_view = True
 
-    def __call__(self, a, b, index, *, out: Optional[np.ndarray] = None):
+    def __call__(self, a, b, index, *, out: np.ndarray):
         """a[index] = b
 
         Parameters
@@ -131,7 +131,7 @@ class SetItem(Operation):
             All means of numpy-array indexing (basic, advanced, mixed, etc) are
             supported.
 
-        out : Optional[ndarray]
+        out : ndarray
             The data to be mutated; defaults to ``a.data``. This argument is
             included to provide parity with standard ufunc signatures.
 
@@ -140,9 +140,6 @@ class SetItem(Operation):
         Additional computational overhead is required for back-propagation when
         `index` contains any integer-valued arrays, to accommodate for the scenario
         in which a single element is set multiple times."""
-
-        if out is None:
-            out = a.data
 
         self.variables = (a, b)
         self.index = index if isinstance(index, tuple) else (index,)

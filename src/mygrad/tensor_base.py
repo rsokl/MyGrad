@@ -1393,15 +1393,6 @@ class Tensor:
             graph.restore_old_graph()
             raise e
 
-        if placeholder_mutant_view.base is inplace_target:
-            # Because `out` and `in_place_target` hold the same ndarray,
-            # `out` was marked as a view of `in_place_target`. However,
-            # this is not a true "base/view-child" relationship but merely
-            # an edge case not accommodated by `Tensor._op` when determining
-            # base/view relationships. Thus `out` should not be considered a
-            # view under these circumstances.
-            placeholder_mutant_view._base = None
-
         # Connect public base tensor to placeholder graph via the mutated placeholder
         # tensor `out`.
         if self.base is None:
