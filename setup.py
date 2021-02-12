@@ -21,7 +21,7 @@ CLASSIFIERS = [
     "Topic :: Scientific/Engineering",
 ]
 
-INSTALL_REQUIRES = ["numpy >= 1.12"]
+INSTALL_REQUIRES = ["numpy >= 1.17"]
 TESTS_REQUIRE = ["pytest >= 3.8", "hypothesis >= 5.32.0", "scipy"]
 
 DESCRIPTION = "A sleek auto-differentiation library that wraps numpy."
@@ -56,7 +56,7 @@ setup(
     },
     url=URL,
     download_url="https://github.com/rsokl/mygrad/tarball/" + versioneer.get_version(),
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     packages=find_packages(where="src", exclude=["tests", "tests.*"]),
     package_dir={"": "src"},
 )
