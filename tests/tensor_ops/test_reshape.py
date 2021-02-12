@@ -239,6 +239,7 @@ def test_input_validation(bad_input):
 # Turn mem-guard off to prevent the leak caused
 # by this
 @mg.mem_guard_off
+@pytest.mark.filterwarnings("ignore:Non-string object detected for the array ordering")
 def test_input_validation_matches_numpy():
     try:
         np.reshape(np.array(1), *(1, 1))
