@@ -1,18 +1,24 @@
-from typing import Type, Union
+from typing import Type, TypeVar, Union
 
 from numpy import dtype
 
-DTypeLike = Union[
-    dtype,
-    None,
-    type,
-    str,
-]
+DTypeLike = TypeVar(
+    "DTypeLike",
+    bound=Union[
+        dtype,
+        None,
+        type,
+        str,
+    ],
+)
 
-DTypeLikeReals = Union[
-    dtype,
-    None,
-    Type[int],
-    Type[float],
-    str,
-]
+DTypeLikeReals = TypeVar(
+    "DTypeLikeReals",
+    bound=Union[
+        dtype,
+        None,
+        Type[int],
+        Type[float],
+        str,
+    ],
+)

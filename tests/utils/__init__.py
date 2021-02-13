@@ -12,8 +12,6 @@ from mygrad.typing import ArrayLike, DTypeLike, DTypeLikeReals
 class InternalTestError(Exception):
     """Marks errors that are caused by bad test configurations"""
 
-    pass
-
 
 def check_dtype_consistency(out: ArrayLike, dest_dtype: DTypeLike):
     if dest_dtype is None:

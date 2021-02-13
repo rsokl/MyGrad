@@ -4,7 +4,7 @@ from functools import lru_cache, partial
 from itertools import groupby
 from numbers import Integral
 from operator import itemgetter
-from typing import Any, Iterable, List, Optional, Tuple, Union
+from typing import Any, Iterable, List, Mapping, Optional, Tuple, Union
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
@@ -13,7 +13,7 @@ from hypothesis.extra.numpy import broadcastable_shapes
 from numpy import ndarray
 
 from mygrad import Tensor
-from mygrad.typing import DTypeLikeReals
+from mygrad.typing import ArrayLike, DTypeLikeReals, Shape
 
 __all__ = [
     "adv_integer_index",
@@ -29,11 +29,19 @@ __all__ = [
     "tensors",
 ]
 
-Shape = Tuple[int, ...]
-
 basic_indices = partial(hnp.basic_indices, allow_newaxis=True, allow_ellipsis=True)
 
 array_shapes = hnp.array_shapes
+
+st.register_type_strategy(
+    DTypeLikeReals,
+    st.none()
+    | st.sampled_from([float, "float32", int, "int16"])
+    | hnp.floating_dtypes()
+    | hnp.integer_dtypes(),
+)
+
+st.register_type_strategy(Shape, hnp.array_shapes(min_dims=0, min_side=0))
 
 
 real_dtypes = (
@@ -96,6 +104,36 @@ class VerboseTensor(Tensor):
             replacement += f", grad={repr(self.grad)}"
         replacement += ")"
         return repr_[:-1] + replacement
+
+
+@st.composite
+def array_likes(
+    draw,
+    dtype: Any = st.sampled_from([float, int]),
+    shape: Union[int, Shape, st.SearchStrategy[Shape]] = hnp.array_shapes(),
+    *,
+    elements: Optional[Union[st.SearchStrategy, Mapping[str, Any]]] = None,
+    fill: Optional[st.SearchStrategy[Any]] = None,
+    unique: bool = False,
+) -> st.SearchStrategy[ArrayLike]:
+    """elements defaults to dict(min_value=-1e6, max_value=1e6)"""
+    if elements is None:
+        elements = {"min_value": -1e6, "max_value": 1e6}
+
+    arr = draw(
+        hnp.arrays(
+            dtype=dtype, shape=shape, elements=elements, fill=fill, unique=unique
+        )
+    )
+    mapper = draw(
+        st.sampled_from(
+            [lambda x: x, lambda x: VerboseTensor(x, copy=False), lambda x: x.tolist()]
+        )
+    )
+    return mapper(arr)
+
+
+st.register_type_strategy(ArrayLike, array_likes())
 
 
 @st.composite

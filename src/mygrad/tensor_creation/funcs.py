@@ -462,45 +462,49 @@ def full(
     constant: Optional[bool] = None,
 ):
     """
-    Return a Tensor of the given shape and type, filled with `fill_value`.
+        Return a Tensor of the given shape and type, filled with `fill_value`.
 
-    Parameters
-    ----------
-    shape : Union[int, Iterable[int]]
-        The shape of the output Tensor.
+        Parameters
+        ----------
+        shape : Union[int, Iterable[int]]
+            The shape of the output Tensor.
 
-    fill_value : ArrayLike
-        The value with which to fill the output Tensor. Note that this function
-        is not differentiable – the resulting tensor will not backprop through
-        `fill_value`.
+        fill_value : ArrayLike
+    <<<<<<< HEAD
+            The value with which to fill the output Tensor. Note that this function
+            is not differentiable – the resulting tensor will not backprop through
+            `fill_value`.
+    =======
+            The value with which to fill the output Tensor.
+    >>>>>>> develop
 
-    dtype : data-type, optional (default=None)
-        The data type of the output Tensor, or None to match `fill_value`..
+        dtype : data-type, optional (default=None)
+            The data type of the output Tensor, or None to match `fill_value`..
 
-    constant : Optional[bool]
-        If ``True``, this tensor is a constant, and thus does not facilitate
-        back propagation.
+        constant : Optional[bool]
+            If ``True``, this tensor is a constant, and thus does not facilitate
+            back propagation.
 
-        Defaults to ``False`` for float-type data.
-        Defaults to ``True`` for integer-type data.
+            Defaults to ``False`` for float-type data.
+            Defaults to ``True`` for integer-type data.
 
-        Integer-type tensors must be constant.
+            Integer-type tensors must be constant.
 
-    Returns
-    -------
-    Tensor
-        A Tensor of `fill_value` with the given shape and dtype.
+        Returns
+        -------
+        Tensor
+            A Tensor of `fill_value` with the given shape and dtype.
 
-    Examples
-    --------
-    >>> import mygrad as mg
-    >>> mg.full((2, 2), 33)
-    Tensor([[ 33,  33],
-            [ 33,  33]])
+        Examples
+        --------
+        >>> import mygrad as mg
+        >>> mg.full((2, 2), 33)
+        Tensor([[ 33,  33],
+                [ 33,  33]])
 
-    >>> mg.full((2, 2), 10)
-    Tensor([[10, 10],
-            [10, 10]])
+        >>> mg.full((2, 2), 10)
+        Tensor([[10, 10],
+                [10, 10]])
     """
     return Tensor(
         np.full(shape, fill_value=fill_value, dtype=dtype),

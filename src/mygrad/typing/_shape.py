@@ -1,3 +1,3 @@
-from typing import Tuple
+from typing import Tuple, TypeVar
 
-Shape = Tuple[int, ...]
+Shape = TypeVar("Shape", bound=Tuple[int, ...])
