@@ -78,7 +78,7 @@ def asarray(a: ArrayLike, dtype: DTypeLike = None, order: str = None) -> np.ndar
     Convert a list into an array:
 
     >>> import mygrad as mg
-    >>> a = None
+    >>> a = [1, 2]
     >>> mg.asarray(a)
     array([1, 2])
 
