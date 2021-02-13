@@ -1,8 +1,8 @@
-from typing import Iterable, Optional, Union
+from typing import Any, Iterable, Optional, Union
 
 import numpy as np
 
-from mygrad.tensor_base import Tensor, asarray
+from mygrad.tensor_base import Tensor
 from mygrad.typing import ArrayLike, DTypeLikeReals, Real
 
 Shape = Union[Iterable[int], int]
@@ -23,6 +23,15 @@ __all__ = [
     "zeros",
     "zeros_like",
 ]
+
+
+def _resolve_constant(other: Any, constant: Optional[bool]) -> Optional[bool]:
+    """Infers `constant` from `other` when `other` is a tensor and `constant`
+    is `None`"""
+    if constant is not None:
+        return constant
+    # constant=None lets subsequent tensor casting infer constant from dtype
+    return other.constant if isinstance(other, Tensor) else None
 
 
 def empty(
@@ -127,13 +136,14 @@ def empty_like(
     Tensor([[-1073741821, -1067949133],
             [  496041986,    19249760]])                     #random
     """
-    return Tensor(np.empty_like(asarray(other), dtype), constant=constant, copy=False)
+    constant = _resolve_constant(other, constant)
+    return Tensor(np.empty_like(other, dtype=dtype), constant=constant, copy=False)
 
 
 def eye(
-    rows: int,
-    cols: Optional[int] = None,
-    diag_idx: int = 0,
+    N: int,
+    M: Optional[int] = None,
+    k: int = 0,
     dtype: DTypeLikeReals = np.float32,
     constant: Optional[bool] = None,
 ):
@@ -141,13 +151,13 @@ def eye(
 
     Parameters
     ----------
-    rows : int
+    N : int
         The number of rows in the output Tensor.
 
-    cols : int, optional (default=None)
+    M : int, optional (default=None)
         The number of columns in the output, or None to match `rows`.
 
-    diag_idx : int, optional (default=0)
+    k : int, optional (default=0)
         The index of the diagonal. 0 is the main diagonal; a positive value is the upper
         diagonal, while a negative value refers to the lower diagonal.
 
@@ -179,7 +189,11 @@ def eye(
             [ 0.,  0.,  1.],
             [ 0.,  0.,  0.]])
     """
-    return Tensor(np.eye(rows, cols, diag_idx, dtype), constant=constant, copy=False)
+    return Tensor(
+        np.eye(N, M=M, k=k, dtype=dtype),
+        constant=constant,
+        copy=False,
+    )
 
 
 def identity(
@@ -217,7 +231,7 @@ def identity(
             [ 0.,  1.,  0.],
             [ 0.,  0.,  1.]])
     """
-    return Tensor(np.identity(n, dtype), constant=constant, copy=False)
+    return Tensor(np.identity(n, dtype=dtype), constant=constant, copy=False)
 
 
 def ones(
@@ -273,7 +287,7 @@ def ones(
     Tensor([[ 1.,  1.],
             [ 1.,  1.]])
     """
-    return Tensor(np.ones(shape, dtype), constant=constant, copy=False)
+    return Tensor(np.ones(shape, dtype=dtype), constant=constant, copy=False)
 
 
 def ones_like(
@@ -323,7 +337,8 @@ def ones_like(
     >>> mg.ones_like(y)
     Tensor([ 1.,  1.,  1.])
     """
-    return Tensor(np.ones_like(asarray(other), dtype), constant=constant, copy=False)
+    constant = _resolve_constant(other, constant)
+    return Tensor(np.ones_like(other, dtype=dtype), constant=constant, copy=False)
 
 
 def zeros(
@@ -436,7 +451,8 @@ def zeros_like(
     >>> mg.zeros_like(y)
     Tensor([ 0.,  0.,  0.])
     """
-    return Tensor(np.zeros_like(asarray(other), dtype), constant=constant, copy=False)
+    constant = _resolve_constant(other, constant)
+    return Tensor(np.zeros_like(other, dtype=dtype), constant=constant, copy=False)
 
 
 def full(
@@ -454,7 +470,9 @@ def full(
         The shape of the output Tensor.
 
     fill_value : ArrayLike
-        The value with which to fill the output Tensor.
+        The value with which to fill the output Tensor. Note that this function
+        is not differentiable – the resulting tensor will not backprop through
+        `fill_value`.
 
     dtype : data-type, optional (default=None)
         The data type of the output Tensor, or None to match `fill_value`..
@@ -485,7 +503,7 @@ def full(
             [10, 10]])
     """
     return Tensor(
-        np.full(shape, fill_value=asarray(fill_value), dtype=dtype),
+        np.full(shape, fill_value=fill_value, dtype=dtype),
         constant=constant,
         copy=False,
     )
@@ -541,8 +559,9 @@ def full_like(
     >>> mg.full_like(y, 0.1)
     Tensor([ 0.1,  0.1,  0.1,  0.1,  0.1,  0.1])
     """
+    constant = _resolve_constant(other, constant)
     return Tensor(
-        np.full_like(asarray(other), fill_value=fill_value, dtype=dtype),
+        np.full_like(other, fill_value=fill_value, dtype=dtype),
         constant=constant,
         copy=False,
     )

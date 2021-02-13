@@ -13,6 +13,7 @@ from hypothesis.extra.numpy import broadcastable_shapes
 from numpy import ndarray
 
 from mygrad import Tensor
+from mygrad.typing import DTypeLikeReals
 
 __all__ = [
     "adv_integer_index",
@@ -21,6 +22,7 @@ __all__ = [
     "broadcastable_shapes",
     "choices",
     "everything_except",
+    "real_dtypes",
     "valid_shapes",
     "valid_axes",
     "valid_constant_arg",
@@ -32,6 +34,13 @@ Shape = Tuple[int, ...]
 basic_indices = partial(hnp.basic_indices, allow_newaxis=True, allow_ellipsis=True)
 
 array_shapes = hnp.array_shapes
+
+
+real_dtypes = (
+    st.sampled_from([None, int, float, "int16", "int32", "float32", "float64"])
+    | hnp.integer_dtypes()
+    | hnp.floating_dtypes()
+)
 
 
 def everything_except(

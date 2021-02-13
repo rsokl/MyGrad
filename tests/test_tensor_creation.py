@@ -27,19 +27,18 @@ from mygrad.tensor_creation.funcs import (
     zeros_like,
 )
 from tests.custom_strategies import tensors, valid_constant_arg
+from tests.utils import expected_constant
 
 
-def check_tensor_array(tensor, array, constant, data_compare=True):
-    if constant is None:
-        constant = not np.issubdtype(tensor.dtype, np.floating)
+def check_tensor_array(tensor, array, data_compare=True):
     assert isinstance(tensor, Tensor)
     if data_compare:
         assert_array_equal(tensor.data, array)
     assert tensor.dtype is array.dtype
-    assert tensor.constant is constant
 
 
 ref_arr = np.arange(3)
+ref_tensor = mg.arange(3)
 
 
 @pytest.mark.parametrize(
@@ -47,14 +46,17 @@ ref_arr = np.arange(3)
     [
         (empty, np.empty, [(3, 2)]),
         (empty_like, np.empty_like, [ref_arr]),
+        (empty_like, np.empty_like, [ref_tensor]),
         (eye, np.eye, [3]),
         (identity, np.identity, [5]),
         (ones, np.ones, [(4, 3, 2)]),
         (ones_like, np.ones_like, [ref_arr]),
+        (ones_like, np.ones_like, [ref_tensor]),
         (zeros, np.zeros, [(4, 3, 2)]),
         (zeros_like, np.zeros_like, [ref_arr]),
         (full, np.full, [(4, 3, 2), 5.0]),
         (full_like, np.full_like, [ref_arr, 5.0]),
+        (full_like, np.full_like, [ref_tensor, 5.0]),
         (arange, np.arange, [3, 7]),
         (linspace, np.linspace, [3, 7]),
         (geomspace, np.geomspace, [3, 7]),
@@ -71,10 +73,18 @@ def test_tensor_creation_matches_array_creation(
 
     kwargs = {} if dtype is None else dict(dtype=dtype)
 
+    mygrad_out = mygrad_func(*args, constant=constant, **kwargs)
+
+    expected_const = expected_constant(
+        *(a for a in args if isinstance(a, (np.ndarray, Tensor))),
+        dest_dtype=mygrad_out.dtype,
+        constant=constant
+    )
+    assert mygrad_out.constant is expected_const
+
     check_tensor_array(
-        mygrad_func(*args, constant=constant, **kwargs),
+        mygrad_out,
         numpy_func(*args, **kwargs),
-        constant,
         data_compare=check_data,
     )
 
@@ -266,3 +276,24 @@ def test_tensor_mirrors_array(arr_like, dtype, copy, constant, ndmin):
 def test_bad_ndmin_raises(t, dtype, copy, constant, ndmin):
     with pytest.raises(TypeError):
         mg.tensor(t, dtype=dtype, copy=copy, ndmin=ndmin, constant=constant)
+
+
+@given(
+    shapes=hnp.mutually_broadcastable_shapes(
+        num_shapes=1, base_shape=(4, 3, 2), max_dims=3, max_side=4
+    ),
+    fill_is_tensor=st.booleans(),
+    data=st.data(),
+)
+def test_full_can_broadcast_fill_value(
+    shapes: hnp.BroadcastableShapes, fill_is_tensor: bool, data: st.DataObject
+):
+    fill_value = data.draw(hnp.arrays(shape=shapes.input_shapes[0], dtype=float))
+    expected = np.full(shape=shapes.result_shape, fill_value=fill_value)
+
+    if fill_is_tensor:
+        fill_value = Tensor(fill_value)
+
+    actual = full(shape=shapes.result_shape, fill_value=fill_value)
+
+    assert_array_equal(actual, expected)

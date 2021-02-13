@@ -1,11 +1,69 @@
 from contextlib import contextmanager
 from functools import wraps
-from typing import Callable, Dict, Union
+from typing import Callable, Dict, Optional, Union
 
 import numpy as np
 
 import mygrad._utils.lock_management as mem
 from mygrad import Tensor
+from mygrad.typing import ArrayLike, DTypeLike, DTypeLikeReals
+
+
+class InternalTestError(Exception):
+    """Marks errors that are caused by bad test configurations"""
+
+    pass
+
+
+def check_dtype_consistency(out: ArrayLike, dest_dtype: DTypeLike):
+    if dest_dtype is None:
+        return
+
+    out = np.asarray(out)
+    dest_dtype = np.dtype(dest_dtype)
+    assert (
+        out.dtype == dest_dtype
+    ), f"Mismatched dtypes.\nSpecified dtype: {dest_dtype}\ndtype of output: {out.dtype}"
+
+
+def expected_constant(
+    *args,
+    dest_dtype: DTypeLikeReals,
+    constant: Optional[bool] = None,
+) -> bool:
+    """Given the input arguments to a function that produces a tensor, infers
+    whether the resulting tensor should be a constant or a variable tensor."""
+    if not isinstance(constant, bool) and constant is not None:
+        raise InternalTestError(f"Invalid type for `constant`; got: {constant}")
+
+    if dest_dtype is None:
+        raise InternalTestError("`dest_dtype` cannot be `None`")
+
+    dest_dtype = np.dtype(dest_dtype)
+
+    if constant is not None:
+        if (
+            constant is False
+            and dest_dtype is not None
+            and issubclass(dest_dtype.type, np.integer)
+        ):
+            raise InternalTestError(
+                f"dest_dtype ({dest_dtype}) and specified constant ({constant}) are inconsistent"
+            )
+        return constant
+
+    if issubclass(dest_dtype.type, np.integer):
+        return True
+
+    if args:
+        # constant inferred from inputs
+        for item in args:
+            # if any input is a variable-tensor, output is variable
+            if isinstance(item, Tensor) and item.constant is False:
+                return False
+        return True
+
+    return issubclass(dest_dtype.type, np.integer)
 
 
 @contextmanager
