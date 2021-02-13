@@ -2,7 +2,6 @@ import sys
 from typing import TYPE_CHECKING, List, Sequence, Tuple, Union
 
 import numpy as np
-from typing_extensions import Protocol
 
 if sys.version_info >= (3, 8):
     from typing import Protocol
@@ -13,6 +12,7 @@ else:
         from typing_extensions import Protocol
     except ImportError:
         HAS_PROTOCOL = False
+        Protocol = object
     else:
         HAS_PROTOCOL = True
 
