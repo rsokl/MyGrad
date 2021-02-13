@@ -3,17 +3,19 @@ Defines the base class for mathematical operations capable of back-propagating
 gradients to their input tensors."""
 from abc import ABC, abstractmethod
 from numbers import Real
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Tuple, Union
 from weakref import ReferenceType
 
 import numpy as np
 
 from mygrad._utils import SkipGradient, reduce_broadcast
 from mygrad.errors import InvalidBackprop, InvalidGradient
+from mygrad.typing import DTypeLike, Mask
 
 if TYPE_CHECKING:  # pragma: no cover
     from mygrad import Tensor
     from mygrad._utils import WeakRef
+
 
 __all__ = [
     "Operation",
@@ -22,6 +24,8 @@ __all__ = [
     "BinaryUfunc",
     "Sequential",
 ]
+
+Axis = Optional[Union[int, Tuple[int, ...]]]
 
 
 class _NoValueType:
@@ -80,7 +84,7 @@ class Operation(ABC):
         self.replay_args: Optional[Tuple[Any, ...]] = None
         self.replay_kwargs: Optional[Dict[str, Any]] = None
         self.replay_force_constant: Optional[bool] = None
-        self.where: Union[bool, np.ndarray] = True
+        self.where: Mask = True
 
     @staticmethod
     def grad_post_process_fn(
@@ -272,17 +276,17 @@ class Ufunc(Operation, ABC):
         return self.numpy_ufunc.ntypes
 
     @property
-    def types(self):
+    def types(self) -> List[str]:
         """Returns a list with types grouped input->output."""
         return self.numpy_ufunc.types
 
     @property
-    def identity(self):
+    def identity(self) -> Optional[int]:
         """The identity value."""
         return self.numpy_ufunc.identity
 
     @property
-    def signature(self):
+    def signature(self) -> Optional[str]:
         """Definition of the core elements a generalized ufunc operates on."""
         return self.numpy_ufunc.signature
 
@@ -297,8 +301,8 @@ class UnaryUfunc(Ufunc, ABC):
         x1: "Tensor",
         out: Optional[np.ndarray] = None,
         *,
-        where: Union[bool, np.ndarray] = True,
-        dtype=None,
+        where: Mask = True,
+        dtype: DTypeLike = None,
     ) -> np.ndarray:
         """f(x1, out=None, *, where=True, dtype=None)
 
@@ -355,8 +359,8 @@ class BinaryUfunc(Ufunc, ABC):
         x2: "Tensor",
         out: Optional[np.ndarray] = None,
         *,
-        where: Union[bool, np.ndarray, _NoValueType] = True,
-        dtype=None,
+        where: Mask = True,
+        dtype: DTypeLike = None,
     ) -> np.ndarray:
         """f(x1, x2, out=None, *, where=True, dtype=None)
 
@@ -426,7 +430,7 @@ class Sequential(Operation, ABC):
     def numpy_func(
         a: np.ndarray,
         axis: Optional[Union[int, Tuple[int, ...]]] = None,
-        dtype=None,
+        dtype: DTypeLike = None,
         out: Optional[np.ndarray] = None,
         *args,
         **kwargs,
@@ -434,7 +438,7 @@ class Sequential(Operation, ABC):
         raise NotImplementedError()  # pragma: no cover
 
     def __init__(self):
-        self.axis: Optional[Union[int, Tuple[int, ...]]]
+        self.axis: Axis
         self.keepdims: Optional[bool]
         self.initial: Real
         self.out_shape: Tuple[int, ...]
@@ -443,7 +447,7 @@ class Sequential(Operation, ABC):
     def __call__(
         self,
         a: "Tensor",
-        axis=None,
+        axis: Axis = None,
         dtype=None,
         out: Optional[np.ndarray] = None,
         keepdims: bool = _NoValue,

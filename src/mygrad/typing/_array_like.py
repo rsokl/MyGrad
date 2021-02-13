@@ -3,6 +3,9 @@ from typing import TYPE_CHECKING, List, Sequence, Tuple, Union
 
 import numpy as np
 
+if TYPE_CHECKING:  # pragma: no cover
+    from mygrad import Tensor
+
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Protocol
 
@@ -16,8 +19,6 @@ else:  # pragma: no cover
     else:
         HAS_PROTOCOL = True
 
-if TYPE_CHECKING:  # pragma: no cover
-    from mygrad import Tensor
 
 if not TYPE_CHECKING and not HAS_PROTOCOL:  # pragma: no cover
 

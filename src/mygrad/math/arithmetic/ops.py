@@ -1,4 +1,3 @@
-from abc import ABC
 from functools import reduce
 from typing import TYPE_CHECKING
 
