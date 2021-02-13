@@ -1,6 +1,11 @@
+from typing import Iterable, Optional, Union
+
 import numpy as np
 
 from mygrad.tensor_base import Tensor, asarray
+from mygrad.typing import ArrayLike, DTypeLikeReals, Real
+
+Shape = Union[Iterable[int], int]
 
 __all__ = [
     "arange",
@@ -20,7 +25,9 @@ __all__ = [
 ]
 
 
-def empty(shape, dtype=np.float32, constant=None):
+def empty(
+    shape: Shape, dtype: DTypeLikeReals = np.float32, constant: Optional[bool] = None
+):
     """Return a new Tensor of the given shape and type, without initializing entries.
 
     Parameters
@@ -74,12 +81,14 @@ def empty(shape, dtype=np.float32, constant=None):
     return Tensor(np.empty(shape, dtype), constant=constant, copy=False)
 
 
-def empty_like(other, dtype=None, constant=None):
+def empty_like(
+    other: ArrayLike, dtype: DTypeLikeReals = None, constant: Optional[bool] = None
+):
     """Return a new Tensor of the same shape and type as the given array.
 
     Parameters
     ----------
-    other : Union[Tensor, ArrayLike]
+    other : ArrayLike
         The Tensor or array whose shape and datatype should be mirrored.
 
     dtype : data-type, optional (default=None)
@@ -121,7 +130,13 @@ def empty_like(other, dtype=None, constant=None):
     return Tensor(np.empty_like(asarray(other), dtype), constant=constant, copy=False)
 
 
-def eye(rows, cols=None, diag_idx=0, dtype=np.float32, constant=None):
+def eye(
+    rows: int,
+    cols: Optional[int] = None,
+    diag_idx: int = 0,
+    dtype: DTypeLikeReals = np.float32,
+    constant: Optional[bool] = None,
+):
     """Return a 2D Tensor with ones on the diagonal and zeros elsewhere.
 
     Parameters
@@ -167,7 +182,9 @@ def eye(rows, cols=None, diag_idx=0, dtype=np.float32, constant=None):
     return Tensor(np.eye(rows, cols, diag_idx, dtype), constant=constant, copy=False)
 
 
-def identity(n, dtype=np.float32, constant=None):
+def identity(
+    n: int, dtype: DTypeLikeReals = np.float32, constant: Optional[bool] = None
+):
     """Return the identity Tensor; a square Tensor with 1s on the main diagonal and 0s elsewhere.
 
     Parameters
@@ -194,7 +211,7 @@ def identity(n, dtype=np.float32, constant=None):
 
     Examples
     --------
-    >>> importy mygrad as mg
+    >>> import mygrad as mg
     >>> mg.identity(3)
     Tensor([[ 1.,  0.,  0.],
             [ 0.,  1.,  0.],
@@ -203,7 +220,9 @@ def identity(n, dtype=np.float32, constant=None):
     return Tensor(np.identity(n, dtype), constant=constant, copy=False)
 
 
-def ones(shape, dtype=np.float32, constant=None):
+def ones(
+    shape: Shape, dtype: DTypeLikeReals = np.float32, constant: Optional[bool] = None
+):
     """
     Return a Tensor of the given shape and type, filled with ones.
 
@@ -257,7 +276,9 @@ def ones(shape, dtype=np.float32, constant=None):
     return Tensor(np.ones(shape, dtype), constant=constant, copy=False)
 
 
-def ones_like(other, dtype=None, constant=None):
+def ones_like(
+    other: ArrayLike, dtype: DTypeLikeReals = None, constant: Optional[bool] = None
+):
     """
     Return a Tensor of the same shape and type as the given, filled with ones.
 
@@ -305,7 +326,9 @@ def ones_like(other, dtype=None, constant=None):
     return Tensor(np.ones_like(asarray(other), dtype), constant=constant, copy=False)
 
 
-def zeros(shape, dtype=np.float32, constant=None):
+def zeros(
+    shape: Shape, dtype: DTypeLikeReals = np.float32, constant: Optional[bool] = None
+):
     """
     Return a Tensor of the given shape and type, filled with zeros.
 
@@ -358,13 +381,15 @@ def zeros(shape, dtype=np.float32, constant=None):
     return Tensor(np.zeros(shape, dtype), constant=constant, copy=False)
 
 
-def zeros_like(other, dtype=None, constant=None):
+def zeros_like(
+    other: ArrayLike, dtype: DTypeLikeReals = None, constant: Optional[bool] = None
+):
     """
     Return a Tensor of the same shape and type as the given, filled with zeros.
 
     Parameters
     ----------
-    other : Union[Tensor, ArrayLike]
+    other : ArrayLike
         The Tensor or array whose shape and datatype should be mirrored.
 
     dtype : data-type, optional (default=None)
@@ -414,16 +439,21 @@ def zeros_like(other, dtype=None, constant=None):
     return Tensor(np.zeros_like(asarray(other), dtype), constant=constant, copy=False)
 
 
-def full(shape, fill_value, dtype=None, constant=None):
+def full(
+    shape: Shape,
+    fill_value: ArrayLike,
+    dtype: DTypeLikeReals = None,
+    constant: Optional[bool] = None,
+):
     """
     Return a Tensor of the given shape and type, filled with `fill_value`.
 
     Parameters
     ----------
-    shape : Union[int, Tuple[int]]
+    shape : Union[int, Iterable[int]]
         The shape of the output Tensor.
 
-    fill_value : Real
+    fill_value : ArrayLike
         The value with which to fill the output Tensor.
 
     dtype : data-type, optional (default=None)
@@ -454,16 +484,28 @@ def full(shape, fill_value, dtype=None, constant=None):
     Tensor([[10, 10],
             [10, 10]])
     """
-    return Tensor(np.full(shape, fill_value, dtype), constant=constant, copy=False)
+    return Tensor(
+        np.full(shape, fill_value=asarray(fill_value), dtype=dtype),
+        constant=constant,
+        copy=False,
+    )
 
 
-def full_like(other, fill_value, dtype=None, constant=None):
+def full_like(
+    other: ArrayLike,
+    fill_value: Real,
+    dtype: DTypeLikeReals = None,
+    constant: Optional[bool] = None,
+):
     """Return a Tensor of the same shape and type as the given, filled with `fill_value`.
 
     Parameters
     ----------
-    other : Union[Tensor, ArrayLike]
+    other : ArrayLike
         The Tensor or array whose shape and datatype should be mirrored.
+
+    fill_value : Real
+        The value with which to fill the output Tensor.
 
     dtype : data-type, optional (default=None)
         Override the data type of the returned Tensor with this value, or None to not override.
@@ -500,13 +542,19 @@ def full_like(other, fill_value, dtype=None, constant=None):
     Tensor([ 0.1,  0.1,  0.1,  0.1,  0.1,  0.1])
     """
     return Tensor(
-        np.full_like(asarray(other), fill_value, dtype),
+        np.full_like(asarray(other), fill_value=fill_value, dtype=dtype),
         constant=constant,
         copy=False,
     )
 
 
-def arange(stop, start=0, step=1, dtype=None, constant=None):
+def arange(
+    stop: Real,
+    start: Real = 0,
+    step: int = 1,
+    dtype: DTypeLikeReals = None,
+    constant: Optional[bool] = None,
+):
     """Return a Tensor with evenly-spaced values within a given interval.
 
     Values are generated within [start, stop). Note that for non-integer steps, results may be
@@ -520,7 +568,7 @@ def arange(stop, start=0, step=1, dtype=None, constant=None):
     stop : Real
         The end of the interval, exclusive.
 
-    step : Real, optional (default=1)
+    step : int, optional (default=1)
         The spacing between successive values.
 
     dtype : data-type, optional (default=None)
@@ -559,7 +607,14 @@ def arange(stop, start=0, step=1, dtype=None, constant=None):
     return Tensor(np.arange(start, stop, step, dtype), constant=constant, copy=False)
 
 
-def linspace(start, stop, num=50, include_endpoint=True, dtype=None, constant=None):
+def linspace(
+    start: Real,
+    stop: Real,
+    num: int = 50,
+    include_endpoint: bool = True,
+    dtype: DTypeLikeReals = None,
+    constant: Optional[bool] = None,
+):
     """Return a Tensor with evenly-spaced numbers over a specified interval.
 
     Values are generated within [start, stop], with the endpoint optionally excluded.
@@ -619,7 +674,13 @@ def linspace(start, stop, num=50, include_endpoint=True, dtype=None, constant=No
 
 
 def logspace(
-    start, stop, num=50, include_endpoint=True, base=10, dtype=None, constant=None
+    start: Real,
+    stop: Real,
+    num: int = 50,
+    include_endpoint: bool = True,
+    base: Real = 10,
+    dtype: DTypeLikeReals = None,
+    constant: Optional[bool] = None,
 ):
     """Return a Tensor with evenly-spaced numbers over a specified interval on a log scale.
 
@@ -688,7 +749,14 @@ def logspace(
     )
 
 
-def geomspace(start, stop, num=50, include_endpoint=True, dtype=None, constant=None):
+def geomspace(
+    start: Real,
+    stop: Real,
+    num: int = 50,
+    include_endpoint: bool = True,
+    dtype: DTypeLikeReals = None,
+    constant: Optional[bool] = None,
+):
     """Return a Tensor with evenly-spaced values in a geometric progression.
 
     Each output sample is a constant multiple of the previous output.

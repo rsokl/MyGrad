@@ -5,10 +5,11 @@ import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
 import pytest
-from hypothesis import given, note, settings
+from hypothesis import given, infer, note, settings
 from numpy.testing import assert_array_equal
 
 from mygrad import Tensor
+from mygrad.typing import ArrayLike, DTypeLikeReals, Shape
 from tests.custom_strategies import (
     _factors,
     adv_integer_index,
@@ -303,3 +304,18 @@ def test_tensor_ndmin(shape: Tuple[int, ...], ndmin: int, data: st.DataObject):
     )
     assert tensor.ndim >= ndmin
     assert tensor.shape == tensor.grad.shape
+
+
+@given(dtype=infer)
+def test_can_infer_DTypeLikeReals(dtype: DTypeLikeReals):
+    issubclass(np.dtype(dtype).type, (np.floating, np.integer))
+
+
+@given(x=infer)
+def test_can_infer_ArrayLike(x: ArrayLike):
+    np.array(x)  # raise if not array-like
+
+
+@given(shape=infer)
+def test_can_infer_Shape(shape: Shape):
+    np.ones(shape)  # raise if not valid shape

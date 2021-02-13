@@ -15,18 +15,17 @@ from typing import (
 )
 from weakref import ReferenceType
 
-import numpy as np
-
 if TYPE_CHECKING:  # pragma: no cover
     from mygrad import Tensor
     from mygrad.operation_base import Operation
 
 __all__ = [
+    "collect_all_operations",
+    "ContextTracker",
     "reduce_broadcast",
     "SkipGradient",
     "WeakRef",
     "WeakRefIterable",
-    "ContextTracker",
 ]
 
 

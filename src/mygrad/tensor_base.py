@@ -4,17 +4,16 @@ attributes and special methods. Public math methods, e.g. ``sum``, ``mean``,
 etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 """
 
-from functools import wraps
-from numbers import Integral, Number, Real
+from numbers import Integral, Number
 from typing import (
     Any,
     Callable,
     Dict,
+    Iterator,
     List,
     Optional,
     Sequence,
     Set,
-    Tuple,
     Type,
     Union,
 )
@@ -42,11 +41,12 @@ from mygrad.math.arithmetic.ops import (
 from mygrad.operation_base import Operation
 from mygrad.tensor_manip.array_shape.ops import Flatten, Reshape
 from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property
+from mygrad.typing import ArrayLike, DTypeLike, DTypeLikeReals, Index, Shape
 
 __all__ = ["Tensor", "asarray", "astensor"]
 
 
-def asarray(a, dtype=None, order=None) -> np.ndarray:
+def asarray(a: ArrayLike, dtype: DTypeLike = None, order: str = None) -> np.ndarray:
     """Convert the input to an array.
 
     This docstring is adapted from that of ``numpy.asarray``
@@ -121,8 +121,8 @@ def asarray(a, dtype=None, order=None) -> np.ndarray:
 
 
 def tensor(
-    arr_like,
-    dtype=None,
+    arr_like: ArrayLike,
+    dtype: DTypeLikeReals = None,
     *,
     constant: Optional[bool] = None,
     copy: bool = True,
@@ -226,7 +226,9 @@ def tensor(
     return Tensor(arr_like, dtype=dtype, constant=constant, copy=copy, ndmin=ndmin)
 
 
-def astensor(t, dtype=None, *, constant: Optional[bool] = None) -> "Tensor":
+def astensor(
+    t: ArrayLike, dtype: DTypeLikeReals = None, *, constant: Optional[bool] = None
+) -> "Tensor":
     """Convert the input to a tensor.
 
     A tensor `t` is returned unchanged - its gradient and computational
@@ -281,11 +283,11 @@ def astensor(t, dtype=None, *, constant: Optional[bool] = None) -> "Tensor":
     Existing tensors are not copied and their gradients and
     computational graphs are preserved:
 
-    >>> t = 2 * mg.Tensor([1, 2])
-    >>> t2 = mg.astensor(t)
-    >>> t is t2
+    >>> t1 = 2 * mg.tensor([1, 2])
+    >>> t2 = mg.astensor(t1)
+    >>> t1 is t2
     True
-    >>> t.creator is t2.creator
+    >>> t1.creator is t2.creator
     True
 
     If `dtype` is set, a new tensor is created - with copied data - only
@@ -300,12 +302,12 @@ def astensor(t, dtype=None, *, constant: Optional[bool] = None) -> "Tensor":
     Otherwise, if `constant` is set, a new tensor is created (with
     no copy of the underlying data) only if constant doesn't match.
 
-    >>> t = mg.Tensor([1, 2], constant=False)
-    >>> mg.astensor(t, constant=False) is t
+    >>> t1 = mg.tensor([1, 2], constant=False)
+    >>> mg.astensor(t1, constant=False) is t
     True
-    >>> mg.astensor(t, constant=True) is t
+    >>> mg.astensor(t1, constant=True) is t1
     False
-    >>> mg.astensor(t, constant=True).data is t.data
+    >>> mg.astensor(t1, constant=True).data is t1.data
     True
     """
     return tensor(t, dtype=dtype, constant=constant, copy=False, ndmin=0)
@@ -336,7 +338,7 @@ class Tensor:
     Tensor(2.3)
     >>> mg.tensor(np.array([1.2, 3.0]))  # casting a numpy-array to a tensor
     Tensor([1.2, 3.0])
-    >>> mg.Tensor([[1, 2], [3, 4]])  # creating a 2-dimensional tensor
+    >>> mg.tensor([[1, 2], [3, 4]])  # creating a 2-dimensional tensor
     Tensor([[1, 2],
             [3, 4]])
     >>> mg.arange(4)    # using numpy-style tensor creation functions
@@ -405,7 +407,7 @@ class Tensor:
     ``mygrad.Tensor`` is a thin wrapper on ``numpy.ndarray``. A tensor's
     underlying numpy-array can be accessed via ``.data``:
 
-    >>> x = mg.Tensor([1, 2])
+    >>> x = mg.tensor([1, 2])
     >>> x.data
     array([1, 2])
 
@@ -419,7 +421,7 @@ class Tensor:
     as NumPy arrays. I.e. any (non-scalar) tensor produced via basic indexing will share
     memory with its parent.
 
-    >>> x = mg.Tensor([1., 2., 3., 4.])
+    >>> x = mg.tensor([1., 2., 3., 4.])
     >>> y = x[:2]  # the view: Tensor([1., 2.])
     >>> y.base is x
     True
@@ -467,14 +469,14 @@ class Tensor:
 
     __array_priority__ = 15.0
 
-    def __array__(self, dtype=None) -> np.ndarray:
+    def __array__(self, dtype: DTypeLike = None) -> np.ndarray:
         return np.array(self.data, dtype=dtype, copy=False)
 
     def __init__(
         self,
-        x,
+        x: ArrayLike,
         *,
-        dtype: Optional[Union[str, np.dtype, type]] = None,
+        dtype: DTypeLikeReals = None,
         constant: Optional[bool] = None,
         copy: bool = True,
         ndmin: int = 0,
@@ -484,12 +486,12 @@ class Tensor:
         """
         Parameters
         ----------
-        x : array_like
+        x : ArrayLike
             Input data, in any form that can be converted to an array.  This
             includes numbers, sequences, nested sequences, numpy-ndarrays,
             and mygrad-tensors.
 
-        dtype : Optional[type]
+        dtype : DTypeLikeReals
             `int`, `float`, or a real-valued numpy data type. By default the
             data type is inferred from ``x`` via ``numpy.asarray(x)``.
 
@@ -526,7 +528,7 @@ class Tensor:
         if constant is not None and not isinstance(constant, bool):
             raise TypeError(f"`constant` must be a boolean value, got: {constant}")
 
-        self._creator = _creator  # type: Union[None, Operation]
+        self._creator: Optional[Operation] = _creator
 
         self.data = np.array(x, dtype=dtype, copy=copy, ndmin=ndmin)  # type: np.ndarray
 
@@ -661,7 +663,7 @@ class Tensor:
         return self._view_grad
 
     def astype(
-        self, dtype: Union[type, str], *, constant: Optional[bool] = None
+        self, dtype: DTypeLikeReals, *, constant: Optional[bool] = None
     ) -> "Tensor":
         """Copy of the tensor with the specified dtype.
 
@@ -707,7 +709,7 @@ class Tensor:
     def _op(
         cls,
         Op: Type[Operation],
-        *input_vars: Union["Tensor", np.ndarray],
+        *input_vars: ArrayLike,
         op_args: Optional[Sequence] = None,
         op_kwargs: Optional[Dict[str, Any]] = None,
         constant: bool = False,
@@ -873,7 +875,7 @@ class Tensor:
             finalize(f, _mem.release_writeability_lock_on_op, tensor_refs)
         return out
 
-    def _replay_op(self, *input_vars: Union[np.ndarray, "Tensor"]) -> "Tensor":
+    def _replay_op(self, *input_vars: ArrayLike) -> "Tensor":
         """*dev use only*
 
         Replays the op that produced `self` - called on the specified
@@ -891,7 +893,7 @@ class Tensor:
             constant=self.creator.replay_force_constant,
         )
 
-    def backward(self, grad: Optional[Union[Real, np.ndarray]] = None):
+    def backward(self, grad: Optional[ArrayLike] = None):
         """Trigger backpropagation and compute the derivatives of this tensor.
 
         Designating this tensor as the tensor ℒ, compute dℒ/dx for all (non-constant) tensors
@@ -916,8 +918,8 @@ class Tensor:
         Examples
         --------
         >>> import mygrad as mg
-        >>> x = mg.Tensor(2)
-        >>> y = mg.Tensor(3)
+        >>> x = mg.tensor(2)
+        >>> y = mg.tensor(3)
         >>> w = x * y
         >>> ℒ = 2 * w
         >>> ℒ.backward()  # computes dℒ/dℒ, dℒ/dw, dℒ/dy, and dℒ/dx
@@ -934,7 +936,7 @@ class Tensor:
         Calling ``ℒ.backward()`` from a non-scalar tensor is equivalent
         to first summing that tensor.
 
-        >>> tensor = mg.Tensor([2.0, 4.0, 8.0])
+        >>> tensor = mg.tensor([2.0, 4.0, 8.0])
         >>> ℒ = tensor * tensor[::-1]  # [x0*x2, x1*x1, x2*x0]
         >>> ℒ.backward()  # behaves like ℒ = x0*x2 + x1*x1 + x2*x0
         >>> tensor.grad
@@ -1067,7 +1069,7 @@ class Tensor:
 
         return self
 
-    def null_gradients(self, clear_graph=True):
+    def null_gradients(self, clear_graph: bool = True):
         """
         **Deprecated: Tensors will automatically have their computational graphs cleared during backprop.
         Simply involving a tensor in a new computational graph will null its gradient.**
@@ -1093,8 +1095,8 @@ class Tensor:
         Examples
         --------
         >>> import mygrad as mg
-        >>> x = mg.Tensor(2)
-        >>> y = mg.Tensor(3)
+        >>> x = mg.tensor(2)
+        >>> y = mg.tensor(3)
         >>> w = x * y
         >>> f = 2 * w
         >>> f.backward()  # computes df/df, df/dw, df/dy, and df/dx
@@ -1226,10 +1228,10 @@ class Tensor:
     def __contains__(self, item) -> bool:
         return self.data.__contains__(item)
 
-    def __getitem__(self, item) -> Union["Tensor", Real]:
+    def __getitem__(self, item: Index) -> "Tensor":
         return self._op(GetItem, self, op_args=(item,))
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator["Tensor"]:
         # In the same way that numpy doesn't let you iterate over 0-dimensional
         # arrays, don't allow iteration over 0-dimensional arrays.
         if self.ndim == 0:
@@ -1239,7 +1241,7 @@ class Tensor:
     def _in_place_op(
         self,
         inplace_op: Type[Operation],
-        *input_vars: "Tensor",
+        *input_vars: ArrayLike,
         op_args: Optional[Sequence] = None,
         op_kwargs: Optional[Dict] = None,
         constant: bool = False,
@@ -1478,7 +1480,7 @@ class Tensor:
             node.parent._view_children.append(node.tensor)
 
     @property
-    def shape(self) -> Tuple[int, ...]:
+    def shape(self) -> Shape:
         """Tuple of tensor dimension-sizes.
 
         Sizes are reported in row-major order.
@@ -1516,7 +1518,7 @@ class Tensor:
         return self.data.shape
 
     @shape.setter
-    def shape(self, newshape: Tuple[int, ...]):
+    def shape(self, newshape: Union[int, Shape]):
         # Even though this op cannot mutate views, we still must
         # do graph-replaying here so that views can still reference
         # this tensor, but with the proper reshaping mediating them.
@@ -1602,56 +1604,56 @@ class Tensor:
             _dup.reroute_ops_through(source=view, target=node.tensor)
             parent._view_children.append(node.tensor)
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: Index, value: ArrayLike):
         self._in_place_op(SetItem, self, value, op_args=(key,))
 
-    def __add__(self, other) -> "Tensor":
+    def __add__(self, other: ArrayLike) -> "Tensor":
         return self._op(Add, self, other)
 
-    def __iadd__(self, other) -> "Tensor":
+    def __iadd__(self, other: ArrayLike) -> "Tensor":
         self._in_place_op(Add, self, other)
         return self
 
-    def __radd__(self, other) -> "Tensor":
+    def __radd__(self, other: ArrayLike) -> "Tensor":
         return self._op(Add, other, self)
 
-    def __sub__(self, other) -> "Tensor":
+    def __sub__(self, other: ArrayLike) -> "Tensor":
         return self._op(Subtract, self, other)
 
-    def __isub__(self, other) -> "Tensor":
+    def __isub__(self, other: ArrayLike) -> "Tensor":
         self._in_place_op(Subtract, self, other)
         return self
 
-    def __rsub__(self, other) -> "Tensor":
+    def __rsub__(self, other: ArrayLike) -> "Tensor":
         return self._op(Subtract, other, self)
 
-    def __truediv__(self, other) -> "Tensor":
+    def __truediv__(self, other: ArrayLike) -> "Tensor":
         return self._op(Divide, self, other)
 
-    def __rtruediv__(self, other) -> "Tensor":
+    def __rtruediv__(self, other: ArrayLike) -> "Tensor":
         return self._op(Divide, other, self)
 
-    def __itruediv__(self, other) -> "Tensor":
+    def __itruediv__(self, other: ArrayLike) -> "Tensor":
         self._in_place_op(Divide, self, other)
         return self
 
-    def __mul__(self, other) -> "Tensor":
+    def __mul__(self, other: ArrayLike) -> "Tensor":
         return self._op(Multiply, self, other)
 
-    def __imul__(self, other) -> "Tensor":
+    def __imul__(self, other: ArrayLike) -> "Tensor":
         self._in_place_op(Multiply, self, other)
         return self
 
-    def __rmul__(self, other) -> "Tensor":
+    def __rmul__(self, other: ArrayLike) -> "Tensor":
         return self._op(Multiply, other, self)
 
-    def __matmul__(self, other) -> "Tensor":
+    def __matmul__(self, other: ArrayLike) -> "Tensor":
         return self._op(MatMul, self, other)
 
-    def __rmatmul__(self, other) -> "Tensor":
+    def __rmatmul__(self, other: ArrayLike) -> "Tensor":
         return self._op(MatMul, other, self)
 
-    def __pow__(self, other):
+    def __pow__(self, other: ArrayLike):
         if isinstance(other, Number) or (
             isinstance(other, np.ndarray) and other.ndim == 0
         ):
@@ -1662,7 +1664,7 @@ class Tensor:
 
         return self._op(Power, self, other)
 
-    def __ipow__(self, other) -> "Tensor":
+    def __ipow__(self, other: ArrayLike) -> "Tensor":
         if isinstance(other, Number) or (
             isinstance(other, np.ndarray) and other.ndim == 0
         ):
@@ -1676,7 +1678,7 @@ class Tensor:
         self._in_place_op(Power, self, other)
         return self
 
-    def __rpow__(self, other):
+    def __rpow__(self, other: ArrayLike):
         return self._op(Power, other, self)
 
     def __neg__(self):
@@ -1685,7 +1687,7 @@ class Tensor:
     def __pos__(self):
         return self._op(Positive, self)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return repr(self.data).replace("array", "Tensor").replace("\n", "\n ")
 
     def __copy__(self) -> "Tensor":
@@ -1736,7 +1738,7 @@ class Tensor:
         copy._grad = np.copy(self._grad) if self._grad is not None else None
         return copy
 
-    def item(self) -> float:
+    def item(self) -> Union[int, float]:
         """Copy an element of a tensor to a standard Python scalar and return it.
 
         Note that the returned object does not support back-propagation.
@@ -1769,7 +1771,7 @@ class Tensor:
             raise TypeError("can only convert a tensor of size 1 to a Python scalar")
         return int(self.data)
 
-    def flatten(self, constant: bool = False) -> "Tensor":
+    def flatten(self, constant: bool = None) -> "Tensor":
         """Return a copy of the tensor collapsed into one dimension.
 
         This docstring was adapted from ``numpy.ndarray.flatten``.
@@ -1886,7 +1888,7 @@ class Tensor:
         return self.data.ndim
 
     @property
-    def dtype(self):
+    def dtype(self) -> np.dtype:
         """Data-type of the tensor's elements.
 
         Returns
@@ -1904,9 +1906,7 @@ class Tensor:
         <type 'numpy.dtype'>"""
         return self.data.dtype
 
-    def reshape(
-        self, *newshape: Union[int, Tuple[int, ...]], constant: bool = False
-    ) -> "Tensor":
+    def reshape(self, *newshape: Union[int, Shape], constant: bool = False) -> "Tensor":
         """Returns a tensor with a new shape, without changing its data.
         This docstring was adapted from ``numpy.reshape``
 
@@ -1975,31 +1975,26 @@ class Tensor:
         """
         return self._op(Tensor_Transpose_Property, self)
 
-    def __eq__(self, other):
-        return np.ndarray.__eq__(
-            self.data, other.data if isinstance(other, Tensor) else other
-        )
+    def __eq__(self, other: ArrayLike) -> np.ndarray:
+        return np.ndarray.__eq__(self.data, asarray(other))
 
-    def __ne__(self, other):
-        return np.ndarray.__ne__(
-            self.data, other.data if isinstance(other, Tensor) else other
-        )
+    def __ne__(self, other: ArrayLike) -> np.ndarray:
+        return np.ndarray.__ne__(self.data, asarray(other))
+
+    def __lt__(self, other: ArrayLike) -> np.ndarray:
+        return np.ndarray.__lt__(self.data, asarray(other))
+
+    def __le__(self, other: ArrayLike) -> np.ndarray:
+        return np.ndarray.__le__(self.data, asarray(other))
+
+    def __gt__(self, other: ArrayLike) -> np.ndarray:
+        return np.ndarray.__gt__(self.data, asarray(other))
+
+    def __ge__(self, other: ArrayLike) -> np.ndarray:
+        return np.ndarray.__ge__(self.data, asarray(other))
 
     def __imatmul__(self, other):
         raise TypeError(
             "In-place matrix multiplication is not (yet) supported. "
             "Use 'a = a @ b' instead of 'a @= b'"
         )
-
-
-# set all comparison operators - mirrors ndarray methods
-def tensor_to_array_wrapper(func):
-    @wraps(func)
-    def wrapped(x, y):
-        return func(x.data, y.data if isinstance(y, Tensor) else y)
-
-    return wrapped
-
-
-for _op in ("__lt__", "__le__", "__gt__", "__ge__"):
-    setattr(Tensor, _op, tensor_to_array_wrapper(getattr(np.ndarray, _op)))
