@@ -57,6 +57,7 @@ def clamp(val, min_=0.1):
         (logspace, np.logspace),
     ],
 )
+@settings(max_examples=200)
 @given(
     start=st.just(_NoValue) | st.integers(min_value=-10, max_value=10),
     stop=st.integers(min_value=-10, max_value=10),
@@ -95,7 +96,7 @@ def test_arange_like_against_numpy_equivalent(
     except (ZeroDivisionError, TypeError) as e:
         with pytest.raises(type(e)):
             mygrad_func(*inputs.args, **inputs.kwargs)
-        assume(False)
+        return
 
     constant = data.draw(valid_constant_arg(array.dtype), label="constant")
     tensor = mygrad_func(*inputs.args, **inputs.kwargs, constant=constant)
@@ -161,8 +162,8 @@ def test_tensor_create_like_against_numpy_equivalent(
     array = numpy_func(*inputs.args, **inputs.kwargs)
 
     constant = data.draw(valid_constant_arg(array.dtype), label="constant")
-
     tensor = mygrad_func(*inputs.args, **inputs.kwargs, constant=constant)
+
     if numpy_func is not np.empty_like:
         assert_array_equal(tensor, array)
     assert tensor.dtype == array.dtype

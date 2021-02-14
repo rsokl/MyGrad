@@ -370,6 +370,22 @@ It is also now standard to require that this argument be a keyword-only argument
 |                                             |    True                                      |
 +---------------------------------------------+----------------------------------------------+
 
+>>> t1 = mg.tensor(1., constant=True)
+>>> t2 = mg.tensor(1., constant=True)
+
+# old behavior
+>>> out = mg.add(t1, t2, constant=False)
+>>> out.constant
+True
+
+# new behavior
+>>> out = mg.add(t1, t2, constant=False)
+>>> out.constant
+False
+
+>>> out = mg.add(t1, t2, constant=None)
+>>> out.constant
+True
 
 Remove Scalar-Only Conditions on Backpropagation
 ------------------------------------------------
