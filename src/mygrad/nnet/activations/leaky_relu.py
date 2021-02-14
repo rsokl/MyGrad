@@ -8,7 +8,7 @@ from mygrad.tensor_base import Tensor
 __all__ = ["leaky_relu"]
 
 
-def leaky_relu(x, slope, constant=False):
+def leaky_relu(x, slope, *, constant=None):
     """Returns the leaky rectified linear activation elementwise along x.
 
     The leaky ReLU is given by `max(x, 0) + slope*min(x, 0)`.

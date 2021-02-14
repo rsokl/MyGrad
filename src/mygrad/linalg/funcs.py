@@ -9,7 +9,7 @@ from .ops import *
 __all__ = ["multi_matmul", "matmul", "einsum"]
 
 
-def matmul(a, b, constant=False):
+def matmul(a, b, *, constant=None):
     r"""
     Matrix product of two tensors:
 
@@ -109,7 +109,7 @@ def matmul(a, b, constant=False):
     return Tensor._op(MatMul, a, b, constant=constant)
 
 
-def einsum(*operands, optimize=False, constant=False):
+def einsum(*operands, optimize=False, constant=None):
     r"""
     einsum(subscripts, *operands)
 
@@ -369,7 +369,7 @@ def einsum(*operands, optimize=False, constant=False):
     )
 
 
-def multi_matmul(tensors, constant=False):
+def multi_matmul(tensors, *, constant=None):
     """
     Matrix product of two or more tensors calculated in the optimal ordering
 
@@ -472,7 +472,7 @@ def multi_matmul(tensors, constant=False):
     if n < 2:
         raise ValueError("Expecting at least two arrays.")
     elif n == 2:
-        return matmul(tensors[0], tensors[1], constant)
+        return matmul(tensors[0], tensors[1], constant=constant)
 
     tensors = [a if isinstance(a, Tensor) else np.asarray(a) for a in tensors]
 
@@ -494,10 +494,12 @@ def multi_matmul(tensors, constant=False):
         )
 
     if n == 3:
-        result = _multi_matmul_three(tensors[0], tensors[1], tensors[2], constant)
+        result = _multi_matmul_three(
+            tensors[0], tensors[1], tensors[2], constant=constant
+        )
     else:
         order = _multi_matmul_chain_order(tensors)
-        result = _multi_matmul(tensors, order, 0, n - 1, constant)
+        result = _multi_matmul(tensors, order, 0, n - 1, constant=constant)
 
     # return proper shape since we possibly added dimensions to the first
     # and last arrays
@@ -511,7 +513,7 @@ def multi_matmul(tensors, constant=False):
         return result
 
 
-def _multi_matmul_three(A, B, C, constant=False) -> Tensor:
+def _multi_matmul_three(A, B, C, *, constant=None) -> Tensor:
     """
     Find the best order for three arrays and do the multiplication.
 
@@ -522,9 +524,9 @@ def _multi_matmul_three(A, B, C, constant=False) -> Tensor:
     cost2 = a1b0 * c1 * (a0 + b1c0)
 
     if cost1 < cost2:
-        return matmul(matmul(A, B, constant), C, constant)
+        return matmul(matmul(A, B, constant=constant), C, constant=constant)
     else:
-        return matmul(A, matmul(B, C, constant), constant)
+        return matmul(A, matmul(B, C, constant=constant), constant=constant)
 
 
 def _multi_matmul_chain_order(arrays):
@@ -552,9 +554,9 @@ def _multi_matmul_chain_order(arrays):
     # s[i, j] is the value of k at which we split the product A_i..A_j
     s = np.empty((n, n), dtype=np.intp)
 
-    for l in range(1, n):
-        for i in range(n - l):
-            j = i + l
+    for ind in range(1, n):
+        for i in range(n - ind):
+            j = i + ind
             m[i, j] = np.inf
             for k in range(i, j):
                 q = m[i, k] + m[k + 1, j] + p[i] * p[k + 1] * p[j + 1]
@@ -564,13 +566,13 @@ def _multi_matmul_chain_order(arrays):
     return s
 
 
-def _multi_matmul(arrays, order, i, j, constant=False) -> Tensor:
+def _multi_matmul(arrays, order, i, j, *, constant=None) -> Tensor:
     """Actually do the multiplication with the given order."""
     if i == j:
         return arrays[i]
     else:
         return matmul(
-            _multi_matmul(arrays, order, i, order[i, j], constant),
-            _multi_matmul(arrays, order, order[i, j] + 1, j, constant),
-            constant,
+            _multi_matmul(arrays, order, i, order[i, j], constant=constant),
+            _multi_matmul(arrays, order, order[i, j] + 1, j, constant=constant),
+            constant=constant,
         )

@@ -3,7 +3,7 @@ import numpy as np
 from mygrad import Tensor
 
 
-def uniform(*shape, lower_bound=0, upper_bound=1, dtype=np.float32, constant=False):
+def uniform(*shape, lower_bound=0, upper_bound=1, dtype=np.float32, constant=None):
     """Initialize a ``Tensor`` by drawing from a uniform distribution.
 
     Parameters

@@ -47,7 +47,7 @@ class SoftmaxCrossEntropy(Operation):
         return grad * self.back
 
 
-def softmax_crossentropy(x, y_true, constant=False):
+def softmax_crossentropy(x, y_true, *, constant=None):
     r"""Given the classification scores of C classes for N pieces of data,
 
     computes the NxC softmax classification probabilities. The

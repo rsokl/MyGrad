@@ -56,7 +56,7 @@ class MulticlassHinge(Operation):
         return grad * self.back
 
 
-def multiclass_hinge(x, y_true, hinge=1.0, constant=False):
+def multiclass_hinge(x, y_true, hinge=1.0, *, constant=None):
     """Computes the average multiclass hinge loss.
 
     Parameters

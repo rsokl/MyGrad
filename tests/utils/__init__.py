@@ -13,6 +13,22 @@ class InternalTestError(Exception):
     """Marks errors that are caused by bad test configurations"""
 
 
+def adds_constant_arg(func):
+    """Compatibility shim so that functions that do not take a `constant`
+    kwarg can be tested by the testing fixtures that require them to."""
+
+    @wraps(func)
+    def wrapper(*args, constant=None, **kwargs):
+        out = func(*args, **kwargs)
+        if isinstance(out, Tensor):
+            out._constant = expected_constant(
+                args, dest_dtype=out.dtype, constant=constant
+            )
+        return out
+
+    return wrapper
+
+
 def check_dtype_consistency(out: ArrayLike, dest_dtype: DTypeLike):
     if dest_dtype is None:
         return

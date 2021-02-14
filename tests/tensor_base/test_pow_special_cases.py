@@ -9,24 +9,20 @@ from hypothesis import given
 import mygrad as mg
 from mygrad.math.arithmetic.ops import Positive, Square
 from tests.custom_strategies import tensors
+from tests.utils import adds_constant_arg, expected_constant
 
 from ..wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
-hnp.mutually_broadcastable_shapes
+
+@adds_constant_arg
+def custom_pow(x, p):
+    return x ** p
 
 
-def custom_pow(x, p, constant=False):
-    out = x ** p
-    if isinstance(out, mg.Tensor) and constant:
-        out._constant = constant
-    return out
-
-
-def in_place_custom_pow(x, p, constant=False):
+@adds_constant_arg
+def in_place_custom_pow(x, p):
     out = +x
     out **= p
-    if isinstance(out, mg.Tensor) and constant:
-        out._constant = constant
     return out
 
 

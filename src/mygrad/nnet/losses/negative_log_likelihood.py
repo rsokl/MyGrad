@@ -5,7 +5,7 @@ from mygrad import Tensor, asarray, mean
 from ._utils import check_loss_inputs
 
 
-def negative_log_likelihood(x, y_true, *, weights=None, constant=False):
+def negative_log_likelihood(x, y_true, *, weights=None, constant=None):
     """Returns the (weighted) negative log-likelihood loss between log-probabilities and y_true.
 
     Note that this does not compute a softmax, so you should input log-probabilities to this.

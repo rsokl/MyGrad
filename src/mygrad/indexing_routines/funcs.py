@@ -18,7 +18,7 @@ class _UniqueIdentifier:
 not_set = _UniqueIdentifier("not_set")
 
 
-def where(condition, x=not_set, y=not_set, constant=False):
+def where(condition, x=not_set, y=not_set, *, constant=None):
     """
     where(condition, [x, y])
 

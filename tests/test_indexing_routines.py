@@ -9,7 +9,7 @@ from mygrad import where
 from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
-def mygrad_where(x, y, condition, constant=False):
+def mygrad_where(x, y, condition, constant=None):
     return where(condition, x, y, constant=constant)
 
 

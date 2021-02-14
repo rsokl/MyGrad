@@ -14,7 +14,7 @@ class ReLu(Operation):
         return grad * self.back
 
 
-def relu(x, constant=False):
+def relu(x, *, constant=None):
     """
     Applies the recitfied linear unit activation function::
 

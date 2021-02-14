@@ -108,7 +108,7 @@ class BatchNorm(Operation):
             raise IndexError
 
 
-def batchnorm(x, *, gamma=None, beta=None, eps, constant=False):
+def batchnorm(x, *, gamma=None, beta=None, eps, constant=None):
     """
     Performs batch normalization on ``x``::
 

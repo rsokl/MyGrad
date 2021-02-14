@@ -19,6 +19,7 @@ from mygrad import (
     swapaxes,
     transpose,
 )
+from tests.utils import adds_constant_arg
 
 from .custom_strategies import valid_axes
 from .utils.numerical_gradient import numerical_gradient_full
@@ -180,14 +181,11 @@ def _np_transpose(x, axes):
     return np.transpose(x, axes)
 
 
-def _transpose_property(x, constant=False):
+@adds_constant_arg
+def _transpose_property(x):
     if not isinstance(x, Tensor):
         x = np.asarray(x)
-
-    y = x.T
-    if isinstance(x, Tensor):
-        y._constant = constant or x.constant
-    return y
+    return x.T
 
 
 @fwdprop_test_factory(

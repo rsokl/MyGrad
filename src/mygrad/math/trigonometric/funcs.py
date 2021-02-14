@@ -20,7 +20,7 @@ __all__ = [
 ]
 
 
-def sin(a, constant=False):
+def sin(a, *, constant=None):
     """``f(a) -> sin(a)``
 
     Parameters
@@ -37,7 +37,7 @@ def sin(a, constant=False):
     return Tensor._op(Sin, a, constant=constant)
 
 
-def sinc(a, constant=False):
+def sinc(a, *, constant=None):
     """``f(a) -> sin(a) / a``
 
     Parameters
@@ -54,7 +54,7 @@ def sinc(a, constant=False):
     return Tensor._op(Sinc, a, constant=constant)
 
 
-def cos(a, constant=False):
+def cos(a, *, constant=None):
     """``f(a) -> cos(a)``
 
     Parameters
@@ -71,7 +71,7 @@ def cos(a, constant=False):
     return Tensor._op(Cos, a, constant=constant)
 
 
-def tan(a, constant=False):
+def tan(a, *, constant=None):
     """``f(a) -> tan(a)``
 
     Parameters
@@ -88,7 +88,7 @@ def tan(a, constant=False):
     return Tensor._op(Tan, a, constant=constant)
 
 
-def cot(a, constant=False):
+def cot(a, *, constant=None):
     """``f(a) -> cot(a)``
 
     Parameters
@@ -105,7 +105,7 @@ def cot(a, constant=False):
     return Tensor._op(Cot, a, constant=constant)
 
 
-def csc(a, constant=False):
+def csc(a, *, constant=None):
     """``f(a) -> csc(a)``
 
     Parameters
@@ -122,7 +122,7 @@ def csc(a, constant=False):
     return Tensor._op(Csc, a, constant=constant)
 
 
-def sec(a, constant=False):
+def sec(a, *, constant=None):
     """``f(a) -> sec(a)``
 
     Parameters
@@ -139,7 +139,7 @@ def sec(a, constant=False):
     return Tensor._op(Sec, a, constant=constant)
 
 
-def arccos(a, constant=False):
+def arccos(a, *, constant=None):
     """``f(a) -> arccos(a)``
 
     Parameters
@@ -156,7 +156,7 @@ def arccos(a, constant=False):
     return Tensor._op(Arccos, a, constant=constant)
 
 
-def arccsc(a, constant=False):
+def arccsc(a, *, constant=None):
     """``f(a) -> arccsc(a)``
 
     Parameters
@@ -173,7 +173,7 @@ def arccsc(a, constant=False):
     return Tensor._op(Arccsc, a, constant=constant)
 
 
-def arccot(a, constant=False):
+def arccot(a, *, constant=None):
     """``f(a) -> arccot(a)``
 
     Parameters
@@ -190,7 +190,7 @@ def arccot(a, constant=False):
     return Tensor._op(Arccot, a, constant=constant)
 
 
-def arcsin(a, constant=False):
+def arcsin(a, *, constant=None):
     """``f(a) -> arctanh(a)``
 
     Parameters
@@ -207,7 +207,7 @@ def arcsin(a, constant=False):
     return Tensor._op(Arcsin, a, constant=constant)
 
 
-def arctan(a, constant=False):
+def arctan(a, *, constant=None):
     """``f(a) -> arctan(a)``
 
     Parameters
@@ -224,7 +224,7 @@ def arctan(a, constant=False):
     return Tensor._op(Arctan, a, constant=constant)
 
 
-def arcsec(a, constant=False):
+def arcsec(a, *, constant=None):
     """``f(a) -> arcsec(a)``
 
     Parameters
@@ -241,7 +241,7 @@ def arcsec(a, constant=False):
     return Tensor._op(Arcsec, a, constant=constant)
 
 
-def arctan2(a, b, constant=False):
+def arctan2(a, b, *, constant=None):
     """``f(a, b) -> arctan(a/b)``
 
     Parameters

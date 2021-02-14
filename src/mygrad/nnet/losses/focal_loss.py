@@ -103,7 +103,7 @@ class FocalLoss(Operation):
         return self.back
 
 
-def focal_loss(class_probs, targets, *, alpha=1, gamma=0, constant=False):
+def focal_loss(class_probs, targets, *, alpha=1, gamma=0, constant=None):
     r"""Return the per-datum focal loss.
 
     Parameters
@@ -156,7 +156,7 @@ def focal_loss(class_probs, targets, *, alpha=1, gamma=0, constant=False):
     )
 
 
-def softmax_focal_loss(scores, targets, *, alpha=1, gamma=0, constant=False):
+def softmax_focal_loss(scores, targets, *, alpha=1, gamma=0, constant=None):
     r"""
     Applies the softmax normalization to the input scores before computing the
     per-datum focal loss.

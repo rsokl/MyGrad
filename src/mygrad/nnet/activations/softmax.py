@@ -35,7 +35,7 @@ class Softmax(Operation):
         return sg - soft * np.sum(sg, **self._kw)
 
 
-def softmax(x, axis=-1, constant=False):
+def softmax(x, axis=-1, *, constant=None):
     r"""
     Applies the softmax activation function::
 
@@ -104,7 +104,7 @@ class LogSoftmax(Operation):
         return grad - soft * np.sum(grad, **self._kw)
 
 
-def logsoftmax(x, axis=-1, constant=False):
+def logsoftmax(x, axis=-1, *, constant=None):
     r"""
     Applies the log-softmax activation function::
 

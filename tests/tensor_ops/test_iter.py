@@ -3,6 +3,7 @@ import numpy as np
 import pytest
 
 from mygrad.tensor_base import Tensor
+from tests.utils import adds_constant_arg
 
 from ..wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
@@ -14,15 +15,14 @@ def test_iter_over_0d_raises():
         sum(x)
 
 
-def _sum(x, constant=False):
+@adds_constant_arg
+def _sum(x):
     out = sum(x)
     if isinstance(x, Tensor):
         if not isinstance(out, Tensor):
             # Hack to deal with summing over an empty tensor.
             # `sum(Tensor([]))` returns 0, which is fine
-            out = Tensor(float(out), constant=constant or x.constant)
-        if constant:
-            out._constant = constant
+            out = Tensor(float(out))
     else:
         out = np.asarray(out)  # ensure numpy-output is array
     return out

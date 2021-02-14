@@ -5,7 +5,7 @@ from .ops import Abs, Cbrt, Maximum, Minimum, Sqrt
 __all__ = ["abs", "absolute", "cbrt", "clip", "sqrt", "maximum", "minimum"]
 
 
-def abs(a, constant=False):
+def abs(a, *, constant=None):
     """``f(a) -> abs(a)``
 
     Parameters
@@ -29,7 +29,7 @@ def abs(a, constant=False):
 absolute = abs
 
 
-def sqrt(a, constant=False):
+def sqrt(a, *, constant=None):
     """``f(a) -> sqrt(a)``
 
     Parameters
@@ -46,7 +46,7 @@ def sqrt(a, constant=False):
     return Tensor._op(Sqrt, a, constant=constant)
 
 
-def cbrt(a, constant=False):
+def cbrt(a, *, constant=None):
     """``f(a) -> cbrt(a)``
 
     Parameters
@@ -63,7 +63,7 @@ def cbrt(a, constant=False):
     return Tensor._op(Cbrt, a, constant=constant)
 
 
-def maximum(a, b, constant=False):
+def maximum(a, b, *, constant=None):
     """Element-wise maximum of array elements.
 
     Parameters
@@ -87,7 +87,7 @@ def maximum(a, b, constant=False):
     return Tensor._op(Maximum, a, b, constant=constant)
 
 
-def minimum(a, b, constant=False):
+def minimum(a, b, *, constant=None):
     """Element-wise minimum of array elements.
 
     Parameters
@@ -111,7 +111,7 @@ def minimum(a, b, constant=False):
     return Tensor._op(Minimum, a, b, constant=constant)
 
 
-def clip(a, a_min, a_max, constant=False):
+def clip(a, a_min, a_max, *, constant=None):
     """Clip (limit) the values in an array.
 
     Given an interval, values outside the interval are clipped to

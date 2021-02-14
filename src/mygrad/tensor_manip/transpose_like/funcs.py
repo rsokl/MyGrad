@@ -5,7 +5,7 @@ from .ops import MoveAxis, Roll, SwapAxes, Transpose
 __all__ = ["transpose", "moveaxis", "swapaxes", "roll"]
 
 
-def transpose(a, *axes, constant=False):
+def transpose(a, *axes, constant=None):
     """Permute the dimensions of a tensor.
 
     Parameters
@@ -49,7 +49,7 @@ def transpose(a, *axes, constant=False):
     return Tensor._op(Transpose, a, op_args=(axes,), constant=constant)
 
 
-def moveaxis(a, source, destination, constant=False):
+def moveaxis(a, source, destination, *, constant=None):
     """Move axes of a tensor to new positions. Other axes remain in their
     original order.
 
@@ -88,7 +88,7 @@ def moveaxis(a, source, destination, constant=False):
     return Tensor._op(MoveAxis, a, op_args=(source, destination), constant=constant)
 
 
-def swapaxes(a, axis1, axis2, constant=False):
+def swapaxes(a, axis1, axis2, *, constant=None):
     """Interchange two axes of a tensor.
 
     Parameters
@@ -133,7 +133,7 @@ def swapaxes(a, axis1, axis2, constant=False):
     return Tensor._op(SwapAxes, a, op_args=(axis1, axis2), constant=constant)
 
 
-def roll(a, shift, axis=None, constant=False):
+def roll(a, shift, axis=None, *, constant=None):
     """
     Roll tensor elements along a given axis.
 

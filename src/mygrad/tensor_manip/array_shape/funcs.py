@@ -5,7 +5,7 @@ from .ops import *
 __all__ = ["reshape", "squeeze", "ravel", "expand_dims", "broadcast_to"]
 
 
-def reshape(a, newshape, constant=False):
+def reshape(a, newshape, *, constant=None):
     """Returns a tensor with a new shape, without changing its data.
 
     This docstring was adapted from ``numpy.reshape``
@@ -50,7 +50,7 @@ def reshape(a, newshape, constant=False):
     return Tensor._op(Reshape, a, op_args=(newshape,), constant=constant)
 
 
-def squeeze(a, axis=None, constant=False):
+def squeeze(a, axis=None, *, constant=None):
     """
     Remove single-dimensional entries from the shape of a tensor.
 
@@ -98,7 +98,7 @@ def squeeze(a, axis=None, constant=False):
     return Tensor._op(Squeeze, a, op_args=(axis,), constant=constant)
 
 
-def ravel(a, constant=False):
+def ravel(a, *, constant=None):
     """
     Flattens contents of a tensor into a contiguous 1-D array.  A copy is made only if needed.
 
@@ -134,7 +134,7 @@ def ravel(a, constant=False):
     return Tensor._op(Ravel, a, constant=constant)
 
 
-def expand_dims(a, axis, constant=False):
+def expand_dims(a, axis, *, constant=None):
     """
     Expand the dimensions of a tensor by adding a new axis.
 
@@ -172,7 +172,7 @@ def expand_dims(a, axis, constant=False):
     return Tensor._op(ExpandDims, a, op_args=(axis,), constant=constant)
 
 
-def broadcast_to(a, shape, constant=False):
+def broadcast_to(a, shape, *, constant=None):
     """
     Broadcast a tensor to a new shape.
 

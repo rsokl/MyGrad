@@ -38,7 +38,7 @@ def test_arr_from_kwargs(args_as_kwargs):
     KWARG1.passed = False
     arrs_from_kwargs = {name_to_pos[k]: k for k in args_as_kwargs if k != "kwarg1"}
 
-    def sentinel(a, b, c, kwarg1=None):
+    def sentinel(a, b, c, kwarg1=None, *, constant=None):
         assert_allclose(
             np.real(a if isinstance(a, np.ndarray) else a.data),
             expected_a,

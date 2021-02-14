@@ -153,7 +153,7 @@ class ConvND(Operation):
             return np.tensordot(grad, windowed_data, axes=[grad_axes, window_axes])
 
 
-def conv_nd(x, filter_bank, *, stride, padding=0, dilation=1, constant=False):
+def conv_nd(x, filter_bank, *, stride, padding=0, dilation=1, constant=None):
     """Use `filter_bank` to perform strided N-dimensional neural network-style
     convolutions (see Notes) over `x`.::
 

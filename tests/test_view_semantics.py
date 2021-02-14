@@ -122,7 +122,7 @@ def test_tensor_base_matches_ndarray_base(constant: bool):
 @pytest.mark.parametrize("constant", [True, False])
 def test_views_of_non_arrays_leave_no_base(constant: bool):
     assert mg.reshape(2.0, (1,), constant=constant).base is None
-    assert mg.reshape(list(range(9)), (3, 3), constant=constant).base is None
+    assert mg.reshape(np.arange(9.0).tolist(), (3, 3), constant=constant).base is None
 
 
 @pytest.mark.parametrize("constant", [True, False])

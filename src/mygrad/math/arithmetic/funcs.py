@@ -29,7 +29,7 @@ __all__ = [
 ]
 
 
-def add(a, b, constant=False):
+def add(a, b, *, constant=None):
     """``f(a, b) -> a + b``
 
     Parameters
@@ -60,7 +60,7 @@ def add(a, b, constant=False):
     return Tensor._op(Add, a, b, constant=constant)
 
 
-def subtract(a, b, constant=False):
+def subtract(a, b, *, constant=None):
     """``f(a, b) -> a - b``
 
     Parameters
@@ -92,7 +92,7 @@ def subtract(a, b, constant=False):
     return Tensor._op(Subtract, a, b, constant=constant)
 
 
-def divide(a, b, constant=False):
+def divide(a, b, *, constant=None):
     """``f(a, b) -> a / b``
 
     Parameters
@@ -111,7 +111,7 @@ def divide(a, b, constant=False):
     return Tensor._op(Divide, a, b, constant=constant)
 
 
-def square(a, constant=False):
+def square(a, *, constant=None):
     """``f(a) -> a ** 2``
 
     Parameters
@@ -128,7 +128,7 @@ def square(a, constant=False):
     return Tensor._op(Square, a, constant=constant)
 
 
-def reciprocal(a, constant=False):
+def reciprocal(a, *, constant=None):
     """``f(a) -> 1 / a``
 
     Parameters
@@ -145,7 +145,7 @@ def reciprocal(a, constant=False):
     return Tensor._op(Reciprocal, a, constant=constant)
 
 
-def power(a, b, constant=False):
+def power(a, b, *, constant=None):
     """``f(a, b) -> a ** b``
 
     Parameters
@@ -164,7 +164,7 @@ def power(a, b, constant=False):
     return Tensor._op(Power, a, b, constant=constant)
 
 
-def multiply(a, b, constant=False):
+def multiply(a, b, *, constant=None):
     """``f(a, b) -> a * b``
 
     Parameters
@@ -183,7 +183,7 @@ def multiply(a, b, constant=False):
     return Tensor._op(Multiply, a, b, constant=constant)
 
 
-def multiply_sequence(*variables, constant=False):
+def multiply_sequence(*variables, constant=None):
     """``f(a, b, ...) -> a * b * ...``
 
     Multiply a sequence of N tensors.
@@ -212,7 +212,7 @@ def multiply_sequence(*variables, constant=False):
     return Tensor._op(MultiplySequence, *variables, constant=constant)
 
 
-def add_sequence(*variables, constant=False):
+def add_sequence(*variables, constant=None):
     """``f(a, b, ...) -> a + b + ...``
 
     Add a sequence of N tensors.
@@ -241,7 +241,7 @@ def add_sequence(*variables, constant=False):
     return Tensor._op(AddSequence, *variables, constant=constant)
 
 
-def positive(a, where=True, constant=False):
+def positive(a, where=True, *, constant=None):
     """``f(a) -> +a``
 
     Creates a new tensor.
@@ -266,7 +266,7 @@ def positive(a, where=True, constant=False):
     return Tensor._op(Positive, a, op_kwargs=(dict(where=where)), constant=constant)
 
 
-def negative(a, where=True, constant=False):
+def negative(a, where=True, *, constant=None):
     """``f(a) -> -a``
 
     Parameters

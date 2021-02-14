@@ -4,6 +4,7 @@ from hypothesis import given, settings
 from numpy.testing import assert_allclose
 
 from mygrad.tensor_base import Tensor
+from tests.utils import adds_constant_arg
 
 from ..custom_strategies import (
     adv_integer_index,
@@ -37,12 +38,9 @@ def test_get_item_propagate_constant(x: Tensor):
     assert y.constant is x.constant
 
 
-def get_item(arr, index, constant=False):
-    o = arr[index]
-    if isinstance(o, Tensor) and constant:
-        o._constant = constant
-
-    return o
+@adds_constant_arg
+def get_item(arr, index):
+    return arr[index]
 
 
 def basic_index_wrap(*arrs):

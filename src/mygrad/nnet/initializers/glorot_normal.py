@@ -3,7 +3,7 @@ import numpy as np
 from mygrad import Tensor
 
 
-def glorot_normal(*shape, gain=1, dtype=np.float32, constant=False):
+def glorot_normal(*shape, gain=1, dtype=np.float32, constant=None):
     r"""Initialize a `Tensor` according to the normal initialization procedure
     described by Glorot and Bengio.
 
