@@ -11,8 +11,8 @@ import mygrad as mg
 from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
-def matmul_wrapper(*args, constant=False):
-    return mg.multi_matmul(args, constant)
+def matmul_wrapper(*args, constant=None):
+    return mg.multi_matmul(args, constant=constant)
 
 
 def multi_matmul_slow(*arrays, **kwargs):

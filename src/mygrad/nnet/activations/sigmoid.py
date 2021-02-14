@@ -18,7 +18,7 @@ class Sigmoid(Operation):
         return grad * self.sigmoid * (1.0 - self.sigmoid)
 
 
-def sigmoid(x, constant=False):
+def sigmoid(x, *, constant=None):
     """Applies the sigmoid activation function::
 
       f(x) = 1 / (1 + exp(-x))

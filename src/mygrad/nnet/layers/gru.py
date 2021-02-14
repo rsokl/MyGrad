@@ -435,7 +435,7 @@ def gru(
     s0=None,
     bp_lim=None,
     dropout=0.0,
-    constant=False,
+    constant=None,
 ):
     r"""Performs a forward pass of sequential data through a Gated Recurrent Unit layer, returning
     the 'hidden-descriptors' arrived at by utilizing the trainable parameters as follows::

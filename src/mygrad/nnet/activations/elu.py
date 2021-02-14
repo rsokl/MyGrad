@@ -41,7 +41,7 @@ class ELU(Operation):
         return grad * np.where(x.data < 0, self.exp + self.alpha, 1)
 
 
-def elu(x, alpha, constant=False):
+def elu(x, alpha, *, constant=None):
     """Returns the exponential linear activation (ELU) elementwise along x.
 
     The ELU is given by  `ɑ(exp(x) - 1) for x < 0 and x for x ≥ 0`.

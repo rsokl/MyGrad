@@ -15,7 +15,7 @@ __all__ = [
 ]
 
 
-def exp(a, constant=False):
+def exp(a, *, constant=None):
     """``f(a) -> exp(a)``
 
     Parameters
@@ -32,7 +32,7 @@ def exp(a, constant=False):
     return Tensor._op(Exp, a, constant=constant)
 
 
-def exp2(a, constant=False):
+def exp2(a, *, constant=None):
     """``f(a) -> 2^a``
 
     Parameters
@@ -49,7 +49,7 @@ def exp2(a, constant=False):
     return Tensor._op(Exp2, a, constant=constant)
 
 
-def expm1(a, constant=False):
+def expm1(a, *, constant=None):
     """``f(a) -> exp(a) - 1``
 
     The inverse of ``logp1``.
@@ -73,7 +73,7 @@ def expm1(a, constant=False):
     return Tensor._op(Expm1, a, constant=constant)
 
 
-def logaddexp(a, b, constant=False):
+def logaddexp(a, b, *, constant=None):
     """``f(a, b) -> log(exp(a) + exp(b))``
 
     Parameters
@@ -101,7 +101,7 @@ def logaddexp(a, b, constant=False):
     return Tensor._op(Logaddexp, a, b, constant=constant)
 
 
-def logaddexp2(a, b, constant=False):
+def logaddexp2(a, b, *, constant=None):
     """``f(a, b) -> log_2(2 ** a + 2 ** b)``
 
     Utilizes base-2 log.
@@ -131,7 +131,7 @@ def logaddexp2(a, b, constant=False):
     return Tensor._op(Logaddexp2, a, b, constant=constant)
 
 
-def log(a, constant=False):
+def log(a, *, constant=None):
     """``f(a) -> log(a)``
 
     Natural logarithm
@@ -155,7 +155,7 @@ def log(a, constant=False):
     return Tensor._op(Log, a, constant=constant)
 
 
-def log2(a, constant=False):
+def log2(a, *, constant=None):
     """``f(a) -> log2(a)``
 
     Base-2 logarithm
@@ -174,7 +174,7 @@ def log2(a, constant=False):
     return Tensor._op(Log2, a, constant=constant)
 
 
-def log10(a, constant=False):
+def log10(a, *, constant=None):
     """``f(a) -> log10(a)``
 
     Base-10 logarithm
@@ -193,7 +193,7 @@ def log10(a, constant=False):
     return Tensor._op(Log10, a, constant=constant)
 
 
-def log1p(a, constant=False):
+def log1p(a, *, constant=None):
     """f(a) -> log(1 + a)
 
     The inverse of ``expm1``.

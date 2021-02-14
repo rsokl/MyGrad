@@ -54,7 +54,7 @@ class GraphCompare(RuleBasedStateMachine):
         a=nodes,
         b=nodes,
         op=st.sampled_from(["add", "multiply"]),
-        constant=st.booleans(),
+        constant=st.sampled_from([True, None]),
     )
     def fuse_nodes(self, a, b, op, constant):
         """
@@ -64,7 +64,10 @@ class GraphCompare(RuleBasedStateMachine):
         n_b, t_b = b  # type: Node, Tensor
         n_op = self.str_to_node_op[op]
         t_op = self.str_to_tensor_op[op]
-        out = (n_op(n_a, n_b, constant=constant), t_op(t_a, t_b, constant=constant))
+        out = (
+            n_op(n_a, n_b, constant=bool(constant)),
+            t_op(t_a, t_b, constant=constant),
+        )
         self.node_list.append(out)
         return out
 

@@ -332,6 +332,60 @@ for extensive examples of its usage.
 For computations involving many small tensors, this can produce **up to a 3x speedup**! So make sure you
 make keen use of this when you don't actually need to perform autodiff.
 
+Revamping Constant Semantics to be Explicit
+-------------------------------------------
+
+Previously, specifying ``constant=False`` in a mygrad function did not actually mean
+that the function would necessarily produce a non-constant tensor. Rather, it simply
+meant that the output would not be _forced_ to be a constant – whether or not the result
+was a constant depended on the inputs (i.e. a function whose inputs were all constants
+would thus produce a constant).
+
+This was a very bad design decision! Now, specifying ``constant=False`` guarantees that
+the output of a function is a non-constant (meaning that it facilitates backpropagation
+through a computational graph).
+
+That being said, we usually _do_ want constant information to propagate through functions.
+Thus ``constant=None`` is now the default value – its behavior matches that of ``constant=False``
+from MyGrad 1.X – for all functions that accept the argument.
+
+It is also now standard to require that this argument be a keyword-only argument.
+
+
++---------------------------------------------+----------------------------------------------+
+| MyGrad 1.X                                  | MyGrad 2.0                                   |
++=============================================+==============================================+
+| .. code:: python                            | .. code:: python                             |
+|                                             |                                              |
+|    >>> t1 = mg.tensor(1., constant=True)    |    >>> t1 = mg.tensor(1., constant=True)     |
+|    >>> t2 = mg.tensor(1., constant=True)    |    >>> t2 = mg.tensor(1., constant=True)     |
+|                                             |                                              |
+|    >>> out = mg.add(t1, t2, constant=False) |    >>> out = mg.add(t1, t2, constant=False)  |
+|    >>> out.constant                         |    >>> out.constant                          |
+|    True                                     |    False                                     |
+|                                             |                                              |
+|                                             |    # constant = None                         |
+|                                             |    >>> out = mg.add(t1, t2)                  |
+|                                             |    >>> out.constant                          |
+|                                             |    True                                      |
++---------------------------------------------+----------------------------------------------+
+
+>>> t1 = mg.tensor(1., constant=True)
+>>> t2 = mg.tensor(1., constant=True)
+
+# old behavior
+>>> out = mg.add(t1, t2, constant=False)
+>>> out.constant
+True
+
+# new behavior
+>>> out = mg.add(t1, t2, constant=False)
+>>> out.constant
+False
+
+>>> out = mg.add(t1, t2, constant=None)
+>>> out.constant
+True
 
 Remove Scalar-Only Conditions on Backpropagation
 ------------------------------------------------

@@ -3,7 +3,7 @@ import numpy as np
 from mygrad import Tensor
 
 
-def rand(*shape, constant=False):
+def rand(*shape, constant=None):
     """Create a Tensor of the given shape and populate it with random
     samples from a uniform distribution over [0, 1).
 
@@ -78,7 +78,7 @@ def randint(low, high=None, shape=None, dtype=int):
     return Tensor(np.random.randint(low, high, shape, dtype), copy=False)
 
 
-def randn(*shape, constant=False):
+def randn(*shape, constant=None):
     """Return a sample (or samples) from the “standard normal” distribution.
 
     Parameters
@@ -117,7 +117,7 @@ def randn(*shape, constant=False):
     return Tensor(np.random.randn(*shape), constant=constant, copy=False)
 
 
-def random(shape=None, constant=False):
+def random(shape=None, *, constant=None):
     """Return random floats in the half-open interval [0.0, 1.0).
 
     To create a random sample of a given shape on the interval [a, b), call
@@ -150,7 +150,7 @@ def random(shape=None, constant=False):
     return Tensor(np.random.random(shape), constant=constant, copy=False)
 
 
-def random_sample(shape=None, constant=False):
+def random_sample(shape=None, *, constant=None):
     """Return random floats in the half-open interval [0.0, 1.0).
 
     Results are from the “continuous uniform” distribution over the stated interval.
@@ -189,7 +189,7 @@ def random_sample(shape=None, constant=False):
     return Tensor(np.random.random_sample(shape), constant=constant, copy=False)
 
 
-def ranf(shape=None, constant=False):
+def ranf(shape=None, *, constant=None):
     """Return random floats in the half-open interval [0.0, 1.0).
 
     To create a random sample of a given shape on the interval [a, b), call
@@ -230,7 +230,7 @@ def ranf(shape=None, constant=False):
     return Tensor(np.random.ranf(shape), constant=constant, copy=False)
 
 
-def sample(shape=None, constant=False):
+def sample(shape=None, *, constant=None):
     """Return random floats in the half-open interval [0.0, 1.0).
 
     To create a random sample of a given shape on the interval [a, b), call

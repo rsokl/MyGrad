@@ -147,7 +147,7 @@ class MaxPoolND(Operation):
         return dx.reshape(x.shape)
 
 
-def max_pool(x, pool, stride, constant=False):
+def max_pool(x, pool, stride, *, constant=None):
     """Perform max-pooling over the last N dimensions of a data batch.
 
     Extended Summary

@@ -8,6 +8,7 @@ from numpy.testing import assert_allclose
 
 import mygrad as mg
 from mygrad.tensor_base import Tensor
+from tests.utils import expected_constant
 
 
 def _check_grad(t: mg.Tensor, expr: Union[None, np.ndarray, float]):
@@ -147,9 +148,9 @@ def test_non_broadcastable(data, grad):
 
 
 @pytest.mark.parametrize("v1_const", [True, False])
-@pytest.mark.parametrize("v2_const", [True, False])
-@pytest.mark.parametrize("v3_const", [True, False])
-@pytest.mark.parametrize("v4_const", [True, False])
+@pytest.mark.parametrize("v2_const", [True, None])
+@pytest.mark.parametrize("v3_const", [True, None])
+@pytest.mark.parametrize("v4_const", [True, None])
 @given(
     v1_val=st.integers(-2, 2).map(float),
     grad=st.integers(-2, 2).map(float),
@@ -225,10 +226,10 @@ def test_linear_graph(
 
 
 @pytest.mark.parametrize("v1_const", [True, False])
-@pytest.mark.parametrize("v2_const", [True, False])
-@pytest.mark.parametrize("v3_const", [True, False])
-@pytest.mark.parametrize("v4_const", [True, False])
-@pytest.mark.parametrize("v5_const", [True, False])
+@pytest.mark.parametrize("v2_const", [True, None])
+@pytest.mark.parametrize("v3_const", [True, None])
+@pytest.mark.parametrize("v4_const", [True, None])
+@pytest.mark.parametrize("v5_const", [True, None])
 @given(
     v1_val=st.integers(-2, 2).map(float),
     grad=st.integers(-2, 2).map(float),
@@ -270,11 +271,13 @@ def test_fanout_graph(
     assert v5.data == v2.data * v3.data * v4.data
 
     # check that constant propagates through graph reliably
-    assert v1.constant is v1_const
-    assert v2.constant is (v2_const or v1_const)
-    assert v3.constant is (v3_const or v1_const)
-    assert v4.constant is (v4_const or v1_const)
-    assert v5.constant is v5_const or v1_const or (v2_const and v3_const and v4_const)
+    assert v1.constant is expected_constant(dest_dtype=float, constant=v1_const)
+    assert v2.constant is expected_constant(v1, dest_dtype=float, constant=v2_const)
+    assert v3.constant is expected_constant(v1, dest_dtype=float, constant=v3_const)
+    assert v4.constant is expected_constant(v1, dest_dtype=float, constant=v4_const)
+    assert v5.constant is expected_constant(
+        v2, v3, v4, dest_dtype=float, constant=v5_const
+    )
 
     # check that gradients are correct
     # dL/d5
@@ -373,11 +376,11 @@ def test_interesting_graph(
     assert v5.data == (v4.data * v3.data)
 
     # check that constant propagates through graph reliably
-    assert v1.constant is v1_const
-    assert v2.constant is v2_const
-    assert v3.constant is v3_const or v1.constant
-    assert v4.constant is v4_const or (v2.constant and v3.constant)
-    assert v5.constant is v5_const or (v3.constant and v4.constant)
+    assert v1.constant is expected_constant(dest_dtype=float, constant=v1_const)
+    assert v2.constant is expected_constant(dest_dtype=float, constant=v2_const)
+    assert v3.constant is expected_constant(v1, v1, dest_dtype=float, constant=v3_const)
+    assert v4.constant is expected_constant(v2, v3, dest_dtype=float, constant=v4_const)
+    assert v5.constant is expected_constant(v4, v3, dest_dtype=float, constant=v5_const)
 
     # check that gradients are correct
     # dL/d5

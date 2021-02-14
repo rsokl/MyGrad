@@ -5,7 +5,7 @@ from mygrad import Tensor, multiply
 from .sigmoid import sigmoid
 
 
-def glu(x, axis=-1, constant=False):
+def glu(x, axis=-1, *, constant=None):
     """Returns the Gated Linear Unit A * σ(B), where A and B are split from `x`.
 
     Parameters

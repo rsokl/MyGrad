@@ -3,7 +3,7 @@ from mygrad import abs, divide
 __all__ = ["soft_sign"]
 
 
-def soft_sign(x, constant=False):
+def soft_sign(x, *, constant=None):
     """Returns the soft sign function x / (1 + |x|).
 
     Parameters

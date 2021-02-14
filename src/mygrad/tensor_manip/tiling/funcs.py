@@ -11,7 +11,8 @@ def repeat(
     a,
     repeats: Union[int, Sequence[int]],
     axis: Optional[int] = None,
-    constant: bool = False,
+    *,
+    constant: bool = None,
 ) -> Tensor:
     """
     Repeat elements of a tensor.

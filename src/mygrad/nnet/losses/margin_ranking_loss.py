@@ -47,7 +47,7 @@ class MarginRanking(Operation):
         return grad * (sign * self._grad)
 
 
-def margin_ranking_loss(x1, x2, y, margin, constant=False):
+def margin_ranking_loss(x1, x2, y, margin, *, constant=None):
     r"""Computes the margin average margin ranking loss.
     Equivalent to::
 

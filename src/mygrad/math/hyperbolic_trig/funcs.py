@@ -17,7 +17,7 @@ __all__ = [
 ]
 
 
-def arccosh(a, constant=False):
+def arccosh(a, *, constant=None):
     """``f(a) -> arccosh(a)``
 
     Parameters
@@ -34,7 +34,7 @@ def arccosh(a, constant=False):
     return Tensor._op(Arccosh, a, constant=constant)
 
 
-def arccoth(a, constant=False):
+def arccoth(a, *, constant=None):
     """``f(a) -> arccoth(a)``
 
     Parameters
@@ -51,7 +51,7 @@ def arccoth(a, constant=False):
     return Tensor._op(Arccoth, a, constant=constant)
 
 
-def arccsch(a, constant=False):
+def arccsch(a, *, constant=None):
     """``f(a) -> arccsch(a)``
 
     Parameters
@@ -68,7 +68,7 @@ def arccsch(a, constant=False):
     return Tensor._op(Arccsch, a, constant=constant)
 
 
-def arcsinh(a, constant=False):
+def arcsinh(a, *, constant=None):
     """``f(a) -> arcsinh(a)``
 
     Parameters
@@ -85,7 +85,7 @@ def arcsinh(a, constant=False):
     return Tensor._op(Arcsinh, a, constant=constant)
 
 
-def arctanh(a, constant=False):
+def arctanh(a, *, constant=None):
     """``f(a) -> arctanh(a)``
 
     Parameters
@@ -102,7 +102,7 @@ def arctanh(a, constant=False):
     return Tensor._op(Arctanh, a, constant=constant)
 
 
-def cosh(a, constant=False):
+def cosh(a, *, constant=None):
     """``f(a) -> cosh(a)``
 
     Parameters
@@ -119,7 +119,7 @@ def cosh(a, constant=False):
     return Tensor._op(Cosh, a, constant=constant)
 
 
-def coth(a, constant=False):
+def coth(a, *, constant=None):
     """``f(a) -> coth(a)``
 
     Parameters
@@ -136,7 +136,7 @@ def coth(a, constant=False):
     return Tensor._op(Coth, a, constant=constant)
 
 
-def csch(a, constant=False):
+def csch(a, *, constant=None):
     """``f(a) -> csch(a)``
 
     Parameters
@@ -153,7 +153,7 @@ def csch(a, constant=False):
     return Tensor._op(Csch, a, constant=constant)
 
 
-def sech(a, constant=False):
+def sech(a, *, constant=None):
     """``f(a) -> sech(a)``
 
     Parameters
@@ -170,7 +170,7 @@ def sech(a, constant=False):
     return Tensor._op(Sech, a, constant=constant)
 
 
-def sinh(a, constant=False):
+def sinh(a, *, constant=None):
     """``f(a) -> sinh(a)``
 
     Parameters
@@ -187,7 +187,7 @@ def sinh(a, constant=False):
     return Tensor._op(Sinh, a, constant=constant)
 
 
-def tanh(x, constant=False):
+def tanh(x, *, constant=None):
     """``f(x) -> tanh(x)``
 
     Parameters

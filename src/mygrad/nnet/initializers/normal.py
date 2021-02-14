@@ -3,7 +3,7 @@ import numpy as np
 from mygrad import Tensor
 
 
-def normal(*shape, mean=0, std=1, dtype=np.float32, constant=False):
+def normal(*shape, mean=0, std=1, dtype=np.float32, constant=None):
     """Initialize a :class:`mygrad.Tensor` by drawing from a normal (Gaussian) distribution.
 
     Parameters

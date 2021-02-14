@@ -10,7 +10,6 @@ import pytest
 from hypothesis import given, settings
 from numpy.testing import assert_allclose
 
-import mygrad as mg
 from mygrad import (
     add,
     arctan2,
@@ -22,6 +21,7 @@ from mygrad import (
     subtract,
 )
 from tests.custom_strategies import tensors
+from tests.utils import adds_constant_arg
 
 from ...wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
@@ -47,10 +47,7 @@ def inplace_op(inplace_target, other, constant=False, *, op_name: str):
     if isinstance(inplace_target, Number):
         inplace_target = np.asarray(inplace_target)
 
-    getattr(inplace_target, op_name)(other)
-
-    if isinstance(inplace_target, mg.Tensor) and constant:
-        inplace_target._constant = constant
+    adds_constant_arg(getattr(inplace_target, op_name))(other, constant=constant)
 
     return inplace_target
 

@@ -725,7 +725,7 @@ class Tensor:
         *input_vars: ArrayLike,
         op_args: Optional[Sequence] = None,
         op_kwargs: Optional[Dict[str, Any]] = None,
-        constant: bool = False,
+        constant: bool = None,
         out: Optional[Union[np.ndarray, "Tensor"]] = None,
     ):
         """Wraps operations performed between tensors: f(a, b, ...).
@@ -863,7 +863,11 @@ class Tensor:
             f.replay_force_constant = constant
 
         # record graph information
-        is_const = constant or all(var.constant for var in tensor_vars)
+        if constant is None:
+            if any(not var.constant for var in tensor_vars):
+                constant = None
+            else:
+                constant = True
 
         # record that a variable participated in that op
         ref_f = ReferenceType(f)  # type: WeakRef[Operation]
@@ -872,7 +876,7 @@ class Tensor:
 
         out = cls(
             op_out,
-            constant=is_const,
+            constant=constant,
             copy=False,
             _creator=f,
             _base=base,
@@ -1257,7 +1261,7 @@ class Tensor:
         *input_vars: ArrayLike,
         op_args: Optional[Sequence] = None,
         op_kwargs: Optional[Dict] = None,
-        constant: bool = False,
+        constant: bool = None,
     ):
         if _track.TRACK_GRAPH is False:
             return self._op(
@@ -1919,7 +1923,7 @@ class Tensor:
         <type 'numpy.dtype'>"""
         return self.data.dtype
 
-    def reshape(self, *newshape: Union[int, Shape], constant: bool = False) -> "Tensor":
+    def reshape(self, *newshape: Union[int, Shape], constant: bool = None) -> "Tensor":
         """Returns a tensor with a new shape, without changing its data.
         This docstring was adapted from ``numpy.reshape``
 

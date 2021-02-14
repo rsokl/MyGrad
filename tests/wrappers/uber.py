@@ -16,6 +16,7 @@ import mygrad._utils.lock_management as mem
 from mygrad import Tensor
 from mygrad.operation_base import Operation
 
+from ..utils import expected_constant as _expected_constant
 from ..utils.numerical_gradient import (
     finite_difference,
     numerical_gradient,
@@ -325,15 +326,19 @@ class fwdprop_test_factory:
             output_tensor = self.op(*mygrad_inputs, **kwargs, constant=constant)
 
             note(f"arrs: {arrs}")
+
             note(f"mygrad output: {output_tensor}")
             note(f"mygrad output.base: {output_tensor.base}")
 
+            expected_constant = _expected_constant(
+                *mygrad_inputs, dest_dtype=output_tensor.dtype, constant=constant
+            )
             assert isinstance(
                 output_tensor, Tensor
             ), f"`mygrad_func` returned type {type(output_tensor)}, should return `mygrad.Tensor`"
-            assert output_tensor.constant is (constant or all(tensor_constants)), (
+            assert output_tensor.constant is expected_constant, (
                 f"`mygrad_func` returned tensor.constant={output_tensor.constant}, "
-                f"should be constant={constant or all(tensor_constants)}"
+                f"should be constant={expected_constant}"
             )
 
             output_array = self.true_func(*arrs, **kwargs)
@@ -745,7 +750,7 @@ class backprop_test_factory:
             )  # type: Tuple[bool, ...]
 
             # forward pass of the function
-            out = self.op(*arrs, **kwargs)  # type: Tensor
+            out = self.op(*arrs, constant=False, **kwargs)  # type: Tensor
             look_to = out.base if out.base is not None else out
             output_was_writeable = id(look_to.data) in mem._array_counter
 
