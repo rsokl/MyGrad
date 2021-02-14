@@ -25,26 +25,23 @@ def check_dtype_consistency(out: ArrayLike, dest_dtype: DTypeLike):
 
 
 def expected_constant(
-    *args,
+    *args: ArrayLike,
     dest_dtype: DTypeLikeReals,
     constant: Optional[bool] = None,
 ) -> bool:
     """Given the input arguments to a function that produces a tensor, infers
     whether the resulting tensor should be a constant or a variable tensor."""
     if not isinstance(constant, bool) and constant is not None:
-        raise InternalTestError(f"Invalid type for `constant`; got: {constant}")
+        raise TypeError(f"Invalid type for `constant`; got: {constant}")
 
     if dest_dtype is None:
         raise InternalTestError("`dest_dtype` cannot be `None`")
 
     dest_dtype = np.dtype(dest_dtype)
+    is_integer_dtype = issubclass(dest_dtype.type, np.integer)
 
     if constant is not None:
-        if (
-            constant is False
-            and dest_dtype is not None
-            and issubclass(dest_dtype.type, np.integer)
-        ):
+        if constant is False and dest_dtype is not None and is_integer_dtype:
             raise InternalTestError(
                 f"dest_dtype ({dest_dtype}) and specified constant ({constant}) are inconsistent"
             )
@@ -61,6 +58,7 @@ def expected_constant(
                 return False
         return True
 
+    # constant is inferred from the dtype
     return issubclass(dest_dtype.type, np.integer)
 
 

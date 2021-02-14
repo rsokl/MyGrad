@@ -382,7 +382,7 @@ def test_nested_contexts(sequence_of_contexts):
 def test_documented_mutation():
     turn_memory_guarding_off()
     x = np.arange(3.0)
-    y = mg.ones_like(x)
+    y = mg.ones_like(x, constant=False)
     z = x * y
     x[:] = 0  # mutates x, corrupting state associated with z
     z.backward()
@@ -398,7 +398,7 @@ def test_documented_guarding():
 
     # memory guarding is on by default
     x = np.arange(3.0)
-    y = mg.ones_like(x)
+    y = mg.ones_like(x, constant=False)
     z = x * y
     try:
         x[:] = 0  # raises because `x` is made read-only

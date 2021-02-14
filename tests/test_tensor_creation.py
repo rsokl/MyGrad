@@ -1,15 +1,17 @@
 from copy import deepcopy
-from typing import Union
+from functools import partial
+from typing import Callable, Union
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
 import pytest
-from hypothesis import assume, given, settings
+from hypothesis import assume, given, infer, settings
 from numpy.testing import assert_array_equal
 
 import mygrad as mg
 from mygrad import Tensor, astensor, mem_guard_off
+from mygrad.operation_base import _NoValue
 from mygrad.tensor_creation.funcs import (
     arange,
     empty,
@@ -26,7 +28,9 @@ from mygrad.tensor_creation.funcs import (
     zeros,
     zeros_like,
 )
-from tests.custom_strategies import tensors, valid_constant_arg
+from mygrad.typing import ArrayLike, DTypeLikeReals, Shape
+from tests import populate_args
+from tests.custom_strategies import real_dtypes, tensors, valid_constant_arg
 from tests.utils import expected_constant
 
 
@@ -37,55 +41,169 @@ def check_tensor_array(tensor, array, data_compare=True):
     assert tensor.dtype is array.dtype
 
 
-ref_arr = np.arange(3)
-ref_tensor = mg.arange(3)
+def clamp(val, min_=0.1):
+    if val is not _NoValue:
+        val = max(val, min_)
+    return val
+
+
+@pytest.mark.parametrize("as_kwargs", [True, False])
+@pytest.mark.parametrize(
+    "mygrad_func, numpy_func",
+    [
+        (arange, np.arange),
+        (linspace, np.linspace),
+        (geomspace, np.geomspace),
+        (logspace, np.logspace),
+    ],
+)
+@given(
+    start=st.just(_NoValue) | st.integers(min_value=-10, max_value=10),
+    stop=st.integers(min_value=-10, max_value=10),
+    step=st.just(_NoValue) | st.integers(0, 5),
+    dtype=infer,
+    data=st.data(),
+)
+def test_arange_like_against_numpy_equivalent(
+    start,
+    stop,
+    step,
+    dtype: DTypeLikeReals,
+    mygrad_func: Callable,
+    numpy_func: Callable,
+    data: st.DataObject,
+    as_kwargs: bool,
+):
+    if numpy_func is not np.arange:
+        axis = data.draw(st.sampled_from([_NoValue, -1]), label="axis")
+    else:
+        axis = _NoValue
+
+    if numpy_func is np.geomspace:
+        start = clamp(start)
+        stop = clamp(stop)
+        step = clamp(step)
+
+    if as_kwargs:
+        inputs = populate_args(
+            start=start, stop=stop, step=step, dtype=dtype, axis=axis
+        )
+    else:
+        inputs = populate_args(start, stop, step, dtype=dtype, axis=axis)
+    try:
+        array = numpy_func(*inputs.args, **inputs.kwargs)
+    except (ZeroDivisionError, TypeError) as e:
+        with pytest.raises(type(e)):
+            mygrad_func(*inputs.args, **inputs.kwargs)
+        assume(False)
+
+    constant = data.draw(valid_constant_arg(array.dtype), label="constant")
+    tensor = mygrad_func(*inputs.args, **inputs.kwargs, constant=constant)
+
+    assert_array_equal(tensor, array)
+    assert tensor.dtype == array.dtype
+    assert tensor.constant is expected_constant(
+        dest_dtype=tensor.dtype, constant=constant
+    )
 
 
 @pytest.mark.parametrize(
-    "mygrad_func, numpy_func, args",
+    "mygrad_func, numpy_func",
     [
-        (empty, np.empty, [(3, 2)]),
-        (empty_like, np.empty_like, [ref_arr]),
-        (empty_like, np.empty_like, [ref_tensor]),
-        (eye, np.eye, [3]),
-        (identity, np.identity, [5]),
-        (ones, np.ones, [(4, 3, 2)]),
-        (ones_like, np.ones_like, [ref_arr]),
-        (ones_like, np.ones_like, [ref_tensor]),
-        (zeros, np.zeros, [(4, 3, 2)]),
-        (zeros_like, np.zeros_like, [ref_arr]),
-        (full, np.full, [(4, 3, 2), 5.0]),
-        (full_like, np.full_like, [ref_arr, 5.0]),
-        (full_like, np.full_like, [ref_tensor, 5.0]),
-        (arange, np.arange, [3, 7]),
-        (linspace, np.linspace, [3, 7]),
-        (geomspace, np.geomspace, [3, 7]),
-        (logspace, np.logspace, [3, 7]),
+        (empty, np.empty),
+        (ones, np.ones),
+        (zeros, np.zeros),
+        (partial(full, fill_value=2), partial(np.full, fill_value=2)),
     ],
 )
-@given(data=st.data(), dtype=hnp.floating_dtypes() | hnp.integer_dtypes())
-def test_tensor_creation_matches_array_creation(
-    mygrad_func, numpy_func, args, data: st.DataObject, dtype: np.dtype
+@settings(max_examples=20)
+@given(shape=infer, dtype=infer, data=st.data())
+def test_tensor_creation_from_shape_against_numpy_equivalent(
+    shape: Shape,
+    dtype: DTypeLikeReals,
+    data: st.DataObject,
+    mygrad_func: Callable,
+    numpy_func: Callable,
 ):
-    constant = data.draw(valid_constant_arg(dtype), label="constant")
+    array = numpy_func(shape, dtype=dtype)
 
-    check_data = mygrad_func not in {empty, empty_like}
-
-    kwargs = {} if dtype is None else dict(dtype=dtype)
-
-    mygrad_out = mygrad_func(*args, constant=constant, **kwargs)
-
-    expected_const = expected_constant(
-        *(a for a in args if isinstance(a, (np.ndarray, Tensor))),
-        dest_dtype=mygrad_out.dtype,
-        constant=constant
+    constant = data.draw(valid_constant_arg(array.dtype), label="constant")
+    tensor = mygrad_func(shape, dtype=dtype, constant=constant)
+    if numpy_func is not np.empty:
+        assert_array_equal(tensor, array)
+    assert tensor.dtype == array.dtype
+    assert tensor.constant is expected_constant(
+        dest_dtype=tensor.dtype, constant=constant
     )
-    assert mygrad_out.constant is expected_const
 
-    check_tensor_array(
-        mygrad_out,
-        numpy_func(*args, **kwargs),
-        data_compare=check_data,
+
+@pytest.mark.parametrize(
+    "mygrad_func, numpy_func",
+    [
+        (partial(full_like, fill_value=-2), partial(np.full_like, fill_value=-2)),
+        (zeros_like, np.zeros_like),
+        (ones_like, np.ones_like),
+        (empty_like, np.empty_like),
+    ],
+)
+@given(arr_like=infer, dtype=infer, data=st.data())
+def test_tensor_create_like_against_numpy_equivalent(
+    arr_like: ArrayLike,
+    dtype: DTypeLikeReals,
+    data: st.DataObject,
+    mygrad_func: Callable,
+    numpy_func: Callable,
+):
+    _flat_shape = (np.asarray(arr_like).size,)
+    shape = data.draw(st.sampled_from([_NoValue, _flat_shape]), label="shape")
+    inputs = populate_args(arr_like, dtype=dtype, shape=shape)
+
+    array = numpy_func(*inputs.args, **inputs.kwargs)
+
+    constant = data.draw(valid_constant_arg(array.dtype), label="constant")
+
+    tensor = mygrad_func(*inputs.args, **inputs.kwargs, constant=constant)
+    if numpy_func is not np.empty_like:
+        assert_array_equal(tensor, array)
+    assert tensor.dtype == array.dtype
+    assert tensor.constant is expected_constant(
+        arr_like, dest_dtype=tensor.dtype, constant=constant
+    )
+
+
+@given(dtype=st.just(_NoValue) | real_dtypes, data=st.data(), n=st.integers(0, 4))
+def test_identity(dtype: DTypeLikeReals, data: st.DataObject, n: int):
+    inputs = populate_args(n, dtype=dtype)
+    arr = np.identity(*inputs.args, **inputs.kwargs)
+
+    constant = data.draw(valid_constant_arg(arr.dtype), label="constant")
+    tensor = identity(*inputs.args, **inputs.kwargs, constant=constant)
+
+    assert_array_equal(tensor, arr)
+    assert tensor.dtype == arr.dtype
+    assert tensor.constant is expected_constant(
+        dest_dtype=tensor.dtype, constant=constant
+    )
+
+
+@given(
+    dtype=st.just(_NoValue) | real_dtypes,
+    data=st.data(),
+    n=st.integers(0, 4),
+    m=st.integers(0, 4),
+)
+def test_eye(dtype: DTypeLikeReals, data: st.DataObject, n: int, m: int):
+    k = data.draw((st.just(_NoValue) | st.integers(0, min(n, m))), label="constant")
+    inputs = populate_args(n, m, k, dtype=dtype)
+    arr = np.eye(*inputs.args, **inputs.kwargs)
+
+    constant = data.draw(valid_constant_arg(arr.dtype), label="constant")
+    tensor = eye(*inputs.args, **inputs.kwargs, constant=constant)
+
+    assert_array_equal(tensor, arr)
+    assert tensor.dtype == arr.dtype
+    assert tensor.constant is expected_constant(
+        dest_dtype=tensor.dtype, constant=constant
     )
 
 

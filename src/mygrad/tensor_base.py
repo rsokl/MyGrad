@@ -46,6 +46,19 @@ from mygrad.typing import ArrayLike, DTypeLike, DTypeLikeReals, Index, Shape
 __all__ = ["Tensor", "asarray", "astensor"]
 
 
+def _resolve_constant(*others: Any, constant: Optional[bool]) -> Optional[bool]:
+    """Determines if `constant` should be resolved to True based on `others`.
+    Otherwise defers to a tensor-creator to handle further resolutions based on dtype."""
+    if constant is not None:
+        return constant
+    for other in others:
+        if isinstance(other, Tensor) and not other.constant:
+            # let subsequent tensor casting infer constant from dtype
+            return None
+    # all inputs are constants
+    return True
+
+
 def asarray(a: ArrayLike, dtype: DTypeLike = None, order: str = None) -> np.ndarray:
     """Convert the input to an array.
 

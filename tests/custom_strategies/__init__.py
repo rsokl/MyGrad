@@ -13,7 +13,7 @@ from hypothesis.extra.numpy import broadcastable_shapes
 from numpy import ndarray
 
 from mygrad import Tensor
-from mygrad.typing import ArrayLike, DTypeLikeReals, Shape
+from mygrad.typing import ArrayLike, DTypeLike, DTypeLikeReals, Shape
 
 __all__ = [
     "adv_integer_index",
@@ -110,7 +110,9 @@ class VerboseTensor(Tensor):
 def array_likes(
     draw,
     dtype: Any = st.sampled_from([float, int]),
-    shape: Union[int, Shape, st.SearchStrategy[Shape]] = hnp.array_shapes(),
+    shape: Union[int, Shape, st.SearchStrategy[Shape]] = hnp.array_shapes(
+        min_side=0, min_dims=0, max_dims=2
+    ),
     *,
     elements: Optional[Union[st.SearchStrategy, Mapping[str, Any]]] = None,
     fill: Optional[st.SearchStrategy[Any]] = None,
@@ -125,11 +127,15 @@ def array_likes(
             dtype=dtype, shape=shape, elements=elements, fill=fill, unique=unique
         )
     )
-    mapper = draw(
-        st.sampled_from(
-            [lambda x: x, lambda x: VerboseTensor(x, copy=False), lambda x: x.tolist()]
-        )
-    )
+    converters = [
+        lambda x: x,
+        lambda x: VerboseTensor(x, copy=False, constant=None),
+        lambda x: x.tolist(),
+    ]
+    # if arr.ndim < 2 and arr.size < 3:
+    #     converters[-1] = lambda x: x.tolist()
+
+    mapper = draw(st.sampled_from(converters))
     return mapper(arr)
 
 
@@ -774,8 +780,8 @@ def arbitrary_indices(draw, shape: Tuple[int]):
 
 
 @st.composite
-def valid_constant_arg(draw, dtype: np.dtype) -> st.SearchStrategy[Union[None, bool]]:
-    if issubclass(dtype.type, np.floating):
+def valid_constant_arg(draw, dtype: DTypeLike) -> st.SearchStrategy[Union[None, bool]]:
+    if issubclass(np.dtype(dtype).type, np.floating):
         return draw(st.none() | st.booleans())
     else:
         return draw(st.sampled_from([None, True]))
