@@ -49,10 +49,12 @@ SequenceNDReals = Union[sr1, sr2, sr3, sr4, sr5, sr6]
 
 # include Tensor and ndarray explicitly in case `ImplementsArray`
 # is not protocol
+
 ArrayLike = TypeVar(
     "ArrayLike",
     bound=Union[Real, "Tensor", np.ndarray, ImplementsArray, SequenceNDReals],
 )
+
 
 sb1 = Sequence[Real]
 sb2 = Sequence[sb1]

@@ -1,5 +1,4 @@
 from numbers import Number
-from typing import Optional
 
 import numpy as np
 

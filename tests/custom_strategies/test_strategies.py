@@ -314,6 +314,7 @@ def test_can_infer_DTypeLikeReals(dtype: DTypeLikeReals):
 @given(x=infer)
 def test_can_infer_ArrayLike(x: ArrayLike):
     np.array(x)  # raise if not array-like
+    print(repr(x))
 
 
 @given(shape=infer)
