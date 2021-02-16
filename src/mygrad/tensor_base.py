@@ -1719,7 +1719,7 @@ class Tensor:
         """
         return self.copy()
 
-    def copy(self, constant: Optional[bool] = None) -> "Tensor":
+    def copy(self, *, constant: Optional[bool] = None) -> "Tensor":
         """Produces a copy of ``self`` with ``copy.creator=None``.
 
         Copies of the underlying numpy data array and gradient array are created.
@@ -1789,19 +1789,21 @@ class Tensor:
             raise TypeError("can only convert a tensor of size 1 to a Python scalar")
         return int(self.data)
 
-    def flatten(self, constant: bool = None) -> "Tensor":
+    def flatten(self, *, constant: bool = None) -> "Tensor":
         """Return a copy of the tensor collapsed into one dimension.
 
         This docstring was adapted from ``numpy.ndarray.flatten``.
+
+        Parameters
+        ----------
+        constant : bool, optional(default=False)
+            If ``True``, the returned tensor is a constant (it
+            does not back-propagate a gradient)
 
         Returns
         -------
         mygrad.Tensor
             A copy of the input tensor, flattened to one dimension.
-
-        constant : bool, optional(default=False)
-            If ``True``, the returned tensor is a constant (it
-            does not back-propagate a gradient)
 
         Notes
         -----
