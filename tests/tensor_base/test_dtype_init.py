@@ -34,7 +34,7 @@ float_dtypes = st.sampled_from([float, "float32"]) | hnp.floating_dtypes()
 
 @given(
     data=st.data(),
-    dtype=st.none() | integer_dtypes,
+    dtype=st.none() | integer_dtypes | hnp.boolean_dtypes(),
     constant=st.none() | st.booleans(),
     copy=st.booleans(),
     ndmin=st.integers(0, 3),
@@ -58,7 +58,9 @@ def test_integer_dtype_behavior(
 
     if exec_info is None:  # did not raise
         assert tensor.constant is True
-        assert np.issubdtype(tensor.dtype, np.integer)
+        assert np.issubdtype(tensor.dtype, np.integer) or np.issubdtype(
+            tensor.dtype, np.bool_
+        )
 
 
 @given(

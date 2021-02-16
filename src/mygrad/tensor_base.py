@@ -551,9 +551,10 @@ class Tensor:
             # No need to constrain dtypes if we aren't tracking the graph.
             # Also, it is nice to enable complex arithmetic through mygrad
             # functions that are wrapped in no_autodiff
-            if not issubclass(dtype, np.integer):
+            if not issubclass(dtype, (np.integer, np.bool_)):
                 raise TypeError(
-                    f"Tensor data must be of an integer type or floating type, received {dtype}"
+                    f"Tensor data must be of an floating type, integer type, or boolean type, "
+                    f"received {dtype}"
                 )
 
             elif constant is False:
