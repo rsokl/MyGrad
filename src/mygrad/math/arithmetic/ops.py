@@ -1,10 +1,6 @@
 from functools import reduce
-from typing import TYPE_CHECKING
 
 import numpy as np
-
-if TYPE_CHECKING:  # pragma: no cover
-    from mygrad import Tensor
 
 from mygrad.operation_base import BinaryUfunc, Operation, UnaryUfunc
 
