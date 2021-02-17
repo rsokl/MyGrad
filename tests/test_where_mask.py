@@ -1,4 +1,7 @@
+from typing import Callable
+
 import numpy as np
+import pytest
 from numpy.testing import assert_allclose, assert_array_equal
 
 import mygrad as mg
@@ -7,8 +10,8 @@ from mygrad.math.arithmetic.ops import Multiply
 from mygrad.math.trigonometric.ops import Sin
 
 
-def mul(x, y, *, constant=None, **kwargs) -> Tensor:
-    return Tensor._op(Multiply, x, y, constant=constant, op_kwargs=kwargs)
+def mul(x, y, out=None, *, constant=None, **kwargs) -> Tensor:
+    return Tensor._op(Multiply, x, y, constant=constant, op_kwargs=kwargs, out=out)
 
 
 def sin(x, *, constant=None, **kwargs) -> Tensor:
@@ -51,6 +54,37 @@ def test_manual_multiply_with_multiple_broadcast():
         x.grad, np.broadcast_to(y.data, x.shape) * np.broadcast_to(mask, x.shape)
     )
     assert_array_equal(y.grad, np.sum(x.data * mask))
+
+
+@pytest.mark.parametrize("process_x", [lambda x: x, lambda x: x[...], lambda x: +x])
+@pytest.mark.parametrize("process_y", [lambda x: x, lambda x: x[...], lambda x: +x])
+@pytest.mark.parametrize("process_out", [lambda x: x, lambda x: x[...], lambda x: +x])
+def test_manual_multiply_with_out(
+    process_x: Callable[[Tensor], Tensor],
+    process_y: Callable[[Tensor], Tensor],
+    process_out: Callable[[Tensor], Tensor],
+):
+    ox = Tensor([1.0, 2.0, 3.0])
+    x = +ox
+    y = -x.copy()
+    mask = np.array([True, False, True])
+    out = mul(process_x(x), process_y(y), where=mask, out=process_out(x))
+
+    assert ox.data.flags.writeable is False
+    assert out.data.flags.writeable is False
+
+    (2 * out).backward()
+
+    assert_allclose(ox.grad, [-2.0, 2.0, -6.0])
+    assert_allclose(y.grad, [2.0, 0.0, 6.0])
+
+    if out is x or out.base is x:
+        assert_allclose(x.grad, [2.0, 2.0, 2.0])
+    else:
+        assert_allclose(x.grad, ox.grad)
+
+    assert ox.data.flags.writeable is True
+    assert out.data.flags.writeable is True
 
 
 def test_manual_sine_no_broadcast():

@@ -1413,6 +1413,41 @@ class Tensor:
             graph.restore_old_graph()
             raise e
 
+        if (
+            placeholder_mutant_view.constant is False
+            and placeholder_mutant_view.creator.where is not True
+        ):
+            # An operation like `multiply(x, y, where=mask, out=z)` occurred.
+            # `placeholder_mutant_view` is the mutated version of `z`.
+            # We need to connect the upstream version of `z` to the computational
+            # graph so that `~mask * dℒ/dz` backprops to it, whereas `~mask * dℒ/dz`
+            # will backprop to `x` and `y`.
+            #
+            # This is basically an alternative to treating `multiply(x, y, where=mask, out=z)`
+            # like a three-input operation, which adds complexity to the implementation of
+            # every op that supports `where` and `out`.
+            #
+            #               old-z ---------------------
+            #                 |                       |
+            #   multiply(x, y, where=mask, out=z)     |
+            #                 |                       |
+            #                 z    --------------------
+            #                 |    |
+            #                 ApplyMask
+            #                    |
+            #                    z
+            with _mem.mem_guard_off:
+                placeholder_mutant_view = type(self)._op(
+                    _dup.ApplyMask,
+                    placeholder_mutant_view,  # gets passed through unchanged
+                    graph[
+                        self
+                    ].placeholder,  # ~mask * grad  backprops to upstream placeholder
+                    op_kwargs=dict(
+                        mask=placeholder_mutant_view.creator.where,
+                    ),
+                )
+
         # Connect public base tensor to placeholder graph via the mutated placeholder
         # tensor `out`.
         if self.base is None:
