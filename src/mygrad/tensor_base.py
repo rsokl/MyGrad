@@ -551,9 +551,10 @@ class Tensor:
             # No need to constrain dtypes if we aren't tracking the graph.
             # Also, it is nice to enable complex arithmetic through mygrad
             # functions that are wrapped in no_autodiff
-            if not issubclass(dtype, np.integer):
+            if not issubclass(dtype, (np.integer, np.bool_)):
                 raise TypeError(
-                    f"Tensor data must be of an integer type or floating type, received {dtype}"
+                    f"Tensor data must be of an floating type, integer type, or boolean type, "
+                    f"received {dtype}"
                 )
 
             elif constant is False:
@@ -1412,6 +1413,41 @@ class Tensor:
             graph.restore_old_graph()
             raise e
 
+        if (
+            placeholder_mutant_view.constant is False
+            and placeholder_mutant_view.creator.where is not True
+        ):
+            # An operation like `multiply(x, y, where=mask, out=z)` occurred.
+            # `placeholder_mutant_view` is the mutated version of `z`.
+            # We need to connect the upstream version of `z` to the computational
+            # graph so that `~mask * dℒ/dz` backprops to it, whereas `~mask * dℒ/dz`
+            # will backprop to `x` and `y`.
+            #
+            # This is basically an alternative to treating `multiply(x, y, where=mask, out=z)`
+            # like a three-input operation, which adds complexity to the implementation of
+            # every op that supports `where` and `out`.
+            #
+            #               old-z ---------------------
+            #                 |                       |
+            #   multiply(x, y, where=mask, out=z)     |
+            #                 |                       |
+            #                 z    --------------------
+            #                 |    |
+            #                 ApplyMask
+            #                    |
+            #                    z
+            with _mem.mem_guard_off:
+                placeholder_mutant_view = type(self)._op(
+                    _dup.ApplyMask,
+                    placeholder_mutant_view,  # gets passed through unchanged
+                    graph[
+                        self
+                    ].placeholder,  # ~mask * grad  backprops to upstream placeholder
+                    op_kwargs=dict(
+                        mask=placeholder_mutant_view.creator.where,
+                    ),
+                )
+
         # Connect public base tensor to placeholder graph via the mutated placeholder
         # tensor `out`.
         if self.base is None:
@@ -1718,7 +1754,7 @@ class Tensor:
         """
         return self.copy()
 
-    def copy(self, constant: Optional[bool] = None) -> "Tensor":
+    def copy(self, *, constant: Optional[bool] = None) -> "Tensor":
         """Produces a copy of ``self`` with ``copy.creator=None``.
 
         Copies of the underlying numpy data array and gradient array are created.
@@ -1788,19 +1824,21 @@ class Tensor:
             raise TypeError("can only convert a tensor of size 1 to a Python scalar")
         return int(self.data)
 
-    def flatten(self, constant: bool = None) -> "Tensor":
+    def flatten(self, *, constant: bool = None) -> "Tensor":
         """Return a copy of the tensor collapsed into one dimension.
 
         This docstring was adapted from ``numpy.ndarray.flatten``.
+
+        Parameters
+        ----------
+        constant : bool, optional(default=False)
+            If ``True``, the returned tensor is a constant (it
+            does not back-propagate a gradient)
 
         Returns
         -------
         mygrad.Tensor
             A copy of the input tensor, flattened to one dimension.
-
-        constant : bool, optional(default=False)
-            If ``True``, the returned tensor is a constant (it
-            does not back-propagate a gradient)
 
         Notes
         -----

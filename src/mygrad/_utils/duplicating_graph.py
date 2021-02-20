@@ -9,9 +9,10 @@ from typing import (
     Sequence,
     Set,
     TypeVar,
+    Union,
 )
 
-from numpy import ndarray
+from numpy import logical_not, ndarray
 
 from mygrad._utils import WeakRefIterable
 from mygrad.operation_base import Operation
@@ -297,5 +298,47 @@ class UnView(Operation):
             assert grad_view.shape == self.variables[1].shape
             return grad_view
 
+        else:  # pragma: no cover
+            raise ValueError(f"UnView: backward_var index: {index}")
+
+
+class ApplyMask(Operation):
+    """When an operation like `multiply(x, y, where=mask, out=z)` occurs,
+    we need to connect the upstream version of `z` to the computational
+    graph so that `~mask * dℒ/dz` backprops to it, whereas `~mask * dℒ/dz`
+    will backprop to `x` and `y`.
+
+                      old-z ---------------------
+                        |                       |
+            multiply(x, y, where=mask, out=z)   |
+                        |                       |
+                        z    --------------------
+                        |    |
+                       ApplyMask
+                          |
+                          z (unchanged in value by ApplyMask, but now backprops to `old-z`
+
+    This is basically an alternative to treating `multiply(x, y, where=mask, out=z)`
+    like a three-input operation, would add complexity to the implementation of
+    every op that supports `where` and `out`. So instead, we delegate this rote
+    task to be performed by `Tensor._inplace_op`
+    """
+
+    def __call__(
+        self,
+        pass_through_tensor: "Tensor",
+        upstream_tensor: "Tensor",
+        *,
+        mask: Union[bool, ndarray],
+    ) -> ndarray:
+        self.variables = (pass_through_tensor, upstream_tensor)
+        self._mask = mask
+        return pass_through_tensor.data
+
+    def backward_var(self, grad: ndarray, index: int, **kwargs) -> ndarray:
+        if index == 0:
+            return grad
+        elif index == 1:
+            return grad * logical_not(self._mask)
         else:  # pragma: no cover
             raise ValueError(f"UnView: backward_var index: {index}")

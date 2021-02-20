@@ -175,11 +175,6 @@ class Operation(ABC):
         """
         for index, var in enumerate(self.variables):
             if not var.constant:
-                if self.where is not True:  # pragma: no cover
-                    raise NotImplementedError(
-                        f"{self} - Backprop is not supported for operations that "
-                        f"were filtered through a `where` ({self.where}) boolean mask."
-                    )
                 if not var._ops:
                     raise InvalidBackprop(
                         f"Part of the computational graph containing "
@@ -204,6 +199,10 @@ class Operation(ABC):
                     )
 
                 backed_grad = np.array(backed_grad, copy=False)
+
+                if self.where is not True:
+                    backed_grad = backed_grad * self.where
+
                 backed_grad = self.grad_post_process_fn(backed_grad, var.shape)
 
                 if var._grad is None:
