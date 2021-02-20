@@ -104,7 +104,7 @@ def test_inplace_arithmetic_bkwd(op_name: str, kwargs: Dict[str, Any]):
     iop_bkwd()
 
 
-@fwdprop_test_factory(mygrad_func=add, true_func=add, num_arrays=2)
+@fwdprop_test_factory(mygrad_func=add, true_func=np.add, num_arrays=2)
 def test_add_fwd():
     pass
 

@@ -250,45 +250,7 @@ class Ufunc(Operation, ABC):
     ----------
     .. [1] Retrieved from https://numpy.org/doc/stable/reference/ufuncs.html"""
 
-    @property
-    @abstractmethod
-    def numpy_ufunc(self) -> np.ufunc:
-        raise NotImplementedError()  # pragma: no cover
-
-    @property
-    def nin(self) -> int:
-        """The number of inputs."""
-        return self.numpy_ufunc.nin
-
-    @property
-    def nout(self) -> int:
-        """The number of outputs."""
-        return self.numpy_ufunc.nout
-
-    @property
-    def nargs(self) -> int:
-        """The number of arguments."""
-        return self.numpy_ufunc.nargs
-
-    @property
-    def ntypes(self) -> int:
-        """The number of types."""
-        return self.numpy_ufunc.ntypes
-
-    @property
-    def types(self) -> List[str]:
-        """Returns a list with types grouped input->output."""
-        return self.numpy_ufunc.types
-
-    @property
-    def identity(self) -> Optional[int]:
-        """The identity value."""
-        return self.numpy_ufunc.identity
-
-    @property
-    def signature(self) -> Optional[str]:
-        """Definition of the core elements a generalized ufunc operates on."""
-        return self.numpy_ufunc.signature
+    numpy_ufunc: np.ufunc
 
 
 class UnaryUfunc(Ufunc, ABC):
