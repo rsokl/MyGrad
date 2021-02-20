@@ -1,4 +1,10 @@
+from typing import Optional, Union
+
+from numpy import ndarray
+
+from mygrad._utils.op_creators import op_creator
 from mygrad.tensor_base import Tensor
+from mygrad.typing import ArrayLike, DTypeLikeReals, Mask
 
 from .ops import (
     Add,
@@ -26,161 +32,682 @@ __all__ = [
     "reciprocal",
     "square",
     "subtract",
+    "true_divide",
 ]
 
 
-def add(a, b, *, constant=None):
-    """``f(a, b) -> a + b``
+@op_creator(Add)
+def add(
+    x1: ArrayLike,
+    x2: ArrayLike,
+    out: Optional[Union[ndarray, Tensor]] = None,
+    *,
+    where: Mask = True,
+    dtype: DTypeLikeReals = None,
+    constant: Optional[bool] = None,
+) -> Tensor:
+    """Add arguments element-wise.
+
+    This docstring was adapted from that of numpy.add [1]_
 
     Parameters
     ----------
-    a : array_like
+    x1, x2 : ArrayLike
+        The arrays to be added.
+        If ``x1.shape != x2.shape``, they must be broadcastable to a common
+        shape (which becomes the shape of the output).
 
-    b : array_like
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. `self.grad` will always return
+        ``None``).
 
-    constant : bool, optional(default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient)
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
+
+    dtype : Optional[DTypeLikeReals]
+        The dtype of the resulting tensor.
+
+    out : Optional[Union[ndarray, Tensor]]
+        A location into which the result is stored. If provided, it must have
+        a shape that the inputs broadcast to. If not provided or None,
+        a freshly-allocated tensor is returned.
+
+    where : Mask
+        This condition is broadcast over the input. At locations where the
+        condition is True, the `out` array will be set to the ufunc result.
+        Elsewhere, the `out` array will retain its original value.
+        Note that if an uninitialized `out` tensor is created via the default
+        ``out=None``, locations within it where the condition is False will
+        remain uninitialized.
 
     Returns
     -------
-    mygrad.Tensor
+    add : Tensor
+        The combination of `x1` and `x2`, element-wise.
+
+    Notes
+    -----
+    Equivalent to `x1` + `x2` in terms of tensor broadcasting.
+
+    References
+    ----------
+    .. [1] Retrieved from https://numpy.org/doc/stable/reference/generated/numpy.add.html
 
     Examples
     --------
     >>> import mygrad as mg
     >>> mg.add(1.0, 4.0)
     Tensor(5.0)
-    >>> x1 = mg.arange(9.0).reshape((3, 3))
-    >>> x2 = mg.arange(3.0)
-    >>> mg.add(x1, x2)  # equivalent to `x1 + x2`
+    >>> x1 = mg.tensor([[0., 1., 2.],
+    ...                 [3., 4., 5.],
+    ...                 [6., 7., 8.]])
+    >>> x2 = mg.tensor([0., 1., 2.])
+    >>> mg.add(x1, x2)
     Tensor([[  0.,   2.,   4.],
             [  3.,   5.,   7.],
-            [  6.,   8.,  10.]])"""
-    return Tensor._op(Add, a, b, constant=constant)
+            [  6.,   8.,  10.]])
+    """
+    pass
 
 
-def subtract(a, b, *, constant=None):
-    """``f(a, b) -> a - b``
+@op_creator(Subtract)
+def subtract(
+    x1: ArrayLike,
+    x2: ArrayLike,
+    out: Optional[Union[ndarray, Tensor]] = None,
+    *,
+    where: Mask = True,
+    dtype: DTypeLikeReals = None,
+    constant: Optional[bool] = None,
+) -> Tensor:
+    """Subtract arguments element-wise.
+
+    This docstring was adapted from that of numpy.subtract [1]_
 
     Parameters
     ----------
-    a : array_like
+    x1, x2 : ArrayLike
+        The arrays to be subtracted from each other.
+        If ``x1.shape != x2.shape``, they must be broadcastable to a common
+        shape (which becomes the shape of the output).
 
-    b : array_like
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. `self.grad` will always return
+        ``None``).
 
-    constant : bool, optional(default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient)
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
+
+    dtype : Optional[DTypeLikeReals]
+        The dtype of the resulting tensor.
+
+    out : Optional[Union[ndarray, Tensor]]
+        A location into which the result is stored. If provided, it must have
+        a shape that the inputs broadcast to. If not provided or None,
+        a freshly-allocated tensor is returned.
+
+    where : Mask
+        This condition is broadcast over the input. At locations where the
+        condition is True, the `out` array will be set to the ufunc result.
+        Elsewhere, the `out` array will retain its original value.
+        Note that if an uninitialized `out` tensor is created via the default
+        ``out=None``, locations within it where the condition is False will
+        remain uninitialized.
 
     Returns
     -------
-    mygrad.Tensor
+    subtract : Tensor
+        The combination of `x1` and `x2`, element-wise.
+
+    Notes
+    -----
+    Equivalent to ``x1 - x2`` in terms of tensor broadcasting.
+
+    References
+    ----------
+    .. [1] Retrieved from https://numpy.org/doc/stable/reference/generated/numpy.subtract.html
 
     Examples
     --------
     >>> import mygrad as mg
-    >>> mg.subtract(1.0, 4.0, constant=True)  # resulting tensor will not back-propagate a gradient
-    Tensor(5.0)
-    >>> x1 = mg.arange(9.0).reshape((3, 3))
-    >>> x2 = mg.arange(3.0)
-    >>> mg.subtract(x2, x1)  # equivalent to `x2 - x1`
-    Tensor([[  0.,   0.,   0.],
-            [  3.,   3.,   3.],
-            [  6.,   6.,  6.]])
+    >>> mg.subtract(1.0, 4.0)
+    Tensor(-3.0)
+
+    >>> x1 = mg.tensor([[0., 1., 2.],
+    ...                 [3., 4., 5.],
+    ...                 [6., 7., 8.]])
+    >>> x2 = mg.tensor([0., 1., 2.])
+    >>> mg.subtract(x1, x2)
+    Tensor([[ 0.,  0.,  0.],
+            [ 3.,  3.,  3.],
+            [ 6.,  6.,  6.]])
     """
-    return Tensor._op(Subtract, a, b, constant=constant)
+    pass
 
 
-def divide(a, b, *, constant=None):
-    """``f(a, b) -> a / b``
+@op_creator(Multiply)
+def multiply(
+    x1: ArrayLike,
+    x2: ArrayLike,
+    out: Optional[Union[ndarray, Tensor]] = None,
+    *,
+    where: Mask = True,
+    dtype: DTypeLikeReals = None,
+    constant: Optional[bool] = None,
+) -> Tensor:
+    """Multiply arguments element-wise.
 
-    Parameters
-    ----------
-    a : array_like
-
-    b : array_like
-
-    constant : bool, optional(default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient)
-
-    Returns
-    -------
-    mygrad.Tensor"""
-    return Tensor._op(Divide, a, b, constant=constant)
-
-
-def square(a, *, constant=None):
-    """``f(a) -> a ** 2``
+    This docstring was adapted from that of numpy.multiply [1]_
 
     Parameters
     ----------
-    a : array_like
+    x1, x2 : ArrayLike
+        Input arrays to be multiplied.
+        If ``x1.shape != x2.shape``, they must be broadcastable to a common
+        shape (which becomes the shape of the output).
 
-    constant : bool, optional(default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient)
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. `self.grad` will always return
+        ``None``).
+
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
+
+    dtype : Optional[DTypeLikeReals]
+        The dtype of the resulting tensor.
+
+    out : Optional[Union[ndarray, Tensor]]
+        A location into which the result is stored. If provided, it must have
+        a shape that the inputs broadcast to. If not provided or None,
+        a freshly-allocated tensor is returned.
+
+    where : Mask
+        This condition is broadcast over the input. At locations where the
+        condition is True, the `out` array will be set to the ufunc result.
+        Elsewhere, the `out` array will retain its original value.
+        Note that if an uninitialized `out` tensor is created via the default
+        ``out=None``, locations within it where the condition is False will
+        remain uninitialized.
 
     Returns
     -------
-    mygrad.Tensor"""
-    return Tensor._op(Square, a, constant=constant)
+    multiply : Tensor
+        The combination of `x1` and `x2`, element-wise.
+
+    Notes
+    -----
+    Equivalent to `x1` * `x2` in terms of tensor broadcasting.
+
+    References
+    ----------
+    .. [1] Retrieved from https://numpy.org/doc/stable/reference/generated/numpy.multiply.html
+
+    Examples
+    --------
+    >>> import mygrad as mg
+    >>> mg.multiply(2.0, 4.0)
+    Tensor(8.0)
+
+    >>> x1 = mg.tensor([[0., 1., 2.],
+    ...                 [3., 4., 5.],
+    ...                 [6., 7., 8.]])
+    >>> x2 = mg.tensor([0., 1., 2.])
+    >>> mg.multiply(x1, x2)
+    Tensor([[  0.,   1.,   4.],
+            [  0.,   4.,  10.],
+            [  0.,   7.,  16.]])
+    """
+    pass
 
 
-def reciprocal(a, *, constant=None):
-    """``f(a) -> 1 / a``
+@op_creator(Divide)
+def true_divide(
+    x1: ArrayLike,
+    x2: ArrayLike,
+    out: Optional[Union[ndarray, Tensor]] = None,
+    *,
+    where: Mask = True,
+    dtype: DTypeLikeReals = None,
+    constant: Optional[bool] = None,
+) -> Tensor:
+    """Divide arguments element-wise.
+
+    This docstring was adapted from that of numpy.true_divide [1]_
 
     Parameters
     ----------
-    a : array_like
+    x1 : ArrayLike
+        Dividend array.
 
-    constant : bool, optional(default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient)
+    x2 : ArrayLike
+        Divisor array.
+        If ``x1.shape != x2.shape``, they must be broadcastable to a common
+        shape (which becomes the shape of the output).
+
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. `self.grad` will always return
+        ``None``).
+
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
+
+    dtype : Optional[DTypeLikeReals]
+        The dtype of the resulting tensor.
+
+    out : Optional[Union[ndarray, Tensor]]
+        A location into which the result is stored. If provided, it must have
+        a shape that the inputs broadcast to. If not provided or None,
+        a freshly-allocated tensor is returned.
+
+    where : Mask
+        This condition is broadcast over the input. At locations where the
+        condition is True, the `out` array will be set to the ufunc result.
+        Elsewhere, the `out` array will retain its original value.
+        Note that if an uninitialized `out` tensor is created via the default
+        ``out=None``, locations within it where the condition is False will
+        remain uninitialized.
 
     Returns
     -------
-    mygrad.Tensor"""
-    return Tensor._op(Reciprocal, a, constant=constant)
+    true_divide : Tensor
+        The combination of `x1` and `x2`, element-wise.
+
+    Notes
+    -----
+    In Python, ``//`` is the floor division operator and ``/`` the
+    true division operator.  The ``true_divide(x1, x2)`` function is
+    equivalent to true division in Python.
+
+    References
+    ----------
+    .. [1] Retrieved from https://numpy.org/doc/stable/reference/generated/numpy.true_divide.html
+
+    Examples
+    --------
+    >>> import mygrad as mg
+    >>> x = mg.arange(5)
+    >>> mg.true_divide(x, 4)
+    array([ 0.  ,  0.25,  0.5 ,  0.75,  1.  ])
+
+    >>> x/4
+    array([ 0.  ,  0.25,  0.5 ,  0.75,  1.  ])
+
+    >>> x//4
+    array([0, 0, 0, 0, 1])
+    """
+    pass
 
 
-def power(a, b, *, constant=None):
-    """``f(a, b) -> a ** b``
+divide = true_divide
+
+
+@op_creator(Power)
+def power(
+    x1: ArrayLike,
+    x2: ArrayLike,
+    out: Optional[Union[ndarray, Tensor]] = None,
+    *,
+    where: Mask = True,
+    dtype: DTypeLikeReals = None,
+    constant: Optional[bool] = None,
+) -> Tensor:
+    """First tensor elements raised to powers from second tensor, element-wise.
+
+    Raise each base in `x1` to the positionally-corresponding power in
+    `x2`.  `x1` and `x2` must be broadcastable to the same shape. Note that an
+    integer type raised to a negative integer power will raise a ValueError.
+
+    This docstring was adapted from that of numpy.power [1]_
 
     Parameters
     ----------
-    a : array_like
+    x1 : ArrayLike
+        The bases.
 
-    b : array_like
+    x2 : ArrayLike
+        The exponents.
+        If ``x1.shape != x2.shape``, they must be broadcastable to a common
+        shape (which becomes the shape of the output).
 
-    constant : bool, optional(default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient)
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. `self.grad` will always return
+        ``None``).
+
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
+
+    dtype : Optional[DTypeLikeReals]
+        The dtype of the resulting tensor.
+
+    out : Optional[Union[ndarray, Tensor]]
+        A location into which the result is stored. If provided, it must have
+        a shape that the inputs broadcast to. If not provided or None,
+        a freshly-allocated tensor is returned.
+
+    where : Mask
+        This condition is broadcast over the input. At locations where the
+        condition is True, the `out` array will be set to the ufunc result.
+        Elsewhere, the `out` array will retain its original value.
+        Note that if an uninitialized `out` tensor is created via the default
+        ``out=None``, locations within it where the condition is False will
+        remain uninitialized.
 
     Returns
     -------
-    mygrad.Tensor"""
-    return Tensor._op(Power, a, b, constant=constant)
+    power : Tensor
+        The combination of `x1` and `x2`, element-wise.
+
+    See Also
+    --------
+    float_power : power function that promotes integers to float
+
+    References
+    ----------
+    .. [1] Retrieved from https://numpy.org/doc/stable/reference/generated/numpy.power.html
+
+    Examples
+    --------
+    Cube each element in a list.
+
+    >>> import mygrad as mg
+    >>> x1 = range(6)
+    >>> x1
+    [0, 1, 2, 3, 4, 5]
+    >>> mg.power(x1, 3)
+    Tensor([  0,   1,   8,  27,  64, 125])
+
+    Raise the bases to different exponents.
+
+    >>> x2 = [1.0, 2.0, 3.0, 3.0, 2.0, 1.0]
+    >>> mg.power(x1, x2)
+    Tensor([  0.,   1.,   8.,  27.,  16.,   5.])
+
+    The effect of broadcasting.
+
+    >>> x2 = mg.array([[1, 2, 3, 3, 2, 1], [1, 2, 3, 3, 2, 1]])
+    >>> x2
+    Tensor([[1, 2, 3, 3, 2, 1],
+            [1, 2, 3, 3, 2, 1]])
+    >>> mg.power(x1, x2)
+    Tensor([[ 0,  1,  8, 27, 16,  5],
+            [ 0,  1,  8, 27, 16,  5]])
+    """
+    pass
 
 
-def multiply(a, b, *, constant=None):
-    """``f(a, b) -> a * b``
+@op_creator(Negative)
+def negative(
+    x: ArrayLike,
+    out: Optional[Union[ndarray, Tensor]] = None,
+    *,
+    where: Mask = True,
+    dtype: DTypeLikeReals = None,
+    constant: Optional[bool] = None,
+) -> Tensor:
+    """Return the reciprocal of the argument element-wise.
+
+    This docstring was adapted from that of numpy.negative [1]_
 
     Parameters
     ----------
-    a : array_like
+    x : ArrayLike or scalar
+        Input tensor.
 
-    b : array_like
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. `self.grad` will always return
+        ``None``).
 
-    constant : bool, optional(default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient)
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
+
+    dtype : Optional[DTypeLikeReals]
+        The dtype of the resulting tensor.
+
+    out : Optional[Union[Tensor, ndarray]]
+        A location into which the result is stored. If provided, it must have
+        a shape that the inputs broadcast to. If not provided or None,
+        a freshly-allocated tensor is returned.
+
+    where : Mask
+        This condition is broadcast over the input. At locations where the
+        condition is True, the `out` array will be set to the ufunc result.
+        Elsewhere, the `out` array will retain its original value.
+        Note that if an uninitialized `out` tensor is created via the default
+        ``out=None``, locations within it where the condition is False will
+        remain uninitialized.
 
     Returns
     -------
-    mygrad.Tensor"""
-    return Tensor._op(Multiply, a, b, constant=constant)
+    negative : Tensor
+        The combination of `x1` and `x2`, element-wise.
+
+    References
+    ----------
+    .. [1] Retrieved from https://numpy.org/doc/stable/reference/generated/numpy.negative.html
+
+    Examples
+    --------
+    >>> import mygrad as mg
+    >>> mg.negative([1.,-1.])
+    Tensor([-1.,  1.])
+    """
+    pass
+
+
+@op_creator(Positive)
+def positive(
+    x: ArrayLike,
+    out: Optional[Union[ndarray, Tensor]] = None,
+    *,
+    where: Mask = True,
+    dtype: DTypeLikeReals = None,
+    constant: Optional[bool] = None,
+) -> Tensor:
+    """Return the reciprocal of the argument element-wise.
+
+    This docstring was adapted from that of numpy.positive [1]_
+
+    Parameters
+    ----------
+    x : ArrayLike
+        Input array.
+
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. `self.grad` will always return
+        ``None``).
+
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
+
+    dtype : Optional[DTypeLikeReals]
+        The dtype of the resulting tensor.
+
+    out : Optional[Union[Tensor, ndarray]]
+        A location into which the result is stored. If provided, it must have
+        a shape that the inputs broadcast to. If not provided or None,
+        a freshly-allocated tensor is returned.
+
+    where : Mask
+        This condition is broadcast over the input. At locations where the
+        condition is True, the `out` array will be set to the ufunc result.
+        Elsewhere, the `out` array will retain its original value.
+        Note that if an uninitialized `out` tensor is created via the default
+        ``out=None``, locations within it where the condition is False will
+        remain uninitialized.
+
+    Returns
+    -------
+    positive : Tensor
+
+    Notes
+    -----
+    Equivalent to `x.copy()`, but only defined for types that support
+    arithmetic.
+
+    References
+    ----------
+    .. [1] Retrieved from https://numpy.org/doc/stable/reference/generated/numpy.positive.html
+    """
+    pass
+
+
+@op_creator(Reciprocal)
+def reciprocal(
+    x: ArrayLike,
+    out: Optional[Union[ndarray, Tensor]] = None,
+    *,
+    where: Mask = True,
+    dtype: DTypeLikeReals = None,
+    constant: Optional[bool] = None,
+) -> Tensor:
+    """Return the reciprocal of the argument element-wise.
+
+    This docstring was adapted from that of numpy.reciprocal [1]_
+
+    Parameters
+    ----------
+    x : ArrayLike
+        Input array.
+
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. `self.grad` will always return
+        ``None``).
+
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
+
+    dtype : Optional[DTypeLikeReals]
+        The dtype of the resulting tensor.
+
+    out : Optional[Union[Tensor, ndarray]]
+        A location into which the result is stored. If provided, it must have
+        a shape that the inputs broadcast to. If not provided or None,
+        a freshly-allocated tensor is returned.
+
+    where : Mask
+        This condition is broadcast over the input. At locations where the
+        condition is True, the `out` array will be set to the ufunc result.
+        Elsewhere, the `out` array will retain its original value.
+        Note that if an uninitialized `out` tensor is created via the default
+        ``out=None``, locations within it where the condition is False will
+        remain uninitialized.
+
+    Returns
+    -------
+    reciprocal : Tensor
+
+    Notes
+    -----
+    .. note::
+        This function is not designed to work with integers.
+
+    For integer arguments with absolute value larger than 1 the result is
+    always zero because of the way Python handles integer division.  For
+    integer zero the result is an overflow.
+
+    References
+    ----------
+    .. [1] Retrieved from https://numpy.org/doc/stable/reference/generated/numpy.reciprocal.html
+
+    Examples
+    --------
+    >>> import mygrad as mg
+    >>> mg.reciprocal(2.)
+    Tensor(0.5)
+    >>> mg.reciprocal([1, 2., 3.33])
+    Tensor([ 1.       ,  0.5      ,  0.3003003])
+    """
+    pass
+
+
+@op_creator(Square)
+def square(
+    x: ArrayLike,
+    out: Optional[Union[ndarray, Tensor]] = None,
+    *,
+    where: Mask = True,
+    dtype: DTypeLikeReals = None,
+    constant: Optional[bool] = None,
+) -> Tensor:
+    """Return the reciprocal of the argument element-wise.
+
+    This docstring was adapted from that of numpy.square [1]_
+
+    Parameters
+    ----------
+    x : ArrayLike
+        Input data.
+
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. `self.grad` will always return
+        ``None``).
+
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
+
+    dtype : Optional[DTypeLikeReals]
+        The dtype of the resulting tensor.
+
+    out : Optional[Union[Tensor, ndarray]]
+        A location into which the result is stored. If provided, it must have
+        a shape that the inputs broadcast to. If not provided or None,
+        a freshly-allocated tensor is returned.
+
+    where : Mask
+        This condition is broadcast over the input. At locations where the
+        condition is True, the `out` array will be set to the ufunc result.
+        Elsewhere, the `out` array will retain its original value.
+        Note that if an uninitialized `out` tensor is created via the default
+        ``out=None``, locations within it where the condition is False will
+        remain uninitialized.
+
+    Returns
+    -------
+    square : Tensor
+
+    See Also
+    --------
+    sqrt
+    power
+
+    References
+    ----------
+    .. [1] Retrieved from https://numpy.org/doc/stable/reference/generated/numpy.square.html
+
+    Examples
+    --------
+    >>> import mygrad as mg
+    >>> mg.square([100., 1000.])
+    array([10.,  100.])
+    """
+    pass
 
 
 def multiply_sequence(*variables, constant=None):
@@ -190,7 +717,7 @@ def multiply_sequence(*variables, constant=None):
 
     Parameters
     ----------
-    variables : array_like
+    variables : ArrayLike
 
     constant : bool, optional(default=False)
         If ``True``, the returned tensor is a constant (it
@@ -219,7 +746,7 @@ def add_sequence(*variables, constant=None):
 
     Parameters
     ----------
-    variables : array_like
+    variables : ArrayLike
 
     constant : bool, optional(default=False)
         If ``True``, the returned tensor is a constant (it
@@ -239,52 +766,3 @@ def add_sequence(*variables, constant=None):
             f"`add_sequence` requires at least two inputs, got {len(variables)} inputs"
         )
     return Tensor._op(AddSequence, *variables, constant=constant)
-
-
-def positive(a, where=True, *, constant=None):
-    """``f(a) -> +a``
-
-    Creates a new tensor.
-
-    Parameters
-    ----------
-    a : array_like
-
-    where : numpy.ndarray
-        Accepts a boolean array which is broadcast together
-        with the operand(s). Values of True indicate to calculate
-        the function at that position, values of False indicate
-        to leave the value in the output alone.
-
-    constant : bool, optional(default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient)
-
-    Returns
-    -------
-    mygrad.Tensor"""
-    return Tensor._op(Positive, a, op_kwargs=(dict(where=where)), constant=constant)
-
-
-def negative(a, where=True, *, constant=None):
-    """``f(a) -> -a``
-
-    Parameters
-    ----------
-    a : array_like
-
-    where : numpy.ndarray
-        Accepts a boolean array which is broadcast together
-        with the operand(s). Values of True indicate to calculate
-        the function at that position, values of False indicate
-        to leave the value in the output alone.
-
-    constant : bool, optional(default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient)
-
-    Returns
-    -------
-    mygrad.Tensor
-    """
-    return Tensor._op(Negative, a, op_kwargs=(dict(where=where)), constant=constant)
