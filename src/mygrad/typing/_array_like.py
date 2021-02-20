@@ -56,7 +56,7 @@ ArrayLike = TypeVar(
 )
 
 
-sb1 = Sequence[Real]
+sb1 = Sequence[bool]
 sb2 = Sequence[sb1]
 sb3 = Sequence[sb2]
 sb4 = Sequence[sb3]
@@ -69,7 +69,11 @@ SequenceNDBools = Union[
 ]  # Sequence[Union[s1, s2]] is *not* valid!
 
 
-Mask = Union[ImplementsArray, np.ndarray, "Tensor", bool, SequenceNDBools]
+Mask = TypeVar(
+    "Mask",
+    bound=Union[ImplementsArray, np.ndarray, "Tensor", bool, SequenceNDBools],
+)
+
 
 si1 = Sequence[int]
 si2 = Sequence[si1]
