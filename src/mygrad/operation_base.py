@@ -175,11 +175,6 @@ class Operation(ABC):
         """
         for index, var in enumerate(self.variables):
             if not var.constant:
-                if self.where is not True:  # pragma: no cover
-                    raise NotImplementedError(
-                        f"{self} - Backprop is not supported for operations that "
-                        f"were filtered through a `where` ({self.where}) boolean mask."
-                    )
                 if not var._ops:
                     raise InvalidBackprop(
                         f"Part of the computational graph containing "
@@ -204,6 +199,10 @@ class Operation(ABC):
                     )
 
                 backed_grad = np.array(backed_grad, copy=False)
+
+                if self.where is not True:
+                    backed_grad = backed_grad * self.where
+
                 backed_grad = self.grad_post_process_fn(backed_grad, var.shape)
 
                 if var._grad is None:
@@ -254,41 +253,6 @@ class Ufunc(Operation, ABC):
     @abstractmethod
     def numpy_ufunc(self) -> np.ufunc:
         raise NotImplementedError()  # pragma: no cover
-
-    @property
-    def nin(self) -> int:
-        """The number of inputs."""
-        return self.numpy_ufunc.nin
-
-    @property
-    def nout(self) -> int:
-        """The number of outputs."""
-        return self.numpy_ufunc.nout
-
-    @property
-    def nargs(self) -> int:
-        """The number of arguments."""
-        return self.numpy_ufunc.nargs
-
-    @property
-    def ntypes(self) -> int:
-        """The number of types."""
-        return self.numpy_ufunc.ntypes
-
-    @property
-    def types(self) -> List[str]:
-        """Returns a list with types grouped input->output."""
-        return self.numpy_ufunc.types
-
-    @property
-    def identity(self) -> Optional[int]:
-        """The identity value."""
-        return self.numpy_ufunc.identity
-
-    @property
-    def signature(self) -> Optional[str]:
-        """Definition of the core elements a generalized ufunc operates on."""
-        return self.numpy_ufunc.signature
 
 
 class UnaryUfunc(Ufunc, ABC):

@@ -29,3 +29,16 @@ def test_that_typical_op_propagates_constant_under_general_conditions(
 
     out = mul(x, y, **populate_args(dtype=dtype, constant=constant).kwargs)
     assert out.constant is expected
+
+
+def test_simple_constant_behavior():
+    const = mg.tensor(1.0, constant=True)
+    var = mg.tensor(1.0, constant=False)
+
+    assert mg.add(const, const).constant is True
+    assert mg.add(const, const, constant=False).constant is False
+    assert mg.add(const, const, constant=True).constant is True
+
+    assert mg.add(const, var).constant is False
+    assert mg.add(const, var, constant=False).constant is False
+    assert mg.add(const, var, constant=True).constant is True

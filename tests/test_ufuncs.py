@@ -21,23 +21,5 @@ all_concrete_ufuncs = sorted(
 
 
 @pytest.mark.parametrize("ufunc", all_concrete_ufuncs)
-@pytest.mark.parametrize(
-    "attribute",
-    [
-        "nin",
-        "nout",
-        "nargs",
-        "ntypes",
-        "types",
-        "identity",
-        "signature",
-    ],
-)
-def test_ufunc_attributes_match_numpy_counterpart(ufunc: Type[Ufunc], attribute: str):
-    ufunc = ufunc()
-    assert getattr(ufunc, attribute) == getattr(ufunc.numpy_ufunc, attribute)
-
-
-@pytest.mark.parametrize("ufunc", all_concrete_ufuncs)
 def test_numpy_ufunc_is_actually_a_ufunc(ufunc: Type[Ufunc]):
     assert isinstance(ufunc.numpy_ufunc, np.ufunc)

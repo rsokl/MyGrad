@@ -17,6 +17,7 @@ DTypeLikeReals = TypeVar(
     bound=Union[
         dtype,
         None,
+        Type[bool],
         Type[int],
         Type[float],
         str,

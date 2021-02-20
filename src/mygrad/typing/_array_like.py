@@ -79,4 +79,6 @@ si5 = Sequence[si4]
 si6 = Sequence[si5]
 
 
-Index = Union[int, None, slice, ImplementsArray, Tuple["Index"], List["Index"]]
+Index = Union[
+    int, None, slice, ImplementsArray, np.ndarray, Tuple["Index"], List["Index"]
+]

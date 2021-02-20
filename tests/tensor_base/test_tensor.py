@@ -112,7 +112,7 @@ def test_copy(data, constant, set_constant, invoke_backward):
     y = +x
     if invoke_backward:
         y.backward()
-    y_copy = y.copy(set_constant)
+    y_copy = y.copy(constant=set_constant)
 
     if not invoke_backward:
         assert y.creator is not None
