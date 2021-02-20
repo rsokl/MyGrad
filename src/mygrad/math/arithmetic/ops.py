@@ -1,8 +1,12 @@
 from functools import reduce
+from typing import TYPE_CHECKING
 
 import numpy as np
 
 from mygrad.operation_base import BinaryUfunc, Operation, UnaryUfunc
+
+if TYPE_CHECKING:
+    from mygrad import Tensor
 
 __all__ = [
     "Add",
@@ -109,7 +113,7 @@ class Negative(UnaryUfunc):
 class AddSequence(Operation):
     """Performs f(a, b, ..., z) = a + b + ... + z"""
 
-    def __call__(self, *input_vars):
+    def __call__(self, *input_vars: "Tensor") -> np.ndarray:
         assert len(input_vars) > 1, "`add_sequence` requires at least two operands"
         self.variables = input_vars
         out = sum(var.data for var in input_vars)
@@ -122,7 +126,7 @@ class AddSequence(Operation):
 class MultiplySequence(Operation):
     """ Performs f(a, b, ..., z) = a * b * ... * z"""
 
-    def __call__(self, *input_vars):
+    def __call__(self, *input_vars: "Tensor") -> np.ndarray:
         self.variables = input_vars
         assert 2 <= len(self.variables)
 

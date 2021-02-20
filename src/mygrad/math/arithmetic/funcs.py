@@ -46,7 +46,7 @@ def add(
     dtype: DTypeLikeReals = None,
     constant: Optional[bool] = None,
 ) -> Tensor:
-    """Add arguments element-wise.
+    """Add the arguments element-wise.
 
     This docstring was adapted from that of numpy.add [1]_
 
@@ -55,11 +55,12 @@ def add(
     x1, x2 : ArrayLike
         The arrays to be added.
         If ``x1.shape != x2.shape``, they must be broadcastable to a common
-        shape (which becomes the shape of the output).
+        shape (which becomes the shape of the output). Non-tensor array-likes are
+        treated as constants.
 
     constant : Optional[bool]
         If ``True``, this tensor is treated as a constant, and thus does not
-        facilitate back propagation (i.e. `self.grad` will always return
+        facilitate back propagation (i.e. ``constant.grad`` will always return
         ``None``).
 
         Defaults to ``False`` for float-type data.
@@ -77,8 +78,8 @@ def add(
 
     where : Mask
         This condition is broadcast over the input. At locations where the
-        condition is True, the `out` array will be set to the ufunc result.
-        Elsewhere, the `out` array will retain its original value.
+        condition is True, the ``out`` tensor will be set to the ufunc result.
+        Elsewhere, the ``out`` tensor will retain its original value.
         Note that if an uninitialized `out` tensor is created via the default
         ``out=None``, locations within it where the condition is False will
         remain uninitialized.
@@ -86,7 +87,7 @@ def add(
     Returns
     -------
     add : Tensor
-        The combination of `x1` and `x2`, element-wise.
+        The sum of `x1` and `x2`, element-wise.
 
     Notes
     -----
@@ -123,7 +124,7 @@ def subtract(
     dtype: DTypeLikeReals = None,
     constant: Optional[bool] = None,
 ) -> Tensor:
-    """Subtract arguments element-wise.
+    """Subtract the arguments element-wise.
 
     This docstring was adapted from that of numpy.subtract [1]_
 
@@ -132,11 +133,12 @@ def subtract(
     x1, x2 : ArrayLike
         The arrays to be subtracted from each other.
         If ``x1.shape != x2.shape``, they must be broadcastable to a common
-        shape (which becomes the shape of the output).
+        shape (which becomes the shape of the output). Non-tensor array-likes are
+        treated as constants.
 
     constant : Optional[bool]
         If ``True``, this tensor is treated as a constant, and thus does not
-        facilitate back propagation (i.e. `self.grad` will always return
+        facilitate back propagation (i.e. ``constant.grad`` will always return
         ``None``).
 
         Defaults to ``False`` for float-type data.
@@ -154,8 +156,8 @@ def subtract(
 
     where : Mask
         This condition is broadcast over the input. At locations where the
-        condition is True, the `out` array will be set to the ufunc result.
-        Elsewhere, the `out` array will retain its original value.
+        condition is True, the ``out`` tensor will be set to the ufunc result.
+        Elsewhere, the ``out`` tensor will retain its original value.
         Note that if an uninitialized `out` tensor is created via the default
         ``out=None``, locations within it where the condition is False will
         remain uninitialized.
@@ -163,7 +165,7 @@ def subtract(
     Returns
     -------
     subtract : Tensor
-        The combination of `x1` and `x2`, element-wise.
+        The difference of `x1` and `x2`, element-wise.
 
     Notes
     -----
@@ -201,7 +203,7 @@ def multiply(
     dtype: DTypeLikeReals = None,
     constant: Optional[bool] = None,
 ) -> Tensor:
-    """Multiply arguments element-wise.
+    """Multiply the arguments element-wise.
 
     This docstring was adapted from that of numpy.multiply [1]_
 
@@ -210,11 +212,12 @@ def multiply(
     x1, x2 : ArrayLike
         Input arrays to be multiplied.
         If ``x1.shape != x2.shape``, they must be broadcastable to a common
-        shape (which becomes the shape of the output).
+        shape (which becomes the shape of the output). Non-tensor array-likes
+        are treated as constants.
 
     constant : Optional[bool]
         If ``True``, this tensor is treated as a constant, and thus does not
-        facilitate back propagation (i.e. `self.grad` will always return
+        facilitate back propagation (i.e. ``constant.grad`` will always return
         ``None``).
 
         Defaults to ``False`` for float-type data.
@@ -232,8 +235,8 @@ def multiply(
 
     where : Mask
         This condition is broadcast over the input. At locations where the
-        condition is True, the `out` array will be set to the ufunc result.
-        Elsewhere, the `out` array will retain its original value.
+        condition is True, the ``out`` tensor will be set to the ufunc result.
+        Elsewhere, the ``out`` tensor will retain its original value.
         Note that if an uninitialized `out` tensor is created via the default
         ``out=None``, locations within it where the condition is False will
         remain uninitialized.
@@ -241,7 +244,7 @@ def multiply(
     Returns
     -------
     multiply : Tensor
-        The combination of `x1` and `x2`, element-wise.
+        The product of `x1` and `x2`, element-wise.
 
     Notes
     -----
@@ -279,7 +282,7 @@ def true_divide(
     dtype: DTypeLikeReals = None,
     constant: Optional[bool] = None,
 ) -> Tensor:
-    """Divide arguments element-wise.
+    """Divide the arguments element-wise.
 
     This docstring was adapted from that of numpy.true_divide [1]_
 
@@ -291,11 +294,12 @@ def true_divide(
     x2 : ArrayLike
         Divisor array.
         If ``x1.shape != x2.shape``, they must be broadcastable to a common
-        shape (which becomes the shape of the output).
+        shape (which becomes the shape of the output). Non-tensor array-likes
+        are treated as constants.
 
     constant : Optional[bool]
         If ``True``, this tensor is treated as a constant, and thus does not
-        facilitate back propagation (i.e. `self.grad` will always return
+        facilitate back propagation (i.e. ``constant.grad`` will always return
         ``None``).
 
         Defaults to ``False`` for float-type data.
@@ -313,8 +317,8 @@ def true_divide(
 
     where : Mask
         This condition is broadcast over the input. At locations where the
-        condition is True, the `out` array will be set to the ufunc result.
-        Elsewhere, the `out` array will retain its original value.
+        condition is True, the ``out`` tensor will be set to the ufunc result.
+        Elsewhere, the ``out`` tensor will retain its original value.
         Note that if an uninitialized `out` tensor is created via the default
         ``out=None``, locations within it where the condition is False will
         remain uninitialized.
@@ -322,7 +326,7 @@ def true_divide(
     Returns
     -------
     true_divide : Tensor
-        The combination of `x1` and `x2`, element-wise.
+        The quotient of `x1` with `x2`, element-wise.
 
     Notes
     -----
@@ -379,11 +383,12 @@ def power(
     x2 : ArrayLike
         The exponents.
         If ``x1.shape != x2.shape``, they must be broadcastable to a common
-        shape (which becomes the shape of the output).
+        shape (which becomes the shape of the output). Non-tensor array-likes
+        are treated as constants.
 
     constant : Optional[bool]
         If ``True``, this tensor is treated as a constant, and thus does not
-        facilitate back propagation (i.e. `self.grad` will always return
+        facilitate back propagation (i.e. ``constant.grad`` will always return
         ``None``).
 
         Defaults to ``False`` for float-type data.
@@ -401,8 +406,8 @@ def power(
 
     where : Mask
         This condition is broadcast over the input. At locations where the
-        condition is True, the `out` array will be set to the ufunc result.
-        Elsewhere, the `out` array will retain its original value.
+        condition is True, the ``out`` tensor will be set to the ufunc result.
+        Elsewhere, the ``out`` tensor will retain its original value.
         Note that if an uninitialized `out` tensor is created via the default
         ``out=None``, locations within it where the condition is False will
         remain uninitialized.
@@ -439,7 +444,7 @@ def power(
 
     The effect of broadcasting.
 
-    >>> x2 = mg.array([[1, 2, 3, 3, 2, 1], [1, 2, 3, 3, 2, 1]])
+    >>> x2 = mg.tensor([[1, 2, 3, 3, 2, 1], [1, 2, 3, 3, 2, 1]])
     >>> x2
     Tensor([[1, 2, 3, 3, 2, 1],
             [1, 2, 3, 3, 2, 1]])
@@ -470,7 +475,7 @@ def negative(
 
     constant : Optional[bool]
         If ``True``, this tensor is treated as a constant, and thus does not
-        facilitate back propagation (i.e. `self.grad` will always return
+        facilitate back propagation (i.e. ``constant.grad`` will always return
         ``None``).
 
         Defaults to ``False`` for float-type data.
@@ -488,8 +493,8 @@ def negative(
 
     where : Mask
         This condition is broadcast over the input. At locations where the
-        condition is True, the `out` array will be set to the ufunc result.
-        Elsewhere, the `out` array will retain its original value.
+        condition is True, the ``out`` tensor will be set to the ufunc result.
+        Elsewhere, the ``out`` tensor will retain its original value.
         Note that if an uninitialized `out` tensor is created via the default
         ``out=None``, locations within it where the condition is False will
         remain uninitialized.
@@ -532,7 +537,7 @@ def positive(
 
     constant : Optional[bool]
         If ``True``, this tensor is treated as a constant, and thus does not
-        facilitate back propagation (i.e. `self.grad` will always return
+        facilitate back propagation (i.e. ``constant.grad`` will always return
         ``None``).
 
         Defaults to ``False`` for float-type data.
@@ -550,8 +555,8 @@ def positive(
 
     where : Mask
         This condition is broadcast over the input. At locations where the
-        condition is True, the `out` array will be set to the ufunc result.
-        Elsewhere, the `out` array will retain its original value.
+        condition is True, the ``out`` tensor will be set to the ufunc result.
+        Elsewhere, the ``out`` tensor will retain its original value.
         Note that if an uninitialized `out` tensor is created via the default
         ``out=None``, locations within it where the condition is False will
         remain uninitialized.
@@ -592,7 +597,7 @@ def reciprocal(
 
     constant : Optional[bool]
         If ``True``, this tensor is treated as a constant, and thus does not
-        facilitate back propagation (i.e. `self.grad` will always return
+        facilitate back propagation (i.e. ``constant.grad`` will always return
         ``None``).
 
         Defaults to ``False`` for float-type data.
@@ -610,8 +615,8 @@ def reciprocal(
 
     where : Mask
         This condition is broadcast over the input. At locations where the
-        condition is True, the `out` array will be set to the ufunc result.
-        Elsewhere, the `out` array will retain its original value.
+        condition is True, the ``out`` tensor will be set to the ufunc result.
+        Elsewhere, the ``out`` tensor will retain its original value.
         Note that if an uninitialized `out` tensor is created via the default
         ``out=None``, locations within it where the condition is False will
         remain uninitialized.
@@ -653,7 +658,7 @@ def square(
     dtype: DTypeLikeReals = None,
     constant: Optional[bool] = None,
 ) -> Tensor:
-    """Return the reciprocal of the argument element-wise.
+    """Return the square of the argument element-wise.
 
     This docstring was adapted from that of numpy.square [1]_
 
@@ -664,7 +669,7 @@ def square(
 
     constant : Optional[bool]
         If ``True``, this tensor is treated as a constant, and thus does not
-        facilitate back propagation (i.e. `self.grad` will always return
+        facilitate back propagation (i.e. ``constant.grad`` will always return
         ``None``).
 
         Defaults to ``False`` for float-type data.
@@ -682,8 +687,8 @@ def square(
 
     where : Mask
         This condition is broadcast over the input. At locations where the
-        condition is True, the `out` array will be set to the ufunc result.
-        Elsewhere, the `out` array will retain its original value.
+        condition is True, the ``out`` tensor will be set to the ufunc result.
+        Elsewhere, the ``out`` tensor will retain its original value.
         Note that if an uninitialized `out` tensor is created via the default
         ``out=None``, locations within it where the condition is False will
         remain uninitialized.
@@ -710,18 +715,26 @@ def square(
     pass
 
 
-def multiply_sequence(*variables, constant=None):
+def multiply_sequence(*variables: ArrayLike, constant: Optional[bool] = None) -> Tensor:
     """``f(a, b, ...) -> a * b * ...``
 
-    Multiply a sequence of N tensors.
+    Multiply a sequence of tensors.
 
     Parameters
     ----------
     variables : ArrayLike
+        A sequence of broadcast-compatible tensors. Non-tensor array-likes are
+        treated as constants.
 
-    constant : bool, optional(default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient)
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. ``constant.grad`` will always return
+        ``None``).
+
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
 
     Returns
     -------
@@ -731,7 +744,25 @@ def multiply_sequence(*variables, constant=None):
     -----
     It is more efficient to back-propagate through this
     function than it is through a computational graph
-    with N-1 corresponding multiplication operations."""
+    with N-1 corresponding multiplication operations.
+
+    Examples
+    --------
+    >>> import mygrad as mg
+    >>> x = mg.tensor([1. , 2.])
+    >>> y = mg.tensor([-1.])
+    >>> z = mg.tensor([[1.]])
+    >>> out = mg.multiply_sequence(x, y, z); out
+        Tensor([[-1., -2.]])
+
+    >>> out.backward()
+    >>> x.grad
+    array([-1., -1.])
+    >>> y.grad
+    array([3.])
+    >>> z.grad
+    array([[-3.]])
+    """
     if len(variables) < 2:
         raise ValueError(
             f"`multiply_sequence` requires at least two inputs, got {len(variables)} inputs"
@@ -739,18 +770,26 @@ def multiply_sequence(*variables, constant=None):
     return Tensor._op(MultiplySequence, *variables, constant=constant)
 
 
-def add_sequence(*variables, constant=None):
+def add_sequence(*variables: ArrayLike, constant: Optional[bool] = None) -> Tensor:
     """``f(a, b, ...) -> a + b + ...``
 
-    Add a sequence of N tensors.
+    Add a sequence of tensors.
 
     Parameters
     ----------
     variables : ArrayLike
+        A sequence of broadcast-compatible tensors. Non-tensor array-likes are
+        treated as constants.
 
-    constant : bool, optional(default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient)
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. ``constant.grad`` will always return
+        ``None``).
+
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
 
     Returns
     -------
@@ -760,7 +799,26 @@ def add_sequence(*variables, constant=None):
     -----
     It is more efficient to back-propagate through this
     function than it is through a computational graph
-    with N-1 corresponding addition operations."""
+    with N-1 corresponding addition operations.
+
+
+    Examples
+    --------
+    >>> import mygrad as mg
+    >>> x = mg.tensor([1. , 2.])
+    >>> y = mg.tensor([-1.])
+    >>> z = mg.tensor([[1.]])
+    >>> out = mg.add_sequence(x, y, z); out
+        Tensor([[1., 2.]])
+
+    >>> out.backward()
+    >>> x.grad
+    array([1., 1.])
+    >>> y.grad
+    array([2.])
+    >>> z.grad
+    array([[2.]])
+    """
     if len(variables) < 2:
         raise ValueError(
             f"`add_sequence` requires at least two inputs, got {len(variables)} inputs"
