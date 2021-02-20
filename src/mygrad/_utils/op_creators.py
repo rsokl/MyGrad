@@ -1,6 +1,6 @@
 from functools import wraps
 from inspect import signature
-from typing import Callable, Optional, Tuple, Type, Union, get_type_hints
+from typing import Callable, Optional, Tuple, Type, TypeVar, Union, get_type_hints
 
 import numpy as np
 
@@ -90,6 +90,9 @@ class MetaBinaryUfunc(type):
         return f"<mygrad-ufunc '{cls._decorated_func.__name__}'>"
 
 
+T = TypeVar("T")
+
+
 class op_creator:
     def __init__(
         self,
@@ -108,7 +111,7 @@ class op_creator:
         self.reduce = reduce_op
         self.reduceat = reduceat_op
 
-    def __call__(self, decorated_func: Callable) -> Callable[..., Tensor]:
+    def __call__(self, decorated_func: T) -> T:
         if not issubclass(self.op, Ufunc):
             for _f in [
                 self.at_op,
