@@ -111,7 +111,7 @@ def add(
             [  3.,   5.,   7.],
             [  6.,   8.,  10.]])
     """
-    pass
+    ...
 
 
 @op_creator(Subtract)
@@ -190,7 +190,7 @@ def subtract(
             [ 3.,  3.,  3.],
             [ 6.,  6.,  6.]])
     """
-    pass
+    ...
 
 
 @op_creator(Multiply)
@@ -269,7 +269,7 @@ def multiply(
             [  0.,   4.,  10.],
             [  0.,   7.,  16.]])
     """
-    pass
+    ...
 
 
 @op_creator(Divide)
@@ -351,7 +351,7 @@ def true_divide(
     >>> x//4
     array([0, 0, 0, 0, 1])
     """
-    pass
+    ...
 
 
 divide = true_divide
@@ -452,7 +452,7 @@ def power(
     Tensor([[ 0,  1,  8, 27, 16,  5],
             [ 0,  1,  8, 27, 16,  5]])
     """
-    pass
+    ...
 
 
 @op_creator(Negative)
@@ -514,7 +514,7 @@ def negative(
     >>> mg.negative([1.,-1.])
     Tensor([-1.,  1.])
     """
-    pass
+    ...
 
 
 @op_creator(Positive)
@@ -574,7 +574,7 @@ def positive(
     ----------
     .. [1] Retrieved from https://numpy.org/doc/stable/reference/generated/numpy.positive.html
     """
-    pass
+    ...
 
 
 @op_creator(Reciprocal)
@@ -646,7 +646,7 @@ def reciprocal(
     >>> mg.reciprocal([1, 2., 3.33])
     Tensor([ 1.       ,  0.5      ,  0.3003003])
     """
-    pass
+    ...
 
 
 @op_creator(Square)
@@ -712,7 +712,7 @@ def square(
     >>> mg.square([100., 1000.])
     array([10.,  100.])
     """
-    pass
+    ...
 
 
 def multiply_sequence(*variables: ArrayLike, constant: Optional[bool] = None) -> Tensor:

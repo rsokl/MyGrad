@@ -1,3 +1,6 @@
-from typing import Tuple, TypeVar
+from typing import TYPE_CHECKING, Tuple, TypeVar
 
-Shape = TypeVar("Shape", bound=Tuple[int, ...])
+if TYPE_CHECKING:
+    Shape = Tuple[int, ...]
+else:
+    Shape = TypeVar("Shape", bound=Tuple[int, ...])
