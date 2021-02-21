@@ -45,6 +45,8 @@ from mygrad.typing import ArrayLike, DTypeLike, DTypeLikeReals, Index, Shape
 
 __all__ = ["Tensor", "asarray", "astensor"]
 
+CONSTANT_ONLY_DTYPES = (np.integer, np.bool_)
+
 
 def _resolve_constant(*others: Any, constant: Optional[bool]) -> Optional[bool]:
     """Determines if `constant` should be resolved to True based on `others`.
@@ -551,7 +553,7 @@ class Tensor:
             # No need to constrain dtypes if we aren't tracking the graph.
             # Also, it is nice to enable complex arithmetic through mygrad
             # functions that are wrapped in no_autodiff
-            if not issubclass(dtype, (np.integer, np.bool_)):
+            if not issubclass(dtype, CONSTANT_ONLY_DTYPES):
                 raise TypeError(
                     f"Tensor data must be of an floating type, integer type, or boolean type, "
                     f"received {dtype}"

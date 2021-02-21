@@ -6,6 +6,7 @@ import numpy as np
 
 import mygrad._utils.lock_management as mem
 from mygrad import Tensor
+from mygrad.tensor_base import CONSTANT_ONLY_DTYPES
 from mygrad.typing import ArrayLike, DTypeLike, DTypeLikeReals
 
 
@@ -54,28 +55,27 @@ def expected_constant(
         raise InternalTestError("`dest_dtype` cannot be `None`")
 
     dest_dtype = np.dtype(dest_dtype)
-    is_integer_dtype = issubclass(dest_dtype.type, np.integer)
+    is_constant_only_dtype = issubclass(dest_dtype.type, CONSTANT_ONLY_DTYPES)
 
     if constant is not None:
-        if constant is False and dest_dtype is not None and is_integer_dtype:
+        if constant is False and dest_dtype is not None and is_constant_only_dtype:
             raise InternalTestError(
                 f"dest_dtype ({dest_dtype}) and specified constant ({constant}) are inconsistent"
             )
         return constant
 
-    if issubclass(dest_dtype.type, np.integer):
+    if is_constant_only_dtype:
         return True
 
-    if args:
+    elif args:
         # constant inferred from inputs
         for item in args:
             # if any input is a variable-tensor, output is variable
             if isinstance(item, Tensor) and item.constant is False:
                 return False
         return True
-
-    # constant is inferred from the dtype
-    return issubclass(dest_dtype.type, np.integer)
+    else:
+        return False
 
 
 @contextmanager
