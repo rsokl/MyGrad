@@ -272,8 +272,8 @@ class op_creator:
                 self.reduceat_op,
             ]:
                 if _f is not None:  # pragma: no cover
-                    raise Exception(
-                        "MyGrad Internal Error: ufunc method specified for non-ufunc op."
+                    raise ValueError(
+                        "op_creator: ufunc method(s) specified for non-ufunc op."
                     )
 
             @wraps(decorated_func)
