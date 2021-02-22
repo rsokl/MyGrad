@@ -2,6 +2,7 @@ from functools import wraps
 from inspect import signature
 from typing import (
     Callable,
+    List,
     Optional,
     Tuple,
     Type,
@@ -31,6 +32,13 @@ def _permitted_type_str(x: str) -> bool:
 class MetaUnaryUfunc(type):
     _Op: Type[UnaryUfunc]
     _decorated_func: Callable
+    nin: int
+    nout: int
+    nargs: int
+    ntypes: int
+    types: List[str]
+    identity: int
+    signature: str
 
     def __call__(
         cls,
@@ -68,6 +76,13 @@ class MetaUnaryUfunc(type):
 class MetaBinaryUfunc(type):
     _Op: Type[BinaryUfunc]
     _decorated_func: Union[Callable, Ufunc]
+    nin: int
+    nout: int
+    nargs: int
+    ntypes: int
+    types: List[str]
+    identity: int
+    signature: str
 
     def __call__(
         cls,
