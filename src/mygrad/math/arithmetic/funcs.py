@@ -464,7 +464,7 @@ def negative(
     dtype: DTypeLikeReals = None,
     constant: Optional[bool] = None,
 ) -> Tensor:
-    """Return the reciprocal of the argument element-wise.
+    """Negates the tensor element-wise.
 
     This docstring was adapted from that of numpy.negative [1]_
 
@@ -526,7 +526,7 @@ def positive(
     dtype: DTypeLikeReals = None,
     constant: Optional[bool] = None,
 ) -> Tensor:
-    """Return the reciprocal of the argument element-wise.
+    """Returns a copy of the tensor.
 
     This docstring was adapted from that of numpy.positive [1]_
 
