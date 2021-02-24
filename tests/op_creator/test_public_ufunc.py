@@ -1,24 +1,31 @@
+import inspect
 from inspect import signature
-from typing import Union, get_type_hints
+from typing import Type, get_type_hints
 
 import numpy as np
 import pytest
 
 import mygrad
-from mygrad._utils.op_creators import MetaBinaryUfunc, MetaUnaryUfunc
+from mygrad.operation_base import Ufunc
+from tests import public_ufunc_names, ufuncs
 
-Ufunc = Union[MetaBinaryUfunc, MetaUnaryUfunc]
 
-public_names = []
-ufuncs = []
+def _all_subclasses(cls):
+    return set(cls.__subclasses__()).union(
+        (s for c in cls.__subclasses__() for s in _all_subclasses(c))
+    )
 
-for name in sorted(
-    public_name for public_name in dir(mygrad) if not public_name.startswith("_")
-):
-    attr = getattr(mygrad, name)
-    if isinstance(attr, (MetaUnaryUfunc, MetaBinaryUfunc)):
-        ufuncs.append(attr)
-        public_names.append(name)
+
+# names need to be sorted so parallel testing doesn't break
+all_concrete_ufuncs = sorted(
+    (ufunc for ufunc in _all_subclasses(Ufunc) if (not inspect.isabstract(ufunc))),
+    key=lambda x: x.__name__,
+)
+
+
+@pytest.mark.parametrize("ufunc", all_concrete_ufuncs)
+def test_bound_numpy_ufunc_is_actually_a_ufunc(ufunc: Type[Ufunc]):
+    assert isinstance(ufunc.numpy_ufunc, np.ufunc)
 
 
 numpy_ufunc_property_names = sorted(
@@ -48,7 +55,7 @@ def test_ufunc_docs_available(ufunc):
     assert "Parameters" in ufunc.__doc__ and "Returns" in ufunc.__doc__
 
 
-@pytest.mark.parametrize("public_name, ufunc", list(zip(public_names, ufuncs)))
+@pytest.mark.parametrize("public_name, ufunc", list(zip(public_ufunc_names, ufuncs)))
 def test_ufunc_name_matches_public_name(public_name, ufunc):
     assert ufunc.__name__ == public_name or "divide" in public_name
 
@@ -59,7 +66,7 @@ def test_ufunc_methods_exist(ufunc, method_name):
     assert hasattr(ufunc, method_name)
 
 
-@pytest.mark.parametrize("public_name, ufunc", list(zip(public_names, ufuncs)))
+@pytest.mark.parametrize("public_name, ufunc", list(zip(public_ufunc_names, ufuncs)))
 @pytest.mark.parametrize("property_name", numpy_ufunc_property_names)
 def test_ufunc_attribute_matches(public_name, ufunc, property_name):
     if "type" in property_name:
@@ -84,8 +91,8 @@ def test_type_codes_are_supported_by_tensor(code: str):
         raise AssertionError()
 
 
-@pytest.mark.parametrize("public_name, ufunc", list(zip(public_names, ufuncs)))
-def test_ufunc_repr(public_name: str, ufunc: Ufunc):
+@pytest.mark.parametrize("public_name, ufunc", list(zip(public_ufunc_names, ufuncs)))
+def test_ufunc_repr(public_name: str, ufunc):
     if public_name == "divide":
         return
     assert repr(ufunc) == f"<mygrad-ufunc '{public_name}'>"
@@ -93,6 +100,6 @@ def test_ufunc_repr(public_name: str, ufunc: Ufunc):
 
 @pytest.mark.parametrize("ufunc", ufuncs)
 @pytest.mark.parametrize("expected_param", ["out", "where", "dtype", "constant"])
-def test_ufunc_signature_is_defined(ufunc: Ufunc, expected_param: str):
+def test_ufunc_signature_is_defined(ufunc, expected_param: str):
     params = signature(ufunc).parameters
     assert expected_param in params

@@ -29,7 +29,7 @@ def _permitted_type_str(x: str) -> bool:
     return True
 
 
-class MetaUnaryUfunc(type):
+class MyGradUnaryUfunc(type):
     _Op: Type[UnaryUfunc]
     _decorated_func: Callable
     nin: int
@@ -73,7 +73,7 @@ class MetaUnaryUfunc(type):
         return f"<mygrad-ufunc '{cls._decorated_func.__name__}'>"
 
 
-class MetaBinaryUfunc(type):
+class MyGradBinaryUfunc(type):
     _Op: Type[BinaryUfunc]
     _decorated_func: Union[Callable, Ufunc]
     nin: int
@@ -133,7 +133,7 @@ def _create_ufunc(
     outer_op: Optional[Type[Operation]] = None,
     reduce_op: Optional[Type[Operation]] = None,
     reduceat_op: Optional[Type[Operation]] = None,
-) -> MetaUnaryUfunc:
+) -> MyGradUnaryUfunc:
     ...
 
 
@@ -147,7 +147,7 @@ def _create_ufunc(
     outer_op: Optional[Type[Operation]] = None,
     reduce_op: Optional[Type[Operation]] = None,
     reduceat_op: Optional[Type[Operation]] = None,
-) -> MetaBinaryUfunc:
+) -> MyGradBinaryUfunc:
     ...
 
 
@@ -216,9 +216,9 @@ def _create_ufunc(
         raise NotImplementedError()
 
     if op.numpy_ufunc.nin == 1:
-        MetaBuilder = MetaUnaryUfunc
+        MetaBuilder = MyGradUnaryUfunc
     elif op.numpy_ufunc.nin == 2:
-        MetaBuilder = MetaBinaryUfunc
+        MetaBuilder = MyGradBinaryUfunc
     else:  # pragma: no cover
         raise NotImplementedError(
             "MyGrad Internal: `mygrad._utils.op_creator` only supports unary and binary ufuncs currently"
