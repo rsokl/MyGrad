@@ -8,6 +8,7 @@ import mygrad._utils.lock_management as mem
 from mygrad import Tensor
 from mygrad.tensor_base import CONSTANT_ONLY_DTYPES
 from mygrad.typing import ArrayLike, DTypeLike, DTypeLikeReals
+from mygrad.operation_base import _NoValue, _NoValueType
 
 
 class InternalTestError(Exception):
@@ -44,10 +45,13 @@ def check_dtype_consistency(out: ArrayLike, dest_dtype: DTypeLike):
 def expected_constant(
     *args: ArrayLike,
     dest_dtype: DTypeLikeReals,
-    constant: Optional[bool] = None,
+    constant: Optional[Union[_NoValueType, bool]] = None,
 ) -> bool:
     """Given the input arguments to a function that produces a tensor, infers
     whether the resulting tensor should be a constant or a variable tensor."""
+    if constant is _NoValue:
+        constant = None
+
     if not isinstance(constant, bool) and constant is not None:
         raise TypeError(f"Invalid type for `constant`; got: {constant}")
 

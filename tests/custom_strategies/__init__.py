@@ -14,6 +14,7 @@ from numpy import ndarray
 
 from mygrad import Tensor
 from mygrad.typing import ArrayLike, DTypeLike, DTypeLikeReals, Shape
+from mygrad.operation_base import _NoValue, _NoValueType
 
 __all__ = [
     "adv_integer_index",
@@ -27,7 +28,14 @@ __all__ = [
     "valid_axes",
     "valid_constant_arg",
     "tensors",
+    "no_value",
 ]
+
+
+def no_value() -> st.SearchStrategy[_NoValueType]:
+    """Signals that an argument should not be passed to a function"""
+    return st.just(_NoValue)
+
 
 basic_indices = partial(hnp.basic_indices, allow_newaxis=True, allow_ellipsis=True)
 
@@ -132,8 +140,6 @@ def array_likes(
         lambda x: VerboseTensor(x, copy=False, constant=None),
         lambda x: x.tolist(),
     ]
-    # if arr.ndim < 2 and arr.size < 3:
-    #     converters[-1] = lambda x: x.tolist()
 
     mapper = draw(st.sampled_from(converters))
     return mapper(arr)
