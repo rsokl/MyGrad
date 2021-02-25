@@ -6,6 +6,7 @@ import pytest
 
 import mygrad
 from mygrad.linalg.ops import EinSum
+from mygrad.math.arithmetic.ops import Positive
 from mygrad.ufuncs._ufunc_creators import ufunc_creator
 from tests.utils.ufuncs import public_ufunc_names, ufuncs
 
@@ -97,5 +98,13 @@ def test_ufunc_creator_raises_on_non_ufunc_op(not_a_ufunc):
     with pytest.raises(TypeError):
 
         @ufunc_creator(not_a_ufunc)
+        def f(*args, **kwargs):
+            return
+
+
+def test_ufunc_method_not_supported():
+    with pytest.raises(NotImplementedError):
+
+        @ufunc_creator(Positive, at_op=Positive)
         def f(*args, **kwargs):
             return

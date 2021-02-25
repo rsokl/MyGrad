@@ -298,11 +298,28 @@ class ufunc_creator:
         reduce_op: Optional[Type[Operation]] = None,
         reduceat_op: Optional[Type[Operation]] = None,
     ):
+        """Provide the Operation-based implementation for the ufunc, and, optionally, implementations
+        for the various methods of that ufunc (e.g. ufunc.at, ufunc.outer, etc.)
+
+        Parameters
+        ----------
+        mygrad_op : Type[Ufunc]
+            An operation-based implementation of a ufunc that supports back-propagation
+            through mygrad tensors.
+        """
         if not issubclass(mygrad_op, (UnaryUfunc, BinaryUfunc)):
             raise TypeError(
                 "ufunc_creator can only accept `UnaryUfunc` and `BinaryUfunc` operations"
             )
         self.op = mygrad_op
+        if any(
+            item is not None
+            for item in (at_op, accumulate_op, outer_op, reduce_op, reduceat_op)
+        ):
+            raise NotImplementedError(
+                "There isn't support for binding ufunc methods presently."
+            )
+
         self.at_op = at_op
         self.accumulate_op = accumulate_op
         self.outer_op = outer_op
