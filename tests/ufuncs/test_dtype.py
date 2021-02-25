@@ -30,14 +30,8 @@ def test_dtype_casts_correctly(ufunc, dest_dtype):
 
 simple_arr_likes = (
     tensors(
-        dtype=st.sampled_from(
-            [
-                np.float64,
-                np.float32,
-                int,
-            ]
-        ),
-        shape=(1,),
+        dtype=st.sampled_from([np.float64, np.float32, int]),
+        shape=st.sampled_from([(1,), (1, 1)]),
         elements=st.just(1),
         constant=st.booleans(),
     )
@@ -46,24 +40,24 @@ simple_arr_likes = (
 
 
 @pytest.mark.parametrize("ufunc", ufuncs)
-def test_constant_propagates_correctly_according_to_dtype(ufunc):
-    @given(
-        inputs=st.tuples(*[simple_arr_likes] * ufunc.nin),
-        constant=no_value() | st.none() | st.just(True),
-        dtype=no_value() | st.just(np.float64),
+@given(
+    constant=no_value() | st.none() | st.just(True),
+    dtype=no_value() | st.just(np.float64),
+    data=st.data(),
+)
+def test_constant_and_grad_propagates_correctly_according_to_dtype(
+    ufunc, data: st.DataObject, constant, dtype
+):
+    inputs = data.draw(st.tuples(*[simple_arr_likes] * ufunc.nin), label="inputs")
+    args = populate_args(*inputs, constant=constant, dtype=dtype)
+    out = ufunc(*args.args, **args.kwargs)
+
+    _expected_constant = expected_constant(
+        *args.args, constant=constant, dest_dtype=out.dtype
     )
-    def _runner(inputs, constant, dtype):
-        args = populate_args(*inputs, constant=constant, dtype=dtype)
-        out = ufunc(*args.args, **args.kwargs)
+    assert out.constant is _expected_constant
 
-        _expected_constant = expected_constant(
-            *args.args, constant=constant, dest_dtype=out.dtype
-        )
-        assert out.constant is _expected_constant
+    out.backward()
 
-        out.backward()
-
-        if out.constant is False:
-            check_consistent_grad_dtype(out, *inputs)
-
-    _runner()
+    if out.constant is False:
+        check_consistent_grad_dtype(out, *inputs)
