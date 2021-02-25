@@ -5,6 +5,8 @@ import numpy as np
 import pytest
 
 import mygrad
+from mygrad.linalg.ops import EinSum
+from mygrad.ufuncs._ufunc_creators import ufunc_creator
 from tests.utils.ufuncs import public_ufunc_names, ufuncs
 
 
@@ -88,3 +90,12 @@ def test_ufunc_repr(public_name: str, ufunc):
 def test_ufunc_signature_is_defined(ufunc, expected_param: str):
     params = signature(ufunc).parameters
     assert expected_param in params
+
+
+@pytest.mark.parametrize("not_a_ufunc", [EinSum, object])
+def test_ufunc_creator_raises_on_non_ufunc_op(not_a_ufunc):
+    with pytest.raises(TypeError):
+
+        @ufunc_creator(not_a_ufunc)
+        def f(*args, **kwargs):
+            return

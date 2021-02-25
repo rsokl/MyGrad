@@ -2,9 +2,9 @@ from typing import Optional, Union
 
 from numpy import ndarray
 
-from mygrad._utils.ufunc_creators import ufunc_creator
 from mygrad.tensor_base import Tensor
 from mygrad.typing import ArrayLike, DTypeLikeReals, Mask
+from mygrad.ufuncs._ufunc_creators import ufunc_creator
 
 from .ops import (
     Add,

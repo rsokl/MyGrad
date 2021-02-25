@@ -1,4 +1,3 @@
-from functools import wraps
 from inspect import signature
 from typing import (
     Callable,
@@ -260,6 +259,35 @@ def _create_ufunc(
 
 
 class ufunc_creator:
+    """Wraps function stub and returns a mygrad-ufunc with the same name and
+    signature.
+
+    Examples
+    --------
+    >>> from mygrad.ufuncs import ufunc_creator, MyGradUnaryUfunc
+    >>> from mygrad.math.trigonometric.ops import Sin
+    >>> @ufunc_creator(mygrad_op=Sin)
+    ... def sin(x, *, constant=None):
+    ...    '''custom docs'''
+
+    ``sin`` is now a mygrad ufunc
+
+    >>> isinstance(sin, MyGradUnaryUfunc)
+    True
+    >>> sin.nin  # `sin` has all of the attributes of a numpy-ufunc
+    1
+    >>>
+    Tensor(0.)
+
+    It has the docstring and signature that was specified by the above stub.
+
+    >>> sin.__doc__
+    custom docs
+    >>> import inspect
+    >>> inspect.signature(sin)
+    <Signature (x, *, constant=None)>
+    """
+
     def __init__(
         self,
         mygrad_op: Type[Ufunc],
@@ -271,8 +299,9 @@ class ufunc_creator:
         reduceat_op: Optional[Type[Operation]] = None,
     ):
         if not issubclass(mygrad_op, (UnaryUfunc, BinaryUfunc)):
-
-            raise ValueError("ufunc_creator: ")
+            raise TypeError(
+                "ufunc_creator can only accept `UnaryUfunc` and `BinaryUfunc` operations"
+            )
         self.op = mygrad_op
         self.at_op = at_op
         self.accumulate_op = accumulate_op
