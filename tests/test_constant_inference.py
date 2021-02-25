@@ -4,9 +4,10 @@ from hypothesis import given
 
 import mygrad as mg
 from mygrad.math.arithmetic.ops import Multiply
-from tests import populate_args
+from tests.utils.functools import populate_args
 from tests.custom_strategies import array_likes, valid_constant_arg
-from tests.utils import clears_mem_state, expected_constant
+from tests.utils.checkers import expected_constant
+from tests.utils.wrappers import clears_mem_state
 
 
 def mul(x, y, *, dtype=None, constant=None):

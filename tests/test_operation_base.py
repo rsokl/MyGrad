@@ -9,7 +9,7 @@ import mygrad as mg
 from mygrad import Tensor
 from mygrad.errors import InvalidGradient
 from mygrad.operation_base import BinaryUfunc, Operation, UnaryUfunc
-from tests.utils import does_not_raise
+from tests.utils.errors import does_not_raise
 
 
 class OldOperation(Operation):

@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 
 from mygrad.tensor_base import Tensor
-from tests.utils import adds_constant_arg
+from tests.utils.wrappers import adds_constant_arg
 
 from ..wrappers.uber import backprop_test_factory, fwdprop_test_factory
 

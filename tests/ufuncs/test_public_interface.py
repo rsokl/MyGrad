@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 
 import mygrad
-from tests import public_ufunc_names, ufuncs
+from tests.utils.ufuncs import public_ufunc_names, ufuncs
 
 
 @pytest.mark.parametrize("ufunc", ufuncs)

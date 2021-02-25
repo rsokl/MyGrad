@@ -21,7 +21,7 @@ from mygrad import (
     subtract,
 )
 from tests.custom_strategies import tensors
-from tests.utils import adds_constant_arg
+from tests.utils.wrappers import adds_constant_arg
 
 from ...wrappers.uber import backprop_test_factory, fwdprop_test_factory
 

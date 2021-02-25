@@ -7,9 +7,7 @@ import numpy as np
 from hypothesis import given
 from numpy.testing import assert_allclose
 
-from tests import is_float_arr
-from tests.custom_strategies import tensors
-from tests.utils import flags_to_dict
+from tests.utils.checkers import is_float_arr
 from tests.utils.numerical_gradient import (
     finite_difference,
     numerical_gradient,
@@ -171,9 +169,3 @@ def test_numerical_gradient_vary_each(x, grad):
     x_grad = grad[::-1]
     assert_allclose(actual=dx, desired=x_grad, atol=atol, rtol=rtol)
 
-
-@given(arr=tensors().map(np.asarray))
-def test_array_flags_to_dict(arr: np.ndarray):
-    x = flags_to_dict(arr)
-    for k, v in x.items():
-        assert arr.flags[k] is v

@@ -19,7 +19,7 @@ def finite_difference(
     of its variables, using the central difference method.
     This is a "fast" method - it varies entire arrays at once. Thus
     this is only appropriate for trivial vectorized functions that
-    map accross entries of arrays (like add or multiply). E.g.
+    map across entries of arrays (like add or multiply). E.g.
     matrix multiplication is *not* suited for this style of gradient.
 
     Parameters

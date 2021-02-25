@@ -4,10 +4,10 @@ import pytest
 from hypothesis import given
 
 import mygrad as mg
-from tests import ufuncs, populate_args
+from tests.utils.functools import populate_args
+from tests.utils.ufuncs import ufuncs
 from tests.custom_strategies import tensors, no_value
-from tests.utils import expected_constant
-from tests.checkers import check_consistent_grad_dtype
+from tests.utils.checkers import check_consistent_grad_dtype, expected_constant
 
 
 @pytest.mark.parametrize("ufunc", ufuncs)

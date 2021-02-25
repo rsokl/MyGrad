@@ -18,7 +18,7 @@ from pytest import raises
 
 from mygrad import Tensor, add, multiply
 from mygrad.errors import InvalidBackprop
-from tests.utils import clear_all_mem_locking_state
+from tests.utils.stateful import clear_all_mem_locking_state
 
 from .simple_graph import Node, _add, _multiply
 

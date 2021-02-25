@@ -55,7 +55,7 @@ from numpy.testing import assert_equal
 
 import mygrad as mg
 from mygrad import Tensor
-from tests.utils import clears_mem_state
+from tests.utils.wrappers import clears_mem_state
 
 
 class Pair(NamedTuple):

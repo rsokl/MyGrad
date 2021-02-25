@@ -29,9 +29,9 @@ from mygrad.tensor_creation.funcs import (
     zeros_like,
 )
 from mygrad.typing import ArrayLike, DTypeLikeReals, Shape
-from tests import populate_args
+from tests.utils.functools import populate_args
 from tests.custom_strategies import real_dtypes, tensors, valid_constant_arg
-from tests.utils import expected_constant
+from tests.utils.checkers import expected_constant
 
 
 def check_tensor_array(tensor, array, data_compare=True):
