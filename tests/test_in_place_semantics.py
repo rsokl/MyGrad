@@ -410,7 +410,7 @@ def test_complicated_inplace_pattern(include_extraneous_ops: bool):
     view_row = x[...][0]  # view of row-0
 
     # This is just a complicated way of transposing x in-place
-    x.T[...] = x  # set diag of x to be y
+    mg.add(0, x, out=x.T[...])  # set diag of x to be y
 
     if include_extraneous_ops:
         # These line shouldn't have any effect
@@ -505,7 +505,7 @@ def test_complicated_inplace_pattern2(x: Tensor, y: Tensor):
     view_of_x = horiz_flipped_x[:, ::-1].T.T
 
     diag_x = mg.einsum("ii->i", view_of_x)  # view of diag of x
-    diag_x[...] = y  # set diag of x to be y
+    mg.add(y, 0, out=diag_x[...])  # set diag of x to be y
 
     # check that update propagated to views of `x`
     assert_allclose(vert_flipped_x[::-1], x)
