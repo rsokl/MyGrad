@@ -30,7 +30,7 @@ def _permitted_type_str(x: str) -> bool:
 
 
 class MyGradUnaryUfunc(type):
-    _Op: Type[UnaryUfunc]
+    _wrapped_op: Type[UnaryUfunc]
     _decorated_func: Callable
     nin: int
     nout: int
@@ -54,7 +54,7 @@ class MyGradUnaryUfunc(type):
         # code
         if out is not None and isinstance(out, Tensor):
             out._in_place_op(
-                cls._Op,
+                cls._wrapped_op,
                 x,
                 op_kwargs={"where": where, "dtype": dtype},
                 constant=constant,
@@ -62,7 +62,7 @@ class MyGradUnaryUfunc(type):
             return out
         else:
             return Tensor._op(
-                cls._Op,
+                cls._wrapped_op,
                 x,
                 op_kwargs={"where": where, "dtype": dtype},
                 constant=constant,
@@ -74,7 +74,7 @@ class MyGradUnaryUfunc(type):
 
 
 class MyGradBinaryUfunc(type):
-    _Op: Type[BinaryUfunc]
+    _wrapped_op: Type[BinaryUfunc]
     _decorated_func: Union[Callable, Ufunc]
     nin: int
     nout: int
@@ -99,7 +99,7 @@ class MyGradBinaryUfunc(type):
         # code
         if out is not None and isinstance(out, Tensor):
             out._in_place_op(
-                cls._Op,
+                cls._wrapped_op,
                 x,
                 y,
                 op_kwargs={"where": where, "dtype": dtype},
@@ -108,7 +108,7 @@ class MyGradBinaryUfunc(type):
             return out
         else:
             return Tensor._op(
-                cls._Op,
+                cls._wrapped_op,
                 x,
                 y,
                 op_kwargs={"where": where, "dtype": dtype},
@@ -235,7 +235,7 @@ def _create_ufunc(
         (object,),
         (
             dict(
-                _Op=op,
+                _wrapped_op=op,
                 at=at,
                 accumulate=accumulate,
                 reduce=reduce,

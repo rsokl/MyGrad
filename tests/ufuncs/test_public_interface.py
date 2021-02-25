@@ -1,31 +1,16 @@
-import inspect
 from inspect import signature
-from typing import Type, get_type_hints
+from typing import get_type_hints
 
 import numpy as np
 import pytest
 
 import mygrad
-from mygrad.operation_base import Ufunc
 from tests import public_ufunc_names, ufuncs
 
 
-def _all_subclasses(cls):
-    return set(cls.__subclasses__()).union(
-        (s for c in cls.__subclasses__() for s in _all_subclasses(c))
-    )
-
-
-# names need to be sorted so parallel testing doesn't break
-all_concrete_ufuncs = sorted(
-    (ufunc for ufunc in _all_subclasses(Ufunc) if (not inspect.isabstract(ufunc))),
-    key=lambda x: x.__name__,
-)
-
-
-@pytest.mark.parametrize("ufunc", all_concrete_ufuncs)
-def test_bound_numpy_ufunc_is_actually_a_ufunc(ufunc: Type[Ufunc]):
-    assert isinstance(ufunc.numpy_ufunc, np.ufunc)
+@pytest.mark.parametrize("ufunc", ufuncs)
+def test_bound_numpy_ufunc_is_actually_a_ufunc(ufunc):
+    assert isinstance(ufunc._wrapped_op.numpy_ufunc, np.ufunc)
 
 
 numpy_ufunc_property_names = sorted(
