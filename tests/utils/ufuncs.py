@@ -1,8 +1,7 @@
 from typing import List, Union
 
 import mygrad
-from mygrad._utils.op_creators import MyGradUnaryUfunc, MyGradBinaryUfunc
-
+from mygrad._utils.ufunc_creators import MyGradBinaryUfunc, MyGradUnaryUfunc
 
 _public_ufunc_names: List[str] = []
 _ufuncs: List[Union[MyGradUnaryUfunc, MyGradBinaryUfunc]] = []

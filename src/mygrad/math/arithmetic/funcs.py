@@ -2,7 +2,7 @@ from typing import Optional, Union
 
 from numpy import ndarray
 
-from mygrad._utils.op_creators import op_creator
+from mygrad._utils.ufunc_creators import ufunc_creator
 from mygrad.tensor_base import Tensor
 from mygrad.typing import ArrayLike, DTypeLikeReals, Mask
 
@@ -36,7 +36,7 @@ __all__ = [
 ]
 
 
-@op_creator(Add)
+@ufunc_creator(Add)
 def add(
     x1: ArrayLike,
     x2: ArrayLike,
@@ -114,7 +114,7 @@ def add(
     ...
 
 
-@op_creator(Subtract)
+@ufunc_creator(Subtract)
 def subtract(
     x1: ArrayLike,
     x2: ArrayLike,
@@ -193,7 +193,7 @@ def subtract(
     ...
 
 
-@op_creator(Multiply)
+@ufunc_creator(Multiply)
 def multiply(
     x1: ArrayLike,
     x2: ArrayLike,
@@ -272,7 +272,7 @@ def multiply(
     ...
 
 
-@op_creator(Divide)
+@ufunc_creator(Divide)
 def true_divide(
     x1: ArrayLike,
     x2: ArrayLike,
@@ -357,7 +357,7 @@ def true_divide(
 divide = true_divide
 
 
-@op_creator(Power)
+@ufunc_creator(Power)
 def power(
     x1: ArrayLike,
     x2: ArrayLike,
@@ -455,7 +455,7 @@ def power(
     ...
 
 
-@op_creator(Negative)
+@ufunc_creator(Negative)
 def negative(
     x: ArrayLike,
     out: Optional[Union[ndarray, Tensor]] = None,
@@ -517,7 +517,7 @@ def negative(
     ...
 
 
-@op_creator(Positive)
+@ufunc_creator(Positive)
 def positive(
     x: ArrayLike,
     out: Optional[Union[ndarray, Tensor]] = None,
@@ -577,7 +577,7 @@ def positive(
     ...
 
 
-@op_creator(Reciprocal)
+@ufunc_creator(Reciprocal)
 def reciprocal(
     x: ArrayLike,
     out: Optional[Union[ndarray, Tensor]] = None,
@@ -649,7 +649,7 @@ def reciprocal(
     ...
 
 
-@op_creator(Square)
+@ufunc_creator(Square)
 def square(
     x: ArrayLike,
     out: Optional[Union[ndarray, Tensor]] = None,

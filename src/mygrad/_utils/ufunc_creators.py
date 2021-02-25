@@ -18,7 +18,7 @@ from mygrad import Tensor
 from mygrad.operation_base import BinaryUfunc, Operation, Ufunc, UnaryUfunc, _NoValue
 from mygrad.typing import ArrayLike, DTypeLikeReals, Index, Mask, Real
 
-__all__ = ["op_creator"]
+__all__ = ["ufunc_creator"]
 
 
 def _permitted_type_str(x: str) -> bool:
@@ -259,7 +259,7 @@ def _create_ufunc(
     )
 
 
-class op_creator:
+class ufunc_creator:
     def __init__(
         self,
         mygrad_op: Type[Ufunc],
@@ -270,6 +270,9 @@ class op_creator:
         reduce_op: Optional[Type[Operation]] = None,
         reduceat_op: Optional[Type[Operation]] = None,
     ):
+        if not issubclass(mygrad_op, (UnaryUfunc, BinaryUfunc)):
+
+            raise ValueError("ufunc_creator: ")
         self.op = mygrad_op
         self.at_op = at_op
         self.accumulate_op = accumulate_op
@@ -278,49 +281,12 @@ class op_creator:
         self.reduceat_op = reduceat_op
 
     def __call__(self, decorated_func: T) -> T:
-        if not issubclass(self.op, (UnaryUfunc, BinaryUfunc)):
-            for _f in [
-                self.at_op,
-                self.accumulate_op,
-                self.outer_op,
-                self.reduce_op,
-                self.reduceat_op,
-            ]:
-                if _f is not None:  # pragma: no cover
-                    raise ValueError(
-                        "op_creator: ufunc method(s) specified for non-ufunc op."
-                    )
-
-            @wraps(decorated_func)
-            def wrapped(
-                *arrs: ArrayLike,
-                constant: Optional[bool] = None,
-                out: Optional[Union[np.ndarray, Tensor]] = None,
-                **kwargs,
-            ) -> Tensor:
-                # it is fastest to check if out is None, which is likely the
-                # most common scenario, and this is a very "hot path" in the
-                # code
-                if out is not None and isinstance(out, Tensor):
-                    out._in_place_op(
-                        self.op, *arrs, op_kwargs=kwargs, constant=constant
-                    )
-                    return out
-
-                else:
-                    return Tensor._op(
-                        self.op, *arrs, op_kwargs=kwargs, constant=constant, out=out
-                    )
-
-            return wrapped
-
-        else:
-            return _create_ufunc(
-                self.op,
-                decorated_func=decorated_func,
-                at_op=self.at_op,
-                accumulate_op=self.accumulate_op,
-                outer_op=self.outer_op,
-                reduce_op=self.reduce_op,
-                reduceat_op=self.reduceat_op,
-            )
+        return _create_ufunc(
+            self.op,
+            decorated_func=decorated_func,
+            at_op=self.at_op,
+            accumulate_op=self.accumulate_op,
+            outer_op=self.outer_op,
+            reduce_op=self.reduce_op,
+            reduceat_op=self.reduceat_op,
+        )

@@ -25,7 +25,7 @@ numpy_ufunc_method_names = sorted(
     if not name.startswith("_") and callable(getattr(np.multiply, name))
 )
 
-mygrad_type_codes = set(code[0] for ufunc in ufuncs for code in ufunc.types)
+mygrad_type_codes = sorted(set(code[0] for ufunc in ufuncs for code in ufunc.types))
 
 
 @pytest.mark.parametrize("ufunc", ufuncs)
