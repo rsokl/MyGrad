@@ -119,7 +119,7 @@ def test_ufunc_fwd(
     - grad shape consistency
     """
     args = data.draw(
-        populates_ufunc(ufunc, arg_index_to_elements=domains), label="ufunc args"
+        populates_ufunc(ufunc, arg_index_to_elements=domains), label="ufunc call sig"
     )
 
     # Explicitly retrieve numpy's ufunc of the same name.
