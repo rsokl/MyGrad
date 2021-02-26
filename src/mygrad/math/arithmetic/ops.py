@@ -100,14 +100,14 @@ class Positive(UnaryUfunc):
     numpy_ufunc = np.positive
 
     def backward_var(self, grad, index, **kwargs):
-        return np.positive(grad, where=self.where)
+        return grad
 
 
 class Negative(UnaryUfunc):
     numpy_ufunc = np.negative
 
     def backward_var(self, grad, index, **kwargs):
-        return np.negative(grad, where=self.where)
+        return np.negative(grad)
 
 
 class AddSequence(Operation):

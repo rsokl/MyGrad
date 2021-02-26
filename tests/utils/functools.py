@@ -10,6 +10,13 @@ Real = Union[float, int]
 NotTensor = Union[Real, Sequence[Real], np.ndarray]
 
 
+def _make_read_only(item):
+    if isinstance(item, np.ndarray):
+        item.flags["WRITEABLE"] = False
+    elif isinstance(item, mg.Tensor):
+        item.data.flags["WRITEABLE"] = False
+    return
+
 @dataclass
 class MinimalArgs:
     args: Tuple[Any, ...]
@@ -36,6 +43,10 @@ class MinimalArgs:
 
     def tensors_only(self, filter=lambda x: True) -> Tuple[mg.Tensor, ...]:
         return tuple(a for a in self.args if isinstance(a, mg.Tensor) and filter(a))
+
+    def make_arrays_read_only(self):
+        map(_make_read_only, self.args)
+        map(_make_read_only, self.kwargs.values())
 
 
 def populate_args(*args, **kwargs) -> MinimalArgs:

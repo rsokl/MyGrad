@@ -17,6 +17,7 @@ from mygrad.operation_base import _NoValue, _NoValueType
 from mygrad.typing import ArrayLike, DTypeLike, DTypeLikeReals, Shape
 
 __all__ = [
+    "array_likes",
     "adv_integer_index",
     "arbitrary_indices",
     "basic_indices",
