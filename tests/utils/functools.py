@@ -29,7 +29,10 @@ class MinimalArgs:
         self.kwargs[key] = value
 
     def args_as_no_mygrad(self) -> Tuple[NotTensor, ...]:
-        return tuple(mg.asarray(item) for item in self.args)
+        return tuple(
+            mg.asarray(item) if isinstance(item, mg.Tensor) else item
+            for item in self.args
+        )
 
     def tensors_only(self, filter=lambda x: True) -> Tuple[mg.Tensor, ...]:
         return tuple(a for a in self.args if isinstance(a, mg.Tensor) and filter(a))
