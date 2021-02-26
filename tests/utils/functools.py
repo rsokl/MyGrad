@@ -1,11 +1,38 @@
-from typing import NamedTuple, Tuple, Any, Dict
+from dataclasses import dataclass
+from typing import Any, Dict, Sequence, Tuple, Union
 
+import numpy as np
+
+import mygrad as mg
 from mygrad.operation_base import _NoValue
 
+Real = Union[float, int]
+NotTensor = Union[Real, Sequence[Real], np.ndarray]
 
-class MinimalArgs(NamedTuple):
+
+@dataclass
+class MinimalArgs:
     args: Tuple[Any, ...]
     kwargs: Dict[str, Any]
+
+    def __repr__(self) -> str:
+        return (
+            ", ".join(repr(a) for a in self.args)
+            + " "
+            + " ".join(f"{k}: {v}" for k, v in self.kwargs.items())
+        )
+
+    def __getitem__(self, key: str):
+        return self.kwargs[key]
+
+    def __setitem__(self, key: str, value):
+        self.kwargs[key] = value
+
+    def args_as_no_mygrad(self) -> Tuple[NotTensor, ...]:
+        return tuple(mg.asarray(item) for item in self.args)
+
+    def tensors_only(self, filter=lambda x: True) -> Tuple[mg.Tensor, ...]:
+        return tuple(a for a in self.args if isinstance(a, mg.Tensor) and filter(a))
 
 
 def populate_args(*args, **kwargs) -> MinimalArgs:

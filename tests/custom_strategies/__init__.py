@@ -13,8 +13,8 @@ from hypothesis.extra.numpy import broadcastable_shapes
 from numpy import ndarray
 
 from mygrad import Tensor
-from mygrad.typing import ArrayLike, DTypeLike, DTypeLikeReals, Shape
 from mygrad.operation_base import _NoValue, _NoValueType
+from mygrad.typing import ArrayLike, DTypeLike, DTypeLikeReals, Shape
 
 __all__ = [
     "adv_integer_index",
@@ -135,10 +135,11 @@ def array_likes(
             dtype=dtype, shape=shape, elements=elements, fill=fill, unique=unique
         )
     )
+
     converters = [
         lambda x: x,
         lambda x: VerboseTensor(x, copy=False, constant=None),
-        lambda x: x.tolist(),
+        lambda x: x.tolist() if x.size > 0 else x,
     ]
 
     mapper = draw(st.sampled_from(converters))
