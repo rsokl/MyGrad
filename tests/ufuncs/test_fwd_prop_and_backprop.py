@@ -95,7 +95,10 @@ not_zero = st.floats(-1e9, 1e9).filter(lambda x: not np.isclose(x, 0, atol=1e-5)
         (mg.reciprocal, {0: not_zero}),
         (mg.add, None),
         (mg.multiply, None),
-        (mg.power, {0: st.floats(0.001, 1e9), 1: st.floats(-3, 3)}),
+        (
+            mg.power,
+            {0: st.floats(0.001, 1e9), 1: st.sampled_from([1, 2]) | st.floats(-3, 3)},
+        ),
         (mg.square, None),
         (mg.subtract, None),
         (mg.true_divide, {1: not_zero}),
@@ -111,6 +114,7 @@ def test_ufunc_fwd(
     """
     Checks:
     - mygrad implementation of ufunc against numpy
+    - tensor base matches array base
     - constant propagates as expected
     - grad shape consistency
     """
