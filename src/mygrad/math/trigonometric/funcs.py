@@ -1,8 +1,10 @@
-from numpy import ndarray
-from mygrad.ufuncs import ufunc_creator
-from mygrad.typing import ArrayLike, Mask, DTypeLikeReals
 from typing import Optional, Union
+
+from numpy import ndarray
+
 from mygrad.tensor_base import Tensor
+from mygrad.typing import ArrayLike, DTypeLikeReals, Mask
+from mygrad.ufuncs import ufunc_creator
 
 from .ops import *
 
@@ -517,6 +519,109 @@ def arctan(
     ...
 
 
+@ufunc_creator(Arctan2)
+def arctan2(
+    x1: ArrayLike,
+    x2: ArrayLike,
+    out: Optional[Union[ndarray, Tensor]] = None,
+    *,
+    where: Mask = True,
+    dtype: DTypeLikeReals = None,
+    constant: Optional[bool] = None,
+) -> Tensor:  # pragma: no cover
+    """Element-wise arc tangent of ``x1/x2`` choosing the quadrant correctly.
+
+    This docstring was adapted from that of numpy.arctan [1]_
+
+    Parameters
+    ----------
+    x1 : ArrayLike
+        ``y``-coordinates.
+
+    x2 : ArrayLike
+        ``x``-coordinates.
+
+    out : Optional[Union[Tensor, ndarray]]
+        A location into which the result is stored. If provided, it must have
+        a shape that the inputs broadcast to. If not provided or None,
+        a freshly-allocated tensor is returned.
+
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. ``constant.grad`` will always return
+        ``None``).
+
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
+
+    where : Mask
+        This condition is broadcast over the input. At locations where the
+        condition is True, the ``out`` tensor will be set to the ufunc result.
+        Elsewhere, the ``out`` tensor will retain its original value.
+        Note that if an uninitialized `out` tensor is created via the default
+        ``out=None``, locations within it where the condition is False will
+        remain uninitialized.
+
+    dtype : Optional[DTypeLikeReals]
+        The dtype of the resulting tensor.
+
+    Returns
+    -------
+    angle : Tensor
+        Tensor of angles in radians, in the range ``[-pi, pi]``.
+
+    See Also
+    --------
+    arctan, tan
+
+    Notes
+    -----
+    *arctan2* is identical to the `atan2` function of the underlying
+    C library.  The following special values are defined in the C
+    standard: [2]_
+
+    ====== ====== ================
+    `x1`   `x2`   `arctan2(x1,x2)`
+    ====== ====== ================
+    +/- 0  +0     +/- 0
+    +/- 0  -0     +/- pi
+     > 0   +/-inf +0 / +pi
+     < 0   +/-inf -0 / -pi
+    +/-inf +inf   +/- (pi/4)
+    +/-inf -inf   +/- (3*pi/4)
+    ====== ====== ================
+
+    Note that +0 and -0 are distinct floating point numbers, as are +inf
+    and -inf.
+
+    References
+    ----------
+    .. [1] Retrieved from https://numpy.org/doc/stable/reference/generated/numpy.arctan.html
+    .. [2] ISO/IEC standard 9899:1999, "Programming language C."
+
+    Examples
+    --------
+    Consider four points in different quadrants:
+
+    >>> import mygrad as mg
+    >>> x = mg.tensor([-1.0, +1.0, +1.0, -1.0])
+    >>> y = mg.tensor([-1.0, -1.0, +1.0, +1.0])
+    >>> mg.arctan2(y, x) * 180 / mg.pi
+    Tensor([-135.,  -45.,   45.,  135.])
+
+    Note the order of the parameters. `arctan2` is defined also when `x2` = 0
+    and at several other special points, obtaining values in
+    the range ``[-pi, pi]``:
+
+    >>> mg.arctan2([1., -1.], [0., 0.])
+    Tenor([ 1.57079633, -1.57079633])
+    >>> mg.arctan2([0., 0., mg.inf], [+0., -0., mg.inf])
+    Tenor([ 0.        ,  3.14159265,  0.78539816])"""
+    ...
+
+
 def sinc(a: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
     """``f(a) -> sin(a) / a``
 
@@ -676,27 +781,3 @@ def arcsec(a: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
     -------
     mygrad.Tensor"""
     return Tensor._op(Arcsec, a, constant=constant)
-
-
-def arctan2(a, b, *, constant=None):
-    """``f(a, b) -> arctan(a/b)``
-
-    Parameters
-    ----------
-    a : ArrayLike
-    b : ArrayLike
-
-    constant : Optional[bool]
-        If ``True``, this tensor is treated as a constant, and thus does not
-        facilitate back propagation (i.e. ``constant.grad`` will always return
-        ``None``).
-
-        Defaults to ``False`` for float-type data.
-        Defaults to ``True`` for integer-type data.
-
-        Integer-type tensors must be constant.
-
-    Returns
-    -------
-    mygrad.Tensor"""
-    return Tensor._op(Arctan2, a, b, constant=constant)
