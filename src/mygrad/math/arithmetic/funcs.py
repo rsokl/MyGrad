@@ -473,6 +473,11 @@ def negative(
     x : ArrayLike or scalar
         Input tensor.
 
+    out : Optional[Union[Tensor, ndarray]]
+        A location into which the result is stored. If provided, it must have
+        a shape that the inputs broadcast to. If not provided or None,
+        a freshly-allocated tensor is returned.
+
     constant : Optional[bool]
         If ``True``, this tensor is treated as a constant, and thus does not
         facilitate back propagation (i.e. ``constant.grad`` will always return
@@ -483,14 +488,6 @@ def negative(
 
         Integer-type tensors must be constant.
 
-    dtype : Optional[DTypeLikeReals]
-        The dtype of the resulting tensor.
-
-    out : Optional[Union[Tensor, ndarray]]
-        A location into which the result is stored. If provided, it must have
-        a shape that the inputs broadcast to. If not provided or None,
-        a freshly-allocated tensor is returned.
-
     where : Mask
         This condition is broadcast over the input. At locations where the
         condition is True, the ``out`` tensor will be set to the ufunc result.
@@ -498,6 +495,9 @@ def negative(
         Note that if an uninitialized `out` tensor is created via the default
         ``out=None``, locations within it where the condition is False will
         remain uninitialized.
+
+    dtype : Optional[DTypeLikeReals]
+        The dtype of the resulting tensor.
 
     Returns
     -------

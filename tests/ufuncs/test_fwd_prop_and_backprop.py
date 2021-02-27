@@ -1,14 +1,13 @@
 from collections import defaultdict
-from functools import reduce, partial
+from functools import partial, reduce
 from itertools import zip_longest
-from typing import Mapping, Optional, Union, List, Tuple
+from typing import Mapping, Optional, Union
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
-import numpy
 import numpy as np
 import pytest
-from hypothesis import given
+from hypothesis import given, settings
 from numpy.testing import assert_allclose
 
 import mygrad as mg
@@ -17,6 +16,7 @@ from mygrad.ufuncs import MyGradBinaryUfunc, MyGradUnaryUfunc
 from tests.custom_strategies import array_likes, no_value, tensors
 from tests.utils.functools import MinimalArgs, populate_args
 from tests.utils.numerical_gradient import numerical_gradient, numerical_gradient_full
+from tests.wrappers.uber import backprop_test_factory
 
 
 def _broadcast_two_shapes(shape_a: Shape, shape_b: Shape) -> Shape:
@@ -97,20 +97,35 @@ def populates_ufunc(
 
 not_zero = st.floats(-1e9, 1e9).filter(lambda x: not np.isclose(x, 0, atol=1e-5))
 
+log_largest = np.log(np.finfo(np.float64).max)
+log2_largest = np.log2(np.finfo(np.float64).max)
+valid_log_inputs = st.floats(np.finfo(np.float64).eps, 1e20)
+valid_exp_inputs = st.floats(min_value=-1e100, max_value=log_largest)
+valid_exp2_inputs = st.floats(min_value=-1e100, max_value=log2_largest)
+
 ufuncs_and_domains = [
+    (mg.add, None),
+    (mg.divide, {1: not_zero}),
+    (mg.exp, {0: valid_exp_inputs}),
+    (mg.exp2, {0: st.floats(min_value=-1e9, max_value=log2_largest)}),
+    (mg.expm1, {0: valid_exp_inputs}),
+    (mg.log, {0: valid_log_inputs}),
+    (mg.log2, {0: valid_log_inputs}),
+    (mg.log10, {0: valid_log_inputs}),
+    (mg.log1p, {0: st.floats(-1 + np.finfo(np.float64).eps, 1e20)}),
+    (mg.logaddexp, {0: valid_exp_inputs, 1: valid_exp_inputs}),
+    (mg.logaddexp2, {0: valid_exp2_inputs, 1: valid_exp_inputs}),
+    (mg.multiply, None),
     (mg.negative, None),
     (mg.positive, None),
-    (mg.reciprocal, {0: not_zero}),
-    (mg.add, None),
-    (mg.multiply, None),
     (
         mg.power,
         {0: st.floats(0.001, 1e9), 1: st.sampled_from([1, 2]) | st.floats(-3, 3)},
     ),
+    (mg.reciprocal, {0: not_zero}),
     (mg.square, None),
     (mg.subtract, None),
     (mg.true_divide, {1: not_zero}),
-    (mg.divide, {1: not_zero}),
 ]
 
 
@@ -135,7 +150,7 @@ def test_ufunc_fwd(
     args.make_arrays_read_only()  # guards against mutation
     # Explicitly retrieve numpy's ufunc of the same name.
     # Don't trust that mygrad ufunc is binds the correct numpy ufunc under the hood
-    numpy_ufunc = getattr(numpy, ufunc.__name__)
+    numpy_ufunc = getattr(np, ufunc.__name__)
 
     numpy_out = numpy_ufunc(*args.args_as_no_mygrad(), **args.kwargs)
     mygrad_out = ufunc(*args.args, **args.kwargs)
@@ -154,7 +169,31 @@ def test_ufunc_fwd(
         assert t.constant or t.grad.shape == t.shape, f"arg: {n}"
 
 
-@pytest.mark.parametrize("ufunc, domains", ufuncs_and_domains)
+@pytest.mark.parametrize(
+    "ufunc, domains",
+    [
+        (mg.add, None),
+        (mg.divide, {1: not_zero}),
+        (mg.exp, {0: st.floats(min_value=-1e9, max_value=log_largest / 10)}),
+        (mg.exp2, {0: st.floats(min_value=-1e9, max_value=log2_largest / 10)}),
+        (mg.expm1, {0: st.floats(min_value=-1e9, max_value=log_largest / 10)}),
+        (mg.log, {0: valid_log_inputs}),
+        (mg.log2, {0: valid_log_inputs}),
+        (mg.log10, {0: valid_log_inputs}),
+        (mg.log1p, {0: st.floats(-1 + np.finfo(np.float64).eps, 1e20)}),
+        (mg.multiply, None),
+        (mg.negative, None),
+        (mg.positive, None),
+        (
+            mg.power,
+            {0: st.floats(0.001, 1e9), 1: st.sampled_from([1, 2]) | st.floats(-3, 3)},
+        ),
+        (mg.reciprocal, {0: not_zero}),
+        (mg.square, None),
+        (mg.subtract, None),
+        (mg.true_divide, {1: not_zero}),
+    ],
+)
 @given(data=st.data())
 def test_ufunc_bkwd(
     data: st.DataObject,
@@ -178,7 +217,7 @@ def test_ufunc_bkwd(
 
     # draw upstream gradient to be backpropped
     grad = data.draw(
-        hnp.arrays(dtype=float, shape=mygrad_out.shape, elements=st.floats(-1e6, 1e6)),
+        hnp.arrays(dtype=float, shape=mygrad_out.shape, elements=st.floats(-1e1, 1e1)),
         label="grad",
     )
 
@@ -189,13 +228,13 @@ def test_ufunc_bkwd(
 
     # numerical grad needs to write complex-valued outputs
     kwargs["out"] = np.zeros_like(mygrad_out, dtype=complex)
-    numpy_ufunc = partial(getattr(numpy, ufunc.__name__), **kwargs)
+    numpy_ufunc = partial(getattr(np, ufunc.__name__), **kwargs)
 
     grads = numerical_gradient(numpy_ufunc, *args.args_as_no_mygrad(), back_grad=grad)
 
     # check that gradients match numerical derivatives
     for n in range(ufunc.nin):
-        desired = grads[n]
+        desired = np.nan_to_num(grads[n])
         actual = args.args[n].grad
         assert_allclose(
             desired=desired,
@@ -203,3 +242,34 @@ def test_ufunc_bkwd(
             err_msg=f"the grad of tensor-{n} did not match the "
             f"numerically-computed gradient",
         )
+
+
+# logaddexp can't be evaluated with complex values
+@settings(deadline=None)
+@backprop_test_factory(
+    mygrad_func=mg.logaddexp,
+    true_func=np.logaddexp,
+    num_arrays=2,
+    index_to_bnds=(-10, 10),
+    use_finite_difference=True,
+    h=1e-8,
+    atol=1e-4,
+    rtol=1e-4,
+)
+def test_logaddexp_bkwd():
+    pass
+
+
+@settings(deadline=None)
+@backprop_test_factory(
+    mygrad_func=mg.logaddexp2,
+    true_func=np.logaddexp2,
+    num_arrays=2,
+    atol=1e-4,
+    rtol=1e-4,
+    use_finite_difference=True,
+    h=1e-8,
+    index_to_bnds=(-100, 100),
+)
+def test_logaddexp2_bkwd():
+    pass
