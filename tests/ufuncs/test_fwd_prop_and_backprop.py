@@ -15,7 +15,7 @@ from mygrad.typing import Shape
 from mygrad.ufuncs import MyGradBinaryUfunc, MyGradUnaryUfunc
 from tests.custom_strategies import array_likes, no_value, tensors
 from tests.utils.functools import MinimalArgs, populate_args
-from tests.utils.numerical_gradient import numerical_gradient, numerical_gradient_full
+from tests.utils.numerical_gradient import numerical_gradient
 from tests.wrappers.uber import backprop_test_factory
 
 
@@ -113,8 +113,20 @@ ufuncs_and_domains = [
     (mg.log2, {0: valid_log_inputs}),
     (mg.log10, {0: valid_log_inputs}),
     (mg.log1p, {0: st.floats(-1 + np.finfo(np.float64).eps, 1e20)}),
-    (mg.logaddexp, {0: valid_exp_inputs, 1: valid_exp_inputs}),
-    (mg.logaddexp2, {0: valid_exp2_inputs, 1: valid_exp_inputs}),
+    (
+        mg.logaddexp,
+        {
+            0: st.floats(min_value=-log_largest / 2, max_value=log_largest / 2),
+            1: st.floats(min_value=-log_largest / 2, max_value=log_largest / 2),
+        },
+    ),
+    (
+        mg.logaddexp2,
+        {
+            0: st.floats(min_value=-log2_largest / 2, max_value=log_largest / 2),
+            1: st.floats(min_value=-log2_largest / 2, max_value=log_largest / 2),
+        },
+    ),
     (mg.multiply, None),
     (mg.negative, None),
     (mg.positive, None),
@@ -126,6 +138,12 @@ ufuncs_and_domains = [
     (mg.square, None),
     (mg.subtract, None),
     (mg.true_divide, {1: not_zero}),
+    (mg.cos, None),
+    (mg.sin, None),
+    (mg.tan, {0: st.floats(-np.pi / 2 + 1e-5, np.pi / 2 - 1e-5)}),
+    (mg.arccos, {0: st.floats(-0.99, 0.99)}),
+    (mg.arcsin, {0: st.floats(-0.99, 0.99)}),
+    (mg.arctan, None),
 ]
 
 
@@ -175,7 +193,7 @@ def test_ufunc_fwd(
         (mg.add, None),
         (mg.divide, {1: not_zero}),
         (mg.exp, {0: st.floats(min_value=-1e9, max_value=log_largest / 10)}),
-        (mg.exp2, {0: st.floats(min_value=-1e9, max_value=log2_largest / 10)}),
+        (mg.exp2, {0: st.floats(min_value=-1e9, max_value=log2_largest / 100)}),
         (mg.expm1, {0: st.floats(min_value=-1e9, max_value=log_largest / 10)}),
         (mg.log, {0: valid_log_inputs}),
         (mg.log2, {0: valid_log_inputs}),
@@ -192,6 +210,12 @@ def test_ufunc_fwd(
         (mg.square, None),
         (mg.subtract, None),
         (mg.true_divide, {1: not_zero}),
+        (mg.cos, None),
+        (mg.sin, None),
+        (mg.tan, {0: st.floats(-np.pi / 2 + 1e-5, np.pi / 2 - 1e-5)}),
+        (mg.arccos, {0: st.floats(-0.99, 0.99)}),
+        (mg.arcsin, {0: st.floats(-0.99, 0.99)}),
+        (mg.arctan, None),
     ],
 )
 @given(data=st.data())
