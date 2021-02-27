@@ -5,7 +5,7 @@ import numpy as np
 
 from mygrad.operation_base import BinaryUfunc, Operation, UnaryUfunc
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from mygrad import Tensor
 
 __all__ = [
