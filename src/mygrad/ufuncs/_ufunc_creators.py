@@ -132,7 +132,7 @@ def _create_ufunc(
     outer_op: Optional[Type[Operation]] = None,
     reduce_op: Optional[Type[Operation]] = None,
     reduceat_op: Optional[Type[Operation]] = None,
-) -> MyGradUnaryUfunc:
+) -> MyGradUnaryUfunc:  # pragma: no cover
     ...
 
 
@@ -146,7 +146,7 @@ def _create_ufunc(
     outer_op: Optional[Type[Operation]] = None,
     reduce_op: Optional[Type[Operation]] = None,
     reduceat_op: Optional[Type[Operation]] = None,
-) -> MyGradBinaryUfunc:
+) -> MyGradBinaryUfunc:  # pragma: no cover
     ...
 
 
