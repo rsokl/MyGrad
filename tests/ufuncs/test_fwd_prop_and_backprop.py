@@ -96,7 +96,7 @@ def test_ufunc_fwd(
 ):
     """
     Checks:
-    - mygrad implementation of ufunc against numpy
+    - mygrad and numpy results agree numerically and in dtype
     - op doesn't mutate inputs
     - tensor base matches array base
     - constant propagates as expected
@@ -116,6 +116,8 @@ def test_ufunc_fwd(
 
     numpy_out = numpy_ufunc(*args.args_as_no_mygrad(), **args)
     mygrad_out = ufunc(*args, **args)
+
+    assert numpy_out.dtype == mygrad_out.dtype
 
     # Check that numpy and mygrad implementations agree
     assert_allclose(actual=mygrad_out, desired=numpy_out)
