@@ -250,6 +250,7 @@ class Ufunc(Operation, ABC):
     .. [1] Retrieved from https://numpy.org/doc/stable/reference/ufuncs.html"""
 
     numpy_ufunc: np.ufunc
+    _supports_where: bool = True
 
 
 class UnaryUfunc(Ufunc, ABC):

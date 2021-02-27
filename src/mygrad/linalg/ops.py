@@ -14,6 +14,7 @@ __all__ = ["MatMul", "EinSum"]
 
 class MatMul(BinaryUfunc):
     numpy_ufunc = np.matmul
+    _supports_where = False
 
     def backward_var(self, grad, index, **kwargs):
         a, b = self.variables

@@ -16,7 +16,7 @@ def test_dtype_casts_correctly(ufunc, dest_dtype):
     if not np.can_cast(np.float16, dest_dtype):
         pytest.skip("invalid cast")
 
-    x = mg.tensor(0.5, dtype=np.float16)
+    x = mg.tensor([0.5], dtype=np.float16)
     args = [x] * ufunc.nin
 
     out = ufunc(*args, dtype=dest_dtype)

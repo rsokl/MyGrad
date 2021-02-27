@@ -7,8 +7,22 @@ import pytest
 import mygrad
 from mygrad.linalg.ops import EinSum
 from mygrad.math.arithmetic.ops import Positive
-from mygrad.ufuncs._ufunc_creators import ufunc_creator
+from mygrad.ufuncs._ufunc_creators import MyGradBinaryUfuncNoMask, ufunc_creator
 from tests.utils.ufuncs import public_ufunc_names, ufuncs
+
+
+@pytest.mark.parametrize("ufunc", ufuncs)
+def test_known_mygrad_ufuncs_mirror_numpy_ufuncs(ufunc):
+    assert issubclass(ufunc, mygrad.ufunc) is (
+        type(getattr(np, ufunc.__name__)) is np.ufunc
+    )
+
+
+def test_mygrad_ufunc_type_not_inheritable():
+    with pytest.raises(TypeError):
+
+        class A(mygrad.ufunc):
+            pass
 
 
 @pytest.mark.parametrize("ufunc", ufuncs)
@@ -90,6 +104,9 @@ def test_ufunc_repr(public_name: str, ufunc):
 @pytest.mark.parametrize("expected_param", ["out", "where", "dtype", "constant"])
 def test_ufunc_signature_is_defined(ufunc, expected_param: str):
     params = signature(ufunc).parameters
+    if type(ufunc) is MyGradBinaryUfuncNoMask:
+        pytest.mark.skip("ufunc does not support where")
+        return
     assert expected_param in params
 
 

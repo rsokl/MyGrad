@@ -1,5 +1,8 @@
+import sys
+from abc import ABC, ABCMeta, abstractmethod
 from inspect import signature
 from typing import (
+    TYPE_CHECKING,
     Callable,
     List,
     Optional,
@@ -17,7 +20,28 @@ from mygrad import Tensor
 from mygrad.operation_base import BinaryUfunc, Operation, Ufunc, UnaryUfunc, _NoValue
 from mygrad.typing import ArrayLike, DTypeLikeReals, Index, Mask, Real
 
+if sys.version_info >= (3, 8):  # pragma: no cover
+    from typing import Literal
+
+    HAS_LITERAL = True
+else:  # pragma: no cover
+    try:
+        from typing_extensions import Literal
+    except ImportError:
+        HAS_LITERAL = False
+    else:
+        HAS_LITERAL = True
+
+if TYPE_CHECKING and HAS_LITERAL:
+    One = Literal[1]
+    Two = Literal[2]
+else:
+    One = int
+    Two = int
+
 __all__ = ["ufunc_creator"]
+
+T = TypeVar("T")
 
 
 def _permitted_type_str(x: str) -> bool:
@@ -39,15 +63,115 @@ class MyGradUfunc(type):
     identity: int
     signature: str
 
-    def __call__(cls, *args, **kwargs):
+    def __call__(cls, *args, **kwargs) -> Tensor:
         raise NotImplementedError()
 
     def __repr__(cls) -> str:
         return f"<mygrad-ufunc '{cls._decorated_func.__name__}'>"
 
 
+class Final(type):
+    def __new__(mcs, name, bases, classdict):
+        for b in bases:
+            if isinstance(b, Final):
+                raise TypeError("mygrad.ufunc cannot be subclassed")
+        return type.__new__(mcs, name, bases, dict(classdict))
+
+
+class FinalABC(ABCMeta, Final):
+    pass
+
+
+class ufunc(ABC, metaclass=FinalABC):
+    """A un-inheritable, abstract superclass of all MyGrad ufuncs.
+
+    Examples
+    --------
+    >>> import mygrad as mg
+    >>> issubclass(mg.add, mg.ufunc)
+    True
+    """
+
+    nin: T
+    nout: int
+    nargs: int
+    ntypes: int
+    types: List[str]
+    identity: int
+    signature: str
+
+    def __call__(
+        self,
+        *args: ArrayLike,
+        dtype: DTypeLikeReals,
+        constant: Optional[bool] = None,
+        **kwargs,
+    ) -> Tensor:  # pragma: no cover
+        pass
+
+    def at(
+        self,
+        a: ArrayLike,
+        indices: Union[ArrayLike, Index, Tuple[ArrayLike, Index]],
+        b: Optional[ArrayLike] = None,
+        *,
+        constant: Optional[bool] = None,
+    ) -> Tensor:  # pragma: no cover
+        """Not implemented"""
+        raise NotImplementedError()
+
+    def accumulate(
+        self,
+        array: ArrayLike,
+        axis: int = 0,
+        dtype: DTypeLikeReals = None,
+        out: Optional[Union[Tensor, np.ndarray]] = None,
+        *,
+        constant: Optional[bool] = None,
+    ) -> Tensor:  # pragma: no cover
+        """Not implemented"""
+        raise NotImplementedError()
+
+    def outer(
+        self,
+        a: ArrayLike,
+        b: ArrayLike,
+        *,
+        dtype: DTypeLikeReals,
+        out: Optional[Union[Tensor, np.ndarray]],
+    ) -> Tensor:  # pragma: no cover
+        """Not Implemented"""
+        raise NotImplementedError()
+
+    def reduce(
+        self,
+        a: ArrayLike,
+        axis: Optional[Union[int, Tuple[int, ...]]] = 0,
+        dtype: DTypeLikeReals = None,
+        out: Optional[Union[Tensor, np.ndarray]] = None,
+        keepdims: bool = False,
+        initial: Real = _NoValue,
+        where: Mask = True,
+    ) -> Tensor:  # pragma: no cover
+        """Not Implemented"""
+        raise NotImplementedError()
+
+    @abstractmethod
+    def reduceat(
+        self,
+        a: ArrayLike,
+        indices: ArrayLike,
+        axis: Optional[Union[int, Tuple[int, ...]]] = 0,
+        dtype: DTypeLikeReals = None,
+        out: Optional[Union[Tensor, np.ndarray]] = None,
+    ) -> Tensor:  # pragma: no cover
+        """Not Implemented"""
+        raise NotImplementedError()
+
+
 class MyGradUnaryUfunc(MyGradUfunc):
     _wrapped_op: Type[UnaryUfunc]
+    nin: One
 
     def __call__(
         cls,
@@ -81,6 +205,7 @@ class MyGradUnaryUfunc(MyGradUfunc):
 
 class MyGradBinaryUfunc(MyGradUfunc):
     _wrapped_op: Type[BinaryUfunc]
+    nin: Two
 
     def __call__(
         cls,
@@ -115,7 +240,40 @@ class MyGradBinaryUfunc(MyGradUfunc):
             )
 
 
-T = TypeVar("T")
+class MyGradBinaryUfuncNoMask(MyGradUfunc):
+    _wrapped_op: Type[BinaryUfunc]
+    nin: Two
+
+    def __call__(
+        cls,
+        x: ArrayLike,
+        y: ArrayLike,
+        out: Optional[Union[Tensor, np.ndarray]] = None,
+        *,
+        dtype: DTypeLikeReals = None,
+        constant: Optional[bool] = None,
+    ) -> Tensor:
+        # it is fastest to check if out is None, which is likely the
+        # most common scenario, and this is a very "hot path" in the
+        # code
+        if out is not None and isinstance(out, Tensor):
+            out._in_place_op(
+                cls._wrapped_op,
+                x,
+                y,
+                op_kwargs={"dtype": dtype},
+                constant=constant,
+            )
+            return out
+        else:
+            return Tensor._op(
+                cls._wrapped_op,
+                x,
+                y,
+                op_kwargs={"dtype": dtype},
+                constant=constant,
+                out=out,
+            )
 
 
 @overload
@@ -148,7 +306,7 @@ def _create_ufunc(
 
 # noinspection PyPep8Naming
 def _create_ufunc(
-    op,
+    op: Type[Ufunc],
     decorated_func,
     *,
     at_op=None,
@@ -213,7 +371,9 @@ def _create_ufunc(
     if op.numpy_ufunc.nin == 1:
         MetaBuilder = MyGradUnaryUfunc
     elif op.numpy_ufunc.nin == 2:
-        MetaBuilder = MyGradBinaryUfunc
+        MetaBuilder = (
+            MyGradBinaryUfunc if op._supports_where else MyGradBinaryUfuncNoMask
+        )
     else:  # pragma: no cover
         raise NotImplementedError(
             "MyGrad Internal: `mygrad._utils.op_creator` only supports unary and binary ufuncs currently"
@@ -225,7 +385,7 @@ def _create_ufunc(
         for type_code in op.numpy_ufunc.types
         if _permitted_type_str(type_code)
     ]
-    return MetaBuilder(
+    out = MetaBuilder(
         decorated_func.__name__,
         (object,),
         (
@@ -252,6 +412,8 @@ def _create_ufunc(
             )
         ),
     )
+    ufunc.register(out)
+    return out
 
 
 class ufunc_creator:

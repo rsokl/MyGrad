@@ -1,15 +1,27 @@
+from typing import Optional, Union
+
 import numpy as np
 from numpy.core.einsumfunc import _parse_einsum_input
 
 import mygrad as mg
 from mygrad import Tensor
+from mygrad.typing import ArrayLike, DTypeLikeReals
+from mygrad.ufuncs import ufunc_creator
 
 from .ops import *
 
 __all__ = ["multi_matmul", "matmul", "einsum"]
 
 
-def matmul(a, b, *, constant=None):
+@ufunc_creator(MatMul)
+def matmul(
+    x1: ArrayLike,
+    x2: ArrayLike,
+    out: Optional[Union[np.ndarray, Tensor]] = None,
+    *,
+    dtype: DTypeLikeReals = None,
+    constant: Optional[bool] = None,
+) -> Tensor:  # pragma: no cover
     r"""
     Matrix product of two tensors:
 
@@ -43,29 +55,44 @@ def matmul(a, b, *, constant=None):
 
     Parameters
     ----------
-    a : array_like
+    x1 : ArrayLike
 
-    b : array_like
+    x2 : ArrayLike
 
-    constant : bool, optional(default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient)
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. ``constant.grad`` will always return
+        ``None``).
+
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
+
+    dtype : Optional[DTypeLikeReals]
+        The dtype of the resulting tensor.
+
+    out : Optional[Union[ndarray, Tensor]]
+        A location into which the result is stored. If provided, it must have
+        a shape that the inputs broadcast to. If not provided or None,
+        a freshly-allocated tensor is returned.
 
     Returns
     -------
     output : mygrad.Tensor
-        Returns the matrix product of `a` and `b`.  If `a` and `b` are both
-        1-D arrays then a scalar is returned; otherwise an array is
-        returned.
-
+        Returns the matrix product of ``x1`` and `x2``.
 
     Raises
     ------
     ValueError
-        If the last dimension of `a` is not the same size as
-        the second-to-last dimension of `b`.
+        If :
+         - The last dimension of ``x1`` is not the same size as
+           the second-to-last dimension of ``x2``.
+         - If scalar value is passed.
 
-        If scalar value is passed.
+    See Also
+    --------
+    einsum : Einstein summation convention.
 
     Notes
     -----
@@ -106,7 +133,7 @@ def matmul(a, b, *, constant=None):
     Traceback (most recent call last):
     ...
     ValueError: Scalar operands are not allowed, use '*' instead"""
-    return Tensor._op(MatMul, a, b, constant=constant)
+    ...
 
 
 def einsum(*operands, optimize=False, constant=None):
@@ -365,7 +392,7 @@ def einsum(*operands, optimize=False, constant=None):
         EinSum,
         *variables,
         op_kwargs=dict(in_lbls=in_lbls, out_lbls=out_lbls, optimize=optimize),
-        constant=constant
+        constant=constant,
     )
 
 
