@@ -1,7 +1,7 @@
 import warnings
 from collections import defaultdict
 from functools import partial
-from typing import Dict, Hashable, Mapping, Optional, Union
+from typing import Dict, Hashable, Optional, Union
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
