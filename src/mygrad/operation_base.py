@@ -204,7 +204,7 @@ class Operation(ABC):
                     backed_grad = backed_grad * self.where
 
                 backed_grad = self.grad_post_process_fn(backed_grad, var.shape)
-
+                assert backed_grad.shape == var.shape
                 if var._grad is None:
                     backed_grad = (
                         np.copy(backed_grad)
