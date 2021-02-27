@@ -4,10 +4,10 @@ import pytest
 from hypothesis import given
 
 import mygrad as mg
-from tests.utils.functools import populate_args
-from tests.utils.ufuncs import ufuncs
-from tests.custom_strategies import tensors, no_value
+from tests.custom_strategies import no_value, tensors
 from tests.utils.checkers import check_consistent_grad_dtype, expected_constant
+from tests.utils.functools import SmartSignature
+from tests.utils.ufuncs import ufuncs
 
 
 @pytest.mark.parametrize("ufunc", ufuncs)
@@ -50,11 +50,11 @@ def test_constant_and_grad_propagates_correctly_according_to_dtype(
     ufunc, data: st.DataObject, constant, dtype
 ):
     inputs = data.draw(st.tuples(*[simple_arr_likes] * ufunc.nin), label="inputs")
-    args = populate_args(*inputs, constant=constant, dtype=dtype)
-    out = ufunc(*args.args, **args.kwargs)
+    args = SmartSignature(*inputs, constant=constant, dtype=dtype)
+    out = ufunc(*args, **args)
 
     _expected_constant = expected_constant(
-        *args.args, constant=constant, dest_dtype=out.dtype
+        *args, constant=constant, dest_dtype=out.dtype
     )
     assert out.constant is _expected_constant
 

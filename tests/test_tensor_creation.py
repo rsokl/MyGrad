@@ -29,9 +29,9 @@ from mygrad.tensor_creation.funcs import (
     zeros_like,
 )
 from mygrad.typing import ArrayLike, DTypeLikeReals, Shape
-from tests.utils.functools import populate_args
 from tests.custom_strategies import real_dtypes, tensors, valid_constant_arg
 from tests.utils.checkers import expected_constant
+from tests.utils.functools import SmartSignature
 
 
 def check_tensor_array(tensor, array, data_compare=True):
@@ -86,20 +86,20 @@ def test_arange_like_against_numpy_equivalent(
         step = clamp(step)
 
     if as_kwargs:
-        inputs = populate_args(
+        inputs = SmartSignature(
             start=start, stop=stop, step=step, dtype=dtype, axis=axis
         )
     else:
-        inputs = populate_args(start, stop, step, dtype=dtype, axis=axis)
+        inputs = SmartSignature(start, stop, step, dtype=dtype, axis=axis)
     try:
-        array = numpy_func(*inputs.args, **inputs.kwargs)
+        array = numpy_func(*inputs, **inputs)
     except (ZeroDivisionError, TypeError) as e:
         with pytest.raises(type(e)):
-            mygrad_func(*inputs.args, **inputs.kwargs)
+            mygrad_func(*inputs, **inputs)
         return
 
     constant = data.draw(valid_constant_arg(array.dtype), label="constant")
-    tensor = mygrad_func(*inputs.args, **inputs.kwargs, constant=constant)
+    tensor = mygrad_func(*inputs, **inputs, constant=constant)
 
     assert_array_equal(tensor, array)
     assert tensor.dtype == array.dtype
@@ -157,12 +157,12 @@ def test_tensor_create_like_against_numpy_equivalent(
 ):
     _flat_shape = (np.asarray(arr_like).size,)
     shape = data.draw(st.sampled_from([_NoValue, _flat_shape]), label="shape")
-    inputs = populate_args(arr_like, dtype=dtype, shape=shape)
+    inputs = SmartSignature(arr_like, dtype=dtype, shape=shape)
 
-    array = numpy_func(*inputs.args, **inputs.kwargs)
+    array = numpy_func(*inputs, **inputs)
 
     constant = data.draw(valid_constant_arg(array.dtype), label="constant")
-    tensor = mygrad_func(*inputs.args, **inputs.kwargs, constant=constant)
+    tensor = mygrad_func(*inputs, **inputs, constant=constant)
 
     if numpy_func is not np.empty_like:
         assert_array_equal(tensor, array)
@@ -174,11 +174,11 @@ def test_tensor_create_like_against_numpy_equivalent(
 
 @given(dtype=st.just(_NoValue) | real_dtypes, data=st.data(), n=st.integers(0, 4))
 def test_identity(dtype: DTypeLikeReals, data: st.DataObject, n: int):
-    inputs = populate_args(n, dtype=dtype)
-    arr = np.identity(*inputs.args, **inputs.kwargs)
+    inputs = SmartSignature(n, dtype=dtype)
+    arr = np.identity(*inputs, **inputs)
 
     constant = data.draw(valid_constant_arg(arr.dtype), label="constant")
-    tensor = identity(*inputs.args, **inputs.kwargs, constant=constant)
+    tensor = identity(*inputs, **inputs, constant=constant)
 
     assert_array_equal(tensor, arr)
     assert tensor.dtype == arr.dtype
@@ -195,11 +195,11 @@ def test_identity(dtype: DTypeLikeReals, data: st.DataObject, n: int):
 )
 def test_eye(dtype: DTypeLikeReals, data: st.DataObject, n: int, m: int):
     k = data.draw((st.just(_NoValue) | st.integers(0, min(n, m))), label="constant")
-    inputs = populate_args(n, m, k, dtype=dtype)
-    arr = np.eye(*inputs.args, **inputs.kwargs)
+    inputs = SmartSignature(n, m, k, dtype=dtype)
+    arr = np.eye(*inputs, **inputs)
 
     constant = data.draw(valid_constant_arg(arr.dtype), label="constant")
-    tensor = eye(*inputs.args, **inputs.kwargs, constant=constant)
+    tensor = eye(*inputs, **inputs, constant=constant)
 
     assert_array_equal(tensor, arr)
     assert tensor.dtype == arr.dtype

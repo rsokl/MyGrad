@@ -1,5 +1,5 @@
-from dataclasses import dataclass
-from typing import Any, Dict, Sequence, Tuple, Union
+from collections import UserDict
+from typing import Any, Dict, Iterable, Sequence, Tuple, Union
 
 import numpy as np
 
@@ -17,10 +17,24 @@ def _make_read_only(item):
         item.data.flags["WRITEABLE"] = False
     return
 
-@dataclass
-class MinimalArgs:
+
+class SmartSignature(UserDict):
+    """Used to populate mygrad ops
+    - ignores any arguments with _NoValue assigned
+    - supports * unpacking for args
+    - supports ** unpacking for kwargs
+    - supports getitem/setitem for kwargs
+    """
+
     args: Tuple[Any, ...]
     kwargs: Dict[str, Any]
+
+    def __len__(self):
+        return len(self.args)
+
+    def __init__(self, *args, **kwargs):
+        self.args = tuple(item for item in args if item is not _NoValue)
+        self.kwargs = {k: v for k, v in kwargs.items() if v is not _NoValue}
 
     def __repr__(self) -> str:
         return (
@@ -29,11 +43,18 @@ class MinimalArgs:
             + " ".join(f"{k}: {v}" for k, v in self.kwargs.items())
         )
 
+    def keys(self) -> Iterable[str]:
+        return self.kwargs.keys()
+
+    def __iter__(self):
+        return iter(self.args)
+
     def __getitem__(self, key: str):
         return self.kwargs[key]
 
     def __setitem__(self, key: str, value):
-        self.kwargs[key] = value
+        if value is not _NoValue:
+            self.kwargs[key] = value
 
     def args_as_no_mygrad(self) -> Tuple[NotTensor, ...]:
         return tuple(
@@ -41,16 +62,9 @@ class MinimalArgs:
             for item in self.args
         )
 
-    def tensors_only(self, filter=lambda x: True) -> Tuple[mg.Tensor, ...]:
-        return tuple(a for a in self.args if isinstance(a, mg.Tensor) and filter(a))
+    def tensors_only(self) -> Tuple[mg.Tensor, ...]:
+        return tuple(a for a in self.args if isinstance(a, mg.Tensor))
 
-    def make_arrays_read_only(self):
+    def make_array_based_args_read_only(self):
         map(_make_read_only, self.args)
         map(_make_read_only, self.kwargs.values())
-
-
-def populate_args(*args, **kwargs) -> MinimalArgs:
-    return MinimalArgs(
-        args=tuple(item for item in args if item is not _NoValue),
-        kwargs={k: v for k, v in kwargs.items() if v is not _NoValue},
-    )
