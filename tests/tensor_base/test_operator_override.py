@@ -114,3 +114,11 @@ def test_floor_div(arr1, arr2, f1, f2):
     assert actual.constant is True
     assert actual.dtype == desired.dtype
     assert_array_equal(desired, actual)
+
+
+def test_floor_div_is_raises_for_variable_tensors():
+    with pytest.raises(ValueError):
+        mg.tensor(1.0, constant=False) // 1
+
+    with pytest.raises(ValueError):
+        1 // mg.tensor(1.0, constant=False)

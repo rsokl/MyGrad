@@ -32,10 +32,10 @@ else:  # pragma: no cover
     else:
         HAS_LITERAL = True
 
-if TYPE_CHECKING and HAS_LITERAL:
+if TYPE_CHECKING and HAS_LITERAL:  # pragma: no cover
     One = Literal[1]
     Two = Literal[2]
-else:
+else:  # pragma: no cover
     One = int
     Two = int
 
@@ -63,7 +63,7 @@ class MyGradUfunc(type):
     identity: int
     signature: str
 
-    def __call__(cls, *args, **kwargs) -> Tensor:
+    def __call__(cls, *args, **kwargs) -> Tensor:  # pragma: no cover
         raise NotImplementedError()
 
     def __repr__(cls) -> str:
@@ -92,7 +92,7 @@ class ufunc(ABC, metaclass=FinalABC):
     True
     """
 
-    nin: T
+    nin: int
     nout: int
     nargs: int
     ntypes: int

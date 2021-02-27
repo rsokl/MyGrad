@@ -1702,8 +1702,6 @@ class Tensor:
             raise ValueError(
                 "Floor division cannot involve non-constant mygrad tensors."
             )
-        if isinstance(other, Tensor):
-            other = other.data
         return type(self)(self.data.__rfloordiv__(other), constant=True)
 
     def __itruediv__(self, other: ArrayLike) -> "Tensor":
