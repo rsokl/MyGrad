@@ -21,6 +21,7 @@ ufuncs = [
     mg.arccos,
     mg.arcsin,
     mg.arctan,
+    mg.arctan2,
     mg.cos,
     mg.divide,
     mg.exp,
@@ -44,7 +45,7 @@ ufuncs = [
     mg.true_divide,
 ]
 
-DOESNT_SUPPORT_COMPLEX_DOMAIN = {mg.logaddexp, mg.logaddexp2}
+DOESNT_SUPPORT_COMPLEX_DOMAIN = {mg.logaddexp, mg.logaddexp2, mg.arctan2}
 
 
 not_zero = st.floats(-1e9, 1e9).filter(lambda x: not np.isclose(x, 0, atol=1e-5))
@@ -255,4 +256,32 @@ def test_logaddexp_bkwd():
     index_to_bnds=(-100, 100),
 )
 def test_logaddexp2_bkwd():
+    pass
+
+
+@backprop_test_factory(
+    mygrad_func=mg.arctan2,
+    true_func=np.arctan2,
+    num_arrays=2,
+    atol=1e-4,
+    rtol=1e-4,
+    index_to_bnds={0: (1e-4, 1e9)},
+    use_finite_difference=True,
+    h=1e-8,
+)
+def test_arctan2_bkwd_pos_x():
+    pass
+
+
+@backprop_test_factory(
+    mygrad_func=mg.arctan2,
+    true_func=np.arctan2,
+    num_arrays=2,
+    atol=1e-4,
+    rtol=1e-4,
+    index_to_bnds={0: (-1e9, -1e-4)},
+    use_finite_difference=True,
+    h=1e-8,
+)
+def test_arctan2_bkwd_neg_x():
     pass
