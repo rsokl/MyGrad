@@ -1,4 +1,5 @@
 from numbers import Real
+from typing import Optional
 
 import numpy as np
 
@@ -6,6 +7,7 @@ import mygrad._utils.graph_tracking as _tracking
 from mygrad.nnet.activations import softmax
 from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor, asarray
+from mygrad.typing import ArrayLike
 
 from ._utils import check_loss_inputs
 
@@ -103,7 +105,14 @@ class FocalLoss(Operation):
         return self.back
 
 
-def focal_loss(class_probs, targets, *, alpha=1, gamma=0, constant=None):
+def focal_loss(
+    class_probs: ArrayLike,
+    targets: ArrayLike,
+    *,
+    alpha: float = 1,
+    gamma: float = 0,
+    constant: Optional[bool] = None,
+) -> Tensor:
     r"""Return the per-datum focal loss.
 
     Parameters
@@ -156,7 +165,14 @@ def focal_loss(class_probs, targets, *, alpha=1, gamma=0, constant=None):
     )
 
 
-def softmax_focal_loss(scores, targets, *, alpha=1, gamma=0, constant=None):
+def softmax_focal_loss(
+    scores: ArrayLike,
+    targets: ArrayLike,
+    *,
+    alpha: float = 1,
+    gamma: float = 0,
+    constant: Optional[bool] = None,
+) -> Tensor:
     r"""
     Applies the softmax normalization to the input scores before computing the
     per-datum focal loss.

@@ -1,9 +1,11 @@
 from numbers import Real
+from typing import Optional
 
 import numpy as np
 
 from mygrad import Tensor
 from mygrad.operation_base import Operation
+from mygrad.typing import ArrayLike
 
 __all__ = ["elu"]
 
@@ -41,7 +43,7 @@ class ELU(Operation):
         return grad * np.where(x.data < 0, self.exp + self.alpha, 1)
 
 
-def elu(x, alpha, *, constant=None):
+def elu(x: ArrayLike, alpha: Real, *, constant: Optional[bool] = None) -> Tensor:
     """Returns the exponential linear activation (ELU) elementwise along x.
 
     The ELU is given by  `ɑ(exp(x) - 1) for x < 0 and x for x ≥ 0`.

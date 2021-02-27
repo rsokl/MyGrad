@@ -1,8 +1,11 @@
+from typing import Optional
+
 import numpy as np
 
 import mygrad._utils.graph_tracking as _tracking
 from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor
+from mygrad.typing import ArrayLike
 
 from ._utils import check_loss_inputs
 
@@ -56,7 +59,13 @@ class MulticlassHinge(Operation):
         return grad * self.back
 
 
-def multiclass_hinge(x, y_true, hinge=1.0, *, constant=None):
+def multiclass_hinge(
+    x: ArrayLike,
+    y_true: ArrayLike,
+    hinge: float = 1.0,
+    *,
+    constant: Optional[bool] = None
+) -> Tensor:
     """Computes the average multiclass hinge loss.
 
     Parameters

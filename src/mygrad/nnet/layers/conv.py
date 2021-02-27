@@ -1,10 +1,12 @@
 from numbers import Integral
+from typing import Optional, Tuple, Union
 
 import numpy as np
 
 from mygrad.nnet.layers.utils import sliding_window_view
 from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor
+from mygrad.typing import ArrayLike
 
 __all__ = ["conv_nd"]
 
@@ -153,7 +155,15 @@ class ConvND(Operation):
             return np.tensordot(grad, windowed_data, axes=[grad_axes, window_axes])
 
 
-def conv_nd(x, filter_bank, *, stride, padding=0, dilation=1, constant=None):
+def conv_nd(
+    x: ArrayLike,
+    filter_bank: ArrayLike,
+    *,
+    stride: Union[int, Tuple[int, ...]],
+    padding: Union[int, Tuple[int, ...]] = 0,
+    dilation: Union[int, Tuple[int, ...]] = 1,
+    constant: Optional[bool] = None,
+) -> Tensor:
     """Use `filter_bank` to perform strided N-dimensional neural network-style
     convolutions (see Notes) over `x`.::
 
@@ -205,7 +215,7 @@ def conv_nd(x, filter_bank, *, stride, padding=0, dilation=1, constant=None):
         If a single integer is provided, that dilation value is used for all
         of the convolved axes
 
-    constant : bool, optional (default=False)
+    constant : Optional[None]
         If True, the resulting Tensor is a constant.
 
     Returns

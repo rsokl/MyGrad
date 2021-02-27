@@ -28,8 +28,8 @@ def _permitted_type_str(x: str) -> bool:
     return True
 
 
-class MyGradUnaryUfunc(type):
-    _wrapped_op: Type[UnaryUfunc]
+class MyGradUfunc(type):
+    _wrapped_op: Union[Type[UnaryUfunc], Type[BinaryUfunc]]
     _decorated_func: Callable
     nin: int
     nout: int
@@ -38,6 +38,16 @@ class MyGradUnaryUfunc(type):
     types: List[str]
     identity: int
     signature: str
+
+    def __call__(cls, *args, **kwargs):
+        raise NotImplementedError()
+
+    def __repr__(cls) -> str:
+        return f"<mygrad-ufunc '{cls._decorated_func.__name__}'>"
+
+
+class MyGradUnaryUfunc(MyGradUfunc):
+    _wrapped_op: Type[UnaryUfunc]
 
     def __call__(
         cls,
@@ -68,20 +78,9 @@ class MyGradUnaryUfunc(type):
                 out=out,
             )
 
-    def __repr__(cls) -> str:
-        return f"<mygrad-ufunc '{cls._decorated_func.__name__}'>"
 
-
-class MyGradBinaryUfunc(type):
+class MyGradBinaryUfunc(MyGradUfunc):
     _wrapped_op: Type[BinaryUfunc]
-    _decorated_func: Union[Callable, Ufunc]
-    nin: int
-    nout: int
-    nargs: int
-    ntypes: int
-    types: List[str]
-    identity: int
-    signature: str
 
     def __call__(
         cls,
@@ -114,9 +113,6 @@ class MyGradBinaryUfunc(type):
                 constant=constant,
                 out=out,
             )
-
-    def __repr__(cls) -> str:
-        return f"<mygrad-ufunc '{cls._decorated_func.__name__}'>"
 
 
 T = TypeVar("T")

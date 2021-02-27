@@ -1,14 +1,22 @@
 from numbers import Real
+from typing import Optional
 
 from numpy import ndarray
 
 from mygrad.math.misc.funcs import maximum, minimum
 from mygrad.tensor_base import Tensor
+from mygrad.typing import ArrayLike
 
 __all__ = ["hard_tanh"]
 
 
-def hard_tanh(x, *, lower_bound=-1, upper_bound=1, constant=None):
+def hard_tanh(
+    x: ArrayLike,
+    *,
+    lower_bound: Real = -1,
+    upper_bound: Real = 1,
+    constant: Optional[bool] = None,
+) -> Tensor:
     """Returns the hard hyperbolic tangent function.
 
     The hard_tanh function is `lower_bound` where `x` <= `lower_bound`, `upper_bound` where

@@ -1,9 +1,12 @@
+from typing import Optional
+
 import numpy as np
 
 import mygrad._utils.graph_tracking as _tracking
 from mygrad.math._special import logsumexp
 from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor
+from mygrad.typing import ArrayLike
 
 from ._utils import check_loss_inputs
 
@@ -47,7 +50,9 @@ class SoftmaxCrossEntropy(Operation):
         return grad * self.back
 
 
-def softmax_crossentropy(x, y_true, *, constant=None):
+def softmax_crossentropy(
+    x: ArrayLike, y_true: ArrayLike, *, constant: Optional[bool] = None
+) -> Tensor:
     r"""Given the classification scores of C classes for N pieces of data,
 
     computes the NxC softmax classification probabilities. The

@@ -1,10 +1,12 @@
 from numbers import Integral
+from typing import Optional, Tuple, Union
 
 import numpy as np
 
 from mygrad.nnet.layers.utils import sliding_window_view
 from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor
+from mygrad.typing import ArrayLike
 
 
 class MaxPoolND(Operation):
@@ -147,7 +149,13 @@ class MaxPoolND(Operation):
         return dx.reshape(x.shape)
 
 
-def max_pool(x, pool, stride, *, constant=None):
+def max_pool(
+    x: ArrayLike,
+    pool: Tuple[int, ...],
+    stride: Union[int, Tuple[int, ...]],
+    *,
+    constant: Optional[bool] = None,
+) -> Tensor:
     """Perform max-pooling over the last N dimensions of a data batch.
 
     Extended Summary
@@ -172,9 +180,11 @@ def max_pool(x, pool, stride, *, constant=None):
         The spacing used to place the pooling window, along ``(P0, ...)`` axes, respectively.
         If a single value is provided, it is used for all ``N`` pooling axes.
 
+    constant : Optional[None]
+        If True, the resulting Tensor is a constant.
     Returns
     -------
-    numpy.ndarray, shape=([...], G0, ...)
+    Tensor, shape=([...], G0, ...)
         The pooled data batch.
 
     Notes
