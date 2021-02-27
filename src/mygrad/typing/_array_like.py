@@ -48,9 +48,9 @@ SequenceNDReals = Union[sr1, sr2, sr3, sr4]
 # include Tensor and ndarray explicitly in case `ImplementsArray`
 # is not protocol
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     ArrayLike = Union[Real, "Tensor", np.ndarray, ImplementsArray, SequenceNDReals]
-else:
+else:  # pragma: no cover
     ArrayLike = TypeVar(
         "ArrayLike", Real, "Tensor", np.ndarray, ImplementsArray, SequenceNDReals
     )
@@ -64,9 +64,9 @@ sb4 = Sequence[sb3]
 # Sequence[Union[s1, s2]] is *not* valid!
 SequenceNDBools = Union[sb1, sb2, sb3, sb4]
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     Mask = Union[ImplementsArray, np.ndarray, "Tensor", bool, SequenceNDBools]
-else:
+else:  # pragma: no cover
     Mask = TypeVar(
         "Mask",
         bound=Union[ImplementsArray, np.ndarray, "Tensor", bool, SequenceNDBools],

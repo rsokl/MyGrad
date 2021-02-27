@@ -29,8 +29,8 @@ def exp(
     where: Mask = True,
     dtype: DTypeLikeReals = None,
     constant: Optional[bool] = None,
-) -> Tensor:
-    """Calculate the exponential of all elements in the input tensor.
+) -> Tensor:  # pragma: no cover
+    r"""Calculate the exponential of all elements in the input tensor.
 
     This docstring was adapted from that of numpy.exp [1]_
 
@@ -111,7 +111,7 @@ def exp2(
     where: Mask = True,
     dtype: DTypeLikeReals = None,
     constant: Optional[bool] = None,
-) -> Tensor:
+) -> Tensor:  # pragma: no cover
     """Calculate `2**p` for all `p` in the input tensor.
 
     This docstring was adapted from that of numpy.exp2 [1]_
@@ -178,7 +178,7 @@ def expm1(
     where: Mask = True,
     dtype: DTypeLikeReals = None,
     constant: Optional[bool] = None,
-) -> Tensor:
+) -> Tensor:  # pragma: no cover
     """Calculate ``exp(x) - 1`` for all elements in the tensor.
 
     This docstring was adapted from that of numpy.expm1 [1]_
@@ -255,7 +255,7 @@ def log(
     where: Mask = True,
     dtype: DTypeLikeReals = None,
     constant: Optional[bool] = None,
-) -> Tensor:
+) -> Tensor:  # pragma: no cover
     """Natural logarithm, element-wise.
 
     The natural logarithm ``log`` is the inverse of the exponential function,
@@ -340,7 +340,7 @@ def log2(
     where: Mask = True,
     dtype: DTypeLikeReals = None,
     constant: Optional[bool] = None,
-) -> Tensor:
+) -> Tensor:  # pragma: no cover
     """Base-2 logarithm applied elementwise to the tensor.
 
     This docstring was adapted from that of numpy.log2 [1]_
@@ -413,7 +413,7 @@ def log10(
     where: Mask = True,
     dtype: DTypeLikeReals = None,
     constant: Optional[bool] = None,
-) -> Tensor:
+) -> Tensor:  # pragma: no cover
     """Return the base 10 logarithm of the input tensor, element-wise.
 
     This docstring was adapted from that of numpy.log10 [1]_
@@ -481,7 +481,7 @@ def log1p(
     where: Mask = True,
     dtype: DTypeLikeReals = None,
     constant: Optional[bool] = None,
-) -> Tensor:
+) -> Tensor:  # pragma: no cover
     """Return the natural logarithm of one plus the input tensor, element-wise.
 
     Calculates ``log(1 + x)``.
@@ -561,7 +561,7 @@ def logaddexp(
     where: Mask = True,
     dtype: DTypeLikeReals = None,
     constant: Optional[bool] = None,
-) -> Tensor:
+) -> Tensor:  # pragma: no cover
     """Logarithm of the sum of exponentiations of the inputs.
 
     Calculates ``log(exp(x1) + exp(x2))``. This function is useful in
@@ -641,7 +641,7 @@ def logaddexp2(
     where: Mask = True,
     dtype: DTypeLikeReals = None,
     constant: Optional[bool] = None,
-) -> Tensor:
+) -> Tensor:  # pragma: no cover
     """Logarithm of the sum of exponentiations of the inputs in base-2.
 
     Calculates ``log2(2**x1 + 2**x2)``. This function is useful in machine

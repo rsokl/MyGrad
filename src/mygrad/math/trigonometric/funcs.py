@@ -32,8 +32,8 @@ def sin(
     where: Mask = True,
     dtype: DTypeLikeReals = None,
     constant: Optional[bool] = None,
-) -> Tensor:
-    """Trigonometric sine, element-wise.
+) -> Tensor:  # pragma: no cover
+    r"""Trigonometric sine, element-wise.
 
     This docstring was adapted from that of numpy.sin [1]_
 
@@ -117,7 +117,7 @@ def cos(
     where: Mask = True,
     dtype: DTypeLikeReals = None,
     constant: Optional[bool] = None,
-) -> Tensor:
+) -> Tensor:  # pragma: no cover
     """Trigonometric cosine, element-wise.
 
     This docstring was adapted from that of numpy.cos [1]_
@@ -186,7 +186,7 @@ def tan(
     where: Mask = True,
     dtype: DTypeLikeReals = None,
     constant: Optional[bool] = None,
-) -> Tensor:
+) -> Tensor:  # pragma: no cover
     """Trigonometric tangent, element-wise.
 
     This docstring was adapted from that of numpy.tan [1]_
@@ -256,7 +256,7 @@ def arcsin(
     where: Mask = True,
     dtype: DTypeLikeReals = None,
     constant: Optional[bool] = None,
-) -> Tensor:
+) -> Tensor:  # pragma: no cover
     """Inverse sine, element-wise.
 
     This docstring was adapted from that of numpy.arcsin [1]_
@@ -347,7 +347,7 @@ def arccos(
     where: Mask = True,
     dtype: DTypeLikeReals = None,
     constant: Optional[bool] = None,
-) -> Tensor:
+) -> Tensor:  # pragma: no cover
     """Inverse cosine, element-wise.
 
     This docstring was adapted from that of numpy.arccos [1]_
@@ -436,7 +436,7 @@ def arctan(
     where: Mask = True,
     dtype: DTypeLikeReals = None,
     constant: Optional[bool] = None,
-) -> Tensor:
+) -> Tensor:  # pragma: no cover
     """Inverse tangent, element-wise.
 
     This docstring was adapted from that of numpy.arctan [1]_

@@ -16,7 +16,7 @@ def test_dtype_casts_correctly(ufunc, dest_dtype):
     if not np.can_cast(np.float16, dest_dtype):
         pytest.skip("invalid cast")
 
-    x = mg.tensor(1.0, dtype=np.float16)
+    x = mg.tensor(0.5, dtype=np.float16)
     args = [x] * ufunc.nin
 
     out = ufunc(*args, dtype=dest_dtype)
@@ -45,6 +45,7 @@ simple_arr_likes = (
     dtype=no_value() | st.just(np.float64),
     data=st.data(),
 )
+@pytest.mark.filterwarnings("ignore: divide by zero")
 def test_constant_and_grad_propagates_correctly_according_to_dtype(
     ufunc, data: st.DataObject, constant, dtype
 ):

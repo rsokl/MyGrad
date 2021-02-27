@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Tuple, TypeVar
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     Shape = Tuple[int, ...]
-else:
+else:  # pragma: no cover
     Shape = TypeVar("Shape", bound=Tuple[int, ...])

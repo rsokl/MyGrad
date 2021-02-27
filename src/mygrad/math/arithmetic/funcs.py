@@ -45,7 +45,7 @@ def add(
     where: Mask = True,
     dtype: DTypeLikeReals = None,
     constant: Optional[bool] = None,
-) -> Tensor:
+) -> Tensor:  # pragma: no cover
     """Add the arguments element-wise.
 
     This docstring was adapted from that of numpy.add [1]_
@@ -123,7 +123,7 @@ def subtract(
     where: Mask = True,
     dtype: DTypeLikeReals = None,
     constant: Optional[bool] = None,
-) -> Tensor:
+) -> Tensor:  # pragma: no cover
     """Subtract the arguments element-wise.
 
     This docstring was adapted from that of numpy.subtract [1]_
@@ -202,7 +202,7 @@ def multiply(
     where: Mask = True,
     dtype: DTypeLikeReals = None,
     constant: Optional[bool] = None,
-) -> Tensor:
+) -> Tensor:  # pragma: no cover
     """Multiply the arguments element-wise.
 
     This docstring was adapted from that of numpy.multiply [1]_
@@ -281,7 +281,7 @@ def true_divide(
     where: Mask = True,
     dtype: DTypeLikeReals = None,
     constant: Optional[bool] = None,
-) -> Tensor:
+) -> Tensor:  # pragma: no cover
     """Divide the arguments element-wise.
 
     This docstring was adapted from that of numpy.true_divide [1]_
@@ -366,7 +366,7 @@ def power(
     where: Mask = True,
     dtype: DTypeLikeReals = None,
     constant: Optional[bool] = None,
-) -> Tensor:
+) -> Tensor:  # pragma: no cover
     """First tensor elements raised to powers from second tensor, element-wise.
 
     Raise each base in `x1` to the positionally-corresponding power in
@@ -463,7 +463,7 @@ def negative(
     where: Mask = True,
     dtype: DTypeLikeReals = None,
     constant: Optional[bool] = None,
-) -> Tensor:
+) -> Tensor:  # pragma: no cover
     """Negates the tensor element-wise.
 
     This docstring was adapted from that of numpy.negative [1]_
@@ -525,7 +525,7 @@ def positive(
     where: Mask = True,
     dtype: DTypeLikeReals = None,
     constant: Optional[bool] = None,
-) -> Tensor:
+) -> Tensor:  # pragma: no cover
     """Returns a copy of the tensor.
 
     This docstring was adapted from that of numpy.positive [1]_
@@ -585,7 +585,7 @@ def reciprocal(
     where: Mask = True,
     dtype: DTypeLikeReals = None,
     constant: Optional[bool] = None,
-) -> Tensor:
+) -> Tensor:  # pragma: no cover
     """Return the reciprocal of the argument element-wise.
 
     This docstring was adapted from that of numpy.reciprocal [1]_
@@ -657,7 +657,7 @@ def square(
     where: Mask = True,
     dtype: DTypeLikeReals = None,
     constant: Optional[bool] = None,
-) -> Tensor:
+) -> Tensor:  # pragma: no cover
     """Return the square of the argument element-wise.
 
     This docstring was adapted from that of numpy.square [1]_
