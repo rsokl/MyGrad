@@ -1688,6 +1688,24 @@ class Tensor:
     def __rtruediv__(self, other: ArrayLike) -> "Tensor":
         return self._op(Divide, other, self)
 
+    def __floordiv__(self, other: ArrayLike) -> "Tensor":
+        if not self.constant:
+            raise ValueError(
+                "Floor division cannot involve non-constant mygrad tensors."
+            )
+        if isinstance(other, Tensor):
+            other = other.data
+        return type(self)(self.data.__floordiv__(other), constant=True)
+
+    def __rfloordiv__(self, other: ArrayLike) -> "Tensor":
+        if not self.constant:
+            raise ValueError(
+                "Floor division cannot involve non-constant mygrad tensors."
+            )
+        if isinstance(other, Tensor):
+            other = other.data
+        return type(self)(self.data.__rfloordiv__(other), constant=True)
+
     def __itruediv__(self, other: ArrayLike) -> "Tensor":
         self._in_place_op(Divide, self, other)
         return self

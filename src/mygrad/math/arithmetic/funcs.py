@@ -343,13 +343,18 @@ def true_divide(
     >>> import mygrad as mg
     >>> x = mg.arange(5)
     >>> mg.true_divide(x, 4)
-    array([ 0.  ,  0.25,  0.5 ,  0.75,  1.  ])
+    Tensor([ 0.  ,  0.25,  0.5 ,  0.75,  1.  ])
 
     >>> x/4
-    array([ 0.  ,  0.25,  0.5 ,  0.75,  1.  ])
+    Tensor([ 0.  ,  0.25,  0.5 ,  0.75,  1.  ])
 
-    >>> x//4
-    array([0, 0, 0, 0, 1])
+    >>> x // 4
+    Tensor([0, 0, 0, 0, 1], dtype=int32)
+
+    Floor division with a tensor always produces a constant
+
+    >>> (x // 4).constant
+    True
     """
     ...
 
