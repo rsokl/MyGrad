@@ -17,6 +17,8 @@ from tests.utils.numerical_gradient import numerical_gradient
 from tests.wrappers.uber import backprop_test_factory
 
 ufuncs = [
+    mg.abs,
+    mg.absolute,
     mg.add,
     mg.arccos,
     mg.arccosh,
@@ -27,6 +29,7 @@ ufuncs = [
     mg.arctan2,
     mg.cos,
     mg.cosh,
+    mg.cbrt,
     mg.divide,
     mg.exp,
     mg.exp2,
@@ -37,6 +40,8 @@ ufuncs = [
     mg.log2,
     mg.logaddexp,
     mg.logaddexp2,
+    mg.maximum,
+    mg.minimum,
     mg.multiply,
     mg.negative,
     mg.positive,
@@ -45,13 +50,23 @@ ufuncs = [
     mg.sin,
     mg.sinh,
     mg.square,
+    mg.sqrt,
     mg.subtract,
     mg.tan,
     mg.tanh,
     mg.true_divide,
 ]
 
-DOES_NOT_SUPPORT_COMPLEX_DOMAIN = {mg.logaddexp, mg.logaddexp2, mg.arctan2}
+DOES_NOT_SUPPORT_COMPLEX_DOMAIN = {
+    mg.logaddexp,
+    mg.logaddexp2,
+    mg.arctan2,
+    mg.absolute,
+    mg.abs,
+    mg.maximum,
+    mg.minimum,
+    mg.cbrt,
+}
 
 
 not_zero = st.floats(-1e9, 1e9).filter(lambda x: not np.isclose(x, 0, atol=1e-5))
@@ -99,6 +114,8 @@ FWD_DOMAINS[mg.power] = {
 }
 FWD_DOMAINS[mg.reciprocal] = {0: not_zero}
 FWD_DOMAINS[mg.true_divide] = {1: not_zero}
+FWD_DOMAINS[mg.sqrt] = {0: st.floats(min_value=1e-9, max_value=1e9)}
+FWD_DOMAINS[mg.cbrt] = {1: st.floats(min_value=1e-9, max_value=1e9)}
 
 
 @pytest.mark.parametrize("ufunc", ufuncs)
@@ -193,6 +210,7 @@ BKWD_DOMAINS[mg.power] = {
 }
 BKWD_DOMAINS[mg.reciprocal] = {0: not_zero}
 BKWD_DOMAINS[mg.true_divide] = {1: not_zero}
+BKWD_DOMAINS[mg.sqrt] = {0: st.floats(min_value=1e-5, max_value=1e6)}
 
 
 @pytest.mark.parametrize(

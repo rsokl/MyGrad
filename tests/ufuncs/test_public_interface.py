@@ -10,6 +10,8 @@ from mygrad.math.arithmetic.ops import Positive
 from mygrad.ufuncs._ufunc_creators import MyGradBinaryUfuncNoMask, ufunc_creator
 from tests.utils.ufuncs import public_ufunc_names, ufuncs
 
+ALIAS_UFUNC_NAMES = {"divide", "abs"}
+
 
 @pytest.mark.parametrize("ufunc", ufuncs)
 def test_known_mygrad_ufuncs_mirror_numpy_ufuncs(ufunc):
@@ -59,7 +61,7 @@ def test_ufunc_docs_available(ufunc):
 
 @pytest.mark.parametrize("public_name, ufunc", list(zip(public_ufunc_names, ufuncs)))
 def test_ufunc_name_matches_public_name(public_name, ufunc):
-    assert ufunc.__name__ == public_name or "divide" in public_name
+    assert ufunc.__name__ == public_name or public_name in ALIAS_UFUNC_NAMES
 
 
 @pytest.mark.parametrize("ufunc", ufuncs)
@@ -95,9 +97,10 @@ def test_type_codes_are_supported_by_tensor(code: str):
 
 @pytest.mark.parametrize("public_name, ufunc", list(zip(public_ufunc_names, ufuncs)))
 def test_ufunc_repr(public_name: str, ufunc):
-    if public_name == "divide":
-        return
-    assert repr(ufunc) == f"<mygrad-ufunc '{public_name}'>"
+    assert (
+        repr(ufunc) == f"<mygrad-ufunc '{public_name}'>"
+        or public_name in ALIAS_UFUNC_NAMES
+    )
 
 
 @pytest.mark.parametrize("ufunc", ufuncs)
