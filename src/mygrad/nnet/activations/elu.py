@@ -50,13 +50,13 @@ def elu(x: ArrayLike, alpha: Real, *, constant: Optional[bool] = None) -> Tensor
 
     Parameters
     ----------
-    x : mygrad.Tensor
+    x : ArrayLike
         Input data.
 
     alpha : Real
         The multiplicative factor on the negative activation.
 
-    constant : bool, optional(default=False)
+    constant : Optional[bool]
         If ``True``, the returned tensor is a constant (it
         does not back-propagate a gradient)
 
@@ -81,6 +81,21 @@ def elu(x: ArrayLike, alpha: Real, *, constant: Optional[bool] = None) -> Tensor
     array([6.73794700e-04, 1.83156389e-03, 4.97870684e-03, 1.35335283e-02,
            3.67879441e-02, 1.00000000e+00, 1.00000000e+00, 1.00000000e+00,
            1.00000000e+00, 1.00000000e+00, 1.00000000e+00])
+
+    .. plot::
+
+       >>> import mygrad as mg
+       >>> from mygrad.nnet.activations import elu
+       >>> import matplotlib.pyplot as plt
+       >>> x = mg.linspace(-2, 2, 100)
+       >>> y = elu(x, alpha=0.1)
+       >>> plt.title("elu(x, alpha=0.1)")
+       >>> y.backward()
+       >>> plt.plot(x, x.grad, label="df/dx")
+       >>> plt.plot(x, y, label="f(x)")
+       >>> plt.legend()
+       >>> plt.grid()
+       >>> plt.show()
     """
     if isinstance(alpha, (np.ndarray, Tensor)):
         alpha = alpha.item()

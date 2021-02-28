@@ -26,10 +26,10 @@ def relu(x: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
 
     Parameters
     ----------
-    x : array_like
+    x : ArrayLike
         relu is applied element-wise on ``x``.
 
-    constant : bool, optional(default=False)
+    constant : Optional[bool]
         If ``True``, the returned tensor is a constant (it
         does not back-propagate a gradient)
 
@@ -49,5 +49,20 @@ def relu(x: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
     >>> relu(x).backward()
     >>> x.grad  # d(relu(x))/dx
     array([0., 0., 0., 1., 1.])
+
+    .. plot::
+
+       >>> import mygrad as mg
+       >>> from mygrad.nnet.activations import relu
+       >>> import matplotlib.pyplot as plt
+       >>> x = mg.linspace(-2, 2, 100)
+       >>> y = relu(x)
+       >>> plt.title("relu(x)")
+       >>> y.backward()
+       >>> plt.plot(x, x.grad, label="df/dx")
+       >>> plt.plot(x, y, label="f(x)")
+       >>> plt.legend()
+       >>> plt.grid()
+       >>> plt.show()
     """
     return Tensor._op(ReLu, x, constant=constant)

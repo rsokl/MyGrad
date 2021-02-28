@@ -13,13 +13,13 @@ def glu(x: ArrayLike, axis: int = -1, *, constant: Optional[bool] = None) -> Ten
 
     Parameters
     ----------
-    x : mygrad.Tensor
+    x : ArrayLike
         The input.
 
     axis : int, optional (default=-1)
         The axis along which to split the input in half and apply the GLU.
 
-    constant : boolean, optional (default=False)
+    constant : Optional[bool]
         If ``True``, the returned tensor is a constant (it
         does not back-propagate a gradient).
 

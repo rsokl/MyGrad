@@ -24,7 +24,7 @@ def hard_tanh(
 
     Parameters
     ----------
-    x : array_like
+    x : ArrayLike
         The input, to which to apply the hard tanh function.
 
     lower_bound : Real, optional (default=-1)
@@ -33,7 +33,7 @@ def hard_tanh(
     upper_bound : Real, optional (default=1)
         The upper bound on the hard tanh.
 
-    constant : boolean, optional (default=False)
+    constant : Optional[bool]
         If ``True``, the returned tensor is a constant (it
         does not back-propagate a gradient).
 
@@ -54,6 +54,21 @@ def hard_tanh(
     >>> y.backward()
     >>> x.grad
     array([0., 0., 0., 1., 1., 1., 1., 1., 0., 0., 0.])
+
+    .. plot::
+
+       >>> import mygrad as mg
+       >>> from mygrad.nnet.activations import hard_tanh
+       >>> import matplotlib.pyplot as plt
+       >>> x = mg.linspace(-6, 6, 100)
+       >>> y = hard_tanh(x, lower_bound=-3, upper_bound=3)
+       >>> plt.title("hard_tanh(x, lower_bound=-3, upper_bound=3)")
+       >>> y.backward()
+       >>> plt.plot(x, x.grad, label="df/dx")
+       >>> plt.plot(x, y, label="f(x)")
+       >>> plt.legend()
+       >>> plt.grid()
+       >>> plt.show()
     """
     if isinstance(lower_bound, (ndarray, Tensor)):
         lower_bound = lower_bound.item()

@@ -19,13 +19,13 @@ def leaky_relu(
 
     Parameters
     ----------
-    x : mygrad.Tensor
+    x : ArrayLike
         Input data.
 
     slope : Union[Real, mygrad.Tensor]
         The slope of the negative activation.
 
-    constant : boolean, optional (default=False)
+    constant : Optional[bool]
         If ``True``, the returned tensor is a constant (it
         does not back-propagate a gradient).
 
@@ -46,6 +46,21 @@ def leaky_relu(
     >>> y.backward()
     >>> x.grad
     array([0.1, 0.1, 0.1, 0.1, 0.1, 0. , 1. , 1. , 1. , 1. , 1. ])
+
+    .. plot::
+
+       >>> import mygrad as mg
+       >>> from mygrad.nnet.activations import leaky_relu
+       >>> import matplotlib.pyplot as plt
+       >>> x = mg.linspace(-2, 2, 100)
+       >>> y = leaky_relu(x, slope=0.1)
+       >>> plt.title("leaky_relu(x, slope=0.1)")
+       >>> y.backward()
+       >>> plt.plot(x, x.grad, label="df/dx")
+       >>> plt.plot(x, y, label="f(x)")
+       >>> plt.legend()
+       >>> plt.grid()
+       >>> plt.show()
     """
     if isinstance(slope, (ndarray, Tensor)):
         slope = slope.item()

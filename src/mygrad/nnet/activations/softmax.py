@@ -127,13 +127,13 @@ def logsoftmax(
 
     Parameters
     ----------
-    x : array_like
+    x : ArrayLike
 
     axis : Union[None, int, Tuple[int, ...]], optional (default=-1)
         The axis/axes over which to compute the log-softmax.
         By default, the log-softmax is computed over the trailing axis.
 
-    constant : bool, optional(default=False)
+    constant : constant : Optional[bool]
         If ``True``, the returned tensor is a constant (it
         does not back-propagate a gradient)
 
