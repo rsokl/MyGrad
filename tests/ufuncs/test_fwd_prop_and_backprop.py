@@ -45,7 +45,7 @@ ufuncs = [
     mg.true_divide,
 ]
 
-DOESNT_SUPPORT_COMPLEX_DOMAIN = {mg.logaddexp, mg.logaddexp2, mg.arctan2}
+DOES_NOT_SUPPORT_COMPLEX_DOMAIN = {mg.logaddexp, mg.logaddexp2, mg.arctan2}
 
 
 not_zero = st.floats(-1e9, 1e9).filter(lambda x: not np.isclose(x, 0, atol=1e-5))
@@ -174,7 +174,7 @@ BKWD_DOMAINS[mg.tan] = {
 
 
 @pytest.mark.parametrize(
-    "ufunc", [u for u in ufuncs if u not in DOESNT_SUPPORT_COMPLEX_DOMAIN]
+    "ufunc", [u for u in ufuncs if u not in DOES_NOT_SUPPORT_COMPLEX_DOMAIN]
 )
 @given(data=st.data())
 def test_ufunc_bkwd(
