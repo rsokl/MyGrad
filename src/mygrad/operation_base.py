@@ -3,7 +3,7 @@ Defines the base class for mathematical operations capable of back-propagating
 gradients to their input tensors."""
 from abc import ABC, abstractmethod
 from numbers import Real
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Set, Tuple, Union
 from weakref import ReferenceType
 
 import numpy as np
@@ -15,7 +15,6 @@ from mygrad.typing import DTypeLike, Mask
 if TYPE_CHECKING:  # pragma: no cover
     from mygrad import Tensor
     from mygrad._utils import WeakRef
-
 
 __all__ = [
     "Operation",

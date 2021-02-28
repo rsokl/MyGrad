@@ -22,7 +22,7 @@ import mygrad
 # -- Project information -----------------------------------------------------
 
 project = "MyGrad"
-copyright = "2018, Ryan Soklaski"
+copyright = "2021, Ryan Soklaski"
 author = "Ryan Soklaski"
 
 # The short X.Y version
@@ -48,6 +48,7 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.githubpages",
     "sphinx.ext.autosummary",
+    "matplotlib.sphinxext.plot_directive",
     "numpydoc",
 ]
 
