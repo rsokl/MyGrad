@@ -62,10 +62,10 @@ def softmax_crossentropy(
 
     Parameters
     ----------
-    x : array_like, shape=(N, C)
+    x : ArrayLike, shape=(N, C)
         The C class scores for each of the N pieces of data.
 
-    y_true : array_like, shape=(N,)
+    y_true : ArrayLike, shape=(N,)
         The correct class-indices, in [0, C), for each datum.
 
     constant : bool, optional(default=False)

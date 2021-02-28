@@ -22,13 +22,13 @@ def negative_log_likelihood(
 
     Parameters
     ----------
-    x : array_like, shape=(N, C)
+    x : ArrayLike, shape=(N, C)
         The C log-probabilities for each of the N pieces of data.
 
-    y_true : array_like, shape=(N,)
+    y_true : ArrayLike, shape=(N,)
         The correct class indices, in [0, C), for each datum.
 
-    weights : array_like, shape=(C,) optional (default=None)
+    weights : ArrayLike, shape=(C,) optional (default=None)
         The weighting factor to use on each class, or None.
 
     constant : bool, optional(default=False)

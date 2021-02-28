@@ -70,10 +70,10 @@ def multiclass_hinge(
 
     Parameters
     ----------
-    x : array_like, shape=(N, K)
+    x : ArrayLike, shape=(N, K)
         The K class scores for each of the N pieces of data.
 
-    y_true : array_like, shape=(N,)
+    y_true : ArrayLike, shape=(N,)
         The correct class-indices, in [0, K), for each datum.
 
     hinge : float
@@ -86,7 +86,8 @@ def multiclass_hinge(
 
     Returns
     -------
-    The average multiclass hinge loss
+    Tensor, shape-() (scalar)
+        The average multiclass hinge loss
 
     Raises
     ------

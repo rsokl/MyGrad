@@ -229,13 +229,8 @@ def conv_nd(
      - The filters are *not* flipped by this operation, meaning that
        an auto-correlation is being performed rather than a true convolution.
 
-     - Only 'valid' filter placements are permitted - where the filters overlap
-       completely with the (padded) data.
-
-     - This is a "scalar-only" operation, meaning that back propagation through
-       this layer assumes that a scalar (i.e. a 0-dimensional tensor) will invoke
-       ``tensor.backward()`` for the computational graph. This is standard for a
-       neural network, which terminates in a scalar loss.
+     - Only 'valid' filter placements – where the filters overlap
+       completely with the (padded) data – are permitted.
 
     Examples
     --------
@@ -289,6 +284,62 @@ def conv_nd(
        >>> plt.grid()
        >>> plt.show()
 
+    Let's apply a edge-detection kernel to each color channel of an RGB image.
+
+     >>> import matplotlib.pyplot as plt
+     >>> import matplotlib.image as mpimg
+     >>> from mygrad.nnet.layers import conv_nd
+     >>> # A shape-(H, W, 3) RGB image
+     >>> img = mpimg.imread('../_static/meerkat.png')
+     >>> # We'll treat this like a batch of three greyscale images
+     >>> # where each "image" is actually a color channel
+     >>> # shape-(H, W, 3) -> shape-(3, 1, H, W)
+     >>> x = img.transpose(2, 0, 1)[:, None, :, :]
+
+     >>> # edge detection kernel
+     >>> kernel = np.array([[-1, -1, -1],
+     ...                    [-1,  8, -1],
+     ...                    [-1, -1, -1]])
+     >>> # (Hf, Wf) --> (1, 1, Hf, Wf)
+     >>> kernel = kernel.reshape(1, 1, *kernel.shape)
+
+     >>> # conv: (3, 1, H, W) w/ (1, 1, Hf, Wf) --> (3, 1, H', W')
+     >>> # squeeze + transpose: (3, 1, H', W') --> (H', W', 3)
+     >>> processed = conv_nd(x, kernel, stride=(1, 1))
+     >>> processed = processed.data.squeeze().transpose(1, 2, 0)
+
+     >>> fig, ax = plt.subplots()
+     >>> ax.imshow(img)
+
+     >>> fig, ax = plt.subplots()
+     >>> ax.imshow(processed)
+
+     .. plot::
+
+        >>> import matplotlib.pyplot as plt
+        >>> import matplotlib.image as mpimg
+        >>> from mygrad.nnet.layers import conv_nd
+        >>> img = mpimg.imread('../_static/meerkat.png')
+
+        >>> # edge detection
+        >>> kernel = np.array([[-1, -1, -1],
+        ...                    [-1,  8, -1],
+        ...                    [-1, -1, -1]])
+        >>> x = img.transpose(2,0,1)[:, None, :, :]
+
+        >>> # (Hf, Wf) --> (1, 1, Hf, Wf)
+        >>> kernel = kernel.reshape(1, 1, *kernel.shape)
+
+        >>> # conv: (C, 1, H, W) w/ (1, 1, Hf, Wf) --> (C, 1, H', W')
+        >>> # squeeze + transpose: (C, 1, H', W') --> (H', W', C)
+        >>> processed = conv_nd(x, kernel, stride=(1, 1)).data.squeeze().transpose(1, 2, 0)
+
+        >>> fig, ax = plt.subplots()
+        >>> ax.imshow(img)
+
+        >>> fig, ax = plt.subplots()
+        >>> ax.imshow(processed)
+
     Now, let's demonstrate a more typical usage for ``conv_nd`` in the context of
     neural networks. ``x`` will represent 10, 32x32 RGB images, and we will use
     5 distinct 2x2 kernels to convolve over each of these images . Note that
@@ -309,6 +360,9 @@ def conv_nd(
     (10, 5, 16, 16)
 
     Extrapolating further, ``conv_nd`` is capable of performing ND convolutions!
+
+
+
     """
     if x.ndim < 3:
         raise ValueError(

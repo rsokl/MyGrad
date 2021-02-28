@@ -40,7 +40,7 @@ class FocalLoss(Operation):
         class_probs : mygrad.Tensor, shape=(N, C)
             The C class scores for each of the N pieces of data.
 
-        targets : Union[mygrad.Tensor, Sequence[int]], shape=(N,)
+        targets : Union[mygrad.Tensor, ArrayLike], shape=(N,)
             The correct class indices, in [0, C), for each datum.
 
         alpha : Real
@@ -117,11 +117,11 @@ def focal_loss(
 
     Parameters
     ----------
-    class_probs : mygrad.Tensor, shape=(N, C)
+    class_probs : ArrayLike, shape=(N, C)
         The C class probabilities for each of the N pieces of data.
         Each value is expected to lie on (0, 1]
 
-    targets : Sequence[int], shape=(N,)
+    targets : ArrayLike, shape=(N,)
         The correct class indices, in [0, C), for each datum.
 
     alpha : Real, optional (default=1)
@@ -131,7 +131,7 @@ def focal_loss(
         The ɣ focusing parameter. Note that for Ɣ=0 and ɑ=1, this is cross-entropy loss.
         Must be a non-negative value.
 
-    constant : bool, optional(default=False)
+    constant : Optional[bool]
         If ``True``, the returned tensor is a constant (it
         does not back-propagate a gradient)
 
@@ -179,10 +179,10 @@ def softmax_focal_loss(
 
     Parameters
     ----------
-    scores : mygrad.Tensor, shape=(N, C)
+    scores : ArrayLike, shape=(N, C)
         The C class scores for each of the N pieces of data.
 
-    targets : Sequence[int], shape=(N,)
+    targets : ArrayLike, shape=(N,)
         The correct class indices, in [0, C), for each datum.
 
     alpha : Real, optional (default=1)
@@ -192,7 +192,7 @@ def softmax_focal_loss(
         The ɣ focusing parameter. Note that for Ɣ=0 and ɑ=1, this is cross-entropy loss.
         Must be a non-negative value.
 
-    constant : bool, optional(default=False)
+    constant : Optional[bool]
         If ``True``, the returned tensor is a constant (it
         does not back-propagate a gradient)
 
