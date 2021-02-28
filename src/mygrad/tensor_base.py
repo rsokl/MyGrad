@@ -1415,10 +1415,10 @@ class Tensor:
             graph.restore_old_graph()
             raise e
 
-        if (
-            placeholder_mutant_view.constant is False
-            and placeholder_mutant_view.creator.where is not True
-        ):
+        if _mem.MEM_GUARD:
+            _mem.force_lock_tensor_and_creators(placeholder_mutant_view)
+
+        if placeholder_mutant_view.creator.where is not True:
             # An operation like `multiply(x, y, where=mask, out=z)` occurred.
             # `placeholder_mutant_view` is the mutated version of `z`.
             # We need to connect the upstream version of `z` to the computational
@@ -1442,9 +1442,8 @@ class Tensor:
                 placeholder_mutant_view = type(self)._op(
                     _dup.ApplyMask,
                     placeholder_mutant_view,  # gets passed through unchanged
-                    graph[
-                        self
-                    ].placeholder,  # ~mask * grad  backprops to upstream placeholder
+                    # ~mask * grad  backprops to upstream placeholder
+                    graph[self].placeholder,
                     op_kwargs=dict(
                         mask=placeholder_mutant_view.creator.where,
                     ),
@@ -1497,27 +1496,8 @@ class Tensor:
         # and has the InPlaceOp as its creator
         _dup.mirror_tensor(source=mutant_base, target=graph.base.tensor)
 
-        del mutant_base  # remove reference so we can re-lock data
+        del mutant_base
 
-        if _mem.MEM_GUARD:
-            # The original base is participating in a new op, which must be
-            # tracked by the array-locking mechanism
-            unique_arrs = tuple(
-                _mem.lock_arr_writeability(arr)
-                for arr in _mem.unique_arrs_and_bases(
-                    graph.base.tensor.creator.variables
-                )
-            )
-            _mem.lock_arr_writeability(graph.base.tensor.data, force_lock=True)
-            tensor_refs = WeakRefIterable(unique_arrs)
-            tensor_refs.append(graph.base.tensor.data)
-            finalize(
-                graph.base.tensor.creator,
-                _mem.release_writeability_lock_on_op,
-                tensor_refs,
-            )
-
-            assert graph.base.tensor.data.flags.writeable is False
         # Now that the base-tensor has been incorporated into the graph,
         # recreate the view-graph and reroute all tensors from previous
         # graph to their downstream counterparts
