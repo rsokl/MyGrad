@@ -20,6 +20,9 @@ from mygrad import Tensor
 from mygrad.operation_base import BinaryUfunc, Operation, Ufunc, UnaryUfunc, _NoValue
 from mygrad.typing import ArrayLike, DTypeLikeReals, Index, Mask, Real
 
+__all__ = ["ufunc_creator"]
+
+
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal
 
@@ -39,7 +42,6 @@ else:  # pragma: no cover
     One = int
     Two = int
 
-__all__ = ["ufunc_creator"]
 
 T = TypeVar("T")
 
