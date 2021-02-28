@@ -19,10 +19,14 @@ from tests.wrappers.uber import backprop_test_factory
 ufuncs = [
     mg.add,
     mg.arccos,
+    mg.arccosh,
     mg.arcsin,
+    mg.arcsinh,
     mg.arctan,
+    mg.arctanh,
     mg.arctan2,
     mg.cos,
+    mg.cosh,
     mg.divide,
     mg.exp,
     mg.exp2,
@@ -39,9 +43,11 @@ ufuncs = [
     mg.power,
     mg.reciprocal,
     mg.sin,
+    mg.sinh,
     mg.square,
     mg.subtract,
     mg.tan,
+    mg.tanh,
     mg.true_divide,
 ]
 
@@ -63,7 +69,15 @@ FWD_DOMAINS: Dict[Hashable, Optional[Dict[int, st.SearchStrategy]]] = defaultdic
 )
 FWD_DOMAINS[mg.arccos] = {0: st.floats(-1, 1, exclude_min=True, exclude_max=True)}
 FWD_DOMAINS[mg.arcsin] = {0: st.floats(-1, 1, exclude_min=True, exclude_max=True)}
-FWD_DOMAINS[mg.divide] = {1: not_zero}
+FWD_DOMAINS[mg.tan] = {
+    0: st.floats(-np.pi / 2, np.pi / 2, exclude_min=True, exclude_max=True)
+}
+
+FWD_DOMAINS[mg.sinh] = {0: st.floats(-100, 100)}
+FWD_DOMAINS[mg.cosh] = {0: st.floats(-100, 100)}
+FWD_DOMAINS[mg.arccosh] = {0: st.floats(1.01, 100)}
+FWD_DOMAINS[mg.arctanh] = {0: st.floats(-0.99, 0.99)}
+
 FWD_DOMAINS[mg.exp] = {0: valid_exp_inputs}
 FWD_DOMAINS[mg.exp2] = {0: valid_exp2_inputs}
 FWD_DOMAINS[mg.expm1] = {0: valid_exp_inputs}
@@ -77,15 +91,14 @@ FWD_DOMAINS[mg.logaddexp] = {
     0: valid_exp_inputs,
     1: valid_exp_inputs,
 }
+
+FWD_DOMAINS[mg.divide] = {1: not_zero}
 FWD_DOMAINS[mg.power] = {
     0: st.floats(min_value=1e-9, max_value=1e9),
     1: st.sampled_from([1, 2]) | st.floats(-3, 3),
 }
 FWD_DOMAINS[mg.reciprocal] = {0: not_zero}
 FWD_DOMAINS[mg.true_divide] = {1: not_zero}
-FWD_DOMAINS[mg.tan] = {
-    0: st.floats(-np.pi / 2, np.pi / 2, exclude_min=True, exclude_max=True)
-}
 
 
 @pytest.mark.parametrize("ufunc", ufuncs)
@@ -150,7 +163,17 @@ BKWD_DOMAINS: Dict[Hashable, Optional[Dict[int, st.SearchStrategy]]] = defaultdi
 )
 BKWD_DOMAINS[mg.arccos] = {0: st.floats(-1, 1, exclude_min=True, exclude_max=True)}
 BKWD_DOMAINS[mg.arcsin] = {0: st.floats(-1, 1, exclude_min=True, exclude_max=True)}
-BKWD_DOMAINS[mg.divide] = {1: not_zero}
+BKWD_DOMAINS[mg.tan] = {
+    0: st.floats(-np.pi / 2, np.pi / 2, exclude_min=True, exclude_max=True)
+}
+
+BKWD_DOMAINS[mg.sinh] = {0: st.floats(-100, 100)}
+BKWD_DOMAINS[mg.cosh] = {0: st.floats(-100, 100)}
+BKWD_DOMAINS[mg.tanh] = {0: st.floats(-10, 10)}
+BKWD_DOMAINS[mg.arccosh] = {0: st.floats(1.01, 100)}
+BKWD_DOMAINS[mg.arctanh] = {0: st.floats(-0.99, 0.99)}
+
+
 BKWD_DOMAINS[mg.exp] = {0: valid_exp_inputs}
 BKWD_DOMAINS[mg.exp2] = {0: valid_exp2_inputs}
 BKWD_DOMAINS[mg.expm1] = {0: valid_exp_inputs}
@@ -162,15 +185,14 @@ BKWD_DOMAINS[mg.logaddexp] = {
     0: valid_exp_inputs,
     1: valid_exp_inputs,
 }
+
+BKWD_DOMAINS[mg.divide] = {1: not_zero}
 BKWD_DOMAINS[mg.power] = {
     0: st.floats(0.001, 1e9),
     1: st.sampled_from([1, 2]) | st.floats(-3, 3),
 }
 BKWD_DOMAINS[mg.reciprocal] = {0: not_zero}
 BKWD_DOMAINS[mg.true_divide] = {1: not_zero}
-BKWD_DOMAINS[mg.tan] = {
-    0: st.floats(-np.pi / 2, np.pi / 2, exclude_min=True, exclude_max=True)
-}
 
 
 @pytest.mark.parametrize(
