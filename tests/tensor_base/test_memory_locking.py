@@ -465,21 +465,21 @@ def test_test_mem_locking_with_inplace_target_and_boolean_mask(fx, fy, fz, where
     if where is True:
         # zo is not involved in the graph when z was a downstream copy
         # and then was rewritten in-place
-        assert zo.data.flags.writeable is not (z is zo or z.base is zo)
+        assert writeable(zo) is not (z is zo or z.base is zo)
     else:
         # when the mask is applied, zo is always still involved in the graph
-        assert zo.data.flags.writeable is False
-    assert xo.data.flags.writeable is False
-    assert yo.data.flags.writeable is False
-    assert z.data.flags.writeable is False
-    assert x.data.flags.writeable is False
-    assert y.data.flags.writeable is False
+        assert writeable(zo) is False
+    assert writeable(xo) is False
+    assert writeable(yo) is False
+    assert writeable(z) is False
+    assert writeable(x) is False
+    assert writeable(y) is False
 
     z.backward()
 
-    assert zo.data.flags.writeable is True
-    assert xo.data.flags.writeable is True
-    assert yo.data.flags.writeable is True
-    assert z.data.flags.writeable is True
-    assert x.data.flags.writeable is True
-    assert y.data.flags.writeable is True
+    assert writeable(zo) is True
+    assert writeable(xo) is True
+    assert writeable(yo) is True
+    assert writeable(z) is True
+    assert writeable(x) is True
+    assert writeable(y) is True
