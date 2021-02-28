@@ -164,8 +164,8 @@ def conv_nd(
     dilation: Union[int, Tuple[int, ...]] = 1,
     constant: Optional[bool] = None,
 ) -> Tensor:
-    """Use `filter_bank` to perform strided N-dimensional neural network-style
-    convolutions (see Notes) over `x`.::
+    """Use ``filter_bank`` (``w``) to perform strided N-dimensional neural network-style
+    convolutions (see Notes) over ``x``.::
 
             f(x, w) -> x ⋆ w
 
@@ -361,8 +361,14 @@ def conv_nd(
 
     Extrapolating further, ``conv_nd`` is capable of performing ND convolutions!
 
+    Performing a convolution over a batch of single-channel, "spatial-3D" tensor data:
 
-
+    >>> # shape-(N=1, C=1, X=10, Y=12, Z=10)
+    >>> x = mg.random.rand(1, 1, 10, 12, 10)
+    >>> # shape-(F=2, C=1, Wx=3, Wy=1, Wz=2)
+    >>> k = mg.random.rand(2, 1, 3, 1, 32)
+    >>> conv_nd(x, k, stride=1).shape
+    (1, 2, 8, 12, 9)
     """
     if x.ndim < 3:
         raise ValueError(
