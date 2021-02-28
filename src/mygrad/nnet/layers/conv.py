@@ -350,9 +350,9 @@ def conv_nd(
     total, this will produce a shape-:math:`(N=10, F=5, G_0=16, G_1=16)` tensor as a
     result.
 
-    >>> import numpy as np
-    >>> x = mg.Tensor(np.random.rand(10, 3, 32, 32))  # creating 10 random 32x32 RGB images
-    >>> k = mg.Tensor(np.random.rand(5, 3, 2, 2))     # creating 5 random 3-channel 2x2 kernels
+    >>> import mygrad as mg
+    >>> x = mg.random.rand(10, 3, 32, 32))  # creating 10 random 32x32 RGB images
+    >>> k = mg.random.rand(5, 3, 2, 2))     # creating 5 random 3-channel 2x2 kernels
 
     Given the shapes of ``x`` and ``k``, ``conv_nd`` automatically executes a 2D convolution:
 
