@@ -19,7 +19,7 @@ from mygrad import (
     swapaxes,
     transpose,
 )
-from tests.utils import adds_constant_arg
+from tests.utils.wrappers import adds_constant_arg
 
 from .custom_strategies import valid_axes
 from .utils.numerical_gradient import numerical_gradient_full

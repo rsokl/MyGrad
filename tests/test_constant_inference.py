@@ -4,9 +4,10 @@ from hypothesis import given
 
 import mygrad as mg
 from mygrad.math.arithmetic.ops import Multiply
-from tests import populate_args
 from tests.custom_strategies import array_likes, valid_constant_arg
-from tests.utils import clears_mem_state, expected_constant
+from tests.utils.checkers import expected_constant
+from tests.utils.functools import SmartSignature
+from tests.utils.wrappers import clears_mem_state
 
 
 def mul(x, y, *, dtype=None, constant=None):
@@ -27,7 +28,7 @@ def test_that_typical_op_propagates_constant_under_general_conditions(
     constant = data.draw(valid_constant_arg(arr.dtype), label="constant")
     expected = expected_constant(x, y, dest_dtype=arr.dtype, constant=constant)
 
-    out = mul(x, y, **populate_args(dtype=dtype, constant=constant).kwargs)
+    out = mul(x, y, **SmartSignature(dtype=dtype, constant=constant).kwargs)
     assert out.constant is expected
 
 

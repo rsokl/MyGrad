@@ -9,7 +9,7 @@ import mygrad as mg
 from mygrad import Tensor
 from mygrad._utils.duplicating_graph import DuplicatingGraph, Node
 from tests.custom_strategies import tensors
-from tests.utils import clear_all_mem_locking_state
+from tests.utils.stateful import clear_all_mem_locking_state
 
 
 @given(x=tensors(read_only=st.booleans()))

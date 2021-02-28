@@ -1,25 +1,20 @@
-from typing import Type, TypeVar, Union
+from typing import TYPE_CHECKING, Type, TypeVar, Union
 
 from numpy import dtype
 
-DTypeLike = TypeVar(
-    "DTypeLike",
-    bound=Union[
-        dtype,
-        None,
-        type,
-        str,
-    ],
-)
+if TYPE_CHECKING:  # pragma: no cover
+    DTypeLike = Union[dtype, None, type, str]
+else:  # pragma: no cover
+    DTypeLike = TypeVar(
+        "DTypeLike",
+        bound=Union[dtype, None, type, str],
+    )
 
-DTypeLikeReals = TypeVar(
-    "DTypeLikeReals",
-    bound=Union[
-        dtype,
-        None,
-        Type[bool],
-        Type[int],
-        Type[float],
-        str,
-    ],
-)
+if TYPE_CHECKING:  # pragma: no cover
+    DTypeLikeReals = Union[dtype, None, Type[bool], Type[int], Type[float], str]
+
+else:  # pragma: no cover
+    DTypeLikeReals = TypeVar(
+        "DTypeLikeReals",
+        bound=Union[dtype, None, Type[bool], Type[int], Type[float], str],
+    )

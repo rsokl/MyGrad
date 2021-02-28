@@ -45,6 +45,8 @@ from mygrad.typing import ArrayLike, DTypeLike, DTypeLikeReals, Index, Shape
 
 __all__ = ["Tensor", "asarray", "astensor"]
 
+CONSTANT_ONLY_DTYPES = (np.integer, np.bool_)
+
 
 def _resolve_constant(*others: Any, constant: Optional[bool]) -> Optional[bool]:
     """Determines if `constant` should be resolved to True based on `others`.
@@ -551,7 +553,7 @@ class Tensor:
             # No need to constrain dtypes if we aren't tracking the graph.
             # Also, it is nice to enable complex arithmetic through mygrad
             # functions that are wrapped in no_autodiff
-            if not issubclass(dtype, (np.integer, np.bool_)):
+            if not issubclass(dtype, CONSTANT_ONLY_DTYPES):
                 raise TypeError(
                     f"Tensor data must be of an floating type, integer type, or boolean type, "
                     f"received {dtype}"
@@ -1413,10 +1415,10 @@ class Tensor:
             graph.restore_old_graph()
             raise e
 
-        if (
-            placeholder_mutant_view.constant is False
-            and placeholder_mutant_view.creator.where is not True
-        ):
+        if _mem.MEM_GUARD:
+            _mem.force_lock_tensor_and_creators(placeholder_mutant_view)
+
+        if placeholder_mutant_view.creator.where is not True:
             # An operation like `multiply(x, y, where=mask, out=z)` occurred.
             # `placeholder_mutant_view` is the mutated version of `z`.
             # We need to connect the upstream version of `z` to the computational
@@ -1440,9 +1442,8 @@ class Tensor:
                 placeholder_mutant_view = type(self)._op(
                     _dup.ApplyMask,
                     placeholder_mutant_view,  # gets passed through unchanged
-                    graph[
-                        self
-                    ].placeholder,  # ~mask * grad  backprops to upstream placeholder
+                    # ~mask * grad  backprops to upstream placeholder
+                    graph[self].placeholder,
                     op_kwargs=dict(
                         mask=placeholder_mutant_view.creator.where,
                     ),
@@ -1495,27 +1496,8 @@ class Tensor:
         # and has the InPlaceOp as its creator
         _dup.mirror_tensor(source=mutant_base, target=graph.base.tensor)
 
-        del mutant_base  # remove reference so we can re-lock data
+        del mutant_base
 
-        if _mem.MEM_GUARD:
-            # The original base is participating in a new op, which must be
-            # tracked by the array-locking mechanism
-            unique_arrs = tuple(
-                _mem.lock_arr_writeability(arr)
-                for arr in _mem.unique_arrs_and_bases(
-                    graph.base.tensor.creator.variables
-                )
-            )
-            _mem.lock_arr_writeability(graph.base.tensor.data, force_lock=True)
-            tensor_refs = WeakRefIterable(unique_arrs)
-            tensor_refs.append(graph.base.tensor.data)
-            finalize(
-                graph.base.tensor.creator,
-                _mem.release_writeability_lock_on_op,
-                tensor_refs,
-            )
-
-            assert graph.base.tensor.data.flags.writeable is False
         # Now that the base-tensor has been incorporated into the graph,
         # recreate the view-graph and reroute all tensors from previous
         # graph to their downstream counterparts
@@ -1685,6 +1667,22 @@ class Tensor:
 
     def __rtruediv__(self, other: ArrayLike) -> "Tensor":
         return self._op(Divide, other, self)
+
+    def __floordiv__(self, other: ArrayLike) -> "Tensor":
+        if not self.constant:
+            raise ValueError(
+                "Floor division cannot involve non-constant mygrad tensors."
+            )
+        if isinstance(other, Tensor):
+            other = other.data
+        return type(self)(self.data.__floordiv__(other), constant=True)
+
+    def __rfloordiv__(self, other: ArrayLike) -> "Tensor":
+        if not self.constant:
+            raise ValueError(
+                "Floor division cannot involve non-constant mygrad tensors."
+            )
+        return type(self)(self.data.__rfloordiv__(other), constant=True)
 
     def __itruediv__(self, other: ArrayLike) -> "Tensor":
         self._in_place_op(Divide, self, other)

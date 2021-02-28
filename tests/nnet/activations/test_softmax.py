@@ -6,7 +6,7 @@ from numpy.testing import assert_allclose
 
 from mygrad import Tensor
 from mygrad.nnet.activations import logsoftmax, softmax
-from tests import is_float_arr
+from tests.utils.checkers import is_float_arr
 from tests.custom_strategies import valid_axes
 from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 

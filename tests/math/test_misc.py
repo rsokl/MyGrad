@@ -17,11 +17,6 @@ def is_not_close(arr0: Tensor, arr1: Tensor) -> bool:
     return not np.any(np.isclose(arr0.data, arr1.data))
 
 
-@fwdprop_test_factory(mygrad_func=maximum, true_func=np.maximum, num_arrays=2)
-def test_maximum_fwd():
-    pass
-
-
 @backprop_test_factory(
     mygrad_func=maximum, true_func=np.maximum, num_arrays=2, assumptions=is_not_close
 )
@@ -51,11 +46,6 @@ def test_maximum_bkwd_equal():
 
     assert_allclose(x.grad, 0.0)
     assert_allclose(y.grad, 0.0)
-
-
-@fwdprop_test_factory(mygrad_func=minimum, true_func=np.minimum, num_arrays=2)
-def test_minimum_fwd():
-    pass
 
 
 @backprop_test_factory(

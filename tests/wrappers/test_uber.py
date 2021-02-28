@@ -7,7 +7,7 @@ from numpy.testing import assert_allclose
 import mygrad as mg
 from mygrad import Tensor
 from mygrad.operation_base import Operation
-from tests.utils import clear_all_mem_locking_state
+from tests.utils.stateful import clear_all_mem_locking_state
 
 from .uber import backprop_test_factory, fwdprop_test_factory
 

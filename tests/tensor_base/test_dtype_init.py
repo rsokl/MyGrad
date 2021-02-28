@@ -6,7 +6,7 @@ from hypothesis import given
 
 import mygrad as mg
 from tests.custom_strategies import tensors
-from tests.utils import does_not_raise
+from tests.utils.errors import does_not_raise
 
 
 def arrays_or_tensors(*args, **kwargs):

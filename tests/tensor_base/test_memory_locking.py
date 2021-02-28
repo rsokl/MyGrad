@@ -433,3 +433,53 @@ def test_turn_memory_guarding_on_off(calls: List[Callable]):
         assert mg.mem_guard_active() is mem.MEM_GUARD
 
     turn_memory_guarding_on()  # make sure to restore global state
+
+
+def view(x):
+    return x[...]
+
+
+def direct_ref(x):
+    return x
+
+
+def downstream_copy(x):
+    return +x
+
+
+@pytest.mark.parametrize("fx", [view, direct_ref, downstream_copy])
+@pytest.mark.parametrize("fy", [view, direct_ref, downstream_copy])
+@pytest.mark.parametrize("fz", [view, direct_ref, downstream_copy])
+@pytest.mark.parametrize("where", [True, [True, True, True]])
+def test_test_mem_locking_with_inplace_target_and_boolean_mask(fx, fy, fz, where):
+    xo = mg.arange(3.0)
+    yo = mg.arange(3.0, 6.0)
+    zo = mg.zeros(3)
+
+    x = fx(xo)
+    y = fy(yo)
+    z = fz(zo)
+
+    z = mg.multiply(x, y, where=where, out=z)
+
+    if where is True:
+        # zo is not involved in the graph when z was a downstream copy
+        # and then was rewritten in-place
+        assert writeable(zo) is not (z is zo or z.base is zo)
+    else:
+        # when the mask is applied, zo is always still involved in the graph
+        assert writeable(zo) is False
+    assert writeable(xo) is False
+    assert writeable(yo) is False
+    assert writeable(z) is False
+    assert writeable(x) is False
+    assert writeable(y) is False
+
+    z.backward()
+
+    assert writeable(zo) is True
+    assert writeable(xo) is True
+    assert writeable(yo) is True
+    assert writeable(z) is True
+    assert writeable(x) is True
+    assert writeable(y) is True

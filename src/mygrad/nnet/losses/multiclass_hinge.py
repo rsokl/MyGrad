@@ -1,8 +1,11 @@
+from typing import Optional
+
 import numpy as np
 
 import mygrad._utils.graph_tracking as _tracking
 from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor
+from mygrad.typing import ArrayLike
 
 from ._utils import check_loss_inputs
 
@@ -56,15 +59,21 @@ class MulticlassHinge(Operation):
         return grad * self.back
 
 
-def multiclass_hinge(x, y_true, hinge=1.0, *, constant=None):
+def multiclass_hinge(
+    x: ArrayLike,
+    y_true: ArrayLike,
+    hinge: float = 1.0,
+    *,
+    constant: Optional[bool] = None
+) -> Tensor:
     """Computes the average multiclass hinge loss.
 
     Parameters
     ----------
-    x : array_like, shape=(N, K)
+    x : ArrayLike, shape=(N, K)
         The K class scores for each of the N pieces of data.
 
-    y_true : array_like, shape=(N,)
+    y_true : ArrayLike, shape=(N,)
         The correct class-indices, in [0, K), for each datum.
 
     hinge : float
@@ -77,7 +86,8 @@ def multiclass_hinge(x, y_true, hinge=1.0, *, constant=None):
 
     Returns
     -------
-    The average multiclass hinge loss
+    Tensor, shape-() (scalar)
+        The average multiclass hinge loss
 
     Raises
     ------

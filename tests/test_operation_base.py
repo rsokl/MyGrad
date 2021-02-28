@@ -9,7 +9,7 @@ import mygrad as mg
 from mygrad import Tensor
 from mygrad.errors import InvalidGradient
 from mygrad.operation_base import BinaryUfunc, Operation, UnaryUfunc
-from tests.utils import does_not_raise
+from tests.utils.errors import does_not_raise
 
 
 class OldOperation(Operation):
@@ -61,9 +61,8 @@ def test_simple_unary_ufunc_with_where():
 
     exp = Exp()
     mask = np.array([True, False, True])
-    out = exp(mg.zeros((3,)), where=mask)
-    assert_allclose(out[mask], [1.0, 1.0])
-    assert not np.isclose(out[1].item(), 1.0)
+    out = exp(mg.zeros((3,)), where=mask, out=np.full((3,), fill_value=2.876))
+    assert_allclose(out, [1.0, 2.876, 1.0])
 
 
 def test_simple_binary_ufunc_with_where():
@@ -71,9 +70,13 @@ def test_simple_binary_ufunc_with_where():
 
     mul = Multiply()
     mask = np.array([True, False, True])
-    out = mul(mg.ones((3,)), mg.full((3,), 2.0), where=mask)
-    assert_allclose(out[mask], [2.0, 2.0])
-    assert not np.isclose(out[1].item(), 2.0)
+    out = mul(
+        mg.ones((3,)),
+        mg.full((3,), 2.0),
+        where=mask,
+        out=np.full((3,), fill_value=2.876),
+    )
+    assert_allclose(out, [2.0, 2.876, 2.0])
 
 
 def test_simple_sequential_func_with_where():

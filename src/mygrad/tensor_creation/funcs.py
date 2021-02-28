@@ -27,7 +27,7 @@ __all__ = [
 
 def empty(
     shape: Shape, dtype: DTypeLikeReals = np.float32, *, constant: Optional[bool] = None
-):
+) -> Tensor:
     """Return a new Tensor of the given shape and type, without initializing entries.
 
     This docstring was adapted from ``numpy.empty`` [1]_
@@ -93,7 +93,7 @@ def empty_like(
     shape: Optional[Union[int, Sequence[int]]] = None,
     *,
     constant: Optional[bool] = None,
-):
+) -> Tensor:
     """Return a new Tensor of the same shape and type as the given array.
 
     This docstring was adapted from ``numpy.empty_like`` [1]_
@@ -158,7 +158,7 @@ def eye(
     dtype: DTypeLikeReals = float,
     *,
     constant: Optional[bool] = None,
-):
+) -> Tensor:
     """Return a 2D Tensor with ones on the diagonal and zeros elsewhere.
 
     This docstring was adapted from ``numpy.eye`` [1]_
@@ -214,7 +214,9 @@ def eye(
     )
 
 
-def identity(n: int, dtype: DTypeLikeReals = float, *, constant: Optional[bool] = None):
+def identity(
+    n: int, dtype: DTypeLikeReals = float, *, constant: Optional[bool] = None
+) -> Tensor:
     """Return the identity Tensor; a square Tensor with 1s on the main diagonal and 0s elsewhere.
 
     This docstring was adapted from ``numpy.identity`` [1]_
@@ -258,7 +260,7 @@ def identity(n: int, dtype: DTypeLikeReals = float, *, constant: Optional[bool] 
 
 def ones(
     shape: Shape, dtype: DTypeLikeReals = np.float32, *, constant: Optional[bool] = None
-):
+) -> Tensor:
     """
     Return a Tensor of the given shape and type, filled with ones.
 
@@ -323,7 +325,7 @@ def ones_like(
     shape: Optional[Union[int, Sequence[int]]] = None,
     *,
     constant: Optional[bool] = None,
-):
+) -> Tensor:
     """
     Return a Tensor of the same shape and type as the given, filled with ones.
 
@@ -385,7 +387,7 @@ def ones_like(
 
 def zeros(
     shape: Shape, dtype: DTypeLikeReals = np.float32, *, constant: Optional[bool] = None
-):
+) -> Tensor:
     """
     Return a Tensor of the given shape and type, filled with zeros.
 
@@ -450,7 +452,7 @@ def zeros_like(
     shape: Optional[Union[int, Shape]] = None,
     *,
     constant: Optional[bool] = None,
-):
+) -> Tensor:
     """
     Return a Tensor of the same shape and type as the given, filled with zeros.
 
@@ -524,7 +526,7 @@ def full(
     dtype: Optional[DTypeLikeReals] = None,
     *,
     constant: Optional[bool] = None,
-):
+) -> Tensor:
     """
     Return a Tensor of the given shape and type, filled with `fill_value`.
 
@@ -587,7 +589,7 @@ def full_like(
     dtype: Optional[DTypeLikeReals] = None,
     shape: Optional[Union[int, Shape]] = None,
     constant: Optional[bool] = None,
-):
+) -> Tensor:
     """Return a Tensor of the same shape and type as the given, filled with `fill_value`.
 
     This docstring was adapted from ``numpy.full_like`` [1]_
@@ -655,7 +657,7 @@ def arange(
     dtype: Optional[DTypeLikeReals] = None,
     *,
     constant: Optional[bool] = None,
-):
+) -> Tensor:
     """Return a Tensor with evenly-spaced values within a given interval.
 
     Values are generated within [start, stop). Note that for non-integer steps, results may be
@@ -724,7 +726,7 @@ def linspace(
     axis: int = 0,
     *,
     constant: Optional[bool] = None,
-):
+) -> Tensor:
     """Return a Tensor with evenly-spaced numbers over a specified interval.
 
     Values are generated within [start, stop], with the endpoint optionally excluded.
@@ -807,7 +809,7 @@ def logspace(
     axis: int = 0,
     *,
     constant: Optional[bool] = None,
-):
+) -> Tensor:
     """Return a Tensor with evenly-spaced numbers over a specified interval on a log scale.
     This is not a differentiable function - it does not propagate gradients to its inputs.
 
@@ -902,7 +904,7 @@ def geomspace(
     axis=0,
     *,
     constant: Optional[bool] = None,
-):
+) -> Tensor:
     """Return a Tensor with evenly-spaced values in a geometric progression.
 
     Each output sample is a constant multiple of the previous output.

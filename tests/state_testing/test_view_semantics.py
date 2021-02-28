@@ -55,7 +55,7 @@ from numpy.testing import assert_equal
 
 import mygrad as mg
 from mygrad import Tensor
-from tests.utils import clears_mem_state
+from tests.utils.wrappers import clears_mem_state
 
 
 class Pair(NamedTuple):
@@ -104,6 +104,11 @@ def einsum(t: T) -> Callable:
     return mg.einsum if isinstance(t, Tensor) else np.einsum
 
 
+def add(*args, **kwargs):
+    _add = mg.add if any(isinstance(x, mg.Tensor) for x in args) else np.add
+    return _add(*args, **kwargs)
+
+
 def diagonal(t: T) -> T:
     return einsum(t)("ii->i", t)
 
@@ -131,7 +136,7 @@ binary_mutation_ops = {
     "x[...] = y": lambda x, y: x.__setitem__(Ellipsis, y),
     "x[0] = y[0]": lambda x, y: x.__setitem__(0, y[0]),
     "x += y": lambda x, y: x.__iadd__(y),
-    "x += (x + y)": lambda x, y: x.__iadd__(x + y),
+    "x[...] = (x + y)": lambda x, y: add(x, y, out=x),
     "diag(x)[...] = diag(y)": lambda x, y: diagonal(x).__setitem__(
         Ellipsis, diagonal(y)
     ),

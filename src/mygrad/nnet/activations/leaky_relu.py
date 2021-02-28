@@ -1,27 +1,31 @@
 from numbers import Real
+from typing import Optional
 
 from numpy import ndarray
 
 from mygrad import maximum, minimum
 from mygrad.tensor_base import Tensor
+from mygrad.typing import ArrayLike
 
 __all__ = ["leaky_relu"]
 
 
-def leaky_relu(x, slope, *, constant=None):
+def leaky_relu(
+    x: ArrayLike, slope: float, *, constant: Optional[bool] = None
+) -> Tensor:
     """Returns the leaky rectified linear activation elementwise along x.
 
     The leaky ReLU is given by `max(x, 0) + slope*min(x, 0)`.
 
     Parameters
     ----------
-    x : mygrad.Tensor
+    x : ArrayLike
         Input data.
 
     slope : Union[Real, mygrad.Tensor]
         The slope of the negative activation.
 
-    constant : boolean, optional (default=False)
+    constant : Optional[bool]
         If ``True``, the returned tensor is a constant (it
         does not back-propagate a gradient).
 
@@ -42,6 +46,21 @@ def leaky_relu(x, slope, *, constant=None):
     >>> y.backward()
     >>> x.grad
     array([0.1, 0.1, 0.1, 0.1, 0.1, 0. , 1. , 1. , 1. , 1. , 1. ])
+
+    .. plot::
+
+       >>> import mygrad as mg
+       >>> from mygrad.nnet.activations import leaky_relu
+       >>> import matplotlib.pyplot as plt
+       >>> x = mg.linspace(-2, 2, 100)
+       >>> y = leaky_relu(x, slope=0.1)
+       >>> plt.title("leaky_relu(x, slope=0.1)")
+       >>> y.backward()
+       >>> plt.plot(x, x.grad, label="df/dx")
+       >>> plt.plot(x, y, label="f(x)")
+       >>> plt.legend()
+       >>> plt.grid()
+       >>> plt.show()
     """
     if isinstance(slope, (ndarray, Tensor)):
         slope = slope.item()

@@ -4,7 +4,7 @@ from hypothesis import given, settings
 from numpy.testing import assert_allclose
 
 from mygrad.tensor_base import Tensor
-from tests.utils import adds_constant_arg
+from tests.utils.wrappers import adds_constant_arg
 
 from ..custom_strategies import (
     adv_integer_index,

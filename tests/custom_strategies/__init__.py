@@ -1,7 +1,8 @@
 """ Custom hypothesis search strategies """
 import math
-from functools import lru_cache, partial
-from itertools import groupby
+from collections import defaultdict
+from functools import lru_cache, partial, reduce
+from itertools import groupby, zip_longest
 from numbers import Integral
 from operator import itemgetter
 from typing import Any, Iterable, List, Mapping, Optional, Tuple, Union
@@ -12,22 +13,35 @@ import numpy as np
 from hypothesis.extra.numpy import broadcastable_shapes
 from numpy import ndarray
 
+import mygrad as mg
 from mygrad import Tensor
+from mygrad.operation_base import _NoValue, _NoValueType
 from mygrad.typing import ArrayLike, DTypeLike, DTypeLikeReals, Shape
+from mygrad.ufuncs import MyGradBinaryUfunc, MyGradUnaryUfunc
+from tests.utils.functools import SmartSignature
 
 __all__ = [
+    "array_likes",
     "adv_integer_index",
     "arbitrary_indices",
     "basic_indices",
     "broadcastable_shapes",
     "choices",
     "everything_except",
+    "no_value",
+    "populates_ufunc",
     "real_dtypes",
+    "tensors",
     "valid_shapes",
     "valid_axes",
     "valid_constant_arg",
-    "tensors",
 ]
+
+
+def no_value() -> st.SearchStrategy[_NoValueType]:
+    """Signals that an argument should not be passed to a function"""
+    return st.just(_NoValue)
+
 
 basic_indices = partial(hnp.basic_indices, allow_newaxis=True, allow_ellipsis=True)
 
@@ -127,13 +141,12 @@ def array_likes(
             dtype=dtype, shape=shape, elements=elements, fill=fill, unique=unique
         )
     )
+
     converters = [
         lambda x: x,
         lambda x: VerboseTensor(x, copy=False, constant=None),
-        lambda x: x.tolist(),
+        lambda x: x.tolist() if x.size > 0 else x,
     ]
-    # if arr.ndim < 2 and arr.size < 3:
-    #     converters[-1] = lambda x: x.tolist()
 
     mapper = draw(st.sampled_from(converters))
     return mapper(arr)
@@ -785,3 +798,87 @@ def valid_constant_arg(draw, dtype: DTypeLike) -> st.SearchStrategy[Union[None, 
         return draw(st.none() | st.booleans())
     else:
         return draw(st.sampled_from([None, True]))
+
+
+def _broadcast_two_shapes(shape_a: Shape, shape_b: Shape) -> Shape:
+    result = []
+    for a, b in zip_longest(reversed(shape_a), reversed(shape_b), fillvalue=1):
+        if a != b and (a != 1) and (b != 1):
+            raise ValueError(
+                f"shapes {shape_a!r} and {shape_b!r} are not broadcast-compatible"
+            )
+        result.append(a if a != 1 else b)
+    return tuple(reversed(result))
+
+
+def _broadcast_shapes(*shapes):
+    """Returns the shape resulting from broadcasting the
+    input shapes together.
+    Raises ValueError if the shapes are not broadcast-compatible"""
+    assert len(shapes)
+    return reduce(_broadcast_two_shapes, shapes, ())
+
+
+@st.composite
+def populates_ufunc(
+    draw: st.DataObject.draw,
+    ufunc: Union[MyGradUnaryUfunc, MyGradBinaryUfunc],
+    arg_index_to_elements: Optional[Mapping[int, st.SearchStrategy]] = None,
+    include_where: bool = True,
+    tensor_only: bool = False,
+    use_ufunc_signature: bool = False,
+    min_side=_NoValue,
+    max_side=_NoValue,
+    min_dims=_NoValue,
+    max_dims=_NoValue,
+) -> st.SearchStrategy[SmartSignature]:
+    ind_to_elements = defaultdict(lambda: st.floats(-1e-9, 1e9))
+    shapes_args = SmartSignature(
+        min_side=min_side, max_side=max_side, min_dims=min_dims, max_dims=max_dims
+    )
+    if use_ufunc_signature:
+        shapes_args["signature"] = ufunc.signature
+    else:
+        shapes_args["num_shapes"] = ufunc.nin + include_where
+
+    if arg_index_to_elements is not None:
+        for k, v in arg_index_to_elements.items():
+            ind_to_elements[k] = v
+
+    shapes: hnp.BroadcastableShapes = draw(
+        hnp.mutually_broadcastable_shapes(**shapes_args),
+        label="shapes",
+    )
+
+    array_strat = (
+        array_likes if tensor_only is False else partial(tensors, constant=False)
+    )
+    args = SmartSignature(
+        *(
+            draw(array_strat(shape=shape, dtype=float, elements=ind_to_elements[n]))
+            for n, shape in enumerate(shapes.input_shapes[: ufunc.nin])
+        )
+    )
+
+    if include_where:
+        args["where"] = draw(
+            no_value()
+            | st.booleans().map(lambda x: not x)
+            | hnp.arrays(
+                shape=shapes.input_shapes[-1], dtype=bool, elements=st.booleans()
+            )
+        )
+
+    fill_value = draw(st.integers(0, 1))
+
+    where = args.kwargs.get("where", True)
+    if where is not True:
+        # the predicted results shape can be wrong if the inputs don't `where`
+        # broadcast against `where`
+        out_shape = (
+            shapes.result_shape
+            if not isinstance(where, bool)
+            else _broadcast_shapes(*(mg.asarray(a).shape for a in args.args))
+        )
+        args["out"] = np.full(out_shape, fill_value=fill_value, dtype=float)
+    return args

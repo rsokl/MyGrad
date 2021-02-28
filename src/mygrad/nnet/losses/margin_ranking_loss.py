@@ -1,10 +1,12 @@
 from numbers import Real
+from typing import Optional
 
 import numpy as np
 
 import mygrad._utils.graph_tracking as _tracking
 from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor, asarray
+from mygrad.typing import ArrayLike
 
 
 class MarginRanking(Operation):
@@ -47,7 +49,14 @@ class MarginRanking(Operation):
         return grad * (sign * self._grad)
 
 
-def margin_ranking_loss(x1, x2, y, margin, *, constant=None):
+def margin_ranking_loss(
+    x1: ArrayLike,
+    x2: ArrayLike,
+    y: ArrayLike,
+    margin: float,
+    *,
+    constant: Optional[bool] = None
+) -> Tensor:
     r"""Computes the margin average margin ranking loss.
     Equivalent to::
 
@@ -56,13 +65,13 @@ def margin_ranking_loss(x1, x2, y, margin, *, constant=None):
 
     Parameters
     ----------
-    x1 : array_like, shape=(N,) or (N, D)
+    x1 : ArrayLike, shape=(N,) or (N, D)
         A batch of scores or descriptors to compare against those in `x2`
 
-    x2 : array_like, shape=(N,) or (N, D)
+    x2 : ArrayLike, shape=(N,) or (N, D)
         A batch of scores or descriptors to compare against those in `x1`
 
-    y  : Union[int, array_like], scalar or shape=(N,)
+    y  : Union[int, ArrayLike], scalar or shape=(N,)
         1 or -1. Specifies whether the margin is compared against `(x1 - x2)`
         or `(x2 - x1)`, for each of the N comparisons.
 

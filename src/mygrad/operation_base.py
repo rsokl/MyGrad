@@ -3,7 +3,7 @@ Defines the base class for mathematical operations capable of back-propagating
 gradients to their input tensors."""
 from abc import ABC, abstractmethod
 from numbers import Real
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Set, Tuple, Union
 from weakref import ReferenceType
 
 import numpy as np
@@ -15,7 +15,6 @@ from mygrad.typing import DTypeLike, Mask
 if TYPE_CHECKING:  # pragma: no cover
     from mygrad import Tensor
     from mygrad._utils import WeakRef
-
 
 __all__ = [
     "Operation",
@@ -204,7 +203,7 @@ class Operation(ABC):
                     backed_grad = backed_grad * self.where
 
                 backed_grad = self.grad_post_process_fn(backed_grad, var.shape)
-
+                assert backed_grad.shape == var.shape
                 if var._grad is None:
                     backed_grad = (
                         np.copy(backed_grad)
@@ -249,10 +248,8 @@ class Ufunc(Operation, ABC):
     ----------
     .. [1] Retrieved from https://numpy.org/doc/stable/reference/ufuncs.html"""
 
-    @property
-    @abstractmethod
-    def numpy_ufunc(self) -> np.ufunc:
-        raise NotImplementedError()  # pragma: no cover
+    numpy_ufunc: np.ufunc
+    _supports_where: bool = True
 
 
 class UnaryUfunc(Ufunc, ABC):

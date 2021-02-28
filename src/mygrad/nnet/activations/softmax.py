@@ -1,8 +1,11 @@
+from typing import Optional, Tuple, Union
+
 import numpy as np
 
 from mygrad.math._special import logsumexp as _logsumexp
 from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor
+from mygrad.typing import ArrayLike
 
 
 def _softmax(x, kwargs):
@@ -35,7 +38,12 @@ class Softmax(Operation):
         return sg - soft * np.sum(sg, **self._kw)
 
 
-def softmax(x, axis=-1, *, constant=None):
+def softmax(
+    x: ArrayLike,
+    axis: Union[None, int, Tuple[int, ...]] = -1,
+    *,
+    constant: Optional[bool] = None
+) -> Tensor:
     r"""
     Applies the softmax activation function::
 
@@ -104,7 +112,12 @@ class LogSoftmax(Operation):
         return grad - soft * np.sum(grad, **self._kw)
 
 
-def logsoftmax(x, axis=-1, *, constant=None):
+def logsoftmax(
+    x: ArrayLike,
+    axis: Union[None, int, Tuple[int, ...]] = -1,
+    *,
+    constant: Optional[bool] = None
+) -> Tensor:
     r"""
     Applies the log-softmax activation function::
 
@@ -114,13 +127,13 @@ def logsoftmax(x, axis=-1, *, constant=None):
 
     Parameters
     ----------
-    x : array_like
+    x : ArrayLike
 
     axis : Union[None, int, Tuple[int, ...]], optional (default=-1)
         The axis/axes over which to compute the log-softmax.
         By default, the log-softmax is computed over the trailing axis.
 
-    constant : bool, optional(default=False)
+    constant : constant : Optional[bool]
         If ``True``, the returned tensor is a constant (it
         does not back-propagate a gradient)
 

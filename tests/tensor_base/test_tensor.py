@@ -15,7 +15,7 @@ from mygrad.linalg.ops import MatMul
 from mygrad.math.arithmetic.ops import Add, Divide, Multiply, Negative, Power, Subtract
 from mygrad.operation_base import Operation
 from tests.custom_strategies import everything_except, tensors, valid_constant_arg
-from tests.utils import does_not_raise
+from tests.utils.errors import does_not_raise
 
 
 def test_simple_default_constant_behavior():

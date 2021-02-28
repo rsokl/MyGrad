@@ -9,7 +9,8 @@ from numpy.testing import assert_allclose, assert_array_equal
 import mygrad as mg
 from mygrad.errors import InvalidBackprop
 from tests.custom_strategies import tensors
-from tests.utils import clear_all_mem_locking_state, clears_mem_state
+from tests.utils.stateful import clear_all_mem_locking_state
+from tests.utils.wrappers import clears_mem_state
 
 
 def test_simple_view_grad_reflects_base_grad():

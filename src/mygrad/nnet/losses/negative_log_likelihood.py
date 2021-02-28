@@ -1,11 +1,20 @@
+from typing import Optional
+
 import numpy as np
 
 from mygrad import Tensor, asarray, mean
+from mygrad.typing import ArrayLike
 
 from ._utils import check_loss_inputs
 
 
-def negative_log_likelihood(x, y_true, *, weights=None, constant=None):
+def negative_log_likelihood(
+    x: ArrayLike,
+    y_true: ArrayLike,
+    *,
+    weights: Optional[ArrayLike] = None,
+    constant: Optional[bool] = None,
+) -> Tensor:
     """Returns the (weighted) negative log-likelihood loss between log-probabilities and y_true.
 
     Note that this does not compute a softmax, so you should input log-probabilities to this.
@@ -13,13 +22,13 @@ def negative_log_likelihood(x, y_true, *, weights=None, constant=None):
 
     Parameters
     ----------
-    x : array_like, shape=(N, C)
+    x : ArrayLike, shape=(N, C)
         The C log-probabilities for each of the N pieces of data.
 
-    y_true : array_like, shape=(N,)
+    y_true : ArrayLike, shape=(N,)
         The correct class indices, in [0, C), for each datum.
 
-    weights : array_like, shape=(C,) optional (default=None)
+    weights : ArrayLike, shape=(C,) optional (default=None)
         The weighting factor to use on each class, or None.
 
     constant : bool, optional(default=False)

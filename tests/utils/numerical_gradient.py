@@ -19,7 +19,7 @@ def finite_difference(
     of its variables, using the central difference method.
     This is a "fast" method - it varies entire arrays at once. Thus
     this is only appropriate for trivial vectorized functions that
-    map accross entries of arrays (like add or multiply). E.g.
+    map across entries of arrays (like add or multiply). E.g.
     matrix multiplication is *not* suited for this style of gradient.
 
     Parameters
@@ -106,7 +106,7 @@ def finite_difference(
     return grads
 
 
-def numerical_gradient(f, *args, back_grad, vary_ind=None, h=1e-20, kwargs=None):
+def numerical_gradient(f, *args, back_grad, vary_ind=None, h=1e-20, kwargs=None) -> Tuple[Optional[np.ndarray], ...]:
     """Computes numerical partial derivatives of f(x0, x1, ...) in each
     of its variables, using the central difference method.
     This is a "fast" method - it varies entire arrays at once. Thus
@@ -161,7 +161,7 @@ def numerical_gradient(f, *args, back_grad, vary_ind=None, h=1e-20, kwargs=None)
         dvar = f(*gen_fwd_diff(n), **kwargs).imag / h
         grads[n] = reduce_broadcast(back_grad * dvar, args[n].shape)
 
-    return grads
+    return tuple(grads)
 
 
 def numerical_gradient_full(

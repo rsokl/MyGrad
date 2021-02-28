@@ -1,10 +1,12 @@
 from numbers import Integral
+from typing import Optional, Tuple, Union
 
 import numpy as np
 
 from mygrad.nnet.layers.utils import sliding_window_view
 from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor
+from mygrad.typing import ArrayLike
 
 __all__ = ["conv_nd"]
 
@@ -153,9 +155,17 @@ class ConvND(Operation):
             return np.tensordot(grad, windowed_data, axes=[grad_axes, window_axes])
 
 
-def conv_nd(x, filter_bank, *, stride, padding=0, dilation=1, constant=None):
-    """Use `filter_bank` to perform strided N-dimensional neural network-style
-    convolutions (see Notes) over `x`.::
+def conv_nd(
+    x: ArrayLike,
+    filter_bank: ArrayLike,
+    *,
+    stride: Union[int, Tuple[int, ...]],
+    padding: Union[int, Tuple[int, ...]] = 0,
+    dilation: Union[int, Tuple[int, ...]] = 1,
+    constant: Optional[bool] = None,
+) -> Tensor:
+    """Use ``filter_bank`` (``w``) to perform strided N-dimensional neural network-style
+    convolutions (see Notes) over ``x``.::
 
             f(x, w) -> x ⋆ w
 
@@ -176,7 +186,7 @@ def conv_nd(x, filter_bank, *, stride, padding=0, dilation=1, constant=None):
 
     Parameters
     ----------
-    x : Union[Tensor, array_like], shape=(N, C, Xo, ...)
+    x : ArrayLike, shape=(N, C, Xo, ...)
         The data batch to be convolved over.
 
     filter_bank : Union[Tensor, array_like], shape=(F, C, Wo, ...)
@@ -205,7 +215,7 @@ def conv_nd(x, filter_bank, *, stride, padding=0, dilation=1, constant=None):
         If a single integer is provided, that dilation value is used for all
         of the convolved axes
 
-    constant : bool, optional (default=False)
+    constant : Optional[None]
         If True, the resulting Tensor is a constant.
 
     Returns
@@ -219,13 +229,8 @@ def conv_nd(x, filter_bank, *, stride, padding=0, dilation=1, constant=None):
      - The filters are *not* flipped by this operation, meaning that
        an auto-correlation is being performed rather than a true convolution.
 
-     - Only 'valid' filter placements are permitted - where the filters overlap
-       completely with the (padded) data.
-
-     - This is a "scalar-only" operation, meaning that back propagation through
-       this layer assumes that a scalar (i.e. a 0-dimensional tensor) will invoke
-       ``tensor.backward()`` for the computational graph. This is standard for a
-       neural network, which terminates in a scalar loss.
+     - Only 'valid' filter placements – where the filters overlap
+       completely with the (padded) data – are permitted.
 
     Examples
     --------
@@ -258,6 +263,83 @@ def conv_nd(x, filter_bank, *, stride, padding=0, dilation=1, constant=None):
     >>> k.grad  # d(summed_conv)/dk
     array([[[6., 6., 6., 6., 6.]]])
 
+    .. plot::
+
+       >>> import mygrad as mg
+       >>> from mygrad.nnet import conv_nd
+       >>> import matplotlib.pyplot as plt
+       >>> kernel = mg.ones(5)  # a square-wave signal
+       >>> x = mg.zeros((1, 1, 16))  # a square-wave signal
+       >>> x[..., 5:11] = 1
+       >>> k = mg.ones((1, 1, 5))    # a constant-valued kernel
+       >>> y = conv_nd(x, k, stride=1)   # performing a stride-1, 1D convolution
+       >>> plt.title("conv(f, g); stride: 1")
+       >>> y.backward()
+       >>> plt.plot(x.data[0,0], label="f", ls="--", lw=3, drawstyle='steps-pre')
+       >>> plt.plot(kernel, label="g", ls="--", lw=3, drawstyle='steps-pre')
+       >>> plt.plot(y.data[0,0], label="f * g")
+       >>> plt.plot(mg.arange(16.), x.grad[0, 0], label="d[sum(f * g)]/df")
+       >>> kernel = mg.ones(5)  # a square-wave signal
+       >>> plt.legend()
+       >>> plt.grid()
+       >>> plt.show()
+
+    Let's apply a edge-detection kernel to each color channel of an RGB image.
+
+     >>> import matplotlib.pyplot as plt
+     >>> import matplotlib.image as mpimg
+     >>> from mygrad.nnet.layers import conv_nd
+     >>> # A shape-(H, W, 3) RGB image
+     >>> img = mpimg.imread('../_static/meerkat.png')
+     >>> # We'll treat this like a batch of three greyscale images
+     >>> # where each "image" is actually a color channel
+     >>> # shape-(H, W, 3) -> shape-(3, 1, H, W)
+     >>> x = img.transpose(2, 0, 1)[:, None, :, :]
+
+     >>> # edge detection kernel
+     >>> kernel = np.array([[-1, -1, -1],
+     ...                    [-1,  8, -1],
+     ...                    [-1, -1, -1]])
+     >>> # (Hf, Wf) --> (1, 1, Hf, Wf)
+     >>> kernel = kernel.reshape(1, 1, *kernel.shape)
+
+     >>> # conv: (3, 1, H, W) w/ (1, 1, Hf, Wf) --> (3, 1, H', W')
+     >>> # squeeze + transpose: (3, 1, H', W') --> (H', W', 3)
+     >>> processed = conv_nd(x, kernel, stride=(1, 1))
+     >>> processed = processed.data.squeeze().transpose(1, 2, 0)
+
+     >>> fig, ax = plt.subplots()
+     >>> ax.imshow(img)
+
+     >>> fig, ax = plt.subplots()
+     >>> ax.imshow(processed)
+
+     .. plot::
+
+        >>> import matplotlib.pyplot as plt
+        >>> import matplotlib.image as mpimg
+        >>> from mygrad.nnet.layers import conv_nd
+        >>> img = mpimg.imread('../_static/meerkat.png')
+
+        >>> # edge detection
+        >>> kernel = np.array([[-1, -1, -1],
+        ...                    [-1,  8, -1],
+        ...                    [-1, -1, -1]])
+        >>> x = img.transpose(2,0,1)[:, None, :, :]
+
+        >>> # (Hf, Wf) --> (1, 1, Hf, Wf)
+        >>> kernel = kernel.reshape(1, 1, *kernel.shape)
+
+        >>> # conv: (C, 1, H, W) w/ (1, 1, Hf, Wf) --> (C, 1, H', W')
+        >>> # squeeze + transpose: (C, 1, H', W') --> (H', W', C)
+        >>> processed = conv_nd(x, kernel, stride=(1, 1)).data.squeeze().transpose(1, 2, 0)
+
+        >>> fig, ax = plt.subplots()
+        >>> ax.imshow(img)
+
+        >>> fig, ax = plt.subplots()
+        >>> ax.imshow(processed)
+
     Now, let's demonstrate a more typical usage for ``conv_nd`` in the context of
     neural networks. ``x`` will represent 10, 32x32 RGB images, and we will use
     5 distinct 2x2 kernels to convolve over each of these images . Note that
@@ -268,9 +350,9 @@ def conv_nd(x, filter_bank, *, stride, padding=0, dilation=1, constant=None):
     total, this will produce a shape-:math:`(N=10, F=5, G_0=16, G_1=16)` tensor as a
     result.
 
-    >>> import numpy as np
-    >>> x = mg.Tensor(np.random.rand(10, 3, 32, 32))  # creating 10 random 32x32 RGB images
-    >>> k = mg.Tensor(np.random.rand(5, 3, 2, 2))     # creating 5 random 3-channel 2x2 kernels
+    >>> import mygrad as mg
+    >>> x = mg.random.rand(10, 3, 32, 32))  # creating 10 random 32x32 RGB images
+    >>> k = mg.random.rand(5, 3, 2, 2))     # creating 5 random 3-channel 2x2 kernels
 
     Given the shapes of ``x`` and ``k``, ``conv_nd`` automatically executes a 2D convolution:
 
@@ -278,6 +360,15 @@ def conv_nd(x, filter_bank, *, stride, padding=0, dilation=1, constant=None):
     (10, 5, 16, 16)
 
     Extrapolating further, ``conv_nd`` is capable of performing ND convolutions!
+
+    Performing a convolution over a batch of single-channel, "spatial-3D" tensor data:
+
+    >>> # shape-(N=1, C=1, X=10, Y=12, Z=10)
+    >>> x = mg.random.rand(1, 1, 10, 12, 10)
+    >>> # shape-(F=2, C=1, Wx=3, Wy=1, Wz=2)
+    >>> k = mg.random.rand(2, 1, 3, 1, 32)
+    >>> conv_nd(x, k, stride=1).shape
+    (1, 2, 8, 12, 9)
     """
     if x.ndim < 3:
         raise ValueError(

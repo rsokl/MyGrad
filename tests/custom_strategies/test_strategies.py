@@ -17,6 +17,7 @@ from tests.custom_strategies import (
     basic_indices,
     choices,
     integer_index,
+    no_value,
     slice_index,
     tensors,
     valid_axes,
@@ -320,3 +321,10 @@ def test_can_infer_ArrayLike(x: ArrayLike):
 @given(shape=infer)
 def test_can_infer_Shape(shape: Shape):
     np.ones(shape)  # raise if not valid shape
+
+
+@given(no_value())
+def test_no_value(x):
+    from mygrad.operation_base import _NoValue
+    assert x is _NoValue
+

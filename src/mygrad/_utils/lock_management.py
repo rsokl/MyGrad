@@ -4,7 +4,7 @@ Provides utilities responsible for locking/releasing array writeability.
 import os
 from collections import Counter, defaultdict
 from typing import TYPE_CHECKING, DefaultDict, Dict, Generator, Iterable
-from weakref import ref
+from weakref import finalize, ref
 
 import numpy as np
 
@@ -387,3 +387,18 @@ def mem_guard_active() -> bool:
     mem_guard_on : context manager & decorator for enabling memory guarding
     """
     return MEM_GUARD
+
+
+def force_lock_tensor_and_creators(tensor: "Tensor"):
+    unique_arrs = tuple(
+        lock_arr_writeability(arr)
+        for arr in unique_arrs_and_bases(tensor.creator.variables)
+    )
+    lock_arr_writeability(tensor.data, force_lock=True)
+    tensor_refs = WeakRefIterable(unique_arrs)
+    tensor_refs.append(tensor.data)
+    finalize(
+        tensor.creator,
+        release_writeability_lock_on_op,
+        tensor_refs,
+    )

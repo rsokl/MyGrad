@@ -1,7 +1,10 @@
+from typing import Optional
+
 import numpy as np
 
 from mygrad import Tensor
 from mygrad.operation_base import Operation
+from mygrad.typing import ArrayLike, Real
 
 __all__ = ["selu"]
 
@@ -45,17 +48,17 @@ class SELU(Operation):
         return grad * _SCALE * np.where(x.data < 0, self.exp + _ALPHA, 1)
 
 
-def selu(x, *, constant=None):
+def selu(x: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
     """Returns the scaled exponential linear activation (SELU) elementwise along x.
 
     The SELU is given by  λɑ(exp(x) - 1) for x < 0 and λx for x ≥ 0.
 
     Parameters
     ----------
-    x : mygrad.Tensor
+    x : ArrayLike
         Input data.
 
-    constant : bool, optional(default=False)
+    constant : Optional[bool]
         If ``True``, the returned tensor is a constant (it
         does not back-propagate a gradient)
 
@@ -64,12 +67,11 @@ def selu(x, *, constant=None):
     mygrad.Tensor
         The SELU function applied to `x` elementwise.
 
-    Notes
-    -----
-    The SELU activation was proposed in the paper
-        Self-Normalizing Neural Networks
-        Günter Klambauer, Thomas Unterthiner, Andreas Mayr, Sepp Hochreiter
-    at https://arxiv.org/abs/1706.02515
+    References
+    ----------
+    .. [1] Günter Klambauer, Thomas Unterthiner, Andreas Mayr, Sepp Hochreiter
+       Self-Normalizing Neural Networks
+       https://arxiv.org/abs/1706.02515
 
     Examples
     --------
@@ -78,9 +80,24 @@ def selu(x, *, constant=None):
     >>> x = mg.arange(-5, 6)
     >>> x
     Tensor([-5, -4, -3, -2, -1,  0,  1,  2,  3,  4,  5])
-    >>> y = elu(x, alpha=0.1); y
+    >>> y = selu(x, alpha=0.1); y
     Tensor([-1.74625336, -1.72589863, -1.67056873, -1.52016647, -1.11133074,
          0.        ,  1.05070099,  2.10140197,  3.15210296,  4.20280395,
          5.25350494])
+
+    .. plot::
+
+       >>> import mygrad as mg
+       >>> from mygrad.nnet.activations import selu
+       >>> import matplotlib.pyplot as plt
+       >>> x = mg.linspace(-2, 2, 100)
+       >>> y = selu(x)
+       >>> plt.title("selu(x)")
+       >>> y.backward()
+       >>> plt.plot(x, x.grad, label="df/dx")
+       >>> plt.plot(x, y, label="f(x)")
+       >>> plt.legend()
+       >>> plt.grid()
+       >>> plt.show()
     """
     return Tensor._op(SELU, x, constant=constant)

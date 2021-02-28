@@ -1,7 +1,10 @@
+from typing import Optional, Tuple, Union
+
 import numpy as np
 
 from mygrad import Tensor
 from mygrad.operation_base import Operation
+from mygrad.typing import ArrayLike
 
 __all__ = ["batchnorm"]
 
@@ -108,7 +111,14 @@ class BatchNorm(Operation):
             raise IndexError
 
 
-def batchnorm(x, *, gamma=None, beta=None, eps, constant=None):
+def batchnorm(
+    x: ArrayLike,
+    *,
+    gamma: Optional[ArrayLike] = None,
+    beta: Optional[ArrayLike] = None,
+    eps: float,
+    constant: Optional[bool] = None
+) -> Tensor:
     """
     Performs batch normalization on ``x``::
 

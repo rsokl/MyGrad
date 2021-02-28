@@ -1,3 +1,6 @@
-from typing import Tuple, TypeVar
+from typing import TYPE_CHECKING, Tuple, TypeVar
 
-Shape = TypeVar("Shape", bound=Tuple[int, ...])
+if TYPE_CHECKING:  # pragma: no cover
+    Shape = Tuple[int, ...]
+else:  # pragma: no cover
+    Shape = TypeVar("Shape", bound=Tuple[int, ...])

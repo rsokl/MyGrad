@@ -7,7 +7,7 @@ from hypothesis import Verbosity, settings
 import mygrad as mg
 import mygrad._utils.graph_tracking as track
 import mygrad._utils.lock_management as lock
-from tests.utils import clear_all_mem_locking_state
+from tests.utils.stateful import clear_all_mem_locking_state
 
 settings.register_profile("ci", deadline=1000)
 settings.register_profile("intense", deadline=None, max_examples=1000)

@@ -8,7 +8,7 @@ from numpy.testing import assert_allclose
 
 import mygrad as mg
 from mygrad.tensor_base import Tensor
-from tests.utils import expected_constant
+from tests.utils.checkers import expected_constant
 
 
 def _check_grad(t: mg.Tensor, expr: Union[None, np.ndarray, float]):

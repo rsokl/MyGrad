@@ -16,7 +16,7 @@ import mygrad._utils.lock_management as mem
 from mygrad import Tensor
 from mygrad.operation_base import Operation
 
-from ..utils import expected_constant as _expected_constant
+from tests.utils.checkers import expected_constant as _expected_constant
 from ..utils.numerical_gradient import (
     finite_difference,
     numerical_gradient,

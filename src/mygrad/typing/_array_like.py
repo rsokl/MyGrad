@@ -41,44 +41,45 @@ sr1 = Sequence[Real]
 sr2 = Sequence[sr1]
 sr3 = Sequence[sr2]
 sr4 = Sequence[sr3]
-sr5 = Sequence[sr4]
-sr6 = Sequence[sr5]
 
 # Sequence[Union[s1, s2]] is *not* valid!
-SequenceNDReals = Union[sr1, sr2, sr3, sr4, sr5, sr6]
+SequenceNDReals = Union[sr1, sr2, sr3, sr4]
 
 # include Tensor and ndarray explicitly in case `ImplementsArray`
 # is not protocol
 
-ArrayLike = TypeVar(
-    "ArrayLike",
-    bound=Union[Real, "Tensor", np.ndarray, ImplementsArray, SequenceNDReals],
-)
+if TYPE_CHECKING:  # pragma: no cover
+    ArrayLike = Union[Real, "Tensor", np.ndarray, ImplementsArray, SequenceNDReals]
+else:  # pragma: no cover
+    ArrayLike = TypeVar(
+        "ArrayLike", Real, "Tensor", np.ndarray, ImplementsArray, SequenceNDReals
+    )
 
 
-sb1 = Sequence[Real]
+sb1 = Sequence[bool]
 sb2 = Sequence[sb1]
 sb3 = Sequence[sb2]
 sb4 = Sequence[sb3]
-sb5 = Sequence[sb4]
-sb6 = Sequence[sb5]
 
+# Sequence[Union[s1, s2]] is *not* valid!
+SequenceNDBools = Union[sb1, sb2, sb3, sb4]
 
-SequenceNDBools = Union[
-    sb1, sb2, sb3, sb4, sb5, sb6
-]  # Sequence[Union[s1, s2]] is *not* valid!
-
-
-Mask = Union[ImplementsArray, np.ndarray, "Tensor", bool, SequenceNDBools]
-
-si1 = Sequence[int]
-si2 = Sequence[si1]
-si3 = Sequence[si2]
-si4 = Sequence[si3]
-si5 = Sequence[si4]
-si6 = Sequence[si5]
+if TYPE_CHECKING:  # pragma: no cover
+    Mask = Union[ImplementsArray, np.ndarray, "Tensor", bool, SequenceNDBools]
+else:  # pragma: no cover
+    Mask = TypeVar(
+        "Mask",
+        bound=Union[ImplementsArray, np.ndarray, "Tensor", bool, SequenceNDBools],
+    )
 
 
 Index = Union[
-    int, None, slice, ImplementsArray, np.ndarray, Tuple["Index"], List["Index"]
+    int,
+    None,
+    slice,
+    ImplementsArray,
+    np.ndarray,
+    Sequence[int],
+    Tuple["Index"],
+    List["Index"],
 ]
