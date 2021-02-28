@@ -167,9 +167,10 @@ def cos(
 
     References
     ----------
+    .. [1] Retrieved from https://numpy.org/doc/stable/reference/generated/numpy.cos.html
+
     M. Abramowitz and I. A. Stegun, Handbook of Mathematical Functions.
     New York, NY: Dover, 1972.
-    .. [1] Retrieved from https://numpy.org/doc/stable/reference/generated/numpy.cos.html
 
     Examples
     --------
@@ -236,9 +237,10 @@ def tan(
 
     References
     ----------
+    .. [1] Retrieved from https://numpy.org/doc/stable/reference/generated/numpy.tan.html
+
     M. Abramowitz and I. A. Stegun, Handbook of Mathematical Functions.
     New York, NY: Dover, 1972.
-    .. [1] Retrieved from https://numpy.org/doc/stable/reference/generated/numpy.tan.html
 
     Examples
     --------
@@ -500,10 +502,11 @@ def arctan(
 
     References
     ----------
+    .. [1] Retrieved from https://numpy.org/doc/stable/reference/generated/numpy.arctan.html
+
     Abramowitz, M. and Stegun, I. A., *Handbook of Mathematical Functions*,
     10th printing, New York: Dover, 1964, pp. 79.
     http://www.math.sfu.ca/~cbm/aands/
-    .. [1] Retrieved from https://numpy.org/doc/stable/reference/generated/numpy.arctan.html
 
     Examples
     --------
