@@ -6,6 +6,7 @@ etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 
 from numbers import Integral, Number
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
@@ -44,6 +45,10 @@ from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property
 from mygrad.typing import ArrayLike, DTypeLike, DTypeLikeReals, Index, Shape
 
 __all__ = ["Tensor", "asarray", "astensor"]
+
+if TYPE_CHECKING:  # pragma: no cover
+    from mygrad.ufuncs._ufunc_creators import ufunc as mygrad_ufunc
+
 
 CONSTANT_ONLY_DTYPES = (np.integer, np.bool_)
 
@@ -328,6 +333,9 @@ def astensor(
     return tensor(t, dtype=dtype, constant=constant, copy=False, ndmin=0)
 
 
+_REGISTERED_UFUNC: Dict[np.ufunc, Type["mygrad_ufunc"]] = {}
+
+
 class Tensor:
     """A numpy-array-like object capable of serving as a node in a computational
     graph that supports back-propagation of derivatives via the chain rule.
@@ -483,6 +491,17 @@ class Tensor:
     """
 
     __array_priority__ = 15.0
+
+    def __array_ufunc__(
+        self, ufunc: Type[np.ufunc], method: str, *inputs: ArrayLike, **kwargs
+    ) -> "Tensor":
+
+        # TODO: handle tuple `out` correctly
+        out = kwargs.pop("out", (None,))[0]
+        try:
+            return getattr(_REGISTERED_UFUNC[ufunc], method)(*inputs, **kwargs, out=out)
+        except KeyError:
+            return NotImplemented
 
     def __array__(self, dtype: DTypeLike = None) -> np.ndarray:
         return np.array(self.data, dtype=dtype, copy=False)

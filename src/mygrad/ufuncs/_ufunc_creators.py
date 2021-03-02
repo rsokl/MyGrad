@@ -16,9 +16,11 @@ from typing import (
 
 import numpy as np
 
-from mygrad import Tensor
 from mygrad.operation_base import BinaryUfunc, Operation, Ufunc, UnaryUfunc, _NoValue
+from mygrad.tensor_base import _REGISTERED_UFUNC, Tensor
 from mygrad.typing import ArrayLike, DTypeLikeReals, Index, Mask, Real
+
+from .non_differentiable import _boolean_out_passthrough, _constant_only_passthrough
 
 __all__ = ["ufunc_creator"]
 
@@ -316,7 +318,7 @@ def _create_ufunc(
     outer_op=None,
     reduce_op=None,
     reduceat_op=None,
-):
+) -> Type[ufunc]:
     def at(
         a: ArrayLike,
         indices: Union[ArrayLike, Index, Tuple[ArrayLike, Index]],
@@ -487,7 +489,7 @@ class ufunc_creator:
         self.reduceat_op = reduceat_op
 
     def __call__(self, decorated_func: T) -> T:
-        return _create_ufunc(
+        out_ufunc = _create_ufunc(
             self.op,
             decorated_func=decorated_func,
             at_op=self.at_op,
@@ -496,3 +498,40 @@ class ufunc_creator:
             reduce_op=self.reduce_op,
             reduceat_op=self.reduceat_op,
         )
+        _REGISTERED_UFUNC[getattr(np, out_ufunc.__name__)] = out_ufunc
+        return out_ufunc
+
+
+# register constant-only & returns-array ufuncs
+for numpy_ufunc in [
+    np.floor_divide,
+    np.remainder,
+    np.mod,
+    np.fmod,
+    np.divmod,
+    np.rint,
+    np.sign,
+    np.floor,
+    np.ceil,
+    np.trunc,
+]:
+    _REGISTERED_UFUNC[numpy_ufunc] = _constant_only_passthrough(numpy_ufunc)
+
+# register boolean passthroughs
+for numpy_ufunc in [
+    np.isnan,
+    np.isfinite,
+    np.isinf,
+    np.isnat,
+    np.signbit,
+    np.logical_not,
+    np.logical_and,
+    np.logical_or,
+    np.logical_xor,
+    np.greater,
+    np.greater_equal,
+    np.less,
+    np.less_equal,
+    np.equal,
+]:
+    _REGISTERED_UFUNC[numpy_ufunc] = _boolean_out_passthrough(numpy_ufunc)
