@@ -447,14 +447,21 @@ def downstream_copy(x):
     return +x
 
 
-@pytest.mark.parametrize("fx", [view, direct_ref, downstream_copy])
-@pytest.mark.parametrize("fy", [view, direct_ref, downstream_copy])
-@pytest.mark.parametrize("fz", [view, direct_ref, downstream_copy])
-@pytest.mark.parametrize("where", [True, [True, True, True]])
-def test_test_mem_locking_with_inplace_target_and_boolean_mask(fx, fy, fz, where):
-    xo = mg.arange(3.0)
-    yo = mg.arange(3.0, 6.0)
-    zo = mg.zeros(3)
+@given(
+    fx=st.sampled_from([direct_ref, downstream_copy, view]),
+    fy=st.sampled_from([direct_ref, downstream_copy, view]),
+    fz=st.sampled_from([direct_ref, downstream_copy, view]),
+    where=st.sampled_from([True, [True, True, True]]),
+    x_cast=st.sampled_from([mg.tensor, np.array]),
+    y_cast=st.sampled_from([mg.tensor, np.array]),
+    z_cast=st.sampled_from([mg.tensor, np.array]),
+)
+def test_test_mem_locking_with_inplace_target_and_boolean_mask(
+    fx, fy, fz, where, x_cast, y_cast, z_cast
+):
+    xo = x_cast(np.arange(3.0))
+    yo = y_cast(np.arange(3.0, 6.0))
+    zo = z_cast(np.zeros(3))
 
     x = fx(xo)
     y = fy(yo)
@@ -462,15 +469,20 @@ def test_test_mem_locking_with_inplace_target_and_boolean_mask(fx, fy, fz, where
 
     z = mg.multiply(x, y, where=where, out=z)
 
-    if where is True:
-        # zo is not involved in the graph when z was a downstream copy
-        # and then was rewritten in-place
-        assert writeable(zo) is not (z is zo or z.base is zo)
-    else:
-        # when the mask is applied, zo is always still involved in the graph
-        assert writeable(zo) is False
-    assert writeable(xo) is False
-    assert writeable(yo) is False
+    if not (isinstance(zo, np.ndarray) and fz is downstream_copy):
+        if where is True:
+            # zo is not involved in the graph when z was a downstream copy
+            # and then was rewritten in-place
+            assert writeable(zo) is not (fz is view or fz is direct_ref)
+        else:
+            # when the mask is applied, zo is always still involved in the graph
+            assert writeable(zo) is False
+    assert writeable(xo) is False or (
+        isinstance(xo, np.ndarray) and fx is downstream_copy
+    )
+    assert writeable(yo) is False or (
+        isinstance(yo, np.ndarray) and fy is downstream_copy
+    )
     assert writeable(z) is False
     assert writeable(x) is False
     assert writeable(y) is False

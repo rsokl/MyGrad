@@ -877,7 +877,7 @@ class Tensor:
         for var in tensor_vars:
             var._ops.add(ref_f)
 
-        out = cls(
+        tensor_out = cls(
             op_out,
             constant=constant,
             copy=False,
@@ -886,14 +886,17 @@ class Tensor:
         )
 
         if parent_var is not None:
-            parent_var._view_children.append(out)
+            parent_var._view_children.append(tensor_out)
 
         if _mem.MEM_GUARD:
-            _mem.lock_arr_writeability(out.data)
+            if out is not None and tensor_out.data.base is not None:
+                _mem.lock_arr_writeability(tensor_out.data.base)
+                _uniques_bases_then_arrs.append(tensor_out.data.base)
+            _mem.lock_arr_writeability(tensor_out.data)
             tensor_refs = _uniques_bases_then_arrs
-            tensor_refs.append(out.data)
+            tensor_refs.append(tensor_out.data)
             finalize(f, _mem.release_writeability_lock_on_op, tensor_refs)
-        return out
+        return tensor_out
 
     def _replay_op(self, *input_vars: ArrayLike) -> "Tensor":
         """*dev use only*
