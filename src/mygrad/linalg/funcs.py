@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Optional, Sequence, Union
 
 import numpy as np
 from numpy.core.einsumfunc import _parse_einsum_input
@@ -136,7 +136,11 @@ def matmul(
     ...
 
 
-def einsum(*operands, optimize=False, constant=None):
+def einsum(
+    *operands: Union[ArrayLike, str, Sequence[int]],
+    optimize: bool = False,
+    constant: Optional[bool] = None,
+) -> Tensor:
     r"""
     einsum(subscripts, *operands)
 
@@ -179,8 +183,15 @@ def einsum(*operands, optimize=False, constant=None):
         algorithm. Also accepts an explicit contraction list from the
         ``np.einsum_path`` function. See ``np.einsum_path`` for more details.
 
-    constant : bool, optional (default=False)
-        If True, the resulting Tensor is a constant.
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. ``constant.grad`` will always return
+        ``None``).
+
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
 
     Returns
     -------
@@ -396,7 +407,7 @@ def einsum(*operands, optimize=False, constant=None):
     )
 
 
-def multi_matmul(tensors, *, constant=None):
+def multi_matmul(tensors: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
     """
     Matrix product of two or more tensors calculated in the optimal ordering
 
@@ -405,10 +416,15 @@ def multi_matmul(tensors, *, constant=None):
     tensors: Sequence[array_like]
         The sequence of tensors to be matrix-multiplied.
 
-    constant : bool, optional(default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient).
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. ``constant.grad`` will always return
+        ``None``).
 
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
     Returns
     -------
     mygrad.Tensor
