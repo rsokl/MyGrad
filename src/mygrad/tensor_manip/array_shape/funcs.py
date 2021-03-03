@@ -1,18 +1,23 @@
+from typing import Optional, Tuple, Union
+
 from mygrad.tensor_base import Tensor
+from mygrad.typing import ArrayLike, Shape
 
 from .ops import *
 
 __all__ = ["reshape", "squeeze", "ravel", "expand_dims", "broadcast_to"]
 
 
-def reshape(a, newshape, *, constant=None):
+def reshape(
+    a: ArrayLike, newshape: Union[int, Shape], *, constant: Optional[bool] = None
+) -> Tensor:
     """Returns a tensor with a new shape, without changing its data.
 
     This docstring was adapted from ``numpy.reshape``
 
     Parameters
     ----------
-    a : array_like
+    a : ArrayLike
         The tensor to be reshaped
 
     newshape : Union[int, Tuple[int, ...]]
@@ -50,7 +55,12 @@ def reshape(a, newshape, *, constant=None):
     return Tensor._op(Reshape, a, op_args=(newshape,), constant=constant)
 
 
-def squeeze(a, axis=None, *, constant=None):
+def squeeze(
+    a: ArrayLike,
+    axis: Optional[Union[int, Tuple[int, ...]]] = None,
+    *,
+    constant: Optional[bool] = None
+) -> Tensor:
     """
     Remove single-dimensional entries from the shape of a tensor.
 
@@ -58,7 +68,7 @@ def squeeze(a, axis=None, *, constant=None):
 
     Parameters
     ----------
-    a : array_like
+    a : ArrayLike
         The tensor to be reshaped
 
     axis : Optional[int, Tuple[int, ...]]
@@ -90,7 +100,7 @@ def squeeze(a, axis=None, *, constant=None):
     >>> mg.squeeze(x, axis=0).shape
     (3, 1)
     >>> mg.squeeze(x, axis=1).shape
-    Traceback (most recent call last):
+    Traceback (most recent call last) -> Tensor:
     ...
     ValueError: cannot select an axis to squeeze out which has size not equal to one
     >>> mg.squeeze(x, axis=2).shape
@@ -98,7 +108,7 @@ def squeeze(a, axis=None, *, constant=None):
     return Tensor._op(Squeeze, a, op_args=(axis,), constant=constant)
 
 
-def ravel(a, *, constant=None):
+def ravel(a: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
     """
     Flattens contents of a tensor into a contiguous 1-D array.  A copy is made only if needed.
 
@@ -106,7 +116,7 @@ def ravel(a, *, constant=None):
 
     Parameters
     ----------
-    a : array_like
+    a : ArrayLike
         The tensor to be flattened
 
     constant : bool, optional(default=False)
@@ -134,7 +144,7 @@ def ravel(a, *, constant=None):
     return Tensor._op(Ravel, a, constant=constant)
 
 
-def expand_dims(a, axis, *, constant=None):
+def expand_dims(a: ArrayLike, axis: int, *, constant: Optional[bool] = None) -> Tensor:
     """
     Expand the dimensions of a tensor by adding a new axis.
 
@@ -142,7 +152,7 @@ def expand_dims(a, axis, *, constant=None):
 
     Parameters
     ----------
-    a : array_like
+    a : ArrayLike
         The tensor to be expanded
 
     axis : int
@@ -172,7 +182,9 @@ def expand_dims(a, axis, *, constant=None):
     return Tensor._op(ExpandDims, a, op_args=(axis,), constant=constant)
 
 
-def broadcast_to(a, shape, *, constant=None):
+def broadcast_to(
+    a: ArrayLike, shape: Shape, *, constant: Optional[bool] = None
+) -> Tensor:
     """
     Broadcast a tensor to a new shape.
 
@@ -180,7 +192,7 @@ def broadcast_to(a, shape, *, constant=None):
 
     Parameters
     ----------
-    a : array_like
+    a : ArrayLike
         The tensor to be broadcasted
 
     shape: Tuple[int, ...]
@@ -211,7 +223,7 @@ def broadcast_to(a, shape, *, constant=None):
             [1, 2, 3],
             [1, 2, 3]])
     >>> mg.broadcast_to(x, (4,4))
-    Traceback (most recent call last):
+    Traceback (most recent call last) -> Tensor:
     ...
     ValueError: operands could not be broadcast together with remapped
     shapes [original->remapped]: (3,) and requested shape (4,4)

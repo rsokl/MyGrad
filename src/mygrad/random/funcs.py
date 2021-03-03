@@ -1,9 +1,12 @@
+from typing import Optional
+
 import numpy as np
 
 from mygrad import Tensor
+from mygrad.typing import ArrayLike, Shape
 
 
-def rand(*shape, constant=None):
+def rand(*shape: int, constant: Optional[bool] = None) -> Tensor:
     """Create a Tensor of the given shape and populate it with random
     samples from a uniform distribution over [0, 1).
 
@@ -13,9 +16,15 @@ def rand(*shape, constant=None):
         The dimensions of the returned array, must be non-negative.
         If no argument is given a single Python float is returned.
 
-    constant : bool, optional (default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient)
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. ``constant.grad`` will always return
+        ``None``).
+
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
 
     Returns
     -------
@@ -35,7 +44,7 @@ def rand(*shape, constant=None):
     return Tensor(np.random.rand(*shape), constant=constant, copy=False)
 
 
-def randint(low, high=None, shape=None, dtype=int):
+def randint(low, high=None, shape: Optional[Shape] = None, dtype=int) -> Tensor:
     """Return random integers from the “discrete uniform” distribution of the specified dtype in the
     “half-open” interval [low, high).
 
@@ -78,7 +87,7 @@ def randint(low, high=None, shape=None, dtype=int):
     return Tensor(np.random.randint(low, high, shape, dtype), copy=False)
 
 
-def randn(*shape, constant=None):
+def randn(*shape: int, constant: Optional[bool] = None) -> Tensor:
     """Return a sample (or samples) from the “standard normal” distribution.
 
     Parameters
@@ -87,9 +96,15 @@ def randn(*shape, constant=None):
         The dimensions of the returned array, must be non-negative.
         If no argument is given a single Python float is returned.
 
-    constant : bool, optional (default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient)
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. ``constant.grad`` will always return
+        ``None``).
+
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
 
     Returns
     -------
@@ -117,7 +132,7 @@ def randn(*shape, constant=None):
     return Tensor(np.random.randn(*shape), constant=constant, copy=False)
 
 
-def random(shape=None, *, constant=None):
+def random(shape: Optional[Shape] = None, *, constant: Optional[bool] = None) -> Tensor:
     """Return random floats in the half-open interval [0.0, 1.0).
 
     To create a random sample of a given shape on the interval [a, b), call
@@ -129,10 +144,15 @@ def random(shape=None, *, constant=None):
         Output shape. If the given shape is, e.g., (m, n, k), then m * n * k samples are drawn.
         Default is None, in which case a single value is returned.
 
-    constant : bool, optional (default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient)
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. ``constant.grad`` will always return
+        ``None``).
 
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
     Returns
     -------
     int or mygrad.Tensor of ints
@@ -150,7 +170,9 @@ def random(shape=None, *, constant=None):
     return Tensor(np.random.random(shape), constant=constant, copy=False)
 
 
-def random_sample(shape=None, *, constant=None):
+def random_sample(
+    shape: Optional[Shape] = None, *, constant: Optional[bool] = None
+) -> Tensor:
     """Return random floats in the half-open interval [0.0, 1.0).
 
     Results are from the “continuous uniform” distribution over the stated interval.
@@ -164,10 +186,15 @@ def random_sample(shape=None, *, constant=None):
         Output shape. If the given shape is, e.g., (m, n, k), then m * n * k samples are drawn.
         Default is None, in which case a single value is returned.
 
-    constant : bool, optional (default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient)
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. ``constant.grad`` will always return
+        ``None``).
 
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
     Returns
     -------
     int or mygrad.Tensor of ints
@@ -189,7 +216,7 @@ def random_sample(shape=None, *, constant=None):
     return Tensor(np.random.random_sample(shape), constant=constant, copy=False)
 
 
-def ranf(shape=None, *, constant=None):
+def ranf(shape: Optional[Shape] = None, *, constant: Optional[bool] = None) -> Tensor:
     """Return random floats in the half-open interval [0.0, 1.0).
 
     To create a random sample of a given shape on the interval [a, b), call
@@ -201,10 +228,15 @@ def ranf(shape=None, *, constant=None):
         Output shape. If the given shape is, e.g., (m, n, k), then m * n * k samples are drawn.
         Default is None, in which case a single value is returned.
 
-    constant : bool, optional (default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient)
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. ``constant.grad`` will always return
+        ``None``).
 
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
     Returns
     -------
     int or mygrad.Tensor of ints
@@ -230,7 +262,7 @@ def ranf(shape=None, *, constant=None):
     return Tensor(np.random.ranf(shape), constant=constant, copy=False)
 
 
-def sample(shape=None, *, constant=None):
+def sample(shape: Optional[Shape] = None, *, constant: Optional[bool] = None) -> Tensor:
     """Return random floats in the half-open interval [0.0, 1.0).
 
     To create a random sample of a given shape on the interval [a, b), call
@@ -242,10 +274,15 @@ def sample(shape=None, *, constant=None):
         Output shape. If the given shape is, e.g., (m, n, k), then m * n * k samples are drawn.
         Default is None, in which case a single value is returned.
 
-    constant : bool, optional (default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient)
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. ``constant.grad`` will always return
+        ``None``).
 
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
     Returns
     -------
     int or mygrad.Tensor of ints
