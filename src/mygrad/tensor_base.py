@@ -26,7 +26,11 @@ import mygrad._utils.duplicating_graph as _dup
 import mygrad._utils.graph_tracking as _track
 import mygrad._utils.lock_management as _mem
 from mygrad._tensor_core_ops.indexing import GetItem, SetItem
-from mygrad._utils import WeakRef, WeakRefIterable, collect_all_operations
+from mygrad._utils import (
+    WeakRef,
+    WeakRefIterable,
+    collect_all_operations_and_clear_grads,
+)
 from mygrad.errors import DisconnectedView
 from mygrad.linalg.ops import MatMul
 from mygrad.math.arithmetic.ops import (
@@ -679,15 +683,14 @@ class Tensor:
         if self._base is None:
             return self._grad
 
-        if self._view_grad is not None:
+        if self._view_grad is not None and self._view_grad.base is self._base._grad:
             # view grad has been computed already
             return self._view_grad
 
         if self._base._grad is None or self._creator is None:
             #  ``self`` had its graph, connecting it to its base, cleared.
             #  ``self._view_grad`` can't be computed without this info.
-            #  Defer to ``self.grad`` so that the present tensor
-            return self._grad
+            return None
 
         (view_parent,) = self._creator.variables
 
@@ -794,37 +797,24 @@ class Tensor:
 
         _uniques_bases_then_arrs = ()
 
+        tensor_vars = tuple(
+            cls(var, constant=True, copy=False) if not isinstance(var, Tensor) else var
+            for var in input_vars
+        )
+
         # cast all input-vars to tensors
-        if _track.TRACK_GRAPH:
-            # lock memory of array data and clear any tensor
-            # gradients
-            tensor_vars = tuple(
-                cls(var, constant=True, copy=False)
-                if not isinstance(var, Tensor)
-                else var.null_grad(_clear_view_info=True)
-                for var in input_vars
-            )
-            if _mem.MEM_GUARD:
-
-                _uniques_bases_then_arrs = WeakRefIterable(
-                    _mem.lock_arr_writeability(x)
-                    for x in _mem.unique_arrs_and_bases(tensor_vars)
-                )
-
-        else:
-            # operations are not being tracked - don't lock memory or null grads
-            tensor_vars = tuple(
-                cls(var, constant=True, copy=False)
-                if not isinstance(var, Tensor)
-                else var
-                for var in input_vars
+        if _track.TRACK_GRAPH and _mem.MEM_GUARD:
+            # lock memory of array data
+            _uniques_bases_then_arrs = WeakRefIterable(
+                _mem.lock_arr_writeability(x)
+                for x in _mem.unique_arrs_and_bases(tensor_vars)
             )
 
         if op_args is None:
             op_args = tuple()
 
         if op_kwargs is None:
-            op_kwargs = dict()
+            op_kwargs = {}
 
         f = Op()
 
@@ -849,13 +839,15 @@ class Tensor:
                 _base=None,
             )
 
-        # Determine whether or not op was a view; if so, `base`
-        # points to parent Tensor
+        # points to parent tensor that op-output is a view of
         base = None  # type: Optional[Tensor]
+
         # If output of op is a view - tracks the tensor var that is
         # the parent of the view
         parent_var: Optional[Tensor] = None
 
+        # Determine whether or not op was a view; if so, `base`
+        # points to parent Tensor
         op_out_base = op_out.base
         if f.can_return_view and op_out_base is not None:
             vars_can_share_mem = (
@@ -872,10 +864,24 @@ class Tensor:
                     or (op_out_base is parent_data_base)
                     or (op_out is parent_data)
                 ):
+                    if parent_var._base is not None and parent_var._creator is None:
+                        parent_var._base = None
+
                     base = parent_var if parent_var.base is None else parent_var.base
                     break
             else:
                 parent_var = None
+
+        for v in input_vars:
+            if isinstance(v, Tensor):
+                # tensor's graph has been cleared, but its base lingers
+                if v._base is not None and v._creator is None:
+                    v._base = None
+
+                if base is None:
+                    # non-view ops clear grads
+                    v._grad = None
+                    v._view_grad = None
 
         if base is not None:
             # we need to be able to replay view-ops for doing in-place operations
@@ -1004,39 +1010,45 @@ class Tensor:
             self.clear_graph()
             return
 
+        # don't set self._grad yet because there is a grad-clearing step that
+        # occurs during graph creation
         if grad is not None:
             # `self` is guaranteed to be a tensor of floats
             # so we can simply cast `grad` to be the same dtype
-            self._grad = asarray(grad, dtype=self.dtype)
+            _grad = asarray(grad, dtype=self.dtype)
 
-            if self._grad.shape != self.shape:
+            if _grad.shape != self.shape:
                 try:
                     # See if grad can broadcast to `self`
                     # raises ValueError if not
-                    self._grad = np.multiply(
+                    _grad = np.multiply(
                         np.full_like(self.data, fill_value=1.0),
-                        self._grad,
+                        _grad,
                         dtype=self.dtype,
                     )
-                    if self._grad.shape != self.shape:
+                    if _grad.shape != self.shape:
                         # mutual broadcasting occurred
                         raise ValueError()
                 except ValueError:
                     raise ValueError(
                         f"`tensor.backward(grad)` was passed a gradient with an incompatible shape.\n"
                         f"`grad` must be broadcast-compatible with `tensor.shape={self.shape}`\n"
-                        f"Got `grad.shape={self._grad.shape}`"
+                        f"Got `grad.shape={_grad.shape}`"
                     )
         else:
-            self._grad = np.full_like(self.data, fill_value=1.0)
+            _grad = np.full_like(self.data, fill_value=1.0)
 
         if self.creator is not None:
-            graph = set()  # type: Set[WeakRef[Operation]]
-
             # stores a set of all the operation-instances that participate in
             # the computational graph up to and including the present operation
-            collect_all_operations(self, seen=graph)
+            graph = set()  # type: Set[WeakRef[Operation]]
+
+            # populates graph and clears all grads
+            collect_all_operations_and_clear_grads(self, seen=graph)
+            self._grad = _grad
             self._backward(graph=graph)
+        else:
+            self._grad = _grad
 
         self.clear_graph()
 

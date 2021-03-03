@@ -5,10 +5,12 @@ import hypothesis.strategies as st
 import numpy as np
 import pytest
 from hypothesis import given, settings
+from numpy.testing import assert_allclose
 from pytest import raises
 
 import mygrad as mg
 from mygrad import amax, amin, cumprod, cumsum, mean, prod, std, sum, var
+from tests.utils.numerical_gradient import numerical_gradient_full
 
 from ...custom_strategies import tensors, valid_axes
 from ...wrappers.uber import (
@@ -474,3 +476,14 @@ def test_cumsum_fwd():
 )
 def test_cumsum_bkwd():
     pass
+
+
+def test_patch_coverage_on_var():
+    # this path coverage through var was flaky
+    x = mg.arange(6.0).reshape((2, 3))
+    o = mg.var(x, axis=1, keepdims=False)
+    o.backward()
+    (num_grad,) = numerical_gradient_full(
+        _var, x.data, kwargs=dict(axis=1, keepdims=False), back_grad=np.ones(o.shape)
+    )
+    assert_allclose(x.grad, num_grad)
