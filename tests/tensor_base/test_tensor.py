@@ -464,6 +464,24 @@ def test_math_methods(attr: str, constant: bool):
     assert type(method_out.creator) is type(function_out.creator)
 
 
+@pytest.mark.parametrize(
+    "attr",
+    (
+        "argmax",
+        "argmin",
+        "any",
+    ),
+)
+def test_math_methods(attr: str):
+    x = Tensor([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+
+    assert hasattr(x, attr)
+    method_out = getattr(x, attr).__call__()
+    function_out = getattr(np, attr).__call__(x.data)
+    assert_equal(method_out, function_out)
+    assert_equal(method_out, function_out)
+
+
 @pytest.mark.parametrize("op", ("moveaxis", "swapaxes"))
 @given(constant=st.booleans())
 def test_axis_interchange_methods(op: str, constant: bool):
