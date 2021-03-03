@@ -20,7 +20,7 @@ if TYPE_CHECKING:  # pragma: no cover
     from mygrad.operation_base import Operation
 
 __all__ = [
-    "collect_all_operations",
+    "collect_all_operations_and_clear_grads",
     "ContextTracker",
     "reduce_broadcast",
     "SkipGradient",
@@ -32,12 +32,17 @@ __all__ = [
 T = TypeVar("T")
 
 
-def collect_all_operations(t: "Tensor", seen: Set["WeakRef[Operation]"]):
+def collect_all_operations_and_clear_grads(
+    t: "Tensor", seen: Set["WeakRef[Operation]"]
+):
     """Recursively accumulates in `seen` all operations involved
     in creating `t`.
 
     `seen` is updated in-place
     """
+    t._view_grad = None
+    t._grad = None
+
     if t.creator is None or t.constant:
         return
 
@@ -49,7 +54,7 @@ def collect_all_operations(t: "Tensor", seen: Set["WeakRef[Operation]"]):
     seen.add(c)
 
     for t in t.creator.variables:
-        collect_all_operations(t, seen)
+        collect_all_operations_and_clear_grads(t, seen)
 
 
 class WeakRef(Generic[T]):
