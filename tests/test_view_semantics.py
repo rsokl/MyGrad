@@ -13,19 +13,43 @@ from tests.utils.stateful import clear_all_mem_locking_state
 from tests.utils.wrappers import clears_mem_state
 
 
-def test_simple_view_grad_reflects_base_grad():
+@pytest.mark.parametrize("view_pre_or_post_backward", ("pre", "post"))
+def test_simple_view_grad_reflects_base_grad(view_pre_or_post_backward: str):
     base = mg.Tensor([1.0, 2.0, 3.0])
-    view = base[:2]
-    assert view.base is base
+
+    if view_pre_or_post_backward == "pre":
+        view = base[:2]
+        assert view.base is base
+
     (base ** 2).backward()
+
+    if view_pre_or_post_backward == "post":
+        view = base[:2]
+        assert view.base is base
+
     assert_array_equal(view.grad, base.grad[:2])
+    assert np.shares_memory(view.grad, base.grad)
     assert view.grad.base is base.grad
 
+    base.null_grad()
+    assert base.grad is None
+    assert view.grad is None
 
-def test_simple_view_grad_reflects_nulled_base_grad():
+
+@pytest.mark.parametrize("view_pre_or_post_backward", ("pre", "post"))
+def test_simple_view_grad_reflects_nulled_base_grad(view_pre_or_post_backward: str):
     base = mg.Tensor([1.0, 2.0, 3.0])
-    view = base[:2]
+
+    if view_pre_or_post_backward == "pre":
+        view = base[:2]
+
     (base ** 2).backward()
+
+    if view_pre_or_post_backward == "post":
+        view = base[:2]
+
+    assert view.grad is not None
+
     # Involving base in new graph should null its gradient
     # and this should be reflected in its views
     _ = +base
@@ -48,19 +72,18 @@ def test_simple_view_becomes_disconnected_from_base_via_clear_graph():
     assert view.grad is None
 
 
-@pytest.mark.xfail(
-    reason=""
-    "This is a known/documented inconsistency in MyGrad's "
-    "view semantics. It would be expensive to propagate "
-    "information forward this aggressively, and it is almost "
-    "certainly the case that the 'fix' would lead to a "
-    "less-intuitive user experience."
-)
-@clears_mem_state
-def test_known_disagreement_between_view_grad_and_base():
+@pytest.mark.parametrize("view_pre_or_post_backward", ("pre", "post"))
+def test_nulling_base_grad_reflects_in_view(view_pre_or_post_backward):
     base = mg.Tensor([1.0, 2.0, 3.0])
-    view = base[:2]
+
+    if view_pre_or_post_backward == "pre":
+        view = base[...][:2]
+
     (base ** 2).backward()
+
+    if view_pre_or_post_backward == "post":
+        view = base[...][:2]
+
     # pulling on `view.grad` will set its gradient
     _ = view.grad
 
@@ -410,3 +433,48 @@ def test_resuming_graph_after_backprop_through_view(
     assert_allclose(view, 3 * np.arange(4.0)[-2:])
     assert_allclose(base.grad, np.ones_like(base))
     assert_allclose(view.grad, np.ones_like(view))
+
+
+@given(num_additional_views=st.integers(0, 3))
+def test_sequence_of_interactions_with_view_and_backprop(num_additional_views: int):
+    base = mg.arange(4.0)[...]
+    base.backward([-1.0, 2.0, 3.0, -4.0])
+
+    view = base[-2:]
+    for _ in range(num_additional_views):
+        view = view[...]
+
+    # view's grad should be accurate even if grad was
+    # formed post-backprop
+    assert_allclose(view.grad, base.grad[-2:])
+    assert np.shares_memory(view.grad, base.grad)
+
+    # backpropping through base should update the
+    # view's grad
+    (2 * base).backward(-1)
+    assert_allclose(base.grad, np.full_like(base, -2))
+    assert_allclose(view.grad, base.grad[-2:])
+    assert np.shares_memory(view.grad, base.grad)
+
+    # taking a view of the base should not null its grad
+    view = base[-2:]
+    assert_allclose(base.grad, np.full_like(base, -2))
+
+    # but backpropping from the view should clear the base's
+    # grad and reset it to reflect the newest derivative
+    view.backward([-1.0, 10.0])
+    assert_allclose(view.grad, np.array([-1.0, 10.0]))
+    assert_allclose(base.grad, np.array([0.0, 0, -1.0, 10.0]))
+    assert np.shares_memory(view.grad, base.grad)
+
+    # involving in a new op should null both of their gradients
+    _ = +base
+
+    assert base.grad is None
+    assert view.grad is None
+
+    # view should be disconnected from base
+    (2 * view).backward()
+    assert view.base is None
+    assert_allclose(view.grad, np.full_like(view, fill_value=2.0))
+    assert base.grad is None

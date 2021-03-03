@@ -10,21 +10,10 @@ from mygrad import Tensor
 from tests.custom_strategies import tensors
 
 
-def view_op(x):
-    return x[...]
-
-
-def std_op(x):
-    return +x
-
-
-@pytest.mark.parametrize("func", [view_op, std_op])
 @given(x=tensors(include_grad=True))
-def test_involving_a_tensor_in_a_graph_nulls_its_gradient(
-    func: Callable[[Tensor], Tensor], x: Tensor
-):
+def test_involving_a_tensor_in_a_graph_nulls_its_gradient(x: Tensor):
     assert x.grad is not None
-    func(x)
+    _ = +x
     assert x.grad is None
     assert x._ops is not None
 
