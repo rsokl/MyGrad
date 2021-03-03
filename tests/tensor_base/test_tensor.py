@@ -472,7 +472,7 @@ def test_math_methods(attr: str, constant: bool):
         "any",
     ),
 )
-def test_math_methods(attr: str):
+def test_numpy_math_methods(attr: str):
     x = Tensor([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
 
     assert hasattr(x, attr)
