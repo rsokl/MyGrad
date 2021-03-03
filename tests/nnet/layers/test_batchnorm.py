@@ -128,16 +128,16 @@ def test_batchnorm(x, data):
         assert not np.shares_memory(g2.grad, b2.grad)
     assert not np.shares_memory(grad, t2.grad)
 
-    y2.null_gradients()
-    assert t2.grad is None
+    assert not t2._ops
 
     if gamma is not None:
-        assert g2.grad is None
+        assert not g2._ops
 
     if beta is not None:
-        assert b2.grad is None
+        assert not b2._ops
 
 
+@mg.no_autodiff
 def simple_batchnorm_numpy(x, gamma=None, beta=None, eps=0):
     return mg.asarray(simple_batchnorm(x, eps=eps, gamma=gamma, beta=beta))
 

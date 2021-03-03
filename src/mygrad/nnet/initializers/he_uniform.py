@@ -3,8 +3,8 @@ import numpy as np
 from mygrad.nnet.initializers.uniform import uniform
 
 
-def he_uniform(*shape, gain=1, dtype=np.float32, constant=False):
-    r""" Initialize a ``mygrad.Tensor`` according to the uniform initialization procedure
+def he_uniform(*shape, gain=1, dtype=np.float32, constant=None):
+    r"""Initialize a ``mygrad.Tensor`` according to the uniform initialization procedure
     described by He et al.
 
     Parameters

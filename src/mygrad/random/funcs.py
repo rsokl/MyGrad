@@ -3,8 +3,8 @@ import numpy as np
 from mygrad import Tensor
 
 
-def rand(*shape, constant=False):
-    """ Create a Tensor of the given shape and populate it with random
+def rand(*shape, constant=None):
+    """Create a Tensor of the given shape and populate it with random
     samples from a uniform distribution over [0, 1).
 
     Parameters
@@ -32,12 +32,13 @@ def rand(*shape, constant=False):
             [0.66029533, 0.79285341, 0.54967228, 0.25178508]])
     """
 
-    return Tensor(np.random.rand(*shape), constant=constant)
+    return Tensor(np.random.rand(*shape), constant=constant, copy=False)
 
 
-def randint(low, high=None, shape=None, dtype=int, constant=False):
-    """ Return random integers from the “discrete uniform” distribution of the specified dtype in the
+def randint(low, high=None, shape=None, dtype=int):
+    """Return random integers from the “discrete uniform” distribution of the specified dtype in the
     “half-open” interval [low, high).
+
     If high is None (the default), then results are from [0, low).
 
     Parameters
@@ -57,11 +58,6 @@ def randint(low, high=None, shape=None, dtype=int, constant=False):
     dtype: dtype, optional
         Desired dtype of the result. Byteorder must be native. The default value is int.
 
-    constant : bool, optional (default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient)
-
-
     Returns
     -------
     int or mygrad.Tensor of ints
@@ -79,11 +75,11 @@ def randint(low, high=None, shape=None, dtype=int, constant=False):
     Tensor(57)
     """
 
-    return Tensor(np.random.randint(low, high, shape, dtype), constant=constant)
+    return Tensor(np.random.randint(low, high, shape, dtype), copy=False)
 
 
-def randn(*shape, constant=False):
-    """ Return a sample (or samples) from the “standard normal” distribution.
+def randn(*shape, constant=None):
+    """Return a sample (or samples) from the “standard normal” distribution.
 
     Parameters
     ----------
@@ -118,11 +114,11 @@ def randn(*shape, constant=False):
              [-1.28788909, -1.52525778]]])
     """
 
-    return Tensor(np.random.randn(*shape), constant=constant)
+    return Tensor(np.random.randn(*shape), constant=constant, copy=False)
 
 
-def random(shape=None, constant=False):
-    """ Return random floats in the half-open interval [0.0, 1.0).
+def random(shape=None, *, constant=None):
+    """Return random floats in the half-open interval [0.0, 1.0).
 
     To create a random sample of a given shape on the interval [a, b), call
     (b-a) * random(shape) + a
@@ -151,11 +147,11 @@ def random(shape=None, constant=False):
             [0.19780163, 0.51162365, 0.7849505 , 0.47864586]])
     """
 
-    return Tensor(np.random.random(shape), constant=constant)
+    return Tensor(np.random.random(shape), constant=constant, copy=False)
 
 
-def random_sample(shape=None, constant=False):
-    """ Return random floats in the half-open interval [0.0, 1.0).
+def random_sample(shape=None, *, constant=None):
+    """Return random floats in the half-open interval [0.0, 1.0).
 
     Results are from the “continuous uniform” distribution over the stated interval.
 
@@ -190,11 +186,11 @@ def random_sample(shape=None, constant=False):
     Tensor(0.47644928)
     """
 
-    return Tensor(np.random.random_sample(shape), constant=constant)
+    return Tensor(np.random.random_sample(shape), constant=constant, copy=False)
 
 
-def ranf(shape=None, constant=False):
-    """ Return random floats in the half-open interval [0.0, 1.0).
+def ranf(shape=None, *, constant=None):
+    """Return random floats in the half-open interval [0.0, 1.0).
 
     To create a random sample of a given shape on the interval [a, b), call
     (b-a) * ranf(shape) + a
@@ -231,11 +227,11 @@ def ranf(shape=None, constant=False):
     Tensor(0.77739196)
     """
 
-    return Tensor(np.random.ranf(shape), constant=constant)
+    return Tensor(np.random.ranf(shape), constant=constant, copy=False)
 
 
-def sample(shape=None, constant=False):
-    """ Return random floats in the half-open interval [0.0, 1.0).
+def sample(shape=None, *, constant=None):
+    """Return random floats in the half-open interval [0.0, 1.0).
 
     To create a random sample of a given shape on the interval [a, b), call
     (b-a) * sample(shape) + a
@@ -268,11 +264,13 @@ def sample(shape=None, constant=False):
     Tensor(0.50690423)
     """
 
-    return Tensor(np.random.sample(shape), constant=constant)
+    return Tensor(np.random.sample(shape), constant=constant, copy=False)
 
 
 def seed(seed_number):
-    """ Seed the generator
+    """Seed the generator.
+
+    Simply used NumPy's random state - i.e. this is equivalent to ``numpy.random.seed``.
 
     Parameters
     ----------

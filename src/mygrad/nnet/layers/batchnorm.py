@@ -1,7 +1,10 @@
+from typing import Optional, Tuple, Union
+
 import numpy as np
 
 from mygrad import Tensor
 from mygrad.operation_base import Operation
+from mygrad.typing import ArrayLike
 
 __all__ = ["batchnorm"]
 
@@ -19,8 +22,6 @@ class BatchNorm(Operation):
     `mean` and `var` are bound as instance-attributes upon
     calling the batch-norm instance.
     """
-
-    scalar_only = True
 
     def __call__(self, x, gamma, beta, *, eps):
         """
@@ -42,12 +43,13 @@ class BatchNorm(Operation):
         normed_dims = tuple(i for i in range(x.ndim) if i != 1)
         keepdims_shape = tuple(1 if n != 1 else d for n, d in enumerate(x.shape))
 
+        self.variables = tuple(i for i in (x, gamma, beta))
+
         if gamma.size == 0:
             gamma = None
         if beta.size == 0:
             beta = None
 
-        self.variables = tuple(i for i in (x, gamma, beta) if i is not None)
         self.gamma = gamma
         self.beta = beta
 
@@ -109,7 +111,14 @@ class BatchNorm(Operation):
             raise IndexError
 
 
-def batchnorm(x, *, gamma=None, beta=None, eps, constant=False):
+def batchnorm(
+    x: ArrayLike,
+    *,
+    gamma: Optional[ArrayLike] = None,
+    beta: Optional[ArrayLike] = None,
+    eps: float,
+    constant: Optional[bool] = None
+) -> Tensor:
     """
     Performs batch normalization on ``x``::
 

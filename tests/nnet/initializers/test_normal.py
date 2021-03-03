@@ -1,14 +1,18 @@
-from hypothesis import given
-import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
+import hypothesis.strategies as st
 import numpy as np
 import pytest
+from hypothesis import given
 
 from mygrad import Tensor
 from mygrad.nnet.initializers import normal
 
 
-@given(dtype=hnp.unsigned_integer_dtypes() | hnp.integer_dtypes() | hnp.complex_number_dtypes())
+@given(
+    dtype=hnp.unsigned_integer_dtypes()
+    | hnp.integer_dtypes()
+    | hnp.complex_number_dtypes()
+)
 def test_normal_dtype_validation(dtype):
     with pytest.raises(ValueError):
         normal(1, dtype=dtype)
@@ -43,7 +47,9 @@ def test_normal_statistics(shape, mean, std):
     constant=st.booleans(),
 )
 def test_normal(shape, mean, std, dtype, constant):
-    tensor = normal(shape, mean=Tensor(mean), std=Tensor(std), dtype=dtype, constant=constant)
+    tensor = normal(
+        shape, mean=Tensor(mean), std=Tensor(std), dtype=dtype, constant=constant
+    )
     assert tensor.shape == shape
     assert tensor.dtype == dtype
     assert tensor.constant == constant

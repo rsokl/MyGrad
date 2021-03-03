@@ -25,7 +25,7 @@ compute the analytic derivatives of functions. Suppose we want to compute this d
 .. code:: pycon
 
     >>> import mygrad as mg
-    >>> x = mg.Tensor(3.0)
+    >>> x = mg.tensor(3.0)
     >>> f = x ** 2
     >>> f
     Tensor(9.0)
@@ -62,7 +62,7 @@ Some Bells and Whistles
 .. code:: pycon
 
     >>> import numpy as np
-    >>> x = mg.Tensor([2.0, 2.0, 2.0])
+    >>> x = mg.tensor([2.0, 2.0, 2.0])
     >>> y = np.array([1.0, 2.0, 3.0])
     >>> f = x ** y  # (2 ** 1, 2 ** 2, 2 ** 3)
     >>> f.backward()
@@ -88,7 +88,7 @@ Advanced Example
 
 The following is an example of using `mygrad` to compute the `hinge loss <https://en.wikipedia.org/wiki/Hinge_loss>`_ of classification scores and to "back-propagate" through (compute the gradient of) this loss. This example demonstrates some of mygrad's ability to perform back-propagation through broadcasted operations, basic indexing, advanced indexing, and in-place assignments.
 
-.. code::
+.. code:: pycon
 
     >>> from mygrad import Tensor
     >>> import numpy as np
@@ -115,8 +115,8 @@ MyGrad provides the capability to visually render diagrams of your computational
 
     import mygrad as mg
     from mygrad.computational_graph import build_graph
-    x = mg.Tensor(2)
-    y = mg.Tensor(3)
+    x = mg.tensor(2)
+    y = mg.tensor(3)
     f = x * y
     g = f + x - 2
 

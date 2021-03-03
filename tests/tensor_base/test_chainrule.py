@@ -8,6 +8,7 @@ from numpy.testing import assert_allclose
 
 import mygrad as mg
 from mygrad.tensor_base import Tensor
+from tests.utils.checkers import expected_constant
 
 
 def _check_grad(t: mg.Tensor, expr: Union[None, np.ndarray, float]):
@@ -21,10 +22,15 @@ def _check_grad(t: mg.Tensor, expr: Union[None, np.ndarray, float]):
             assert_allclose(t.grad, expr)
 
 
+def _check_cleared_node(t: mg.Tensor):
+    assert not t._ops and not t._accum_ops and t.creator is None
+    assert t.data.flags.writeable is True
+
+
 def test_check_grad():
     # forced grad on constant
     x = Tensor(1.0, constant=True)
-    x.grad = np.array(1.0)
+    x._grad = np.array(1.0)
 
     # bad: constant tensor should have grad None
     with pytest.raises(AssertionError):
@@ -142,11 +148,12 @@ def test_non_broadcastable(data, grad):
 
 
 @pytest.mark.parametrize("v1_const", [True, False])
-@pytest.mark.parametrize("v2_const", [True, False])
-@pytest.mark.parametrize("v3_const", [True, False])
-@pytest.mark.parametrize("v4_const", [True, False])
+@pytest.mark.parametrize("v2_const", [True, None])
+@pytest.mark.parametrize("v3_const", [True, None])
+@pytest.mark.parametrize("v4_const", [True, None])
 @given(
-    v1_val=st.integers(-2, 2).map(float), grad=st.integers(-2, 2).map(float),
+    v1_val=st.integers(-2, 2).map(float),
+    grad=st.integers(-2, 2).map(float),
 )
 def test_linear_graph(
     v1_val: float,
@@ -157,13 +164,13 @@ def test_linear_graph(
     grad: float,
 ):
     r"""
-     v1
-     |
-     v2
-     |
-     v3
-     |
-     v4
+    v1
+    |
+    v2
+    |
+    v3
+    |
+    v4
     """
     v1 = Tensor(v1_val, constant=v1_const)
     v2 = mg.square(v1, constant=v2_const)
@@ -206,26 +213,26 @@ def test_linear_graph(
     )
 
     # check that backprop metadata cleared appropriately upon completion of backprop
-    assert not v4._accum_ops and v4.creator is not None
-    assert not v3._accum_ops and v3.creator is not None
-    assert not v2._accum_ops and v2.creator is not None
-    assert not v1._accum_ops and v1.creator is None
+    assert not v4._accum_ops
+    assert not v3._accum_ops
+    assert not v2._accum_ops
+    assert not v1._accum_ops
 
-    # check the null grads & clear graph always propagates through the graph
-    v4.null_gradients(clear_graph=True)
-    assert v4.grad is None and v4.creator is None
-    assert v3.grad is None and not v3._ops and v3.creator is None
-    assert v2.grad is None and not v2._ops and v2.creator is None
-    assert v1.grad is None and not v1._ops and v1.creator is None
+    # check the backprop clears graph & clear graph always propagates through the graph
+    _check_cleared_node(v4)
+    _check_cleared_node(v3)
+    _check_cleared_node(v2)
+    _check_cleared_node(v1)
 
 
 @pytest.mark.parametrize("v1_const", [True, False])
-@pytest.mark.parametrize("v2_const", [True, False])
-@pytest.mark.parametrize("v3_const", [True, False])
-@pytest.mark.parametrize("v4_const", [True, False])
-@pytest.mark.parametrize("v5_const", [True, False])
+@pytest.mark.parametrize("v2_const", [True, None])
+@pytest.mark.parametrize("v3_const", [True, None])
+@pytest.mark.parametrize("v4_const", [True, None])
+@pytest.mark.parametrize("v5_const", [True, None])
 @given(
-    v1_val=st.integers(-2, 2).map(float), grad=st.integers(-2, 2).map(float),
+    v1_val=st.integers(-2, 2).map(float),
+    grad=st.integers(-2, 2).map(float),
 )
 def test_fanout_graph(
     v1_val: float,
@@ -264,11 +271,13 @@ def test_fanout_graph(
     assert v5.data == v2.data * v3.data * v4.data
 
     # check that constant propagates through graph reliably
-    assert v1.constant is v1_const
-    assert v2.constant is (v2_const or v1_const)
-    assert v3.constant is (v3_const or v1_const)
-    assert v4.constant is (v4_const or v1_const)
-    assert v5.constant is v5_const or v1_const or (v2_const and v3_const and v4_const)
+    assert v1.constant is expected_constant(dest_dtype=float, constant=v1_const)
+    assert v2.constant is expected_constant(v1, dest_dtype=float, constant=v2_const)
+    assert v3.constant is expected_constant(v1, dest_dtype=float, constant=v3_const)
+    assert v4.constant is expected_constant(v1, dest_dtype=float, constant=v4_const)
+    assert v5.constant is expected_constant(
+        v2, v3, v4, dest_dtype=float, constant=v5_const
+    )
 
     # check that gradients are correct
     # dL/d5
@@ -299,19 +308,18 @@ def test_fanout_graph(
     )
 
     # check that backprop metadata cleared appropriately upon completion of backprop
-    assert not v5._accum_ops and v5.creator is not None
-    assert not v4._accum_ops and v4.creator is not None
-    assert not v3._accum_ops and v3.creator is not None
-    assert not v2._accum_ops and v2.creator is not None
-    assert not v1._accum_ops and v1.creator is None
+    assert not v5._accum_ops
+    assert not v4._accum_ops
+    assert not v3._accum_ops
+    assert not v2._accum_ops
+    assert not v1._accum_ops
 
     # check the null grads & clear graph always propagates through the graph
-    v5.null_gradients(clear_graph=True)
-    assert v5.grad is None and v5.creator is None
-    assert v4.grad is None and not v4._ops and v4.creator is None
-    assert v3.grad is None and not v3._ops and v3.creator is None
-    assert v2.grad is None and not v2._ops and v2.creator is None
-    assert v1.grad is None and not v1._ops and v1.creator is None
+    _check_cleared_node(v5)
+    _check_cleared_node(v4)
+    _check_cleared_node(v3)
+    _check_cleared_node(v2)
+    _check_cleared_node(v1)
 
 
 @pytest.mark.parametrize("v1_const", [True, False])
@@ -368,11 +376,11 @@ def test_interesting_graph(
     assert v5.data == (v4.data * v3.data)
 
     # check that constant propagates through graph reliably
-    assert v1.constant is v1_const
-    assert v2.constant is v2_const
-    assert v3.constant is v3_const or v1.constant
-    assert v4.constant is v4_const or (v2.constant and v3.constant)
-    assert v5.constant is v5_const or (v3.constant and v4.constant)
+    assert v1.constant is expected_constant(dest_dtype=float, constant=v1_const)
+    assert v2.constant is expected_constant(dest_dtype=float, constant=v2_const)
+    assert v3.constant is expected_constant(v1, v1, dest_dtype=float, constant=v3_const)
+    assert v4.constant is expected_constant(v2, v3, dest_dtype=float, constant=v4_const)
+    assert v5.constant is expected_constant(v4, v3, dest_dtype=float, constant=v5_const)
 
     # check that gradients are correct
     # dL/d5
@@ -406,19 +414,18 @@ def test_interesting_graph(
     _check_grad(v1, v1_grad)
 
     # check that backprop metadata cleared appropriately upon completion of backprop
-    assert not v5._accum_ops and v5.creator is not None
-    assert not v4._accum_ops and v4.creator is not None
-    assert not v3._accum_ops and v3.creator is not None
-    assert not v2._accum_ops and v2.creator is None
-    assert not v1._accum_ops and v1.creator is None
+    assert not v5._accum_ops
+    assert not v4._accum_ops
+    assert not v3._accum_ops
+    assert not v2._accum_ops
+    assert not v1._accum_ops
 
     # check the null grads & clear graph always propagates through the graph
-    v5.null_gradients(clear_graph=True)
-    assert v5.grad is None and v5.creator is None
-    assert v4.grad is None and not v4._ops and v4.creator is None
-    assert v3.grad is None and not v3._ops and v3.creator is None
-    assert v2.grad is None and not v2._ops and v2.creator is None
-    assert v1.grad is None and not v1._ops and v1.creator is None
+    _check_cleared_node(v5)
+    _check_cleared_node(v4)
+    _check_cleared_node(v3)
+    _check_cleared_node(v2)
+    _check_cleared_node(v1)
 
 
 @pytest.mark.parametrize("v1_const", [True, False])
@@ -430,9 +437,8 @@ def test_interesting_graph(
     v1_val=st.integers(-2, 2).map(float),
     v2_val=st.integers(-2, 2).map(float),
     grad=st.integers(-2, 2).map(float),
-    dangling_site=st.integers(0, 4).map(
-        lambda x: f"v{5 - x}"
-    ),  # shrink to v5 (simplest pattern)
+    # shrink to v5 (simplest pattern)
+    dangling_site=st.integers(0, 4).map(lambda x: f"v{5 - x}"),
     dangling_const=st.booleans(),
 )
 def test_dynamic_interesting_graph(
@@ -529,18 +535,18 @@ def test_dynamic_interesting_graph(
     _check_grad(dead_leaf, None)
 
     # check that backprop metadata cleared appropriately upon completion of backprop
-    assert not v5._accum_ops and v5.creator is not None
-    assert not v4._accum_ops and v4.creator is not None
-    assert not v3._accum_ops and v3.creator is not None
-    assert not v2._accum_ops and v2.creator is None
-    assert not v1._accum_ops and v1.creator is None
+    assert not v5._accum_ops
+    assert not v4._accum_ops
+    assert not v3._accum_ops
+    assert not v2._accum_ops
+    assert not v1._accum_ops
     assert not dead_leaf._accum_ops and dead_leaf.creator is not None
 
-    # check the null grads & clear graph always propagates through the graph
-    v5.null_gradients(clear_graph=True)
-    assert v5.grad is None and v5.creator is None
-    assert v4.grad is None and not v4._ops and v4.creator is None
-    assert v3.grad is None and not v3._ops and v3.creator is None
-    assert v2.grad is None and not v2._ops and v2.creator is None
-    assert v1.grad is None and not v1._ops and v1.creator is None
     assert dead_leaf.creator is not None
+    del dead_leaf  # pruning the dead leaf should unlock all memory
+    # check the null grads & clear graph always propagates through the graph
+    _check_cleared_node(v5)
+    _check_cleared_node(v4)
+    _check_cleared_node(v3)
+    _check_cleared_node(v2)
+    _check_cleared_node(v1)

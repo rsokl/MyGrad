@@ -1,16 +1,22 @@
 import hypothesis.extra.numpy as hnp
 import numpy as np
-from hypothesis import settings
+from hypothesis import given, settings
 from numpy.testing import assert_allclose
 
 from mygrad.tensor_base import Tensor
+from tests.utils.wrappers import adds_constant_arg
 
-from ..custom_strategies import adv_integer_index, arbitrary_indices, basic_indices
+from ..custom_strategies import (
+    adv_integer_index,
+    arbitrary_indices,
+    basic_indices,
+    tensors,
+)
 from ..wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
 def test_getitem():
-    x = Tensor([1, 2, 3])
+    x = Tensor([1.0, 2.0, 3.0])
     a, b, c = x
     f = 2 * a + 3 * b + 4 * c
     f.backward()
@@ -26,14 +32,15 @@ def test_getitem():
     assert_allclose(x.grad, np.array([2, 3, 4]))
 
 
-def get_item(arr, index, constant=False):
-    if not isinstance(arr, Tensor):
-        arr = np.asarray(arr)
-    o = arr[index]
-    if isinstance(o, Tensor):
-        o._constant = constant
+@given(x=tensors())
+def test_get_item_propagate_constant(x: Tensor):
+    y = x[...]
+    assert y.constant is x.constant
 
-    return o
+
+@adds_constant_arg
+def get_item(arr, index):
+    return arr[index]
 
 
 def basic_index_wrap(*arrs):
@@ -70,6 +77,14 @@ def test_index_0d():
     assert Tensor(3)[None].item() == 3
 
 
+def test_getitem_view_base():
+    x = Tensor(np.asarray(0.0))
+    o = x[(Ellipsis,)]
+    assert o.data.base is o.base.data
+    assert np.shares_memory(o, x.data)
+    assert np.shares_memory(o, x)
+
+
 @fwdprop_test_factory(
     mygrad_func=get_item,
     true_func=get_item,
@@ -78,6 +93,7 @@ def test_index_0d():
         0: hnp.array_shapes(min_side=0, min_dims=0, max_side=6, max_dims=4)
     },
     kwargs=dict(index=basic_index_wrap),
+    permit_0d_array_as_float=False,
 )
 def test_getitem_basicindex_fwdprop():
     pass
@@ -251,6 +267,7 @@ def test_getitem_basic_w_adv_bkprop():
     pass
 
 
+@settings(deadline=None, max_examples=500)
 @fwdprop_test_factory(
     mygrad_func=get_item,
     true_func=get_item,
@@ -259,6 +276,7 @@ def test_getitem_basic_w_adv_bkprop():
         0: hnp.array_shapes(min_side=0, max_side=4, min_dims=0, max_dims=5)
     },
     kwargs=dict(index=arb_index_wrap),
+    permit_0d_array_as_float=False,
 )
 def test_getitem_arbitraryindex_fwdprop():
     pass

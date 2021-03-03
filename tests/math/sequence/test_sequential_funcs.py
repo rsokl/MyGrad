@@ -5,10 +5,12 @@ import hypothesis.strategies as st
 import numpy as np
 import pytest
 from hypothesis import given, settings
+from numpy.testing import assert_allclose
 from pytest import raises
 
 import mygrad as mg
 from mygrad import amax, amin, cumprod, cumsum, mean, prod, std, sum, var
+from tests.utils.numerical_gradient import numerical_gradient_full
 
 from ...custom_strategies import tensors, valid_axes
 from ...wrappers.uber import (
@@ -26,7 +28,7 @@ def axis_arg(*arrs, min_dim=0):
 
 
 def single_axis_arg(*arrs):
-    """ Wrapper for passing valid-axis (single-value only)
+    """Wrapper for passing valid-axis (single-value only)
     search strategy to test factory"""
     if arrs[0].ndim:
         return valid_axes(arrs[0].ndim, single_axis_only=True)
@@ -40,7 +42,7 @@ def keepdims_arg(*arrs):
 
 
 def ddof_arg(*arrs):
-    """ Wrapper for passing ddof strategy to test factory
+    """Wrapper for passing ddof strategy to test factory
     (argument for var and std)"""
     min_side = min(arrs[0].shape) if arrs[0].shape else 0
     return st.integers(0, min_side - 1) if min_side else st.just(0)
@@ -54,6 +56,18 @@ def ddof_arg(*arrs):
 )
 def test_max_fwd():
     pass
+
+
+@fwdprop_test_factory(
+    mygrad_func=amax,
+    true_func=mg.no_autodiff(mg.max, to_numpy=True),
+    num_arrays=1,
+    kwargs=dict(axis=axis_arg, keepdims=keepdims_arg),
+)
+def test_max_no_graph_track_fwd():
+    """tests no-graph mode transitively
+    mg.max == np.max
+    mg.max == mg.max(no-grad)"""
 
 
 @backprop_test_factory(
@@ -77,6 +91,18 @@ def test_max_bkwd():
 )
 def test_min_fwd():
     pass
+
+
+@fwdprop_test_factory(
+    mygrad_func=amin,
+    true_func=mg.no_autodiff(mg.min, to_numpy=True),
+    num_arrays=1,
+    kwargs=dict(axis=axis_arg, keepdims=keepdims_arg),
+)
+def test_min_no_graph_track_fwd():
+    """tests no-graph mode transitively
+    mg.min == np.min
+    mg.min == mg.min(no-grad)"""
 
 
 @backprop_test_factory(
@@ -184,23 +210,34 @@ def test_custom_var_fwd():
     pass
 
 
+# test keepdims=True/False explicitly to deal with coverage issues
 @backprop_test_factory(
     mygrad_func=var,
     true_func=_var,
     num_arrays=1,
-    kwargs=dict(
-        axis=partial(axis_arg, min_dim=1), keepdims=keepdims_arg, ddof=ddof_arg
-    ),
+    kwargs=dict(axis=partial(axis_arg, min_dim=1), keepdims=False, ddof=ddof_arg),
     vary_each_element=True,
     index_to_bnds={0: (-10, 10)},
 )
-def test_var_bkwd():
+def test_var_bkwd_without_keepdims():
+    pass
+
+
+@backprop_test_factory(
+    mygrad_func=var,
+    true_func=_var,
+    num_arrays=1,
+    kwargs=dict(axis=partial(axis_arg, min_dim=1), keepdims=True, ddof=ddof_arg),
+    vary_each_element=True,
+    index_to_bnds={0: (-10, 10)},
+)
+def test_var_bkwd_with_keepdims():
     pass
 
 
 @given(
     x=tensors(
-        dtype=np.float,
+        dtype=np.float64,
         shape=hnp.array_shapes(),
         elements=st.floats(allow_infinity=False, allow_nan=False),
     )
@@ -212,7 +249,7 @@ def test_var_no_axis_fwd(x: mg.Tensor):
 
 @given(
     x=tensors(
-        dtype=np.float,
+        dtype=np.float64,
         shape=hnp.array_shapes(),
         elements=st.floats(allow_infinity=False, allow_nan=False),
         constant=False,
@@ -291,7 +328,7 @@ def test_std_bkwd():
 
 @given(
     x=tensors(
-        dtype=np.float,
+        dtype=np.float64,
         shape=hnp.array_shapes(),
         elements=st.floats(allow_infinity=False, allow_nan=False),
     )
@@ -303,7 +340,7 @@ def test_std_no_axis_fwd(x):
 
 @given(
     x=tensors(
-        dtype=np.float,
+        dtype=np.float64,
         shape=hnp.array_shapes(),
         elements=st.floats(allow_infinity=False, allow_nan=False),
         constant=False,
@@ -439,3 +476,14 @@ def test_cumsum_fwd():
 )
 def test_cumsum_bkwd():
     pass
+
+
+def test_patch_coverage_on_var():
+    # this path coverage through var was flaky
+    x = mg.arange(6.0).reshape((2, 3))
+    o = mg.var(x, axis=1, keepdims=False)
+    o.backward()
+    (num_grad,) = numerical_gradient_full(
+        _var, x.data, kwargs=dict(axis=1, keepdims=False), back_grad=np.ones(o.shape)
+    )
+    assert_allclose(x.grad, num_grad)

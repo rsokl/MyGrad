@@ -60,6 +60,7 @@ def test_asarray_returns_array_with_expected_data_and_attributes(
 
     assert actual.flags[f"{order.capitalize()}_CONTIGUOUS"]
 
+
 # Test the third example from
 # https://numpy.org/doc/stable/reference/generated/numpy.asarray.html
 def test_asarray_copies_consistently():

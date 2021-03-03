@@ -1,7 +1,9 @@
+import weakref
 from numbers import Integral
 
 import numpy as np
 
+from mygrad._utils import SkipGradient
 from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor
 
@@ -14,7 +16,8 @@ except ImportError:  # pragma: no cover
 
 
 @vectorize(
-    ["float32(float32)", "float64(float64)"], nopython=True,
+    ["float32(float32)", "float64(float64)"],
+    nopython=True,
 )
 def sig(f):  # pragma: no cover
     """
@@ -24,7 +27,8 @@ def sig(f):  # pragma: no cover
 
 
 @vectorize(
-    ["float32(float32)", "float64(float64)"], nopython=True,
+    ["float32(float32)", "float64(float64)"],
+    nopython=True,
 )
 def d_sig(f):  # pragma: no cover
     """
@@ -34,7 +38,8 @@ def d_sig(f):  # pragma: no cover
 
 
 @vectorize(
-    ["float32(float32)", "float64(float64)"], nopython=True,
+    ["float32(float32)", "float64(float64)"],
+    nopython=True,
 )
 def d_tanh(f):  # pragma: no cover
     """
@@ -54,27 +59,27 @@ def dot(a, b):
 
 @njit
 def _gru_layer(s, z, r, h, Wz, Wr, Wh):
-    """ Given:
-            S(t=0)
-            z = X(t) Uz + bz
-            r = X(t) Ur + br
-            h = X(t) Uh + bh
+    """Given:
+        S(t=0)
+        z = X(t) Uz + bz
+        r = X(t) Ur + br
+        h = X(t) Uh + bh
 
-        Compute Z(t), R(t), H(t), S(t) for all 1 <= t <= T
+    Compute Z(t), R(t), H(t), S(t) for all 1 <= t <= T
 
-        Parameters
-        ----------
-        s : numpy.ndarray, shape=(T+1, N, D)
-            Modified in-place
-        z : numpy.ndarray, shape=(T, N, D)
-            Modified in-place
-        r : numpy.ndarray, shape=(T, N, D)
-            Modified in-place
-        h : numpy.ndarray, shape=(T, N, D)
-            Modified in-place
-        Wz : numpy.ndarray, shape=(D, D)
-        Wr : numpy.ndarray, shape=(D, D)
-        Wh : numpy.ndarray, shape=(D, D) """
+    Parameters
+    ----------
+    s : numpy.ndarray, shape=(T+1, N, D)
+        Modified in-place
+    z : numpy.ndarray, shape=(T, N, D)
+        Modified in-place
+    r : numpy.ndarray, shape=(T, N, D)
+        Modified in-place
+    h : numpy.ndarray, shape=(T, N, D)
+        Modified in-place
+    Wz : numpy.ndarray, shape=(D, D)
+    Wr : numpy.ndarray, shape=(D, D)
+    Wh : numpy.ndarray, shape=(D, D)"""
     for n in range(len(s) - 1):
         z[n] += np.dot(s[n], Wz)
         z[n] = sig(z[n])
@@ -153,15 +158,13 @@ def _gru_bptt(
 
 def _backprop(var, grad):  # pragma: no cover
     if not var.constant:
-        if var.grad is None:
-            var.grad = np.asarray(grad)
+        if var._grad is None:
+            var._grad = np.asarray(grad)
         else:
-            var.grad += grad
+            var._grad += grad
 
 
 class GRUnit(Operation):
-    scalar_only = True
-
     def __call__(
         self, X, Uz, Wz, bz, Ur, Wr, br, Uh, Wh, bh, s0=None, bp_lim=None, dropout=0.0
     ):
@@ -248,19 +251,24 @@ class GRUnit(Operation):
 
         _gru_layer(out, z, r, h, Wz, Wr, Wh)
 
-        self._hidden_seq = Tensor(out, _creator=self)
-        self._z = Tensor(z, _creator=self)
-        self._r = Tensor(r, _creator=self)
-        self._h = Tensor(h, _creator=self)
+        self._z = z
+        self._r = r
+        self._h = h
 
-        return self._hidden_seq
+        return out
+
+    def backward_var(self, grad, index, **kwargs):
+        raise SkipGradient("Gradient computed in GRU.backward()")
 
     def backward(self, grad, *, graph, **kwargs):
+        hidden_seq = self._hidden_seq()
+        if hidden_seq is None:  # pragma: no cover
+            assert False, "should be unreachable"
 
-        s = self._hidden_seq.data[:-1]
-        z = self._z.data
-        r = self._r.data
-        h = self._h.data
+        s = hidden_seq.data[:-1]
+        z = self._z
+        r = self._r
+        h = self._h
 
         dLds = grad[1:].astype(self.type, copy=False)
 
@@ -299,7 +307,7 @@ class GRUnit(Operation):
         hgrad = dLds * const["1 - z"]  # dL / dh
         rgrad = dot(const["1 - h**2"] * hgrad, Wh.T) * s  # dL / dr
 
-        self._hidden_seq.grad = dLds
+        hidden_seq._grad = dLds
 
         if not (self.Uz.constant and self.Wz.constant and self.bz.constant):
             dz = zgrad * const["z*(1 - z)"]
@@ -410,21 +418,7 @@ class GRUnit(Operation):
         del self._r
         del self._h
 
-        for x in (
-            self.X,
-            self.Uz,
-            self.Wz,
-            self.bz,
-            self.Ur,
-            self.Wr,
-            self.br,
-            self.Uh,
-            self.Wh,
-            self.bh,
-        ):
-            if not x.constant:
-                x._accum_ops.add(self)
-                x._backward(graph=graph)
+        super().backward(grad, graph=graph)
 
 
 def gru(
@@ -441,9 +435,9 @@ def gru(
     s0=None,
     bp_lim=None,
     dropout=0.0,
-    constant=False,
+    constant=None,
 ):
-    r""" Performs a forward pass of sequential data through a Gated Recurrent Unit layer, returning
+    r"""Performs a forward pass of sequential data through a Gated Recurrent Unit layer, returning
     the 'hidden-descriptors' arrived at by utilizing the trainable parameters as follows::
 
                 Z_{t} = sigmoid(X_{t} Uz + S_{t-1} Wz + bz)
@@ -546,7 +540,7 @@ def gru(
            arXiv:1708.02182v1, 2017.
 
     .. [2] Y. Gal, Z. Ghahramani "A Theoretically Grounded Application of Dropout
-           in Recurrent Neural Networks" arXiv:1512.05287v5, 2016. """
+           in Recurrent Neural Networks" arXiv:1512.05287v5, 2016."""
     if s0 is not None:
         if not isinstance(s0, np.ndarray) and not (
             isinstance(s0, Tensor) and (constant or s0.constant)
@@ -570,5 +564,9 @@ def gru(
         op_kwargs=dict(s0=s0, bp_lim=bp_lim, dropout=dropout),
         constant=constant,
     )
-    s.creator._hidden_seq = s
+    try:
+        s.creator._hidden_seq = weakref.ref(s)
+    except AttributeError:  # pragma: no cover
+        # `no-autodiff` mode does not record creator
+        pass
     return s

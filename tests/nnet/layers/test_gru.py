@@ -7,11 +7,13 @@ import pytest
 from hypothesis import example, given, settings
 from numpy.testing import assert_allclose
 
-from mygrad import matmul
+from mygrad import matmul, mem_guard_off, no_autodiff
 from mygrad.nnet.activations import sigmoid, tanh
-from mygrad.nnet.layers import gru
 from mygrad.tensor_base import Tensor
-from tests.utils import does_not_raise
+from tests.utils.errors import does_not_raise
+
+gru_module = pytest.importorskip("mygrad.nnet.layers.gru")
+gru = gru_module.gru
 
 
 @settings(deadline=None)
@@ -28,6 +30,7 @@ from tests.utils import does_not_raise
     dropout=st.floats(0, 1),
     out_constant=st.booleans(),
 )
+@mem_guard_off
 def test_nonconstant_s0_raises(s0, dropout: float, out_constant: bool):
     T, N, C, D = 5, 1, 3, 2
     X = Tensor(np.random.rand(T, N, C))
@@ -57,6 +60,7 @@ def test_nonconstant_s0_raises(s0, dropout: float, out_constant: bool):
 
 @settings(deadline=None)
 @given(out_constant=st.booleans())
+@mem_guard_off
 def test_all_constant(out_constant: bool):
     T, N, C, D = 5, 1, 3, 2
     X = Tensor(np.random.rand(T, N, C), constant=True)
@@ -95,6 +99,7 @@ def test_all_constant(out_constant: bool):
 )
 @pytest.mark.filterwarnings("ignore: overflow encountered in exp")
 @pytest.mark.filterwarnings("ignore: overflow encountered in sig")
+@mem_guard_off
 def test_gru_fwd(X, D, dropout, dtypes, data: st.DataObject):
     T, N, C = X.shape
 
@@ -196,26 +201,30 @@ def test_gru_fwd(X, D, dropout, dtypes, data: st.DataObject):
         Wz2d = Wz2
         Wr2d = Wr2
         Wh2d = Wh2
-    for n, x in enumerate(X2):
-        if not dropout:
-            z = sigmoid(matmul(x, Uz2) + matmul(stt, Wz2d) + bz2)
-            r = sigmoid(matmul(x, Ur2) + matmul(stt, Wr2d) + br2)
-            h = tanh(matmul(x, Uh2) + matmul((r * stt), Wh2d) + bh2)
-        else:
-            z = sigmoid(
-                (s.creator._dropUz[0] * matmul(x, Uz2)) + matmul(stt, Wz2d) + bz2
-            )
-            r = sigmoid(
-                (s.creator._dropUr[0] * matmul(x, Ur2)) + matmul(stt, Wr2d) + br2
-            )
-            h = tanh(
-                (s.creator._dropUh[0] * matmul(x, Uh2)) + matmul((r * stt), Wh2d) + bh2
-            )
 
-        stt = (1 - z) * h + z * stt
-        all_s.append(stt)
-        o = matmul(stt, V2)
-        ls2 += o.sum()
+    with no_autodiff:
+        for n, x in enumerate(X2):
+            if not dropout:
+                z = sigmoid(matmul(x, Uz2) + matmul(stt, Wz2d) + bz2)
+                r = sigmoid(matmul(x, Ur2) + matmul(stt, Wr2d) + br2)
+                h = tanh(matmul(x, Uh2) + matmul((r * stt), Wh2d) + bh2)
+            else:
+                z = sigmoid(
+                    (s.creator._dropUz[0] * matmul(x, Uz2)) + matmul(stt, Wz2d) + bz2
+                )
+                r = sigmoid(
+                    (s.creator._dropUr[0] * matmul(x, Ur2)) + matmul(stt, Wr2d) + br2
+                )
+                h = tanh(
+                    (s.creator._dropUh[0] * matmul(x, Uh2))
+                    + matmul((r * stt), Wh2d)
+                    + bh2
+                )
+
+            stt = (1 - z) * h + z * stt
+            all_s.append(stt)
+            o = matmul(stt, V2)
+            ls2 += o.sum()
 
     tolerances = dict(atol=1e-5, rtol=1e-5)
     rec_s_dat = np.stack([i.data for i in all_s])
@@ -240,9 +249,11 @@ def test_gru_fwd(X, D, dropout, dtypes, data: st.DataObject):
 
     assert_allclose(X.data, X2.data, **tolerances)
 
-    ls.null_gradients()
+    ls.clear_graph()
+    ls2.clear_graph()
+
     for x in [s, Wz, Wr, Wh, bz, br, bh, X, Uz, Ur, Uh, V]:
-        assert x.grad is None
+        assert not x._ops
 
 
 # There is an occasional overflow in the oracle sigmoid
@@ -372,7 +383,6 @@ def test_gru_backward(
     )
     o = matmul(s[1:], V)
     ls = o.sum()
-    ls.backward()
 
     stt = s2
     all_s = [s0.data]
@@ -404,6 +414,8 @@ def test_gru_backward(
         all_s.append(stt)
         o = matmul(stt, V2)
         ls2 += o.sum()
+
+    ls.backward()
     ls2.backward()
 
     rec_s_grad = np.stack([i.grad for i in all_s[1:]])
@@ -468,8 +480,5 @@ def test_gru_backward(
     else:
         assert X.grad is None
 
-    ls.null_gradients()
-    ls2.null_gradients()
-
     for x in [s, Wz, Wr, Wh, bz, br, bh, X, Uz, Ur, Uh, V]:
-        assert x.grad is None
+        assert not x._ops

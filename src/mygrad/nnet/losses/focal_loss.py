@@ -1,10 +1,13 @@
 from numbers import Real
+from typing import Optional
 
 import numpy as np
 
+import mygrad._utils.graph_tracking as _tracking
 from mygrad.nnet.activations import softmax
 from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor, asarray
+from mygrad.typing import ArrayLike
 
 from ._utils import check_loss_inputs
 
@@ -12,7 +15,7 @@ __all__ = ["softmax_focal_loss", "focal_loss"]
 
 
 class FocalLoss(Operation):
-    r""" Returns the per-datum focal loss as described in https://arxiv.org/abs/1708.02002
+    r"""Returns the per-datum focal loss as described in https://arxiv.org/abs/1708.02002
     which is given by -ɑ(1-p)ˠlog(p).
 
     Extended Description
@@ -30,8 +33,6 @@ class FocalLoss(Operation):
     It is recommended in the paper that you normalize by the number of foreground samples.
     """
 
-    scalar_only = True
-
     def __call__(self, class_probs, targets, alpha, gamma):
         """
         Parameters
@@ -39,7 +40,7 @@ class FocalLoss(Operation):
         class_probs : mygrad.Tensor, shape=(N, C)
             The C class scores for each of the N pieces of data.
 
-        targets : Union[mygrad.Tensor, Sequence[int]], shape=(N,)
+        targets : Union[mygrad.Tensor, ArrayLike], shape=(N,)
             The correct class indices, in [0, C), for each datum.
 
         alpha : Real
@@ -68,6 +69,9 @@ class FocalLoss(Operation):
 
         one_m_pc_gamma = one_m_pc ** gamma
         loss = -(alpha * one_m_pc_gamma * log_pc)
+
+        if not _tracking.TRACK_GRAPH:
+            return loss
 
         self.back = np.zeros(class_probs.shape, dtype=np.float64)
 
@@ -101,16 +105,23 @@ class FocalLoss(Operation):
         return self.back
 
 
-def focal_loss(class_probs, targets, *, alpha=1, gamma=0, constant=False):
-    r""" Return the per-datum focal loss.
+def focal_loss(
+    class_probs: ArrayLike,
+    targets: ArrayLike,
+    *,
+    alpha: float = 1,
+    gamma: float = 0,
+    constant: Optional[bool] = None,
+) -> Tensor:
+    r"""Return the per-datum focal loss.
 
     Parameters
     ----------
-    class_probs : mygrad.Tensor, shape=(N, C)
+    class_probs : ArrayLike, shape=(N, C)
         The C class probabilities for each of the N pieces of data.
         Each value is expected to lie on (0, 1]
 
-    targets : Sequence[int], shape=(N,)
+    targets : ArrayLike, shape=(N,)
         The correct class indices, in [0, C), for each datum.
 
     alpha : Real, optional (default=1)
@@ -120,7 +131,7 @@ def focal_loss(class_probs, targets, *, alpha=1, gamma=0, constant=False):
         The ɣ focusing parameter. Note that for Ɣ=0 and ɑ=1, this is cross-entropy loss.
         Must be a non-negative value.
 
-    constant : bool, optional(default=False)
+    constant : Optional[bool]
         If ``True``, the returned tensor is a constant (it
         does not back-propagate a gradient)
 
@@ -154,17 +165,24 @@ def focal_loss(class_probs, targets, *, alpha=1, gamma=0, constant=False):
     )
 
 
-def softmax_focal_loss(scores, targets, *, alpha=1, gamma=0, constant=False):
+def softmax_focal_loss(
+    scores: ArrayLike,
+    targets: ArrayLike,
+    *,
+    alpha: float = 1,
+    gamma: float = 0,
+    constant: Optional[bool] = None,
+) -> Tensor:
     r"""
     Applies the softmax normalization to the input scores before computing the
     per-datum focal loss.
 
     Parameters
     ----------
-    scores : mygrad.Tensor, shape=(N, C)
+    scores : ArrayLike, shape=(N, C)
         The C class scores for each of the N pieces of data.
 
-    targets : Sequence[int], shape=(N,)
+    targets : ArrayLike, shape=(N,)
         The correct class indices, in [0, C), for each datum.
 
     alpha : Real, optional (default=1)
@@ -174,7 +192,7 @@ def softmax_focal_loss(scores, targets, *, alpha=1, gamma=0, constant=False):
         The ɣ focusing parameter. Note that for Ɣ=0 and ɑ=1, this is cross-entropy loss.
         Must be a non-negative value.
 
-    constant : bool, optional(default=False)
+    constant : Optional[bool]
         If ``True``, the returned tensor is a constant (it
         does not back-propagate a gradient)
 

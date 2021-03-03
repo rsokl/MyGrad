@@ -1,3 +1,4 @@
+from mygrad.operation_base import _NoValue
 from mygrad.tensor_base import Tensor
 
 from .ops import *
@@ -17,7 +18,7 @@ __all__ = [
 ]
 
 
-def sum(x, axis=None, keepdims=False, constant=False):
+def sum(x, axis=None, keepdims=False, *, constant=None):
     """
     Sum of tensor elements over a given axis.
 
@@ -92,10 +93,12 @@ def sum(x, axis=None, keepdims=False, constant=False):
     >>> mg.sum([10], initial=5)
     Tensor(15)
     """
-    return Tensor._op(Sum, x, op_args=(axis, keepdims), constant=constant)
+    return Tensor._op(
+        Sum, x, op_kwargs=dict(axis=axis, keepdims=keepdims), constant=constant
+    )
 
 
-def mean(x, axis=None, keepdims=False, constant=False):
+def mean(x, axis=None, keepdims=False, *, constant=None):
     """
     Mean of tensor elements over a given axis.
 
@@ -154,10 +157,12 @@ def mean(x, axis=None, keepdims=False, constant=False):
     >>> mg.mean(a, dtype=np.float64)
     Tensor(0.55000000074505806)
     """
-    return Tensor._op(Mean, x, op_args=(axis, keepdims), constant=constant)
+    return Tensor._op(
+        Mean, x, op_kwargs=dict(axis=axis, keepdims=keepdims), constant=constant
+    )
 
 
-def var(x, axis=None, ddof=0, keepdims=False, constant=False):
+def var(x, axis=None, ddof=0, keepdims=False, *, constant=None):
     """
     Compute the variance along the specified axis.
 
@@ -240,7 +245,7 @@ def var(x, axis=None, ddof=0, keepdims=False, constant=False):
     )
 
 
-def std(x, axis=None, ddof=0, keepdims=False, constant=False):
+def std(x, axis=None, ddof=0, keepdims=False, *, constant=None):
     """
     Compute the standard deviation along the specified axis.
 
@@ -321,7 +326,7 @@ def std(x, axis=None, ddof=0, keepdims=False, constant=False):
     )
 
 
-def max(x, axis=None, keepdims=False, constant=False):
+def max(x, axis=None, keepdims=False, *, constant=None):
     """
     Return the maximum of a tensor or maximum along its axes.
 
@@ -366,14 +371,14 @@ def max(x, axis=None, keepdims=False, constant=False):
     Tensor(nan)
     """
     return Tensor._op(
-        MaxMin,
+        Max,
         x,
-        op_kwargs=dict(axis=axis, keepdims=keepdims, maxmin="max"),
+        op_kwargs=dict(axis=axis, keepdims=keepdims, dtype=_NoValue),
         constant=constant,
     )
 
 
-def min(x, axis=None, keepdims=False, constant=False):
+def min(x, axis=None, keepdims=False, *, constant=None):
     """
     Return the minimum of a tensor or minimum along its axes.
 
@@ -416,9 +421,9 @@ def min(x, axis=None, keepdims=False, constant=False):
     Tensor(nan)
     """
     return Tensor._op(
-        MaxMin,
+        Min,
         x,
-        op_kwargs=dict(axis=axis, keepdims=keepdims, maxmin="min"),
+        op_kwargs=dict(axis=axis, keepdims=keepdims, dtype=_NoValue),
         constant=constant,
     )
 
@@ -428,7 +433,7 @@ amin = min
 amax = max
 
 
-def prod(a, axis=None, keepdims=False, constant=False):
+def prod(a, axis=None, keepdims=False, *, constant=None):
     """
     Return the product of array elements over given axes.
 
@@ -476,13 +481,13 @@ def prod(a, axis=None, keepdims=False, constant=False):
 
     >>> mg.prod([[1.,2.],
     ...          [3.,4.]], axis=1)
-    Tensor([  2.,  12.]) """
+    Tensor([  2.,  12.])"""
     return Tensor._op(
         Prod, a, op_kwargs=dict(axis=axis, keepdims=keepdims), constant=constant
     )
 
 
-def cumprod(a, axis=None, constant=False):
+def cumprod(a, axis=None, *, constant=None):
     """
     Return the cumulative product of elements along a given axis.
 
@@ -534,7 +539,7 @@ def cumprod(a, axis=None, constant=False):
     return Tensor._op(CumProd, a, op_kwargs=dict(axis=axis), constant=constant)
 
 
-def cumsum(a, axis=None, constant=False):
+def cumsum(a, axis=None, *, constant=None):
     """
     Return the cumulative sum of the elements along a given axis.
 

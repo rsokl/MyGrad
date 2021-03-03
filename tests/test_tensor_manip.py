@@ -19,6 +19,7 @@ from mygrad import (
     swapaxes,
     transpose,
 )
+from tests.utils.wrappers import adds_constant_arg
 
 from .custom_strategies import valid_axes
 from .utils.numerical_gradient import numerical_gradient_full
@@ -73,7 +74,7 @@ def test_transpose(x, data):
 
 
 def test_transpose_property():
-    dat = np.arange(6).reshape(2, 3)
+    dat = np.arange(6.0).reshape(2, 3)
     x = Tensor(dat)
     f = x.T
     f.backward(dat.T)
@@ -83,7 +84,7 @@ def test_transpose_property():
 
 
 def test_transpose_method():
-    dat = np.arange(24).reshape(2, 3, 4)
+    dat = np.arange(24.0).reshape(2, 3, 4)
 
     for axes in permutations(range(3)):
         # passing tuple of integers
@@ -170,6 +171,62 @@ def _swap_axes_axis(arr):
 
 def _valid_moveaxis_args(*arrs, **kwargs):
     return len(kwargs["source"]) == len(kwargs["destination"])
+
+
+def _transpose(x, axes, constant=False):
+    return transpose(x, axes, constant=constant)
+
+
+def _np_transpose(x, axes):
+    return np.transpose(x, axes)
+
+
+@adds_constant_arg
+def _transpose_property(x):
+    if not isinstance(x, Tensor):
+        x = np.asarray(x)
+    return x.T
+
+
+@fwdprop_test_factory(
+    mygrad_func=_transpose_property,
+    true_func=_transpose_property,
+    num_arrays=1,
+    permit_0d_array_as_float=False,
+)
+def test_transpose_property_fwd():
+    pass
+
+
+@backprop_test_factory(
+    mygrad_func=_transpose_property,
+    true_func=_transpose_property,
+    num_arrays=1,
+    vary_each_element=True,
+)
+def test_transpose_property_bkwd():
+    pass
+
+
+@fwdprop_test_factory(
+    mygrad_func=_transpose,
+    true_func=_np_transpose,
+    num_arrays=1,
+    kwargs=dict(axes=lambda x: valid_axes(x.ndim, min_dim=x.ndim, max_dim=x.ndim)),
+)
+def test_transpose_fwd():
+    pass
+
+
+@backprop_test_factory(
+    mygrad_func=_transpose,
+    true_func=_np_transpose,
+    num_arrays=1,
+    kwargs=dict(axes=lambda x: valid_axes(x.ndim, min_dim=x.ndim, max_dim=x.ndim)),
+    vary_each_element=True,
+)
+def test_transpose_bkwd():
+    pass
 
 
 @fwdprop_test_factory(
@@ -348,7 +405,10 @@ def gen_int_repeat_args(arr: Tensor) -> st.SearchStrategy[dict]:
     valid_axis = st.none()
     valid_axis |= st.integers(-arr.ndim, arr.ndim - 1) if arr.ndim else st.just(0)
     return st.fixed_dictionaries(
-        dict(repeats=st.integers(min_value=0, max_value=5), axis=valid_axis,)
+        dict(
+            repeats=st.integers(min_value=0, max_value=5),
+            axis=valid_axis,
+        )
     )
 
 
@@ -363,11 +423,17 @@ def gen_tuple_repeat_args(draw: st.DataObject.draw, arr: Tensor):
         arr.shape[valid_axis] if valid_axis is not None and arr.ndim else arr.size
     )
     repeats = draw(st.tuples(*[st.integers(0, 5)] * num_repeats))
-    return dict(repeats=repeats, axis=valid_axis,)
+    return dict(
+        repeats=repeats,
+        axis=valid_axis,
+    )
 
 
 @fwdprop_test_factory(
-    mygrad_func=repeat, true_func=np.repeat, num_arrays=1, kwargs=gen_int_repeat_args,
+    mygrad_func=repeat,
+    true_func=np.repeat,
+    num_arrays=1,
+    kwargs=gen_int_repeat_args,
 )
 def test_repeat_int_repeats_only_fwd():
     pass
@@ -385,7 +451,10 @@ def test_repeat_int_repeats_only_bkwd():
 
 
 @fwdprop_test_factory(
-    mygrad_func=repeat, true_func=np.repeat, num_arrays=1, kwargs=gen_tuple_repeat_args,
+    mygrad_func=repeat,
+    true_func=np.repeat,
+    num_arrays=1,
+    kwargs=gen_tuple_repeat_args,
 )
 def test_repeat_tuple_repeats_only_fwd():
     pass

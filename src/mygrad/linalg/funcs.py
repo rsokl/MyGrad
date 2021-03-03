@@ -1,15 +1,27 @@
+from typing import Optional, Union
+
 import numpy as np
 from numpy.core.einsumfunc import _parse_einsum_input
 
 import mygrad as mg
 from mygrad import Tensor
+from mygrad.typing import ArrayLike, DTypeLikeReals
+from mygrad.ufuncs import ufunc_creator
 
 from .ops import *
 
 __all__ = ["multi_matmul", "matmul", "einsum"]
 
 
-def matmul(a, b, constant=False):
+@ufunc_creator(MatMul)
+def matmul(
+    x1: ArrayLike,
+    x2: ArrayLike,
+    out: Optional[Union[np.ndarray, Tensor]] = None,
+    *,
+    dtype: DTypeLikeReals = None,
+    constant: Optional[bool] = None,
+) -> Tensor:  # pragma: no cover
     r"""
     Matrix product of two tensors:
 
@@ -43,29 +55,44 @@ def matmul(a, b, constant=False):
 
     Parameters
     ----------
-    a : array_like
+    x1 : ArrayLike
 
-    b : array_like
+    x2 : ArrayLike
 
-    constant : bool, optional(default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient)
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. ``constant.grad`` will always return
+        ``None``).
+
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
+
+    dtype : Optional[DTypeLikeReals]
+        The dtype of the resulting tensor.
+
+    out : Optional[Union[ndarray, Tensor]]
+        A location into which the result is stored. If provided, it must have
+        a shape that the inputs broadcast to. If not provided or None,
+        a freshly-allocated tensor is returned.
 
     Returns
     -------
     output : mygrad.Tensor
-        Returns the matrix product of `a` and `b`.  If `a` and `b` are both
-        1-D arrays then a scalar is returned; otherwise an array is
-        returned.
-
+        Returns the matrix product of ``x1`` and `x2``.
 
     Raises
     ------
     ValueError
-        If the last dimension of `a` is not the same size as
-        the second-to-last dimension of `b`.
+        If :
+         - The last dimension of ``x1`` is not the same size as
+           the second-to-last dimension of ``x2``.
+         - If scalar value is passed.
 
-        If scalar value is passed.
+    See Also
+    --------
+    einsum : Einstein summation convention.
 
     Notes
     -----
@@ -106,10 +133,10 @@ def matmul(a, b, constant=False):
     Traceback (most recent call last):
     ...
     ValueError: Scalar operands are not allowed, use '*' instead"""
-    return Tensor._op(MatMul, a, b, constant=constant)
+    ...
 
 
-def einsum(*operands, optimize=False, constant=False):
+def einsum(*operands, optimize=False, constant=None):
     r"""
     einsum(subscripts, *operands)
 
@@ -365,11 +392,11 @@ def einsum(*operands, optimize=False, constant=False):
         EinSum,
         *variables,
         op_kwargs=dict(in_lbls=in_lbls, out_lbls=out_lbls, optimize=optimize),
-        constant=constant
+        constant=constant,
     )
 
 
-def multi_matmul(tensors, constant=False):
+def multi_matmul(tensors, *, constant=None):
     """
     Matrix product of two or more tensors calculated in the optimal ordering
 
@@ -472,7 +499,7 @@ def multi_matmul(tensors, constant=False):
     if n < 2:
         raise ValueError("Expecting at least two arrays.")
     elif n == 2:
-        return matmul(tensors[0], tensors[1], constant)
+        return matmul(tensors[0], tensors[1], constant=constant)
 
     tensors = [a if isinstance(a, Tensor) else np.asarray(a) for a in tensors]
 
@@ -494,22 +521,26 @@ def multi_matmul(tensors, constant=False):
         )
 
     if n == 3:
-        result = _multi_matmul_three(tensors[0], tensors[1], tensors[2], constant)
+        result = _multi_matmul_three(
+            tensors[0], tensors[1], tensors[2], constant=constant
+        )
     else:
         order = _multi_matmul_chain_order(tensors)
-        result = _multi_matmul(tensors, order, 0, n - 1, constant)
+        result = _multi_matmul(tensors, order, 0, n - 1, constant=constant)
 
     # return proper shape since we possibly added dimensions to the first
     # and last arrays
     if ndim_first == 1 and ndim_last == 1:
-        return result[0, 0]
+        result = result[0, 0]
+        return result
     elif ndim_first == 1 or ndim_last == 1:
-        return result.reshape(-1)
+        result = result.reshape(-1)
+        return result
     else:
         return result
 
 
-def _multi_matmul_three(A, B, C, constant=False) -> Tensor:
+def _multi_matmul_three(A, B, C, *, constant=None) -> Tensor:
     """
     Find the best order for three arrays and do the multiplication.
 
@@ -520,9 +551,9 @@ def _multi_matmul_three(A, B, C, constant=False) -> Tensor:
     cost2 = a1b0 * c1 * (a0 + b1c0)
 
     if cost1 < cost2:
-        return matmul(matmul(A, B, constant), C, constant)
+        return matmul(matmul(A, B, constant=constant), C, constant=constant)
     else:
-        return matmul(A, matmul(B, C, constant), constant)
+        return matmul(A, matmul(B, C, constant=constant), constant=constant)
 
 
 def _multi_matmul_chain_order(arrays):
@@ -550,9 +581,9 @@ def _multi_matmul_chain_order(arrays):
     # s[i, j] is the value of k at which we split the product A_i..A_j
     s = np.empty((n, n), dtype=np.intp)
 
-    for l in range(1, n):
-        for i in range(n - l):
-            j = i + l
+    for ind in range(1, n):
+        for i in range(n - ind):
+            j = i + ind
             m[i, j] = np.inf
             for k in range(i, j):
                 q = m[i, k] + m[k + 1, j] + p[i] * p[k + 1] * p[j + 1]
@@ -562,13 +593,13 @@ def _multi_matmul_chain_order(arrays):
     return s
 
 
-def _multi_matmul(arrays, order, i, j, constant=False) -> Tensor:
+def _multi_matmul(arrays, order, i, j, *, constant=None) -> Tensor:
     """Actually do the multiplication with the given order."""
     if i == j:
         return arrays[i]
     else:
         return matmul(
-            _multi_matmul(arrays, order, i, order[i, j], constant),
-            _multi_matmul(arrays, order, order[i, j] + 1, j, constant),
-            constant,
+            _multi_matmul(arrays, order, i, order[i, j], constant=constant),
+            _multi_matmul(arrays, order, order[i, j] + 1, j, constant=constant),
+            constant=constant,
         )

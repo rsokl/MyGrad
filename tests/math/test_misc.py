@@ -17,11 +17,6 @@ def is_not_close(arr0: Tensor, arr1: Tensor) -> bool:
     return not np.any(np.isclose(arr0.data, arr1.data))
 
 
-@fwdprop_test_factory(mygrad_func=maximum, true_func=np.maximum, num_arrays=2)
-def test_maximum_fwd():
-    pass
-
-
 @backprop_test_factory(
     mygrad_func=maximum, true_func=np.maximum, num_arrays=2, assumptions=is_not_close
 )
@@ -30,8 +25,8 @@ def test_maximum_bkwd():
 
 
 def test_maximum_bkwd_equal():
-    """ regression test for documented behavior of maximum/minimum where
-        x == y"""
+    """regression test for documented behavior of maximum/minimum where
+    x == y"""
 
     x = Tensor([1.0, 0.0, 2.0])
     y = Tensor([2.0, 0.0, 1.0])
@@ -41,7 +36,6 @@ def test_maximum_bkwd_equal():
 
     assert_allclose(x.grad, [0.0, 0.0, 1])
     assert_allclose(y.grad, [1.0, 0.0, 0])
-    o.null_gradients()
 
     # ensure branch covered for equal scalars
     x = Tensor(1.0)
@@ -52,12 +46,6 @@ def test_maximum_bkwd_equal():
 
     assert_allclose(x.grad, 0.0)
     assert_allclose(y.grad, 0.0)
-    o.null_gradients()
-
-
-@fwdprop_test_factory(mygrad_func=minimum, true_func=np.minimum, num_arrays=2)
-def test_minimum_fwd():
-    pass
 
 
 @backprop_test_factory(
@@ -68,8 +56,8 @@ def test_minimum_bkwd():
 
 
 def test_minimum_bkwd_equal():
-    """ regression test for documented behavior of minimum/minimum where
-        x == y"""
+    """regression test for documented behavior of minimum/minimum where
+    x == y"""
 
     x = Tensor([1.0, 0.0, 2.0])
     y = Tensor([2.0, 0.0, 1.0])
@@ -79,7 +67,6 @@ def test_minimum_bkwd_equal():
 
     assert_allclose(x.grad, [1.0, 0.0, 0.0])
     assert_allclose(y.grad, [0.0, 0.0, 1.0])
-    o.null_gradients()
 
     # ensure branch covered for equal scalars
     x = Tensor(1.0)
@@ -90,7 +77,6 @@ def test_minimum_bkwd_equal():
 
     assert_allclose(x.grad, 0.0)
     assert_allclose(y.grad, 0.0)
-    o.null_gradients()
 
 
 def to_min_max(arr: np.ndarray) -> st.SearchStrategy:

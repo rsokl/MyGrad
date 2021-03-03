@@ -15,56 +15,56 @@ def finite_difference(
     as_decimal=False,
     kwargs=None
 ):
-    """ Computes numerical partial derivatives of f(x0, x1, ...) in each
-        of its variables, using the central difference method.
-        This is a "fast" method - it varies entire arrays at once. Thus
-        this is only appropriate for trivial vectorized functions that
-        map accross entries of arrays (like add or multiply). E.g.
-        matrix multiplication is *not* suited for this style of gradient.
+    """Computes numerical partial derivatives of f(x0, x1, ...) in each
+    of its variables, using the central difference method.
+    This is a "fast" method - it varies entire arrays at once. Thus
+    this is only appropriate for trivial vectorized functions that
+    map across entries of arrays (like add or multiply). E.g.
+    matrix multiplication is *not* suited for this style of gradient.
+
+    Parameters
+    ----------
+    f : Callable[[numpy.ndarray, ...], numpy.ndarray]
+        f(x, ...) -> numpy.ndarray
+    *args : Tuple[numpy.ndarray, ...]
+        The input arguments to be fed to f.
+
+    back_grad : numpy.ndarray
+        The gradient being back-propagated to x and y, via f
+
+    vary_ind : Optional[Tuple[int, ...]]
+        If `None`, the partials of f with respect to all the inputs are.
+        computed. Otherwise you can specify a sequence of the indices
+        of the variables whose partials are to be computed
+           0 -> w.r.t x only, 1 -> w.r.t y only, etc.
+
+    h : float, optional, (default=Decimal(1E-8))
+        Approximating infinitesimal.
+
+    as_decimal : bool, optional (default=True)
+        If True, f's arguments are passed as Decimal-type arrays. This
+        improves numerical precision, but is not permitted by some functions.
+
+    kwargs : Optional[Dict]
+
+    Returns
+    -------
+    Tuple[Union[NoneType, numpy.ndarray], ...]
+        df/dx0, df/dx1, ... - evaluated at (`x0`, `x1`, ... ).
+    """
+
+    def to_decimal_array(arr):
+        """Convert numpy ND-array to Decimal-type object array of the same shape.
+        Used for facilitating high-precision arithmetic.
 
         Parameters
         ----------
-        f : Callable[[numpy.ndarray, ...], numpy.ndarray]
-            f(x, ...) -> numpy.ndarray
-        *args : Tuple[numpy.ndarray, ...]
-            The input arguments to be fed to f.
-
-        back_grad : numpy.ndarray
-            The gradient being back-propagated to x and y, via f
-
-        vary_ind : Optional[Tuple[int, ...]]
-            If `None`, the partials of f with respect to all the inputs are.
-            computed. Otherwise you can specify a sequence of the indices
-            of the variables whose partials are to be computed
-               0 -> w.r.t x only, 1 -> w.r.t y only, etc.
-
-        h : float, optional, (default=Decimal(1E-8))
-            Approximating infinitesimal.
-
-        as_decimal : bool, optional (default=True)
-            If True, f's arguments are passed as Decimal-type arrays. This
-            improves numerical precision, but is not permitted by some functions.
-
-        kwargs : Optional[Dict]
+        arr : Union[float, numpy.ndarray]
 
         Returns
         -------
-        Tuple[Union[NoneType, numpy.ndarray], ...]
-            df/dx0, df/dx1, ... - evaluated at (`x0`, `x1`, ... ).
-        """
-
-    def to_decimal_array(arr):
-        """ Convert numpy ND-array to Decimal-type object array of the same shape.
-            Used for facilitating high-precision arithmetic.
-
-            Parameters
-            ----------
-            arr : Union[float, numpy.ndarray]
-
-            Returns
-            -------
-            numpy.ndarray
-                Decimal-type object array"""
+        numpy.ndarray
+            Decimal-type object array"""
         arr = np.asarray(arr)
 
         if arr.dtype.kind == "O":
@@ -106,40 +106,40 @@ def finite_difference(
     return grads
 
 
-def numerical_gradient(f, *args, back_grad, vary_ind=None, h=1e-20, kwargs=None):
-    """ Computes numerical partial derivatives of f(x0, x1, ...) in each
-        of its variables, using the central difference method.
-        This is a "fast" method - it varies entire arrays at once. Thus
-        this is only appropriate for trivial vectorized functions that
-        map across entries of arrays (like add or multiply). E.g.
-        matrix multiplication is *not* suited for this style of gradient.
+def numerical_gradient(f, *args, back_grad, vary_ind=None, h=1e-20, kwargs=None) -> Tuple[Optional[np.ndarray], ...]:
+    """Computes numerical partial derivatives of f(x0, x1, ...) in each
+    of its variables, using the central difference method.
+    This is a "fast" method - it varies entire arrays at once. Thus
+    this is only appropriate for trivial vectorized functions that
+    map across entries of arrays (like add or multiply). E.g.
+    matrix multiplication is *not* suited for this style of gradient.
 
-        Parameters
-        ----------
-        f : Callable[[numpy.ndarray, ...], numpy.ndarray]
-            f(x, ...) -> numpy.ndarray
-        *args : Tuple[numpy.ndarray, ...]
-            The input arguments to be fed to f.
+    Parameters
+    ----------
+    f : Callable[[numpy.ndarray, ...], numpy.ndarray]
+        f(x, ...) -> numpy.ndarray
+    *args : Tuple[numpy.ndarray, ...]
+        The input arguments to be fed to f.
 
-        back_grad : numpy.ndarray
-            The gradient being back-propagated to x and y, via f
+    back_grad : numpy.ndarray
+        The gradient being back-propagated to x and y, via f
 
-        vary_ind : Optional[Tuple[int, ...]]
-            If `None`, the partials of f with respect to all the inputs are.
-            computed. Otherwise you can specify a sequence of the indices
-            of the variables whose partials are to be computed
-               0 -> w.r.t x only, 1 -> w.r.t y only, etc.
+    vary_ind : Optional[Tuple[int, ...]]
+        If `None`, the partials of f with respect to all the inputs are.
+        computed. Otherwise you can specify a sequence of the indices
+        of the variables whose partials are to be computed
+           0 -> w.r.t x only, 1 -> w.r.t y only, etc.
 
-        h : float, optional, (default=Decimal(1E-8))
-            Approximating infinitesimal.
+    h : float, optional, (default=Decimal(1E-8))
+        Approximating infinitesimal.
 
-        kwargs : Optional[Dict]
+    kwargs : Optional[Dict]
 
-        Returns
-        -------
-        Tuple[Union[NoneType, numpy.ndarray], ...]
-            df/dx0, df/dx1, ... - evaluated at (`x0`, `x1`, ... ).
-        """
+    Returns
+    -------
+    Tuple[Union[NoneType, numpy.ndarray], ...]
+        df/dx0, df/dx1, ... - evaluated at (`x0`, `x1`, ... ).
+    """
 
     if kwargs is None:
         kwargs = {}
@@ -161,13 +161,13 @@ def numerical_gradient(f, *args, back_grad, vary_ind=None, h=1e-20, kwargs=None)
         dvar = f(*gen_fwd_diff(n), **kwargs).imag / h
         grads[n] = reduce_broadcast(back_grad * dvar, args[n].shape)
 
-    return grads
+    return tuple(grads)
 
 
 def numerical_gradient_full(
     f, *args, back_grad, kwargs=None, vary_ind=None
 ) -> Tuple[np.ndarray, ...]:
-    """ Computes numerical partial derivatives of f(x, y, ..., **kwargs), by
+    """Computes numerical partial derivatives of f(x, y, ..., **kwargs), by
     varying each entry of x, y, ... independently producing a gradient
     in each variable.
 
@@ -253,29 +253,29 @@ def numerical_gradient_full(
 
 
 def _numerical_gradient_full(f, *, x, back_grad, h=1e-20):
-    """ Computes numerical partial derivatives of f(x), by
-        varying each entry of `x` independently.
+    """Computes numerical partial derivatives of f(x), by
+    varying each entry of `x` independently.
 
-        Parameters
-        ----------
-        f : Callable[[numpy.ndarray], numpy.ndarray]
-            f(x) -> numpy.ndarray
+    Parameters
+    ----------
+    f : Callable[[numpy.ndarray], numpy.ndarray]
+        f(x) -> numpy.ndarray
 
-        x : numpy.ndarray
-            An array storing the sequence(s) of values in the array. More than once
-            sequence may be designated, according to the `axis` argument of `f`.
+    x : numpy.ndarray
+        An array storing the sequence(s) of values in the array. More than once
+        sequence may be designated, according to the `axis` argument of `f`.
 
-        back_grad : numpy.ndarray
-            The gradient being back-propagated to {x}, via f
+    back_grad : numpy.ndarray
+        The gradient being back-propagated to {x}, via f
 
-        h : float, optional, (default=Decimal(1E-8))
-            Approximating infinitesimal.
+    h : float, optional, (default=Decimal(1E-8))
+        Approximating infinitesimal.
 
-        Returns
-        -------
-        numpy.ndarray
-            df/dx
-        """
+    Returns
+    -------
+    numpy.ndarray
+        df/dx
+    """
 
     grad = np.empty(x.shape, dtype=np.float64)
     x_orig = np.copy(x)

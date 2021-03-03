@@ -4,7 +4,7 @@ from mygrad.tensor_base import asarray
 
 
 def check_loss_inputs(x, y_true):
-    """ Ensures that the inputs to scores-truth style loss functions
+    """Ensures that the inputs to scores-truth style loss functions
     are of the correct shapes and types.
 
     Parameters

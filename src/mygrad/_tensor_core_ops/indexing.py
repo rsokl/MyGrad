@@ -2,21 +2,22 @@ from numbers import Number
 
 import numpy as np
 
-from mygrad.operation_base import BroadcastableOp, Operation
+import mygrad._utils.graph_tracking as _tracking
+from mygrad.operation_base import Operation
 
 __all__ = ["GetItem", "SetItem"]
 
 
 def _is_int_array_index(index):
-    """ Returns True if `index` contains any array-like integer-valued sequences
+    """Returns True if `index` contains any array-like integer-valued sequences
 
-        Parameters
-        ----------
-        index : Tuple[Any]
+    Parameters
+    ----------
+    index : Tuple[Any]
 
-        Returns
-        -------
-        bool """
+    Returns
+    -------
+    bool"""
     return any(
         np.issubdtype(np.asarray(ind).dtype, np.int_) and np.asarray(ind).ndim
         for ind in index
@@ -24,25 +25,27 @@ def _is_int_array_index(index):
 
 
 def _is_bool_array_index(index):
-    """ Returns True if `index` solely contains a boolean-valued array
+    """Returns True if `index` solely contains a boolean-valued array
 
-        Parameters
-        ----------
-        index : Tuple[Any]
+    Parameters
+    ----------
+    index : Tuple[Any]
 
-        Returns
-        -------
-        bool """
+    Returns
+    -------
+    bool"""
     return len(index) == 1 and np.issubdtype(np.asarray(index[0]).dtype, np.bool_)
 
 
 class GetItem(Operation):
-    """ Defines the __getitem__ interface for a Tensor, supporting back-propagation
+    """Defines the __getitem__ interface for a Tensor, supporting back-propagation
 
-        Supports back-propagation through all valid numpy-indexing (basic, advanced, mixed, etc.)"""
+    Supports back-propagation through all valid numpy-indexing (basic, advanced, mixed, etc.)"""
+
+    can_return_view = True
 
     def __call__(self, a, index):
-        """ ``a[index]``
+        """``a[index]``
 
         Parameters
         ----------
@@ -63,15 +66,21 @@ class GetItem(Operation):
         out = a.data[index]
 
         self._used_distinct_indices = (
-            np.shares_memory(a.data, out)
-            or isinstance(out, Number)
-            or _is_bool_array_index(self.index)
+            (
+                out.base is not None
+                and (out.base is a.data or out.base is a.data.base)
+                or out.ndim == 0
+                or isinstance(out, Number)
+                or _is_bool_array_index(self.index)
+            )
+            if _tracking.TRACK_GRAPH
+            else None
         )
-        return a.data[index]
+        return out
 
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
-        out = np.zeros_like(a.data)
+        out = np.zeros_like(a.data)  # TODO: ensure ints are promoted to floats
         if self._used_distinct_indices:
             out[self.index] += grad
         else:
@@ -81,51 +90,56 @@ class GetItem(Operation):
         return out
 
 
-def _arr(*shape):
-    """ Construct an array of a specified consisting of values [0, _arr.size)
-        filled in row-major order.
+def _arr(*shape: int) -> np.ndarray:
+    """Construct an array of a specified consisting of values [0, _arr.size)
+    filled in row-major order.
 
-        Parameters
-        ----------
-        *shape : int
+    Parameters
+    ----------
+    *shape : int
 
-        Returns
-        -------
-        numpy.ndarray"""
+    Returns
+    -------
+    numpy.ndarray"""
     return np.arange(np.prod(shape)).reshape(shape)
 
 
-class SetItem(BroadcastableOp):
-    """ Defines the __setitem__ interface for a Tensor, supporting back-propagation through
-        both the tensor being set and the tensor whose .
+class SetItem(Operation):
+    """Defines the __setitem__ interface for a Tensor, supporting back-propagation through
+    both the tensor being set and the tensor whose .
 
-        Supports back-propagation through all valid numpy-indexing (basic, advanced, mixed, etc.),
-        as well as """
+    Supports back-propagation through all valid numpy-indexing (basic, advanced, mixed, etc.),
+    as well as"""
 
-    def __call__(self, a, b, index):
-        """ a[index] = b
+    can_return_view = True
 
-            Parameters
-            ----------
-            a : mygrad.Tensor
-                The tensor whose entries are being set. A copy of the underlying
-                data is made if `a` is a non-constant tensor.
+    def __call__(self, a, b, index, *, out: np.ndarray):
+        """a[index] = b
 
-            b : mygrad.Tensor
-                `b` must be broadcast-compatible with `a[index]`
+        Parameters
+        ----------
+        a : mygrad.Tensor
+            The tensor whose entries are being set. A copy of the underlying
+            data is made if `a` is a non-constant tensor.
 
-            index : valid-array-index
-                An n-dimensional index for specifying entries or subregions of `a`.
-                All means of numpy-array indexing (basic, advanced, mixed, etc) are
-                supported.
+        b : mygrad.Tensor
+            `b` must be broadcast-compatible with `a[index]`
 
-            Notes
-            -----
-            Additional computational overhead is required for back-propagation when
-            `index` contains any integer-valued arrays, to accommodate for the scenario
-            in which a single element is set multiple times."""
+        index : valid-array-index
+            An n-dimensional index for specifying entries or subregions of `a`.
+            All means of numpy-array indexing (basic, advanced, mixed, etc) are
+            supported.
 
-        out = np.copy(a.data) if not a.constant else a.data
+        out : ndarray
+            The data to be mutated; defaults to ``a.data``. This argument is
+            included to provide parity with standard ufunc signatures.
+
+        Notes
+        -----
+        Additional computational overhead is required for back-propagation when
+        `index` contains any integer-valued arrays, to accommodate for the scenario
+        in which a single element is set multiple times."""
+
         self.variables = (a, b)
         self.index = index if isinstance(index, tuple) else (index,)
         out[index] = b.data
@@ -151,7 +165,7 @@ class SetItem(BroadcastableOp):
             # being set redundantly, and mask out any elements in `grad` corresponding to
             # the elements in `b` that weren't actually set.
             if (
-                not np.shares_memory(grad_sel, grad)
+                (grad_sel.base is None or not np.shares_memory(grad_sel, grad))
                 and grad_sel.size > 0
                 and grad_sel.ndim > 0
                 and not _is_bool_array_index(self.index)
@@ -161,9 +175,10 @@ class SetItem(BroadcastableOp):
                 # any redundant elements
                 unique = _arr(*grad.shape)
                 sub_sel = unique[self.index].flat
-                elements, first_inds, = np.unique(
-                    np.flip(sub_sel, axis=0), return_index=True
-                )
+                (
+                    elements,
+                    first_inds,
+                ) = np.unique(np.flip(sub_sel, axis=0), return_index=True)
                 if len(first_inds) < len(sub_sel):
                     # one or more elements were set redundantly, identify the entries in `b`
                     # that actually were set to those elements (the last-most set-item calls

@@ -5,14 +5,14 @@ mygrad.Tensor
 
 .. autoclass:: Tensor
 
-   
+
    .. automethod:: __init__
 
-   
+
    .. rubric:: Methods
 
    .. autosummary::
-   
+
       ~Tensor.__init__
       ~Tensor.argmax
       ~Tensor.argmin
@@ -35,15 +35,15 @@ mygrad.Tensor
       ~Tensor.swapaxes
       ~Tensor.transpose
       ~Tensor.var
-   
-   
 
-   
-   
+
+
+
+
    .. rubric:: Attributes
 
    .. autosummary::
-   
+
       ~Tensor.T
       ~Tensor.constant
       ~Tensor.creator
@@ -52,5 +52,3 @@ mygrad.Tensor
       ~Tensor.scalar_only
       ~Tensor.shape
       ~Tensor.size
-   
-   

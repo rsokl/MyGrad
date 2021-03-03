@@ -1,22 +1,25 @@
+from typing import Optional
+
 from numpy import ndarray
 
 from mygrad import Tensor, multiply
+from mygrad.typing import ArrayLike
 
 from .sigmoid import sigmoid
 
 
-def glu(x, axis=-1, constant=False):
-    """ Returns the Gated Linear Unit A * σ(B), where A and B are split from `x`.
+def glu(x: ArrayLike, axis: int = -1, *, constant: Optional[bool] = None) -> Tensor:
+    """Returns the Gated Linear Unit A * σ(B), where A and B are split from `x`.
 
     Parameters
     ----------
-    x : mygrad.Tensor
+    x : ArrayLike
         The input.
 
     axis : int, optional (default=-1)
         The axis along which to split the input in half and apply the GLU.
 
-    constant : boolean, optional (default=False)
+    constant : Optional[bool]
         If ``True``, the returned tensor is a constant (it
         does not back-propagate a gradient).
 
@@ -40,9 +43,9 @@ def glu(x, axis=-1, constant=False):
     --------
     >>> import mygrad as mg
     >>> from mygrad.nnet.activations import glu
-    >>> x = mg.arange(-5, 5)
+    >>> x = mg.arange(-5., 5.)
     >>> x
-    Tensor([-5, -4, -3, -2, -1,  0,  1,  2,  3,  4])
+    Tensor([-5., -4., -3., -2., -1.,  0.,  1.,  2.,  3.,  4.])
     >>> y = glu(x); y
     Tensor([-2.5       , -2.92423431, -2.64239123, -1.90514825, -0.98201379])
     >>> y.backward()

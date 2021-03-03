@@ -5,10 +5,11 @@ import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
 import pytest
-from hypothesis import given, note, settings
+from hypothesis import given, infer, note, settings
 from numpy.testing import assert_array_equal
 
 from mygrad import Tensor
+from mygrad.typing import ArrayLike, DTypeLikeReals, Shape
 from tests.custom_strategies import (
     _factors,
     adv_integer_index,
@@ -16,6 +17,7 @@ from tests.custom_strategies import (
     basic_indices,
     choices,
     integer_index,
+    no_value,
     slice_index,
     tensors,
     valid_axes,
@@ -25,9 +27,9 @@ from tests.custom_strategies import (
 
 @given(seq=st.lists(elements=st.integers()), replace=st.booleans(), data=st.data())
 def test_choices(seq: List[int], replace: bool, data: st.SearchStrategy):
-    """ Ensures that the `choices` strategy:
-        - draws from the provided sequence
-        - respects input parameters"""
+    """Ensures that the `choices` strategy:
+    - draws from the provided sequence
+    - respects input parameters"""
     upper = len(seq) + 10 if replace and seq else len(seq)
     size = data.draw(st.integers(0, upper), label="size")
     chosen = data.draw(choices(seq, size=size, replace=replace), label="choices")
@@ -180,7 +182,7 @@ def test_factors(size: int):
     data=st.data(),
 )
 def test_valid_shapes(arr: np.ndarray, data: st.DataObject):
-    newshape = data.draw(valid_shapes(arr.size), label="newshape")
+    newshape = data.draw(valid_shapes(arr.size, min_len=0), label="newshape")
     arr.reshape(newshape)
 
 
@@ -204,7 +206,7 @@ def test_arbitrary_indices_strategy(a, data):
 @pytest.mark.parametrize("constant", [st.booleans(), None])
 def test_tensors_handles_constant_strat(constant):
     constants = []
-    kwargs = dict(dtype=np.int8, shape=(2, 3))
+    kwargs = dict(dtype=np.float32, shape=(2, 3))
     if constant is not None:
         kwargs["constant"] = constant
 
@@ -220,7 +222,7 @@ def test_tensors_handles_constant_strat(constant):
 @pytest.mark.parametrize("constant", [True, False])
 @given(data=st.data())
 def test_tensors_static_constant(constant: bool, data: st.DataObject):
-    tensor = data.draw(tensors(np.int8, (2, 3), constant=constant), label="tensor")
+    tensor = data.draw(tensors(np.float32, (2, 3), constant=constant), label="tensor")
     assert isinstance(tensor, Tensor)
     assert tensor.constant is constant
     assert tensor.grad is None
@@ -271,3 +273,58 @@ def test_tensors_with_grad(
         assert np.all((100 <= tensor.grad) & (tensor.grad <= 200))
     else:
         assert np.all((-10 <= tensor.grad) & (tensor.grad <= 10))
+
+
+@given(t=tensors())
+def test_tensor_owns_memory(t: Tensor):
+    assert t.base is None
+    assert t.data.base is None
+
+
+@given(tensor=tensors())
+def test_tensor_read_only_default(tensor: Tensor):
+    assert tensor.data.flags.writeable is True
+
+
+@pytest.mark.parametrize("read_only", [True, False])
+@given(data=st.data())
+def test_tensor_read_only(data: st.DataObject, read_only: bool):
+    tensor = data.draw(tensors(read_only=read_only))
+    assert tensor.data.flags.writeable is not read_only
+
+
+@given(
+    shape=hnp.array_shapes(min_dims=0, min_side=0),
+    ndmin=st.integers(0, 10),
+    data=st.data(),
+)
+def test_tensor_ndmin(shape: Tuple[int, ...], ndmin: int, data: st.DataObject):
+    tensor = data.draw(
+        tensors(shape=shape, ndmin=ndmin, include_grad=True, read_only=st.booleans()),
+        label="tensor",
+    )
+    assert tensor.ndim >= ndmin
+    assert tensor.shape == tensor.grad.shape
+
+
+@given(dtype=infer)
+def test_can_infer_DTypeLikeReals(dtype: DTypeLikeReals):
+    issubclass(np.dtype(dtype).type, (np.floating, np.integer))
+
+
+@given(x=infer)
+def test_can_infer_ArrayLike(x: ArrayLike):
+    np.array(x)  # raise if not array-like
+    print(repr(x))
+
+
+@given(shape=infer)
+def test_can_infer_Shape(shape: Shape):
+    np.ones(shape)  # raise if not valid shape
+
+
+@given(no_value())
+def test_no_value(x):
+    from mygrad.operation_base import _NoValue
+    assert x is _NoValue
+

@@ -1,31 +1,35 @@
+from typing import Optional
+
 import numpy as np
 
+import mygrad._utils.graph_tracking as _tracking
 from mygrad.math._special import logsumexp
 from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor
+from mygrad.typing import ArrayLike
 
 from ._utils import check_loss_inputs
 
 
 class SoftmaxCrossEntropy(Operation):
-    """ Given the classification scores of C classes for N pieces of data,
-        computes the NxC softmax classification probabilities. The
-        cross entropy is then computed by using the true classification labels.
+    """Given the classification scores of C classes for N pieces of data,
+    computes the NxC softmax classification probabilities. The
+    cross entropy is then computed by using the true classification labels.
 
-        log-softmax is used for improved numerical stability"""
+    log-softmax is used for improved numerical stability"""
 
     def __call__(self, x, y_true):
-        """ Parameters
-            ----------
-            x : mygrad.Tensor, shape=(N, C)
-                The C class scores for each of the N pieces of data.
+        """Parameters
+        ----------
+        x : mygrad.Tensor, shape=(N, C)
+            The C class scores for each of the N pieces of data.
 
-            y_true : Sequence[int]
-                The correct class-indices, in [0, C), for each datum.
+        y_true : Sequence[int]
+            The correct class-indices, in [0, C), for each datum.
 
-            Returns
-            -------
-            The average softmax loss"""
+        Returns
+        -------
+        The average softmax loss"""
         if isinstance(y_true, Tensor):
             y_true = y_true.data
 
@@ -36,17 +40,20 @@ class SoftmaxCrossEntropy(Operation):
         label_locs = (range(len(scores)), y_true)
         loss = -np.sum(log_softmax[label_locs]) / scores.shape[0]
 
-        self.back = np.exp(log_softmax)
-        self.back[label_locs] -= 1.0
-        self.back /= scores.shape[0]
+        if _tracking.TRACK_GRAPH:
+            self.back = np.exp(log_softmax)
+            self.back[label_locs] -= 1.0
+            self.back /= scores.shape[0]
         return loss
 
     def backward_var(self, grad, index, **kwargs):
         return grad * self.back
 
 
-def softmax_crossentropy(x, y_true, constant=False):
-    r""" Given the classification scores of C classes for N pieces of data,
+def softmax_crossentropy(
+    x: ArrayLike, y_true: ArrayLike, *, constant: Optional[bool] = None
+) -> Tensor:
+    r"""Given the classification scores of C classes for N pieces of data,
 
     computes the NxC softmax classification probabilities. The
     cross entropy is then computed by using the true classification labels.
@@ -55,10 +62,10 @@ def softmax_crossentropy(x, y_true, constant=False):
 
     Parameters
     ----------
-    x : array_like, shape=(N, C)
+    x : ArrayLike, shape=(N, C)
         The C class scores for each of the N pieces of data.
 
-    y_true : array_like, shape=(N,)
+    y_true : ArrayLike, shape=(N,)
         The correct class-indices, in [0, C), for each datum.
 
     constant : bool, optional(default=False)

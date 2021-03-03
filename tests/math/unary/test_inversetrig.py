@@ -1,67 +1,7 @@
 import numpy as np
 
-from mygrad import arccos, arccot, arccsc, arcsec, arcsin, arctan
+from mygrad import arccot, arccsc, arcsec
 from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
-
-
-@fwdprop_test_factory(
-    mygrad_func=arcsin,
-    true_func=np.arcsin,
-    index_to_bnds={0: (-0.9, 0.9)},
-    num_arrays=1,
-)
-def test_arcsin_fwd():
-    pass
-
-
-@backprop_test_factory(
-    mygrad_func=arcsin,
-    true_func=np.arcsin,
-    index_to_bnds={0: (-0.9, 0.9)},
-    num_arrays=1,
-)
-def test_arcsin_backward(data):
-    pass
-
-
-@fwdprop_test_factory(
-    mygrad_func=arccos,
-    true_func=np.arccos,
-    index_to_bnds={0: (-0.9, 0.9)},
-    num_arrays=1,
-)
-def test_arccos_fwd():
-    pass
-
-
-@backprop_test_factory(
-    mygrad_func=arccos,
-    true_func=np.arccos,
-    index_to_bnds={0: (-0.9, 0.9)},
-    num_arrays=1,
-)
-def test_arccos_backward(data):
-    pass
-
-
-@fwdprop_test_factory(
-    mygrad_func=arctan,
-    true_func=np.arctan,
-    index_to_bnds={0: (0.1, 10.0)},
-    num_arrays=1,
-)
-def test_arctan_fwd():
-    pass
-
-
-@backprop_test_factory(
-    mygrad_func=arctan,
-    true_func=np.arctan,
-    index_to_bnds={0: (0.1, 10.0)},
-    num_arrays=1,
-)
-def test_arctan_backward(data):
-    pass
 
 
 @fwdprop_test_factory(

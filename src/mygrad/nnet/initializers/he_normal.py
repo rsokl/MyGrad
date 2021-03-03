@@ -3,8 +3,8 @@ import numpy as np
 from mygrad.nnet.initializers.normal import normal
 
 
-def he_normal(*shape, gain=1, dtype=np.float32, constant=False):
-    r""" Initialize a ``Tensor`` according to the normal initialization procedure
+def he_normal(*shape, gain=1, dtype=np.float32, constant=None):
+    r"""Initialize a ``Tensor`` according to the normal initialization procedure
     described by He et al.
 
     Parameters

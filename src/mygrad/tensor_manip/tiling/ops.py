@@ -3,16 +3,15 @@ from typing import Optional, Sequence, Union
 import numpy as np
 
 from mygrad.nnet.layers.utils import sliding_window_view
-from mygrad.operation_base import BroadcastableOp
+from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor
 
 __all__ = ["Repeat"]
 
 
-class Repeat(BroadcastableOp):
+class Repeat(Operation):
     # Repeat can broadcast in the case:
     #    repeat(1, 2) -> [1 1]
-    scalar_only = True  # type: bool
 
     def __call__(
         self, a: Tensor, repeats: Union[int, Sequence[int]], axis: Optional[int] = None

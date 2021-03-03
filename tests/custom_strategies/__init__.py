@@ -1,10 +1,11 @@
 """ Custom hypothesis search strategies """
 import math
-from functools import lru_cache, partial
-from itertools import groupby
+from collections import defaultdict
+from functools import lru_cache, partial, reduce
+from itertools import groupby, zip_longest
 from numbers import Integral
 from operator import itemgetter
-from typing import Any, Iterable, List, Optional, Tuple, Union
+from typing import Any, Iterable, List, Mapping, Optional, Tuple, Union
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
@@ -12,24 +13,56 @@ import numpy as np
 from hypothesis.extra.numpy import broadcastable_shapes
 from numpy import ndarray
 
+import mygrad as mg
 from mygrad import Tensor
+from mygrad.operation_base import _NoValue, _NoValueType
+from mygrad.typing import ArrayLike, DTypeLike, DTypeLikeReals, Shape
+from mygrad.ufuncs import MyGradBinaryUfunc, MyGradUnaryUfunc
+from tests.utils.functools import SmartSignature
 
 __all__ = [
+    "array_likes",
     "adv_integer_index",
     "arbitrary_indices",
     "basic_indices",
     "broadcastable_shapes",
     "choices",
     "everything_except",
-    "valid_axes",
+    "no_value",
+    "populates_ufunc",
+    "real_dtypes",
     "tensors",
+    "valid_shapes",
+    "valid_axes",
+    "valid_constant_arg",
 ]
 
-Shape = Tuple[int, ...]
+
+def no_value() -> st.SearchStrategy[_NoValueType]:
+    """Signals that an argument should not be passed to a function"""
+    return st.just(_NoValue)
+
 
 basic_indices = partial(hnp.basic_indices, allow_newaxis=True, allow_ellipsis=True)
 
 array_shapes = hnp.array_shapes
+
+st.register_type_strategy(
+    DTypeLikeReals,
+    st.none()
+    | st.sampled_from([float, "float32", int, "int16"])
+    | hnp.floating_dtypes()
+    | hnp.integer_dtypes(),
+)
+
+st.register_type_strategy(Shape, hnp.array_shapes(min_dims=0, min_side=0))
+
+
+real_dtypes = (
+    st.sampled_from([None, int, float, "int16", "int32", "float32", "float64"])
+    | hnp.integer_dtypes()
+    | hnp.floating_dtypes()
+)
 
 
 def everything_except(
@@ -78,12 +111,48 @@ def _check_min_max(min_val, min_dim, max_dim, param_name, max_val=None):
 class VerboseTensor(Tensor):
     def __repr__(self):
         repr_ = repr(self.data).replace("array", "Tensor").replace("\n", "\n ")
-        replacement = f", constant={self.constant}"
+        replacement = (
+            f", constant={self._constant}, writeable={self.data.flags.writeable}"
+        )
         if self.grad is not None:
             replacement += f", grad={repr(self.grad)}"
         replacement += ")"
-        repr_ = repr_.replace(")", replacement)
-        return repr_
+        return repr_[:-1] + replacement
+
+
+@st.composite
+def array_likes(
+    draw,
+    dtype: Any = st.sampled_from([float, int]),
+    shape: Union[int, Shape, st.SearchStrategy[Shape]] = hnp.array_shapes(
+        min_side=0, min_dims=0, max_dims=2
+    ),
+    *,
+    elements: Optional[Union[st.SearchStrategy, Mapping[str, Any]]] = None,
+    fill: Optional[st.SearchStrategy[Any]] = None,
+    unique: bool = False,
+) -> st.SearchStrategy[ArrayLike]:
+    """elements defaults to dict(min_value=-1e6, max_value=1e6)"""
+    if elements is None:
+        elements = {"min_value": -1e6, "max_value": 1e6}
+
+    arr = draw(
+        hnp.arrays(
+            dtype=dtype, shape=shape, elements=elements, fill=fill, unique=unique
+        )
+    )
+
+    converters = [
+        lambda x: x,
+        lambda x: VerboseTensor(x, copy=False, constant=None),
+        lambda x: x.tolist() if x.size > 0 else x,
+    ]
+
+    mapper = draw(st.sampled_from(converters))
+    return mapper(arr)
+
+
+st.register_type_strategy(ArrayLike, array_likes())
 
 
 @st.composite
@@ -94,6 +163,7 @@ def tensors(
         min_dims=0, min_side=0
     ),
     *,
+    ndmin: int = 0,
     elements: Optional[st.SearchStrategy[Any]] = None,
     fill: Optional[st.SearchStrategy[Any]] = None,
     unique: bool = False,
@@ -101,6 +171,7 @@ def tensors(
     include_grad: Union[bool, st.SearchStrategy[bool]] = False,
     grad_dtype: Optional[Any] = None,
     grad_elements_bounds: Optional[Tuple[int, int]] = None,
+    read_only: Union[bool, st.SearchStrategy[bool]] = False,
 ) -> st.SearchStrategy[Tensor]:
     r"""Returns a strategy for generating :class:`mygrad:mygrad.Tensor`\ s.
 
@@ -139,6 +210,11 @@ def tensors(
         returns True. So e.g. for complex numbers (nan+1j) is also a valid fill).
         Note that if unique is set to True the generated values must be hashable.
 
+    ndmin : int, optional
+        Specifies the minimum number of dimensions that the resulting
+        array should have.  Ones will be pre-pended to the shape as
+        needed to meet this requirement.
+
     constant : Union[bool, st.SearchStrategy[bool]]
         Specifies ``tensor.constant``. Default is :func:`~hypothesis.strategies.booleans`
 
@@ -153,6 +229,13 @@ def tensors(
         The min and max bounds used to draw the gradient's elements.
         Defaults to (-10, 10)
         Specifying ``grad_element_bounds``, while ``include_grad`` is False, will raise an error.
+
+    read_only: Union[bool, st.SearchStrategy[bool]]
+        If True, the underlying numpy array is marked as not-writeable.
+
+    Returns
+    -------
+    st.SearchStrategy[Tensor]
 
     Tensors of specified ``dtype`` and ``shape`` are generated for example
     like this:
@@ -198,14 +281,24 @@ def tensors(
     hundreds or more elements, having a fill value is essential if you want
     your tests to run in reasonable time.
     """
+    assert isinstance(read_only, (bool, st.SearchStrategy))
+    if isinstance(read_only, st.SearchStrategy):
+        read_only = draw(read_only)
+
     x = draw(
         hnp.arrays(
             dtype=dtype, shape=shape, elements=elements, fill=fill, unique=unique
         )
     )  # type: np.ndarray
+
+    x.flags.writeable = not read_only
+
     constant = draw(constant) if isinstance(constant, st.SearchStrategy) else constant
 
-    tensor = VerboseTensor(x, constant=constant)
+    if np.issubdtype(x.dtype, np.integer):
+        constant = True
+
+    tensor = VerboseTensor(x, constant=constant, copy=False, ndmin=ndmin)
     if isinstance(include_grad, st.SearchStrategy):
         include_grad = draw(include_grad)
 
@@ -218,10 +311,10 @@ def tensors(
         if grad_elements_bounds is None:
             grad_elements_bounds = (-10, 10)
 
-        tensor.grad = draw(
+        tensor._grad = draw(
             hnp.arrays(
                 dtype=grad_dtype,
-                shape=x.shape,
+                shape=tensor.shape,
                 elements=st.floats(
                     *grad_elements_bounds, width=grad_dtype.itemsize * 8
                 ),
@@ -293,7 +386,7 @@ def valid_axes(
     min_dim: int = 0,
     max_dim: Optional[int] = None,
 ) -> st.SearchStrategy[Union[None, int, Tuple[int, ...]]]:
-    """ Hypothesis search strategy: Given array dimensionality, generate valid
+    """Hypothesis search strategy: Given array dimensionality, generate valid
     `axis` arguments (including `None`) for numpy's sequential functions.
 
     Examples from this strategy shrink towards an empty tuple of axes.
@@ -357,7 +450,7 @@ def valid_axes(
 
 
 def integer_index(size):
-    """ Generate a valid integer-index for an axis of a given size,
+    """Generate a valid integer-index for an axis of a given size,
     either a positive or negative value: [-size, size).
 
     Examples from this strategy shrink towards 0.
@@ -386,7 +479,7 @@ def slice_index(
     max_step=2,
     negative_step=True,
 ):
-    """ Hypothesis search strategy: Generate a valid slice-index
+    """Hypothesis search strategy: Generate a valid slice-index
     for an axis of a given size. Slices are chosen such that
     most slices will not be empty.
 
@@ -450,7 +543,7 @@ def adv_integer_index(
     min_side: int = 1,
     max_side: int = 3,
 ) -> st.SearchStrategy[Tuple[ndarray, ...]]:
-    """ Hypothesis search strategy: given an array shape, generate a
+    """Hypothesis search strategy: given an array shape, generate a
     a valid index for specifying an element/subarray of that array,
     using advanced indexing with integer-valued arrays.
 
@@ -489,10 +582,10 @@ def adv_integer_index(
 
 @lru_cache(maxsize=1000)
 def _factors(n: int) -> List[int]:
-    """ Returns the divisors of n
+    """Returns the divisors of n
 
-        >>> _factors(4)
-        {1, 2, 4}"""
+    >>> _factors(4)
+    {1, 2, 4}"""
     if not isinstance(n, int) and 0 <= n:
         raise ValueError(f"n={n} must be a non-negative integer")
     gen = ([i, n // i] for i in range(1, int(n ** 0.5) + 1) if n % i == 0)
@@ -503,7 +596,7 @@ def _factors(n: int) -> List[int]:
 def valid_shapes(
     draw, size: int, min_len: int = 1, max_len: int = 6
 ) -> st.SearchStrategy[Union[int, Tuple[int, ...]]]:
-    """ Given an array's size, generate a compatible random shape
+    """Given an array's size, generate a compatible random shape
 
     Parameters
     ----------
@@ -519,6 +612,8 @@ def valid_shapes(
     if not isinstance(size, int) or size < 0:
         raise ValueError(f"size={size} must be a non-negative integer")
 
+    if min_len == 0 and 1 < size:
+        min_len = 1
     shape_length = draw(st.integers(min_len, max_len))  # type: int
     shape = []  # type: List[int]
     rem = int(size / np.prod(shape))
@@ -695,3 +790,95 @@ def arbitrary_indices(draw, shape: Tuple[int]):
 
     out_ind = tuple(i[1] for i in index)
     return out_ind
+
+
+@st.composite
+def valid_constant_arg(draw, dtype: DTypeLike) -> st.SearchStrategy[Union[None, bool]]:
+    if issubclass(np.dtype(dtype).type, np.floating):
+        return draw(st.none() | st.booleans())
+    else:
+        return draw(st.sampled_from([None, True]))
+
+
+def _broadcast_two_shapes(shape_a: Shape, shape_b: Shape) -> Shape:
+    result = []
+    for a, b in zip_longest(reversed(shape_a), reversed(shape_b), fillvalue=1):
+        if a != b and (a != 1) and (b != 1):
+            raise ValueError(
+                f"shapes {shape_a!r} and {shape_b!r} are not broadcast-compatible"
+            )
+        result.append(a if a != 1 else b)
+    return tuple(reversed(result))
+
+
+def _broadcast_shapes(*shapes):
+    """Returns the shape resulting from broadcasting the
+    input shapes together.
+    Raises ValueError if the shapes are not broadcast-compatible"""
+    assert len(shapes)
+    return reduce(_broadcast_two_shapes, shapes, ())
+
+
+@st.composite
+def populates_ufunc(
+    draw: st.DataObject.draw,
+    ufunc: Union[MyGradUnaryUfunc, MyGradBinaryUfunc],
+    arg_index_to_elements: Optional[Mapping[int, st.SearchStrategy]] = None,
+    include_where: bool = True,
+    tensor_only: bool = False,
+    use_ufunc_signature: bool = False,
+    min_side=_NoValue,
+    max_side=_NoValue,
+    min_dims=_NoValue,
+    max_dims=_NoValue,
+) -> st.SearchStrategy[SmartSignature]:
+    ind_to_elements = defaultdict(lambda: st.floats(-1e-9, 1e9))
+    shapes_args = SmartSignature(
+        min_side=min_side, max_side=max_side, min_dims=min_dims, max_dims=max_dims
+    )
+    if use_ufunc_signature:
+        shapes_args["signature"] = ufunc.signature
+    else:
+        shapes_args["num_shapes"] = ufunc.nin + include_where
+
+    if arg_index_to_elements is not None:
+        for k, v in arg_index_to_elements.items():
+            ind_to_elements[k] = v
+
+    shapes: hnp.BroadcastableShapes = draw(
+        hnp.mutually_broadcastable_shapes(**shapes_args),
+        label="shapes",
+    )
+
+    array_strat = (
+        array_likes if tensor_only is False else partial(tensors, constant=False)
+    )
+    args = SmartSignature(
+        *(
+            draw(array_strat(shape=shape, dtype=float, elements=ind_to_elements[n]))
+            for n, shape in enumerate(shapes.input_shapes[: ufunc.nin])
+        )
+    )
+
+    if include_where:
+        args["where"] = draw(
+            no_value()
+            | st.booleans().map(lambda x: not x)
+            | hnp.arrays(
+                shape=shapes.input_shapes[-1], dtype=bool, elements=st.booleans()
+            )
+        )
+
+    fill_value = draw(st.integers(0, 1))
+
+    where = args.kwargs.get("where", True)
+    if where is not True:
+        # the predicted results shape can be wrong if the inputs don't `where`
+        # broadcast against `where`
+        out_shape = (
+            shapes.result_shape
+            if not isinstance(where, bool)
+            else _broadcast_shapes(*(mg.asarray(a).shape for a in args.args))
+        )
+        args["out"] = np.full(out_shape, fill_value=fill_value, dtype=float)
+    return args

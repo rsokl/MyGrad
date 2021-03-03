@@ -1,14 +1,17 @@
 from numbers import Real
+from typing import Optional
 
 import numpy as np
 
+import mygrad._utils.graph_tracking as _tracking
 from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor, asarray
+from mygrad.typing import ArrayLike
 
 
 class MarginRanking(Operation):
     def __call__(self, x1, x2, y, margin):
-        """ Computes the margin ranking loss between ``x1``
+        """Computes the margin ranking loss between ``x1``
         and ``x2``.
 
         Parameters
@@ -35,10 +38,10 @@ class MarginRanking(Operation):
         not_thresh = M <= 0
         loss = M
         loss[not_thresh] = 0.0
-
-        self._grad = np.ones_like(M)
-        self._grad[not_thresh] = 0.0
-        self._grad /= M.size
+        if _tracking.TRACK_GRAPH:
+            self._grad = np.ones_like(M)
+            self._grad[not_thresh] = 0.0
+            self._grad /= M.size
         return np.mean(loss)
 
     def backward_var(self, grad, index, **kwargs):
@@ -46,7 +49,14 @@ class MarginRanking(Operation):
         return grad * (sign * self._grad)
 
 
-def margin_ranking_loss(x1, x2, y, margin, constant=False):
+def margin_ranking_loss(
+    x1: ArrayLike,
+    x2: ArrayLike,
+    y: ArrayLike,
+    margin: float,
+    *,
+    constant: Optional[bool] = None
+) -> Tensor:
     r"""Computes the margin average margin ranking loss.
     Equivalent to::
 
@@ -55,13 +65,13 @@ def margin_ranking_loss(x1, x2, y, margin, constant=False):
 
     Parameters
     ----------
-    x1 : array_like, shape=(N,) or (N, D)
+    x1 : ArrayLike, shape=(N,) or (N, D)
         A batch of scores or descriptors to compare against those in `x2`
 
-    x2 : array_like, shape=(N,) or (N, D)
+    x2 : ArrayLike, shape=(N,) or (N, D)
         A batch of scores or descriptors to compare against those in `x1`
 
-    y  : Union[int, array_like], scalar or shape=(N,)
+    y  : Union[int, ArrayLike], scalar or shape=(N,)
         1 or -1. Specifies whether the margin is compared against `(x1 - x2)`
         or `(x2 - x1)`, for each of the N comparisons.
 

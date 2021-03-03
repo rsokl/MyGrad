@@ -8,18 +8,20 @@ import pytest
 from hypothesis import assume, given, note, settings
 from numpy.testing import assert_allclose, assert_array_equal
 
-from mygrad.tensor_base import Tensor
-from mygrad.tensor_core_ops.indexing import (
+import mygrad as mg
+from mygrad._tensor_core_ops.indexing import (
     _arr,
     _is_bool_array_index,
     _is_int_array_index,
 )
+from mygrad.tensor_base import Tensor
 
 from ..custom_strategies import (
     adv_integer_index,
     arbitrary_indices,
     basic_indices,
     broadcastable_shapes,
+    tensors,
 )
 from ..utils.numerical_gradient import numerical_gradient_full
 
@@ -28,6 +30,17 @@ from ..utils.numerical_gradient import numerical_gradient_full
 def test_arr_util():
     assert_array_equal(_arr(2, 2), np.arange(4).reshape(2, 2))
     assert_array_equal(_arr(4, 3), np.arange(12).reshape(4, 3))
+
+
+@given(tensors(elements=st.floats(-10, 10)))
+def test_setitem_mutates_input(x: Tensor):
+    assume(x.size)
+    data_copy = np.array(x, copy=True)
+    data_view = np.asarray(x)
+    with mg.no_autodiff:
+        x[...] = 1 + x
+    assert np.all(x == data_view)
+    assert np.all(data_copy != data_view)
 
 
 @pytest.mark.parametrize(
@@ -146,18 +159,9 @@ class set_item_test_factory:
                 err_msg="After `x[index] = y`, y.grad does not match the expected numerical gradient",
             )
 
-            out.null_gradients(clear_graph=True)
-            assert (
-                mygrad_y.grad is None and not mygrad_y._ops and not mygrad_y._accum_ops
-            )
-            assert (
-                mygrad_x.grad is None and not mygrad_x._ops and not mygrad_x._accum_ops
-            )
-            assert (
-                mygrad_x1.grad is None
-                and not mygrad_x1._ops
-                and not mygrad_x1._accum_ops
-            )
+            assert not mygrad_y._ops and not mygrad_y._accum_ops
+            assert not mygrad_x._ops and not mygrad_x._accum_ops
+            assert not mygrad_x1._ops and not mygrad_x1._accum_ops
 
         return wrapper
 
@@ -168,7 +172,7 @@ def test_setitem_multiple_input():
     in which variable that is set on serves as multiple
     inputs to a single operation.
 
-    Ensures that null-gradient and clear-graph works properly.
+    Ensures that clear-graph works properly.
     """
     from mygrad import add_sequence
 
@@ -192,11 +196,10 @@ def test_setitem_multiple_input():
     assert_array_equal(o.grad, np.array([4.0]))
     assert_array_equal(y.grad, np.array([3.0]))
 
-    f.null_gradients(clear_graph=True)
-    assert x.grad is None and not x._ops and not x._accum_ops
-    assert y.grad is None and not y._ops and not y._accum_ops
-    assert o.grad is None and not o._ops and not o._accum_ops
-    assert f.grad is None and not f._ops and not f._accum_ops
+    assert not x._ops and not x._accum_ops
+    assert not y._ops and not y._accum_ops
+    assert not o._ops and not o._accum_ops
+    assert not f._ops and not f._accum_ops
 
 
 @given(x_constant=st.booleans(), y_constant=st.booleans(), data=st.data())
@@ -230,17 +233,11 @@ def test_setitem_sanity_check(x_constant, y_constant, data):
         else:
             assert_allclose(y.grad, np.array([-1.0, -2.0]))
 
-    w.null_gradients(clear_graph=True)
-
-    assert w.grad is None and not w._accum_ops, "null_gradients with clear-graph failed"
-    assert (
-        x.grad is None and not x._ops and not x._accum_ops
-    ), "null_gradients with clear-graph failed"
+    assert not w._ops and not w._accum_ops, "clear-graph with clear-graph failed"
+    assert not x._ops and not x._accum_ops, "clear-graph with clear-graph failed"
 
     if as_tensor:
-        assert (
-            y.grad is None and not y._ops and not y._accum_ops
-        ), "null_gradients failed"
+        assert not y._ops and not y._accum_ops, "clear-graph failed"
 
 
 def test_setitem_downstream_doesnt_affect_upstream_backprop():
@@ -259,15 +256,17 @@ def test_setitem_downstream_doesnt_affect_upstream_backprop():
     assert y.grad is None
 
 
-def test_setitem_doesnt_mutate_upstream_nodes():
+@pytest.mark.parametrize("x_constant", [True, False])
+@pytest.mark.parametrize("y_constant", [True, False])
+def test_setitem_doesnt_mutate_upstream_nodes(x_constant: bool, y_constant: bool):
     """ Ensure setitem doesn't mutate variable non-constant tensor"""
-    x = Tensor([1.0, 2.0])
-    y = Tensor([3.0, 4.0])
+    x = Tensor([1.0, 2.0], constant=x_constant)
+    y = Tensor([3.0, 4.0], constant=y_constant)
     z = x + y
     y[:] = 0
     y_old = z.creator.variables[-1]  # version of y that participated in x + y
-    assert_allclose(np.array([3.0, 4.0]), y_old.data)
-    assert_allclose(np.array([0.0, 0.0]), y.data)
+    assert_allclose(np.array([3.0, 4.0]), y_old)
+    assert_allclose(np.array([0.0, 0.0]), y)
 
 
 @settings(deadline=None, max_examples=1000)
@@ -393,7 +392,6 @@ index2 = (rows2, columns2)
 )
 def test_setitem_broadcast_bool_index():
     """ index mixes boolean and int-array indexing"""
-    pass
 
 
 @settings(deadline=None)
@@ -410,7 +408,6 @@ def test_setitem_broadcast_bool_index():
 )
 def test_setitem_bool_basic_index():
     """ index mixes boolean and basic indexing"""
-    pass
 
 
 @settings(deadline=None)
@@ -429,7 +426,6 @@ def test_setitem_bool_basic_index():
 )
 def test_setitem_bool_axes_index():
     """ index consists of boolean arrays specified for each axis """
-    pass
 
 
 @settings(deadline=None, max_examples=1000)
@@ -459,4 +455,3 @@ def test_setitem_bool_axes_index():
 )
 def test_setitem_arbitrary_index():
     """ test arbitrary indices"""
-    pass

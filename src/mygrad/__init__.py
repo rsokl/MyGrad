@@ -1,5 +1,17 @@
-from mygrad.tensor_base import Tensor, asarray, astensor  # isort:skip  # avoid an import cycle
-
+from mygrad.tensor_base import (  # isort:skip  # avoid an import cycle
+    asarray,
+    astensor,
+    tensor,
+    Tensor,
+)
+from mygrad._utils.graph_tracking import no_autodiff
+from mygrad._utils.lock_management import (
+    mem_guard_active,
+    mem_guard_off,
+    mem_guard_on,
+    turn_memory_guarding_off,
+    turn_memory_guarding_on,
+)
 from mygrad.indexing_routines.funcs import *
 from mygrad.linalg.funcs import *
 from mygrad.math.arithmetic.funcs import *
@@ -16,6 +28,7 @@ from mygrad.tensor_creation.funcs import *
 from mygrad.tensor_manip.array_shape.funcs import *
 from mygrad.tensor_manip.tiling.funcs import *
 from mygrad.tensor_manip.transpose_like.funcs import *
+from mygrad.ufuncs._ufunc_creators import ufunc
 
 from . import random
 from ._version import get_versions
@@ -24,7 +37,7 @@ __version__ = get_versions()["version"]
 del get_versions
 
 
-for attr in (
+for _attr in (
     sum,
     prod,
     cumprod,
@@ -44,4 +57,6 @@ for attr in (
     matmul,
     any,
 ):
-    setattr(Tensor, attr.__name__, attr)
+    setattr(Tensor, _attr.__name__, _attr)
+
+del _attr

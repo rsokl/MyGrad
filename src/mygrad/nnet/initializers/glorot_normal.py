@@ -3,8 +3,8 @@ import numpy as np
 from mygrad import Tensor
 
 
-def glorot_normal(*shape, gain=1, dtype=np.float32, constant=False):
-    r""" Initialize a `Tensor` according to the normal initialization procedure
+def glorot_normal(*shape, gain=1, dtype=np.float32, constant=None):
+    r"""Initialize a `Tensor` according to the normal initialization procedure
     described by Glorot and Bengio.
 
     Parameters
@@ -54,4 +54,9 @@ def glorot_normal(*shape, gain=1, dtype=np.float32, constant=False):
     fan_in = shape[1] * (shape[-1] if len(shape) > 2 else 1)
     fan_out = shape[0] * (shape[-1] if len(shape) > 2 else 1)
     std = gain * np.sqrt(2 / (fan_in + fan_out))
-    return Tensor(np.random.normal(0, std, shape), dtype=dtype, constant=constant)
+    return Tensor(
+        np.random.normal(0, std, shape),
+        dtype=dtype,
+        constant=constant,
+        copy=False,
+    )
