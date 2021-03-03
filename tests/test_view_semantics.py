@@ -10,7 +10,6 @@ import mygrad as mg
 from mygrad.errors import InvalidBackprop
 from tests.custom_strategies import tensors
 from tests.utils.stateful import clear_all_mem_locking_state
-from tests.utils.wrappers import clears_mem_state
 
 
 @pytest.mark.parametrize("view_pre_or_post_backward", ("pre", "post"))
