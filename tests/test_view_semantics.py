@@ -85,20 +85,12 @@ def test_nulling_base_grad_reflects_in_view(view_pre_or_post_backward):
 
     # pulling on `view.grad` will set its gradient
     _ = view.grad
-
-    # Involving base in new graph nulls its gradient
-    # and disconnects it from any of its views
     +base
 
     assert base.grad is None
 
-    # But this doesn't propagate to `view` because it
-    # would be expensive to do so
-    #
-    # Despite view's base being set, its grad doesn't
-    # reflect the (nulled) grad of its base
     assert view.base is base
-    assert view.grad is None  # This should fail!
+    assert view.grad is None
 
 
 def test_simple_view_becomes_disconnected_from_base_via_clear_graph2():
