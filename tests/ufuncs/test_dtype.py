@@ -12,6 +12,7 @@ from tests.utils.ufuncs import ufuncs
 
 @pytest.mark.parametrize("ufunc", ufuncs)
 @pytest.mark.parametrize("dest_dtype", [np.float64, np.float32, np.float16])
+@pytest.mark.filterwarnings("ignore: invalid value encountered")
 def test_dtype_casts_correctly(ufunc, dest_dtype):
     if not np.can_cast(np.float16, dest_dtype):
         pytest.skip("invalid cast")
