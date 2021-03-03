@@ -226,6 +226,7 @@ def test_ufunc_bkwd(
     Checks:
     - backprop matches numerical gradient
     - backprop doesn't mutate grad
+    - that calling op through numpy overload works identically
     """
     args = data.draw(
         populates_ufunc(
