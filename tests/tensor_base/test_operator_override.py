@@ -103,8 +103,11 @@ constant_tensor: Callable[..., Tensor] = partial(mg.tensor, constant=True)
 @pytest.mark.parametrize(
     "f1, f2",
     [
-        (constant_tensor, lambda x: x.tolist()),
-        (lambda x: x, constant_tensor),
+        (constant_tensor, lambda x: x),
+        (
+            lambda x: x.tolist(),
+            constant_tensor,
+        ),  # `list/tensor` ensures __rfloordiv__ gets called
         (constant_tensor, constant_tensor),
     ],
 )
