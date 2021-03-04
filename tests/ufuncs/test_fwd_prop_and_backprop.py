@@ -267,6 +267,7 @@ def test_ufunc_bkwd(
             actual=actual,
             err_msg=f"the grad of tensor-{n} did not match the "
             f"numerically-computed gradient",
+            atol=1e-5,
         )
 
 
