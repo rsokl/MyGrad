@@ -1,11 +1,16 @@
+from typing import Optional, Tuple, Union
+
 import numpy as np
 
 from mygrad.tensor_base import Tensor
+from mygrad.typing import ArrayLike
 
-__all__ = ["argmin", "argmax"]
+__all__ = ["any", "argmin", "argmax"]
 
 
-def argmax(a, axis=None, out=None):
+def argmax(
+    a: ArrayLike, axis: Optional[int] = None, out: Optional[np.ndarray] = None
+) -> np.ndarray:
     """Returns the indices of the maximum values along an axis.
 
     Parameters
@@ -26,7 +31,9 @@ def argmax(a, axis=None, out=None):
     return np.argmax(a, axis, out)
 
 
-def argmin(a, axis=None, out=None):
+def argmin(
+    a: ArrayLike, axis: Optional[int] = None, out: Optional[np.ndarray] = None
+) -> np.ndarray:
     """Returns the indices of the minimum values along an axis.
 
     Parameters
@@ -47,7 +54,12 @@ def argmin(a, axis=None, out=None):
     return np.argmin(a, axis, out)
 
 
-def any(a, axis=None, out=None, keepdims=False):
+def any(
+    a: ArrayLike,
+    axis: Optional[Union[int, Tuple[int, ...]]] = None,
+    out: Optional[np.ndarray] = None,
+    keepdims: bool = False,
+) -> np.ndarray:
     """Test whether any array or Tensor element along a given axis evaluates to True.
 
     Returns single boolean if `axis` is ``None``

@@ -15,6 +15,7 @@ from typing import (
     Optional,
     Sequence,
     Set,
+    Tuple,
     Type,
     Union,
 )
@@ -43,9 +44,25 @@ from mygrad.math.arithmetic.ops import (
     Square,
     Subtract,
 )
-from mygrad.operation_base import Operation
-from mygrad.tensor_manip.array_shape.ops import Flatten, Reshape
-from mygrad.tensor_manip.transpose_like.ops import Tensor_Transpose_Property
+from mygrad.math.sequential.ops import (
+    CumProd,
+    CumSum,
+    Max,
+    Mean,
+    Min,
+    Prod,
+    StdDev,
+    Sum,
+    Variance,
+)
+from mygrad.operation_base import Operation, _NoValue
+from mygrad.tensor_manip.array_shape.ops import Flatten, Ravel, Reshape, Squeeze
+from mygrad.tensor_manip.transpose_like.ops import (
+    MoveAxis,
+    SwapAxes,
+    Tensor_Transpose_Property,
+    Transpose,
+)
 from mygrad.typing import ArrayLike, DTypeLike, DTypeLikeReals, Index, Shape
 
 __all__ = ["Tensor", "asarray", "astensor"]
@@ -2168,3 +2185,778 @@ class Tensor:
             "In-place matrix multiplication is not (yet) supported. "
             "Use 'a = a @ b' instead of 'a @= b'"
         )
+
+    def sum(
+        self,
+        axis: Optional[Union[int, Tuple[int, ...]]] = None,
+        keepdims: bool = False,
+        *,
+        constant: Optional[bool] = None,
+    ) -> "Tensor":
+        """
+        Sum of tensor elements over a given axis.
+
+        Parameters
+        ----------
+        axis : Optional[int, Tuple[ints, ...]]
+            Axis or axes along which a sum is performed.  The default,
+            axis=None, will sum all of the elements of the input tensor.  If
+            axis is negative it counts from the last to the first axis.
+            If axis is a tuple of ints, a sum is performed on all of the axes
+            specified in the tuple instead of a single axis or all the axes as
+            before.
+
+        keepdims : bool, optional
+            If this is set to True, the axes which are reduced are left
+            in the result as dimensions with size one. With this option,
+            the result will broadcast correctly against the input tensor.
+
+        constant : Optional[bool]
+            If ``True``, this tensor is treated as a constant, and thus does not
+            facilitate back propagation (i.e. ``constant.grad`` will always return
+            ``None``).
+
+            Defaults to ``False`` for float-type data.
+            Defaults to ``True`` for integer-type data.
+
+            Integer-type tensors must be constant.
+
+        Returns
+        -------
+        sum_along_axis : mygrad.Tensor
+            A Tensor with the same shape as `self`, with the specified
+            axis/axes removed. If `self` is a 0-d tensor, or if `axis` is None,
+            a 0-dim Tensor is returned.
+
+        See Also
+        --------
+        mygrad.Tensor.sum : Equivalent method.
+
+        cumsum : Cumulative sum of array elements.
+
+        mean, average
+
+        Notes
+        -----
+        Arithmetic is modular when using integer types, and no error is
+        raised on overflow.
+
+        The sum of an empty tensor is the neutral element 0:
+
+        >>> mygrad.sum([])
+        Tensor(0.0)
+
+        Examples
+        --------
+        >>> import mygrad as mg
+        >>> import numpy as np
+        >>> x = mg.tensor([1., 1.])
+        >>> x.sum()
+        Tensor(2.0)
+        >>> x = mg.tensor([0.5, 0.7, 0.2, 1.5])
+        >>> x.sum(dtype=np.int32)
+        Tensor(1)
+        >>> x = mg.tensor([[0, 1], [0, 5]])
+        >>> x.sum()
+        Tensor(6)
+        >>> x.sum(axis=0)
+        Tensor([0, 6])
+        >>> x.sum(axis=1)
+        Tensor([1, 5])
+        """
+        return Tensor._op(
+            Sum, self, op_kwargs=dict(axis=axis, keepdims=keepdims), constant=constant
+        )
+
+    def prod(
+        self,
+        axis: Optional[Union[int, Tuple[int, ...]]] = None,
+        keepdims: bool = False,
+        *,
+        constant: Optional[bool] = None,
+    ) -> "Tensor":
+        """
+        Return the product of array elements over given axes.
+
+        Parameters
+        ----------
+        axis : Optional[Union[int, Tuple[int, ...]]]
+            Axis or axes along which to operate. By default, flattened input is used.
+
+        keepdims : bool, optional (default=False)
+            If this is set to True, the axes which are reduced are left in the
+            result as dimensions with size one. With this option, the result
+            will broadcast correctly against the input array.
+
+        constant : Optional[bool]
+            If ``True``, this tensor is treated as a constant, and thus does not
+            facilitate back propagation (i.e. ``constant.grad`` will always return
+            ``None``).
+
+            Defaults to ``False`` for float-type data.
+            Defaults to ``True`` for integer-type data.
+
+            Integer-type tensors must be constant.
+
+        Returns
+        -------
+        product_along_axis : mygrad.Tensor
+            A tensor shaped as `a` but with the specified axis removed."""
+        return Tensor._op(
+            Prod, self, op_kwargs=dict(axis=axis, keepdims=keepdims), constant=constant
+        )
+
+    def cumprod(
+        self,
+        axis: Optional[Union[int, Tuple[int, ...]]] = None,
+        *,
+        constant: Optional[bool] = None,
+    ) -> "Tensor":
+        """
+        Return the cumulative product of elements along a given axis.
+
+        This docstring was adapted from the official numpy documentation
+
+        Parameters
+        ----------
+        axis : Optional[int]
+            Axis along which the cumulative product is computed.  By default
+            the input is flattened.
+
+        constant : bool, optional(default=False)
+            If ``True``, the returned tensor is a constant (it
+            does not back-propagate a gradient)
+
+        constant : Optional[bool]
+            If ``True``, this tensor is treated as a constant, and thus does not
+            facilitate back propagation (i.e. ``constant.grad`` will always return
+            ``None``).
+
+            Defaults to ``False`` for float-type data.
+            Defaults to ``True`` for integer-type data.
+
+            Integer-type tensors must be constant.
+
+        Returns
+        -------
+        mygrad.Tensor
+
+        Notes
+        -----
+        Arithmetic is modular when using integer types, and no error is
+        raised on overflow."""
+
+        return Tensor._op(CumProd, self, op_kwargs=dict(axis=axis), constant=constant)
+
+    def cumsum(
+        self,
+        axis: Optional[Union[int, Tuple[int, ...]]] = None,
+        *,
+        constant: Optional[bool] = None,
+    ) -> "Tensor":
+        """
+        Return the cumulative sum of the elements along a given axis.
+
+        This docstring was adapted from the official numpy documentation
+
+        Parameters
+        ----------
+        axis : int, optional
+            Axis along which the cumulative sum is computed. The default
+            (None) is to compute the cumsum over the flattened array.
+
+        constant : Optional[bool]
+            If ``True``, this tensor is treated as a constant, and thus does not
+            facilitate back propagation (i.e. ``constant.grad`` will always return
+            ``None``).
+
+            Defaults to ``False`` for float-type data.
+            Defaults to ``True`` for integer-type data.
+
+            Integer-type tensors must be constant.
+
+        Returns
+        -------
+        mygrad.Tensor
+        """
+
+        return Tensor._op(CumSum, self, op_kwargs=dict(axis=axis), constant=constant)
+
+    def mean(
+        self,
+        axis: Optional[Union[int, Tuple[int, ...]]] = None,
+        keepdims: bool = False,
+        *,
+        constant: Optional[bool] = None,
+    ) -> "Tensor":
+        """
+        Mean of tensor elements over a given axis.
+
+        Parameters
+        ----------
+        x : ArrayLike
+
+        axis : Optional[int, Tuple[ints, ...]
+            Axis or axes along which a mean is performed.  The default,
+            axis=None, will mean all of the elements of the input tensor.  If
+            axis is negative it counts from the last to the first axis.
+
+            If axis is a tuple of ints, a mean is performed on all of the axes
+            specified in the tuple instead of a single axis or all the axes as
+            before.
+
+        keepdims : bool, optional
+            If this is set to True, the axes which are reduced are left
+            in the result as dimensions with size one. With this option,
+            the result will broadcast correctly against the input tensor.
+
+        constant : Optional[bool]
+            If ``True``, this tensor is treated as a constant, and thus does not
+            facilitate back propagation (i.e. ``constant.grad`` will always return
+            ``None``).
+
+            Defaults to ``False`` for float-type data.
+            Defaults to ``True`` for integer-type data.
+
+            Integer-type tensors must be constant.
+
+        Returns
+        -------
+        mean_along_axis : Tensor
+            A Tensor with the same shape as `self`, with the specified
+            axis/axes removed. If `self` is a 0-d tensor, or if `axis` is None,
+            a 0-dim Tensor is returned.
+        """
+        return Tensor._op(
+            Mean, self, op_kwargs=dict(axis=axis, keepdims=keepdims), constant=constant
+        )
+
+    def std(
+        self,
+        axis: Optional[Union[int, Tuple[int, ...]]] = None,
+        ddof: int = 0,
+        keepdims: bool = False,
+        *,
+        constant: Optional[bool] = None,
+    ) -> "Tensor":
+        """
+        Compute the standard deviation along the specified axis.
+
+        Returns the variance of the array elements, a measure of the spread of a
+        distribution.  The variance is computed for the flattened array by
+        default, otherwise over the specified axis.
+
+        Parameters
+        ----------
+        axis : Optional[Union[int, Tuple[int, ...]]]
+            Axis or axes along which the variance is computed.  The default is to
+            compute the variance of the flattened array.
+
+        ddof : int, optional (default=0)
+            "Delta Degrees of Freedom": the divisor used in the calculation is
+            ``N - ddof``, where ``N`` represents the number of elements. By
+            default `ddof` is zero.
+
+        keepdims : bool, optional (default=False)
+            If this is set to True, the axes which are reduced are left
+            in the result as dimensions with size one. With this option,
+            the result will broadcast correctly against the input array.
+
+        constant : Optional[bool]
+            If ``True``, this tensor is treated as a constant, and thus does not
+            facilitate back propagation (i.e. ``constant.grad`` will always return
+            ``None``).
+
+            Defaults to ``False`` for float-type data.
+            Defaults to ``True`` for integer-type data.
+
+            Integer-type tensors must be constant.
+
+        Returns
+        -------
+        std : mygrad.Tensor
+
+        Notes
+        -----
+        The variance is the average of the squared deviations from the mean,
+        i.e.,  ``var = mean(abs(x - x.mean())**2)``.
+
+        The mean is normally calculated as ``x.sum() / N``, where ``N = len(x)``.
+        If, however, `ddof` is specified, the divisor ``N - ddof`` is used
+        instead.  In standard statistical practice, ``ddof=1`` provides an
+        unbiased estimator of the variance of a hypothetical infinite population.
+        ``ddof=0`` provides a maximum likelihood estimate of the variance for
+        normally distributed variables."""
+        return Tensor._op(
+            StdDev,
+            self,
+            op_kwargs=dict(axis=axis, keepdims=keepdims, ddof=ddof),
+            constant=constant,
+        )
+
+    def var(
+        self,
+        axis: Optional[Union[int, Tuple[int, ...]]] = None,
+        ddof: int = 0,
+        keepdims: bool = False,
+        *,
+        constant: Optional[bool] = None,
+    ) -> "Tensor":
+        """
+        Compute the variance along the specified axis.
+
+        Returns the variance of the array elements, a measure of the spread of a
+        distribution.  The variance is computed for the flattened array by
+        default, otherwise over the specified axis.
+
+        Parameters
+        ----------
+        axis : Optional[int, Tuple[int, ...]]
+            Axis or axes along which the variance is computed.  The default is to
+            compute the variance of the flattened array.
+
+        ddof : int, optional (default=0)
+            "Delta Degrees of Freedom": the divisor used in the calculation is
+            ``N - ddof``, where ``N`` represents the number of elements. By
+            default `ddof` is zero.
+
+        keepdims : bool, optional (default=False)
+            If this is set to True, the axes which are reduced are left
+            in the result as dimensions with size one. With this option,
+            the result will broadcast correctly against the input array..
+
+        constant : Optional[bool]
+            If ``True``, this tensor is treated as a constant, and thus does not
+            facilitate back propagation (i.e. ``constant.grad`` will always return
+            ``None``).
+
+            Defaults to ``False`` for float-type data.
+            Defaults to ``True`` for integer-type data.
+
+            Integer-type tensors must be constant.
+        Returns
+        -------
+        variance : mygrad.Tensor
+
+        Notes
+        -----
+        The variance is the average of the squared deviations from the mean,
+        i.e.,  ``var = mean(abs(x - x.mean())**2)``.
+
+        The mean is normally calculated as ``x.sum() / N``, where ``N = len(x)``.
+        If, however, `ddof` is specified, the divisor ``N - ddof`` is used
+        instead.  In standard statistical practice, ``ddof=1`` provides an
+        unbiased estimator of the variance of a hypothetical infinite population.
+        ``ddof=0`` provides a maximum likelihood estimate of the variance for
+        normally distributed variables."""
+        return Tensor._op(
+            Variance,
+            self,
+            op_kwargs=dict(axis=axis, keepdims=keepdims, ddof=ddof),
+            constant=constant,
+        )
+
+    def max(
+        self,
+        axis: Optional[Union[int, Tuple[int, ...]]] = None,
+        keepdims: bool = False,
+        *,
+        constant: Optional[bool] = None,
+    ) -> "Tensor":
+        """
+        Return the maximum of a tensor or maximum along its axes.
+
+        Parameters
+        ----------
+        x : ArrayLike
+
+        axis : Optional[int, Tuple[int, ...]]
+            Axis or axes along which to operate. By default, flattened input is used.
+
+        keepdims : bool, optional
+            If this is set to True, the axes which are reduced are left
+            in the result as dimensions with size one. With this option,
+            the result will broadcast correctly against the original `arr`.
+
+        constant : Optional[bool]
+            If ``True``, this tensor is treated as a constant, and thus does not
+            facilitate back propagation (i.e. ``constant.grad`` will always return
+            ``None``).
+
+            Defaults to ``False`` for float-type data.
+            Defaults to ``True`` for integer-type data.
+
+            Integer-type tensors must be constant.
+
+        Returns
+        -------
+        max : mygrad.Tensor
+            Maximum of `a`. If `axis` is None, the result is a 0-D tensor.
+
+        Examples
+        --------
+        >>> import mygrad as mg
+        >>> import numpy as np
+        >>> a = mg.arange(4).reshape((2,2))
+        >>> a
+        Tensor([[0, 1],
+                [2, 3]])
+        >>> mg.amax(a)           # Maximum of the flattened array
+        Tensor(3)
+        >>> mg.amax(a, axis=0)   # Maxima along the first axis
+        Tensor([2, 3])
+        >>> mg.amax(a, axis=1)   # Maxima along the second axis
+        Tensor([1, 3])
+        >>> b = mg.arange(5, dtype=float)
+        >>> b[2] = np.NaN
+        >>> mg.amax(b)
+        Tensor(nan)
+        """
+        return Tensor._op(
+            Max,
+            self,
+            op_kwargs=dict(axis=axis, keepdims=keepdims, dtype=_NoValue),
+            constant=constant,
+        )
+
+    def min(
+        self,
+        axis: Optional[Union[int, Tuple[int, ...]]] = None,
+        keepdims: bool = False,
+        *,
+        constant: Optional[bool] = None,
+    ) -> "Tensor":
+        """
+        Return the minimum of a tensor or minimum along its axes.
+
+        Parameters
+        ----------
+        axis : Optional[int, Tuple[int, ...]]
+            Axis or axes along which to operate. By default, flattened input is used.
+
+        keepdims : bool, optional
+            If this is set to True, the axes which are reduced are left
+            in the result as dimensions with size one. With this option,
+            the result will broadcast correctly against the original `arr`.
+
+        constant : Optional[bool]
+            If ``True``, this tensor is treated as a constant, and thus does not
+            facilitate back propagation (i.e. ``constant.grad`` will always return
+            ``None``).
+
+            Defaults to ``False`` for float-type data.
+            Defaults to ``True`` for integer-type data.
+
+            Integer-type tensors must be constant.
+
+        Returns
+        -------
+        min : mygrad.Tensor
+            Minimum of `a`. If `axis` is None, the result is a 0-D tensor.
+
+        Examples
+        --------
+        >>> import mygrad as mg
+        >>> import numpy as np
+        >>> a = mg.arange(4).reshape((2,2))
+        >>> a
+        Tensor([[0, 1],
+                [2, 3]])
+        >>> mg.amin(a)           # Minimum of the flattened array
+        Tensor(0)
+        >>> mg.amin(a, axis=0)   # Minima along the first axis
+        Tensor([0, 1])
+        >>> mg.amin(a, axis=1)   # Minima along the second axis
+        Tensor([0, 2])
+        >>> b = mg.arange(5, dtype=float)
+        >>> b[2] = np.NaN
+        >>> mg.amin(b)
+        Tensor(nan)
+        """
+        return Tensor._op(
+            Min,
+            self,
+            op_kwargs=dict(axis=axis, keepdims=keepdims, dtype=_NoValue),
+            constant=constant,
+        )
+
+    def swapaxes(
+        self, axis1: int, axis2: int, *, constant: Optional[bool] = None
+    ) -> "Tensor":
+        """Interchange two axes of a tensor.
+
+        Parameters
+        ----------
+        axis1 : int
+            First axis.
+
+        axis2 : int
+            Second axis.
+
+        constant : Optional[bool]
+            If ``True``, this tensor is treated as a constant, and thus does not
+            facilitate back propagation (i.e. ``constant.grad`` will always return
+            ``None``).
+
+            Defaults to ``False`` for float-type data.
+            Defaults to ``True`` for integer-type data.
+
+            Integer-type tensors must be constant.
+
+        Returns
+        -------
+        mygrad.Tensor
+        """
+        return Tensor._op(SwapAxes, self, op_args=(axis1, axis2), constant=constant)
+
+    def transpose(
+        self: ArrayLike, *axes: int, constant: Optional[bool] = None
+    ) -> "Tensor":
+        """Permute the dimensions of a tensor.
+
+        Parameters
+        ----------
+        axes : int
+            By default, reverse the dimensions, otherwise permute the axes
+            according to the values given.
+
+        constant : Optional[bool]
+            If ``True``, this tensor is treated as a constant, and thus does not
+            facilitate back propagation (i.e. ``constant.grad`` will always return
+            ``None``).
+
+            Defaults to ``False`` for float-type data.
+            Defaults to ``True`` for integer-type data.
+
+            Integer-type tensors must be constant.
+
+        Returns
+        -------
+        mygrad.Tensor
+            `a` with its axes permuted.  A new tensor is returned.
+
+        Examples
+        --------
+        >>> import mygrad as mg
+        >>> a = mg.tensor([[1, 2], [3, 4]])
+        >>> a
+        Tensor([[1, 2],
+                [3, 4]])
+        >>> a.transpose()
+        Tensor([[1, 3],
+                [2, 4]])
+        >>> a.transpose((1, 0))
+        Tensor([[1, 3],
+                [2, 4]])
+        >>> a.transpose(1, 0)
+        Tensor([[1, 3],
+                [2, 4]])"""
+        if not axes:
+            axes = None
+        elif hasattr(axes[0], "__iter__") or axes[0] is None:
+            if len(axes) > 1:
+                raise TypeError(
+                    f"'{type(axes[0])}' object cannot be interpreted as an integer"
+                )
+            axes = axes[0]
+        return Tensor._op(Transpose, self, op_args=(axes,), constant=constant)
+
+    def moveaxis(
+        self,
+        source: Union[int, Tuple[int, ...]],
+        destination: Union[int, Tuple[int, ...]],
+        *,
+        constant: Optional[bool] = None,
+    ) -> "Tensor":
+        """Move axes of a tensor to new positions. Other axes remain in their
+        original order.
+
+
+        Parameters
+        ----------
+        source : Union[int, Sequence[int]]
+            Original positions of the axes to move. These must be unique.
+
+        destination : Union[int, Sequence[int]]
+            Destination positions for each of the original axes. These must also be
+            unique.
+
+        constant : Optional[bool]
+            If ``True``, this tensor is treated as a constant, and thus does not
+            facilitate back propagation (i.e. ``constant.grad`` will always return
+            ``None``).
+
+            Defaults to ``False`` for float-type data.
+            Defaults to ``True`` for integer-type data.
+
+            Integer-type tensors must be constant.
+
+        Returns
+        -------
+        result : mygrad.Tensor
+            Array with moved axes. This array is a view of the input array.."""
+        return Tensor._op(
+            MoveAxis, self, op_args=(source, destination), constant=constant
+        )
+
+    def squeeze(
+        self,
+        axis: Optional[Union[int, Tuple[int, ...]]] = None,
+        *,
+        constant: Optional[bool] = None,
+    ) -> "Tensor":
+        """
+        Remove single-dimensional entries from the shape of a tensor.
+
+        This docstring was adapted from ``numpy.squeeze``
+
+        Parameters
+        ----------
+        axis : Optional[int, Tuple[int, ...]]
+            Selects a subset of the single-dimensional entries in the
+            shape. If an axis is selected with shape entry greater than
+            one, an error is raised.
+
+        constant : Optional[bool]
+            If ``True``, this tensor is treated as a constant, and thus does not
+            facilitate back propagation (i.e. ``constant.grad`` will always return
+            ``None``).
+
+            Defaults to ``False`` for float-type data.
+            Defaults to ``True`` for integer-type data.
+
+            Integer-type tensors must be constant.
+
+
+        Returns
+        -------
+        mygrad.Tensor
+
+        Raises
+        ------
+        ValueError
+            If ``axis`` is not ``None``, and an axis being squeezed is not of length 1"""
+        return Tensor._op(Squeeze, self, op_args=(axis,), constant=constant)
+
+    def ravel(self, *, constant: Optional[bool] = None) -> "Tensor":
+        """
+        Flattens contents of a tensor into a contiguous 1-D array.  A copy is made only if needed.
+
+        This docstring was adapted from ``numpy.ravel``.
+
+        Parameters
+        ----------
+        constant : Optional[bool]
+            If ``True``, this tensor is treated as a constant, and thus does not
+            facilitate back propagation (i.e. ``constant.grad`` will always return
+            ``None``).
+
+            Defaults to ``False`` for float-type data.
+            Defaults to ``True`` for integer-type data.
+
+            Integer-type tensors must be constant.
+
+
+        Returns
+        -------
+        mygrad.Tensor
+
+        Notes
+        -----
+        ``ravel`` utilizes C-ordering, meaning that it reads & writes elements using
+        C-like index ordering; the last axis index changing fastest, and, proceeding
+        in reverse order, the first axis index changing slowest.
+        """
+        return Tensor._op(Ravel, self, constant=constant)
+
+    def argmax(
+        self, axis: Optional[int] = None, out: Optional[np.ndarray] = None
+    ) -> np.ndarray:
+        """Returns the indices of the maximum values along an axis.
+
+        Parameters
+        ----------
+        a: array_like
+
+        axis: int, optional
+            By default, the index is into the flattened array, otherwise along the specified axis.
+
+        out: numpy.array, optional
+            If provided, the result will be inserted into this array. It should be of the appropriate shape and dtype.
+
+        Returns
+        -------
+        numpy.ndarray[int]"""
+
+        return np.argmax(self.data, axis, out)
+
+    def argmin(
+        self, axis: Optional[int] = None, out: Optional[np.ndarray] = None
+    ) -> np.ndarray:
+        """Returns the indices of the minimum values along an axis.
+
+        Parameters
+        ----------
+        axis: int, optional
+            By default, the index is into the flattened array, otherwise along the specified axis.
+
+        out: numpy.array, optional
+            If provided, the result will be inserted into this array. It should be of the appropriate shape and dtype.
+
+        Returns
+        -------
+        numpy.ndarray[int]"""
+
+        return np.argmin(self.data, axis, out)
+
+    def any(
+        self,
+        axis: Optional[Union[int, Tuple[int, ...]]] = None,
+        out: Optional[np.ndarray] = None,
+        keepdims: bool = False,
+    ) -> np.ndarray:
+        """Test whether any array or Tensor element along a given axis evaluates to True.
+
+        Returns single boolean if `axis` is ``None``
+
+        This documentation was adapted from ``numpy.add``
+
+        Parameters
+        ----------
+        axis : None or int or tuple of ints, optional
+            Axis or axes along which a logical OR reduction is performed.
+            The default (``axis=None``) is to perform a logical OR over all
+            the dimensions of the input array. `axis` may be negative, in
+            which case it counts from the last to the first axis.
+            If this is a tuple of ints, a reduction is performed on multiple
+            axes, instead of a single axis or all the axes as before.
+
+        out : ndarray, optional
+            Alternate output array in which to place the result.  It must have
+            the same shape as the expected output and its type is preserved
+            (e.g., if it is of type float, then it will remain so, returning
+            1.0 for True and 0.0 for False, regardless of the type of `a`).
+            See `ufuncs-output-type` for more details.
+
+        keepdims : bool, optional
+            If this is set to True, the axes which are reduced are left
+            in the result as dimensions with size one. With this option,
+            the result will broadcast correctly against the input array.
+            If the default value is passed, then `keepdims` will not be
+            passed through to the `any` method of sub-classes of
+            `ndarray`, however any non-default value will be.  If the
+            sub-class' method does not implement `keepdims` any
+            exceptions will be raised.
+
+        Returns
+        -------
+        any : bool or ndarray
+            A new boolean or `ndarray` is returned unless `out` is specified,
+            in which case a reference to `out` is returned.
+
+        See Also
+        --------
+        Tensor.any : equivalent method
+
+        """
+        return np.any(self.data, axis=axis, out=out, keepdims=keepdims)

@@ -35,28 +35,3 @@ from ._version import get_versions
 
 __version__ = get_versions()["version"]
 del get_versions
-
-
-for _attr in (
-    sum,
-    prod,
-    cumprod,
-    cumsum,
-    mean,
-    std,
-    var,
-    max,
-    min,
-    argmax,
-    argmin,
-    swapaxes,
-    transpose,
-    moveaxis,
-    squeeze,
-    ravel,
-    matmul,
-    any,
-):
-    setattr(Tensor, _attr.__name__, _attr)
-
-del _attr

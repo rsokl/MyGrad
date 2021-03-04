@@ -32,6 +32,9 @@ def test_input_validation():
     with raises(TypeError):
         transpose(x, (0,), 1)
 
+    with raises(TypeError):
+        x.transpose((0,), 1)
+
 
 @settings(deadline=None)
 @given(
