@@ -560,7 +560,60 @@ class Tensor:
     def __array_ufunc__(
         self, ufunc: Type[np.ufunc], method: str, *inputs: ArrayLike, **kwargs
     ) -> Union["Tensor", np.ndarray]:
+        """An interface provided by NumPy to override the behavior of its ufuncs [1]_.
 
+        MyGrad implements its own ufuncs for all differentiable NumPy ufuncs.
+
+        Non-differentiable numpy ufuncs simply get called on the underlying arrays of tensors and
+        will return ndarrays.
+
+        The differentiability - or lack thereof - of ufuncs may not be obvious to end users.
+        Thus potentially ambiguous ufuncs (e.g. `numpy.ceil`) will be made to raise on non-constant
+        tensors so that the lack of differentiability is made obvious to the users. This design decision
+        is made in the same spirit as requiring integer-dtype tensors be constant.
+
+        References
+        ----------
+        .. [1] https://numpy.org/doc/stable/reference/arrays.classes.html#numpy.class.__array_ufunc__
+
+        Examples
+        --------
+        NumPy ufuncs that represent differentiable operations are overloaded by MyGrad tensors
+        so that they support backprop
+
+        >>> import mygrad as mg
+        >>> import numpy as np
+
+        >>> x = mg.tensor([1., 2.])
+
+        This calls ``mygrad.sin`` under the hood.
+
+        >>> np.sin(x)  # returns a tensor
+        Tensor([0.84147098, 0.90929743])
+
+        >>> np.sin(x).backward()
+        >>> x.grad  # note: derivative of
+        array([ 0.54030231, -0.41614684])
+
+        Specifying a dtype, a ``where`` mask, an in-place target (via ``out``) as an array
+        or a tensor, are all supported.
+
+        >>> x = mg.tensor([1., 2.])
+        >>> y = mg.tensor([-1., -1.])
+        >>> np.exp(x, where=[False, True], out=y)
+        Tensor([-1.       ,  7.3890561])
+        >>> y.backward()
+        >>> x.grad
+        array([0.       , 7.3890561])
+
+        Non-differentiable NumPy ufuncs simply operate on the ndarrays that are wrapped
+        by MyGrad tensors; these return ndarrays, which will appropriately and explicitly
+        serve as constants elsewhere in a computational graph.
+
+        >>> x = mg.tensor([1., 2.])
+        >>> np.less_equal(x, 1)
+        array([ True, False])
+        """
         out = kwargs.pop("out", (None,))
         if len(out) > 1:  # pragma: no cover
             raise ValueError(
@@ -576,9 +629,11 @@ class Tensor:
         except KeyError:
             pass
 
+        # non-differentiable ufuncs get called on numpy arrays stored by tensors
         if ufunc in _REGISTERED_BOOL_ONLY_UFUNC:
             caster = asarray
         elif ufunc in _REGISTERED_CONST_ONLY_UFUNC:
+            # the presence of non-constant tensors will raise
             caster = _as_constant_array
         else:  # pragma: no cover
             return NotImplemented
@@ -1802,21 +1857,11 @@ class Tensor:
     def __rtruediv__(self, other: ArrayLike) -> "Tensor":
         return self._op(Divide, other, self)
 
-    def __floordiv__(self, other: ArrayLike) -> "Tensor":
-        if not self.constant:
-            raise ValueError(
-                "Floor division cannot involve non-constant mygrad tensors."
-            )
-        if isinstance(other, Tensor):
-            other = other.data
-        return type(self)(self.data.__floordiv__(other), constant=True)
+    def __floordiv__(self, other: ArrayLike) -> np.ndarray:
+        return np.floor_divide(self, other)
 
-    def __rfloordiv__(self, other: ArrayLike) -> "Tensor":
-        if not self.constant:
-            raise ValueError(
-                "Floor division cannot involve non-constant mygrad tensors."
-            )
-        return type(self)(self.data.__rfloordiv__(other), constant=True)
+    def __rfloordiv__(self, other: ArrayLike) -> np.ndarray:
+        return np.floor_divide(other, self)
 
     def __itruediv__(self, other: ArrayLike) -> "Tensor":
         self._in_place_op(Divide, self, other)

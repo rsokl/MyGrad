@@ -325,50 +325,50 @@ def _create_ufunc(
         constant: Optional[bool] = None,
     ) -> Tensor:  # pragma: no cover
         """Not implemented"""
-        return NotImplementedError
+        raise NotImplementedError()
 
     def accumulate(
         array: ArrayLike,
         axis: int = 0,
-        dtype: DTypeLikeReals = None,
+        dtype: Optional[DTypeLikeReals] = None,
         out: Optional[Union[Tensor, np.ndarray]] = None,
         *,
         constant: Optional[bool] = None,
     ) -> Tensor:  # pragma: no cover
         """Not implemented"""
-        return NotImplementedError
+        raise NotImplementedError()
 
     def outer(
         a: ArrayLike,
         b: ArrayLike,
         *,
-        dtype: DTypeLikeReals,
-        out: Optional[Union[Tensor, np.ndarray]],
+        dtype: Optional[DTypeLikeReals] = None,
+        out: Optional[Union[Tensor, np.ndarray]] = None,
     ) -> Tensor:  # pragma: no cover
         """Not Implemented"""
-        return NotImplementedError
+        raise NotImplementedError()
 
     def reduce(
         a: ArrayLike,
         axis: Optional[Union[int, Tuple[int, ...]]] = 0,
-        dtype: DTypeLikeReals = None,
+        dtype: Optional[DTypeLikeReals] = None,
         out: Optional[Union[Tensor, np.ndarray]] = None,
         keepdims: bool = False,
         initial: Real = _NoValue,
         where: Mask = True,
     ) -> Tensor:  # pragma: no cover
         """Not Implemented"""
-        return NotImplementedError
+        raise NotImplementedError()
 
     def reduceat(
         a: ArrayLike,
         indices: ArrayLike,
         axis: Optional[Union[int, Tuple[int, ...]]] = 0,
-        dtype: DTypeLikeReals = None,
+        dtype: Optional[DTypeLikeReals] = None,
         out: Optional[Union[Tensor, np.ndarray]] = None,
     ) -> Tensor:  # pragma: no cover
         """Not Implemented"""
-        return NotImplementedError
+        raise NotImplementedError()
 
     if op.numpy_ufunc.nin == 1:
         MetaBuilder = MyGradUnaryUfunc
