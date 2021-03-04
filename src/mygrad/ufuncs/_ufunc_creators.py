@@ -20,8 +20,6 @@ from mygrad.operation_base import BinaryUfunc, Operation, Ufunc, UnaryUfunc, _No
 from mygrad.tensor_base import _REGISTERED_UFUNC, Tensor
 from mygrad.typing import ArrayLike, DTypeLikeReals, Index, Mask, Real
 
-from .non_differentiable import _boolean_out_passthrough, _constant_only_passthrough
-
 __all__ = ["ufunc_creator"]
 
 
@@ -327,7 +325,7 @@ def _create_ufunc(
         constant: Optional[bool] = None,
     ) -> Tensor:  # pragma: no cover
         """Not implemented"""
-        raise NotImplementedError()
+        return NotImplementedError
 
     def accumulate(
         array: ArrayLike,
@@ -338,7 +336,7 @@ def _create_ufunc(
         constant: Optional[bool] = None,
     ) -> Tensor:  # pragma: no cover
         """Not implemented"""
-        raise NotImplementedError()
+        return NotImplementedError
 
     def outer(
         a: ArrayLike,
@@ -348,7 +346,7 @@ def _create_ufunc(
         out: Optional[Union[Tensor, np.ndarray]],
     ) -> Tensor:  # pragma: no cover
         """Not Implemented"""
-        raise NotImplementedError()
+        return NotImplementedError
 
     def reduce(
         a: ArrayLike,
@@ -360,7 +358,7 @@ def _create_ufunc(
         where: Mask = True,
     ) -> Tensor:  # pragma: no cover
         """Not Implemented"""
-        raise NotImplementedError()
+        return NotImplementedError
 
     def reduceat(
         a: ArrayLike,
@@ -370,7 +368,7 @@ def _create_ufunc(
         out: Optional[Union[Tensor, np.ndarray]] = None,
     ) -> Tensor:  # pragma: no cover
         """Not Implemented"""
-        raise NotImplementedError()
+        return NotImplementedError
 
     if op.numpy_ufunc.nin == 1:
         MetaBuilder = MyGradUnaryUfunc
@@ -380,7 +378,7 @@ def _create_ufunc(
         )
     else:  # pragma: no cover
         raise NotImplementedError(
-            "MyGrad Internal: `mygrad._utils.op_creator` only supports unary and binary ufuncs currently"
+            "MyGrad Internal: `mygrad._utils.op_creator` only supports unary and binary ufuncs presently"
         )
 
     # filter out non-real dtypes
@@ -500,38 +498,3 @@ class ufunc_creator:
         )
         _REGISTERED_UFUNC[getattr(np, out_ufunc.__name__)] = out_ufunc
         return out_ufunc
-
-
-# register constant-only & returns-array ufuncs
-for numpy_ufunc in [
-    np.floor_divide,
-    np.remainder,
-    np.mod,
-    np.fmod,
-    np.divmod,
-    np.rint,
-    np.sign,
-    np.floor,
-    np.ceil,
-    np.trunc,
-]:
-    _REGISTERED_UFUNC[numpy_ufunc] = _constant_only_passthrough(numpy_ufunc)
-
-# register boolean passthroughs
-for numpy_ufunc in [
-    np.isnan,
-    np.isfinite,
-    np.isinf,
-    np.isnat,
-    np.signbit,
-    np.logical_not,
-    np.logical_and,
-    np.logical_or,
-    np.logical_xor,
-    np.greater,
-    np.greater_equal,
-    np.less,
-    np.less_equal,
-    np.equal,
-]:
-    _REGISTERED_UFUNC[numpy_ufunc] = _boolean_out_passthrough(numpy_ufunc)

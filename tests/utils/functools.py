@@ -1,4 +1,5 @@
 from collections import UserDict
+from copy import deepcopy
 from typing import Any, Dict, Iterable, Sequence, Tuple, Union
 
 import numpy as np
@@ -68,3 +69,8 @@ class SmartSignature(UserDict):
     def make_array_based_args_read_only(self):
         map(_make_read_only, self.args)
         map(_make_read_only, self.kwargs.values())
+
+    def copy(self):
+        return SmartSignature(
+            *(deepcopy(x) for x in self.args), **deepcopy(self.kwargs)
+        )
