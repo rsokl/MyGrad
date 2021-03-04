@@ -103,7 +103,7 @@ constant_tensor: Callable[..., Tensor] = partial(mg.tensor, constant=True)
 @pytest.mark.parametrize(
     "f1, f2",
     [
-        (constant_tensor, lambda x: x),
+        (constant_tensor, lambda x: x.tolist()),
         (lambda x: x, constant_tensor),
         (constant_tensor, constant_tensor),
     ],

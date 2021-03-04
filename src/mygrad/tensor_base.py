@@ -562,7 +562,7 @@ class Tensor:
     ) -> Union["Tensor", np.ndarray]:
 
         out = kwargs.pop("out", (None,))
-        if len(out) > 1:
+        if len(out) > 1:  # pragma: no cover
             raise ValueError(
                 "mygrad does not support in-place operations with more that one target"
             )
@@ -877,7 +877,7 @@ class Tensor:
             The tensor-result of the operation's forward-pass."""
         if out is not None:
             if isinstance(out, tuple):
-                if len(out) > 1:
+                if len(out) > 1:  # pragma: no cover
                     raise ValueError(
                         "mygrad does not support in-place operations with more that one target"
                     )
