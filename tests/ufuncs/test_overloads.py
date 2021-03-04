@@ -43,8 +43,8 @@ def test_ufunc_overload_with_out(where, input_cast, out_cast, pos_or_kwarg: str)
 def test_mutiple_outputs_to_overloaded_ufunc_raises():
     input = mg.tensor([-1.0, -2.0])
     target = mg.tensor([0.0, 0.0])
-    # with pytest.raises(ValueError):
-    np.negative(input, out=(target, target))
+    with pytest.raises(ValueError):
+        np.negative(input, out=(target, target))
 
 
 def test_boolean_overload():
