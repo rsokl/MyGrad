@@ -696,7 +696,9 @@ class Tensor:
                 f"{repr(ufunc)} cannot involve non-constant mygrad tensors."
             )
 
-    def __array_function__(self, func: Callable[..., np.ndarray], types, args, kwargs):
+    def __array_function__(
+        self, func: Callable[..., np.ndarray], types, args, kwargs
+    ) -> Union["Tensor", np.ndarray]:
         if func in _REGISTERED_DIFFERENTIABLE_NUMPY_FUNCS:
             return _REGISTERED_DIFFERENTIABLE_NUMPY_FUNCS[func](*args, **kwargs)
         elif func in _REGISTERED_NO_DIFF_NUMPY_FUNCS:
