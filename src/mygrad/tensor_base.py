@@ -709,7 +709,7 @@ class Tensor:
                     for k, v in kwargs.items()
                 },
             )
-        else:
+        else:  # pragma: no cover
             return NotImplemented
 
     def __array__(self, dtype: DTypeLike = None) -> np.ndarray:
