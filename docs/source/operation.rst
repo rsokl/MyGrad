@@ -18,39 +18,6 @@ node then back-propagates to any Operation-instance that is recorded
 as its creator, and so on.
 
 
-Explaining Scalar-Only Operations
-----------------------------------
-MyGrad only supports gradients whose elements have a one-to-one correspondence
-with the elements of their associated tensors. That is, if ``x`` is a shape-(4,)
-tensor:
-
-.. math::
-
-   x = [x_0, x_1, x_2, x_3]
-
-then the gradient, with respect to ``x``, of the terminal node of our computational graph (:math:`l`) must
-be representable as a shape-(4,) tensor whose elements correspond to those of ``x``:
-
-.. math::
-
-  \nabla_{x}{l} = [\frac{dl}{dx_0}, \frac{dl}{dx_1}, \frac{dl}{dx_2}, \frac{dl}{dx_3}]
-
-If an operation class has ``scalar_only=True``, then the terminal node of a
-computational graph involving that operation can only trigger back-propagation
-from a 0-dimensional tensor (i.e. a scalar). This is ``False`` for operations that
-manifest as trivial element-wise operations over tensors. In such cases, the
-gradient of the operation can also be treated element-wise, and thus be computed
-unambiguously.
-
-The matrix-multiplication operation, for example, is a scalar-only operation because
-computing the derivative of :math:`F_{ik} = \sum_{j}{A_{ij} B_{jk}}` with respect
-to each element of :math:`A` produces a 3-tensor: :math:`\frac{d F_{ik}}{d A_{iq}}`, since each element 
-of :math:`F` depends on *every* element in the corresponding row of :math:`A`.
-This is the case unless the terminal node of this graph is eventually reduced (via summation, for instance) to a
-scalar, :math:`l`, in which  case the elements of the 2-tensor :math:`\frac{dl}{dA_{pq}}` has a trivial one-to-one
-correspondence to the elements of :math:`A_{pq}`.
-
-
 Documentation for mygrad.Operation
 ----------------------------------
 

@@ -1,5 +1,7 @@
 import numpy as np
 
+from mygrad.errors import InvalidBackprop
+
 
 class SimpleOperation:
     def __call__(self, *input_vars):
@@ -18,9 +20,9 @@ class SimpleOperation:
         for var in self.variables:
             var.null_gradients(clear_graph=clear_graph)
 
-    def clear_graph(self, terminal_node):
+    def clear_graph(self):
         for var in self.variables:
-            var.clear_graph(terminal_node)
+            var.clear_graph()
 
 
 class Node:
@@ -42,27 +44,30 @@ class Node:
         for var in input_vars:
             if not isinstance(var, cls):
                 var = cls(var, constant=True)
+            var.grad = None  # participating in graph construction nulls tensor gradient
             tensor_vars.append(var)
 
         f = Op()
         op_out = f(*tensor_vars)
         is_const = constant or all(var.constant for var in tensor_vars)
-        if not is_const:
-            # record that a variable participated in that op
-            for var in tensor_vars:
-                if not var.constant:
-                    var._ops.append(f)
+
+        # record that a variable participated in that op
+        for var in tensor_vars:
+            var._ops.append(f)
+
         return cls(op_out, constant=is_const, _creator=f)
 
     def backward(self, grad=None, terminal_node=False):
         if self.constant:
+            if terminal_node:
+                self.clear_graph()
             return
         grad = np.asarray(grad) if grad is not None else np.asarray(1.0, dtype=float)
         if terminal_node:
             self.grad = np.asarray(grad)
         else:
             if not terminal_node and not self._ops:
-                raise Exception(
+                raise InvalidBackprop(
                     "Invalid Backprop: part of the computational graph containing "
                     "this tensor was cleared prior to backprop"
                 )
@@ -71,18 +76,13 @@ class Node:
         if self.creator is not None:
             self.creator.backward(grad)
 
-    def null_gradients(self, clear_graph=True):
-        self.grad = None
-        if self.creator is not None:
-            self.creator.null_gradients(False)
-        if clear_graph:
+        if terminal_node:
             self.clear_graph()
 
-    def clear_graph(self, terminal_node=True):
-        if not terminal_node:
-            self._ops.clear()
+    def clear_graph(self):
+        self._ops.clear()
         if self.creator is not None:
-            self.creator.clear_graph(terminal_node=False)
+            self.creator.clear_graph()
             self.creator = None
 
 

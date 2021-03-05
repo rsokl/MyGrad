@@ -1,61 +1,11 @@
 import numpy as np
 
-from mygrad import cosh, coth, csch, sech, sinh, tanh
+from mygrad import coth, csch, sech
 from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
 def _is_nonzero(x):
     return np.all(np.abs(x.data) > 1e-8)
-
-
-@fwdprop_test_factory(
-    mygrad_func=sinh, true_func=np.sinh, index_to_bnds={0: (-10, 10)}, num_arrays=1
-)
-def test_sinh_fwd():
-    pass
-
-
-@backprop_test_factory(
-    mygrad_func=sinh, true_func=np.sinh, index_to_bnds={0: (-10, 10)}, num_arrays=1
-)
-def test_sinh_backward():
-    pass
-
-
-@fwdprop_test_factory(
-    mygrad_func=cosh, true_func=np.cosh, index_to_bnds={0: (-10, 10)}, num_arrays=1
-)
-def test_cosh_fwd():
-    pass
-
-
-@backprop_test_factory(
-    mygrad_func=cosh,
-    true_func=np.cosh,
-    index_to_bnds={0: (-10, 10)},
-    atol=1e-5,
-    num_arrays=1,
-)
-def test_cosh_backward():
-    pass
-
-
-@fwdprop_test_factory(
-    mygrad_func=tanh, true_func=np.tanh, index_to_bnds={0: (-10, 10)}, num_arrays=1
-)
-def test_tanh_fwd():
-    pass
-
-
-@backprop_test_factory(
-    mygrad_func=tanh,
-    true_func=np.tanh,
-    index_to_bnds={0: (-10, 10)},
-    atol=1e-5,
-    num_arrays=1,
-)
-def test_tanh_backward():
-    pass
 
 
 @fwdprop_test_factory(

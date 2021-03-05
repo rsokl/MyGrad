@@ -1,16 +1,24 @@
 """ Test `numerical_gradient`, `numerical_derivative`, and `broadcast_check`"""
 
+
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
 from hypothesis import given
 from numpy.testing import assert_allclose
 
+from tests.utils.checkers import is_float_arr
 from tests.utils.numerical_gradient import (
     finite_difference,
     numerical_gradient,
     numerical_gradient_full,
 )
+
+
+def test_is_float_arr():
+    assert is_float_arr(np.array(1)) is False
+    assert is_float_arr(np.array([1.0j])) is False
+    assert is_float_arr(np.array(1.0)) is True
 
 
 def unary_func(x):
@@ -160,3 +168,4 @@ def test_numerical_gradient_vary_each(x, grad):
     (dx,) = numerical_gradient_full(lambda y: y[::-1], x, back_grad=np.array(grad))
     x_grad = grad[::-1]
     assert_allclose(actual=dx, desired=x_grad, atol=atol, rtol=rtol)
+

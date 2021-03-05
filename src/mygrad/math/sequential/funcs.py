@@ -1,6 +1,19 @@
-from mygrad.tensor_base import Tensor
+from typing import Optional, Tuple, Union
+
+import numpy as np
+
+from mygrad.operation_base import _NoValue
+from mygrad.tensor_base import (
+    _REGISTERED_DIFFERENTIABLE_NUMPY_FUNCS,
+    Tensor,
+    implements_numpy_override,
+)
+from mygrad.typing import ArrayLike
 
 from .ops import *
+
+Axis = Union[None, int, Tuple[int, ...]]
+
 
 __all__ = [
     "sum",
@@ -17,13 +30,20 @@ __all__ = [
 ]
 
 
-def sum(x, axis=None, keepdims=False, constant=False):
+@implements_numpy_override
+def sum(
+    x: ArrayLike,
+    axis: Axis = None,
+    keepdims: bool = False,
+    *,
+    constant: Optional[bool] = None
+) -> Tensor:
     """
     Sum of tensor elements over a given axis.
 
     Parameters
     ----------
-    x : array_like
+    x : ArrayLike
 
     axis : Optional[int, Tuple[ints, ...]]
         Axis or axes along which a sum is performed.  The default,
@@ -38,9 +58,15 @@ def sum(x, axis=None, keepdims=False, constant=False):
         in the result as dimensions with size one. With this option,
         the result will broadcast correctly against the input tensor.
 
-    constant : bool, optional(default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient)
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. ``constant.grad`` will always return
+        ``None``).
+
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
 
     Returns
     -------
@@ -86,22 +112,26 @@ def sum(x, axis=None, keepdims=False, constant=False):
 
     >>> mg.ones(128, dtype=mg.int8).sum(dtype=np.int8)
     Tensor(-128)
-
-    You can also start the sum with a value other than zero:
-
-    >>> mg.sum([10], initial=5)
-    Tensor(15)
     """
-    return Tensor._op(Sum, x, op_args=(axis, keepdims), constant=constant)
+    return Tensor._op(
+        Sum, x, op_kwargs=dict(axis=axis, keepdims=keepdims), constant=constant
+    )
 
 
-def mean(x, axis=None, keepdims=False, constant=False):
+@implements_numpy_override
+def mean(
+    x: ArrayLike,
+    axis: Axis = None,
+    keepdims: bool = False,
+    *,
+    constant: Optional[bool] = None
+) -> Tensor:
     """
     Mean of tensor elements over a given axis.
 
     Parameters
     ----------
-    x : array_like
+    x : ArrayLike
 
     axis : Optional[int, Tuple[ints, ...]
         Axis or axes along which a mean is performed.  The default,
@@ -117,9 +147,15 @@ def mean(x, axis=None, keepdims=False, constant=False):
         in the result as dimensions with size one. With this option,
         the result will broadcast correctly against the input tensor.
 
-    constant : bool, optional(default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient)
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. ``constant.grad`` will always return
+        ``None``).
+
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
 
     Returns
     -------
@@ -154,10 +190,20 @@ def mean(x, axis=None, keepdims=False, constant=False):
     >>> mg.mean(a, dtype=np.float64)
     Tensor(0.55000000074505806)
     """
-    return Tensor._op(Mean, x, op_args=(axis, keepdims), constant=constant)
+    return Tensor._op(
+        Mean, x, op_kwargs=dict(axis=axis, keepdims=keepdims), constant=constant
+    )
 
 
-def var(x, axis=None, ddof=0, keepdims=False, constant=False):
+@implements_numpy_override
+def var(
+    x: ArrayLike,
+    axis: Axis = None,
+    ddof: int = 0,
+    keepdims: bool = False,
+    *,
+    constant: Optional[bool] = None
+) -> Tensor:
     """
     Compute the variance along the specified axis.
 
@@ -167,7 +213,7 @@ def var(x, axis=None, ddof=0, keepdims=False, constant=False):
 
     Parameters
     ----------
-    x : array_like
+    x : ArrayLike
         Array containing numbers whose variance is desired.
 
     axis : Optional[int, Tuple[int, ...]]
@@ -184,10 +230,15 @@ def var(x, axis=None, ddof=0, keepdims=False, constant=False):
         in the result as dimensions with size one. With this option,
         the result will broadcast correctly against the input array..
 
-    constant : bool, optional(default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient)
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. ``constant.grad`` will always return
+        ``None``).
 
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
     Returns
     -------
     variance : mygrad.Tensor
@@ -240,7 +291,15 @@ def var(x, axis=None, ddof=0, keepdims=False, constant=False):
     )
 
 
-def std(x, axis=None, ddof=0, keepdims=False, constant=False):
+@implements_numpy_override
+def std(
+    x: ArrayLike,
+    axis: Axis = None,
+    ddof: int = 0,
+    keepdims: bool = False,
+    *,
+    constant: Optional[bool] = None
+) -> Tensor:
     """
     Compute the standard deviation along the specified axis.
 
@@ -250,7 +309,7 @@ def std(x, axis=None, ddof=0, keepdims=False, constant=False):
 
     Parameters
     ----------
-    x : array_like
+    x : ArrayLike
         Array containing numbers whose standard deviation is desired.
 
     axis : Optional[int, Tuple[int, ...]]
@@ -267,9 +326,15 @@ def std(x, axis=None, ddof=0, keepdims=False, constant=False):
         in the result as dimensions with size one. With this option,
         the result will broadcast correctly against the input array.
 
-    constant : bool, optional(default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient)
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. ``constant.grad`` will always return
+        ``None``).
+
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
 
     Returns
     -------
@@ -321,13 +386,20 @@ def std(x, axis=None, ddof=0, keepdims=False, constant=False):
     )
 
 
-def max(x, axis=None, keepdims=False, constant=False):
+@implements_numpy_override
+def max(
+    x: ArrayLike,
+    axis: Axis = None,
+    keepdims: bool = False,
+    *,
+    constant: Optional[bool] = None
+) -> Tensor:
     """
     Return the maximum of a tensor or maximum along its axes.
 
     Parameters
     ----------
-    x : array_like
+    x : ArrayLike
 
     axis : Optional[int, Tuple[int, ...]]
         Axis or axes along which to operate. By default, flattened input is used.
@@ -337,9 +409,15 @@ def max(x, axis=None, keepdims=False, constant=False):
         in the result as dimensions with size one. With this option,
         the result will broadcast correctly against the original `arr`.
 
-    constant : bool, optional(default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient)
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. ``constant.grad`` will always return
+        ``None``).
+
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
 
     Returns
     -------
@@ -366,14 +444,21 @@ def max(x, axis=None, keepdims=False, constant=False):
     Tensor(nan)
     """
     return Tensor._op(
-        MaxMin,
+        Max,
         x,
-        op_kwargs=dict(axis=axis, keepdims=keepdims, maxmin="max"),
+        op_kwargs=dict(axis=axis, keepdims=keepdims, dtype=_NoValue),
         constant=constant,
     )
 
 
-def min(x, axis=None, keepdims=False, constant=False):
+@implements_numpy_override
+def min(
+    x: ArrayLike,
+    axis: Axis = None,
+    keepdims: bool = False,
+    *,
+    constant: Optional[bool] = None
+) -> Tensor:
     """
     Return the minimum of a tensor or minimum along its axes.
 
@@ -387,9 +472,15 @@ def min(x, axis=None, keepdims=False, constant=False):
         in the result as dimensions with size one. With this option,
         the result will broadcast correctly against the original `arr`.
 
-    constant : bool, optional(default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient)
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. ``constant.grad`` will always return
+        ``None``).
+
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
 
     Returns
     -------
@@ -416,9 +507,9 @@ def min(x, axis=None, keepdims=False, constant=False):
     Tensor(nan)
     """
     return Tensor._op(
-        MaxMin,
+        Min,
         x,
-        op_kwargs=dict(axis=axis, keepdims=keepdims, maxmin="min"),
+        op_kwargs=dict(axis=axis, keepdims=keepdims, dtype=_NoValue),
         constant=constant,
     )
 
@@ -426,15 +517,24 @@ def min(x, axis=None, keepdims=False, constant=False):
 # aliases
 amin = min
 amax = max
+_REGISTERED_DIFFERENTIABLE_NUMPY_FUNCS[np.amin] = amin
+_REGISTERED_DIFFERENTIABLE_NUMPY_FUNCS[np.amax] = amax
 
 
-def prod(a, axis=None, keepdims=False, constant=False):
+@implements_numpy_override
+def prod(
+    a: ArrayLike,
+    axis: Axis = None,
+    keepdims: bool = False,
+    *,
+    constant: Optional[bool] = None
+) -> Tensor:
     """
     Return the product of array elements over given axes.
 
     Parameters
     ----------
-    a : array_like
+    a : ArrayLike
         Input data.
 
     axis : Optional[int, Tuple[int, ...]]
@@ -444,6 +544,16 @@ def prod(a, axis=None, keepdims=False, constant=False):
         If this is set to True, the axes which are reduced are left in the
         result as dimensions with size one. With this option, the result
         will broadcast correctly against the input array.
+
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. ``constant.grad`` will always return
+        ``None``).
+
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
 
     Returns
     -------
@@ -476,13 +586,16 @@ def prod(a, axis=None, keepdims=False, constant=False):
 
     >>> mg.prod([[1.,2.],
     ...          [3.,4.]], axis=1)
-    Tensor([  2.,  12.]) """
+    Tensor([  2.,  12.])"""
     return Tensor._op(
         Prod, a, op_kwargs=dict(axis=axis, keepdims=keepdims), constant=constant
     )
 
 
-def cumprod(a, axis=None, constant=False):
+@implements_numpy_override
+def cumprod(
+    a: ArrayLike, axis: Axis = None, *, constant: Optional[bool] = None
+) -> Tensor:
     """
     Return the cumulative product of elements along a given axis.
 
@@ -490,7 +603,7 @@ def cumprod(a, axis=None, constant=False):
 
     Parameters
     ----------
-    a : array_like
+    a : ArrayLike
         Input array.
 
     axis : Optional[int]
@@ -500,6 +613,16 @@ def cumprod(a, axis=None, constant=False):
     constant : bool, optional(default=False)
         If ``True``, the returned tensor is a constant (it
         does not back-propagate a gradient)
+
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. ``constant.grad`` will always return
+        ``None``).
+
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
 
     Returns
     -------
@@ -534,7 +657,10 @@ def cumprod(a, axis=None, constant=False):
     return Tensor._op(CumProd, a, op_kwargs=dict(axis=axis), constant=constant)
 
 
-def cumsum(a, axis=None, constant=False):
+@implements_numpy_override
+def cumsum(
+    a: ArrayLike, axis: Axis = None, *, constant: Optional[bool] = None
+) -> Tensor:
     """
     Return the cumulative sum of the elements along a given axis.
 
@@ -542,16 +668,22 @@ def cumsum(a, axis=None, constant=False):
 
     Parameters
     ----------
-    a : array_like
+    a : ArrayLike
         Input array.
 
     axis : int, optional
         Axis along which the cumulative sum is computed. The default
         (None) is to compute the cumsum over the flattened array.
 
-    constant : bool, optional(default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient)
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. ``constant.grad`` will always return
+        ``None``).
+
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
 
     Returns
     -------

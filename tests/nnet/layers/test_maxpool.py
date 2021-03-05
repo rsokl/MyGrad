@@ -23,7 +23,7 @@ def text_constant():
             ],
         ]
     )
-    x = Tensor(x)
+    x = Tensor(x, dtype="float32")
     pool = (3,)
     stride = (1,)
     assert max_pool(x, pool, stride, constant=True).constant is True
@@ -47,7 +47,7 @@ def test_1d_case():
             ],
         ]
     )
-    x = Tensor(x)
+    x = Tensor(x, dtype="float32")
     pool = (3,)
     stride = (1,)
     out = max_pool(x, pool, stride)
@@ -100,7 +100,7 @@ def test_2d_case():
             ],
         ]
     )
-    x = Tensor(x)
+    x = Tensor(x, dtype="float32")
     pool = (2, 3)
     stride = (2, 1)
     out = max_pool(x, pool, stride)
@@ -148,7 +148,7 @@ def test_3d_case():
             ],
         ]
     )
-    x = Tensor(x)
+    x = Tensor(x, dtype="float32")
     pool = (2, 2, 2)
     stride = (1, 1, 2)
     out = max_pool(x, pool, stride)
@@ -179,7 +179,7 @@ def test_3d_case():
 
 
 def test_bad_max_shapes():
-    x = Tensor(np.zeros((1, 2, 2, 2)))
+    x = Tensor(np.zeros((1, 2, 2, 2)), dtype="float32")
     with raises(ValueError):
         max_pool(x, (3,) * 3, (1,) * 3)  # large filter
 

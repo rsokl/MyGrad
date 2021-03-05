@@ -1,56 +1,68 @@
-from mygrad.tensor_base import Tensor
+from typing import Optional, Tuple, Union
+
+from mygrad.tensor_base import Tensor, implements_numpy_override
+from mygrad.typing import ArrayLike, Shape
 
 from .ops import *
 
 __all__ = ["reshape", "squeeze", "ravel", "expand_dims", "broadcast_to"]
 
 
-def reshape(a, newshape, constant=False):
-    """ Returns a tensor with a new shape, without changing its data.
+@implements_numpy_override
+def reshape(
+    a: ArrayLike, newshape: Union[int, Shape], *, constant: Optional[bool] = None
+) -> Tensor:
+    """Returns a tensor with a new shape, without changing its data.
 
-        This docstring was adapted from ``numpy.reshape``
+    This docstring was adapted from ``numpy.reshape``
 
-        Parameters
-        ----------
-        a : array_like
-            The tensor to be reshaped
+    Parameters
+    ----------
+    a : ArrayLike
+        The tensor to be reshaped
 
-        newshape : Union[int, Tuple[int, ...]]
-            The new shape should be compatible with the original shape. If
-            an integer, then the result will be a 1-D tensor of that length.
-            One shape dimension can be -1. In this case, the value is
-            inferred from the length of the tensor and remaining dimensions.
+    newshape : Union[int, Tuple[int, ...]]
+        The new shape should be compatible with the original shape. If
+        an integer, then the result will be a 1-D tensor of that length.
+        One shape dimension can be -1. In this case, the value is
+        inferred from the length of the tensor and remaining dimensions.
 
-        constant : bool, optional(default=False)
-            If ``True``, the returned tensor is a constant (it
-            does not back-propagate a gradient)
+    constant : bool, optional(default=False)
+        If ``True``, the returned tensor is a constant (it
+        does not back-propagate a gradient)
 
-        Returns
-        -------
-        mygrad.Tensor
-            ``a`` with its shape changed permuted.  A new tensor is returned.
+    Returns
+    -------
+    mygrad.Tensor
+        ``a`` with its shape changed permuted.  A new tensor is returned.
 
-        Notes
-        -----
-        ``reshape`` utilizes C-ordering, meaning that it reads & writes elements using
-        C-like index ordering; the last axis index changing fastest, and, proceeding
-        in reverse order, the first axis index changing slowest.
+    Notes
+    -----
+    ``reshape`` utilizes C-ordering, meaning that it reads & writes elements using
+    C-like index ordering; the last axis index changing fastest, and, proceeding
+    in reverse order, the first axis index changing slowest.
 
-        Examples
-        --------
-        >>> import mygrad as mg
-        >>> a = mg.Tensor([[1,2,3], [4,5,6]])
-        >>> mg.reshape(a, 6)
-        Tensor([1, 2, 3, 4, 5, 6])
+    Examples
+    --------
+    >>> import mygrad as mg
+    >>> a = mg.Tensor([[1,2,3], [4,5,6]])
+    >>> mg.reshape(a, 6)
+    Tensor([1, 2, 3, 4, 5, 6])
 
-        >>> mg.reshape(a, (3,-1))   # the unspecified value is inferred to be 2
-        Tensor([[1, 2],
-                [3, 4],
-                [5, 6]])"""
+    >>> mg.reshape(a, (3,-1))   # the unspecified value is inferred to be 2
+    Tensor([[1, 2],
+            [3, 4],
+            [5, 6]])"""
     return Tensor._op(Reshape, a, op_args=(newshape,), constant=constant)
 
 
-def squeeze(a, axis=None, constant=False):
+@implements_numpy_override
+def squeeze(
+    a: ArrayLike,
+    axis: Optional[Union[int, Tuple[int, ...]]] = None,
+    *,
+    constant: Optional[bool] = None
+) -> Tensor:
     """
     Remove single-dimensional entries from the shape of a tensor.
 
@@ -58,7 +70,7 @@ def squeeze(a, axis=None, constant=False):
 
     Parameters
     ----------
-    a : array_like
+    a : ArrayLike
         The tensor to be reshaped
 
     axis : Optional[int, Tuple[int, ...]]
@@ -90,7 +102,7 @@ def squeeze(a, axis=None, constant=False):
     >>> mg.squeeze(x, axis=0).shape
     (3, 1)
     >>> mg.squeeze(x, axis=1).shape
-    Traceback (most recent call last):
+    Traceback (most recent call last) -> Tensor:
     ...
     ValueError: cannot select an axis to squeeze out which has size not equal to one
     >>> mg.squeeze(x, axis=2).shape
@@ -98,7 +110,8 @@ def squeeze(a, axis=None, constant=False):
     return Tensor._op(Squeeze, a, op_args=(axis,), constant=constant)
 
 
-def ravel(a, constant=False):
+@implements_numpy_override
+def ravel(a: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
     """
     Flattens contents of a tensor into a contiguous 1-D array.  A copy is made only if needed.
 
@@ -106,7 +119,7 @@ def ravel(a, constant=False):
 
     Parameters
     ----------
-    a : array_like
+    a : ArrayLike
         The tensor to be flattened
 
     constant : bool, optional(default=False)
@@ -134,7 +147,8 @@ def ravel(a, constant=False):
     return Tensor._op(Ravel, a, constant=constant)
 
 
-def expand_dims(a, axis, constant=False):
+@implements_numpy_override
+def expand_dims(a: ArrayLike, axis: int, *, constant: Optional[bool] = None) -> Tensor:
     """
     Expand the dimensions of a tensor by adding a new axis.
 
@@ -142,7 +156,7 @@ def expand_dims(a, axis, constant=False):
 
     Parameters
     ----------
-    a : array_like
+    a : ArrayLike
         The tensor to be expanded
 
     axis : int
@@ -172,7 +186,10 @@ def expand_dims(a, axis, constant=False):
     return Tensor._op(ExpandDims, a, op_args=(axis,), constant=constant)
 
 
-def broadcast_to(a, shape, constant=False):
+@implements_numpy_override
+def broadcast_to(
+    a: ArrayLike, shape: Shape, *, constant: Optional[bool] = None
+) -> Tensor:
     """
     Broadcast a tensor to a new shape.
 
@@ -180,7 +197,7 @@ def broadcast_to(a, shape, constant=False):
 
     Parameters
     ----------
-    a : array_like
+    a : ArrayLike
         The tensor to be broadcasted
 
     shape: Tuple[int, ...]
@@ -211,7 +228,7 @@ def broadcast_to(a, shape, constant=False):
             [1, 2, 3],
             [1, 2, 3]])
     >>> mg.broadcast_to(x, (4,4))
-    Traceback (most recent call last):
+    Traceback (most recent call last) -> Tensor:
     ...
     ValueError: operands could not be broadcast together with remapped
     shapes [original->remapped]: (3,) and requested shape (4,4)

@@ -1,18 +1,26 @@
+from typing import Optional
+
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
 import pytest
 from hypothesis import assume, given, settings
-from numpy.testing import assert_allclose, assert_array_equal, assert_equal
+from numpy.testing import assert_array_equal, assert_equal
 from pytest import raises
 
 import mygrad as mg
 from mygrad import Tensor
-from mygrad.errors import InvalidBackprop, InvalidGradient
+from mygrad.errors import InvalidBackprop
 from mygrad.linalg.ops import MatMul
 from mygrad.math.arithmetic.ops import Add, Divide, Multiply, Negative, Power, Subtract
 from mygrad.operation_base import Operation
-from tests.utils import does_not_raise
+from tests.custom_strategies import everything_except, tensors, valid_constant_arg
+from tests.utils.errors import does_not_raise
+
+
+def test_simple_default_constant_behavior():
+    assert Tensor(1).constant is True
+    assert Tensor(1.0).constant is False
 
 
 @pytest.mark.parametrize(
@@ -22,6 +30,8 @@ from tests.utils import does_not_raise
         np.array(None, dtype="O"),
         np.array([[0], [0, 0]], dtype="O"),
         np.array(1, dtype="O"),
+        0j,
+        np.array(1, dtype=complex),
     ],
 )
 @given(constant=st.booleans(), creator=st.none() | st.just(MatMul()))
@@ -30,24 +40,96 @@ def test_input_type_checking(data, constant, creator):
         Tensor(data, constant=constant, _creator=creator)
 
 
+@given(constant=everything_except((bool, type(None))))
+def test_input_constant_checking(constant):
+    with raises(TypeError):
+        Tensor(1.0, constant=constant)
+
+
+@given(
+    x=hnp.arrays(
+        shape=hnp.array_shapes(min_dims=0, min_side=0), dtype=hnp.floating_dtypes()
+    ),
+    dtype=hnp.floating_dtypes(),
+    copy=st.booleans(),
+    ndmin=st.integers(0, 10),
+)
+def test_ndmin(x: np.ndarray, copy: bool, dtype, ndmin: int):
+    """Ensure Tensor(..., ndmin=<val>) mirrors numpy behavior and
+    produces appropriate view behavior"""
+    arr = np.array(x, copy=copy, ndmin=ndmin, dtype=dtype)
+    tensor = Tensor(x, copy=copy, ndmin=ndmin, dtype=dtype)
+    assert_equal(tensor, arr)
+
+    # Specifying array(... , ndmin=val) can create an internal
+    # base that the array points to. We want to be sure that
+    # this behavior doesnt manifest in tensor, which should
+    # bot behave as if it is a view
+
+    # check base behavior
+    assert tensor.data.flags.writeable
+    assert tensor.base is None
+    assert tensor[...].base is tensor
+
+    # check mem-lock behavior
+    z = +tensor
+    assert not tensor.data.flags.writeable
+    del z
+    assert tensor.data.flags.writeable
+
+
+@given(
+    x=hnp.arrays(
+        shape=hnp.array_shapes(min_dims=0, min_side=0), dtype=hnp.floating_dtypes()
+    ),
+    constant=st.booleans(),
+    data=st.data(),
+)
+def test_basic_backward(x: np.ndarray, constant: bool, data: st.DataObject):
+    """Ensure Tensor.backward() sets the expected gradient for general array-shape/dtype"""
+    grad = data.draw(hnp.arrays(shape=x.shape, dtype=x.dtype) | st.none(), label="grad")
+    tensor = Tensor(x, constant=constant)
+    tensor.backward(grad)
+    if tensor.constant:
+        assert tensor.grad is None
+    else:
+        assert_array_equal(
+            tensor.grad, np.ones_like(tensor.data) if grad is None else grad
+        )
+
+    if tensor.grad is not None:
+        assert tensor.dtype == tensor.grad.dtype
+
+
 @given(
     data=hnp.arrays(shape=hnp.array_shapes(), dtype=hnp.floating_dtypes()),
     constant=st.booleans(),
+    set_constant=st.booleans() | st.none(),
+    invoke_backward=st.booleans(),
 )
-def test_copy(data, constant):
+def test_copy(data, constant, set_constant, invoke_backward):
     x = Tensor(data, constant=constant)
     y = +x
-    y.backward()
-    y_copy = y.copy()
+    if invoke_backward:
+        y.backward()
+    y_copy = y.copy(constant=set_constant)
 
-    assert y.creator is not None
+    if not invoke_backward:
+        assert y.creator is not None
     assert y.dtype == y_copy.dtype
-    assert y_copy.constant is constant
+    assert y_copy.constant is (constant if set_constant is None else set_constant)
     if y.grad is None:
         assert y_copy.grad is None
     else:
         assert_array_equal(y.grad, y_copy.grad)
     assert_array_equal(y.data, y_copy.data)
+
+
+@pytest.mark.parametrize("constant", [True, False])
+def test_cant_set_constant(constant):
+    tensor = Tensor([1.0], constant=constant)
+    with pytest.raises(AttributeError):
+        tensor.constant = constant
 
 
 def test_to_scalar():
@@ -83,11 +165,12 @@ def test_repr(tensor, repr_):
     assert repr(tensor) == repr_
 
 
+@pytest.mark.parametrize("bad_grads", ["bad", 1.0j])
 @given(constant=st.booleans())
-def test_invalid_gradient_raises(constant: bool):
-    x = Tensor(3, constant=constant) * 2
-    with (pytest.raises(InvalidGradient) if not constant else does_not_raise()):
-        x.backward("bad")
+def test_invalid_gradient_raises(constant: bool, bad_grads):
+    x = Tensor(3.0, constant=constant) * 2
+    with (pytest.raises((TypeError, ValueError)) if not constant else does_not_raise()):
+        x.backward(bad_grads)
 
 
 @pytest.mark.parametrize("element", (0, [0, 1, 2]))
@@ -103,17 +186,16 @@ def test_contains(element):
         elements=st.floats(-100, 100),
     ),
     constant=st.booleans(),
-    scalar=st.booleans(),
     creator=st.booleans(),
 )
-def test_properties(a, constant, scalar, creator):
+def test_properties(a, constant, creator):
     array = np.asarray(a)
     if creator:
-        ref = Operation()
-        tensor = Tensor(a, constant=constant, _creator=ref, _scalar_only=scalar)
+        ref = Add()
+        tensor = Tensor(a, constant=constant, _creator=ref)
     else:
         ref = None
-        tensor = Tensor(a, constant=constant, _scalar_only=scalar)
+        tensor = Tensor(a, constant=constant)
 
     assert tensor.ndim == array.ndim
     assert tensor.shape == array.shape
@@ -138,19 +220,39 @@ def test_init_data():
         )
 
 
-@given(x=hnp.arrays(dtype=float, shape=hnp.array_shapes(min_dims=1, max_dims=4)))
-def test_init_data_rand(x):
+@given(
+    arr=hnp.arrays(
+        dtype=hnp.floating_dtypes(), shape=hnp.array_shapes(min_side=1, min_dims=1)
+    ),
+    as_tensor=st.booleans(),
+    constant=st.booleans(),
+)
+def test_tensor_copy_on_init_mirrors_array(
+    arr: np.ndarray, as_tensor: bool, constant: bool
+):
+    x = Tensor(arr, copy=False) if as_tensor else arr
+    tensor = Tensor(x, constant=constant)
+    array = np.array(arr)
+    assert np.shares_memory(tensor, arr) is np.shares_memory(array, arr)
+
+
+@given(
+    x=hnp.arrays(
+        dtype=hnp.floating_dtypes(), shape=hnp.array_shapes(min_side=0, min_dims=0)
+    )
+)
+def test_init_data_rand(x: np.ndarray):
     assert_equal(actual=Tensor(x).data, desired=x)
 
 
 @given(
     x=hnp.arrays(
         dtype=float,
-        shape=hnp.array_shapes(),
+        shape=hnp.array_shapes(min_dims=0, min_side=0),
         elements=st.floats(allow_infinity=False, allow_nan=False),
     )
     | st.floats(allow_infinity=False, allow_nan=False)
-    | st.integers(-100, 100),
+    | st.integers(-100, 100)
 )
 def test_items(x):
     """ verify that tensor.item() mirrors array.item()"""
@@ -163,7 +265,7 @@ def test_items(x):
             tensor.item()
 
 
-op = Operation()
+op = Add()
 dtype_strat = st.sampled_from(
     (
         None,
@@ -186,38 +288,58 @@ dtype_strat_numpy = st.sampled_from(
 @given(
     data=st.data(),
     creator=st.sampled_from((None, op)),
-    constant=st.booleans(),
-    scalar_only=st.booleans(),
     dtype=dtype_strat,
     numpy_dtype=dtype_strat_numpy,
+    ndmin=st.integers(0, 10),
+    copy=st.none() | st.booleans(),
 )
-def test_init_params(data, creator, constant, scalar_only, dtype, numpy_dtype):
+def test_init_params(
+    data,
+    creator,
+    dtype,
+    numpy_dtype,
+    ndmin: int,
+    copy: Optional[bool],
+):
+    """Check for bad combinations of init parameters leading to unexpected behavior"""
     elements = (
         (lambda x, y: st.floats(x, y, width=8 * np.dtype(numpy_dtype).itemsize))
         if np.issubdtype(numpy_dtype, np.floating)
         else st.integers
     )
+    array_strat_args = dict(
+        shape=hnp.array_shapes(max_side=3, max_dims=5),
+        dtype=numpy_dtype,
+        elements=elements(-100, 100),
+    )
     a = data.draw(
-        hnp.arrays(
-            shape=hnp.array_shapes(max_side=3, max_dims=5),
-            dtype=numpy_dtype,
-            elements=elements(-100, 100),
-        ),
+        hnp.arrays(**array_strat_args) | tensors(**array_strat_args),
         label="a",
     )
-    if dtype is not None:
-        a = a.astype(dtype)
+
+    arr = np.array(a, dtype=dtype, ndmin=ndmin)
+
+    constant = data.draw(valid_constant_arg(arr.dtype), label="constant")
 
     tensor = Tensor(
-        a, _creator=creator, constant=constant, _scalar_only=scalar_only, dtype=dtype
+        a,
+        _creator=creator,
+        constant=constant,
+        dtype=dtype,
+        ndmin=ndmin,
+        copy=copy,
     )
+
+    if constant is None:
+        constant = issubclass(tensor.dtype.type, np.integer)
 
     assert tensor.creator is creator
     assert tensor.constant is constant
-    assert tensor.scalar_only is scalar_only
-    assert tensor.dtype is a.dtype
-    assert_equal(tensor.data, a)
+    assert tensor.dtype is arr.dtype
+    assert_equal(tensor.data, arr)
     assert tensor.grad is None
+    assert tensor.base is None
+    assert tensor.ndim >= ndmin
 
 
 @pytest.mark.parametrize(
@@ -342,11 +464,22 @@ def test_math_methods(attr: str, constant: bool):
     assert type(method_out.creator) is type(function_out.creator)
 
 
-# Test https://github.com/rsokl/MyGrad/issues/210
-def test_0d_iter():
-    x = Tensor(3)
-    with pytest.raises(TypeError):
-        sum(x)
+@pytest.mark.parametrize(
+    "attr",
+    (
+        "argmax",
+        "argmin",
+        "any",
+    ),
+)
+def test_numpy_math_methods(attr: str):
+    x = Tensor([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+
+    assert hasattr(x, attr)
+    method_out = getattr(x, attr).__call__()
+    function_out = getattr(np, attr).__call__(x.data)
+    assert_equal(method_out, function_out)
+    assert_equal(method_out, function_out)
 
 
 @pytest.mark.parametrize("op", ("moveaxis", "swapaxes"))
@@ -360,67 +493,17 @@ def test_axis_interchange_methods(op: str, constant: bool):
     assert type(method_out.creator) is type(function_out.creator)
 
 
-@given(
-    x=st.floats(min_value=-1e6, max_value=1e6),
-    y=st.floats(min_value=-1e6, max_value=1e6),
-    z=st.floats(min_value=-1e6, max_value=1e6),
-    clear_graph=st.booleans(),
-)
-def test_null_gradients(x, y, z, clear_graph):
-    x = Tensor(x)
-    y = Tensor(y)
-    z = Tensor(z)
+@given(x=tensors(include_grad=st.booleans()), clear_graph=st.booleans())
+def test_null_gradients(x: Tensor, clear_graph: bool):
+    with pytest.warns(FutureWarning):
+        x.null_gradients(clear_graph=clear_graph)
 
-    f = x * y + z
-    g = x + z * f * f
 
-    # check side effects
-    unused = 2 * g - f
-    w = 1 * f
-    assert unused is not None
-
-    g.backward()
-    assert x.grad is not None
-    assert y.grad is not None
-    assert z.grad is not None
-    assert f.grad is not None
-    assert g.grad is not None
-    assert len(x._ops) > 0
-    assert len(y._ops) > 0
-    assert len(z._ops) > 0
-    assert len(f._ops) > 0
-    assert len(g._ops) > 0
-    assert w.grad is None
-
-    g.null_gradients(clear_graph=clear_graph)
+@given(x=tensors(include_grad=st.booleans()))
+def test_null_grad(x: Tensor):
+    y = x.null_grad()
     assert x.grad is None
-    assert y.grad is None
-    assert z.grad is None
-    assert f.grad is None
-    assert g.grad is None
-
-    if clear_graph:
-        assert len(x._ops) == 0
-        assert len(y._ops) == 0
-        assert len(z._ops) == 0
-        assert len(f._ops) == 0
-        assert len(g._ops) > 0
-        assert x.creator is None
-        assert y.creator is None
-        assert z.creator is None
-        assert f.creator is None
-        assert g.creator is None
-    else:
-        assert len(x._ops) > 0
-        assert len(y._ops) > 0
-        assert len(z._ops) > 0
-        assert len(f._ops) > 0
-        assert len(g._ops) > 0
-        assert x.creator is None
-        assert y.creator is None
-        assert z.creator is None
-        assert f.creator is not None
-        assert g.creator is not None
+    assert y is x
 
 
 @settings(deadline=None)
@@ -430,10 +513,6 @@ def test_null_gradients(x, y, z, clear_graph):
     z=st.floats(min_value=-1e-6, max_value=1e6),
 )
 def test_clear_graph(x, y, z):
-    x_orig = x
-    y_orig = y
-    z_orig = z
-
     x = Tensor(x)
     y = Tensor(y)
     z = Tensor(z)
@@ -446,40 +525,8 @@ def test_clear_graph(x, y, z):
     w = 1 * f
     assert unused is not None
 
-    g.backward()
-    assert_allclose(f.grad, 2 * z.data * f.data)
-    assert_allclose(x.grad, 1 + 2 * z.data * f.data * y.data)
-    assert_allclose(y.grad, 2 * z.data * f.data * x.data)
-    assert_allclose(z.grad, f.data ** 2 + z.data * 2 * f.data)
-    assert w.grad is None
-
-    assert_array_equal(x.data, x_orig, err_msg="x was mutated during the operation")
-    assert_array_equal(y.data, y_orig, err_msg="y was mutated during the operation")
-    assert_array_equal(z.data, z_orig, err_msg="z was mutated during the operation")
-
-    # null-gradients without clearing the graph, confirm that backprop still works
-    g.null_gradients(clear_graph=False)
-    g.backward()
-    assert_allclose(f.grad, 2 * z.data * f.data)
-    assert_allclose(x.grad, 1 + 2 * z.data * f.data * y.data)
-    assert_allclose(y.grad, 2 * z.data * f.data * x.data)
-    assert_allclose(z.grad, f.data ** 2 + z.data * 2 * f.data)
-    assert w.grad is None
-
-    assert_array_equal(x.data, x_orig, err_msg="x was mutated during the operation")
-    assert_array_equal(y.data, y_orig, err_msg="y was mutated during the operation")
-    assert_array_equal(z.data, z_orig, err_msg="z was mutated during the operation")
-
-    g.null_gradients(clear_graph=False)
-    w.backward()
-    assert_allclose(x.grad, y.data)
-    assert_allclose(y.grad, x.data)
-    assert_allclose(z.grad, np.array(1.0))
-
     w.clear_graph()
-    assert_allclose(x.grad, y.data)
-    assert_allclose(y.grad, x.data)
-    assert_allclose(z.grad, np.array(1.0))
+
     assert len(g._ops) > 0
     assert g.creator is not None
     assert len(x._ops) == 0
@@ -493,3 +540,15 @@ def test_clear_graph(x, y, z):
 
     with raises(InvalidBackprop):
         g.backward()
+
+
+# Tensor has its `__eq__` but not its `__hash__` overridden which leads to subtle
+# problems if it ends up being used in a hashable context. See
+# https://hynek.me/articles/hashes-and-equality/
+# for more details. This checks to make sure that anyone who does so will get an
+# error. See also https://github.com/rsokl/MyGrad/pull/276
+def test_no_hash():
+    try:
+        {Tensor(3): "this should not work"}
+    except TypeError as e:
+        assert str(e) == "unhashable type: 'Tensor'"

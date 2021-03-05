@@ -4,16 +4,22 @@ from typing import List, Tuple
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
-from hypothesis import given, note
+import pytest
+from hypothesis import given, infer, note, settings
 from numpy.testing import assert_array_equal
 
+from mygrad import Tensor
+from mygrad.typing import ArrayLike, DTypeLikeReals, Shape
 from tests.custom_strategies import (
     _factors,
     adv_integer_index,
+    arbitrary_indices,
     basic_indices,
     choices,
     integer_index,
+    no_value,
     slice_index,
+    tensors,
     valid_axes,
     valid_shapes,
 )
@@ -21,9 +27,9 @@ from tests.custom_strategies import (
 
 @given(seq=st.lists(elements=st.integers()), replace=st.booleans(), data=st.data())
 def test_choices(seq: List[int], replace: bool, data: st.SearchStrategy):
-    """ Ensures that the `choices` strategy:
-        - draws from the provided sequence
-        - respects input parameters"""
+    """Ensures that the `choices` strategy:
+    - draws from the provided sequence
+    - respects input parameters"""
     upper = len(seq) + 10 if replace and seq else len(seq)
     size = data.draw(st.integers(0, upper), label="size")
     chosen = data.draw(choices(seq, size=size, replace=replace), label="choices")
@@ -176,5 +182,149 @@ def test_factors(size: int):
     data=st.data(),
 )
 def test_valid_shapes(arr: np.ndarray, data: st.DataObject):
-    newshape = data.draw(valid_shapes(arr.size), label="newshape")
+    newshape = data.draw(valid_shapes(arr.size, min_len=0), label="newshape")
     arr.reshape(newshape)
+
+
+@settings(deadline=None)
+@given(
+    a=hnp.arrays(
+        shape=hnp.array_shapes(min_side=0, max_side=4, min_dims=0, max_dims=5),
+        dtype=float,
+    ),
+    data=st.data(),
+)
+def test_arbitrary_indices_strategy(a, data):
+    shape = a.shape
+    index = data.draw(arbitrary_indices(shape))
+
+    # if index does not comply with numpy indexing
+    # rules, numpy will raise an error
+    a[index]
+
+
+@pytest.mark.parametrize("constant", [st.booleans(), None])
+def test_tensors_handles_constant_strat(constant):
+    constants = []
+    kwargs = dict(dtype=np.float32, shape=(2, 3))
+    if constant is not None:
+        kwargs["constant"] = constant
+
+    @given(x=tensors(**kwargs))
+    def f(x):
+        constants.append(x.constant)
+
+    f()
+
+    assert len(set(constants)) > 1
+
+
+@pytest.mark.parametrize("constant", [True, False])
+@given(data=st.data())
+def test_tensors_static_constant(constant: bool, data: st.DataObject):
+    tensor = data.draw(tensors(np.float32, (2, 3), constant=constant), label="tensor")
+    assert isinstance(tensor, Tensor)
+    assert tensor.constant is constant
+    assert tensor.grad is None
+
+
+@given(data=st.data(), shape=hnp.array_shapes())
+def test_tensors_shape(shape, data: st.DataObject):
+    tensor = data.draw(tensors(np.int8, shape=shape), label="tensor")
+    assert isinstance(tensor, Tensor)
+    assert tensor.shape == shape
+    assert tensor.grad is None
+
+
+@given(data=st.data(), dtype=hnp.floating_dtypes() | hnp.integer_dtypes())
+def test_tensors_dtype(dtype, data: st.DataObject):
+    tensor = data.draw(tensors(dtype=dtype, shape=(2, 3)), label="tensor")
+    assert isinstance(tensor, Tensor)
+    assert tensor.dtype == dtype
+    assert tensor.grad is None
+
+
+@given(
+    data=st.data(),
+    dtype=hnp.floating_dtypes(),
+    shape=hnp.array_shapes(min_dims=0, min_side=0),
+    grad_dtype=hnp.floating_dtypes() | st.none(),
+    grad_elements_bounds=st.just((100, 200)) | st.none(),
+)
+def test_tensors_with_grad(
+    dtype, data: st.DataObject, shape, grad_dtype, grad_elements_bounds
+):
+    tensor = data.draw(
+        tensors(
+            dtype=dtype,
+            shape=shape,
+            include_grad=True,
+            grad_dtype=grad_dtype,
+            grad_elements_bounds=grad_elements_bounds,
+        ),
+        label="tensor",
+    )
+    assert isinstance(tensor, Tensor)
+    assert tensor.dtype == dtype
+    assert isinstance(tensor.grad, np.ndarray)
+    assert tensor.grad.shape == tensor.shape
+    assert tensor.grad.dtype == (grad_dtype if grad_dtype is not None else tensor.dtype)
+    if grad_elements_bounds is not None:
+        assert np.all((100 <= tensor.grad) & (tensor.grad <= 200))
+    else:
+        assert np.all((-10 <= tensor.grad) & (tensor.grad <= 10))
+
+
+@given(t=tensors())
+def test_tensor_owns_memory(t: Tensor):
+    assert t.base is None
+    assert t.data.base is None
+
+
+@given(tensor=tensors())
+def test_tensor_read_only_default(tensor: Tensor):
+    assert tensor.data.flags.writeable is True
+
+
+@pytest.mark.parametrize("read_only", [True, False])
+@given(data=st.data())
+def test_tensor_read_only(data: st.DataObject, read_only: bool):
+    tensor = data.draw(tensors(read_only=read_only))
+    assert tensor.data.flags.writeable is not read_only
+
+
+@given(
+    shape=hnp.array_shapes(min_dims=0, min_side=0),
+    ndmin=st.integers(0, 10),
+    data=st.data(),
+)
+def test_tensor_ndmin(shape: Tuple[int, ...], ndmin: int, data: st.DataObject):
+    tensor = data.draw(
+        tensors(shape=shape, ndmin=ndmin, include_grad=True, read_only=st.booleans()),
+        label="tensor",
+    )
+    assert tensor.ndim >= ndmin
+    assert tensor.shape == tensor.grad.shape
+
+
+@given(dtype=infer)
+def test_can_infer_DTypeLikeReals(dtype: DTypeLikeReals):
+    issubclass(np.dtype(dtype).type, (np.floating, np.integer))
+
+
+@given(x=infer)
+def test_can_infer_ArrayLike(x: ArrayLike):
+    np.array(x)  # raise if not array-like
+    print(repr(x))
+
+
+@given(shape=infer)
+def test_can_infer_Shape(shape: Shape):
+    np.ones(shape)  # raise if not valid shape
+
+
+@given(no_value())
+def test_no_value(x):
+    from mygrad.operation_base import _NoValue
+    assert x is _NoValue
+

@@ -32,4 +32,4 @@ inf = np.inf
 infty = np.infty
 nan = np.nan
 newaxis = np.newaxis
-pi = np.pi
+pi = float(np.pi)

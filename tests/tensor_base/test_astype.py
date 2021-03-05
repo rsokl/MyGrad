@@ -1,5 +1,3 @@
-from typing import Optional
-
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
@@ -8,6 +6,7 @@ from hypothesis import given, settings
 from numpy.testing import assert_array_equal
 
 from mygrad import Tensor
+from tests.custom_strategies import tensors, valid_constant_arg
 
 real_types = (
     hnp.integer_dtypes() | hnp.unsigned_integer_dtypes() | hnp.floating_dtypes()
@@ -15,24 +14,24 @@ real_types = (
 
 
 @given(
-    tensor=st.tuples(
-        hnp.arrays(shape=hnp.array_shapes(), dtype=real_types), st.booleans(),
-    ).map(lambda x: Tensor(x[0], constant=x[1])),
+    tensor=tensors(dtype=real_types),
     dest_type=real_types,
-    constant=st.booleans() | st.none(),
+    data=st.data(),
 )
-def test_astype(tensor: Tensor, dest_type: type, constant: Optional[bool]):
-    tensor = tensor * 1  # give tensor a creator
+def test_astype(tensor: Tensor, dest_type: np.dtype, data: st.DataObject):
+    tensor = +tensor  # give tensor a creator
+    constant = data.draw(valid_constant_arg(dest_type), label="constant")
     new_tensor = tensor.astype(dest_type, constant=constant)
 
-    assert new_tensor.constant is (tensor.constant if constant is None else constant)
+    expected_tensor = Tensor(tensor, dtype=dest_type, constant=constant)
+
+    assert new_tensor.constant is expected_tensor.constant
     assert tensor.creator is not None
     assert new_tensor.creator is None
-    assert new_tensor.dtype is dest_type
+    assert new_tensor.dtype == dest_type
     assert new_tensor.shape == tensor.shape
-
-    if new_tensor.dtype is tensor.dtype:
-        assert_array_equal(new_tensor.data, tensor.data)
+    assert new_tensor.data is not tensor.data
+    assert_array_equal(new_tensor.data, expected_tensor.data)
 
 
 @settings(max_examples=30)

@@ -1,10 +1,10 @@
 import numpy as np
 
-from mygrad.tensor_base import Tensor
+from mygrad.tensor_base import asarray
 
 
 def check_loss_inputs(x, y_true):
-    """ Ensures that the inputs to scores-truth style loss functions
+    """Ensures that the inputs to scores-truth style loss functions
     are of the correct shapes and types.
 
     Parameters
@@ -28,10 +28,7 @@ def check_loss_inputs(x, y_true):
             "`x` must be a 2-dimensional array-like object, got {}-dim".format(x.ndim)
         )
 
-    if isinstance(y_true, Tensor):
-        y_true = y_true.data
-
-    y_true = np.asarray(y_true)
+    y_true = asarray(y_true)
     if not np.issubdtype(y_true.dtype, np.integer):
         raise TypeError(
             "`y_true` must be an integer-type "

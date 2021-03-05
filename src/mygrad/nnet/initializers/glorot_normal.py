@@ -1,9 +1,10 @@
 import numpy as np
+
 from mygrad import Tensor
 
 
-def glorot_normal(*shape, gain=1, dtype=np.float32, constant=False):
-    """ Initialize a `Tensor` according to the normal initialization procedure
+def glorot_normal(*shape, gain=1, dtype=np.float32, constant=None):
+    r"""Initialize a `Tensor` according to the normal initialization procedure
     described by Glorot and Bengio.
 
     Parameters
@@ -26,8 +27,8 @@ def glorot_normal(*shape, gain=1, dtype=np.float32, constant=False):
     mygrad.Tensor, shape=`shape`
         A Tensor, with values initialized according to the glorot normal initialization.
 
-    Extended Description
-    --------------------
+    Notes
+    -----
     Glorot and Bengio put forward this initialization in the paper
         "Understanding the Difficulty of Training Deep Feedforward Neural Networks"
     http://proceedings.mlr.press/v9/glorot10a/glorot10a.pdf
@@ -43,7 +44,9 @@ def glorot_normal(*shape, gain=1, dtype=np.float32, constant=False):
     if len(shape) == 1:
         shape = shape[0]
     if len(shape) < 2:
-        raise ValueError("Glorot Normal initialization requires at least two dimensions")
+        raise ValueError(
+            "Glorot Normal initialization requires at least two dimensions"
+        )
 
     if isinstance(gain, Tensor):
         gain = gain.item()
@@ -51,4 +54,9 @@ def glorot_normal(*shape, gain=1, dtype=np.float32, constant=False):
     fan_in = shape[1] * (shape[-1] if len(shape) > 2 else 1)
     fan_out = shape[0] * (shape[-1] if len(shape) > 2 else 1)
     std = gain * np.sqrt(2 / (fan_in + fan_out))
-    return Tensor(np.random.normal(0, std, shape), dtype=dtype, constant=constant)
+    return Tensor(
+        np.random.normal(0, std, shape),
+        dtype=dtype,
+        constant=constant,
+        copy=False,
+    )

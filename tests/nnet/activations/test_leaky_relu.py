@@ -1,9 +1,9 @@
+import hypothesis.strategies as st
 import numpy as np
 import pytest
 
-import hypothesis.strategies as st
+from mygrad import Tensor, asarray
 from mygrad.nnet.activations import leaky_relu
-from mygrad import Tensor
 from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
@@ -14,27 +14,25 @@ def test_input_validation(slope):
 
 
 def _np_leaky_relu(x, slope):
-    if isinstance(slope, Tensor):
-        slope = slope.data
-    return np.maximum(x, 0) + slope * np.minimum(x, 0)
+    return np.maximum(x, 0) + asarray(slope) * np.minimum(x, 0)
 
 
 _reasonable_floats = st.floats(-100, 100)
 
 
 def _finite_params(arrs, slope):
-    if isinstance(arrs, Tensor):
-        arrs = arrs.data
-    if isinstance(slope, Tensor):
-        slope = slope.data
-    return np.all(np.isfinite(slope * arrs))
+    return np.all(np.isfinite(asarray(slope) * asarray(arrs)))
 
 
 @fwdprop_test_factory(
     mygrad_func=leaky_relu,
     true_func=_np_leaky_relu,
     num_arrays=1,
-    kwargs={"slope": lambda x: _reasonable_floats | _reasonable_floats.map(np.array) | _reasonable_floats.map(Tensor)},
+    kwargs={
+        "slope": lambda x: _reasonable_floats
+        | _reasonable_floats.map(np.array)
+        | _reasonable_floats.map(Tensor)
+    },
     assumptions=_finite_params,
 )
 def test_leaky_relu_fwd():
@@ -50,8 +48,13 @@ def _away_from_zero(*arrs, **kwargs):
     mygrad_func=leaky_relu,
     true_func=_np_leaky_relu,
     num_arrays=1,
-    assumptions=lambda arrs, slope: _away_from_zero(arrs) and _finite_params(arrs, slope),
-    kwargs={"slope": lambda x: _reasonable_floats | _reasonable_floats.map(np.array) | _reasonable_floats.map(Tensor)},
+    assumptions=lambda arrs, slope: _away_from_zero(arrs)
+    and _finite_params(arrs, slope),
+    kwargs={
+        "slope": lambda x: _reasonable_floats
+        | _reasonable_floats.map(np.array)
+        | _reasonable_floats.map(Tensor)
+    },
 )
 def test_leaky_relu_bkwd():
     pass

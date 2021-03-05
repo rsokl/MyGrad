@@ -15,10 +15,11 @@ from mygrad import (
     ravel,
     repeat,
     roll,
-    squeeze,
     swapaxes,
     transpose,
 )
+from tests.utils.functools import add_constant_passthrough
+from tests.utils.wrappers import adds_constant_arg
 
 from .custom_strategies import valid_axes
 from .utils.numerical_gradient import numerical_gradient_full
@@ -30,6 +31,9 @@ def test_input_validation():
 
     with raises(TypeError):
         transpose(x, (0,), 1)
+
+    with raises(TypeError):
+        x.transpose((0,), 1)
 
 
 @settings(deadline=None)
@@ -73,7 +77,7 @@ def test_transpose(x, data):
 
 
 def test_transpose_property():
-    dat = np.arange(6).reshape(2, 3)
+    dat = np.arange(6.0).reshape(2, 3)
     x = Tensor(dat)
     f = x.T
     f.backward(dat.T)
@@ -83,7 +87,7 @@ def test_transpose_property():
 
 
 def test_transpose_method():
-    dat = np.arange(24).reshape(2, 3, 4)
+    dat = np.arange(24.0).reshape(2, 3, 4)
 
     for axes in permutations(range(3)):
         # passing tuple of integers
@@ -139,10 +143,10 @@ def test_squeeze(x, data):
         numpy_out = np.squeeze(x, axes)
     except ValueError:
         with raises(ValueError):
-            squeeze(x_arr, axes, constant=False)
+            np.squeeze(x_arr, axes)
         return
 
-    o = squeeze(x_arr, axes, constant=False)
+    o = np.squeeze(x_arr, axes)  # exercises __array_function__
     o_method = x_arr2.squeeze(axes)
     assert_allclose(o.data, numpy_out)
     assert_allclose(o_method.data, numpy_out)
@@ -172,6 +176,62 @@ def _valid_moveaxis_args(*arrs, **kwargs):
     return len(kwargs["source"]) == len(kwargs["destination"])
 
 
+def _transpose(x, axes, constant=False):
+    return transpose(x, axes, constant=constant)
+
+
+def _np_transpose(x, axes):
+    return np.transpose(x, axes)
+
+
+@adds_constant_arg
+def _transpose_property(x):
+    if not isinstance(x, Tensor):
+        x = np.asarray(x)
+    return x.T
+
+
+@fwdprop_test_factory(
+    mygrad_func=_transpose_property,
+    true_func=_transpose_property,
+    num_arrays=1,
+    permit_0d_array_as_float=False,
+)
+def test_transpose_property_fwd():
+    pass
+
+
+@backprop_test_factory(
+    mygrad_func=_transpose_property,
+    true_func=_transpose_property,
+    num_arrays=1,
+    vary_each_element=True,
+)
+def test_transpose_property_bkwd():
+    pass
+
+
+@fwdprop_test_factory(
+    mygrad_func=_transpose,
+    true_func=_np_transpose,
+    num_arrays=1,
+    kwargs=dict(axes=lambda x: valid_axes(x.ndim, min_dim=x.ndim, max_dim=x.ndim)),
+)
+def test_transpose_fwd():
+    pass
+
+
+@backprop_test_factory(
+    mygrad_func=add_constant_passthrough(_np_transpose),  # exercises __array_function__
+    true_func=_np_transpose,
+    num_arrays=1,
+    kwargs=dict(axes=lambda x: valid_axes(x.ndim, min_dim=x.ndim, max_dim=x.ndim)),
+    vary_each_element=True,
+)
+def test_transpose_bkwd():
+    pass
+
+
 @fwdprop_test_factory(
     mygrad_func=expand_dims,
     true_func=np.expand_dims,
@@ -183,7 +243,9 @@ def test_expand_dims_fwd():
 
 
 @backprop_test_factory(
-    mygrad_func=expand_dims,
+    mygrad_func=add_constant_passthrough(
+        np.expand_dims
+    ),  # exercises __array_function__
     true_func=np.expand_dims,
     num_arrays=1,
     kwargs=dict(axis=_expand_dims_axis),
@@ -210,7 +272,7 @@ def test_moveaxis_fwd():
 
 @settings(deadline=None)
 @backprop_test_factory(
-    mygrad_func=moveaxis,
+    mygrad_func=add_constant_passthrough(np.moveaxis),  # exercises __array_function__
     true_func=np.moveaxis,
     num_arrays=1,
     kwargs=dict(
@@ -237,7 +299,7 @@ def test_swapaxes_fwd():
 
 
 @backprop_test_factory(
-    mygrad_func=swapaxes,
+    mygrad_func=add_constant_passthrough(np.swapaxes),  # exercises __array_function__
     true_func=np.swapaxes,
     num_arrays=1,
     kwargs=dict(axis1=_swap_axes_axis, axis2=_swap_axes_axis),
@@ -274,7 +336,10 @@ def test_ravel_fwd():
 
 
 @backprop_test_factory(
-    mygrad_func=ravel, true_func=np.ravel, num_arrays=1, vary_each_element=True
+    mygrad_func=add_constant_passthrough(np.ravel),  # exercises __array_function__
+    true_func=np.ravel,
+    num_arrays=1,
+    vary_each_element=True,
 )
 def test_ravel_bkwd():
     pass
@@ -294,7 +359,9 @@ def test_broadcast_to_fwd():
 
 
 @backprop_test_factory(
-    mygrad_func=broadcast_to,
+    mygrad_func=add_constant_passthrough(
+        np.broadcast_to
+    ),  # exercise __array_function__
     true_func=np.broadcast_to,
     num_arrays=1,
     vary_each_element=True,
@@ -334,7 +401,7 @@ def test_roll_fwd():
 
 
 @backprop_test_factory(
-    mygrad_func=roll,
+    mygrad_func=add_constant_passthrough(np.roll),  # exercises __array_function__
     true_func=np.roll,
     num_arrays=1,
     kwargs=gen_roll_args,
@@ -348,7 +415,10 @@ def gen_int_repeat_args(arr: Tensor) -> st.SearchStrategy[dict]:
     valid_axis = st.none()
     valid_axis |= st.integers(-arr.ndim, arr.ndim - 1) if arr.ndim else st.just(0)
     return st.fixed_dictionaries(
-        dict(repeats=st.integers(min_value=0, max_value=5), axis=valid_axis,)
+        dict(
+            repeats=st.integers(min_value=0, max_value=5),
+            axis=valid_axis,
+        )
     )
 
 
@@ -363,11 +433,17 @@ def gen_tuple_repeat_args(draw: st.DataObject.draw, arr: Tensor):
         arr.shape[valid_axis] if valid_axis is not None and arr.ndim else arr.size
     )
     repeats = draw(st.tuples(*[st.integers(0, 5)] * num_repeats))
-    return dict(repeats=repeats, axis=valid_axis,)
+    return dict(
+        repeats=repeats,
+        axis=valid_axis,
+    )
 
 
 @fwdprop_test_factory(
-    mygrad_func=repeat, true_func=np.repeat, num_arrays=1, kwargs=gen_int_repeat_args,
+    mygrad_func=repeat,
+    true_func=np.repeat,
+    num_arrays=1,
+    kwargs=gen_int_repeat_args,
 )
 def test_repeat_int_repeats_only_fwd():
     pass
@@ -385,14 +461,17 @@ def test_repeat_int_repeats_only_bkwd():
 
 
 @fwdprop_test_factory(
-    mygrad_func=repeat, true_func=np.repeat, num_arrays=1, kwargs=gen_tuple_repeat_args,
+    mygrad_func=repeat,
+    true_func=np.repeat,
+    num_arrays=1,
+    kwargs=gen_tuple_repeat_args,
 )
 def test_repeat_tuple_repeats_only_fwd():
     pass
 
 
 @backprop_test_factory(
-    mygrad_func=repeat,
+    mygrad_func=add_constant_passthrough(np.repeat),  # exercises __array_function__
     true_func=np.repeat,
     num_arrays=1,
     kwargs=gen_tuple_repeat_args,

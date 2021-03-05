@@ -1,7 +1,10 @@
+from typing import Optional
+
 import numpy as np
 
 from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor
+from mygrad.typing import ArrayLike
 
 
 class ReLu(Operation):
@@ -14,7 +17,7 @@ class ReLu(Operation):
         return grad * self.back
 
 
-def relu(x, constant=False):
+def relu(x: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
     """
     Applies the recitfied linear unit activation function::
 
@@ -23,10 +26,10 @@ def relu(x, constant=False):
 
     Parameters
     ----------
-    x : array_like
+    x : ArrayLike
         relu is applied element-wise on ``x``.
 
-    constant : bool, optional(default=False)
+    constant : Optional[bool]
         If ``True``, the returned tensor is a constant (it
         does not back-propagate a gradient)
 
@@ -46,5 +49,20 @@ def relu(x, constant=False):
     >>> relu(x).backward()
     >>> x.grad  # d(relu(x))/dx
     array([0., 0., 0., 1., 1.])
+
+    .. plot::
+
+       >>> import mygrad as mg
+       >>> from mygrad.nnet.activations import relu
+       >>> import matplotlib.pyplot as plt
+       >>> x = mg.linspace(-2, 2, 100)
+       >>> y = relu(x)
+       >>> plt.title("relu(x)")
+       >>> y.backward()
+       >>> plt.plot(x, x.grad, label="df/dx")
+       >>> plt.plot(x, y, label="f(x)")
+       >>> plt.legend()
+       >>> plt.grid()
+       >>> plt.show()
     """
     return Tensor._op(ReLu, x, constant=constant)

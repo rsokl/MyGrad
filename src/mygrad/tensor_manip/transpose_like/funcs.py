@@ -1,43 +1,57 @@
-from mygrad.tensor_base import Tensor
+from typing import Optional, Tuple, Union
+
+from mygrad.tensor_base import Tensor, implements_numpy_override
+from mygrad.typing import ArrayLike
 
 from .ops import MoveAxis, Roll, SwapAxes, Transpose
 
 __all__ = ["transpose", "moveaxis", "swapaxes", "roll"]
 
 
-def transpose(a, *axes, constant=False):
-    """ Permute the dimensions of a tensor.
+@implements_numpy_override
+def transpose(a: ArrayLike, *axes: int, constant: Optional[bool] = None) -> Tensor:
+    """Permute the dimensions of a tensor.
 
-        Parameters
-        ----------
-        a : array_like
-            The tensor to be transposed
+    Parameters
+    ----------
+    a : ArrayLike
+        The tensor to be transposed
 
-        axes : Optional[Tuple[int]]
-            By default, reverse the dimensions, otherwise permute the axes
-            according to the values given.
+    axes : int
+        By default, reverse the dimensions, otherwise permute the axes
+        according to the values given.
 
-        Returns
-        -------
-        mygrad.Tensor
-            `a` with its axes permuted.  A new tensor is returned.
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. ``constant.grad`` will always return
+        ``None``).
 
-        Examples
-        --------
-        >>> import mygrad as mg
-        >>> a = mg.Tensor([[1, 2], [3, 4]])
-        >>> a
-        Tensor([[1, 2],
-                [3, 4]])
-        >>> a.transpose()
-        Tensor([[1, 3],
-                [2, 4]])
-        >>> a.transpose((1, 0))
-        Tensor([[1, 3],
-                [2, 4]])
-        >>> a.transpose(1, 0)
-        Tensor([[1, 3],
-                [2, 4]]) """
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
+
+    Returns
+    -------
+    mygrad.Tensor
+        `a` with its axes permuted.  A new tensor is returned.
+
+    Examples
+    --------
+    >>> import mygrad as mg
+    >>> a = mg.tensor([[1, 2], [3, 4]])
+    >>> a
+    Tensor([[1, 2],
+            [3, 4]])
+    >>> a.transpose()
+    Tensor([[1, 3],
+            [2, 4]])
+    >>> a.transpose((1, 0))
+    Tensor([[1, 3],
+            [2, 4]])
+    >>> a.transpose(1, 0)
+    Tensor([[1, 3],
+            [2, 4]])"""
     if not axes:
         axes = None
     elif hasattr(axes[0], "__iter__") or axes[0] is None:
@@ -49,91 +63,119 @@ def transpose(a, *axes, constant=False):
     return Tensor._op(Transpose, a, op_args=(axes,), constant=constant)
 
 
-def moveaxis(a, source, destination, constant=False):
-    """ Move axes of a tensor to new positions. Other axes remain in their
-        original order.
+@implements_numpy_override
+def moveaxis(
+    a: ArrayLike,
+    source: Union[int, Tuple[int, ...]],
+    destination: Union[int, Tuple[int, ...]],
+    *,
+    constant: Optional[bool] = None,
+) -> Tensor:
+    """Move axes of a tensor to new positions. Other axes remain in their
+    original order.
 
 
-        Parameters
-        ----------
-        a : array_like
-            The array whose axes should be reordered.
+    Parameters
+    ----------
+    a : ArrayLike
+        The array whose axes should be reordered.
 
-        source : Union[int, Sequence[int]]
-            Original positions of the axes to move. These must be unique.
+    source : Union[int, Sequence[int]]
+        Original positions of the axes to move. These must be unique.
 
-        destination : Union[int, Sequence[int]]
-            Destination positions for each of the original axes. These must also be
-            unique.
+    destination : Union[int, Sequence[int]]
+        Destination positions for each of the original axes. These must also be
+        unique.
 
-        constant : bool, optional(default=False)
-            If ``True``, the returned tensor is a constant (it
-            does not back-propagate a gradient)
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. ``constant.grad`` will always return
+        ``None``).
 
-        Returns
-        -------
-        result : mygrad.Tensor
-            Array with moved axes. This array is a view of the input array..
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
 
-        Examples
-        --------
-        >>> from mygrad import Tensor, moveaxis
-        >>> x = Tensor(np.zeros((3, 4, 5)))
-        >>> moveaxis(x, 0, -1).shape
-        (4, 5, 3)
-        >>> moveaxis(x, -1, 0).shape
-        (5, 3, 4)
-        >>> moveaxis(x, [0, 1], [-1, -2]).shape
-        (5, 4, 3) """
+        Integer-type tensors must be constant.
+    Returns
+    -------
+    result : mygrad.Tensor
+        Array with moved axes. This array is a view of the input array..
+
+    Examples
+    --------
+    >>> from mygrad import zeros, moveaxis
+    >>> x = zeros((3, 4, 5))
+    >>> moveaxis(x, 0, -1).shape
+    (4, 5, 3)
+    >>> moveaxis(x, -1, 0).shape
+    (5, 3, 4)
+    >>> moveaxis(x, [0, 1], [-1, -2]).shape
+    (5, 4, 3)"""
     return Tensor._op(MoveAxis, a, op_args=(source, destination), constant=constant)
 
 
-def swapaxes(a, axis1, axis2, constant=False):
-    """ Interchange two axes of a tensor.
+@implements_numpy_override
+def swapaxes(
+    a: ArrayLike, axis1: int, axis2: int, *, constant: Optional[bool] = None
+) -> Tensor:
+    """Interchange two axes of a tensor.
 
-        Parameters
-        ----------
-        a : array_like
-            Input array.
+    Parameters
+    ----------
+    a : ArrayLike
+        Input array.
 
-        axis1 : int
-            First axis.
+    axis1 : int
+        First axis.
 
-        axis2 : int
-            Second axis.
+    axis2 : int
+        Second axis.
 
-        constant : bool, optional(default=False)
-            If ``True``, the returned tensor is a constant (it
-            does not back-propagate a gradient)
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. ``constant.grad`` will always return
+        ``None``).
 
-        Returns
-        -------
-        mygrad.Tensor
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
 
-        Examples
-        --------
-        >>> from mygrad import Tensor, swapaxes
-        >>> x = Tensor([[1, 2, 3]])
-        >>> swapaxes(x, 0, 1)
-        Tensor([[1],
-               [2],
-               [3]])
-        >>> x = Tensor([[[0, 1], [2, 3]], [[4, 5], [6, 7]]])
-        >>> x
-        Tensor([[[0, 1],
-                [2, 3]],
-               [[4, 5],
-                [6, 7]]])
-        >>> swapaxes(x, 0, 2)
-        Tensor([[[0, 4],
-                [2, 6]],
-               [[1, 5],
-                [3, 7]]])
+        Integer-type tensors must be constant.
+
+    Returns
+    -------
+    mygrad.Tensor
+
+    Examples
+    --------
+    >>> from mygrad import Tensor, swapaxes
+    >>> x = Tensor([[1, 2, 3]])
+    >>> swapaxes(x, 0, 1)
+    Tensor([[1],
+           [2],
+           [3]])
+    >>> x = Tensor([[[0, 1], [2, 3]], [[4, 5], [6, 7]]])
+    >>> x
+    Tensor([[[0, 1],
+            [2, 3]],
+           [[4, 5],
+            [6, 7]]])
+    >>> swapaxes(x, 0, 2)
+    Tensor([[[0, 4],
+            [2, 6]],
+           [[1, 5],
+            [3, 7]]])
     """
     return Tensor._op(SwapAxes, a, op_args=(axis1, axis2), constant=constant)
 
 
-def roll(a, shift, axis=None, constant=False):
+@implements_numpy_override
+def roll(
+    a: ArrayLike,
+    shift: Union[int, Tuple[int, ...]],
+    axis=None,
+    *,
+    constant: Optional[bool] = None,
+) -> Tensor:
     """
     Roll tensor elements along a given axis.
 
@@ -143,7 +185,7 @@ def roll(a, shift, axis=None, constant=False):
 
     Parameters
     ----------
-    a : array_like
+    a : ArrayLike
         Input tensor.
 
     shift : Union[int, Tuple[int, ...]]
@@ -158,11 +200,20 @@ def roll(a, shift, axis=None, constant=False):
         array is flattened before shifting, after which the original
         shape is restored.
 
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. ``constant.grad`` will always return
+        ``None``).
+
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
+
     Returns
     -------
     res : Tensor
         Output array, with the same shape as `a`.
-
 
     Examples
     --------

@@ -1,8 +1,12 @@
 from functools import reduce
+from typing import TYPE_CHECKING
 
 import numpy as np
 
-from mygrad.operation_base import BroadcastableOp, Operation
+from mygrad.operation_base import BinaryUfunc, Operation, UnaryUfunc
+
+if TYPE_CHECKING:  # pragma: no cover
+    from mygrad import Tensor
 
 __all__ = [
     "Add",
@@ -18,43 +22,18 @@ __all__ = [
     "MultiplySequence",
 ]
 
+# Binary Ops
 
-class Add(BroadcastableOp):
-    def __call__(self, a, b):
-        """ Performs 'add' forward-pass: f(a,b) -> a + b
 
-            Parameters
-            ----------
-            a : mygrad.Tensor
-            b : mygrad.Tensor
-
-            Returns
-            -------
-            out : numpy.ndarray """
-
-        self.variables = (a, b)
-        out = a.data + b.data
-        return out
+class Add(BinaryUfunc):
+    numpy_ufunc = np.add
 
     def backward_var(self, grad, index, **kwargs):
         return grad
 
 
-class Subtract(BroadcastableOp):
-    def __call__(self, a, b):
-        """ f(a,b) -> a - b
-
-            Parameters
-            ----------
-            a : mygrad.Tensor
-            b : mygrad.Tensor
-
-            Returns
-            -------
-            out : numpy.ndarray """
-        self.variables = (a, b)
-        out = a.data - b.data
-        return out
+class Subtract(BinaryUfunc):
+    numpy_ufunc = np.subtract
 
     def backward_var(self, grad, index, **kwargs):
         if index == 0:
@@ -63,15 +42,8 @@ class Subtract(BroadcastableOp):
             return -grad
 
 
-class Multiply(BroadcastableOp):
-    def __call__(self, a, b):
-        """ Parameters
-            ----------
-            a : mygrad.Tensor
-            b : mygrad.Tensor"""
-        self.variables = (a, b)
-        out = a.data * b.data
-        return out
+class Multiply(BinaryUfunc):
+    numpy_ufunc = np.multiply
 
     def backward_var(self, grad, index, **kwargs):
         a, b = self.variables
@@ -81,12 +53,8 @@ class Multiply(BroadcastableOp):
             return grad * a.data
 
 
-class Divide(BroadcastableOp):
-    def __call__(self, a, b):
-        """ f(a, b) -> a / b"""
-        self.variables = (a, b)
-        out = a.data / b.data
-        return out
+class Divide(BinaryUfunc):
+    numpy_ufunc = np.divide
 
     def backward_var(self, grad, index, **kwargs):
         a, b = self.variables
@@ -96,96 +64,56 @@ class Divide(BroadcastableOp):
             return -grad * a.data / (b.data ** 2)
 
 
-class Reciprocal(BroadcastableOp):
-    def __call__(self, a):
-        """ f(a) -> 1 / a"""
-        self.variables = (a,)
-        return np.reciprocal(a.data)
+class Power(BinaryUfunc):
+    numpy_ufunc = np.power
 
     def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
-        return -grad * np.reciprocal(a.data ** 2)
+        x, y = (i.data for i in self.variables)
 
-
-class Power(BroadcastableOp):
-    def __call__(self, a, b):
-        """ f(a, b) -> a ** b
-
-            Parameters
-            ----------
-            a: mygrad.Tensor
-            b: mygrad.Tensor"""
-        self.variables = (a, b)
-        out = a.data ** b.data
-        return out
-
-    def backward_var(self, grad, index, **kwargs):
-        a, b = self.variables
-        x, y = a.data, b.data
         if index == 0:
             return grad * y * (x ** np.where(y, (y - 1), 1))
         else:
             return grad * (x ** y) * np.log(np.where(x, x, 1))
 
 
-class Square(Operation):
-    def __call__(self, a):
-        """ f(a) -> a ** 2
+# Unary Ops
 
-            Parameters
-            ----------
-            a : mygrad.Tensor"""
-        self.variables = (a,)
-        return np.square(a.data)
+
+class Reciprocal(UnaryUfunc):
+    numpy_ufunc = np.reciprocal
 
     def backward_var(self, grad, index, **kwargs):
-        return grad * 2 * self.variables[index].data
+        (a,) = self.variables
+        return -grad * np.reciprocal(a.data ** 2)
 
 
-class Positive(Operation):
-    """ f(a) = +a """
-
-    def __call__(self, a, where=True):
-        """
-        Parameters
-        ----------
-        a: mygrad.Tensor
-
-        where : array_like, optional
-            Values of True indicate to calculate the ufunc at that position,
-            values of False indicate to leave the value in the output alone."""
-        self.variables = (a,)
-        self.conf = dict(where=where)
-        return np.positive(a.data, where=where)
+class Square(UnaryUfunc):
+    numpy_ufunc = np.square
 
     def backward_var(self, grad, index, **kwargs):
-        return np.positive(grad, **self.conf)
+        grad = 2 * grad
+        grad *= self.variables[index].data
+        return grad
 
 
-class Negative(Operation):
-    """ f(a) = -a """
-
-    def __call__(self, a, where=True):
-        """
-        Parameters
-        ----------
-        a : mygrad.Tensor
-
-        where : array_like, optional
-            Values of True indicate to calculate the ufunc at that position,
-            values of False indicate to leave the value in the output alone."""
-        self.variables = (a,)
-        self.conf = dict(where=where)
-        return np.negative(a.data, where=where)
+class Positive(UnaryUfunc):
+    numpy_ufunc = np.positive
 
     def backward_var(self, grad, index, **kwargs):
-        return np.negative(grad, **self.conf)
+        return grad
 
 
-class AddSequence(BroadcastableOp):
+class Negative(UnaryUfunc):
+    numpy_ufunc = np.negative
+
+    def backward_var(self, grad, index, **kwargs):
+        return np.negative(grad)
+
+
+class AddSequence(Operation):
     """Performs f(a, b, ..., z) = a + b + ... + z"""
 
-    def __call__(self, *input_vars):
+    def __call__(self, *input_vars: "Tensor") -> np.ndarray:
         assert len(input_vars) > 1, "`add_sequence` requires at least two operands"
         self.variables = input_vars
         out = sum(var.data for var in input_vars)
@@ -195,10 +123,10 @@ class AddSequence(BroadcastableOp):
         return grad
 
 
-class MultiplySequence(BroadcastableOp):
+class MultiplySequence(Operation):
     """ Performs f(a, b, ..., z) = a * b * ... * z"""
 
-    def __call__(self, *input_vars):
+    def __call__(self, *input_vars: "Tensor") -> np.ndarray:
         self.variables = input_vars
         assert 2 <= len(self.variables)
 
@@ -207,8 +135,8 @@ class MultiplySequence(BroadcastableOp):
         return out
 
     def backward(self, grad, *, graph, **kwargs):
-        """ Back-propagates the gradient through all of the operation's inputs. This needs to be updated
-            by an operation if that operation takes more than 2 Tensor arguments."""
+        """Back-propagates the gradient through all of the operation's inputs. This needs to be updated
+        by an operation if that operation takes more than 2 Tensor arguments."""
         if not self._iszero:
             self._product = grad * reduce(
                 lambda x, y: x * y, (var.data for n, var in enumerate(self.variables))
