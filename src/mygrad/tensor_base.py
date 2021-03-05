@@ -590,7 +590,7 @@ class Tensor:
     ) -> Union["Tensor", np.ndarray]:
         """An interface provided by NumPy to override the behavior of its ufuncs [1]_.
 
-        MyGrad implements_numpy_override its own ufuncs for all differentiable NumPy ufuncs.
+        MyGrad implements its own ufuncs for all differentiable NumPy ufuncs.
 
         Non-differentiable numpy ufuncs simply get called on the underlying arrays of tensors and
         will return ndarrays.

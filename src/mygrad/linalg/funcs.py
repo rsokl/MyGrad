@@ -96,7 +96,7 @@ def matmul(
 
     Notes
     -----
-    The matmul function implements_numpy_override the semantics of the `@` operator introduced
+    The matmul function implements the semantics of the `@` operator introduced
     in Python 3.5 following PEP465.
 
     Examples
