@@ -404,7 +404,9 @@ def minimum(
 
 
 @implements_numpy_override
-def clip(a, a_min, a_max, *, constant=None):
+def clip(
+    a: ArrayLike, a_min: ArrayLike, a_max: ArrayLike, *, constant: Optional[bool] = None
+) -> Tensor:
     """Clip (limit) the values in an array.
 
     Given an interval, values outside the interval are clipped to
