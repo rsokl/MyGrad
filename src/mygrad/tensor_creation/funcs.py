@@ -2,10 +2,17 @@ from typing import Optional, Sequence, Union
 
 import numpy as np
 
-from mygrad.tensor_base import Tensor, _resolve_constant
+from mygrad.tensor_base import Tensor, _resolve_constant, implements_numpy_override
 from mygrad.typing import ArrayLike, DTypeLikeReals, Real
 
 Shape = Union[Sequence[int], int]
+
+
+def _anything_but_tensor(x):
+    if isinstance(x, Tensor):
+        x = x.data
+    return x
+
 
 __all__ = [
     "arange",
@@ -87,6 +94,7 @@ def empty(
     return Tensor(np.empty(shape=shape, dtype=dtype), constant=constant, copy=False)
 
 
+@implements_numpy_override
 def empty_like(
     other: ArrayLike,
     dtype: Optional[DTypeLikeReals] = None,
@@ -147,7 +155,9 @@ def empty_like(
     """
     constant = _resolve_constant(other, constant=constant)
     return Tensor(
-        np.empty_like(other, dtype=dtype, shape=shape), constant=constant, copy=False
+        np.empty_like(_anything_but_tensor(other), dtype=dtype, shape=shape),
+        constant=constant,
+        copy=False,
     )
 
 
@@ -319,6 +329,7 @@ def ones(
     return Tensor(np.ones(shape, dtype=dtype), constant=constant, copy=False)
 
 
+@implements_numpy_override
 def ones_like(
     other: ArrayLike,
     dtype: Optional[DTypeLikeReals] = None,
@@ -380,8 +391,11 @@ def ones_like(
     Tensor([ 1.,  1.,  1.])
     """
     constant = _resolve_constant(other, constant=constant)
+
     return Tensor(
-        np.ones_like(other, dtype=dtype, shape=shape), constant=constant, copy=False
+        np.ones_like(_anything_but_tensor(other), dtype=dtype, shape=shape),
+        constant=constant,
+        copy=False,
     )
 
 
@@ -446,6 +460,7 @@ def zeros(
     return Tensor(np.zeros(shape, dtype), constant=constant, copy=False)
 
 
+@implements_numpy_override
 def zeros_like(
     other: ArrayLike,
     dtype: Optional[DTypeLikeReals] = None,
@@ -516,7 +531,9 @@ def zeros_like(
     """
     constant = _resolve_constant(other, constant=constant)
     return Tensor(
-        np.zeros_like(other, dtype=dtype, shape=shape), constant=constant, copy=False
+        np.zeros_like(_anything_but_tensor(other), dtype=dtype, shape=shape),
+        constant=constant,
+        copy=False,
     )
 
 
@@ -583,6 +600,7 @@ def full(
     )
 
 
+@implements_numpy_override
 def full_like(
     other: ArrayLike,
     fill_value: Real,
@@ -643,8 +661,14 @@ def full_like(
     Tensor([ 0.1,  0.1,  0.1,  0.1,  0.1,  0.1])
     """
     constant = _resolve_constant(other, constant=constant)
+
     return Tensor(
-        np.full_like(other, fill_value=fill_value, dtype=dtype, shape=shape),
+        np.full_like(
+            _anything_but_tensor(other),
+            fill_value=_anything_but_tensor(fill_value),
+            dtype=dtype,
+            shape=shape,
+        ),
         constant=constant,
         copy=False,
     )

@@ -401,14 +401,10 @@ _REGISTERED_NO_DIFF_NUMPY_FUNCS: Set[Callable[..., np.ndarray]] = {
     np.bincount,
     np.can_cast,
     np.copyto,
-    np.empty_like,
-    np.full_like,
     np.may_share_memory,
     np.min_scalar_type,
-    np.ones_like,
     np.result_type,
     np.shares_memory,
-    np.zeros_like,
 }
 
 

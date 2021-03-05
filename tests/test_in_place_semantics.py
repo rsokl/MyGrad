@@ -528,7 +528,7 @@ def test_complicated_inplace_pattern2(x: Tensor, y: Tensor):
     assert x.data.flags.writeable
     assert diag_x.data.flags.writeable
 
-    grad_x = np.zeros_like(x)
+    grad_x = np.zeros_like(x.data)
 
     # dl/dx =
     # [2y0, y1, y2]
