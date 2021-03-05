@@ -1,7 +1,13 @@
 from typing import Optional, Tuple, Union
 
+import numpy as np
+
 from mygrad.operation_base import _NoValue
-from mygrad.tensor_base import Tensor
+from mygrad.tensor_base import (
+    _REGISTERED_DIFFERENTIABLE_NUMPY_FUNCS,
+    Tensor,
+    implements_numpy_override,
+)
 from mygrad.typing import ArrayLike
 
 from .ops import *
@@ -24,6 +30,7 @@ __all__ = [
 ]
 
 
+@implements_numpy_override
 def sum(
     x: ArrayLike,
     axis: Axis = None,
@@ -111,6 +118,7 @@ def sum(
     )
 
 
+@implements_numpy_override
 def mean(
     x: ArrayLike,
     axis: Axis = None,
@@ -187,6 +195,7 @@ def mean(
     )
 
 
+@implements_numpy_override
 def var(
     x: ArrayLike,
     axis: Axis = None,
@@ -282,6 +291,7 @@ def var(
     )
 
 
+@implements_numpy_override
 def std(
     x: ArrayLike,
     axis: Axis = None,
@@ -376,6 +386,7 @@ def std(
     )
 
 
+@implements_numpy_override
 def max(
     x: ArrayLike,
     axis: Axis = None,
@@ -440,6 +451,7 @@ def max(
     )
 
 
+@implements_numpy_override
 def min(
     x: ArrayLike,
     axis: Axis = None,
@@ -505,8 +517,11 @@ def min(
 # aliases
 amin = min
 amax = max
+_REGISTERED_DIFFERENTIABLE_NUMPY_FUNCS[np.amin] = amin
+_REGISTERED_DIFFERENTIABLE_NUMPY_FUNCS[np.amax] = amax
 
 
+@implements_numpy_override
 def prod(
     a: ArrayLike,
     axis: Axis = None,
@@ -577,6 +592,7 @@ def prod(
     )
 
 
+@implements_numpy_override
 def cumprod(
     a: ArrayLike, axis: Axis = None, *, constant: Optional[bool] = None
 ) -> Tensor:
@@ -641,6 +657,7 @@ def cumprod(
     return Tensor._op(CumProd, a, op_kwargs=dict(axis=axis), constant=constant)
 
 
+@implements_numpy_override
 def cumsum(
     a: ArrayLike, axis: Axis = None, *, constant: Optional[bool] = None
 ) -> Tensor:

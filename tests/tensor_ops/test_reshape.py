@@ -10,6 +10,7 @@ from numpy.testing import assert_array_equal
 import mygrad as mg
 from mygrad import reshape
 from mygrad.tensor_base import Tensor
+from tests.utils.functools import add_constant_passthrough
 
 from ..custom_strategies import tensors, valid_shapes
 from ..wrappers.uber import backprop_test_factory, fwdprop_test_factory
@@ -211,7 +212,9 @@ def test_method_reshape_fwd(reshape_type):
 )
 def test_reshape_bkwd(reshape_type):
     @backprop_test_factory(
-        mygrad_func=partial(reshape_type, reshaper=reshape),
+        mygrad_func=partial(
+            reshape_type, reshaper=add_constant_passthrough(reshape)
+        ),  # exercises __array_function__
         true_func=partial(reshape_type, reshaper=np.reshape),
         num_arrays=1,
         kwargs=dict(newshape=lambda arrs: valid_shapes(arrs.size, min_len=0)),

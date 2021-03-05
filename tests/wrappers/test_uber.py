@@ -225,7 +225,7 @@ def test_catches_incorrect_op_gradient():
 
         def backward_var(self, grad, index, **kwargs):
             a = self.variables[index]
-            return grad * np.ones_like(a)  # should be: grad * 2 * np.ones_like(a)
+            return grad * np.ones_like(a.data)  # should be: grad * 2 * np.ones_like(a)
 
     def mul2_wrong_grad(x, constant=False):
         return Tensor._op(Mul2, x, constant=constant)
@@ -249,7 +249,7 @@ def test_catches_op_didnt_propagate_grad():
 
         def backward_var(self, grad, index, **kwargs):
             a = self.variables[index]
-            return 2 * np.ones_like(a)  # should be: grad * 2 * np.ones_like(a)
+            return 2 * np.ones_like(a.data)  # should be: grad * 2 * np.ones_like(a)
 
     def mul2_doesnt_prop_incoming_grad(x, constant=False):
         return Tensor._op(Mul2, x, constant=constant)
@@ -275,7 +275,7 @@ def test_catches_mutated_gradient():
 
         def backward_var(self, grad, index, **kwargs):
             a = self.variables[index]
-            grad *= 2 * np.ones_like(a)
+            grad *= 2 * np.ones_like(a.data)
             return grad
 
     def mul2_backprop_mutates_grad(x, constant=False):
@@ -303,7 +303,7 @@ def test_catches_backprop_mutated_input():
             a.data.flags.writeable = True
             a.data *= 3
             a.data.flags.writeable = False
-            return grad * 2 * np.ones_like(a)
+            return grad * 2 * np.ones_like(a.data)
 
     def mul2_backprop_mutates_input(x, constant=False):
         return Tensor._op(Mul2, x, constant=constant)

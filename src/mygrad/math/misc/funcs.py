@@ -2,7 +2,7 @@ from typing import Optional, Union
 
 from numpy import ndarray
 
-from mygrad.tensor_base import Tensor
+from mygrad.tensor_base import Tensor, implements_numpy_override
 from mygrad.typing import ArrayLike, DTypeLikeReals, Mask
 from mygrad.ufuncs import ufunc_creator
 
@@ -403,6 +403,7 @@ def minimum(
     ...
 
 
+@implements_numpy_override
 def clip(a, a_min, a_max, *, constant=None):
     """Clip (limit) the values in an array.
 

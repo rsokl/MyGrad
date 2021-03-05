@@ -4,7 +4,7 @@ import numpy as np
 from numpy.core.einsumfunc import _parse_einsum_input
 
 import mygrad as mg
-from mygrad import Tensor
+from mygrad.tensor_base import Tensor, implements_numpy_override
 from mygrad.typing import ArrayLike, DTypeLikeReals
 from mygrad.ufuncs import ufunc_creator
 
@@ -136,9 +136,11 @@ def matmul(
     ...
 
 
+@implements_numpy_override
 def einsum(
     *operands: Union[ArrayLike, str, Sequence[int]],
     optimize: bool = False,
+    out: Optional[Union[np.ndarray, Tensor]] = None,
     constant: Optional[bool] = None,
 ) -> Tensor:
     r"""
@@ -399,11 +401,15 @@ def einsum(
             )
 
     in_lbls, out_lbls, _ = _parse_einsum_input(operands)
+
+    # einsum doesn't handle out=None properly in numpy 1.17
+
     return Tensor._op(
         EinSum,
         *variables,
         op_kwargs=dict(in_lbls=in_lbls, out_lbls=out_lbls, optimize=optimize),
         constant=constant,
+        out=out,
     )
 
 

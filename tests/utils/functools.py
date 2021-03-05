@@ -1,5 +1,6 @@
 from collections import UserDict
 from copy import deepcopy
+from functools import wraps
 from typing import Any, Dict, Iterable, Sequence, Tuple, Union
 
 import numpy as np
@@ -17,6 +18,15 @@ def _make_read_only(item):
     elif isinstance(item, mg.Tensor):
         item.data.flags["WRITEABLE"] = False
     return
+
+
+def add_constant_passthrough(func):
+    @wraps(func)
+    def wrapped(*args, **kwargs):
+        kwargs.pop("constant", None)
+        return func(*args, **kwargs)
+
+    return wrapped
 
 
 class SmartSignature(UserDict):

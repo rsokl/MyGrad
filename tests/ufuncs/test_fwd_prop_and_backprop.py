@@ -257,7 +257,7 @@ def test_ufunc_bkwd(
     kwargs = args.kwargs.copy()
 
     # numerical grad needs to write complex-valued outputs
-    kwargs["out"] = np.zeros_like(mygrad_out, dtype=complex)
+    kwargs["out"] = np.zeros_like(mygrad_out.data, dtype=complex)
     numpy_ufunc = partial(getattr(np, ufunc.__name__), **kwargs)
 
     grads = numerical_gradient(numpy_ufunc, *args.args_as_no_mygrad(), back_grad=grad)

@@ -3,7 +3,7 @@ from typing import Optional
 import numpy as np
 
 from mygrad import Tensor
-from mygrad.typing import ArrayLike, Shape
+from mygrad.typing import Shape
 
 
 def rand(*shape: int, constant: Optional[bool] = None) -> Tensor:
