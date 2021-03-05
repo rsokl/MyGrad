@@ -15,10 +15,10 @@ from mygrad import (
     ravel,
     repeat,
     roll,
-    squeeze,
     swapaxes,
     transpose,
 )
+from tests.utils.functools import add_constant_passthrough
 from tests.utils.wrappers import adds_constant_arg
 
 from .custom_strategies import valid_axes
@@ -143,10 +143,10 @@ def test_squeeze(x, data):
         numpy_out = np.squeeze(x, axes)
     except ValueError:
         with raises(ValueError):
-            squeeze(x_arr, axes, constant=False)
+            np.squeeze(x_arr, axes)
         return
 
-    o = squeeze(x_arr, axes, constant=False)
+    o = np.squeeze(x_arr, axes)  # exercises __array_function__
     o_method = x_arr2.squeeze(axes)
     assert_allclose(o.data, numpy_out)
     assert_allclose(o_method.data, numpy_out)
@@ -222,7 +222,7 @@ def test_transpose_fwd():
 
 
 @backprop_test_factory(
-    mygrad_func=_transpose,
+    mygrad_func=add_constant_passthrough(_np_transpose),  # exercises __array_function__
     true_func=_np_transpose,
     num_arrays=1,
     kwargs=dict(axes=lambda x: valid_axes(x.ndim, min_dim=x.ndim, max_dim=x.ndim)),
@@ -243,7 +243,9 @@ def test_expand_dims_fwd():
 
 
 @backprop_test_factory(
-    mygrad_func=expand_dims,
+    mygrad_func=add_constant_passthrough(
+        np.expand_dims
+    ),  # exercises __array_function__
     true_func=np.expand_dims,
     num_arrays=1,
     kwargs=dict(axis=_expand_dims_axis),
@@ -270,7 +272,7 @@ def test_moveaxis_fwd():
 
 @settings(deadline=None)
 @backprop_test_factory(
-    mygrad_func=moveaxis,
+    mygrad_func=add_constant_passthrough(np.moveaxis),  # exercises __array_function__
     true_func=np.moveaxis,
     num_arrays=1,
     kwargs=dict(
@@ -297,7 +299,7 @@ def test_swapaxes_fwd():
 
 
 @backprop_test_factory(
-    mygrad_func=swapaxes,
+    mygrad_func=add_constant_passthrough(np.swapaxes),  # exercises __array_function__
     true_func=np.swapaxes,
     num_arrays=1,
     kwargs=dict(axis1=_swap_axes_axis, axis2=_swap_axes_axis),
@@ -334,7 +336,10 @@ def test_ravel_fwd():
 
 
 @backprop_test_factory(
-    mygrad_func=ravel, true_func=np.ravel, num_arrays=1, vary_each_element=True
+    mygrad_func=add_constant_passthrough(np.ravel),  # exercises __array_function__
+    true_func=np.ravel,
+    num_arrays=1,
+    vary_each_element=True,
 )
 def test_ravel_bkwd():
     pass
@@ -354,7 +359,9 @@ def test_broadcast_to_fwd():
 
 
 @backprop_test_factory(
-    mygrad_func=broadcast_to,
+    mygrad_func=add_constant_passthrough(
+        np.broadcast_to
+    ),  # exercise __array_function__
     true_func=np.broadcast_to,
     num_arrays=1,
     vary_each_element=True,
@@ -394,7 +401,7 @@ def test_roll_fwd():
 
 
 @backprop_test_factory(
-    mygrad_func=roll,
+    mygrad_func=add_constant_passthrough(np.roll),  # exercises __array_function__
     true_func=np.roll,
     num_arrays=1,
     kwargs=gen_roll_args,
@@ -464,7 +471,7 @@ def test_repeat_tuple_repeats_only_fwd():
 
 
 @backprop_test_factory(
-    mygrad_func=repeat,
+    mygrad_func=add_constant_passthrough(np.repeat),  # exercises __array_function__
     true_func=np.repeat,
     num_arrays=1,
     kwargs=gen_tuple_repeat_args,

@@ -66,7 +66,7 @@ from mygrad.tensor_manip.transpose_like.ops import (
 )
 from mygrad.typing import ArrayLike, DTypeLike, DTypeLikeReals, Index, Shape
 
-__all__ = ["Tensor", "asarray", "astensor"]
+__all__ = ["Tensor", "asarray", "astensor", "implements_numpy_override"]
 
 if TYPE_CHECKING:  # pragma: no cover
     from mygrad.ufuncs._ufunc_creators import ufunc as mygrad_ufunc
@@ -409,7 +409,31 @@ _REGISTERED_NO_DIFF_NUMPY_FUNCS: Set[Callable[..., np.ndarray]] = {
 
 
 def implements_numpy_override(func: T) -> T:
-    _REGISTERED_DIFFERENTIABLE_NUMPY_FUNCS[getattr(np, func.__name__)] = func
+    """Registers a mygrad-based override for a NumPy function of the same name, via
+    the standard __array_function__ interface. [1]_
+
+    Examples
+    --------
+    >>> @implements_numpy_override
+    ... def reshape(x, shape):
+    ...    # a mygrad-based implementation of numpy.sin
+    ...    print("hello world")
+
+    >>> import numpy as np
+    >>> import mygrad as mg
+    >>> np.shape(mg.tensor(1.), 2)
+    'hello world'
+
+    References
+    ----------
+    .. [1] https://numpy.org/devdocs/reference/arrays.classes.html?#numpy.class.__array_function__"""
+    try:
+        _REGISTERED_DIFFERENTIABLE_NUMPY_FUNCS[getattr(np, func.__name__)] = func
+    except AttributeError:
+        raise AttributeError(
+            f"@implements_numpy_override tried to register an override for the function numpy.{func.__name__}, but no "
+            f"such function exists."
+        )
     return func
 
 

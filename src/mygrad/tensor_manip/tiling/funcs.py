@@ -1,6 +1,6 @@
 from typing import Optional, Sequence, Union
 
-from mygrad.tensor_base import Tensor
+from mygrad.tensor_base import Tensor, implements_numpy_override
 from mygrad.typing import ArrayLike
 
 from .ops import Repeat
@@ -8,6 +8,7 @@ from .ops import Repeat
 __all__ = ["repeat"]
 
 
+@implements_numpy_override
 def repeat(
     a: ArrayLike,
     repeats: Union[int, Sequence[int]],
