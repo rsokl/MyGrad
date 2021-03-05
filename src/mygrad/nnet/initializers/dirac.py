@@ -1,9 +1,12 @@
+from typing import Optional
+
 import numpy as np
+
 from mygrad import Tensor
 
 
-def dirac(*shape, dtype=np.float32, constant=False):
-    """ Initialize a `Tensor` according to the Dirac initialization procedure described by Zagoruyko and Komodakis.
+def dirac(*shape: int, dtype=np.float32, constant: Optional[bool] = None) -> Tensor:
+    """Initialize a `Tensor` according to the Dirac initialization procedure described by Zagoruyko and Komodakis.
 
     Parameters
     ----------
@@ -13,9 +16,15 @@ def dirac(*shape, dtype=np.float32, constant=False):
     dtype : data-type, optional (default=float32)
         The data type of the output tensor.
 
-    constant : bool, optional (default=False)
-        If `True`, the returned tensor is a constant (it
-            does not back-propagate a gradient).
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. ``constant.grad`` will always return
+        ``None``).
+
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
 
     Returns
     -------
