@@ -216,15 +216,17 @@ BKWD_DOMAINS[mg.sqrt] = {0: st.floats(min_value=1e-5, max_value=1e6)}
 @pytest.mark.parametrize(
     "ufunc", [u for u in ufuncs if u not in DOES_NOT_SUPPORT_COMPLEX_DOMAIN]
 )
-@given(data=st.data())
+@given(data=st.data(), use_numpy_overload=st.booleans())
 def test_ufunc_bkwd(
     data: st.DataObject,
     ufunc: Union[MyGradUnaryUfunc, MyGradBinaryUfunc],
+    use_numpy_overload: bool,
 ):
     """
     Checks:
     - backprop matches numerical gradient
     - backprop doesn't mutate grad
+    - that calling op through numpy overload works identically
     """
     args = data.draw(
         populates_ufunc(
@@ -237,6 +239,8 @@ def test_ufunc_bkwd(
     )
     args.make_array_based_args_read_only()  # guards against mutation
 
+    if use_numpy_overload:
+        ufunc = getattr(np, ufunc.__name__)
     mygrad_out = ufunc(*args.args, **args.kwargs)
 
     # Draw upstream gradient to be backpropped

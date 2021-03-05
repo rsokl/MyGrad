@@ -104,14 +104,16 @@ constant_tensor: Callable[..., Tensor] = partial(mg.tensor, constant=True)
     "f1, f2",
     [
         (constant_tensor, lambda x: x),
-        (lambda x: x, constant_tensor),
+        (
+            lambda x: x.tolist(),
+            constant_tensor,
+        ),  # `list/tensor` ensures __rfloordiv__ gets called
         (constant_tensor, constant_tensor),
     ],
 )
 def test_floor_div(arr1, arr2, f1, f2):
     desired = arr1 // arr2
     actual = f1(arr1) // f2(arr2)
-    assert actual.constant is True
     assert actual.dtype == desired.dtype
     assert_array_equal(desired, actual)
 

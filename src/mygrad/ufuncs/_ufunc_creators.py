@@ -16,8 +16,8 @@ from typing import (
 
 import numpy as np
 
-from mygrad import Tensor
 from mygrad.operation_base import BinaryUfunc, Operation, Ufunc, UnaryUfunc, _NoValue
+from mygrad.tensor_base import _REGISTERED_UFUNC, Tensor
 from mygrad.typing import ArrayLike, DTypeLikeReals, Index, Mask, Real
 
 __all__ = ["ufunc_creator"]
@@ -316,7 +316,7 @@ def _create_ufunc(
     outer_op=None,
     reduce_op=None,
     reduceat_op=None,
-):
+) -> Type[ufunc]:
     def at(
         a: ArrayLike,
         indices: Union[ArrayLike, Index, Tuple[ArrayLike, Index]],
@@ -330,7 +330,7 @@ def _create_ufunc(
     def accumulate(
         array: ArrayLike,
         axis: int = 0,
-        dtype: DTypeLikeReals = None,
+        dtype: Optional[DTypeLikeReals] = None,
         out: Optional[Union[Tensor, np.ndarray]] = None,
         *,
         constant: Optional[bool] = None,
@@ -342,8 +342,8 @@ def _create_ufunc(
         a: ArrayLike,
         b: ArrayLike,
         *,
-        dtype: DTypeLikeReals,
-        out: Optional[Union[Tensor, np.ndarray]],
+        dtype: Optional[DTypeLikeReals] = None,
+        out: Optional[Union[Tensor, np.ndarray]] = None,
     ) -> Tensor:  # pragma: no cover
         """Not Implemented"""
         raise NotImplementedError()
@@ -351,7 +351,7 @@ def _create_ufunc(
     def reduce(
         a: ArrayLike,
         axis: Optional[Union[int, Tuple[int, ...]]] = 0,
-        dtype: DTypeLikeReals = None,
+        dtype: Optional[DTypeLikeReals] = None,
         out: Optional[Union[Tensor, np.ndarray]] = None,
         keepdims: bool = False,
         initial: Real = _NoValue,
@@ -364,7 +364,7 @@ def _create_ufunc(
         a: ArrayLike,
         indices: ArrayLike,
         axis: Optional[Union[int, Tuple[int, ...]]] = 0,
-        dtype: DTypeLikeReals = None,
+        dtype: Optional[DTypeLikeReals] = None,
         out: Optional[Union[Tensor, np.ndarray]] = None,
     ) -> Tensor:  # pragma: no cover
         """Not Implemented"""
@@ -378,7 +378,7 @@ def _create_ufunc(
         )
     else:  # pragma: no cover
         raise NotImplementedError(
-            "MyGrad Internal: `mygrad._utils.op_creator` only supports unary and binary ufuncs currently"
+            "MyGrad Internal: `mygrad._utils.op_creator` only supports unary and binary ufuncs presently"
         )
 
     # filter out non-real dtypes
@@ -487,7 +487,7 @@ class ufunc_creator:
         self.reduceat_op = reduceat_op
 
     def __call__(self, decorated_func: T) -> T:
-        return _create_ufunc(
+        out_ufunc = _create_ufunc(
             self.op,
             decorated_func=decorated_func,
             at_op=self.at_op,
@@ -496,3 +496,5 @@ class ufunc_creator:
             reduce_op=self.reduce_op,
             reduceat_op=self.reduceat_op,
         )
+        _REGISTERED_UFUNC[getattr(np, out_ufunc.__name__)] = out_ufunc
+        return out_ufunc

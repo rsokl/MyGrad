@@ -6,6 +6,7 @@ etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 
 from numbers import Integral, Number
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
@@ -65,6 +66,10 @@ from mygrad.tensor_manip.transpose_like.ops import (
 from mygrad.typing import ArrayLike, DTypeLike, DTypeLikeReals, Index, Shape
 
 __all__ = ["Tensor", "asarray", "astensor"]
+
+if TYPE_CHECKING:  # pragma: no cover
+    from mygrad.ufuncs._ufunc_creators import ufunc as mygrad_ufunc
+
 
 CONSTANT_ONLY_DTYPES = (np.integer, np.bool_)
 
@@ -349,6 +354,53 @@ def astensor(
     return tensor(t, dtype=dtype, constant=constant, copy=False, ndmin=0)
 
 
+_REGISTERED_UFUNC: Dict[np.ufunc, Type["mygrad_ufunc"]] = {}
+_REGISTERED_BOOL_ONLY_UFUNC: Set[np.ufunc] = {
+    np.isnan,
+    np.isfinite,
+    np.isinf,
+    np.isnat,
+    np.signbit,
+    np.logical_not,
+    np.logical_and,
+    np.logical_or,
+    np.logical_xor,
+    np.greater,
+    np.greater_equal,
+    np.less,
+    np.less_equal,
+    np.equal,
+}
+
+# These are ufuncs that users might mistake for being differentiable functions;
+# for this reason we make explicit the fact that only constant tensors are permitted
+# in these operations.
+_REGISTERED_CONST_ONLY_UFUNC = {
+    np.floor_divide,
+    np.remainder,
+    np.mod,
+    np.fmod,
+    np.divmod,
+    np.rint,
+    np.sign,
+    np.floor,
+    np.ceil,
+    np.trunc,
+}
+
+
+class _ConstantOnly(ValueError):
+    pass
+
+
+def _as_constant_array(t: Union["Tensor", np.ndarray]) -> np.ndarray:
+    if isinstance(t, Tensor):
+        if t.constant is False:
+            raise _ConstantOnly()
+        return t.data
+    return t
+
+
 class Tensor:
     """A numpy-array-like object capable of serving as a node in a computational
     graph that supports back-propagation of derivatives via the chain rule.
@@ -504,6 +556,97 @@ class Tensor:
     """
 
     __array_priority__ = 15.0
+
+    def __array_ufunc__(
+        self, ufunc: Type[np.ufunc], method: str, *inputs: ArrayLike, **kwargs
+    ) -> Union["Tensor", np.ndarray]:
+        """An interface provided by NumPy to override the behavior of its ufuncs [1]_.
+
+        MyGrad implements its own ufuncs for all differentiable NumPy ufuncs.
+
+        Non-differentiable numpy ufuncs simply get called on the underlying arrays of tensors and
+        will return ndarrays.
+
+        The differentiability - or lack thereof - of ufuncs may not be obvious to end users.
+        Thus potentially ambiguous ufuncs (e.g. `numpy.ceil`) will be made to raise on non-constant
+        tensors so that the lack of differentiability is made obvious to the users. This design decision
+        is made in the same spirit as requiring integer-dtype tensors be constant.
+
+        References
+        ----------
+        .. [1] https://numpy.org/doc/stable/reference/arrays.classes.html#numpy.class.__array_ufunc__
+
+        Examples
+        --------
+        NumPy ufuncs that represent differentiable operations are overloaded by MyGrad tensors
+        so that they support backprop
+
+        >>> import mygrad as mg
+        >>> import numpy as np
+
+        >>> x = mg.tensor([1., 2.])
+
+        This calls ``mygrad.sin`` under the hood.
+
+        >>> np.sin(x)  # returns a tensor
+        Tensor([0.84147098, 0.90929743])
+
+        >>> np.sin(x).backward()
+        >>> x.grad  # note: derivative of
+        array([ 0.54030231, -0.41614684])
+
+        Specifying a dtype, a ``where`` mask, an in-place target (via ``out``) as an array
+        or a tensor, are all supported.
+
+        >>> x = mg.tensor([1., 2.])
+        >>> y = mg.tensor([-1., -1.])
+        >>> np.exp(x, where=[False, True], out=y)
+        Tensor([-1.       ,  7.3890561])
+        >>> y.backward()
+        >>> x.grad
+        array([0.       , 7.3890561])
+
+        Non-differentiable NumPy ufuncs simply operate on the ndarrays that are wrapped
+        by MyGrad tensors; these return ndarrays, which will appropriately and explicitly
+        serve as constants elsewhere in a computational graph.
+
+        >>> x = mg.tensor([1., 2.])
+        >>> np.less_equal(x, 1)
+        array([ True, False])
+        """
+        out = kwargs.pop("out", (None,))
+        if len(out) > 1:  # pragma: no cover
+            raise ValueError(
+                "mygrad does not support in-place operations with more that one target"
+            )
+        (out,) = out
+
+        out: Optional[Union[np.ndarray, "Tensor"]]
+
+        try:
+            # differentiable ufunc implemented by mygrad
+            return getattr(_REGISTERED_UFUNC[ufunc], method)(*inputs, **kwargs, out=out)
+        except KeyError:
+            pass
+
+        # non-differentiable ufuncs get called on numpy arrays stored by tensors
+        if ufunc in _REGISTERED_BOOL_ONLY_UFUNC:
+            caster = asarray
+        elif ufunc in _REGISTERED_CONST_ONLY_UFUNC:
+            # the presence of non-constant tensors will raise
+            caster = _as_constant_array
+        else:  # pragma: no cover
+            return NotImplemented
+
+        try:
+            if out is not None:
+                kwargs["out"] = caster(out)
+            # returns ndarray
+            return getattr(ufunc, method)(*(caster(t) for t in inputs), **kwargs)
+        except _ConstantOnly:
+            raise ValueError(
+                f"{repr(ufunc)} cannot involve non-constant mygrad tensors."
+            )
 
     def __array__(self, dtype: DTypeLike = None) -> np.ndarray:
         return np.array(self.data, dtype=dtype, copy=False)
@@ -787,11 +930,25 @@ class Tensor:
         -------
         mygrad.Tensor
             The tensor-result of the operation's forward-pass."""
-        if out is not None and isinstance(out, Tensor):
-            out._in_place_op(
-                Op, *input_vars, op_args=op_args, op_kwargs=op_kwargs, constant=constant
-            )
-            return out
+        if out is not None:
+            if isinstance(out, tuple):
+                if len(out) > 1:  # pragma: no cover
+                    raise ValueError(
+                        "mygrad does not support in-place operations with more that one target"
+                    )
+                (out,) = out
+
+            if isinstance(out, Tensor):
+                out._in_place_op(
+                    Op,
+                    *input_vars,
+                    op_args=op_args,
+                    op_kwargs=op_kwargs,
+                    constant=constant,
+                )
+                return out
+
+        out: Optional[np.ndarray]
 
         _uniques_bases_then_arrs = ()
 
@@ -1700,21 +1857,11 @@ class Tensor:
     def __rtruediv__(self, other: ArrayLike) -> "Tensor":
         return self._op(Divide, other, self)
 
-    def __floordiv__(self, other: ArrayLike) -> "Tensor":
-        if not self.constant:
-            raise ValueError(
-                "Floor division cannot involve non-constant mygrad tensors."
-            )
-        if isinstance(other, Tensor):
-            other = other.data
-        return type(self)(self.data.__floordiv__(other), constant=True)
+    def __floordiv__(self, other: ArrayLike) -> np.ndarray:
+        return np.floor_divide(self, other)
 
-    def __rfloordiv__(self, other: ArrayLike) -> "Tensor":
-        if not self.constant:
-            raise ValueError(
-                "Floor division cannot involve non-constant mygrad tensors."
-            )
-        return type(self)(self.data.__rfloordiv__(other), constant=True)
+    def __rfloordiv__(self, other: ArrayLike) -> np.ndarray:
+        return np.floor_divide(other, self)
 
     def __itruediv__(self, other: ArrayLike) -> "Tensor":
         self._in_place_op(Divide, self, other)
