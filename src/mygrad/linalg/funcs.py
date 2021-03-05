@@ -431,6 +431,7 @@ def multi_matmul(tensors: ArrayLike, *, constant: Optional[bool] = None) -> Tens
         Defaults to ``True`` for integer-type data.
 
         Integer-type tensors must be constant.
+
     Returns
     -------
     mygrad.Tensor

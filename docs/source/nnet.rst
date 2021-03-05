@@ -58,6 +58,7 @@ Initializers
    :toctree: generated/
 
 
+   dirac
    glorot_normal
    glorot_uniform
    he_normal
