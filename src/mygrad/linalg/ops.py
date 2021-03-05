@@ -139,11 +139,14 @@ class EinSum(Operation):
         # fed to einsum. Only one gradient will be computed for a
         # unique tensor-label pair
         self._cache = None
+
+        # einsum doesn't handle out=None properly in numpy 1.17
+        kwargs = {} if out is None else {"out": out}
         return np.einsum(
             "->".join((in_lbls, out_lbls)),
             *(var.data for var in self.variables),
             optimize=optimize,
-            out=out,
+            **kwargs,
         )
 
     @property

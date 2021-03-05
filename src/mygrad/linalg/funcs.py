@@ -403,14 +403,13 @@ def einsum(
     in_lbls, out_lbls, _ = _parse_einsum_input(operands)
 
     # einsum doesn't handle out=None properly in numpy 1.17
-    kwargs = {} if out is None else {"out": out}
 
     return Tensor._op(
         EinSum,
         *variables,
         op_kwargs=dict(in_lbls=in_lbls, out_lbls=out_lbls, optimize=optimize),
         constant=constant,
-        **kwargs,
+        out=out,
     )
 
 
