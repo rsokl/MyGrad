@@ -218,17 +218,19 @@ def test_setitem_sanity_check(x_constant, y_constant, data):
     assert isinstance(w, Tensor)
     assert_allclose(w.data, np.array([-1.0, 8.0, 0.0, 16.0]))
 
-    if not x.constant or (as_tensor and not y.constant):
+    if not w.constant:
+        assert w.grad is not None
         assert_allclose(w.grad, np.ones_like(w.data))
-    assert w.constant is (x.constant and (not as_tensor or y.constant))
+    assert w.constant is x.constant
 
     if x.constant:
+        pass
         assert x.grad is None
     else:
         assert_allclose(x.grad, np.array([0.0, 4.0, 0.0, 4.0]))
 
     if as_tensor:
-        if y.constant:
+        if w.constant or y.constant:
             assert y.grad is None
         else:
             assert_allclose(y.grad, np.array([-1.0, -2.0]))

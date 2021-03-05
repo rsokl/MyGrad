@@ -160,7 +160,7 @@ def test_raising_during_in_place_op_doesnt_corrupt_graph(inplace_on_view: bool):
 @pytest.mark.parametrize("inplace_on_view", [False, True])
 @pytest.mark.parametrize("x_constant", [False, True])
 @pytest.mark.parametrize("y_constant", [False, True])
-def test_inplace_update_propagates_constant_info(
+def test_inplace_update_constant_dictated_by_target(
     inplace_on_view: bool, x_constant: bool, y_constant: bool
 ):
     x = mg.arange(1.0, 5.0, constant=x_constant)
@@ -175,7 +175,7 @@ def test_inplace_update_propagates_constant_info(
 
     x[...] = y
 
-    assert x.constant is (x_constant and y_constant)
+    assert x.constant is x_constant
     assert dangling_view.constant is x.constant
 
 
