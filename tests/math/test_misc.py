@@ -8,6 +8,7 @@ import pytest
 from hypothesis import given, settings
 from numpy.testing import assert_allclose
 
+import mygrad as mg
 from mygrad import clip, maximum, minimum
 from mygrad.tensor_base import Tensor
 from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
@@ -204,3 +205,16 @@ def test_clip_input_validation(a, a_min, a_max):
     mygrad_out = clip(a, a_min, a_max)
 
     np.testing.assert_array_equal(numpy_out, mygrad_out.data)
+
+
+def test_clip_method_fwd():
+    a = mg.arange(10.0)
+    assert_allclose(
+        a.clip([3, 4, 1, 1, 1, 4, 4, 4, 4, 4], 8), [3, 4, 2, 3, 4, 5, 6, 7, 8, 8]
+    )
+
+
+def test_clip_method_bkwd():
+    x = mg.tensor([1.0, 5.0, 10.0])
+    x.clip(2, 7).backward()
+    assert_allclose(x.grad, [0.0, 1.0, 0.0])
