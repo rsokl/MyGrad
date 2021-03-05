@@ -157,6 +157,19 @@ def test_raising_during_in_place_op_doesnt_corrupt_graph(inplace_on_view: bool):
     assert_allclose(x.grad, 4 * np.ones_like(y))
 
 
+@pytest.mark.parametrize("x_constant", [False, True])
+@pytest.mark.parametrize("y_constant", [False, True])
+@pytest.mark.parametrize("z_constant", [False, True])
+def test_inplace_update_constant_dictated_by_target(
+    x_constant: bool, y_constant: bool, z_constant: bool
+):
+    x = mg.tensor([1.0], constant=x_constant)
+    y = mg.tensor([1.0], constant=y_constant)
+    z = mg.tensor([1.0], constant=z_constant)
+
+    assert np.multiply(x, y, out=z).constant is z_constant
+
+
 @pytest.mark.parametrize("inplace_on_view", [False, True])
 @pytest.mark.parametrize("x_constant", [False, True])
 @pytest.mark.parametrize("y_constant", [False, True])

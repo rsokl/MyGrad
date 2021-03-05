@@ -1668,7 +1668,7 @@ class Tensor:
             graph.restore_old_graph()
             raise e
 
-        placeholder_mutant_view._constant |= inplace_target._constant
+        placeholder_mutant_view._constant = inplace_target._constant
 
         if _mem.MEM_GUARD:
             _mem.force_lock_tensor_and_creators(placeholder_mutant_view)
