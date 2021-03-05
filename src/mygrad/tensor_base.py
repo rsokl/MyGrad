@@ -421,7 +421,7 @@ def implements_numpy_override(func: T) -> T:
 
     >>> import numpy as np
     >>> import mygrad as mg
-    >>> np.shape(mg.tensor(1.), 2)
+    >>> np.reshape(mg.tensor(1.), 2)
     'hello world'
 
     References
