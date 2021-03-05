@@ -10,6 +10,7 @@ from pytest import raises
 
 import mygrad as mg
 from mygrad import amax, amin, cumprod, cumsum, mean, prod, std, sum, var
+from tests.utils.functools import add_constant_passthrough
 from tests.utils.numerical_gradient import numerical_gradient_full
 
 from ...custom_strategies import tensors, valid_axes
@@ -71,7 +72,7 @@ def test_max_no_graph_track_fwd():
 
 
 @backprop_test_factory(
-    mygrad_func=amax,
+    mygrad_func=add_constant_passthrough(np.amax),  # exercises __array_function__
     true_func=np.amax,
     num_arrays=1,
     kwargs=dict(axis=axis_arg, keepdims=keepdims_arg),
@@ -106,7 +107,7 @@ def test_min_no_graph_track_fwd():
 
 
 @backprop_test_factory(
-    mygrad_func=amin,
+    mygrad_func=add_constant_passthrough(np.amin),  # exercises __array_function__
     true_func=np.amin,
     num_arrays=1,
     kwargs=dict(axis=axis_arg, keepdims=keepdims_arg),
@@ -134,7 +135,7 @@ def test_sum_fwd():
 
 
 @backprop_test_factory(
-    mygrad_func=sum,
+    mygrad_func=add_constant_passthrough(np.sum),  # exercises __array_function__
     true_func=np.sum,
     num_arrays=1,
     kwargs=dict(axis=axis_arg, keepdims=keepdims_arg),
@@ -156,7 +157,7 @@ def test_mean_fwd():
 
 
 @backprop_test_factory(
-    mygrad_func=mean,
+    mygrad_func=add_constant_passthrough(np.mean),  # exercises __array_function__
     true_func=np.mean,
     num_arrays=1,
     kwargs=dict(axis=axis_arg, keepdims=keepdims_arg),
@@ -212,7 +213,7 @@ def test_custom_var_fwd():
 
 # test keepdims=True/False explicitly to deal with coverage issues
 @backprop_test_factory(
-    mygrad_func=var,
+    mygrad_func=add_constant_passthrough(np.var),  # exercises __array_function__,
     true_func=_var,
     num_arrays=1,
     kwargs=dict(axis=partial(axis_arg, min_dim=1), keepdims=False, ddof=ddof_arg),
@@ -224,7 +225,7 @@ def test_var_bkwd_without_keepdims():
 
 
 @backprop_test_factory(
-    mygrad_func=var,
+    mygrad_func=add_constant_passthrough(np.var),  # exercises __array_function__,,
     true_func=_var,
     num_arrays=1,
     kwargs=dict(axis=partial(axis_arg, min_dim=1), keepdims=True, ddof=ddof_arg),
@@ -256,7 +257,7 @@ def test_var_no_axis_fwd(x: mg.Tensor):
     )
 )
 def test_var_no_axis_bkwrd(x: mg.Tensor):
-    mg.var(x, axis=()).backward()
+    np.var(x, axis=()).backward()
     assert np.all(x.grad == mg.zeros_like(x))
 
 
@@ -310,7 +311,7 @@ def _assume(*arrs, **kwargs):
 
 
 @backprop_test_factory(
-    mygrad_func=std,
+    mygrad_func=add_constant_passthrough(np.std),  # exercises __array_function__,,
     true_func=_std,
     num_arrays=1,
     kwargs=dict(
@@ -374,7 +375,7 @@ def test_prod_bkwd():
 
 
 @backprop_test_factory(
-    mygrad_func=prod,
+    mygrad_func=add_constant_passthrough(np.prod),  # exercises __array_function__,,
     true_func=np.prod,
     num_arrays=1,
     elements_strategy=st.integers,
@@ -413,7 +414,7 @@ def test_cumprod_fwd():
 
 @settings(deadline=None)
 @backprop_test_factory(
-    mygrad_func=cumprod,
+    mygrad_func=add_constant_passthrough(np.cumprod),  # exercises __array_function__,
     true_func=np.cumprod,
     num_arrays=1,
     kwargs=dict(axis=single_axis_arg),
@@ -466,7 +467,7 @@ def test_cumsum_fwd():
 
 @settings(deadline=None)
 @backprop_test_factory(
-    mygrad_func=cumsum,
+    mygrad_func=add_constant_passthrough(np.cumsum),  # exercises __array_function__,,
     true_func=np.cumsum,
     num_arrays=1,
     kwargs=dict(axis=single_axis_arg),

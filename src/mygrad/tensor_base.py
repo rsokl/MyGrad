@@ -3,7 +3,7 @@ This module defines the base tensor class along with all of its essential
 attributes and special methods. Public math methods, e.g. ``sum``, ``mean``,
 etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 """
-
+from functools import wraps
 from numbers import Integral, Number
 from typing import (
     TYPE_CHECKING,
@@ -17,6 +17,7 @@ from typing import (
     Set,
     Tuple,
     Type,
+    TypeVar,
     Union,
 )
 from weakref import ReferenceType, finalize
@@ -70,6 +71,8 @@ __all__ = ["Tensor", "asarray", "astensor"]
 if TYPE_CHECKING:  # pragma: no cover
     from mygrad.ufuncs._ufunc_creators import ufunc as mygrad_ufunc
 
+
+T = TypeVar("T")
 
 CONSTANT_ONLY_DTYPES = (np.integer, np.bool_)
 
@@ -355,6 +358,10 @@ def astensor(
 
 
 _REGISTERED_UFUNC: Dict[np.ufunc, Type["mygrad_ufunc"]] = {}
+_REGISTERED_DIFFERENTIABLE_NUMPY_FUNCS: Dict[
+    Callable[..., np.ndarray], Callable[..., "Tensor"]
+] = {}
+
 _REGISTERED_BOOL_ONLY_UFUNC: Set[np.ufunc] = {
     np.isnan,
     np.isfinite,
@@ -387,6 +394,27 @@ _REGISTERED_CONST_ONLY_UFUNC = {
     np.ceil,
     np.trunc,
 }
+
+
+_REGISTERED_NO_DIFF_NUMPY_FUNCS: Set[Callable[..., np.ndarray]] = {
+    np.allclose,
+    np.bincount,
+    np.can_cast,
+    np.copyto,
+    np.empty_like,
+    np.full_like,
+    np.may_share_memory,
+    np.min_scalar_type,
+    np.ones_like,
+    np.result_type,
+    np.shares_memory,
+    np.zeros_like,
+}
+
+
+def implements_numpy_override(func: T) -> T:
+    _REGISTERED_DIFFERENTIABLE_NUMPY_FUNCS[getattr(np, func.__name__)] = func
+    return func
 
 
 class _ConstantOnly(ValueError):
@@ -562,7 +590,7 @@ class Tensor:
     ) -> Union["Tensor", np.ndarray]:
         """An interface provided by NumPy to override the behavior of its ufuncs [1]_.
 
-        MyGrad implements its own ufuncs for all differentiable NumPy ufuncs.
+        MyGrad implements_numpy_override its own ufuncs for all differentiable NumPy ufuncs.
 
         Non-differentiable numpy ufuncs simply get called on the underlying arrays of tensors and
         will return ndarrays.
@@ -592,7 +620,7 @@ class Tensor:
         Tensor([0.84147098, 0.90929743])
 
         >>> np.sin(x).backward()
-        >>> x.grad  # note: derivative of
+        >>> x.grad  # stores d(sin(x))/dx @ x = [1., 2.]
         array([ 0.54030231, -0.41614684])
 
         Specifying a dtype, a ``where`` mask, an in-place target (via ``out``) as an array
@@ -647,6 +675,20 @@ class Tensor:
             raise ValueError(
                 f"{repr(ufunc)} cannot involve non-constant mygrad tensors."
             )
+
+    def __array_function__(self, func: Callable[..., np.ndarray], types, args, kwargs):
+        if func in _REGISTERED_DIFFERENTIABLE_NUMPY_FUNCS:
+            return _REGISTERED_DIFFERENTIABLE_NUMPY_FUNCS[func](*args, **kwargs)
+        elif func in _REGISTERED_NO_DIFF_NUMPY_FUNCS:
+            return func(
+                *(t.data if isinstance(t, Tensor) else t for t in args),
+                **{
+                    k: (v.data if isinstance(v, Tensor) else v)
+                    for k, v in kwargs.items()
+                },
+            )
+        else:
+            return NotImplemented
 
     def __array__(self, dtype: DTypeLike = None) -> np.ndarray:
         return np.array(self.data, dtype=dtype, copy=False)

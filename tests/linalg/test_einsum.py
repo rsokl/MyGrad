@@ -44,7 +44,8 @@ def compare_backprop(*operands, atol=1e-5, rtol=1e-5, optimize=False):
         def f(*args):
             return np.einsum(script, *args)
 
-        out = einsum(script, *tensors, optimize=optimize)
+        # tests override of numpy einsum when passed tensors
+        out = np.einsum(script, *tensors, optimize=optimize)
     else:
         # operands form: op0, sublist0, op1, sublist1, ..., [sublistout]
         end = -1 if len(operands) % 2 else None  # -1 if sublistout is included

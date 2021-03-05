@@ -2,8 +2,8 @@ from typing import Optional
 
 import numpy as np
 
-from mygrad import Tensor, asarray
 from mygrad.operation_base import _NoValue
+from mygrad.tensor_base import Tensor, asarray, implements_numpy_override
 from mygrad.typing import ArrayLike
 
 from .ops import Where
@@ -11,6 +11,7 @@ from .ops import Where
 __all__ = ["where"]
 
 
+@implements_numpy_override
 def where(
     condition: ArrayLike,
     x: ArrayLike = _NoValue,

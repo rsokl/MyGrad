@@ -115,7 +115,7 @@ def _get_indices(item, seq):
 class EinSum(Operation):
     can_return_view = True
 
-    def __call__(self, *variables, in_lbls, out_lbls, optimize=False):
+    def __call__(self, *variables, in_lbls, out_lbls, out=None, optimize=False):
         """
         einsum('{in_lbls}->{out_lbls}', *variables, optimize=optimize)
 
@@ -142,7 +142,8 @@ class EinSum(Operation):
         return np.einsum(
             "->".join((in_lbls, out_lbls)),
             *(var.data for var in self.variables),
-            optimize=optimize
+            optimize=optimize,
+            out=out,
         )
 
     @property

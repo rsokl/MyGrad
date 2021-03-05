@@ -149,12 +149,12 @@ def is_not_close_clip(a: Tensor, a_min=None, a_max=None) -> bool:
     ("mygrad_clip", "numpy_clip", "num_arrays"),
     [
         (
-            partial(amin_clip_only, clip),
+            partial(amin_clip_only, np.clip),  # exercises __array_function__
             partial(amin_clip_only, np.clip, constant=None),
             2,
         ),
         (
-            partial(amax_clip_only, clip),
+            partial(amax_clip_only, np.clip),  # exercises __array_function__
             partial(amax_clip_only, np.clip, constant=None),
             2,
         ),

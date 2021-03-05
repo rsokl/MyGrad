@@ -4,7 +4,7 @@ import numpy as np
 from numpy.core.einsumfunc import _parse_einsum_input
 
 import mygrad as mg
-from mygrad import Tensor
+from mygrad.tensor_base import Tensor, implements_numpy_override
 from mygrad.typing import ArrayLike, DTypeLikeReals
 from mygrad.ufuncs import ufunc_creator
 
@@ -96,7 +96,7 @@ def matmul(
 
     Notes
     -----
-    The matmul function implements the semantics of the `@` operator introduced
+    The matmul function implements_numpy_override the semantics of the `@` operator introduced
     in Python 3.5 following PEP465.
 
     Examples
@@ -136,9 +136,11 @@ def matmul(
     ...
 
 
+@implements_numpy_override
 def einsum(
     *operands: Union[ArrayLike, str, Sequence[int]],
     optimize: bool = False,
+    out: Optional[Union[np.ndarray, Tensor]] = None,
     constant: Optional[bool] = None,
 ) -> Tensor:
     r"""
@@ -404,6 +406,7 @@ def einsum(
         *variables,
         op_kwargs=dict(in_lbls=in_lbls, out_lbls=out_lbls, optimize=optimize),
         constant=constant,
+        out=out,
     )
 
 
