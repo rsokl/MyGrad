@@ -26,6 +26,7 @@ from mygrad.math.trigonometric.funcs import *
 from mygrad.nnet.layers.utils import sliding_window_view
 from mygrad.tensor_creation.funcs import *
 from mygrad.tensor_manip.array_shape.funcs import *
+from mygrad.tensor_manip.tensor_joining.funcs import *
 from mygrad.tensor_manip.tiling.funcs import *
 from mygrad.tensor_manip.transpose_like.funcs import *
 from mygrad.ufuncs._ufunc_creators import ufunc

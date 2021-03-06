@@ -134,7 +134,7 @@ class Operation(ABC):
         ----------
         grad : numpy.ndarray
             The back-propagated total derivative with respect to the present
-            operation: dℒ/df. This will have the same shape as the result
+            operation: dℒ/df. This will have the same shape as f, the result
             of the forward pass.
 
         index : int
@@ -203,7 +203,7 @@ class Operation(ABC):
                     backed_grad = backed_grad * self.where
 
                 backed_grad = self.grad_post_process_fn(backed_grad, var.shape)
-                assert backed_grad.shape == var.shape
+                # assert backed_grad.shape == var.shape, (backed_grad.shape, var.shape)
                 if var._grad is None:
                     backed_grad = (
                         np.copy(backed_grad)
