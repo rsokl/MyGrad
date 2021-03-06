@@ -98,8 +98,6 @@ def test_concatenate_with_dtype():
 
 
 def test_concatenate_with_inplace_target():
-    if np.__version__ < "1.20":
-        pytest.skip("concatenate does not support dtype until numpy 1.20")
     x = mg.tensor([1.0, 2.0])
     y = mg.empty((4,))
     np.concatenate([x, x], out=y)
