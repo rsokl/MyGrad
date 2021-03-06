@@ -40,7 +40,7 @@ def concatable_tensors(
     axis = draw(st.integers(-N, N - 1))
     pos_axis = axis % N
     shapes = []
-    for size in draw(st.lists(st.integers(1, 3), min_size=1, max_size=4)):
+    for size in draw(st.lists(st.integers(0, 3), min_size=1, max_size=4)):
         shape = master_shape.copy()
         shape.insert(pos_axis, size)
         shapes.append(shape)
