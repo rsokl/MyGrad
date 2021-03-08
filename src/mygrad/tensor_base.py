@@ -405,6 +405,7 @@ _REGISTERED_NO_DIFF_NUMPY_FUNCS: Set[Callable[..., np.ndarray]] = {
     np.min_scalar_type,
     np.result_type,
     np.shares_memory,
+    np.shape,
 }
 
 
@@ -442,6 +443,8 @@ class _ConstantOnly(ValueError):
 
 
 def _as_constant_array(t: Union["Tensor", np.ndarray]) -> np.ndarray:
+    """Passes through all non-tensor objects and constant tensors. Raises on
+    non-constant tensors."""
     if isinstance(t, Tensor):
         if t.constant is False:
             raise _ConstantOnly()

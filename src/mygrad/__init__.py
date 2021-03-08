@@ -24,6 +24,7 @@ from mygrad.math.sequential.funcs import *
 from mygrad.math.sequential.funcs import max, min
 from mygrad.math.trigonometric.funcs import *
 from mygrad.nnet.layers.utils import sliding_window_view
+from mygrad.no_grad_funcs import *
 from mygrad.tensor_creation.funcs import *
 from mygrad.tensor_manip.array_shape.funcs import *
 from mygrad.tensor_manip.tensor_joining.funcs import *
