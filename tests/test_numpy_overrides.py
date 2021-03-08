@@ -7,7 +7,7 @@ from mygrad.tensor_base import _REGISTERED_NO_DIFF_NUMPY_FUNCS
 
 
 def test_no_autodiff_all_matches_registered_numpy_funcs():
-    from mygrad.no_autodiff import __all__ as all_no_autodiffs
+    from mygrad.no_grad_funcs import __all__ as all_no_autodiffs
 
     assert set(all_no_autodiffs) >= set(
         k.__name__ for k in _REGISTERED_NO_DIFF_NUMPY_FUNCS
