@@ -906,18 +906,38 @@ class Tensor:
         return self._view_grad
 
     def astype(
-        self, dtype: DTypeLikeReals, *, constant: Optional[bool] = None
+        self,
+        dtype: DTypeLikeReals,
+        casting="unsafe",
+        copy: bool = True,
+        *,
+        constant: Optional[bool] = None,
     ) -> "Tensor":
         """Copy of the tensor with the specified dtype.
 
         The resulting tensor is not involved in any computational graph
         and has no gradient associated with it.
 
+        This docstring was adapted from that of ``ndarray.astype``.
+
         Parameters
         ----------
         dtype : Union[type, str]
             The real-valued numeric data type. This can be a numpy dtype or
             a corresponding string identifier.
+
+        casting : Literal['no', 'equiv', 'safe', 'same_kind', 'unsafe']
+            Controls what kind of data casting may occur. Defaults to ‘unsafe’ for backwards compatibility.
+                - ‘no’ means the data types should not be cast at all.
+                - ‘equiv’ means only byte-order changes are allowed.
+                - ‘safe’ means only casts which can preserve values are allowed.
+                - ‘same_kind’ means only safe casts or casts within a kind, like float64 to float32, are allowed.
+                - ‘unsafe’ means any data conversions may be done.
+
+        copy : bool, optional (default=True)
+            By default, astype always returns a newly allocated array. If this is set to false, and
+            the ``dtype`` and ``constant`` requirements are satisfied, the input tensor is returned
+            instead of a copy.
 
         constant : Optional[bool]
             If specified, determines if the returned tensor is a constant.
@@ -927,6 +947,10 @@ class Tensor:
         -------
         Tensor
             The resulting tensor with the specified data type.
+
+        References
+        ----------
+        [1].. Retrieved from: https://numpy.org/doc/stable/reference/generated/numpy.ndarray.astype.html
 
         Examples
         --------
@@ -946,7 +970,12 @@ class Tensor:
         >>> x.astype(np.int8, constant=True)
         Tensor([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype=int8)
         """
-        return type(self)(self.data, dtype=dtype, copy=True, constant=constant)
+        cast_data = self.data.astype(dtype=dtype, casting=casting, copy=copy)
+
+        if cast_data is self.data and (constant is None or self.constant is constant):
+            return self
+
+        return type(self)(cast_data, copy=False, constant=constant)
 
     @classmethod
     def _op(
