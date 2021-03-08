@@ -25,6 +25,7 @@ def test_astype(tensor: Tensor, dest_type: np.dtype, data: st.DataObject):
 
     expected_tensor = Tensor(tensor, dtype=dest_type, constant=constant)
 
+    assert new_tensor is not tensor
     assert new_tensor.constant is expected_tensor.constant
     assert tensor.creator is not None
     assert new_tensor.creator is None
@@ -56,3 +57,16 @@ def test_upcast_roundtrip(type_strategy, data: st.DataObject):
 
     roundtripped_tensor = orig_tensor.astype(wide).astype(thin)
     assert_array_equal(orig_tensor, roundtripped_tensor)
+
+
+@pytest.mark.parametrize("src_constant", [True, False])
+@pytest.mark.parametrize("dst_constant", [None, "match"])
+@pytest.mark.parametrize("casting", ["no", "equiv", "safe", "same_kind", "unsafe"])
+def test_nocopy(src_constant: bool, dst_constant, casting):
+    x = Tensor([1.0, 2.0], constant=src_constant)
+
+    if dst_constant == "match":
+        dst_constant = src_constant
+
+    y = x.astype(x.dtype, copy=False, casting=casting, constant=dst_constant)
+    assert y is x
