@@ -1,7 +1,24 @@
 import numpy as np
+import pytest
 from numpy.testing import assert_array_equal
 
 import mygrad as mg
+from mygrad.tensor_base import _REGISTERED_NO_DIFF_NUMPY_FUNCS
+
+
+def test_no_autodiff_all_matches_registered_numpy_funcs():
+    from mygrad.no_autodiff import __all__ as all_no_autodiffs
+
+    assert set(all_no_autodiffs) >= set(
+        k.__name__ for k in _REGISTERED_NO_DIFF_NUMPY_FUNCS
+    )
+
+
+@pytest.mark.parametrize(
+    "numpy_func", sorted(_REGISTERED_NO_DIFF_NUMPY_FUNCS, key=lambda x: x.__name__)
+)
+def test_registered_noautodiff_mirrored_in_mygrad(numpy_func):
+    assert getattr(mg, numpy_func.__name__) is numpy_func
 
 
 def test_allclose():
@@ -41,3 +58,21 @@ def test_result_type():
 def test_min_scalar_type():
     assert np.min_scalar_type(mg.tensor(3.1)) is np.dtype("float16")
     assert np.min_scalar_type(mg.tensor(1e50)) is np.dtype("float64")
+
+
+def test_copyto_tensor_to_tensor():
+    x = mg.tensor([1.0, 2.0])
+    y = mg.zeros((2,))
+    np.copyto(y, x)
+    assert_array_equal(y, [1.0, 2.0])
+
+
+def test_copyto_respects_read_only():
+    x = mg.tensor([1.0, 2.0])
+    y = +mg.zeros((2,))
+    with pytest.raises(ValueError):
+        np.copyto(y, x)
+
+
+def test_shape():
+    assert np.shape(mg.tensor(1, ndmin=3)) == (1, 1, 1)
