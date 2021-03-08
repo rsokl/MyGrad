@@ -14,7 +14,7 @@ from mygrad.errors import InvalidBackprop
 from mygrad.linalg.ops import MatMul
 from mygrad.math.arithmetic.ops import Add, Divide, Multiply, Negative, Power, Subtract
 from mygrad.operation_base import Operation
-from tests.custom_strategies import everything_except, tensors, valid_constant_arg
+from tests.custom_strategies import tensors, valid_constant_arg
 from tests.utils.errors import does_not_raise
 
 
@@ -40,7 +40,7 @@ def test_input_type_checking(data, constant, creator):
         Tensor(data, constant=constant, _creator=creator)
 
 
-@given(constant=everything_except((bool, type(None))))
+@pytest.mark.parametrize("constant", [1, (1,), np.array(1.0), "true", 0])
 def test_input_constant_checking(constant):
     with raises(TypeError):
         Tensor(1.0, constant=constant)
