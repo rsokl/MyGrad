@@ -27,15 +27,15 @@ class Concatenate(Operation):
 
         out = np.concatenate(tuple(var.data for var in input_vars), **kwargs)
 
+        self.variables = tuple(input_vars)
         if TRACK_GRAPH:
             self.axis = axis
-            self.variables = tuple(input_vars)
             if axis is not None:
                 # need to make sure axis is non-negative so that
                 # axis checking during backprop is simplified
                 self.axis = axis % out.ndim
                 self.indices = list(
-                    accumulate([var.data.shape[axis] for var in input_vars])
+                    accumulate(var.data.shape[axis] for var in input_vars)
                 )
                 self.indices.insert(0, 0)
             else:
@@ -56,5 +56,38 @@ class Concatenate(Operation):
                 if dim != self.axis
                 else slice(self.indices[index], self.indices[index + 1])
                 for dim in range(var.data.ndim)
+            )
+        ]
+
+
+class Stack(Operation):
+    def __call__(
+        self,
+        *input_vars: "Tensor",
+        axis: int = 0,
+        out: Optional[np.ndarray] = None,
+    ) -> np.ndarray:
+        out = np.stack(tuple(var.data for var in input_vars), axis=axis, out=out)
+
+        self.variables = tuple(input_vars)
+
+        if TRACK_GRAPH:
+            # need to make sure axis is non-negative so that
+            # axis checking during backprop is simplified
+            self.axis = axis % out.ndim
+
+        return out
+
+    def backward_var(self, grad, index, **kwargs) -> np.ndarray:
+        assert 0 <= index
+        var = self.variables[index]
+
+        if var.data.ndim == 0:
+            return grad[index]
+
+        return grad[
+            tuple(
+                slice(None, None, None) if dim != self.axis else index
+                for dim in range(var.data.ndim + 1)
             )
         ]

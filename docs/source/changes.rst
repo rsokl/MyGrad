@@ -43,7 +43,8 @@ New Functions and Utilities
 - :func:`~mygrad.mem_guard_on`
 - :func:`~mygrad.turn_memory_guarding_off`
 - :func:`~mygrad.turn_memory_guarding_on`
-
+- :func:`~mygrad.concatenate`
+- :func:`~mygrad.stack`
 
 Dropping Support for Python 3.6 and Numpy < 1.17
 ------------------------------------------------
