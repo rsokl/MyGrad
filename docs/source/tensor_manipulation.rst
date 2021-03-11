@@ -41,6 +41,7 @@ Joining tensors
    :toctree: generated/
 
    concatenate
+   stack
 
 
 Tiling tensors
