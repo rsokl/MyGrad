@@ -2,12 +2,13 @@ from typing import Optional, Tuple, Union
 
 import numpy as np
 
-from mygrad.tensor_base import Tensor
+from mygrad.tensor_base import Tensor, implements_numpy_override
 from mygrad.typing import ArrayLike
 
 __all__ = ["any", "argmin", "argmax"]
 
 
+@implements_numpy_override
 def argmax(
     a: ArrayLike, axis: Optional[int] = None, out: Optional[np.ndarray] = None
 ) -> np.ndarray:
@@ -31,6 +32,7 @@ def argmax(
     return np.argmax(a, axis, out)
 
 
+@implements_numpy_override
 def argmin(
     a: ArrayLike, axis: Optional[int] = None, out: Optional[np.ndarray] = None
 ) -> np.ndarray:
@@ -54,6 +56,7 @@ def argmin(
     return np.argmin(a, axis, out)
 
 
+@implements_numpy_override
 def any(
     a: ArrayLike,
     axis: Optional[Union[int, Tuple[int, ...]]] = None,
