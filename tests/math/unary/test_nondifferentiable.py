@@ -24,8 +24,8 @@ def test_argmin(tensor: mg.Tensor, data: st.DataObject):
 
     a = tensor.data
 
-    # tensor input
-    assert_allclose(mg.argmin(tensor, axis=axis), np.argmin(a, axis=axis))
+    # tensor input (exercises __array_function__)
+    assert_allclose(np.argmin(tensor, axis=axis), np.argmin(a, axis=axis))
 
     # tensor method
     assert_allclose(tensor.argmin(axis=axis), a.argmin(axis=axis))
@@ -45,8 +45,8 @@ def test_argmax(tensor: mg.Tensor, data: st.DataObject):
 
     a = tensor.data
 
-    # tensor input
-    assert_allclose(mg.argmax(tensor, axis=axis), np.argmax(a, axis=axis))
+    # tensor input (exercises __array_function__)
+    assert_allclose(np.argmax(tensor, axis=axis), np.argmax(a, axis=axis))
 
     # tensor method
     assert_allclose(tensor.argmax(axis=axis), a.argmax(axis=axis))
@@ -66,9 +66,9 @@ def test_any(tensor: mg.Tensor, data: st.DataObject, keepdims):
     axis = data.draw(valid_axes(ndim=tensor.ndim), label="axis")
     a = tensor.data
 
-    # tensor input
+    # tensor input (exercises __array_function__)
     assert_allclose(
-        mg.any(tensor, axis=axis, keepdims=keepdims),
+        np.any(tensor, axis=axis, keepdims=keepdims),
         np.any(a, axis=axis, keepdims=keepdims),
     )
 
