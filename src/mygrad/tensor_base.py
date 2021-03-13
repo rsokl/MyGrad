@@ -3,7 +3,6 @@ This module defines the base tensor class along with all of its essential
 attributes and special methods. Public math methods, e.g. ``sum``, ``mean``,
 etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 """
-from functools import wraps
 from numbers import Integral, Number
 from typing import (
     TYPE_CHECKING,
@@ -409,15 +408,15 @@ _REGISTERED_NO_DIFF_NUMPY_FUNCS: Set[Callable[..., np.ndarray]] = {
 }
 
 
-def implements_numpy_override(func: T) -> T:
+class implements_numpy_override:
     """Registers a mygrad-based override for a NumPy function of the same name, via
     the standard __array_function__ interface. [1]_
 
     Examples
     --------
-    >>> @implements_numpy_override
+    >>> @implements_numpy_override()  # np.reshape to be overridden
     ... def reshape(x, shape):
-    ...    # a mygrad-based implementation of numpy.sin
+    ...    # a mygrad-based implementation of numpy.reshape
     ...    print("hello world")
 
     >>> import numpy as np
@@ -425,17 +424,35 @@ def implements_numpy_override(func: T) -> T:
     >>> np.reshape(mg.tensor(1.), 2)
     'hello world'
 
+    You can also explicit provide the numpy function explicitly
+
+    >>> import numpy as np
+    >>> @implements_numpy_override(np.reshape)  # np.reshape to be overridden
+    ... def some_function(x, shape):
+    ...    pass
+
     References
     ----------
     .. [1] https://numpy.org/devdocs/reference/arrays.classes.html?#numpy.class.__array_function__"""
-    try:
-        _REGISTERED_DIFFERENTIABLE_NUMPY_FUNCS[getattr(np, func.__name__)] = func
-    except AttributeError:
-        raise AttributeError(
-            f"@implements_numpy_override tried to register an override for the function numpy.{func.__name__}, but no "
-            f"such function exists."
-        )
-    return func
+
+    __slots__ = ("numpy_func",)
+
+    def __init__(self, numpy_func: Optional[T] = None):
+        # if None, `numpy_func` is inferred from the name of the decorated function
+        self.numpy_func = numpy_func
+
+    def __call__(self, wrapped_func):
+        if self.numpy_func is None:
+            try:
+                self.numpy_func = getattr(np, wrapped_func.__name__)
+            except AttributeError:
+                raise AttributeError(
+                    f"@implements_numpy_override tried to register an override for the function numpy.{wrapped_func.__name__}, but no "
+                    f"such function exists."
+                )
+
+        _REGISTERED_DIFFERENTIABLE_NUMPY_FUNCS[self.numpy_func] = wrapped_func
+        return wrapped_func
 
 
 class _ConstantOnly(ValueError):

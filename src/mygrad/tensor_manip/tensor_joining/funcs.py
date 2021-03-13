@@ -10,7 +10,7 @@ from .ops import Concatenate, Stack
 __all__ = ["concatenate", "stack"]
 
 
-@implements_numpy_override
+@implements_numpy_override()
 def concatenate(
     tensors: Sequence[ArrayLike],
     axis: Optional[int] = 0,
@@ -97,7 +97,7 @@ def concatenate(
     )
 
 
-@implements_numpy_override
+@implements_numpy_override()
 def stack(
     tensors: Sequence[ArrayLike],
     axis: int = 0,

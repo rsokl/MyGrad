@@ -12,7 +12,7 @@ def test_override_on_non_numpy_function():
         pass
 
     with pytest.raises(AttributeError):
-        implements_numpy_override(not_a_numpy_function)
+        implements_numpy_override()(not_a_numpy_function)
 
 
 @pytest.mark.parametrize(

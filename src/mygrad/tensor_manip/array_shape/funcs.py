@@ -8,7 +8,7 @@ from .ops import *
 __all__ = ["reshape", "squeeze", "ravel", "expand_dims", "broadcast_to"]
 
 
-@implements_numpy_override
+@implements_numpy_override()
 def reshape(
     a: ArrayLike, newshape: Union[int, Shape], *, constant: Optional[bool] = None
 ) -> Tensor:
@@ -56,7 +56,7 @@ def reshape(
     return Tensor._op(Reshape, a, op_args=(newshape,), constant=constant)
 
 
-@implements_numpy_override
+@implements_numpy_override()
 def squeeze(
     a: ArrayLike,
     axis: Optional[Union[int, Tuple[int, ...]]] = None,
@@ -110,7 +110,7 @@ def squeeze(
     return Tensor._op(Squeeze, a, op_args=(axis,), constant=constant)
 
 
-@implements_numpy_override
+@implements_numpy_override()
 def ravel(a: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
     """
     Flattens contents of a tensor into a contiguous 1-D array.  A copy is made only if needed.
@@ -147,7 +147,7 @@ def ravel(a: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
     return Tensor._op(Ravel, a, constant=constant)
 
 
-@implements_numpy_override
+@implements_numpy_override()
 def expand_dims(a: ArrayLike, axis: int, *, constant: Optional[bool] = None) -> Tensor:
     """
     Expand the dimensions of a tensor by adding a new axis.
@@ -186,7 +186,7 @@ def expand_dims(a: ArrayLike, axis: int, *, constant: Optional[bool] = None) -> 
     return Tensor._op(ExpandDims, a, op_args=(axis,), constant=constant)
 
 
-@implements_numpy_override
+@implements_numpy_override()
 def broadcast_to(
     a: ArrayLike, shape: Shape, *, constant: Optional[bool] = None
 ) -> Tensor:

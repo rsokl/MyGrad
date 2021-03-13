@@ -8,7 +8,7 @@ from .ops import Repeat
 __all__ = ["repeat"]
 
 
-@implements_numpy_override
+@implements_numpy_override()
 def repeat(
     a: ArrayLike,
     repeats: Union[int, Sequence[int]],

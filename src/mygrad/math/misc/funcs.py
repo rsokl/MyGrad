@@ -403,7 +403,7 @@ def minimum(
     ...
 
 
-@implements_numpy_override
+@implements_numpy_override()
 def clip(
     a: ArrayLike, a_min: ArrayLike, a_max: ArrayLike, *, constant: Optional[bool] = None
 ) -> Tensor:

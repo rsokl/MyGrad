@@ -2,14 +2,16 @@ from collections import Counter
 from copy import copy
 from functools import reduce
 from itertools import chain
+from typing import Optional
 
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
 
 from mygrad._utils import SkipGradient, reduce_broadcast
+from mygrad._utils.graph_tracking import TRACK_GRAPH
 from mygrad.operation_base import BinaryUfunc, Operation
 
-__all__ = ["MatMul", "EinSum"]
+__all__ = ["MatMul", "EinSum", "Norm"]
 
 
 class MatMul(BinaryUfunc):
@@ -281,3 +283,68 @@ class EinSum(Operation):
             # pair is accounted for.
             dfdx *= factor
         return dfdx
+
+
+class Norm(Operation):
+    def __call__(self, tensor, ord=None, axis=None, keepdims=None):
+        self.variables = (tensor,)
+        out = np.linalg.norm(tensor.data, ord=ord, axis=axis, keepdims=keepdims)
+
+        if np.isinf(ord):  # pragma: no cover
+            raise NotImplementedError(
+                "inf norms should be handled by mygrad.max(abs(x))"
+            )
+
+        if (tensor.ndim == 2 and ord is not None and axis is None) or (
+            hasattr(axis, "__len__") and len(axis) > 1
+        ):
+            raise NotImplementedError(
+                "mygrad.linalg.norm does not support matrix norms"
+            )
+
+        if ord == 0:
+            raise NotImplementedError(
+                "mygrad.linalg.norm(..., ord=0) is not a differentiable operation"
+            )
+
+        if TRACK_GRAPH:
+            if hasattr(axis, "__len__"):
+                (axis,) = axis
+
+            self.axis: Optional[int] = axis
+            self.keepdims = keepdims
+            self.ord = ord
+
+            if self.keepdims is not None:
+                out = np.expand_dims(out, axis=self.axis)
+
+            # is broadcast-compatible with `tensor`
+            self._norm: np.ndarray = out
+
+        return out
+
+    def backward_var(self, grad: np.ndarray, index: int, **kwargs) -> np.ndarray:
+        (tensor,) = self.variables
+        x = tensor.data
+
+        if self.keepdims is not None:
+            # is broadcast-compatible with `tensor`
+            grad = np.expand_dims(grad, axis=self.axis)
+
+        if self.ord == 1:
+            out = np.sign(x)
+            out *= grad
+            return out
+
+        if self.ord == 2:
+            out = x / self._norm
+            out *= grad
+            return out
+
+        out = np.fabs(x)
+        out **= self.ord - 1
+        out *= np.sign(x)
+        out *= self._norm
+        out /= np.linalg.norm(x, axis=self.axis, ord=1, keepdims=True)
+        out *= grad
+        return out

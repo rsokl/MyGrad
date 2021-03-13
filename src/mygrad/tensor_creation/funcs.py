@@ -94,7 +94,7 @@ def empty(
     return Tensor(np.empty(shape=shape, dtype=dtype), constant=constant, copy=False)
 
 
-@implements_numpy_override
+@implements_numpy_override()
 def empty_like(
     other: ArrayLike,
     dtype: Optional[DTypeLikeReals] = None,
@@ -329,7 +329,7 @@ def ones(
     return Tensor(np.ones(shape, dtype=dtype), constant=constant, copy=False)
 
 
-@implements_numpy_override
+@implements_numpy_override()
 def ones_like(
     other: ArrayLike,
     dtype: Optional[DTypeLikeReals] = None,
@@ -460,7 +460,7 @@ def zeros(
     return Tensor(np.zeros(shape, dtype), constant=constant, copy=False)
 
 
-@implements_numpy_override
+@implements_numpy_override()
 def zeros_like(
     other: ArrayLike,
     dtype: Optional[DTypeLikeReals] = None,
@@ -600,7 +600,7 @@ def full(
     )
 
 
-@implements_numpy_override
+@implements_numpy_override()
 def full_like(
     other: ArrayLike,
     fill_value: Real,
