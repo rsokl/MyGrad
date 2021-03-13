@@ -2,6 +2,7 @@ from collections import Counter
 from copy import copy
 from functools import reduce
 from itertools import chain
+from numbers import Real
 from typing import Optional
 
 import numpy as np
@@ -286,11 +287,11 @@ class EinSum(Operation):
 
 
 class Norm(Operation):
-    def __call__(self, tensor, ord=None, axis=None, keepdims=None):
+    def __call__(self, tensor, ord=None, axis=None, keepdims=False):
         self.variables = (tensor,)
         out = np.linalg.norm(tensor.data, ord=ord, axis=axis, keepdims=keepdims)
 
-        if np.isinf(ord):  # pragma: no cover
+        if isinstance(ord, Real) and np.isinf(ord):  # pragma: no cover
             raise NotImplementedError(
                 "inf norms should be handled by mygrad.max(abs(x))"
             )
@@ -313,13 +314,17 @@ class Norm(Operation):
 
             self.axis: Optional[int] = axis
             self.keepdims = keepdims
-            self.ord = ord
+            self.ord = ord if ord is not None else 2
 
-            if self.keepdims is not None:
-                out = np.expand_dims(out, axis=self.axis)
+            # self._norm is broadcast-compatible with `tensor`
+            if self.keepdims is False:
+                _axis = (
+                    self.axis if self.axis is not None else tuple(range(tensor.ndim))
+                )
 
-            # is broadcast-compatible with `tensor`
-            self._norm: np.ndarray = out
+                self._norm: np.ndarray = np.expand_dims(out, axis=_axis)
+            else:
+                self._norm: np.ndarray = out
 
         return out
 
@@ -327,9 +332,10 @@ class Norm(Operation):
         (tensor,) = self.variables
         x = tensor.data
 
-        if self.keepdims is not None:
+        if self.keepdims is False:
             # is broadcast-compatible with `tensor`
-            grad = np.expand_dims(grad, axis=self.axis)
+            _axis = self.axis if self.axis is not None else tuple(range(tensor.ndim))
+            grad = np.expand_dims(grad, axis=_axis)
 
         if self.ord == 1:
             out = np.sign(x)
