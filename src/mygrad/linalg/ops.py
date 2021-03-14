@@ -300,10 +300,12 @@ class Norm(Operation):
 
         if self.ord == 1:
             out = np.sign(x)
+            out[out == 0.0] = 1.0
             out *= grad
             return out
 
         if self.ord == 2:
+            self._norm = np.clip(self._norm, np.finfo(self._norm.dtype).eps, None)
             out = x / self._norm
             out *= grad
             return out
