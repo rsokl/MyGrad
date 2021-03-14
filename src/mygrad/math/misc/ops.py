@@ -79,3 +79,42 @@ class Maximum(_MaxMin):
 class Minimum(_MaxMin):
     numpy_ufunc = np.minimum
     _comparison = staticmethod(np.less)
+
+
+class MatMul(BinaryUfunc):
+    numpy_ufunc = np.matmul
+    _supports_where = False
+
+    def backward_var(self, grad, index, **kwargs):
+        a, b = self.variables
+        a = a.data
+        b = b.data
+
+        # handle 1D w/ 1D (dot product of vectors)
+        if a.ndim == 1 and b.ndim == 1:
+            if index == 0:
+                return grad * b
+            elif index == 1:
+                return grad * a
+
+        if index == 0:  # compute grad through a
+            if b.ndim > 1:  # ([...], j) w/ ([...], j, k)
+                if a.ndim == 1:
+                    grad = np.expand_dims(grad, -2)
+                dfdx = np.matmul(grad, b.swapaxes(-1, -2))
+            else:  # ([...], i, j) w/ (j,)
+                dfdx = np.expand_dims(grad, -1) * b
+            return dfdx
+
+        if index == 1:  # compute grad through b
+            if a.ndim > 1:  # ([...], i, j) w/ ([...], j, [k])
+                if b.ndim == 1:
+                    grad = np.expand_dims(grad, -1)
+                dfdx = np.matmul(a.swapaxes(-1, -2), grad)
+                if b.ndim == 1:
+                    dfdx = dfdx.squeeze(-1)
+            else:  # (j,) w/ ([...], j, k)
+                dfdx = a[:, np.newaxis] * np.expand_dims(grad, -2)
+            return dfdx
+        else:  # pragma: no cover
+            raise ValueError()

@@ -14,7 +14,7 @@ from mygrad._utils.lock_management import (
     turn_memory_guarding_on,
 )
 from mygrad.indexing_routines.funcs import *
-from mygrad.linalg.funcs import *
+from mygrad.linalg.funcs import einsum
 from mygrad.math.arithmetic.funcs import *
 from mygrad.math.consts import *
 from mygrad.math.exp_log.funcs import *

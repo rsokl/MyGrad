@@ -1,10 +1,11 @@
 import hypothesis.extra.numpy as hnp
+import mygrad.math.misc.funcs
 import numpy as np
 from hypothesis import settings
 from numpy.testing import assert_allclose
 
 import mygrad as mg
-from mygrad import matmul
+from mygrad.math.misc.funcs import matmul
 from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
@@ -36,7 +37,7 @@ def test_matmul_with_target_tensor():
     y = mg.tensor([0.0, 0.0, 0.0])
     x1 = mg.tensor([1.0])
     x2 = mg.tensor([2.0])
-    out = mg.matmul(x1, x2, out=y[1:2])
+    out = mygrad.math.misc.funcs.matmul(x1, x2, out=y[1:2])
 
     assert_allclose(y, [0.0, 2.0, 0.0])
     out.backward()

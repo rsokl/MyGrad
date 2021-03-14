@@ -11,7 +11,7 @@ from pytest import raises
 import mygrad as mg
 from mygrad import Tensor
 from mygrad.errors import InvalidBackprop
-from mygrad.linalg.ops import MatMul
+from mygrad.math.misc.ops import MatMul
 from mygrad.math.arithmetic.ops import Add, Divide, Multiply, Negative, Power, Subtract
 from mygrad.operation_base import Operation
 from tests.custom_strategies import tensors, valid_constant_arg

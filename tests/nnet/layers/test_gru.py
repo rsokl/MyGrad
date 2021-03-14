@@ -7,7 +7,8 @@ import pytest
 from hypothesis import example, given, settings
 from numpy.testing import assert_allclose
 
-from mygrad import matmul, mem_guard_off, no_autodiff
+from mygrad import mem_guard_off, no_autodiff
+from mygrad.math.misc.funcs import matmul
 from mygrad.nnet.activations import sigmoid, tanh
 from mygrad.tensor_base import Tensor
 from tests.utils.errors import does_not_raise
