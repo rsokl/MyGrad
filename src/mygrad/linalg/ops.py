@@ -298,22 +298,24 @@ class Norm(Operation):
             _axis = self.axis if self.axis is not None else tuple(range(tensor.ndim))
             grad = np.expand_dims(grad, axis=_axis)
 
+        invalid_derivative = np.where(x == 0)
+
         if self.ord == 1:
             out = np.sign(x)
-            out[out == 0.0] = 1.0
             out *= grad
-            return out
 
-        if self.ord == 2:
-            self._norm = np.clip(self._norm, np.finfo(self._norm.dtype).eps, None)
+        elif self.ord == 2:
             out = x / self._norm
             out *= grad
-            return out
 
-        out = np.fabs(x)
-        out **= self.ord - 1
-        out *= np.sign(x)
-        out *= self._norm
-        out /= np.linalg.norm(x, axis=self.axis, ord=1, keepdims=True)
-        out *= grad
+        else:
+            out = np.fabs(x)
+            _norm = self._norm / np.sum(
+                out ** self.ord, axis=self.axis, keepdims=True
+            )
+            out **= self.ord - 1
+            out *= np.sign(x)
+            out *= _norm
+            out *= grad
+        out[invalid_derivative] = np.nan
         return out

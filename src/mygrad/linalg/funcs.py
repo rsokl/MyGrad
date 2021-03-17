@@ -23,7 +23,7 @@ def norm(
     keepdims: bool = False,
     *,
     constant: Optional[bool] = None,
-):
+) -> Tensor:
     r"""Vector norm.
 
     This function is an infinite number of vector norms (described below), depending
@@ -404,5 +404,3 @@ def einsum(
         constant=constant,
         out=out,
     )
-
-

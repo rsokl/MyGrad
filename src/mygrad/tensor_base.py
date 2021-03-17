@@ -437,11 +437,11 @@ class implements_numpy_override:
 
     __slots__ = ("numpy_func",)
 
-    def __init__(self, numpy_func: Optional[T] = None):
+    def __init__(self, numpy_func: Optional[Callable] = None):
         # if None, `numpy_func` is inferred from the name of the decorated function
         self.numpy_func = numpy_func
 
-    def __call__(self, wrapped_func):
+    def __call__(self, wrapped_func: T) -> T:
         if self.numpy_func is None:
             try:
                 self.numpy_func = getattr(np, wrapped_func.__name__)
