@@ -310,9 +310,13 @@ class Norm(Operation):
 
         else:
             out = np.fabs(x)
-            _norm = self._norm / np.sum(
-                out ** self.ord, axis=self.axis, keepdims=True
-            )
+            if out.size:
+                # this
+                _norm = self._norm / np.sum(
+                    out ** self.ord, axis=self.axis, keepdims=True
+                )
+            else:
+                _norm = +self._norm
             out **= self.ord - 1
             out *= np.sign(x)
             out *= _norm
