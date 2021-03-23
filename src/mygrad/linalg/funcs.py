@@ -65,8 +65,8 @@ def norm(
 
     Returns
     -------
-    n : float or ndarray
-        Norm of the matrix or vector(s).
+    Tensor
+        Norm(s) of the vector(s).
 
     Notes
     -----
@@ -106,6 +106,25 @@ def norm(
 
     Examples
     --------
+    >>> import mygrad as mg
+    >>> x = mg.tensor([[1.0, 2.0, 3.0],
+    ...                [1.0, 0.0, 0.0]])
+    >>> l2_norms = mg.linalg.norm(x, axis=1, ord=2)
+    >>> l2_norms
+    Tensor([3.74165739, 1.        ])
+
+    The presence of the elementwise absolute values in the norm means that zero-valued
+    entries in a vectors have an undefined derivative.
+
+    >>> l2_norms.backward()
+    >>> x.grad
+    array([[0.26726124, 0.53452248, 0.80178373],
+           [1.        ,        nan,        nan]])
+
+    L1 norms along each of the three columns:
+
+    >>> mg.linalg.norm(x, axis=0, ord=1)
+    Tensor([2., 2., 3.])
     """
     if isinstance(ord, Real) and np.isinf(ord):
         op = mg_max if ord > 0 else mg_min
