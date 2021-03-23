@@ -311,7 +311,7 @@ class Norm(Operation):
         else:
             out = np.fabs(x)
             if out.size:
-                # this
+                # if out.size is 0, then this produces div-by-zero
                 _norm = self._norm / np.sum(
                     out ** self.ord, axis=self.axis, keepdims=True
                 )
