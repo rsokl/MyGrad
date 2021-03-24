@@ -55,9 +55,11 @@ NumPy's view semantics are also mirrored to a high fidelity
          [6., 7., 8.]]),
  Tensor([0., 4., 8.]))
 
+# views share memory
 >>> np.shares_memory(x, diag_view)
 True
 
+# mutating a view affects its base (and all other views)
 >>> diag_view *= -1  # mutates x in-place
 >>> x
 Tensor([[-0.,  1.,  2.],
@@ -71,6 +73,7 @@ Tensor([[-0.,  1.,  2.],
         [ 12.,  14., -16.]]),
  array([ -0.,  -8., -16.]))
 
+# the gradients have the same view relationship!
 >>> np.shares_memory(x.grad, diag_view.grad)
 True
 ```
