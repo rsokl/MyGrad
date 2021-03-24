@@ -264,14 +264,13 @@ def test_ufunc_bkwd(
 
     # check that gradients match numerical derivatives
     for n in range(ufunc.nin):
-        desired = np.nan_to_num(grads[n])
+        desired = grads[n]
         actual = args.args[n].grad
         assert_allclose(
             desired=desired,
             actual=actual,
             err_msg=f"the grad of tensor-{n} did not match the "
             f"numerically-computed gradient",
-            atol=1e-5,
         )
 
 
