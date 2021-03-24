@@ -7,17 +7,94 @@
 
 # [MyGrad's Documentation](https://mygrad.readthedocs.io/en/latest/)
 
+Please note that MyGrad 2.0 is currently available as a pre-release;
+you can give it a whirl by installing it via the following command:
+
+```shell script
+pip install --pre mygrad
+```
+
+This represents a [massive overhaul of the library](https://mygrad.readthedocs.io/en/latest/changes.html), which adds lots of exciting features, like drop-in autodiff for
+NumPy functions!
+
 # Introducing mygrad
-`mygrad` is a simple, NumPy-centric autograd library. An autograd library enables you to automatically compute derivatives of mathematical functions. This library
-is designed to serve both as a tool for prototyping/testing and as an education tool for learning about gradient-based machine learning; it is easy to install, has a readable and easily customizable code
-base, and provides a sleek interface that mimics NumPy. Furthermore, it leverages NumPy's vectorization
-to achieve good performance despite the library's simplicity. 
+MyGrad is a lightweight (its only dependency is NumPy) autodiff library, that brings drop-in autodiff to NumPy!
 
-This is not meant to be a competitor to libraries like PyTorch (which `mygrad` most closely resembles) or
-TensorFlow. Rather, it is meant to serve as a useful tool for students who are learning about training neural networks
-using back propagation.
+```python
+>>> import mygrad as mg
+>>> import numpy as np
 
+>>> x = mg.tensor([1., 2., 3.])  # like numpy.array, but supports backprop!
+>>> np.sum(x * x).backward()  # works natively with numpy functions!
+>>> x.grad
+array([2., 4., 6.])
+```
 
+MyGrad's main goal is to make automatic differentiation accessible and easy to use for students and researchers alike!
+As such, it strives to behave and feel exactly like NumPy so that users need not learn yet another array-based math library.  
+
+NumPy's ufuncs are richly supported; e.g. we can autodiff through in-place targets and boolean masks:  
+
+```python
+>>> x = mg.tensor([1., 2., 3.])
+>>> y = mg.zeros_like(x)
+>>> np.multiply(x, x, where=[True, False, True], out=y)
+>>> y.backward()
+>>> x.grad
+array([2., 0., 6.])
+```
+
+NumPy's view semantics are also mirrored to a high fidelity
+
+```python
+>>> x = mg.arange(9.).reshape(3, 3)
+>>> diag_view = np.einsum("ii->i", x)
+>>> x, diag_view
+(Tensor([[0., 1., 2.],
+         [3., 4., 5.],
+         [6., 7., 8.]]),
+ Tensor([0., 4., 8.]))
+
+>>> np.shares_memory(x, diag_view)
+True
+
+>>> diag_view *= -1  # mutates x in-place
+>>> x
+Tensor([[-0.,  1.,  2.],
+        [ 3., -4.,  5.],
+        [ 6.,  7., -8.]])
+
+>>> (x ** 2).backward()
+>>> x.grad, diag_view.grad
+(array([[ -0.,   2.,   4.],
+        [  6.,  -8.,  10.],
+        [ 12.,  14., -16.]]),
+ array([ -0.,  -8., -16.]))
+
+>>> np.shares_memory(x.grad, diag_view.grad)
+True
+```
+
+Basic and advanced indexing is fully supported
+
+```python
+>>> (x[x < 4] ** 2).backward()
+>>> x.grad
+array([[0., 2., 4.],
+       [6., 0., 0.],
+       [0., 0., 0.]])
+```
+
+NumPy arrays and other array-likes play nicely with MyGrad's tensor. These behave like constants
+during automatic differentiation
+
+```python
+>>> x = mg.tensor([1., 2., 3.])
+>>> y = np.array([-1., 0., 10])
+>>> (x * y).backward()  # y is treated as a constant
+>>> x.grad
+array([-1.,  0., 10.])
+```
 
 ## Installing mygrad (this project)
 To install MyGrad, you can pip-install it:
