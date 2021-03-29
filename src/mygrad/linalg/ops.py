@@ -247,6 +247,15 @@ class EinSum(Operation):
         return dfdx
 
 
+def _expand_dims(x, axis, original_ndmin):
+    if axis is not None:
+        # axis: int
+        return np.expand_dims(x, axis=axis)
+    else:
+        # expand_dims doesn't work for tuple axes for numpy < 1.18
+        return x[(None,) * original_ndmin]
+
+
 class Norm(Operation):
     def __call__(self, tensor, ord=None, axis=None, keepdims=False):
         self.variables = (tensor,)
@@ -279,11 +288,9 @@ class Norm(Operation):
 
             # self._norm is broadcast-compatible with `tensor`
             if self.keepdims is False:
-                _axis = (
-                    self.axis if self.axis is not None else tuple(range(tensor.ndim))
+                self._norm = _expand_dims(
+                    out, axis=self.axis, original_ndmin=tensor.ndim
                 )
-
-                self._norm: np.ndarray = np.expand_dims(out, axis=_axis)
             else:
                 self._norm: np.ndarray = out
 
@@ -295,8 +302,7 @@ class Norm(Operation):
 
         if self.keepdims is False:
             # is broadcast-compatible with `tensor`
-            _axis = self.axis if self.axis is not None else tuple(range(tensor.ndim))
-            grad = np.expand_dims(grad, axis=_axis)
+            grad = _expand_dims(grad, axis=self.axis, original_ndmin=tensor.ndim)
 
         invalid_derivative = np.where(x == 0)
 

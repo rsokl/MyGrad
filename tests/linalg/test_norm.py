@@ -17,10 +17,10 @@ def axis_strat(*ts, permit_none=False):
     (t,) = ts
     if t.ndim == 0:
         return st.none()
-
-    return valid_axes(
+    v = valid_axes(
         t.ndim, single_axis_only=True, permit_int=True, permit_none=permit_none
     )
+    return v | st.tuples(v)
 
 
 def ord_strat(*ts):
@@ -70,6 +70,10 @@ def test_ord_0_raises():
         mg.linalg.norm(t, ord=0)
 
 
+def test_manual_norm_with_tuple_axis():
+    pass
+
+
 @settings(max_examples=1000)
 @fwdprop_test_factory(
     mygrad_func=mg.linalg.norm,
@@ -77,7 +81,7 @@ def test_ord_0_raises():
     num_arrays=1,
     kwargs=dict(axis=axis_strat, ord=ord_strat, keepdims=keepdims_strat),
 )
-def test_linalg_fwd():
+def test_norm_fwd():
     pass
 
 
@@ -91,7 +95,7 @@ def test_linalg_fwd():
     ),
     vary_each_element=True,
 )
-def test_linalg_bkwd_ord_2():
+def test_norm_bkwd_ord_2():
     pass
 
 
@@ -100,7 +104,7 @@ def test_linalg_bkwd_ord_2():
     x=hnp.arrays(
         shape=hnp.array_shapes(min_dims=1, min_side=0),
         dtype=float,
-        elements=st.floats(-1e1, 1e1).filter(lambda x: np.abs(x) > 0.1),
+        elements=st.floats(-1e9, 1e9).filter(lambda x: np.abs(x) > 1e-6),
     ),
     data=st.data(),
 )
