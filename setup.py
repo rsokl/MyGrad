@@ -23,18 +23,18 @@ CLASSIFIERS = [
 INSTALL_REQUIRES = ["numpy >= 1.17"]
 TESTS_REQUIRE = ["pytest >= 3.8", "hypothesis >= 5.32.0", "scipy"]
 
-DESCRIPTION = "A sleek auto-differentiation library that wraps numpy."
+DESCRIPTION = "Brings drop-in automatic differentiation to NumPy"
 LONG_DESCRIPTION = """
-mygrad is a simple, NumPy-centric autograd library. An autograd library enables
-you to automatically compute derivatives of mathematical functions. This library is
-designed to serve primarily as an education tool for learning about gradient-based
-machine learning; it is easy to install, has a readable and easily customizable code base,
-and provides a sleek interface that mimics NumPy. Furthermore, it leverages NumPy's
-vectorization to achieve good performance despite the library's simplicity.
+MyGrad is a lightweight library that adds automatic differentiation to NumPy – its only dependency is NumPy!
+It's primary goal is to make automatic differentiation an accessible and easy to use across the Python/NumPy ecosystem.
 
-This is not meant to be a competitor to libraries like PyTorch (which mygrad most
-closely resembles) or TensorFlow. Rather, it is meant to serve as a useful tool for
-students who are learning about training neural networks using back propagation.
+MyGrad introduces a tensor object, which behaves like NumPy's ndarray object, but that builds a computational
+graph, which enables MyGrad to perform reverse-mode differentiation (i.e. "backpropagation"). By exploiting
+NumPy's mechanisms for ufunc/function overrides, MyGrad's tensor works "natively" with NumPy's suite of mathematical
+functions so that they can be chained together into a differentiable computational graph.
+
+NumPy's systems for broadcasting operations, producing views of arrays, performing in-place operations, and permitting
+both "basic" and "advanced" indexing of arrays are all supported by MyGrad to a high-fidelity.
 """
 
 

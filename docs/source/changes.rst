@@ -9,19 +9,25 @@ on pip.
 .. _v2.0.0:
 
 ------------------
-2.0.0 - 2021-01-01
+2.0.0 - 2021-03-30
 ------------------
 
 🎉🎉🎉
 
 This is a compatibility-breaking update to MyGrad, and it's great!
 MyGrad 2.0 represents a major overhaul to this project.
-Its primary feature is that MyGrad now offers the ability to create and augment views of
-tensors.
-This enables a large variety of convenient code patterns that were impossible in MyGrad 1.X.
-It also creates near parity between the experiences of using MyGrad and using NumPy
-(which, in turn, paves the way for injecting autodiff functionality *into* NumPy code via MyGrad in
-a future release!).
+This release creates near parity between the experiences of using MyGrad and using NumPy, and uses NumPy's new
+mechanisms for overriding functions so that NumPy functions can operate "directly" on MyGrad's tensors, and thus
+can be used to construct differentiable computational graphs!
+
+.. code:: python
+
+   >>> import numpy as np
+   >>> from mygrad import tensor
+   >>> x = tensor([1., 2.])
+   >>> np.square(x).backward()  # backprop through NumPy functions!
+   >>> x.grad
+   array([2., 4.])
 
 Another important, but less exciting, feature is that MyGrad now protects users from inadvertently
 corrupting the state of a computational graph by, say, mutating a NumPy array that is participating in
@@ -45,6 +51,8 @@ New Functions and Utilities
 - :func:`~mygrad.turn_memory_guarding_on`
 - :func:`~mygrad.concatenate`
 - :func:`~mygrad.stack`
+- :func:`~mygrad.linalg.norm`
+
 
 Dropping Support for Python 3.6 and Numpy < 1.17
 ------------------------------------------------

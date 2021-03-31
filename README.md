@@ -7,18 +7,9 @@
 
 # [MyGrad's Documentation](https://mygrad.readthedocs.io/en/latest/)
 
-Please note that MyGrad 2.0 is currently available as a pre-release;
-you can give it a whirl by installing it via the following command:
-
-```shell script
-pip install --pre mygrad
-```
-
-This represents a [massive overhaul of the library](https://mygrad.readthedocs.io/en/latest/changes.html), which adds lots of exciting features, like drop-in autodiff for
-NumPy functions!
 
 # Introducing mygrad
-MyGrad is a lightweight (its only dependency is NumPy) autodiff library, that brings drop-in autodiff to NumPy!
+MyGrad is a lightweight library that adds automatic differentiation to NumPy – its only dependency is NumPy! 
 
 ```python
 >>> import mygrad as mg
@@ -30,7 +21,7 @@ MyGrad is a lightweight (its only dependency is NumPy) autodiff library, that br
 array([2., 4., 6.])
 ```
 
-MyGrad's main goal is to make automatic differentiation accessible and easy to use for students and researchers alike!
+MyGrad's primary goal is to make automatic differentiation an accessible and easy to use across the Python/NumPy ecosystem.
 As such, it strives to behave and feel exactly like NumPy so that users need not learn yet another array-based math library.  
 
 NumPy's ufuncs are richly supported; e.g. we can autodiff through in-place targets and boolean masks:  

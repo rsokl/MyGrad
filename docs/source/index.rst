@@ -5,80 +5,94 @@
 
 MyGrad
 ======
-MyGrad is a simple, NumPy-centric math library that is capable of performing *automatic differentiation*. That is, the
-mathematical functions provided by MyGrad are capable of computing their own derivatives. If you know `how to use NumPy
-<https://www.pythonlikeyoumeanit.com/module_3.html>`_ then you can learn how to use MyGrad in a matter of minutes!
+MyGrad is a lightweight library that adds automatic differentiation to NumPy – its only dependency is NumPy!
 
-Let's use ``mygrad`` to compute the derivative of
-:math:`f(x) = x^2` evaluated at :math:`x = 3` (which is :math:`\frac{df}{dx}\rvert_{x=3} = 2\times 3`).
+.. code:: python
 
-:class:`~mygrad.Tensor` behaves nearly identically to NumPy's ndarray, in addition to having the machinery needed to
-compute the analytic derivatives of functions. Suppose we want to compute this derivative at ``x = 3``. We can create a
-0-dimensional tensor (a scalar) for x and compute ``f(x)``:
+   >>> import mygrad as mg
+   >>> import numpy as np
 
-.. code:: pycon
-
-    >>> import mygrad as mg
-    >>> x = mg.Tensor(3.0)
-    >>> f = x ** 2
-    >>> f
-    Tensor(9.0)
+   >>> x = mg.tensor([1., 2., 3.])  # like numpy.array, but supports backprop!
+   >>> np.sum(x * x).backward()  # works natively with numpy functions!
+   >>> x.grad
+   array([2., 4., 6.])
 
 
-Invoking :meth:`~mygrad.Tensor.backward` on ``f`` instructs ``mygrad`` to trace through the computational graph that produced ``f`` and compute the
-derivatives of ``f`` with respect to all of its independent variables. Thus, executing ``f.backward()`` will compute :math:`\frac{df}{dx} = 2x` at :math:`x=3`, and will store the resulting value in ``x.grad``:
+MyGrad's primary goal is to make automatic differentiation an accessible and easy to use across the Python/NumPy ecosystem.
+As such, it strives to behave and feel exactly like NumPy so that users need not learn yet another array-based math library.
 
-.. code:: pycon
+NumPy's ufuncs are richly supported. We can even differentiate through an operation that occur in-place on a tensor and applies a boolean mask to
+the results:
 
-    >>> f.backward()  # triggers computation of ``df/dx``
-    >>> x.grad  # df/dx = 2x = 6.0
-    array(6.0)
+.. code:: python
+
+   >>> x = mg.tensor([1., 2., 3.])
+   >>> y = mg.zeros_like(x)
+   >>> np.multiply(x, x, where=[True, False, True], out=y)
+   >>> y.backward()
+   >>> x.grad
+   array([2., 0., 6.])
 
 
-While fantastic auto-differentiation libraries like TensorFlow, PyTorch, and JAX are available to the same end as
-MyGrad (and far far beyond, ultimately), they are industrial-grade tools in both function and form. MyGrad's primary purpose
-is to serve as an educational tool. It is simple to install (its only core dependency in NumPy), it is trivial to use
-if you are comfortable with NumPy, and its code base is well-documented and easy to understand. This makes it simple for
-students and teachers alike to use, hack, prototype with, and enhance MyGrad!
+NumPy's `view semantics <https://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/BasicIndexing.html#Producing-a-View-of-an-Array>`_ are also mirrored to a high fidelity: performing basic
+indexing and similar operations on tensors will produce a "view" of that tensor's data, thus a tensor and its view share memory.
+This relationship will also manifest between the derivatives stored by a tensor and its views!
 
-Why is Automatic Differentiation Useful?
-----------------------------------------
-In general, auto-differentiation permits us to compute massive equations that depend on millions of variables and then
-seamlessly evaluate the derivatives of the equation's output *with respect to every one of those variables*. This
-capability lies at the heart of the burgeoning field of **deep learning**, which is now the predominant use case for
-auto-differentiation libraries, and is the manifest purpose of TensorFlow, PyTorch, and MXNet.
+.. code:: python
 
-The "decisions" made by a neural network are dictated by the network's many, many parameters, which us researchers have
-arranged to serve as variables in a tremendous equation. This equation might, for example, attempt to take as input the pixels
-of a picture and return as an output an image-classification - a statement of the image's content (e.g. 0 is 'dog',
-1 is 'cat', etc.).
+   >>> x = mg.arange(9.).reshape(3, 3)
+   >>> diag_view = np.einsum("ii->i", x)  # returns a view of the diagonal elements of `x`
+   >>> x, diag_view
+   (Tensor([[0., 1., 2.],
+   [3., 4., 5.],
+   [6., 7., 8.]]),
+   Tensor([0., 4., 8.]))
 
-The way that we train this neural network is by "tuning" the values of its many parameters so that the network's
-predictions reliably agree with what we know to be true. It turns out that having access to the derivative of the
-neural network's output with respect to its parameters grants us the ability to quite reliably optimize its parameters -
-through a process known as gradient-based optimization we can update the values of these parameters to steer the neural
-network towards making more faithful predictions (note: a gradient is just a collection of derivatives of a
-multivariate function).
+   # views share memory
+   >>> np.shares_memory(x, diag_view)
+   True
 
-More specifically, we can hook our neural network up to an "objective" function that measures how well its predictions
-match against "the truth". Recalling the basic definition of a derivative (as prescribed by any calculus course) and its
-relationship to the slope of a function at a point, knowing
-the derivative of this objective function with respect to one of our neural network's parameters means that we know whether
-increasing this parameter will increase or decrease the output of the objective function; tuning the parameter so will affect
-the network's output such that its prediction is in closer agreement with the truth than before. If we make such an
-adjustment to each of our neural network's parameters and repeat this process many times over, using a wide variety of
-"training data" we may arrive at a configuration of network parameters that permits our neural network to faithfully
-classify pictures that we have never encountered before.
+   # mutating a view affects its base (and all other views)
+   >>> diag_view *= -1  # mutates x in-place
+   >>> x
+   Tensor([[-0.,  1.,  2.],
+           [ 3., -4.,  5.],
+           [ 6.,  7., -8.]])
 
-Thus auto-differentiation permits us to efficiently and automatically compute the derivatives of massive functions by
-way of simply coding the functions using the auto-differentiation software. This in turn, is what allows us nimbly design
-neural networks and objective functions, and to tune the parameters of our neural networks using derivative-based (or
-gradient-based) optimization schemes.
+   >>> (x ** 2).backward()
+   >>> x.grad, diag_view.grad
+   (array([[ -0.,   2.,   4.],
+           [  6.,  -8.,  10.],
+           [ 12.,  14., -16.]]),
+    array([ -0.,  -8., -16.]))
 
-It should be noted that description of training neural networks, as presented here, only provides a narrow view of deep learning.
-Specifically, it describes the supervised learning of an image classification problem. While this is sufficient for conveying
-the utility of auto-differentiation software as a means for training neural networks, there is more nuiance to deep learning
-than is suggested here.
+   # the gradients have the same view relationship!
+   >>> np.shares_memory(x.grad, diag_view.grad)
+   True
+
+
+Basic and advanced indexing is fully supported
+
+.. code:: python
+
+   >>> (x[x < 4] ** 2).backward()
+   >>> x.grad
+   array([[0., 2., 4.],
+          [6., 0., 0.],
+          [0., 0., 0.]])
+
+
+NumPy arrays and other array-likes play nicely with MyGrad's tensor. These behave like constants
+during automatic differentiation
+
+.. code:: python
+
+   >>> x = mg.tensor([1., 2., 3.])
+   >>> constant = [-1., 0., 10]  # can be a numpy array, list, or any other array-like
+   >>> (x * constant).backward()  # all array-likes are treated as constants
+   >>> x.grad
+   array([-1.,  0., 10.])
+
 
 
 
