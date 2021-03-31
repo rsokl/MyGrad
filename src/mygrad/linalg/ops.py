@@ -2,53 +2,17 @@ from collections import Counter
 from copy import copy
 from functools import reduce
 from itertools import chain
+from numbers import Real
+from typing import Optional
 
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
 
 from mygrad._utils import SkipGradient, reduce_broadcast
-from mygrad.operation_base import BinaryUfunc, Operation
+from mygrad._utils.graph_tracking import TRACK_GRAPH
+from mygrad.operation_base import Operation
 
-__all__ = ["MatMul", "EinSum"]
-
-
-class MatMul(BinaryUfunc):
-    numpy_ufunc = np.matmul
-    _supports_where = False
-
-    def backward_var(self, grad, index, **kwargs):
-        a, b = self.variables
-        a = a.data
-        b = b.data
-
-        # handle 1D w/ 1D (dot product of vectors)
-        if a.ndim == 1 and b.ndim == 1:
-            if index == 0:
-                return grad * b
-            elif index == 1:
-                return grad * a
-
-        if index == 0:  # compute grad through a
-            if b.ndim > 1:  # ([...], j) w/ ([...], j, k)
-                if a.ndim == 1:
-                    grad = np.expand_dims(grad, -2)
-                dfdx = np.matmul(grad, b.swapaxes(-1, -2))
-            else:  # ([...], i, j) w/ (j,)
-                dfdx = np.expand_dims(grad, -1) * b
-            return dfdx
-
-        if index == 1:  # compute grad through b
-            if a.ndim > 1:  # ([...], i, j) w/ ([...], j, [k])
-                if b.ndim == 1:
-                    grad = np.expand_dims(grad, -1)
-                dfdx = np.matmul(a.swapaxes(-1, -2), grad)
-                if b.ndim == 1:
-                    dfdx = dfdx.squeeze(-1)
-            else:  # (j,) w/ ([...], j, k)
-                dfdx = a[:, np.newaxis] * np.expand_dims(grad, -2)
-            return dfdx
-        else:  # pragma: no cover
-            raise ValueError()
+__all__ = ["EinSum", "Norm"]
 
 
 # EinSum #
@@ -281,3 +245,87 @@ class EinSum(Operation):
             # pair is accounted for.
             dfdx *= factor
         return dfdx
+
+
+def _expand_dims(x, axis, original_ndmin):
+    if axis is not None:
+        # axis: int
+        return np.expand_dims(x, axis=axis)
+    else:
+        # expand_dims doesn't work for tuple axes for numpy < 1.18
+        return x[(None,) * original_ndmin]
+
+
+class Norm(Operation):
+    def __call__(self, tensor, ord=None, axis=None, keepdims=False):
+        self.variables = (tensor,)
+        out = np.linalg.norm(tensor.data, ord=ord, axis=axis, keepdims=keepdims)
+
+        if isinstance(ord, Real) and np.isinf(ord):  # pragma: no cover
+            raise NotImplementedError(
+                "inf norms should be handled by mygrad.max(abs(x))"
+            )
+
+        if (tensor.ndim == 2 and ord is not None and axis is None) or (
+            hasattr(axis, "__len__") and len(axis) > 1
+        ):
+            raise NotImplementedError(
+                "mygrad.linalg.norm does not support matrix norms"
+            )
+
+        if ord == 0:
+            raise NotImplementedError(
+                "mygrad.linalg.norm(..., ord=0) is not a differentiable operation"
+            )
+
+        if TRACK_GRAPH:
+            if hasattr(axis, "__len__"):
+                (axis,) = axis
+
+            self.axis: Optional[int] = axis
+            self.keepdims = keepdims
+            self.ord = ord if ord is not None else 2
+
+            # self._norm is broadcast-compatible with `tensor`
+            if self.keepdims is False:
+                self._norm = _expand_dims(
+                    out, axis=self.axis, original_ndmin=tensor.ndim
+                )
+            else:
+                self._norm: np.ndarray = out
+
+        return out
+
+    def backward_var(self, grad: np.ndarray, index: int, **kwargs) -> np.ndarray:
+        (tensor,) = self.variables
+        x = tensor.data
+
+        if self.keepdims is False:
+            # is broadcast-compatible with `tensor`
+            grad = _expand_dims(grad, axis=self.axis, original_ndmin=tensor.ndim)
+
+        invalid_derivative = np.where(x == 0)
+
+        if self.ord == 1:
+            out = np.sign(x)
+            out *= grad
+
+        elif self.ord == 2:
+            out = x / self._norm
+            out *= grad
+
+        else:
+            out = np.fabs(x)
+            if out.size:
+                # if out.size is 0, then this produces div-by-zero
+                _norm = self._norm / np.sum(
+                    out ** self.ord, axis=self.axis, keepdims=True
+                )
+            else:
+                _norm = +self._norm
+            out **= self.ord - 1
+            out *= np.sign(x)
+            out *= _norm
+            out *= grad
+        out[invalid_derivative] = np.nan
+        return out

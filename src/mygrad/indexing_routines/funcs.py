@@ -11,7 +11,7 @@ from .ops import Where
 __all__ = ["where"]
 
 
-@implements_numpy_override
+@implements_numpy_override()
 def where(
     condition: ArrayLike,
     x: ArrayLike = _NoValue,

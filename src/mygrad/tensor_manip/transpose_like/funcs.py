@@ -8,7 +8,7 @@ from .ops import MoveAxis, Roll, SwapAxes, Transpose
 __all__ = ["transpose", "moveaxis", "swapaxes", "roll"]
 
 
-@implements_numpy_override
+@implements_numpy_override()
 def transpose(a: ArrayLike, *axes: int, constant: Optional[bool] = None) -> Tensor:
     """Permute the dimensions of a tensor.
 
@@ -63,7 +63,7 @@ def transpose(a: ArrayLike, *axes: int, constant: Optional[bool] = None) -> Tens
     return Tensor._op(Transpose, a, op_args=(axes,), constant=constant)
 
 
-@implements_numpy_override
+@implements_numpy_override()
 def moveaxis(
     a: ArrayLike,
     source: Union[int, Tuple[int, ...]],
@@ -114,7 +114,7 @@ def moveaxis(
     return Tensor._op(MoveAxis, a, op_args=(source, destination), constant=constant)
 
 
-@implements_numpy_override
+@implements_numpy_override()
 def swapaxes(
     a: ArrayLike, axis1: int, axis2: int, *, constant: Optional[bool] = None
 ) -> Tensor:
@@ -168,7 +168,7 @@ def swapaxes(
     return Tensor._op(SwapAxes, a, op_args=(axis1, axis2), constant=constant)
 
 
-@implements_numpy_override
+@implements_numpy_override()
 def roll(
     a: ArrayLike,
     shift: Union[int, Tuple[int, ...]],

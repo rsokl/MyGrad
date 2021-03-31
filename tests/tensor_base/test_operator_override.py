@@ -10,7 +10,7 @@ from numpy.testing import assert_array_equal
 
 import mygrad as mg
 from mygrad import Tensor
-from mygrad.linalg.ops import MatMul
+from mygrad.math.misc.ops import MatMul
 from mygrad.math.arithmetic.ops import (
     Add,
     Divide,
