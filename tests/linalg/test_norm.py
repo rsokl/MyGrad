@@ -128,3 +128,36 @@ def test_norm_backward(x, data, ord):
 
     assert_allclose(o1, o2)
     assert_allclose(t1.grad, t2.grad, atol=1e-7, rtol=1e-7)
+
+
+@pytest.mark.parametrize("ord", [-1.0, 0.5, 1.0, 1.25, 1.5, 2.0, 2.5, -np.inf, np.inf])
+@given(
+    x=hnp.arrays(
+        shape=hnp.array_shapes(min_dims=1, max_dims=1, min_side=0),
+        dtype=float,
+        elements=st.floats(-1e9, 1e9).filter(lambda x: np.abs(x) > 1e-6),
+    ),
+    data=st.data(),
+)
+def test_norm_backward_1d(x, data, ord):
+    if np.isinf(ord) and x.size == 0:
+        # raises for numpy.linalg.norm too
+        assume(False)
+    p = ord
+    keepdims = data.draw(keepdims_strat(x), label="keepdims")
+    axis = data.draw(axis_strat(x, permit_none=True), label="axis")
+    if axis == (None,):
+        axis = None
+    t1 = mg.tensor(x)
+    t2 = mg.tensor(x.copy())
+
+    o1 = mg.linalg.norm(t1, axis=axis, keepdims=keepdims, ord=p)
+    o1.backward()
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        o2 = manual_norm(t2, axis=axis, keepdims=keepdims, ord=p)
+        o2.backward()
+
+    assert_allclose(o1, o2)
+    assert_allclose(t1.grad, t2.grad, atol=1e-7, rtol=1e-7)
