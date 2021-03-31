@@ -53,6 +53,45 @@ derivatives of ``f`` with respect to all of its independent variables. Thus, exe
 This is the absolute tip of the iceberg. ``mygrad`` can compute derivatives of multivariable composite
 functions of tensor-valued variables!
 
+Gradient Descent with MyGrad
+############################
+
+Performing gradient descent on :math:`\mathscr{L}(w) = w ^ 2`
+
+.. code:: pycon
+
+   w = mg.tensor(10.0)
+   learning_rate = 0.3
+   num_steps = 10
+   print(w)
+
+   for step_cnt in range(num_steps):
+       ℒ = w ** 2    # compute L(w) (this also "nulls" any derivatives")
+       ℒ.backward()  # compute derivative of L
+
+       # Update w via gradient-step..
+       # We do an augmented update on the underlying numpy-array
+       # stored by `w`
+       w.data -= learning_rate * w.grad
+       print(w)
+
+The following steps are printed out.. see that gradient descent leads us towards
+the minimum of :math:`w = 0`
+
+.. code:: pycon
+
+   Tensor(10.)
+   Tensor(4.)
+   Tensor(1.6)
+   Tensor(0.64)
+   Tensor(0.256)
+   Tensor(0.1024)
+   Tensor(0.04096)
+   Tensor(0.016384)
+   Tensor(0.0065536)
+   Tensor(0.00262144)
+   Tensor(0.00104858)
+
 
 Some Bells and Whistles
 #######################
