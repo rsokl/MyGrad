@@ -80,9 +80,9 @@ Some Bells and Whistles
     array([ 1.,  4., 12.])
 
 
-:mod:`mygrad.nnet` supplies essential functions for machine learning, including:
+:mod:`~mygrad.nnet` supplies essential functions for machine learning, including:
 
-- N-dimensional convolutions (with striding, dilation, and padding)
+- `N-dimensional convolutions (with striding, dilation, and padding) <https://mygrad.readthedocs.io/en/latest/generated/mygrad.nnet.layers.conv_nd.html>`_
 - N-dimensional pooling
 - A `gated recurrent unit <https://en.wikipedia.org/wiki/Gated_recurrent_unit>`_ for sequence-learning (with input-level
   dropout and variational hidden-hidden dropout)
@@ -96,7 +96,7 @@ intuitively (and quite efficiently) perform the neural network-style convolution
 Advanced Example
 ################
 
-The following is an example of using `mygrad` to compute the `hinge loss <https://en.wikipedia.org/wiki/Hinge_loss>`_ of classification scores and to "back-propagate" through (compute the gradient of) this loss. This example demonstrates some of mygrad's ability to perform back-propagation through broadcasted operations, basic indexing, advanced indexing, and in-place assignments.
+The following is an example of using ``mygrad`` to compute the `hinge loss <https://en.wikipedia.org/wiki/Hinge_loss>`_ of classification scores and to "back-propagate" through (compute the gradient of) this loss. This example demonstrates some of mygrad's ability to perform back-propagation through broadcasted operations, basic indexing, advanced indexing, and in-place assignments.
 
 .. code:: pycon
 
@@ -114,7 +114,7 @@ The following is an example of using `mygrad` to compute the `hinge loss <https:
     >>> loss = Lij.sum() / class_scores.shape[0]  # compute mean hinge loss
     >>> loss.backward()    # compute gradient of loss w.r.t all dependent tensors
     >>> class_scores.grad  # d(loss)/d(class_scores)
-   array([[ 0.  ,  0.01,  0.  , -0.04,  0.  ,  0.  ,  0.01,  0.  ,  0.01, 0.01], ...])
+    array([[ 0.  ,  0.01,  0.  , -0.04,  0.  ,  0.  ,  0.01,  0.  ,  0.01, 0.01], ...])
 
 Computational Graph Visualization
 #################################
