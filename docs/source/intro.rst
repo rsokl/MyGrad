@@ -58,7 +58,7 @@ Gradient Descent with MyGrad
 
 Performing gradient descent on :math:`\mathscr{L}(w) = w ^ 2`
 
-.. code:: pycon
+.. code:: python
 
    w = mg.tensor(10.0)
    learning_rate = 0.3
@@ -160,7 +160,7 @@ Computational Graph Visualization
 
 MyGrad provides the capability to visually render diagrams of your computational graphs:
 
-.. code:: pycon
+.. code:: python
 
     import mygrad as mg
     from mygrad.computational_graph import build_graph
