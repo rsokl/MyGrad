@@ -78,6 +78,22 @@ You can now control the dimensionality of a tensor and whether or not a tensor c
 +-------------------------------------------------------+-------------------------------------------------------+-------------------------------------------------+
 
 
+Support for dtype, where, and out in ufuncs
+-------------------------------------------
+
+MyGrad now implements ufuncs with support for specifying dtype, boolean masks, and in-place targets. The
+additional methods, such as ``mygrad.add.reduce``, are not yet implemented.
+
++---------------------------------------------------------------+
+| MyGrad 2.0                                                    |
++===============================================================+
+| .. code:: python                                              |
+|                                                               |
+|    >>> mg.add([1, 2],[0, 2], where=[True, False], dtype=float)|
+|    Tensor([3., 1.])                                           |
++---------------------------------------------------------------+
+
+
 Augmented Updates on Tensors Now Match NumPy's Behavior
 -------------------------------------------------------
 
