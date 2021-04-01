@@ -93,7 +93,12 @@ class Operation(ABC):
         # the extra function call by doing the shape check upfront
         if grad.shape == var_shape:
             return grad
-        return reduce_broadcast(grad, var_shape)
+        out = reduce_broadcast(grad, var_shape)
+
+        if out.ndim == 0:
+            # sum-reduction to a scalar produces a float
+            out = np.array(out, copy=False)
+        return out
 
     @abstractmethod
     def __call__(self, *input_vars: "Tensor", **kwargs) -> np.ndarray:

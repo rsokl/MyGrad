@@ -9,6 +9,15 @@ import mygrad as mg
 from tests.custom_strategies import tensors
 
 
+def test_scalar_broadcasting_produces_narray_grad():
+    x = mg.tensor(2.0)
+    y = mg.tensor([1.0, 2.0, 3.0])
+
+    (x * y).backward()
+    assert isinstance(x.grad, np.ndarray)
+    assert isinstance(y.grad, np.ndarray)
+
+
 def test_simple_behavior():
     tensor = mg.Tensor([1.0, 2.0])
 
