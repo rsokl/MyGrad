@@ -41,3 +41,4 @@ del get_versions
 
 
 setattr(Tensor, "clip", clip)
+prepare_op = Tensor._op

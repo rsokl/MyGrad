@@ -10,8 +10,9 @@ MyGrad is a lightweight library that adds automatic differentiation to NumPy –
    >>> import numpy as np
 
    >>> x = mg.tensor([1., 2., 3.])  # like numpy.array, but supports backprop!
-   >>> np.sum(x * x).backward()  # works natively with numpy functions!
-   >>> x.grad
+   >>> f = np.sum(x * x)  # tensors work with numpy functions!
+   >>> f.backward() # triggers automatic differentiation
+   >>> x.grad  # stores [df/dx0, df/dx1, df/dx2]
    array([2., 4., 6.])
 
 
