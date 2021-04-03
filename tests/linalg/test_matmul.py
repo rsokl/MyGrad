@@ -1,11 +1,11 @@
 import hypothesis.extra.numpy as hnp
-import mygrad.math.misc.funcs
 import numpy as np
 from hypothesis import settings
 from numpy.testing import assert_allclose
 
 import mygrad as mg
-from mygrad.math.misc.funcs import matmul
+import mygrad.math.misc.funcs
+from mygrad import matmul
 from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 

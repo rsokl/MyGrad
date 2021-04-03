@@ -1,16 +1,32 @@
+import itertools
+
 import numpy as np
 import pytest
 from numpy.testing import assert_array_equal
 
 import mygrad as mg
-from mygrad.tensor_base import _REGISTERED_NO_DIFF_NUMPY_FUNCS
+from mygrad.tensor_base import (
+    _REGISTERED_BOOL_ONLY_UFUNC,
+    _REGISTERED_CONST_ONLY_UFUNC,
+    _REGISTERED_NO_DIFF_NUMPY_FUNCS,
+)
 
 
 def test_no_autodiff_all_matches_registered_numpy_funcs():
     from mygrad.no_grad_funcs import __all__ as all_no_autodiffs
 
-    assert set(all_no_autodiffs) >= set(
-        k.__name__ for k in _REGISTERED_NO_DIFF_NUMPY_FUNCS
+    all_no_autodiffs = set(all_no_autodiffs)
+    all_no_autodiffs.remove("mod")
+
+    assert set(all_no_autodiffs) == set(
+        k.__name__
+        for k in itertools.chain.from_iterable(
+            (
+                _REGISTERED_NO_DIFF_NUMPY_FUNCS,
+                _REGISTERED_BOOL_ONLY_UFUNC,
+                _REGISTERED_CONST_ONLY_UFUNC,
+            )
+        )
     )
 
 
