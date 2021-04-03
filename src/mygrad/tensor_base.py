@@ -33,7 +33,6 @@ from mygrad._utils import (
     collect_all_operations_and_clear_grads,
 )
 from mygrad.errors import DisconnectedView
-from mygrad.math.misc.ops import MatMul
 from mygrad.math.arithmetic.ops import (
     Add,
     Divide,
@@ -44,6 +43,7 @@ from mygrad.math.arithmetic.ops import (
     Square,
     Subtract,
 )
+from mygrad.math.misc.ops import MatMul
 from mygrad.math.sequential.ops import (
     CumProd,
     CumSum,
@@ -376,6 +376,7 @@ _REGISTERED_BOOL_ONLY_UFUNC: Set[np.ufunc] = {
     np.less,
     np.less_equal,
     np.equal,
+    np.not_equal,
 }
 
 # These are ufuncs that users might mistake for being differentiable functions;
@@ -400,6 +401,7 @@ _REGISTERED_NO_DIFF_NUMPY_FUNCS: Set[Callable[..., np.ndarray]] = {
     np.bincount,
     np.can_cast,
     np.copyto,
+    np.isclose,
     np.may_share_memory,
     np.min_scalar_type,
     np.result_type,

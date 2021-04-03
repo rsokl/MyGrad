@@ -6,6 +6,50 @@ This is a record of all past mygrad releases and what went into them,
 in reverse chronological order. All previous releases should still be available
 on pip.
 
+.. _v2.0.1:
+
+------------------
+2.0.1 - 2021-04-03
+------------------
+
+Bug Fixes
+---------
+
+- :func:`~mygrad.matmul` and :func:`~mygrad.multi_matmul` were missing from the top-level namespace
+
+New Functions
+-------------
+The following non-differentiable NumPy functions now work on mygrad tensors (and return ndarrays).
+Aliases of these are available at the top-level namespace of ``mygrad``
+
+- np.isnan
+- np.isfinite
+- np.isinf
+- np.isnat
+- np.signbit
+- np.logical_not
+- np.logical_and
+- np.logical_or
+- np.logical_xor
+- np.greater
+- np.greater_equal
+- np.less
+- np.less_equal
+- np.equal
+- np.not_equal
+- np.floor_divide
+- np.remainder
+- np.mod
+- np.fmod
+- np.divmod
+- np.rint
+- np.sign
+- np.floor
+- np.ceil
+- np.trunc
+- np.isclose
+
+
 .. _v2.0.0:
 
 ------------------

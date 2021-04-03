@@ -11,7 +11,17 @@ from mygrad.ufuncs import ufunc_creator
 
 from .ops import Abs, Cbrt, Maximum, Minimum, Sqrt
 
-__all__ = ["abs", "absolute", "cbrt", "clip", "sqrt", "maximum", "minimum"]
+__all__ = [
+    "abs",
+    "absolute",
+    "cbrt",
+    "clip",
+    "sqrt",
+    "maximum",
+    "minimum",
+    "matmul",
+    "multi_matmul",
+]
 
 
 @ufunc_creator(Abs)
