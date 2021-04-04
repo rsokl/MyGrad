@@ -1,55 +1,89 @@
-MyGrad's Operation Class
-************************
-Base class for all tensor operations that support back-propagation
-of gradients.
+Writing Your Own Operations
+***************************
 
-Consider the Operation-instance ``f``. A forward-pass through ``f`` is defined
-via ``f.__call__``. Thus, given tensors ``a`` and ``b``, a computational
-graph is defined ``f.__call__(a, b) -> c``, where the "creator" of tensor ``c``
-is recorded as ``f``.::
+Let's write our own "multiply" operation.
 
-       (tensor: a) --+
-                      |-> [operation: f(a, b)] --> (tensor: c)
-       (tensor: b) --+
+.. code:: python
 
-Thus back-propagating through ``c`` will instruct ``f`` to back-propagate
-the gradient to its inputs, which are recorded as ``a`` and ``b``. Each
-node then back-propagates to any Operation-instance that is recorded
-as its creator, and so on.
+   import numpy as np
+
+   import mygrad as mg
+   from mygrad import prepare_op
+   from mygrad.operation_base import Operation
+   from mygrad.typing import ArrayLike
+
+   # All operations should inherit from Operation, or one of its subclasses
+   class CustomMultiply(Operation):
+       """ Performs f(x, y) = x * y """
+
+       def __call__(self, x: mg.Tensor, y: mg.Tensor) -> np.ndarray:
+           # This method defines the "forward pass" of the operation.
+           # It must bind the variable tensors to the op and compute
+           # the output of the operation as a numpy array
+
+           # All tensors must be bound as a tuple to the `variables`
+           # instance variable.
+           self.variables = (x, y)
+
+           # The forward pass should be performed using numpy arrays,
+           # not the tensors themselves.
+           x_arr = x.data
+           y_arr = y.data
+           return x_arr * y_arr
+
+       def backward_var(self, grad, index, **kwargs):
+           """Given ``grad = dℒ/df``, computes ``∂ℒ/∂x`` and ``∂ℒ/∂y``
+
+           ``ℒ`` is assumed to be the terminal node from which ``ℒ.backward()`` was
+           called.
+
+           Parameters
+           ----------
+           grad : numpy.ndarray
+               The back-propagated total derivative with respect to the present
+               operation: dℒ/df. This will have the same shape as f, the result
+               of the forward pass.
+
+           index : Literal[0, 1]
+               The index-location of ``var`` in ``self.variables``
+
+           Returns
+           -------
+           numpy.ndarray
+               ∂ℒ/∂x_{i}
+
+           Raises
+           ------
+           SkipGradient"""
+           x, y = self.variables
+           x_arr = x.data
+           y_arr = y.data
+
+           if index == 0:  # backprop through a
+               return grad * y.data  # ∂ℒ/∂x = (∂ℒ/∂f)(∂f/∂x)
+           elif index == 1:  # backprop through b
+               return grad * x.data  # ∂ℒ/∂y = (∂ℒ/∂f)(∂f/∂y)
 
 
-Explaining Scalar-Only Operations
-----------------------------------
-MyGrad only supports gradients whose elements have a one-to-one correspondence
-with the elements of their associated tensors. That is, if ``x`` is a shape-(4,)
-tensor:
+   # Our function stitches together our operation class with the
+   # operation arguments via `mygrad.prepare_op`
+   def custom_multiply(x: ArrayLike, y: ArrayLike) -> mg.Tensor:
+       # `prepare_op` will take care of casting `x` and `y` to tensors if
+       # they are not already tensors.
+       return prepare_op(CustomMultiply, x, y)
 
-.. math::
+We can now use our differentiable function! It will automatically be compatible
+with broadcasting; out operation need not account for broadcasting in either the
+forward pass or the backward pass.
 
-   x = [x_0, x_1, x_2, x_3]
+.. code:: pycon
 
-then the gradient, with respect to ``x``, of the terminal node of our computational graph (:math:`l`) must
-be representable as a shape-(4,) tensor whose elements correspond to those of ``x``:
+   >> x = mg.tensor(2.0)
+   >> y = mg.tensor([1.0, 2.0, 3.0])
 
-.. math::
-
-  \nabla_{x}{l} = [\frac{dl}{dx_0}, \frac{dl}{dx_1}, \frac{dl}{dx_2}, \frac{dl}{dx_3}]
-
-If an operation class has ``scalar_only=True``, then the terminal node of a
-computational graph involving that operation can only trigger back-propagation
-from a 0-dimensional tensor (i.e. a scalar). This is ``False`` for operations that
-manifest as trivial element-wise operations over tensors. In such cases, the
-gradient of the operation can also be treated element-wise, and thus be computed
-unambiguously.
-
-The matrix-multiplication operation, for example, is a scalar-only operation because
-computing the derivative of :math:`F_{ik} = \sum_{j}{A_{ij} B_{jk}}` with respect
-to each element of :math:`A` produces a 3-tensor: :math:`\frac{d F_{ik}}{d A_{iq}}`, since each element 
-of :math:`F` depends on *every* element in the corresponding row of :math:`A`.
-This is the case unless the terminal node of this graph is eventually reduced (via summation, for instance) to a
-scalar, :math:`l`, in which  case the elements of the 2-tensor :math:`\frac{dl}{dA_{pq}}` has a trivial one-to-one
-correspondence to the elements of :math:`A_{pq}`.
-
+   >> custom_multiply(x, y).backward()
+   >> x.grad, y.grad
+   (array(6.), array([2., 2., 2.]))
 
 Documentation for mygrad.Operation
 ----------------------------------

@@ -1,21 +1,29 @@
-from hypothesis import assume, given
-import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
+import hypothesis.strategies as st
 import numpy as np
 import pytest
+from hypothesis import assume, given
 
 from mygrad import Tensor
 from mygrad.nnet.initializers import uniform
 
 
-@given(dtype=hnp.unsigned_integer_dtypes() | hnp.integer_dtypes() | hnp.complex_number_dtypes())
+@given(
+    dtype=hnp.unsigned_integer_dtypes()
+    | hnp.integer_dtypes()
+    | hnp.complex_number_dtypes()
+)
 def test_uniform_dtype_validation(dtype):
     with pytest.raises(ValueError):
         uniform(0, 1, dtype=dtype)
 
 
 _reasonable_floats = st.floats(-1000, 1000, width=32)
-_bounds = st.tuples(_reasonable_floats, _reasonable_floats).filter(lambda x: x[0] != x[1]).map(sorted)
+_bounds = (
+    st.tuples(_reasonable_floats, _reasonable_floats)
+    .filter(lambda x: x[0] != x[1])
+    .map(sorted)
+)
 
 
 @given(data=st.data())
@@ -36,7 +44,10 @@ _large_shapes = ((100_000,), (100, 10, 100), (1000, 1, 100), (10, 10, 10, 10, 10
 )
 def test_uniform_statistics(shape, lower_bound, upper_bound):
     # ensure a minimum interval width
-    lower_bound, upper_bound = min(lower_bound ,upper_bound), max(lower_bound, upper_bound) + 1
+    lower_bound, upper_bound = (
+        min(lower_bound, upper_bound),
+        max(lower_bound, upper_bound) + 1,
+    )
     tensor = uniform(shape, lower_bound=lower_bound, upper_bound=upper_bound)
     assert isinstance(tensor, Tensor)
     assert tensor.min() >= lower_bound
@@ -58,7 +69,7 @@ def test_uniform(shape, bounds, dtype, constant):
         lower_bound=Tensor(bounds[0]),
         upper_bound=Tensor(bounds[1]),
         dtype=dtype,
-        constant=constant
+        constant=constant,
     )
     assert tensor.shape == shape
     assert tensor.dtype == dtype

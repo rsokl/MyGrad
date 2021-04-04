@@ -1,115 +1,160 @@
+from numbers import Real
+from typing import Optional, Sequence, Tuple, Union
+
 import numpy as np
 from numpy.core.einsumfunc import _parse_einsum_input
 
 import mygrad as mg
-from mygrad import Tensor
+from mygrad.math.misc.funcs import absolute
+from mygrad.math.sequential.funcs import max as mg_max, min as mg_min
+from mygrad.tensor_base import Tensor, implements_numpy_override
+from mygrad.typing import ArrayLike
 
-from .ops import *
+from .ops import EinSum, Norm
 
-__all__ = ["multi_matmul", "matmul", "einsum"]
+__all__ = ["einsum", "norm"]
 
 
-def matmul(a, b, constant=False):
-    r"""
-    Matrix product of two tensors:
+@implements_numpy_override(np.linalg.norm)
+def norm(
+    x: ArrayLike,
+    ord: Optional[Union[int, float]] = None,
+    axis: Optional[Union[int, Tuple[int]]] = None,
+    keepdims: bool = False,
+    *,
+    constant: Optional[bool] = None,
+) -> Tensor:
+    r"""Vector norm.
 
-    ``matmul(x, y)`` is equivalent to ``x @ y``.
+    This function is an infinite number of vector norms (described below), depending
+    on the value of the ``ord`` parameter.
 
-    This documentation was adapted from ``numpy.matmul``
+    In contrast to ``numpy.linalg.norm``, matrix norms are not supported.
 
-    The behavior depends on the arguments in the following way.
-
-    - If both arguments are 2-D they are multiplied like conventional
-      matrices.
-    - If either argument is N-D, N > 2, it is treated as a stack of
-      matrices residing in the last two indexes and broadcast accordingly.
-    - If the first argument is 1-D, it is promoted to a matrix by
-      prepending a 1 to its dimensions. After matrix multiplication
-      the prepended 1 is removed.
-    - If the second argument is 1-D, it is promoted to a matrix by
-      appending a 1 to its dimensions. After matrix multiplication
-      the appended 1 is removed.
-
-    Multiplication by a scalar is not allowed, use ``*`` instead. Note that
-    multiplying a stack of matrices with a vector will result in a stack of
-    vectors, but matmul will not recognize it as such.
-
-    ``matmul`` differs from ``numpy.dot`` in two important ways.
-
-    - Multiplication by scalars is not allowed.
-    - Stacks of matrices are broadcast together as if the matrices
-      were elements.
-
+    This docstring was adapted from that of ``numpy.linalg.norm`` [1]_.
 
     Parameters
     ----------
-    a : array_like
+    x : ArrayLike
+        Input tensor.  If `axis` is None, then `x` must be 1-D unless `ord`
+        is None. If both `axis` and `ord` are None, the 2-norm of
+        ``x.ravel`` will be returned.
 
-    b : array_like
+    ord : Optional[Union[int, float]]
+        Order of the norm (see table under ``Notes``). inf means numpy's
+        `inf` object. The default is None.
 
-    constant : bool, optional(default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient)
+    axis : Optional[Union[int, Tuple[int]]]
+        If `axis` is an integer, it specifies the axis of `x` along which to
+        compute the vector norms. The default is None.
+
+    keepdims : bool, optional (default=False)
+        If this is set to True, the axes which are normed over are left in the
+        result as dimensions with size one.  With this option the result will
+        broadcast correctly against the original `x`.
+
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. ``constant.grad`` will always return
+        ``None``).
+
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
 
     Returns
     -------
-    output : mygrad.Tensor
-        Returns the matrix product of `a` and `b`.  If `a` and `b` are both
-        1-D arrays then a scalar is returned; otherwise an array is
-        returned.
-
-
-    Raises
-    ------
-    ValueError
-        If the last dimension of `a` is not the same size as
-        the second-to-last dimension of `b`.
-
-        If scalar value is passed.
+    Tensor
+        Norm(s) of the vector(s).
 
     Notes
     -----
-    The matmul function implements the semantics of the `@` operator introduced
-    in Python 3.5 following PEP465.
+    For values of ``ord < 1``, the result is, strictly speaking, not a
+    mathematical 'norm', but it may still be useful for various numerical
+    purposes.
+
+    The following norms can be calculated:
+
+    =====  ==========================
+    ord    norm for vectors
+    =====  ==========================
+    inf    max(abs(x))
+    -inf   min(abs(x))
+    0      sum(x != 0)
+    1      as below
+    -1     as below
+    2      as below
+    -2     as below
+    other  sum(abs(x)**ord)**(1./ord)
+    =====  ==========================
+
+    The Frobenius norm is given by [1]_:
+
+        :math:`||A||_F = [\sum_{i,j} abs(a_{i,j})^2]^{1/2}`
+
+    The nuclear norm is the sum of the singular values.
+
+    Both the Frobenius and nuclear norm orders are only defined for
+    matrices and raise a ValueError when ``x.ndim != 2``.
+
+    References
+    ----------
+    .. [1] Retrived from: https://numpy.org/doc/stable/reference/generated/numpy.linalg.norm.html
+    .. [2] G. H. Golub and C. F. Van Loan, *Matrix Computations*,
+           Baltimore, MD, Johns Hopkins University Press, 1985, pg. 15
 
     Examples
     --------
-    For two 2D tensors, ``matmul(a, b)`` is the matrix product :math:`\sum_{j}{A_{ij} B_{jk}} = F_{ik}`:
-
     >>> import mygrad as mg
-    >>> a = [[1, 0], [0, 1]]
-    >>> b = [[4, 1], [2, 2]]
-    >>> mg.matmul(a, b)
-    Tensor([[4, 1],
-            [2, 2]])
+    >>> x = mg.tensor([[1.0, 2.0, 3.0],
+    ...                [1.0, 0.0, 0.0]])
+    >>> l2_norms = mg.linalg.norm(x, axis=1, ord=2)
+    >>> l2_norms
+    Tensor([3.74165739, 1.        ])
 
-    For 2-D mixed with 1-D, the result is the matrix-vector product, :math:`\sum_{j}{A_{ij} B_{j}} = F_{i}`:
+    The presence of the elementwise absolute values in the norm means that zero-valued
+    entries in a vectors have an undefined derivative.
 
-    >>> a = [[1, 0], [0, 1]]
-    >>> b = [1, 2]
-    >>> mg.matmul(a, b)
-    Tensor([1, 2])
+    >>> l2_norms.backward()
+    >>> x.grad
+    array([[0.26726124, 0.53452248, 0.80178373],
+           [1.        ,        nan,        nan]])
 
-    Broadcasting is conventional for stacks of arrays. Here ``a`` is treated
-    like a stack of three 5x6 matrices, and the 6x4 matrix ``b`` is broadcast
-    matrix-multiplied against each one. This produces a shape-(3, 5, 4) tensor
-    as a result.
+    L1 norms along each of the three columns:
 
-    >>> a = mg.arange(3*5*6).reshape((3,5,6))
-    >>> b = mg.arange(6*4).reshape((6,4))
-    >>> mg.matmul(a,b).shape
-    (3, 5, 4)
+    >>> mg.linalg.norm(x, axis=0, ord=1)
+    Tensor([2., 2., 3.])
+    """
+    if isinstance(ord, Real) and np.isinf(ord):
+        op = mg_max if ord > 0 else mg_min
+        abs_ = absolute(x, constant=constant)
+        out = op(abs_, axis=axis, keepdims=keepdims)
 
-    Scalar multiplication raises an error.
+        in_ndim = abs_.creator.variables[0].ndim
 
-    >>> mg.matmul(a, 3)
-    Traceback (most recent call last):
-    ...
-    ValueError: Scalar operands are not allowed, use '*' instead"""
-    return Tensor._op(MatMul, a, b, constant=constant)
+        if (axis is None and ord is not None and in_ndim == 2) or (
+            hasattr(axis, "__len__") and len(axis) > 1
+        ):
+            raise NotImplementedError(
+                "mygrad.linalg.norm does not support matrix norms"
+            )
+        return out
+    return Tensor._op(
+        Norm,
+        x,
+        op_kwargs={"axis": axis, "keepdims": keepdims, "ord": ord},
+        constant=constant,
+    )
 
 
-def einsum(*operands, optimize=False, constant=False):
+@implements_numpy_override()
+def einsum(
+    *operands: Union[ArrayLike, str, Sequence[int]],
+    optimize: bool = False,
+    out: Optional[Union[np.ndarray, Tensor]] = None,
+    constant: Optional[bool] = None,
+) -> Tensor:
     r"""
     einsum(subscripts, *operands)
 
@@ -152,8 +197,15 @@ def einsum(*operands, optimize=False, constant=False):
         algorithm. Also accepts an explicit contraction list from the
         ``np.einsum_path`` function. See ``np.einsum_path`` for more details.
 
-    constant : bool, optional (default=False)
-        If True, the resulting Tensor is a constant.
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. ``constant.grad`` will always return
+        ``None``).
+
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
 
     Returns
     -------
@@ -361,214 +413,13 @@ def einsum(*operands, optimize=False, constant=False):
             )
 
     in_lbls, out_lbls, _ = _parse_einsum_input(operands)
+
+    # einsum doesn't handle out=None properly in numpy 1.17
+
     return Tensor._op(
         EinSum,
         *variables,
         op_kwargs=dict(in_lbls=in_lbls, out_lbls=out_lbls, optimize=optimize),
-        constant=constant
+        constant=constant,
+        out=out,
     )
-
-
-def multi_matmul(tensors, constant=False):
-    """
-    Matrix product of two or more tensors calculated in the optimal ordering
-
-    Parameters
-    ----------
-    tensors: Sequence[array_like]
-        The sequence of tensors to be matrix-multiplied.
-
-    constant : bool, optional(default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient).
-
-    Returns
-    -------
-    mygrad.Tensor
-        Returns the matrix product of the tensors provided
-
-
-    Extended Summary
-    ----------------
-    This documentation was adapted from ``numpy.linalg.multi_dot``
-
-    Compute the matrix multiplication of two or more arrays in a single function
-    call, while automatically selecting the fastest evaluation order.
-    ``multi_matmul`` chains ``matmul`` and uses optimal parenthesization  [1]_ [2]_.
-    Depending on the shapes of the matrices, this can speed up the multiplication a lot.
-
-    If the first argument is 1-D it is treated as a row vector.
-
-    If the last argument is 1-D it is treated as a column vector.
-
-    The other arguments must be 2-D or greater.
-
-    Think of `multi_dot` as an optimized version of::
-
-        def multi_dot(tensors): return functools.reduce(mg.matmul, tensors)
-
-    Raises
-    ------
-    ValueError
-        If ``tensors`` contains less than two array_like items.
-
-    ValueError
-        If ``tensor`` other than the first or last is less than two dimensional
-
-    See Also
-    --------
-    matmul : matrix multiplication with two arguments.
-
-    References
-    ----------
-
-    .. [1] Cormen, "Introduction to Algorithms", Chapter 15.2, p. 370-378
-    .. [2] http://en.wikipedia.org/wiki/Matrix_chain_multiplication
-
-    Notes
-    -----
-    The cost for a matrix multiplication can be calculated with the
-    following function::
-
-        def cost(A, B):
-            return A.shape[0] * A.shape[1] * B.shape[1]
-
-    Let's assume we have three matrices :math:`A_{10x100}, B_{100x5}, C_{5x50}`.
-
-    The costs for the two different parenthesizations are as follows::
-
-        cost((AB)C) = 10*100*5 + 10*5*50   = 5000 + 2500   = 7500
-        cost(A(BC)) = 10*100*50 + 100*5*50 = 50000 + 25000 = 75000
-
-    Examples
-    --------
-    ``multi_matmul`` allows you to write:
-
-    >>> from mygrad import multi_matmul, matmul, Tensor
-    >>> import numpy as np
-    >>> # Prepare some random tensors
-    >>> A = Tensor(np.random.random((10000, 100)))
-    >>> B = Tensor(np.random.random((100, 1000)))
-    >>> C = Tensor(np.random.random((1000, 5)))
-    >>> D = Tensor(np.random.random((5, 333)))
-    >>> # the actual matrix multiplication
-    >>> multi_matmul([A, B, C, D]) # computes (A @ (B @ C)) @ D
-
-    instead of:
-
-    >>> matmul(matmul(matmul(A, B), C), D)
-    >>> # or
-    >>> A @ B @ C @ D
-    """
-
-    for a in tensors:
-        if not (1 <= a.ndim <= 2):
-            raise ValueError(
-                "%d-dimensional tensor given. Tensor must be one or two-dimensional"
-                % (a.ndim,)
-            )
-
-    n = len(tensors)
-    if n < 2:
-        raise ValueError("Expecting at least two arrays.")
-    elif n == 2:
-        return matmul(tensors[0], tensors[1], constant)
-
-    tensors = [a if isinstance(a, Tensor) else np.asarray(a) for a in tensors]
-
-    # save original ndim to reshape the result array into the proper form later
-    ndim_first, ndim_last = tensors[0].ndim, tensors[-1].ndim
-
-    # Explicitly convert vectors to 2D arrays to keep the logic of this function simpler
-    if tensors[0].ndim == 1:
-        tensors[0] = mg.expand_dims(
-            tensors[0],
-            axis=0,
-            constant=tensors[0].constant if isinstance(tensors[0], Tensor) else True,
-        )
-    if tensors[-1].ndim == 1:
-        tensors[-1] = mg.expand_dims(
-            tensors[-1],
-            axis=1,
-            constant=tensors[-1].constant if isinstance(tensors[-1], Tensor) else True,
-        )
-
-    if n == 3:
-        result = _multi_matmul_three(tensors[0], tensors[1], tensors[2], constant)
-    else:
-        order = _multi_matmul_chain_order(tensors)
-        result = _multi_matmul(tensors, order, 0, n - 1, constant)
-
-    # return proper shape since we possibly added dimensions to the first
-    # and last arrays
-    if ndim_first == 1 and ndim_last == 1:
-        return result[0, 0]
-    elif ndim_first == 1 or ndim_last == 1:
-        return result.reshape(-1)
-    else:
-        return result
-
-
-def _multi_matmul_three(A, B, C, constant=False) -> Tensor:
-    """
-    Find the best order for three arrays and do the multiplication.
-
-    """
-    a0, a1b0 = A.shape[-2:]
-    b1c0, c1 = C.shape[-2:]
-    cost1 = a0 * b1c0 * (a1b0 + c1)
-    cost2 = a1b0 * c1 * (a0 + b1c0)
-
-    if cost1 < cost2:
-        return matmul(matmul(A, B, constant), C, constant)
-    else:
-        return matmul(A, matmul(B, C, constant), constant)
-
-
-def _multi_matmul_chain_order(arrays):
-    """
-    Return a np.array that encodes the optimal order of multiplications.
-    The optimal order array is then used by `_multi_matmul()` to do the
-    multiplication.
-
-    The implementation CLOSELY follows Cormen, "Introduction to Algorithms",
-    Chapter 15.2, p. 370-378.  Note that Cormen uses 1-based indices.
-
-        cost[i, j] = min([
-            cost[prefix] + cost[suffix] + cost_mult(prefix, suffix)
-            for k in range(i, j)])
-    """
-    n = len(arrays)
-    # p stores the dimensions of the matrices
-    # Example for p: A_{10x100}, B_{100x5}, C_{5x50} --> p = [10, 100, 5, 50]
-    # Using -2 to generalize for shapes that are more than 2 dimmensions
-    p = [a.shape[-2] for a in arrays] + [arrays[-1].shape[-1]]
-    # m is a matrix of costs of the subproblems
-    # m[i,j]: min number of scalar multiplications needed to compute A_{i..j}
-    m = np.zeros((n, n), dtype=np.double)
-    # s is the actual ordering
-    # s[i, j] is the value of k at which we split the product A_i..A_j
-    s = np.empty((n, n), dtype=np.intp)
-
-    for l in range(1, n):
-        for i in range(n - l):
-            j = i + l
-            m[i, j] = np.inf
-            for k in range(i, j):
-                q = m[i, k] + m[k + 1, j] + p[i] * p[k + 1] * p[j + 1]
-                if q < m[i, j]:
-                    m[i, j] = q
-                    s[i, j] = k  # Note that Cormen uses 1-based index
-    return s
-
-
-def _multi_matmul(arrays, order, i, j, constant=False) -> Tensor:
-    """Actually do the multiplication with the given order."""
-    if i == j:
-        return arrays[i]
-    else:
-        return matmul(
-            _multi_matmul(arrays, order, i, order[i, j], constant),
-            _multi_matmul(arrays, order, order[i, j] + 1, j, constant),
-            constant,
-        )

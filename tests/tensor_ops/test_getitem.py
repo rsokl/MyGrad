@@ -1,16 +1,22 @@
 import hypothesis.extra.numpy as hnp
 import numpy as np
-from hypothesis import settings
+from hypothesis import given, settings
 from numpy.testing import assert_allclose
 
 from mygrad.tensor_base import Tensor
+from tests.utils.wrappers import adds_constant_arg
 
-from ..custom_strategies import adv_integer_index, basic_indices
+from ..custom_strategies import (
+    adv_integer_index,
+    arbitrary_indices,
+    basic_indices,
+    tensors,
+)
 from ..wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
 def test_getitem():
-    x = Tensor([1, 2, 3])
+    x = Tensor([1.0, 2.0, 3.0])
     a, b, c = x
     f = 2 * a + 3 * b + 4 * c
     f.backward()
@@ -26,11 +32,15 @@ def test_getitem():
     assert_allclose(x.grad, np.array([2, 3, 4]))
 
 
-def get_item(*arrs, index, constant=False):
-    o = arrs[0][index]
-    if isinstance(o, Tensor):
-        o._constant = constant
-    return o
+@given(x=tensors())
+def test_get_item_propagate_constant(x: Tensor):
+    y = x[...]
+    assert y.constant is x.constant
+
+
+@adds_constant_arg
+def get_item(arr, index):
+    return arr[index]
 
 
 def basic_index_wrap(*arrs):
@@ -45,12 +55,45 @@ def adv_index_bool_wrap(*arrs):
     return hnp.arrays(shape=arrs[0].shape, dtype=bool)
 
 
+def arb_index_wrap(*arrs):
+    return arbitrary_indices(arrs[0].shape)
+
+
+def test_index_empty():
+    a = Tensor([])
+    b = a[[]]
+
+    assert b.shape == (0,)
+
+    b.sum().backward()
+    # since a is empty, a.grad should be empty and same shape
+    assert a.shape == a.grad.shape
+    assert b.shape == b.grad.shape
+
+
+# https://github.com/rsokl/MyGrad/issues/272
+def test_index_0d():
+    assert Tensor(3)[None].shape == (1,)
+    assert Tensor(3)[None].item() == 3
+
+
+def test_getitem_view_base():
+    x = Tensor(np.asarray(0.0))
+    o = x[(Ellipsis,)]
+    assert o.data.base is o.base.data
+    assert np.shares_memory(o, x.data)
+    assert np.shares_memory(o, x)
+
+
 @fwdprop_test_factory(
     mygrad_func=get_item,
     true_func=get_item,
     num_arrays=1,
-    index_to_arr_shapes={0: hnp.array_shapes(max_side=6, max_dims=4)},
+    index_to_arr_shapes={
+        0: hnp.array_shapes(min_side=0, min_dims=0, max_side=6, max_dims=4)
+    },
     kwargs=dict(index=basic_index_wrap),
+    permit_0d_array_as_float=False,
 )
 def test_getitem_basicindex_fwdprop():
     pass
@@ -61,7 +104,9 @@ def test_getitem_basicindex_fwdprop():
     mygrad_func=get_item,
     true_func=get_item,
     num_arrays=1,
-    index_to_arr_shapes={0: hnp.array_shapes(max_side=6, max_dims=4)},
+    index_to_arr_shapes={
+        0: hnp.array_shapes(min_side=0, min_dims=0, max_side=6, max_dims=4)
+    },
     kwargs=dict(index=basic_index_wrap),
     vary_each_element=True,
 )
@@ -219,4 +264,34 @@ def test_getitem_basic_w_adv_fwdprop():
     vary_each_element=True,
 )
 def test_getitem_basic_w_adv_bkprop():
+    pass
+
+
+@settings(deadline=None, max_examples=500)
+@fwdprop_test_factory(
+    mygrad_func=get_item,
+    true_func=get_item,
+    num_arrays=1,
+    index_to_arr_shapes={
+        0: hnp.array_shapes(min_side=0, max_side=4, min_dims=0, max_dims=5)
+    },
+    kwargs=dict(index=arb_index_wrap),
+    permit_0d_array_as_float=False,
+)
+def test_getitem_arbitraryindex_fwdprop():
+    pass
+
+
+@settings(deadline=None, max_examples=500)
+@backprop_test_factory(
+    mygrad_func=get_item,
+    true_func=get_item,
+    num_arrays=1,
+    index_to_arr_shapes={
+        0: hnp.array_shapes(min_side=0, max_side=4, min_dims=0, max_dims=5)
+    },
+    kwargs=dict(index=arb_index_wrap),
+    vary_each_element=True,
+)
+def test_getitem_arbitraryindex_bkwdprop():
     pass

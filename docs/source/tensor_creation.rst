@@ -3,6 +3,16 @@ Tensor creation routines (:mod:`mygrad.tensor_creation`)
 
 .. currentmodule:: mygrad
 
+Array-Like
+----------
+.. autosummary::
+   :toctree: generated/
+
+   tensor
+   asarray
+   astensor
+
+
 Ones and zeros
 --------------
 .. autosummary::

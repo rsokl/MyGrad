@@ -61,8 +61,8 @@ def test_input_validation(args: dict, data: st.DataObject):
     ),
 )
 def test_sliding_window(data, x):
-    """ Test variations of window-shape, step, and dilation for sliding window
-        view of N-dimensional array."""
+    """Test variations of window-shape, step, and dilation for sliding window
+    view of N-dimensional array."""
 
     win_dim = data.draw(st.integers(1, x.ndim), label="win_dim")
     win_shape = data.draw(
@@ -99,10 +99,10 @@ def test_sliding_window(data, x):
 
 @given(dtype=dtype_strat_numpy)
 def test_memory_details(dtype):
-    """ Ensure that:
-          - function handles non C-contiguous layouts correctly
-          - output is view of input
-          - output is not writeable"""
+    """Ensure that:
+    - function handles non C-contiguous layouts correctly
+    - output is view of input
+    - output is not writeable"""
     x = np.arange(20).reshape(2, 10).astype(dtype)
     x = np.asfortranarray(x)
     y = sliding_window_view(x, (5,), 5)

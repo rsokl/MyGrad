@@ -1,7 +1,10 @@
+from typing import Optional
+
 import numpy as np
 
 from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor
+from mygrad.typing import ArrayLike
 
 
 class Sigmoid(Operation):
@@ -18,17 +21,17 @@ class Sigmoid(Operation):
         return grad * self.sigmoid * (1.0 - self.sigmoid)
 
 
-def sigmoid(x, constant=False):
-    """ Applies the sigmoid activation function::
+def sigmoid(x: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
+    """Applies the sigmoid activation function::
 
       f(x) = 1 / (1 + exp(-x))
 
     Parameters
     ----------
-    x : array_like
+    x : ArrayLike
         sigmoid is applied element-wise on ``x``.
 
-    constant : bool, optional(default=False)
+    constant : Optional[bool]
         If ``True``, the returned tensor is a constant (it
         does not back-propagate a gradient)
 
@@ -43,5 +46,20 @@ def sigmoid(x, constant=False):
     >>> x = mg.linspace(-5, 5, 10)
     >>> sigmoid(x)
     Tensor([0.00669285, 0.02005754, 0.0585369 , 0.1588691 , 0.36457644,
-        0.63542356, 0.8411309 , 0.9414631 , 0.97994246, 0.99330715])"""
+        0.63542356, 0.8411309 , 0.9414631 , 0.97994246, 0.99330715])
+
+    .. plot::
+
+       >>> import mygrad as mg
+       >>> from mygrad.nnet.activations import sigmoid
+       >>> import matplotlib.pyplot as plt
+       >>> x = mg.linspace(-10, 10, 100)
+       >>> y = sigmoid(x)
+       >>> plt.title("sigmoid(x)")
+       >>> y.backward()
+       >>> plt.plot(x, x.grad, label="df/dx")
+       >>> plt.plot(x, y, label="f(x)")
+       >>> plt.legend()
+       >>> plt.grid()
+       >>> plt.show()"""
     return Tensor._op(Sigmoid, x, constant=constant)

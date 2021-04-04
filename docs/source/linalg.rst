@@ -13,3 +13,15 @@ Matrix and vector products
    matmul
    multi_matmul
    einsum
+
+
+Norms and other numbers
+-----------------------
+
+.. currentmodule:: mygrad
+
+
+.. autosummary::
+   :toctree: generated/
+
+   linalg.norm

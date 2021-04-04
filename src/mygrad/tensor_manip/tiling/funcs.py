@@ -1,17 +1,20 @@
 from typing import Optional, Sequence, Union
 
-from mygrad.tensor_base import Tensor
+from mygrad.tensor_base import Tensor, implements_numpy_override
+from mygrad.typing import ArrayLike
 
 from .ops import Repeat
 
 __all__ = ["repeat"]
 
 
+@implements_numpy_override()
 def repeat(
-    a,
+    a: ArrayLike,
     repeats: Union[int, Sequence[int]],
     axis: Optional[int] = None,
-    constant: bool = False,
+    *,
+    constant: Optional[bool] = None,
 ) -> Tensor:
     """
     Repeat elements of a tensor.
@@ -20,7 +23,7 @@ def repeat(
 
     Parameters
     ----------
-    a : array_like
+    a : ArrayLike
         Input tensor.
 
     repeats : Union[int, Sequence[int]]
@@ -31,10 +34,15 @@ def repeat(
         The axis along which to repeat values. By default, use the
         flattened input array, and return a flat output tensor.
 
-    constant : bool, optional(default=False)
-        If ``True``, the returned tensor is a constant (it does not
-        back-propagate a gradient).
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. ``constant.grad`` will always return
+        ``None``).
 
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
     Returns
     -------
     repeated_tensor : Tensor

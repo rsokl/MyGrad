@@ -11,11 +11,14 @@ def _np_selu(x):
     return _SCALE * np.where(x < 0, _ALPHA * (np.exp(x) - 1), x)
 
 
+bound = np.log(sys.float_info.max / (_ALPHA * _SCALE))
+
+
 @fwdprop_test_factory(
     mygrad_func=selu,
     true_func=_np_selu,
     num_arrays=1,
-    index_to_bnds={0: (-np.log(sys.float_info.max), np.log(sys.float_info.max))},
+    index_to_bnds={0: (-bound, bound)},
 )
 def test_selu_fwd():
     pass
@@ -25,7 +28,7 @@ def test_selu_fwd():
     mygrad_func=selu,
     true_func=_np_selu,
     num_arrays=1,
-    index_to_bnds={0: (-np.log(sys.float_info.max), np.log(sys.float_info.max))},
+    index_to_bnds={0: (-bound, bound)},
 )
 def test_selu_bkwd():
     pass

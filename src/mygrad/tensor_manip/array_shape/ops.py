@@ -1,11 +1,13 @@
 import numpy as np
 
-from mygrad.operation_base import BroadcastableOp, Operation
+from mygrad.operation_base import Operation
 
 __all__ = ["Reshape", "Flatten", "Squeeze", "Ravel", "ExpandDims", "BroadcastTo"]
 
 
 class Reshape(Operation):
+    can_return_view = True
+
     def __call__(self, a, newshape):
         """
         Parameters
@@ -27,10 +29,12 @@ class Reshape(Operation):
 
 
 class Squeeze(Operation):
+    can_return_view = True
+
     def __call__(self, a, axis):
-        """ Parameters
-            ----------
-            axis : Optional[int, Tuple[int, ...]] """
+        """Parameters
+        ----------
+        axis : Optional[int, Tuple[int, ...]]"""
         self.variables = (a,)
         return np.squeeze(a.data, axis=axis)
 
@@ -41,9 +45,9 @@ class Squeeze(Operation):
 
 class Flatten(Operation):
     def __call__(self, a):
-        """ Parameters
-            ----------
-            a : mygrad.Tensor"""
+        """Parameters
+        ----------
+        a : mygrad.Tensor"""
         self.variables = (a,)
         return a.data.flatten(order="C")
 
@@ -53,10 +57,12 @@ class Flatten(Operation):
 
 
 class Ravel(Operation):
+    can_return_view = True
+
     def __call__(self, a):
-        """ Parameters
-            ----------
-            a : mygrad.Tensor"""
+        """Parameters
+        ----------
+        a : mygrad.Tensor"""
         self.variables = (a,)
         return np.ravel(a.data, order="C")
 
@@ -66,11 +72,13 @@ class Ravel(Operation):
 
 
 class ExpandDims(Operation):
+    can_return_view = True
+
     def __call__(self, a, axis):
-        """ Parameters
-            ----------
-            a : mygrad.Tensor
-            axis : int """
+        """Parameters
+        ----------
+        a : mygrad.Tensor
+        axis : int"""
         self.variables = (a,)
         return np.expand_dims(a.data, axis=axis)
 
@@ -79,12 +87,14 @@ class ExpandDims(Operation):
         return grad.reshape(a.shape)
 
 
-class BroadcastTo(BroadcastableOp):
+class BroadcastTo(Operation):
+    can_return_view = True
+
     def __call__(self, a, shape):
-        """ Parameters
-            ----------
-            a : mygrad.Tensor
-            shape : Tuple[int, ...]"""
+        """Parameters
+        ----------
+        a : mygrad.Tensor
+        shape : Tuple[int, ...]"""
         self.variables = (a,)
         return np.broadcast_to(a.data, shape=shape)
 

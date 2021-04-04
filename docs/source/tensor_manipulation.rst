@@ -35,8 +35,17 @@ Changing number of dimensions
    squeeze
 
 
-Tiling arrays
--------------
+Joining tensors
+---------------
+.. autosummary::
+   :toctree: generated/
+
+   concatenate
+   stack
+
+
+Tiling tensors
+--------------
 .. autosummary::
    :toctree: generated/
 

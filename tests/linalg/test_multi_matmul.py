@@ -3,6 +3,7 @@ from typing import List, Tuple
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
+import mygrad.math.misc.funcs
 import numpy as np
 import pytest
 from hypothesis import given
@@ -11,8 +12,8 @@ import mygrad as mg
 from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
-def matmul_wrapper(*args, constant=False):
-    return mg.multi_matmul(args, constant)
+def matmul_wrapper(*args, constant=None):
+    return mygrad.math.misc.funcs.multi_matmul(args, constant=constant)
 
 
 def multi_matmul_slow(*arrays, **kwargs):
@@ -23,7 +24,7 @@ def multi_matmul_slow(*arrays, **kwargs):
 def test_input_validation_too_few_tensors(tensors: List[mg.Tensor]):
     """multi_matmul requires at least two input-tensors"""
     with pytest.raises(ValueError):
-        mg.multi_matmul(tensors)
+        mygrad.math.misc.funcs.multi_matmul(tensors)
 
 
 @given(st.lists(hnp.array_shapes(min_dims=1, min_side=2, max_side=2), min_size=2))
@@ -33,7 +34,7 @@ def test_input_validation_large_dimensionality(shapes: List[Tuple[int, ...]]):
         shapes[0] = (1, 1, *shapes[0])
     tensors = [mg.ones(shape=shape) for shape in shapes]
     with pytest.raises(ValueError):
-        mg.multi_matmul(tensors)
+        mygrad.math.misc.funcs.multi_matmul(tensors)
 
 
 @pytest.mark.parametrize(
@@ -52,6 +53,7 @@ def test_matmul_fwd(signature):
         default_bnds=(-10, 10),
         atol=1e-5,
         rtol=1e-5,
+        internal_view_is_ok=True,
     )
     def test_runner():
         pass

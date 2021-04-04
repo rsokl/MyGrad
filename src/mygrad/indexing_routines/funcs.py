@@ -1,24 +1,24 @@
+from typing import Optional
+
 import numpy as np
 
-from mygrad.tensor_base import Tensor
+from mygrad.operation_base import _NoValue
+from mygrad.tensor_base import Tensor, asarray, implements_numpy_override
+from mygrad.typing import ArrayLike
 
 from .ops import Where
 
 __all__ = ["where"]
 
 
-class _UniqueIdentifier:
-    def __init__(self, identifier):
-        self.identifier = identifier
-
-    def __repr__(self):  # pragma: nocover
-        return self.identifier
-
-
-not_set = _UniqueIdentifier("not_set")
-
-
-def where(condition, x=not_set, y=not_set, constant=False):
+@implements_numpy_override()
+def where(
+    condition: ArrayLike,
+    x: ArrayLike = _NoValue,
+    y: ArrayLike = _NoValue,
+    *,
+    constant: Optional[bool] = None
+) -> Tensor:
     """
     where(condition, [x, y])
 
@@ -34,19 +34,25 @@ def where(condition, x=not_set, y=not_set, constant=False):
 
     Parameters
     ----------
-    condition : array_like, bool
+    condition : ArrayLike, bool
         Where True, yield `x`, otherwise yield ``y``. ``x``, ``y``
         and `condition` need to be broadcastable to some shape.
 
-    x : array_like
+    x : ArrayLike
         Values from which to chosen where ``condition`` is ``True``.
 
-    y : array_like
+    y : ArrayLike
        Values from which to chosen where ``condition`` is ``False``.
 
-    constant : bool, optional(default=False)
-        If ``True``, the returned tensor is a constant (it
-        does not back-propagate a gradient)
+    constant : Optional[bool]
+        If ``True``, this tensor is treated as a constant, and thus does not
+        facilitate back propagation (i.e. ``constant.grad`` will always return
+        ``None``).
+
+        Defaults to ``False`` for float-type data.
+        Defaults to ``True`` for integer-type data.
+
+        Integer-type tensors must be constant.
 
     Returns
     -------
@@ -87,12 +93,10 @@ def where(condition, x=not_set, y=not_set, constant=False):
             [ 0,  2, -1],
             [ 0,  3, -1]])
     """
-    if x is not_set and y is not_set:
-        if isinstance(condition, Tensor):
-            condition = condition.data
-        return np.where(condition)
+    if x is _NoValue and y is _NoValue:
+        return np.where(asarray(condition))
 
-    if x is not_set or y is not_set:
+    if x is _NoValue or y is _NoValue:
         raise ValueError("either both or neither of x and y should be given")
 
     return Tensor._op(

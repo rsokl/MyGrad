@@ -1,7 +1,10 @@
+from typing import Optional, Tuple, Union
+
 import numpy as np
 
 from mygrad import Tensor
 from mygrad.operation_base import Operation
+from mygrad.typing import ArrayLike
 
 __all__ = ["batchnorm"]
 
@@ -19,8 +22,6 @@ class BatchNorm(Operation):
     `mean` and `var` are bound as instance-attributes upon
     calling the batch-norm instance.
     """
-
-    scalar_only = True
 
     def __call__(self, x, gamma, beta, *, eps):
         """
@@ -42,37 +43,37 @@ class BatchNorm(Operation):
         normed_dims = tuple(i for i in range(x.ndim) if i != 1)
         keepdims_shape = tuple(1 if n != 1 else d for n, d in enumerate(x.shape))
 
+        self.variables = tuple(i for i in (x, gamma, beta))
+
         if gamma.size == 0:
             gamma = None
         if beta.size == 0:
             beta = None
 
-        self.variables = tuple(i for i in (x, gamma, beta) if i is not None)
         self.gamma = gamma
         self.beta = beta
 
         x = x.data
         self.x_norm = None  # required for backprop through gamma
         self.mean = x.mean(axis=normed_dims)
-        self.var = np.einsum(x, range(x.ndim), x, range(x.ndim), [1])
-        self.var /= x.size / x.shape[1]
-        self.var -= self.mean ** 2
+        self.var = x.var(axis=normed_dims)
+
         if eps:
             self.var += eps
 
         y = x - self.mean.reshape(keepdims_shape)
-        y /= np.sqrt(self.var).reshape(keepdims_shape)
-
+        self._std = np.sqrt(self.var).reshape(keepdims_shape)  # sqrt(var + eps)
+        y /= self._std
+        self.x_norm = y
         # optional affine transformation
         if gamma is not None:
-            self.x_norm = y
             gamma = gamma.data
             # must copy `y` to prevent mutation of `self.x_norm`
             y = y * gamma.reshape(keepdims_shape)
 
         if beta is not None:
             beta = beta.data
-            y += beta.reshape(keepdims_shape)
+            y = y + beta.reshape(keepdims_shape)
         return y
 
     def backward_var(self, grad, index, **kwargs):
@@ -80,25 +81,25 @@ class BatchNorm(Operation):
         if index == 0:  # backprop through x
             normed_dims = tuple(i for i in range(x.ndim) if i != 1)
             keepdims_shape = tuple(1 if n != 1 else d for n, d in enumerate(x.shape))
-            mean = self.mean.reshape(keepdims_shape)
-            var = self.var.reshape(keepdims_shape)
+            N = x.size / x.shape[1]
 
-            grad = grad - np.mean(grad, axis=normed_dims, keepdims=True)
-            x_sub_Ex = x - mean
-            rterm = x_sub_Ex / var
-            rterm /= x.size / x.shape[1]
-            rterm *= np.reshape(
-                np.einsum(grad, range(x.ndim), x_sub_Ex, range(x.ndim), [1]),
+            # all sums carried over non-channel dims
+            # (1/sqrt(var + eps)) * [dL - dL.mean() - (1/N)*x_norm*(x_norm @ dL)]
+            grad_ = grad - np.mean(grad, axis=normed_dims, keepdims=True)
+
+            rterm = self.x_norm * np.reshape(
+                np.einsum(grad, range(x.ndim), self.x_norm, range(x.ndim), [1]),
                 keepdims_shape,
             )
-            grad -= rterm
-            grad /= np.sqrt(var)
+            rterm /= N
+            grad_ -= rterm
+            grad_ /= self._std
             if (
                 self.gamma is not None
             ):  # backprop through optional affine transformation
                 gamma = self.gamma.data
-                grad *= gamma.reshape(keepdims_shape)
-            return grad
+                grad_ *= gamma.reshape(keepdims_shape)
+            return grad_
 
         elif index == 1 and self.gamma is not None:  # backprop through gamma
             return np.einsum(grad, range(x.ndim), self.x_norm, range(x.ndim), [1])
@@ -110,7 +111,14 @@ class BatchNorm(Operation):
             raise IndexError
 
 
-def batchnorm(x, *, gamma=None, beta=None, eps, constant=False):
+def batchnorm(
+    x: ArrayLike,
+    *,
+    gamma: Optional[ArrayLike] = None,
+    beta: Optional[ArrayLike] = None,
+    eps: float,
+    constant: Optional[bool] = None
+) -> Tensor:
     """
     Performs batch normalization on ``x``::
 

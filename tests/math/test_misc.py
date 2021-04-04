@@ -8,6 +8,7 @@ import pytest
 from hypothesis import given, settings
 from numpy.testing import assert_allclose
 
+import mygrad as mg
 from mygrad import clip, maximum, minimum
 from mygrad.tensor_base import Tensor
 from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
@@ -15,11 +16,6 @@ from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 def is_not_close(arr0: Tensor, arr1: Tensor) -> bool:
     return not np.any(np.isclose(arr0.data, arr1.data))
-
-
-@fwdprop_test_factory(mygrad_func=maximum, true_func=np.maximum, num_arrays=2)
-def test_maximum_fwd():
-    pass
 
 
 @backprop_test_factory(
@@ -30,8 +26,8 @@ def test_maximum_bkwd():
 
 
 def test_maximum_bkwd_equal():
-    """ regression test for documented behavior of maximum/minimum where
-        x == y"""
+    """regression test for documented behavior of maximum/minimum where
+    x == y"""
 
     x = Tensor([1.0, 0.0, 2.0])
     y = Tensor([2.0, 0.0, 1.0])
@@ -41,7 +37,6 @@ def test_maximum_bkwd_equal():
 
     assert_allclose(x.grad, [0.0, 0.0, 1])
     assert_allclose(y.grad, [1.0, 0.0, 0])
-    o.null_gradients()
 
     # ensure branch covered for equal scalars
     x = Tensor(1.0)
@@ -52,12 +47,6 @@ def test_maximum_bkwd_equal():
 
     assert_allclose(x.grad, 0.0)
     assert_allclose(y.grad, 0.0)
-    o.null_gradients()
-
-
-@fwdprop_test_factory(mygrad_func=minimum, true_func=np.minimum, num_arrays=2)
-def test_minimum_fwd():
-    pass
 
 
 @backprop_test_factory(
@@ -68,8 +57,8 @@ def test_minimum_bkwd():
 
 
 def test_minimum_bkwd_equal():
-    """ regression test for documented behavior of minimum/minimum where
-        x == y"""
+    """regression test for documented behavior of minimum/minimum where
+    x == y"""
 
     x = Tensor([1.0, 0.0, 2.0])
     y = Tensor([2.0, 0.0, 1.0])
@@ -79,7 +68,6 @@ def test_minimum_bkwd_equal():
 
     assert_allclose(x.grad, [1.0, 0.0, 0.0])
     assert_allclose(y.grad, [0.0, 0.0, 1.0])
-    o.null_gradients()
 
     # ensure branch covered for equal scalars
     x = Tensor(1.0)
@@ -90,7 +78,6 @@ def test_minimum_bkwd_equal():
 
     assert_allclose(x.grad, 0.0)
     assert_allclose(y.grad, 0.0)
-    o.null_gradients()
 
 
 def to_min_max(arr: np.ndarray) -> st.SearchStrategy:
@@ -163,12 +150,12 @@ def is_not_close_clip(a: Tensor, a_min=None, a_max=None) -> bool:
     ("mygrad_clip", "numpy_clip", "num_arrays"),
     [
         (
-            partial(amin_clip_only, clip),
+            partial(amin_clip_only, np.clip),  # exercises __array_function__
             partial(amin_clip_only, np.clip, constant=None),
             2,
         ),
         (
-            partial(amax_clip_only, clip),
+            partial(amax_clip_only, np.clip),  # exercises __array_function__
             partial(amax_clip_only, np.clip, constant=None),
             2,
         ),
@@ -218,3 +205,16 @@ def test_clip_input_validation(a, a_min, a_max):
     mygrad_out = clip(a, a_min, a_max)
 
     np.testing.assert_array_equal(numpy_out, mygrad_out.data)
+
+
+def test_clip_method_fwd():
+    a = mg.arange(10.0)
+    assert_allclose(
+        a.clip([3, 4, 1, 1, 1, 4, 4, 4, 4, 4], 8), [3, 4, 2, 3, 4, 5, 6, 7, 8, 8]
+    )
+
+
+def test_clip_method_bkwd():
+    x = mg.tensor([1.0, 5.0, 10.0])
+    x.clip(2, 7).backward()
+    assert_allclose(x.grad, [0.0, 1.0, 0.0])

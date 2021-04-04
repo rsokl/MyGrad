@@ -2,14 +2,23 @@
 Introducing MyGrad
 ##################
 
-MyGrad is a simple, NumPy-centric autograd library. An autograd library enables you to automatically compute derivatives of mathematical functions. This library
-is designed to serve primarily as an education tool for learning about gradient-based machine learning; it is easy to install, has a readable and easily customizable code
-base, and provides a sleek interface that mimics NumPy. Furthermore, it leverages NumPy's vectorization
-to achieve good performance despite the library's simplicity.
+MyGrad is a lightweight library that adds automatic differentiation to NumPy – its only dependency is NumPy!
 
-This is not meant to be a competitor to libraries like PyTorch (which ``mygrad`` most closely resembles) or
-TensorFlow. Rather, it is meant to serve as a useful tool for students who are learning about training neural networks
-using back propagation.
+.. code:: python
+
+   >>> import mygrad as mg
+   >>> import numpy as np
+
+   >>> x = mg.tensor([1., 2., 3.])  # like numpy.array, but supports backprop!
+   >>> f = np.sum(x * x)  # tensors work with numpy functions!
+   >>> f.backward() # triggers automatic differentiation
+   >>> x.grad  # stores [df/dx0, df/dx1, df/dx2]
+   array([2., 4., 6.])
+
+
+Its primary goal is to make automatic differentiation an accessible and easy to use across the Python/NumPy ecosystem.
+As such, it strives to behave and feel exactly like NumPy so that users need not learn yet another array-based math library.
+You can pass MyGrad's :class:`~mygrad.Tensor` to NumPy's functions in order to make them differentiable!
 
 
 A Simple Application
@@ -25,8 +34,9 @@ compute the analytic derivatives of functions. Suppose we want to compute this d
 .. code:: pycon
 
     >>> import mygrad as mg
-    >>> x = mg.Tensor(3.0)
-    >>> f = x ** 2
+    >>> import numpy as np
+    >>> x = mg.tensor(3.0)
+    >>> f = np.square(x)  # mygrad's tensors can be passed into NumPy functions
     >>> f
     Tensor(9.0)
 
@@ -44,6 +54,45 @@ derivatives of ``f`` with respect to all of its independent variables. Thus, exe
 This is the absolute tip of the iceberg. ``mygrad`` can compute derivatives of multivariable composite
 functions of tensor-valued variables!
 
+Gradient Descent with MyGrad
+############################
+
+Performing gradient descent on :math:`\mathscr{L}(w) = w ^ 2`
+
+.. code:: python
+
+   w = mg.tensor(10.0)
+   learning_rate = 0.3
+   num_steps = 10
+   print(w)
+
+   for step_cnt in range(num_steps):
+       ℒ = w ** 2    # compute L(w) (this also "nulls" any derivatives")
+       ℒ.backward()  # compute derivative of L
+
+       # Update w via gradient-step..
+       # We do an augmented update on the underlying numpy-array
+       # stored by `w`
+       w.data -= learning_rate * w.grad
+       print(w)
+
+The following steps are printed out.. see that gradient descent leads us towards
+the minimum of :math:`w = 0`
+
+.. code:: pycon
+
+   Tensor(10.)
+   Tensor(4.)
+   Tensor(1.6)
+   Tensor(0.64)
+   Tensor(0.256)
+   Tensor(0.1024)
+   Tensor(0.04096)
+   Tensor(0.016384)
+   Tensor(0.0065536)
+   Tensor(0.00262144)
+   Tensor(0.00104858)
+
 
 Some Bells and Whistles
 #######################
@@ -51,18 +100,19 @@ Some Bells and Whistles
 ``mygrad`` supports all of NumPy's essential features, including:
 
  - `N-dimensional tensors <https://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/IntroducingTheNDarray.html>`_ that can be reshaped and have their axes transposed
+ - creating and operating on `views of tensors <https://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/BasicIndexing.html#Producing-a-View-of-an-Array>`_
+ - `in-place operations on tensors <https://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/BasicIndexing.html#Augmenting-the-Underlying-Data-of-an-Array>`_
  - `vectorization <https://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/VectorizedOperations.html>`_
  - `broadcasting <https://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/Broadcasting.html>`_
  - `basic and advanced indexing <https://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/BasicIndexing.html>`_ (including all varieties of mixed indexing schemes) for both getting and setting items.
- - fully-fledged support for `einsum <https://rockt.github.io/2018/04/30/einsum>`_ (including broadcasting and traces,
-   which are not supported by PyTorch, TensorFlow, or HIPS-autograd)
+ - fully-fledged support for `einsum <https://rockt.github.io/2018/04/30/einsum>`_ (including broadcasting and traces)
 
  :class:`~mygrad.Tensor` plays nicely with NumPy-arrays, which behave as constants when they are used in computational graphs:
 
 .. code:: pycon
 
     >>> import numpy as np
-    >>> x = mg.Tensor([2.0, 2.0, 2.0])
+    >>> x = mg.tensor([2.0, 2.0, 2.0])
     >>> y = np.array([1.0, 2.0, 3.0])
     >>> f = x ** y  # (2 ** 1, 2 ** 2, 2 ** 3)
     >>> f.backward()
@@ -70,9 +120,9 @@ Some Bells and Whistles
     array([ 1.,  4., 12.])
 
 
-:mod:`mygrad.nnet` supplies essential functions for machine learning, including:
+:mod:`~mygrad.nnet` supplies essential functions for machine learning, including:
 
-- N-dimensional convolutions (with striding, dilation, and padding)
+- `N-dimensional convolutions (with striding, dilation, and padding) <https://mygrad.readthedocs.io/en/latest/generated/mygrad.nnet.layers.conv_nd.html>`_
 - N-dimensional pooling
 - A `gated recurrent unit <https://en.wikipedia.org/wiki/Gated_recurrent_unit>`_ for sequence-learning (with input-level
   dropout and variational hidden-hidden dropout)
@@ -86,9 +136,9 @@ intuitively (and quite efficiently) perform the neural network-style convolution
 Advanced Example
 ################
 
-The following is an example of using `mygrad` to compute the `hinge loss <https://en.wikipedia.org/wiki/Hinge_loss>`_ of classification scores and to "back-propagate" through (compute the gradient of) this loss. This example demonstrates some of mygrad's ability to perform back-propagation through broadcasted operations, basic indexing, advanced indexing, and in-place assignments.
+The following is an example of using ``mygrad`` to compute the `hinge loss <https://en.wikipedia.org/wiki/Hinge_loss>`_ of classification scores and to "back-propagate" through (compute the gradient of) this loss. This example demonstrates some of mygrad's ability to perform back-propagation through broadcasted operations, basic indexing, advanced indexing, and in-place assignments.
 
-.. code::
+.. code:: pycon
 
     >>> from mygrad import Tensor
     >>> import numpy as np
@@ -97,26 +147,26 @@ The following is an example of using `mygrad` to compute the `hinge loss <https:
     >>> class_labels = (range(len(class_labels)), class_labels)
     >>> correct_class_scores = class_scores[class_labels]
 
-    >>> Lij = class_scores - correct_class_scores[:, np.newaxis] + 1.  # 100x10 margins
+    >>> Lij = class_scores - correct_class_scores[:, np.newaxis] + 1. 0 # 100x10 margins
     >>> Lij[Lij <= 0] = 0      # scores within the hinge incur no loss
     >>> Lij[class_labels] = 0  # the score corresponding to the correct label incurs no loss
 
     >>> loss = Lij.sum() / class_scores.shape[0]  # compute mean hinge loss
     >>> loss.backward()    # compute gradient of loss w.r.t all dependent tensors
     >>> class_scores.grad  # d(loss)/d(class_scores)
-   array([[ 0.  ,  0.01,  0.  , -0.04,  0.  ,  0.  ,  0.01,  0.  ,  0.01, 0.01], ...])
+    array([[ 0.  ,  0.01,  0.  , -0.04,  0.  ,  0.  ,  0.01,  0.  ,  0.01, 0.01], ...])
 
 Computational Graph Visualization
 #################################
 
 MyGrad provides the capability to visually render diagrams of your computational graphs:
 
-.. code:: pycon
+.. code:: python
 
     import mygrad as mg
     from mygrad.computational_graph import build_graph
-    x = mg.Tensor(2)
-    y = mg.Tensor(3)
+    x = mg.tensor(2)
+    y = mg.tensor(3)
     f = x * y
     g = f + x - 2
 

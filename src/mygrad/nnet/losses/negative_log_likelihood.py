@@ -1,24 +1,34 @@
+from typing import Optional
+
 import numpy as np
 
-from mygrad import Tensor, mean
+from mygrad import Tensor, asarray, mean
+from mygrad.typing import ArrayLike
+
 from ._utils import check_loss_inputs
 
 
-def negative_log_likelihood(x, y_true, *, weights=None, constant=False):
-    """ Returns the (weighted) negative log-likelihood loss between log-probabilities and y_true.
+def negative_log_likelihood(
+    x: ArrayLike,
+    y_true: ArrayLike,
+    *,
+    weights: Optional[ArrayLike] = None,
+    constant: Optional[bool] = None,
+) -> Tensor:
+    """Returns the (weighted) negative log-likelihood loss between log-probabilities and y_true.
 
     Note that this does not compute a softmax, so you should input log-probabilities to this.
     See ``softmax_crossentropy`` if you need your loss to compute a softmax.
 
     Parameters
     ----------
-    x : array_like, shape=(N, C)
+    x : ArrayLike, shape=(N, C)
         The C log-probabilities for each of the N pieces of data.
 
-    y_true : array_like, shape=(N,)
+    y_true : ArrayLike, shape=(N,)
         The correct class indices, in [0, C), for each datum.
 
-    weights : array_like, shape=(C,) optional (default=None)
+    weights : ArrayLike, shape=(C,) optional (default=None)
         The weighting factor to use on each class, or None.
 
     constant : bool, optional(default=False)
@@ -45,12 +55,14 @@ def negative_log_likelihood(x, y_true, *, weights=None, constant=False):
     >>> negative_log_likelihood(x, y_true)
     Tensor(1.09861229)
 
-    # log-probabilities where the prediction is highly-confident and correct
+    Log-probabilities where the prediction is highly-confident and correct:
+
     >>> x = mg.Tensor([[0, -20, -20]])
     >>> negative_log_likelihood(x, y_true)
     Tensor(0.)
 
-    # adding a class-weighting
+    Adding a class-weighting:
+
     >>> x = mg.Tensor([[-4.6, -4.6, -0.02]])
     >>> weights = mg.Tensor([2, 1, 1])
     >>> negative_log_likelihood(x, y_true, weights=weights)
@@ -62,8 +74,8 @@ def negative_log_likelihood(x, y_true, *, weights=None, constant=False):
 
     if weights is None:
         weights = np.ones(x.shape[1])
-    if isinstance(weights, Tensor):
-        weights = weights.data
+
+    weights = asarray(weights)
 
     if weights.ndim != 1 or weights.shape[0] != x.shape[1]:
         raise ValueError(
@@ -74,4 +86,4 @@ def negative_log_likelihood(x, y_true, *, weights=None, constant=False):
 
     label_locs = (range(len(y_true)), y_true)
     factors = weights[y_true]
-    return -mean(x[label_locs] * factors)
+    return -mean(x[label_locs] * factors, constant=constant)

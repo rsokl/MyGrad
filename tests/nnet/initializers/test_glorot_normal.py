@@ -1,14 +1,18 @@
-from hypothesis import given
-import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
+import hypothesis.strategies as st
 import numpy as np
 import pytest
+from hypothesis import given
 
 from mygrad import Tensor
 from mygrad.nnet.initializers import glorot_normal
 
 
-@given(dtype=hnp.unsigned_integer_dtypes() | hnp.integer_dtypes() | hnp.complex_number_dtypes())
+@given(
+    dtype=hnp.unsigned_integer_dtypes()
+    | hnp.integer_dtypes()
+    | hnp.complex_number_dtypes()
+)
 def test_glorot_normal_dtype_validation(dtype):
     with pytest.raises(ValueError):
         glorot_normal(1, 1, dtype=dtype)
@@ -20,8 +24,17 @@ def test_glorot_normal_input_validation(shape):
         glorot_normal(shape)
 
 
-_array_shapes = ((10000, 100), (1000, 100, 10), (10, 10, 10, 10, 10, 10))  # each 1 million elements
-_valid_gains = (1, 5/3, np.sqrt(2), np.sqrt(2 / (1.01 ** 2)))  # most activations, tanh, relu, leaky
+_array_shapes = (
+    (10000, 100),
+    (1000, 100, 10),
+    (10, 10, 10, 10, 10, 10),
+)  # each 1 million elements
+_valid_gains = (
+    1,
+    5 / 3,
+    np.sqrt(2),
+    np.sqrt(2 / (1.01 ** 2)),
+)  # most activations, tanh, relu, leaky
 
 
 @given(shape=st.sampled_from(_array_shapes), gain=st.sampled_from(_valid_gains))

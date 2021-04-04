@@ -2,85 +2,40 @@ from collections import Counter
 from copy import copy
 from functools import reduce
 from itertools import chain
+from numbers import Real
+from typing import Optional
 
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
 
 from mygrad._utils import SkipGradient, reduce_broadcast
-from mygrad.operation_base import BroadcastableOp
+from mygrad._utils.graph_tracking import TRACK_GRAPH
+from mygrad.operation_base import Operation
 
-__all__ = ["MatMul", "EinSum"]
-
-
-class MatMul(BroadcastableOp):
-    scalar_only = True
-
-    def __call__(self, a, b):
-        """ f(a) -> matmul(a, b)
-
-            Parameters
-            ----------
-            a : mygrad.Tensor
-            b : mygrad.Tensor
-
-            Returns
-            -------
-            numpy.ndarray"""
-        self.variables = (a, b)
-        return np.matmul(a.data, b.data)
-
-    def backward_var(self, grad, index, **kwargs):
-        a, b = (i.data for i in self.variables)
-
-        # handle 1D w/ 1D (dot product of vectors)
-        if a.ndim == 1 and b.ndim == 1:
-            if index == 0:
-                return grad * b
-            elif index == 1:
-                return grad * a
-
-        if index == 0:  # compute grad through a
-            if b.ndim > 1:  # ([...], j) w/ ([...], j, k)
-                if a.ndim == 1:
-                    grad = np.expand_dims(grad, -2)
-                dfdx = np.matmul(grad, b.swapaxes(-1, -2))
-            else:  # ([...], i, j) w/ (j,)
-                dfdx = np.expand_dims(grad, -1) * b
-            return dfdx
-
-        if index == 1:  # compute grad through b
-            if a.ndim > 1:  # ([...], i, j) w/ ([...], j, [k])
-                if b.ndim == 1:
-                    grad = np.expand_dims(grad, -1)
-                dfdx = np.matmul(a.swapaxes(-1, -2), grad)
-                if b.ndim == 1:
-                    dfdx = dfdx.squeeze(-1)
-            else:  # (j,) w/ ([...], j, k)
-                dfdx = a[:, np.newaxis] * np.expand_dims(grad, -2)
-            return dfdx
+__all__ = ["EinSum", "Norm"]
 
 
 # EinSum #
 
 
 def _unique_from_end(in_str):
-    """ Return a string with all redundant characters removed,
-        removing left-most redundant entries
+    """Return a string with all redundant characters removed,
+    removing left-most redundant entries
 
-        i.e. "ijikik" -> "jik"
+    i.e. "ijikik" -> "jik"
 
-        Parameters
-        ----------
-        in_str: str
+    Parameters
+    ----------
+    in_str: str
 
-        Returns
-        -------
-        str
+    Returns
+    -------
+    str
 
-        Examples
-        --------
-        >>> _unique_from_end("ijikik")
-        "jik"
+    Examples
+    --------
+    >>> _unique_from_end("ijikik")
+    "jik"
     """
 
     return reduce(lambda acc, x: acc + x if x not in acc else acc, in_str[::-1], "")[
@@ -89,20 +44,20 @@ def _unique_from_end(in_str):
 
 
 def _merge_max_mappings(*mappings):
-    """ Merge dictionaries based on largest values in key->value.
+    """Merge dictionaries based on largest values in key->value.
 
-        Parameters
-        ----------
-        *mappings : Dict[Any, Any]
+    Parameters
+    ----------
+    *mappings : Dict[Any, Any]
 
-        Returns
-        -------
-        Dict[Any, Any]
+    Returns
+    -------
+    Dict[Any, Any]
 
-        Examples
-        --------
-        >>> _merge_max_mappings({"a":1, "b":4}, {"a":2})
-        {"a":2, "b":4}
+    Examples
+    --------
+    >>> _merge_max_mappings({"a":1, "b":4}, {"a":2})
+    {"a":2, "b":4}
     """
 
     def _merge_max(d1, d2):
@@ -113,18 +68,18 @@ def _merge_max_mappings(*mappings):
 
 
 def _get_indices(item, seq):
-    """ Return the indices where `item` occurs in `seq`
+    """Return the indices where `item` occurs in `seq`
 
-        Returns
-        -------
-        Generator[int]"""
+    Returns
+    -------
+    Generator[int]"""
     return (n for n, x in enumerate(seq) if x == item)
 
 
-class EinSum(BroadcastableOp):
-    scalar_only = True
+class EinSum(Operation):
+    can_return_view = True
 
-    def __call__(self, *variables, in_lbls, out_lbls, optimize=False):
+    def __call__(self, *variables, in_lbls, out_lbls, out=None, optimize=False):
         """
         einsum('{in_lbls}->{out_lbls}', *variables, optimize=optimize)
 
@@ -147,12 +102,28 @@ class EinSum(BroadcastableOp):
         # cache counts the number of redundant tensor-label pairs
         # fed to einsum. Only one gradient will be computed for a
         # unique tensor-label pair
-        self.cache = Counter(zip(variables, self.in_lbls))
+        self._cache = None
+
+        # einsum doesn't handle out=None properly in numpy 1.17
+        kwargs = {} if out is None else {"out": out}
         return np.einsum(
             "->".join((in_lbls, out_lbls)),
             *(var.data for var in self.variables),
-            optimize=optimize
+            optimize=optimize,
+            **kwargs,
         )
+
+    @property
+    def cache(self) -> Counter:
+        if self._cache is None:
+            # This is hacky, but because this caching mechanism depends on the tensor-ids,
+            # we have to build the cache here - in case einsum is used to produce a view
+            # involved in an inplace operations, and placeholder tensors need be replaced.
+            #
+            # Creating the cache in __call__ could create a nasty inconsistency between
+            # tensor ids
+            self._cache = Counter(zip((id(v) for v in self.variables), self.in_lbls))
+        return self._cache
 
     def backward_var(self, grad, index, **kwargs):
         """
@@ -168,7 +139,7 @@ class EinSum(BroadcastableOp):
         original_var_lbl = in_lbls.pop(index)
         var = self.variables[index]
 
-        factor = self.cache[(var, original_var_lbl)]
+        factor = self.cache[(id(var), original_var_lbl)]
         if factor == 0:
             # the gradient for the current tensor-label pair
             # has already been computed, scaled, and back-propped,
@@ -176,7 +147,7 @@ class EinSum(BroadcastableOp):
             raise SkipGradient()
 
         numpy_arrays = tuple(i.data for i in self.variables)
-        self.cache[(var, original_var_lbl)] = 0
+        self.cache[(id(var), original_var_lbl)] = 0
 
         var_lbl = _unique_from_end(original_var_lbl)
         repeat_lbls = len(var_lbl) != len(original_var_lbl)
@@ -274,3 +245,87 @@ class EinSum(BroadcastableOp):
             # pair is accounted for.
             dfdx *= factor
         return dfdx
+
+
+def _expand_dims(x, axis, original_ndmin):
+    if axis is not None:
+        # axis: int
+        return np.expand_dims(x, axis=axis)
+    else:
+        # expand_dims doesn't work for tuple axes for numpy < 1.18
+        return x[(None,) * original_ndmin]
+
+
+class Norm(Operation):
+    def __call__(self, tensor, ord=None, axis=None, keepdims=False):
+        self.variables = (tensor,)
+        out = np.linalg.norm(tensor.data, ord=ord, axis=axis, keepdims=keepdims)
+
+        if isinstance(ord, Real) and np.isinf(ord):  # pragma: no cover
+            raise NotImplementedError(
+                "inf norms should be handled by mygrad.max(abs(x))"
+            )
+
+        if (tensor.ndim == 2 and ord is not None and axis is None) or (
+            hasattr(axis, "__len__") and len(axis) > 1
+        ):
+            raise NotImplementedError(
+                "mygrad.linalg.norm does not support matrix norms"
+            )
+
+        if ord == 0:
+            raise NotImplementedError(
+                "mygrad.linalg.norm(..., ord=0) is not a differentiable operation"
+            )
+
+        if TRACK_GRAPH:
+            if hasattr(axis, "__len__"):
+                (axis,) = axis
+
+            self.axis: Optional[int] = axis
+            self.keepdims = keepdims
+            self.ord = ord if ord is not None else 2
+
+            # self._norm is broadcast-compatible with `tensor`
+            if self.keepdims is False:
+                self._norm = _expand_dims(
+                    out, axis=self.axis, original_ndmin=tensor.ndim
+                )
+            else:
+                self._norm: np.ndarray = out
+
+        return out
+
+    def backward_var(self, grad: np.ndarray, index: int, **kwargs) -> np.ndarray:
+        (tensor,) = self.variables
+        x = tensor.data
+
+        if self.keepdims is False:
+            # is broadcast-compatible with `tensor`
+            grad = _expand_dims(grad, axis=self.axis, original_ndmin=tensor.ndim)
+
+        invalid_derivative = np.where(x == 0)
+
+        if self.ord == 1:
+            out = np.sign(x)
+            out *= grad
+
+        elif self.ord == 2:
+            out = x / self._norm
+            out *= grad
+
+        else:
+            out = np.fabs(x)
+            if out.size:
+                # if out.size is 0, then this produces div-by-zero
+                _norm = self._norm / np.sum(
+                    out ** self.ord, axis=self.axis, keepdims=True
+                )
+            else:
+                _norm = +self._norm
+            out **= self.ord - 1
+            out *= np.sign(x)
+            out *= _norm
+            out *= grad
+        out[invalid_derivative] = np.nan
+        return out
