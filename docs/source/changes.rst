@@ -15,7 +15,9 @@ on pip.
 Bug Fixes
 ---------
 
-- :func:`~mygrad.matmul` and :func:`~mygrad.multi_matmul` were missing from the top-level namespace
+- :func:`~mygrad.matmul` and :func:`~mygrad.multi_matmul` were missing from the top-level namespace of ``mygrad``.
+- A 0D tensor involved in a broadcasted operation would have a numpy-float set for its gradient instead of a 0D
+  array.
 
 New Functions
 -------------
