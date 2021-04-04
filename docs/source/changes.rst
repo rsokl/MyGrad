@@ -24,32 +24,32 @@ New Functions
 The following non-differentiable NumPy functions now work on mygrad tensors (and return ndarrays).
 Aliases of these are available at the top-level namespace of ``mygrad``
 
-- np.isnan
-- np.isfinite
-- np.isinf
-- np.isnat
-- np.signbit
-- np.logical_not
-- np.logical_and
-- np.logical_or
-- np.logical_xor
-- np.greater
-- np.greater_equal
-- np.less
-- np.less_equal
-- np.equal
-- np.not_equal
-- np.floor_divide
-- np.remainder
-- np.mod
-- np.fmod
-- np.divmod
-- np.rint
-- np.sign
-- np.floor
-- np.ceil
-- np.trunc
-- np.isclose
+  - np.isnan
+  - np.isfinite
+  - np.isinf
+  - np.isnat
+  - np.signbit
+  - np.logical_not
+  - np.logical_and
+  - np.logical_or
+  - np.logical_xor
+  - np.greater
+  - np.greater_equal
+  - np.less
+  - np.less_equal
+  - np.equal
+  - np.not_equal
+  - np.floor_divide
+  - np.remainder
+  - np.mod
+  - np.fmod
+  - np.divmod
+  - np.rint
+  - np.sign
+  - np.floor
+  - np.ceil
+  - np.trunc
+  - np.isclose
 
 
 .. _v2.0.0:
@@ -87,17 +87,17 @@ is nicely compatible with gradient-based optimization work flows.
 New Functions and Utilities
 ---------------------------
 
-- :func:`~mygrad.tensor`
-- :func:`~mygrad.astensor`
-- :func:`~mygrad.asarray`
-- :func:`~mygrad.no_autodiff`
-- :func:`~mygrad.mem_guard_off`
-- :func:`~mygrad.mem_guard_on`
-- :func:`~mygrad.turn_memory_guarding_off`
-- :func:`~mygrad.turn_memory_guarding_on`
-- :func:`~mygrad.concatenate`
-- :func:`~mygrad.stack`
-- :func:`~mygrad.linalg.norm`
+ - :func:`~mygrad.tensor`
+ - :func:`~mygrad.astensor`
+ - :func:`~mygrad.asarray`
+ - :func:`~mygrad.no_autodiff`
+ - :func:`~mygrad.mem_guard_off`
+ - :func:`~mygrad.mem_guard_on`
+ - :func:`~mygrad.turn_memory_guarding_off`
+ - :func:`~mygrad.turn_memory_guarding_on`
+ - :func:`~mygrad.concatenate`
+ - :func:`~mygrad.stack`
+ - :func:`~mygrad.linalg.norm`
 
 
 Dropping Support for Python 3.6 and Numpy < 1.17
