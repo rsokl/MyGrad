@@ -61,6 +61,9 @@ Let's write our own "multiply" operation. There are two components to doing this
            x_arr = x.data
            y_arr = y.data
 
+           # The operation need not incorporate specialized logic for
+           # broadcasting. The appropriate sum-reductions will be performed
+           # by MyGrad's autodiff system.
            if index == 0:  # backprop through a
                return grad * y.data  # ∂ℒ/∂x = (∂ℒ/∂f)(∂f/∂x)
            elif index == 1:  # backprop through b
@@ -76,9 +79,7 @@ Let's write our own "multiply" operation. There are two components to doing this
        #  - handling in-place operations (specified via the `out` parameter)
        return execute_op(CustomMultiply, x, y, constant=constant)
 
-We can now use our differentiable function! It will automatically be compatible
-with broadcasting; out operation need not account for broadcasting in either the
-forward pass or the backward pass.
+We can now use our differentiable function!
 
 .. code:: pycon
 
