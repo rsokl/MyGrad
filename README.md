@@ -25,6 +25,12 @@ array([2., 4., 6.])
 MyGrad's primary goal is to make automatic differentiation an accessible and easy to use across the Python/NumPy ecosystem.
 As such, it strives to behave and feel exactly like NumPy so that users need not learn yet another array-based math library.  
 
+Installing MyGrad:
+
+```shell script
+pip install mygrad
+```
+
 NumPy's ufuncs are richly supported; e.g. we can autodiff through in-place targets and boolean masks:  
 
 ```python
