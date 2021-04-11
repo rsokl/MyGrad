@@ -6,6 +6,14 @@ This is a record of all past mygrad releases and what went into them,
 in reverse chronological order. All previous releases should still be available
 on pip.
 
+.. _v2.0.2:
+
+------------------
+2.0.2 - 2021-04-10
+------------------
+
+Exposes :func:`~mygrad.execute_op` at top-level namespace
+
 .. _v2.0.1:
 
 ------------------
