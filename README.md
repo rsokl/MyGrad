@@ -109,9 +109,9 @@ array([-1.,  0., 10.])
 The following is an example of using `mygrad` to compute the [hinge loss](https://en.wikipedia.org/wiki/Hinge_loss) of classification scores and to "backpropagate" through (compute the gradient of) this loss. This example demonstrates some of mygrad's ability to perform backpropagation through broadcasted operations, basic indexing, advanced indexing, and in-place assignments.
 
 ```python
->>> from mygrad import Tensor
+>>> import mygrad as mg
 >>> import numpy as np
->>> class_scores = Tensor(10 * np.random.rand(100, 10))         # 100 samples, 10 possible classes for each
+>>> class_scores = 10 * mg.random.rand(100, 10) # 100 samples, 10 possible classes for each
 >>> class_labels = np.random.randint(low=0, high=10, size=100)  # correct label for each datum
 >>> class_labels = (range(len(class_labels)), class_labels)
 >>> correct_class_scores = class_scores[class_labels]
