@@ -61,9 +61,9 @@ graph - the graph is constructed as we carry out the forward-pass computation.
 >>> ℒ = 2 * x + y ** 2
 
 Invoking ``ℒ.backward()`` signals the computational graph to
-compute the total-derivative of ``f`` with respect to each one of its dependent
+compute the total-derivative of ``ℒ`` with respect to each one of its dependent
 variables. I.e. ``x.grad`` will store ``dℒ/dx`` and ``y.grad`` will store
-``dℒ/dy``. Thus we have back-propagated a gradient from ``f`` through our graph.
+``dℒ/dy``. Thus we have back-propagated a gradient from ``ℒ`` through our graph.
 
 Each tensor of derivatives is computed elementwise. That is, if ``x = Tensor(x0, x1, x2)``,
 then ``dℒ/dx`` represents ``[dℒ/d(x0), dℒ/d(x1), dℒ/d(x2)]``

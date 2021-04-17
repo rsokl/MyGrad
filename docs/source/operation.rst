@@ -83,11 +83,11 @@ We can now use our differentiable function!
 
 .. code:: pycon
 
-   >> x = mg.tensor(2.0)
-   >> y = mg.tensor([1.0, 2.0, 3.0])
+   >>> x = mg.tensor(2.0)
+   >>> y = mg.tensor([1.0, 2.0, 3.0])
 
-   >> custom_multiply(x, y).backward()
-   >> x.grad, y.grad
+   >>> custom_multiply(x, y).backward()
+   >>> x.grad, y.grad
    (array(6.), array([2., 2., 2.]))
 
 Documentation for mygrad.Operation

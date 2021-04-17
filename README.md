@@ -22,8 +22,9 @@ MyGrad is a lightweight library that adds automatic differentiation to NumPy –
 array([2., 4., 6.])
 ```
 
-MyGrad's primary goal is to make automatic differentiation an accessible and easy to use across the Python/NumPy ecosystem.
-As such, it strives to behave and feel exactly like NumPy so that users need not learn yet another array-based math library.  
+MyGrad's primary goal is to make automatic differentiation accessible and easy to use across the Python/NumPy ecosystem.
+As such, it strives to behave and feel exactly like NumPy so that users need not learn yet another array-based math library.
+Of the various modes and flavors of auto-diff, MyGrad supports backpropagation from a scalar quantity.   
 
 Installing MyGrad:
 
