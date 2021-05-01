@@ -88,7 +88,7 @@ html_theme = "sphinx_rtd_theme"
 
 
 def setup(app):
-    app.add_stylesheet("my_theme.css")
+    app.add_css_file("my_theme.css")
     # app.add_javascript("https://www.googletagmanager.com/gtag/js?id=UA-115029372-1")
     # app.add_javascript("gtag.js")
 
