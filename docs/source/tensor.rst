@@ -68,10 +68,10 @@ variables. I.e. ``x.grad`` will store ``dℒ/dx`` and ``y.grad`` will store
 Each tensor of derivatives is computed elementwise. That is, if ``x = Tensor(x0, x1, x2)``,
 then ``dℒ/dx`` represents ``[dℒ/d(x0), dℒ/d(x1), dℒ/d(x2)]``
 
->>> ℒ.backward()  # computes df/dx and df/dy
->>> x.grad  # df/dx
+>>> ℒ.backward()  # computes dℒ/dx and dℒ/dy
+>>> x.grad  # dℒ/dx
 array(6.0)
->>> y.grad  # df/dy
+>>> y.grad  # dℒ/dy
 array(4.0)
 >>> ℒ.grad
 array(1.0)  # dℒ/dℒ
