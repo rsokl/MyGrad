@@ -1750,9 +1750,9 @@ class Tensor:
                     placeholder_mutant_view,  # gets passed through unchanged
                     # ~mask * grad  backprops to upstream placeholder
                     graph[self].placeholder,
-                    op_kwargs=dict(
-                        mask=placeholder_mutant_view.creator.where,
-                    ),
+                    op_kwargs={
+                        "mask": placeholder_mutant_view.creator.where,
+                    },
                 )
 
         # Connect public base tensor to placeholder graph via the mutated placeholder
@@ -1788,12 +1788,12 @@ class Tensor:
                 _dup.UnView,
                 graph.base.placeholder,
                 placeholder_mutant_view,
-                op_kwargs=dict(
+                op_kwargs={
                     # Copy to avoid upstream placeholder mutant view sharing memory
                     # with downstream mutant base
-                    mutant_base_data=mutant_base_data,
-                    view_fn_sequence=view_fn_sequence,
-                ),
+                    "mutant_base_data": mutant_base_data,
+                    "view_fn_sequence": view_fn_sequence,
+                },
             )
 
         del placeholder_mutant_view
@@ -2427,7 +2427,7 @@ class Tensor:
         Tensor([1, 5])
         """
         return Tensor._op(
-            Sum, self, op_kwargs=dict(axis=axis, keepdims=keepdims), constant=constant
+            Sum, self, op_kwargs={"axis": axis, "keepdims": keepdims}, constant=constant
         )
 
     def prod(
@@ -2465,7 +2465,10 @@ class Tensor:
         product_along_axis : mygrad.Tensor
             A tensor shaped as `a` but with the specified axis removed."""
         return Tensor._op(
-            Prod, self, op_kwargs=dict(axis=axis, keepdims=keepdims), constant=constant
+            Prod,
+            self,
+            op_kwargs={"axis": axis, "keepdims": keepdims},
+            constant=constant,
         )
 
     def cumprod(
@@ -2508,7 +2511,7 @@ class Tensor:
         Arithmetic is modular when using integer types, and no error is
         raised on overflow."""
 
-        return Tensor._op(CumProd, self, op_kwargs=dict(axis=axis), constant=constant)
+        return Tensor._op(CumProd, self, op_kwargs={"axis": axis}, constant=constant)
 
     def cumsum(
         self,
@@ -2542,7 +2545,7 @@ class Tensor:
         mygrad.Tensor
         """
 
-        return Tensor._op(CumSum, self, op_kwargs=dict(axis=axis), constant=constant)
+        return Tensor._op(CumSum, self, op_kwargs={"axis": axis}, constant=constant)
 
     def mean(
         self,
@@ -2590,7 +2593,10 @@ class Tensor:
             a 0-dim Tensor is returned.
         """
         return Tensor._op(
-            Mean, self, op_kwargs=dict(axis=axis, keepdims=keepdims), constant=constant
+            Mean,
+            self,
+            op_kwargs={"axis": axis, "keepdims": keepdims},
+            constant=constant,
         )
 
     def std(
@@ -2652,7 +2658,7 @@ class Tensor:
         return Tensor._op(
             StdDev,
             self,
-            op_kwargs=dict(axis=axis, keepdims=keepdims, ddof=ddof),
+            op_kwargs={"axis": axis, "keepdims": keepdims, "ddof": ddof},
             constant=constant,
         )
 
@@ -2714,7 +2720,7 @@ class Tensor:
         return Tensor._op(
             Variance,
             self,
-            op_kwargs=dict(axis=axis, keepdims=keepdims, ddof=ddof),
+            op_kwargs={"axis": axis, "keepdims": keepdims, "ddof": ddof},
             constant=constant,
         )
 
@@ -2777,7 +2783,7 @@ class Tensor:
         return Tensor._op(
             Max,
             self,
-            op_kwargs=dict(axis=axis, keepdims=keepdims, dtype=_NoValue),
+            op_kwargs={"axis": axis, "keepdims": keepdims, "dtype": _NoValue},
             constant=constant,
         )
 
@@ -2838,7 +2844,7 @@ class Tensor:
         return Tensor._op(
             Min,
             self,
-            op_kwargs=dict(axis=axis, keepdims=keepdims, dtype=_NoValue),
+            op_kwargs={"axis": axis, "keepdims": keepdims, "dtype": _NoValue},
             constant=constant,
         )
 
