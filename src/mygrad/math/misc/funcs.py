@@ -32,6 +32,7 @@ def absolute(
     where: Mask = True,
     dtype: DTypeLikeReals = None,
     constant: Optional[bool] = None,
+    nan_to_num: bool = True,
 ) -> Tensor:  # pragma: no cover
     """The absolute value, computed elementwise.
 
@@ -56,6 +57,10 @@ def absolute(
         Defaults to ``True`` for integer-type data.
 
         Integer-type tensors must be constant.
+
+    nan_to_num : bool, optional (default=True)
+        If `True` then gradients that would store nans due to the presence of
+        zeros in `x` will instead store zeros in those places.
 
     where : Mask
         This condition is broadcast over the input. At locations where the
@@ -84,6 +89,22 @@ def absolute(
     >>> x = mg.array([-1.2, 1.2])
     >>> mg.absolute([-1.2, 1.2])
     Tensor([ 1.2,  1.2])
+
+    The absolute-value function is not differentiable at `x=0.0`.
+    By default the derivative at this point is treated as 0.
+
+    >>> x = mg.tensor([-2.0, 0.0, 2.0])
+    >>> mg.absolute(x).backward()
+    >>> x.grad
+    np.array([-1., 0., 1.])
+
+    However a more rigorous behavior can be enabled such that the
+    undefined derivative will be returned as `nan`.
+
+    >>> x = mg.tensor([-2.0, 0.0, 2.0])
+    >>> mg.absolute(x, nan_to_num=False).backward()
+    >>> x.grad
+    np.array([-1., nan, 1.])
 
     Plot the function and its derivate over ``[-10, 10]``:
 
