@@ -161,3 +161,17 @@ def test_norm_backward_1d(x, data, ord):
 
     assert_allclose(o1, o2)
     assert_allclose(t1.grad, t2.grad, atol=1e-7, rtol=1e-7)
+
+
+def test_nan_to_num_behavior():
+    x = mg.tensor([[1.0, 2.0, 3.0], [1.0, 0.0, 0.0]])
+    y = x.copy()
+    z = x.copy()
+
+    mg.linalg.norm(x, axis=1, nan_to_num=False).backward()
+    mg.linalg.norm(y, axis=1, nan_to_num=True).backward()
+    mg.linalg.norm(z, axis=1).backward()  # default behavior should be `nan_to_num=True`
+
+    assert np.isnan(x.grad).sum() == 2
+    assert_allclose(np.nan_to_num(x.grad), y.grad)
+    assert_allclose(z.grad, y.grad)

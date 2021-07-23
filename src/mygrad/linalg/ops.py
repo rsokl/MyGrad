@@ -257,8 +257,17 @@ def _expand_dims(x, axis, original_ndmin):
 
 
 class Norm(Operation):
-    def __call__(self, tensor, ord=None, axis=None, keepdims=False):
+    def __call__(
+        self,
+        tensor,
+        ord=None,
+        axis=None,
+        keepdims: bool = False,
+        *,
+        nan_to_num: bool = True
+    ):
         self.variables = (tensor,)
+        self._nan_to_num = nan_to_num
         out = np.linalg.norm(tensor.data, ord=ord, axis=axis, keepdims=keepdims)
 
         if isinstance(ord, Real) and np.isinf(ord):  # pragma: no cover
@@ -304,7 +313,8 @@ class Norm(Operation):
             # is broadcast-compatible with `tensor`
             grad = _expand_dims(grad, axis=self.axis, original_ndmin=tensor.ndim)
 
-        invalid_derivative = np.where(x == 0)
+        if not self._nan_to_num:
+            invalid_derivative = np.where(x == 0)
 
         if self.ord == 1:
             out = np.sign(x)
@@ -327,5 +337,7 @@ class Norm(Operation):
             out *= np.sign(x)
             out *= _norm
             out *= grad
-        out[invalid_derivative] = np.nan
+
+        if not self._nan_to_num:
+            out[invalid_derivative] = np.nan
         return out
