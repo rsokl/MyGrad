@@ -11,10 +11,17 @@ __all__ = ["Abs", "Sqrt", "Cbrt", "Maximum", "Minimum"]
 class Abs(UnaryUfunc):
     numpy_ufunc = np.absolute
 
+    def __call__(self, *args, nan_to_num: bool = True, **kwargs):
+        self._nan_to_num = nan_to_num
+        return super().__call__(*args, **kwargs)
+
     def backward_var(self, grad, index, **kwargs):
         (a,) = self.variables
+
         return grad * np.piecewise(
-            a.data, [a.data < 0, a.data == 0, a.data > 0], [-1, np.nan, 1]
+            a.data,
+            [a.data < 0, a.data == 0, a.data > 0],
+            [-1, (0 if self._nan_to_num else np.nan), 1],
         )
 
 

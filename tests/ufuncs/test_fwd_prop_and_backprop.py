@@ -331,3 +331,17 @@ def test_arctan2_bkwd_pos_x():
 )
 def test_arctan2_bkwd_neg_x():
     pass
+
+
+def test_abs_nan_to_num():
+    x = mg.arange(-2.0, 3.0)
+    y = x.copy()
+    z = x.copy()
+
+    mg.abs(x, nan_to_num=False).backward()
+    mg.abs(y, nan_to_num=True).backward()
+    mg.abs(z).backward()
+
+    assert np.all(np.isnan(x.grad) == np.array([False, False, True, False, False]))
+    assert_allclose(np.nan_to_num(x.grad), y.grad)
+    assert_allclose(y.grad, z.grad)

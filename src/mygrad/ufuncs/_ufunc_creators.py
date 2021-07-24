@@ -183,6 +183,7 @@ class MyGradUnaryUfunc(MyGradUfunc):
         where: Mask = True,
         dtype: DTypeLikeReals = None,
         constant: Optional[bool] = None,
+        **kwargs,
     ) -> Tensor:
         # it is fastest to check if out is None, which is likely the
         # most common scenario, and this is a very "hot path" in the
@@ -191,7 +192,7 @@ class MyGradUnaryUfunc(MyGradUfunc):
             out._in_place_op(
                 cls._wrapped_op,
                 x,
-                op_kwargs={"where": where, "dtype": dtype},
+                op_kwargs={"where": where, "dtype": dtype, **kwargs},
                 constant=constant,
             )
             return out
@@ -199,7 +200,7 @@ class MyGradUnaryUfunc(MyGradUfunc):
             return Tensor._op(
                 cls._wrapped_op,
                 x,
-                op_kwargs={"where": where, "dtype": dtype},
+                op_kwargs={"where": where, "dtype": dtype, **kwargs},
                 constant=constant,
                 out=out,
             )

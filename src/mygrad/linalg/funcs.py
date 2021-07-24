@@ -22,6 +22,7 @@ def norm(
     axis: Optional[Union[int, Tuple[int]]] = None,
     keepdims: bool = False,
     *,
+    nan_to_num: bool = True,
     constant: Optional[bool] = None,
 ) -> Tensor:
     r"""Vector norm.
@@ -52,6 +53,10 @@ def norm(
         If this is set to True, the axes which are normed over are left in the
         result as dimensions with size one.  With this option the result will
         broadcast correctly against the original `x`.
+
+    nan_to_num : bool, optional (default=True)
+        If `True` then gradients that would store nans due to the presence of
+        zeros in `x` will instead store zeros in those places.
 
     constant : Optional[bool]
         If ``True``, this tensor is treated as a constant, and thus does not
@@ -113,13 +118,25 @@ def norm(
     >>> l2_norms
     Tensor([3.74165739, 1.        ])
 
-    The presence of the elementwise absolute values in the norm means that zero-valued
-    entries in a vectors have an undefined derivative.
+    The presence of the elementwise absolute values in the norm operation means that zero-valued entries in any of 
+    input vectors have an undefined derivative. When `nan_to_num=False` is specified these derivatives will be reported
+    as `nan`, otherwise they will be made to be 0.0.
 
+    >>> l2_norms = mg.linalg.norm(x, axis=1, ord=2, nan_to_num=True)
     >>> l2_norms.backward()
     >>> x.grad
     array([[0.26726124, 0.53452248, 0.80178373],
            [1.        ,        nan,        nan]])
+
+    This is rigorously true, but is often not the desired behavior in autodiff applications.
+    Rather, it can be preferable to use `0.0` to fill these undefined derivatives.
+    This is the default behavior, when `nan_to_num` is not specified.
+
+    >>> l2_norms = mg.linalg.norm(x, axis=1, ord=2, nan_to_num=False)  # default setting: `nan_to_num=False`
+    >>> l2_norms.backward()
+    >>> x.grad
+    array([[0.26726124, 0.53452248, 0.80178373],
+          [1.        ,          0.,         0.]])
 
     L1 norms along each of the three columns:
 
@@ -143,7 +160,12 @@ def norm(
     return Tensor._op(
         Norm,
         x,
-        op_kwargs={"axis": axis, "keepdims": keepdims, "ord": ord},
+        op_kwargs={
+            "axis": axis,
+            "keepdims": keepdims,
+            "ord": ord,
+            "nan_to_num": nan_to_num,
+        },
         constant=constant,
     )
 
