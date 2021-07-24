@@ -118,8 +118,9 @@ def norm(
     >>> l2_norms
     Tensor([3.74165739, 1.        ])
 
-    When `nan_to_num=False` is specified the presence of the elementwise absolute values in the
-    norm operation means that zero-valued entries in any of input vectors will have an undefined derivative.
+    The presence of the elementwise absolute values in the norm operation means that zero-valued entries in any of 
+    input vectors have an undefined derivative. When `nan_to_num=False` is specified these derivatives will be reported
+    as `nan`, otherwise they will be made to be 0.0.
 
     >>> l2_norms = mg.linalg.norm(x, axis=1, ord=2, nan_to_num=True)
     >>> l2_norms.backward()
