@@ -675,14 +675,14 @@ def full_like(
 
 
 def arange(
-    start: Real,
-    stop: Real = None,
-    step: int = None,
-    dtype: Optional[DTypeLikeReals] = None,
-    *,
+    *args,
     constant: Optional[bool] = None,
+    **kwargs,
 ) -> Tensor:
-    """Return a Tensor with evenly-spaced values within a given interval.
+    """
+    arange([start,] stop[, step,], dtype=None, *, constant=None)
+
+    Return a Tensor with evenly-spaced values within a given interval.
 
     Values are generated within [start, stop). Note that for non-integer steps, results may be
     inconsistent; you are better off using `linspace` instead.
@@ -726,19 +726,14 @@ def arange(
     >>> import mygrad as mg
     >>> mg.arange(3)
     Tensor([0, 1, 2])
-    >>> mg.arange(3.0, constant=True)
-    Tensor([ 0.,  1.,  2.])  # resulting tensor will not back-propagate a gradient
+    >>> mg.arange(3.0, constant=True)  # resulting tensor will not back-propagate a gradient
+    Tensor([ 0.,  1.,  2.])
     >>> mg.arange(3,7)
     Tensor([3, 4, 5, 6])
     >>> mg.arange(3,7,2)
     Tensor([3, 5])
     """
-    if stop is None:
-        arr = np.arange(start, step=step, dtype=dtype)
-    else:
-        arr = np.arange(start, stop, step=step, dtype=dtype)
-
-    return Tensor(arr, constant=constant, copy=False)
+    return Tensor(np.arange(*args, **kwargs), constant=constant, copy=False)
 
 
 def linspace(
