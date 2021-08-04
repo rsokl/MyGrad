@@ -24,6 +24,8 @@ def save(filename : str, tensor : Tensor) -> None:
     if not isinstance(tensor, Tensor):
         raise TypeError(f"mygrad.save requires a Tensor-type object, got type {type(tensor)}")
 
+    # if tensor.grad == None:
+    #     np.savez(filename, data=tensor.data)
     np.savez(filename, data=tensor.data, grad=tensor.grad)
 
 
@@ -41,9 +43,11 @@ def load(tensor_filename : str) -> Tensor:
     -------
     A tensor with the desired gradient data.
     """
-    _tensor = np.load(tensor_filename)
+    _tensor = np.load(tensor_filename, allow_pickle=True)
 
     loaded_tensor = tensor(_tensor['data'])
-    loaded_tensor.backward(_tensor['grad'])
+
+    if _tensor['grad'] != None:
+        loaded_tensor.backward(_tensor['grad'])
 
     return loaded_tensor
