@@ -47,7 +47,7 @@ def load(tensor_filename : str) -> Tensor:
 
     loaded_tensor = tensor(_tensor['data'])
 
-    if _tensor['grad'] != None:
+    if not _tensor['grad'].all():
         loaded_tensor.backward(_tensor['grad'])
 
     return loaded_tensor
