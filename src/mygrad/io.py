@@ -15,7 +15,7 @@ def save(file : str, tensor : Tensor) -> None:
         The desired name of the file that will hold the tensor data. Note that the file will be saved as a .npz
 
     tensor : Tensor
-        The tensor that is to be saved, along with its gradient information. If there is no gradient, it saves as None.
+        The tensor that is to be saved, along with its gradient information.
 
     Returns
     -------
