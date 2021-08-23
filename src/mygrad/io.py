@@ -1,10 +1,13 @@
-import typing
-import mygrad as mg
-from mygrad.tensor_base import Tensor, tensor
+from pathlib import Path
+from typing import Union, str
+
 import numpy as np
 
+import mygrad as mg
+from mygrad.tensor_base import Tensor, tensor
 
-def save(file: str, tensor: Tensor) -> None:
+
+def save(file: Union[str, Path], tensor: Tensor) -> None:
     """Saves a tensor and its gradient information.
 
     This docstring was adapted from that of numpy.save()
@@ -32,7 +35,7 @@ def save(file: str, tensor: Tensor) -> None:
         np.savez(file, data=tensor.data)
 
 
-def load(file: str) -> Tensor:
+def load(file: Union[str, Path]) -> Tensor:
     """Loads a saved Tensor and its gradient information (if applicable).
 
     This docstring was adapted from that of numpy.load()
