@@ -48,11 +48,11 @@ def load(file: Union[str, Path]) -> tb.Tensor:
     -------
     A tensor with the desired gradient data.
     """
-    _tensor = np.load(file)
+    loaded = np.load(file)
 
-    loaded_tensor = tb.tensor(_tensor["data"])
+    loaded_tensor = tb.tensor(loaded["data"])
 
-    if "grad" in _tensor.files:
-        loaded_tensor.backward(_tensor["grad"])
+    if "grad" in loaded:
+        loaded_tensor.backward(loaded["grad"])
 
     return loaded_tensor
