@@ -3,7 +3,6 @@ from typing import Union
 
 import numpy as np
 
-import mygrad as mg
 from mygrad.tensor_base import Tensor, tensor
 
 
