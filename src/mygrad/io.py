@@ -3,10 +3,10 @@ from typing import Union
 
 import numpy as np
 
-from mygrad.tensor_base import Tensor, tensor
+import mygrad.tensor_base as tb
 
 
-def save(file: Union[str, Path], tensor: Tensor) -> None:
+def save(file: Union[str, Path], tensor: tb.Tensor) -> None:
     """Saves a tensor and its gradient information.
 
     This docstring was adapted from that of numpy.save()
@@ -23,7 +23,7 @@ def save(file: Union[str, Path], tensor: Tensor) -> None:
     -------
     None
     """
-    if not isinstance(tensor, Tensor):
+    if not isinstance(tensor, tb.Tensor):
         raise TypeError(
             f"mygrad.save requires a Tensor-type object, got type {type(tensor)}"
         )
@@ -34,7 +34,7 @@ def save(file: Union[str, Path], tensor: Tensor) -> None:
         np.savez(file, data=tensor.data)
 
 
-def load(file: Union[str, Path]) -> Tensor:
+def load(file: Union[str, Path]) -> tb.Tensor:
     """Loads a saved Tensor and its gradient information (if applicable).
 
     This docstring was adapted from that of numpy.load()
@@ -50,7 +50,7 @@ def load(file: Union[str, Path]) -> Tensor:
     """
     _tensor = np.load(file)
 
-    loaded_tensor = tensor(_tensor["data"])
+    loaded_tensor = tb.tensor(_tensor["data"])
 
     if "grad" in _tensor.files:
         loaded_tensor.backward(_tensor["grad"])
