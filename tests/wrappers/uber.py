@@ -8,6 +8,7 @@ import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
 from hypothesis import assume, given, note
+from hypothesis.extra._array_helpers import MutuallyBroadcastableShapesStrategy
 from hypothesis.strategies import SearchStrategy
 from hypothesis.strategies._internal.lazy import LazyStrategy
 from numpy.testing import assert_allclose, assert_array_equal
@@ -15,8 +16,8 @@ from numpy.testing import assert_allclose, assert_array_equal
 import mygrad._utils.lock_management as mem
 from mygrad import Tensor
 from mygrad.operation_base import Operation
-
 from tests.utils.checkers import expected_constant as _expected_constant
+
 from ..utils.numerical_gradient import (
     finite_difference,
     numerical_gradient,
@@ -103,7 +104,7 @@ class fwdprop_test_factory:
         mygrad_func: Callable[[Tensor], Tensor],
         true_func: Callable[[np.ndarray], np.ndarray],
         num_arrays: Optional[int] = None,
-        shapes: Optional[hnp.MutuallyBroadcastableShapesStrategy] = None,
+        shapes: Optional[MutuallyBroadcastableShapesStrategy] = None,
         index_to_bnds: Dict[int, Tuple[int, int]] = None,
         default_bnds: Tuple[float, float] = (-1e6, 1e6),
         index_to_no_go: Dict[int, Sequence[int]] = None,
@@ -191,7 +192,7 @@ class fwdprop_test_factory:
             if not isinstance(shapes, st.SearchStrategy):
                 raise TypeError(
                     f"`shapes` should be "
-                    f"Optional[hnp.MutuallyBroadcastableShapesStrategy]"
+                    f"Optional[MutuallyBroadcastableShapesStrategy]"
                     f", got {shapes}"
                 )
 
@@ -199,10 +200,10 @@ class fwdprop_test_factory:
                 shapes.wrapped_strategy if isinstance(shapes, LazyStrategy) else shapes
             )
 
-            if not isinstance(shapes_type, hnp.MutuallyBroadcastableShapesStrategy):
+            if not isinstance(shapes_type, MutuallyBroadcastableShapesStrategy):
                 raise TypeError(
                     f"`shapes` should be "
-                    f"Optional[hnp.MutuallyBroadcastableShapesStrategy]"
+                    f"Optional[MutuallyBroadcastableShapesStrategy]"
                     f", got {shapes}"
                 )
             num_arrays = shapes_type.num_shapes
@@ -429,7 +430,7 @@ class backprop_test_factory:
         mygrad_func: Callable[[Tensor], Tensor],
         true_func: Callable[[np.ndarray], np.ndarray],
         num_arrays: Optional[int] = None,
-        shapes: Optional[hnp.MutuallyBroadcastableShapesStrategy] = None,
+        shapes: Optional[MutuallyBroadcastableShapesStrategy] = None,
         index_to_bnds: Optional[Dict[int, Tuple[int, int]]] = None,
         default_bnds: Tuple[float, float] = (-1e6, 1e6),
         index_to_no_go: Optional[Dict[int, Sequence[int]]] = None,
