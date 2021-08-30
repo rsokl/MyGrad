@@ -130,7 +130,7 @@ class fwdprop_test_factory:
         num_arrays : Optional[int]
             The number of arrays to be fed to the function
 
-        shapes : Optional[hnp.MutuallyBroadcastableShapesStrategy]
+        shapes : Optional[MutuallyBroadcastableShapesStrategy]
             A strategy that generates all of the input shapes to feed to the function.
 
         index_to_bnds : Dict[int, Tuple[int, int]]
@@ -463,7 +463,7 @@ class backprop_test_factory:
         num_arrays : Optional[int]
             The number of arrays that must be passed to ``mygrad_func``
 
-        shapes : Optional[hnp.MutuallyBroadcastableShapesStrategy]
+        shapes : Optional[MutuallyBroadcastableShapesStrategy]
             A strategy that generates all of the input shapes to feed to the function.
 
         index_to_bnds : Optional[Dict[int, Tuple[int, int]]]
@@ -569,7 +569,7 @@ class backprop_test_factory:
             if not isinstance(shapes, st.SearchStrategy):
                 raise TypeError(
                     f"`shapes` should be "
-                    f"Optional[hnp.MutuallyBroadcastableShapesStrategy]"
+                    f"Optional[MutuallyBroadcastableShapesStrategy]"
                     f", got {shapes}"
                 )
 
@@ -577,10 +577,10 @@ class backprop_test_factory:
                 shapes.wrapped_strategy if isinstance(shapes, LazyStrategy) else shapes
             )
 
-            if not isinstance(shapes_type, hnp.MutuallyBroadcastableShapesStrategy):
+            if not isinstance(shapes_type, MutuallyBroadcastableShapesStrategy):
                 raise TypeError(
                     f"`shapes` should be "
-                    f"Optional[hnp.MutuallyBroadcastableShapesStrategy]"
+                    f"Optional[MutuallyBroadcastableShapesStrategy]"
                     f", got {shapes}"
                 )
             num_arrays = shapes_type.num_shapes
