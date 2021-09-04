@@ -1,8 +1,8 @@
 """
 Provides user interface for suspending computational graph tracking and back-propagation
 """
-from functools import wraps
-from typing import Callable
+from functools import wraps, partial
+from typing import Callable, TypeVar, Any, cast, Optional
 
 import numpy as np
 
@@ -10,6 +10,7 @@ from mygrad._utils import ContextTracker
 
 __all__ = ["no_autodiff"]
 
+_T = TypeVar("_T", bound=Callable[..., Any])
 
 # If `False`, suspends all computational graph tracking and backprop
 TRACK_GRAPH = True  # type: bool
@@ -42,17 +43,6 @@ class _NoAutoDiff(ContextTracker):
     ...     # No graph-tracking will occur within
     ...     # the body of this function
     ...     pass
-
-    The following pattern is particularly useful for making a MyGrad-function
-    behave as if it were a pure NumPy function.
-
-    >>> @mg.no_autodiff(to_numpy=True)
-    ... def func_returns_array():
-    ...     # No graph-tracking will occur within
-    ...     # the body of this function.
-    ...     # And the output of the function will be
-    ...     # cast to a numpy array
-    ...     pass
     """
 
     _enter_set_value = False
@@ -71,7 +61,7 @@ class _NoAutoDiff(ContextTracker):
         global TRACK_GRAPH
         TRACK_GRAPH = value
 
-    def __call__(self, func: Callable, to_numpy: bool = False) -> Callable:
+    def __call__(self, func: _T, to_numpy: bool = False) -> _T:
         """Decorates a function so that it will have graph-tracking suspended
         during its execution.
 
@@ -94,7 +84,7 @@ class _NoAutoDiff(ContextTracker):
                 out = func(*args, **kwargs)
             return out if not to_numpy else np.asarray(out)
 
-        return wrapper
+        return cast(_T, wrapper)
 
 
 no_autodiff = _NoAutoDiff()
