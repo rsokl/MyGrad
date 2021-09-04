@@ -4,29 +4,45 @@ import numpy as np
 
 from mygrad.operation_base import Operation
 
-__all__ = ["Reshape", "Flatten", "Squeeze", "Ravel", "ExpandDims", "BroadcastTo", "AtLeast1D", "AtLeast2D", "AtLeast3D"]
+__all__ = [
+    "Reshape",
+    "Flatten",
+    "Squeeze",
+    "Ravel",
+    "ExpandDims",
+    "BroadcastTo",
+    "AtLeast1D",
+    "AtLeast2D",
+    "AtLeast3D",
+]
+
 
 class _PreservesOrder(Operation):
-    def backward_var(self, grad, index, **kwargs):
-        a, = self.variables
+    def backward_var(self, grad: np.ndarray, index: int, **kwargs) -> np.ndarray:
+        (a,) = self.variables
         return np.reshape(grad, a.shape)
+
 
 class _AtLeastKD(_PreservesOrder):
     can_return_view = True
     numpy_func: Callable[[np.ndarray], np.ndarray]
-    
+
     def __call__(self, a):
         self.variables = (a,)
         return self.numpy_func(a.data)
 
+
 class AtLeast1D(_AtLeastKD):
     numpy_func = staticmethod(np.atleast_1d)
+
 
 class AtLeast2D(_AtLeastKD):
     numpy_func = staticmethod(np.atleast_2d)
 
+
 class AtLeast3D(_AtLeastKD):
     numpy_func = staticmethod(np.atleast_3d)
+
 
 class Reshape(_PreservesOrder):
     can_return_view = True
@@ -47,7 +63,7 @@ class Reshape(_PreservesOrder):
         return np.reshape(a.data, newshape)
 
 
-class Squeeze(Operation):
+class Squeeze(_PreservesOrder):
     can_return_view = True
 
     def __call__(self, a, axis):
@@ -58,7 +74,7 @@ class Squeeze(Operation):
         return np.squeeze(a.data, axis=axis)
 
 
-class Flatten(Operation):
+class Flatten(_PreservesOrder):
     def __call__(self, a):
         """Parameters
         ----------
@@ -67,7 +83,7 @@ class Flatten(Operation):
         return a.data.flatten(order="C")
 
 
-class Ravel(Operation):
+class Ravel(_PreservesOrder):
     can_return_view = True
 
     def __call__(self, a):
@@ -78,7 +94,7 @@ class Ravel(Operation):
         return np.ravel(a.data, order="C")
 
 
-class ExpandDims(Operation):
+class ExpandDims(_PreservesOrder):
     can_return_view = True
 
     def __call__(self, a, axis):
