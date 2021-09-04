@@ -105,7 +105,7 @@ class fwdprop_test_factory:
         true_func: Callable[[np.ndarray], np.ndarray],
         num_arrays: Optional[int] = None,
         shapes: Optional[MutuallyBroadcastableShapesStrategy] = None,
-        index_to_bnds: Dict[int, Tuple[int, int]] = None,
+        index_to_bnds: Dict[int, Tuple[float, float]] = None,
         default_bnds: Tuple[float, float] = (-1e6, 1e6),
         index_to_no_go: Dict[int, Sequence[int]] = None,
         kwargs: Union[
