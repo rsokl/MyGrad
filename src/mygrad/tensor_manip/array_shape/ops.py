@@ -1,7 +1,8 @@
+from typing import Callable
+
 import numpy as np
 
 from mygrad.operation_base import Operation
-from typing import Callable
 
 __all__ = ["Reshape", "Flatten", "Squeeze", "Ravel", "ExpandDims", "BroadcastTo", "AtLeast1D", "AtLeast2D", "AtLeast3D"]
 

@@ -1,4 +1,4 @@
-from typing import Callable, Optional, Tuple, Union, List, cast, TypeVar, overload
+from typing import Callable, List, Optional, Tuple, TypeVar, Union, cast, overload
 
 from mygrad.tensor_base import Tensor, implements_numpy_override
 from mygrad.typing import ArrayLike, Shape
