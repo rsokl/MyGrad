@@ -1,11 +1,33 @@
 import numpy as np
 
 from mygrad.operation_base import Operation
+from typing import Callable
 
-__all__ = ["Reshape", "Flatten", "Squeeze", "Ravel", "ExpandDims", "BroadcastTo"]
+__all__ = ["Reshape", "Flatten", "Squeeze", "Ravel", "ExpandDims", "BroadcastTo", "AtLeast1D", "AtLeast2D", "AtLeast3D"]
 
+class _PreservesOrder(Operation):
+    def backward_var(self, grad, index, **kwargs):
+        a, = self.variables
+        return np.reshape(grad, a.shape)
 
-class Reshape(Operation):
+class _AtLeastKD(_PreservesOrder):
+    can_return_view = True
+    numpy_func: Callable[[np.ndarray], np.ndarray]
+    
+    def __call__(self, a):
+        self.variables = (a,)
+        return self.numpy_func(a.data)
+
+class AtLeast1D(_AtLeastKD):
+    numpy_func = staticmethod(np.atleast_1d)
+
+class AtLeast2D(_AtLeastKD):
+    numpy_func = staticmethod(np.atleast_2d)
+
+class AtLeast3D(_AtLeastKD):
+    numpy_func = staticmethod(np.atleast_3d)
+
+class Reshape(_PreservesOrder):
     can_return_view = True
 
     def __call__(self, a, newshape):
@@ -23,10 +45,6 @@ class Reshape(Operation):
         self.variables = (a,)
         return np.reshape(a.data, newshape)
 
-    def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
-        return np.reshape(grad, a.shape)
-
 
 class Squeeze(Operation):
     can_return_view = True
@@ -38,10 +56,6 @@ class Squeeze(Operation):
         self.variables = (a,)
         return np.squeeze(a.data, axis=axis)
 
-    def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
-        return grad.reshape(a.shape)
-
 
 class Flatten(Operation):
     def __call__(self, a):
@@ -50,10 +64,6 @@ class Flatten(Operation):
         a : mygrad.Tensor"""
         self.variables = (a,)
         return a.data.flatten(order="C")
-
-    def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
-        return grad.reshape(a.shape)
 
 
 class Ravel(Operation):
@@ -66,10 +76,6 @@ class Ravel(Operation):
         self.variables = (a,)
         return np.ravel(a.data, order="C")
 
-    def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
-        return grad.reshape(a.shape)
-
 
 class ExpandDims(Operation):
     can_return_view = True
@@ -81,10 +87,6 @@ class ExpandDims(Operation):
         axis : int"""
         self.variables = (a,)
         return np.expand_dims(a.data, axis=axis)
-
-    def backward_var(self, grad, index, **kwargs):
-        a = self.variables[index]
-        return grad.reshape(a.shape)
 
 
 class BroadcastTo(Operation):
