@@ -264,12 +264,16 @@ def _dispatch_atleast_kd(func: Callable[..., _T], Op, *tensors, k: int, constant
 
 
 @overload
-def atleast_1d(tensors: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
+def atleast_1d(
+    tensors: ArrayLike, *, constant: Optional[bool] = None
+) -> Tensor:  # pragma: no cover
     ...
 
 
 @overload
-def atleast_1d(*tensors: ArrayLike, constant: Optional[bool] = None) -> List[Tensor]:
+def atleast_1d(
+    *tensors: ArrayLike, constant: Optional[bool] = None
+) -> List[Tensor]:  # pragma: no cover
     ...
 
 
@@ -337,12 +341,16 @@ def atleast_1d(
 
 
 @overload
-def atleast_2d(tensors: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
+def atleast_2d(
+    tensors: ArrayLike, *, constant: Optional[bool] = None
+) -> Tensor:  # pragma: no cover
     ...
 
 
 @overload
-def atleast_2d(*tensors: ArrayLike, constant: Optional[bool] = None) -> List[Tensor]:
+def atleast_2d(
+    *tensors: ArrayLike, constant: Optional[bool] = None
+) -> List[Tensor]:  # pragma: no cover
     ...
 
 
@@ -408,12 +416,16 @@ def atleast_2d(
 
 
 @overload
-def atleast_3d(tensors: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
+def atleast_3d(
+    tensors: ArrayLike, *, constant: Optional[bool] = None
+) -> Tensor:  # pragma: no cover
     ...
 
 
 @overload
-def atleast_3d(*tensors: ArrayLike, constant: Optional[bool] = None) -> List[Tensor]:
+def atleast_3d(
+    *tensors: ArrayLike, constant: Optional[bool] = None
+) -> List[Tensor]:  # pragma: no cover
     ...
 
 

@@ -1,6 +1,6 @@
-mygrad.broadcast\_to
-====================
+mygrad.atleast_2d
+=================
 
 .. currentmodule:: mygrad
 
-.. autofunction:: broadcast_to
+.. autofunction:: atleast_2d
