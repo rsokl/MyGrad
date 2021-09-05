@@ -755,6 +755,10 @@ class backprop_test_factory:
             look_to = out.base if out.base is not None else out
             output_was_writeable = id(look_to.data) in mem._array_counter
 
+            if len(arrs) == 1 and out is arrs[0]:
+                # op returns reference of input
+                return
+            
             assert all(
                 a.data.flags.writeable is False for a in arrs
             ), "input array memory is not locked by op"
