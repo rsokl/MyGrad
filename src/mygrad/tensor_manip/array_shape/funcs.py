@@ -475,4 +475,4 @@ def atleast_3d(
     >>> np.atleast_3d(x, 1.)
     [Tensor([[[2.]]]), Tensor([[[1.]]])]
     """
-    return _dispatch_atleast_kd(atleast_3d, AtLeast3D, *tensors, k=2, constant=constant)
+    return _dispatch_atleast_kd(atleast_3d, AtLeast3D, *tensors, k=3, constant=constant)
