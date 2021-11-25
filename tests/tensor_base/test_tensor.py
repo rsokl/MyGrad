@@ -291,7 +291,7 @@ dtype_strat_numpy = st.sampled_from(
     dtype=dtype_strat,
     numpy_dtype=dtype_strat_numpy,
     ndmin=st.integers(0, 10),
-    copy=st.none() | st.booleans(),
+    copy=st.booleans(),
 )
 def test_init_params(
     data,
@@ -299,7 +299,7 @@ def test_init_params(
     dtype,
     numpy_dtype,
     ndmin: int,
-    copy: Optional[bool],
+    copy: bool,
 ):
     """Check for bad combinations of init parameters leading to unexpected behavior"""
     elements = (
