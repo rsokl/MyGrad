@@ -122,3 +122,19 @@ def test_0_pow_y_special_case(t):
     y.backward()
     assert_allclose(y.data, np.zeros_like(t))
     assert_allclose(t.grad, np.zeros_like(t))
+
+
+import numpy as np
+from hypothesis import given, assume
+import hypothesis.strategies as st
+import hypothesis.extra.numpy as hnp
+
+@given(hnp.mutually_broadcastable_shapes(num_shapes=2))
+def test_f(shapes):
+    x = np.zeros(shapes.input_shapes[0])
+    y = np.zeros(shapes.input_shapes[1])
+
+    try:
+        x += y
+    except ValueError:
+        assume(False)
