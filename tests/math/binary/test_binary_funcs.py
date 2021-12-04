@@ -22,9 +22,13 @@ def inplace_op(inplace_target, other, constant=False, *, op_name: str):
 
     # hack to make broadcastable shapes work for inplace op:    
     x = inplace_target.copy()
-    try:
-        x += other
-    except ValueError:
+    check = False
+    
+    if np.broadcast(inplace_target, other).shape != inplace_target.shape:
+        inplace_target, other = other, inplace_target
+        check = True
+    
+    if check and np.broadcast(inplace_target, other).shape != inplace_target.shape:
         assume(False)
             
     # touch so that it doesn't look like the input
