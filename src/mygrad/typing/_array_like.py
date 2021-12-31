@@ -10,7 +10,7 @@ from typing import Protocol
 
 
 class ImplementsArray(Protocol):
-    def __array__(self, dtype: None = ...) -> np.ndarray:
+    def __array__(self, dtype: None = ...) -> np.ndarray:  # pragma: no cover
         ...
 
 
