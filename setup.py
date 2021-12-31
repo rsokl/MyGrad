@@ -14,13 +14,12 @@ CLASSIFIERS = [
     "Intended Audience :: Education",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Topic :: Scientific/Engineering",
 ]
 
-INSTALL_REQUIRES = ["numpy >= 1.17"]
+INSTALL_REQUIRES = ["numpy >= 1.19"]
 TESTS_REQUIRE = ["pytest >= 3.8", "hypothesis >= 6.17.1", "scipy"]
 
 DESCRIPTION = "Brings drop-in automatic differentiation to NumPy"
@@ -55,7 +54,7 @@ setup(
     },
     url=URL,
     download_url="https://github.com/rsokl/mygrad/tarball/" + versioneer.get_version(),
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     packages=find_packages(where="src", exclude=["tests", "tests.*"]),
     package_dir={"": "src"},
 )
