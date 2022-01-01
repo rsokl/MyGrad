@@ -396,7 +396,7 @@ _REGISTERED_CONST_ONLY_UFUNC = {
 }
 
 
-_REGISTERED_NO_DIFF_NUMPY_FUNCS: Set[Callable[..., np.ndarray]] = {
+_REGISTERED_NO_DIFF_NUMPY_FUNCS: Set[Callable] = {
     np.allclose,
     np.bincount,
     np.can_cast,
@@ -1528,17 +1528,20 @@ class Tensor:
         return self._constant
 
     @property
-    def creator(self) -> Operation:
+    def creator(self) -> Optional[Operation]:
         """The ``Operation`` instance that produced ``self``.
 
         Returns
         -------
-        Operation
+        creator : Optional[Operation]
+            The operation-instance that created the tensor, or `None`.
 
         Examples
         --------
         >>> import mygrad as mg
         >>> x = mg.Tensor(3)
+        >>> x.creator is None
+        True
         >>> y = mg.Tensor(2)
         >>> z = x * y  # Multiply(x, y) -> z
         >>> z.creator
