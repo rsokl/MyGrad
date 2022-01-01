@@ -31,6 +31,7 @@ Improvements
 
 - :func:`~mygrad.clip` and ``Tensor.clip`` now accept an ``out`` target, permitting in-place operations. 
 - The method ``Tensor.__index__()`` is now implemented, which permits scalar integer-valued tensors to be used to index into Python sequences.
+- Added Python 3.10 to our automated test matrix. 
 
 Compatibility-Breaking Changes
 ------------------------------
