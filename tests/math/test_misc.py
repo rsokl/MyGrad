@@ -215,7 +215,8 @@ def test_inplace_clip(as_method: bool):
     x = mg.arange(4.0)
     y = mg.tensor([-1.0, 2.0, 3.0])
 
-    out = y.clip(0, 2.1, out=x[1:]) if as_method else mg.clip(y, 0, 2.1, out=x[1:])
+    clipper = y.clip if as_method else partial(mg.clip, y)
+    out = clipper(0, 2.1, out=x[1:])
     out.backward()
 
     assert_allclose(out, mg.tensor([0.0, 2.0, 2.1]))
