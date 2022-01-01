@@ -114,5 +114,6 @@ during automatic differentiation
    math
    indexing
    nnet
+   io
    graph_viz
    changes
