@@ -5,15 +5,17 @@
 
 MyGrad
 ======
-MyGrad is a lightweight library that adds automatic differentiation to NumPy – its only dependency is NumPy!
+MyGrad is a lightweight library that adds automatic differentiation to NumPy – its only 
+dependency is NumPy. Simply "drop in" a MyGrad tensor into your NumPy-based code, and 
+start differentiating!
 
-.. code:: python
+.. code-block:: pycon
 
    >>> import mygrad as mg
    >>> import numpy as np
 
-   >>> x = mg.tensor([1., 2., 3.])  # like numpy.array, but supports backprop!
-   >>> f = np.sum(x * x)  # tensors work with numpy functions!
+   >>> x = mg.tensor([1., 2., 3.])  # like numpy.array, but supports backprop
+   >>> f = np.sum(x * x)  # tensors can be passed directly to native numpy functions!
    >>> f.backward() # triggers automatic differentiation
    >>> x.grad  # stores [df/dx0, df/dx1, df/dx2]
    array([2., 4., 6.])
@@ -26,7 +28,7 @@ Of the various modes and flavors of auto-diff, MyGrad supports backpropagation f
 NumPy's ufuncs are richly supported. We can even differentiate through an operation that occur in-place on a tensor and applies a boolean mask to
 the results:
 
-.. code:: python
+.. code-block:: pycon
 
    >>> x = mg.tensor([1., 2., 3.])
    >>> y = mg.zeros_like(x)
@@ -40,7 +42,7 @@ NumPy's `view semantics <https://www.pythonlikeyoumeanit.com/Module3_Introducing
 indexing and similar operations on tensors will produce a "view" of that tensor's data, thus a tensor and its view share memory.
 This relationship will also manifest between the derivatives stored by a tensor and its views!
 
-.. code:: python
+.. code-block:: pycon
 
    >>> x = mg.arange(9.).reshape(3, 3)
    >>> diag_view = np.einsum("ii->i", x)  # returns a view of the diagonal elements of `x`
@@ -75,7 +77,7 @@ This relationship will also manifest between the derivatives stored by a tensor 
 
 Basic and advanced indexing is fully supported
 
-.. code:: python
+.. code-block:: pycon
 
    >>> (x[x < 4] ** 2).backward()
    >>> x.grad
@@ -87,7 +89,7 @@ Basic and advanced indexing is fully supported
 NumPy arrays and other array-likes play nicely with MyGrad's tensor. These behave like constants
 during automatic differentiation
 
-.. code:: python
+.. code-block:: pycon
 
    >>> x = mg.tensor([1., 2., 3.])
    >>> constant = [-1., 0., 10]  # can be a numpy array, list, or any other array-like
