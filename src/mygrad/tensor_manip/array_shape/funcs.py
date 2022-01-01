@@ -296,7 +296,7 @@ def atleast_1d(
 
     Returns
     -------
-    ret : Tensor
+    ret : Tensor | List[Tensor]
         A tensor, or list of tensors, each with ``a.ndim >= 1``.
         Copies are made only if necessary.
 
@@ -373,7 +373,7 @@ def atleast_2d(
 
     Returns
     -------
-    ret : Tensor
+    ret : Tensor | List[Tensor]
         A tensor, or list of tensors, each with ``a.ndim >= 2``.
         Copies are made only if necessary.
 
@@ -448,7 +448,7 @@ def atleast_3d(
 
     Returns
     -------
-    ret : Tensor
+    ret : Tensor | List[Tensor]
         A tensor, or list of tensors, each with ``a.ndim >= 3``.
         Copies are made only if necessary. For example, a 1-D tensor of shape ``(N,)``
         becomes a view of shape ``(1, N, 1)``, and a 2-D tensor of shape ``(M, N)``
