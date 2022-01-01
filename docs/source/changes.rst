@@ -6,6 +6,40 @@ This is a record of all past mygrad releases and what went into them,
 in reverse chronological order. All previous releases should still be available
 on pip.
 
+.. _v2.1.0:
+
+------------------
+2.1.0 - 2022-01-01
+------------------
+
+New Functions and Utilities
+---------------------------
+
+The following differentiable functions are now supported by MyGrad, and "drop-in" overrides for their NumPy counterparts are supported as well.
+
+ - :func:`~mygrad.atleast_1d`
+ - :func:`~mygrad.atleast_2d`
+ - :func:`~mygrad.atleast_3d`
+
+Basic tensor save/load functionality has been added (thanks to @kw-0).
+
+ - :func:`~mygrad.save`
+ - :func:`~mygrad.load`
+
+Improvements
+------------
+
+- :func:`~mygrad.clip` and ``Tensor.clip`` now accept an ``out`` target, permitting in-place operations. 
+- The method ``Tensor.__index__()`` is now implemented, which permits scalar integer-valued tensors to be used to index into Python sequences.
+- Added Python 3.10 to our automated test matrix. 
+
+Compatibility-Breaking Changes
+------------------------------
+
+- In accordance with `NEP 29 <https://numpy.org/neps/nep-0029-deprecation_policy.html>`_ we are dropping support for NumPy versions below 1.19. However, MyGrad will not drop support for Python 3.7; to remain as lightweight and flexible as possible we will support minor versions of Python up until their EOL or until our minimal NumPy dependency drops support -- whichever occurs first.
+- The interface to :func:`~mygrad.arange` was changed from ``arange(start, stop=None, step=None, ...)`` to ``arange([start,] stop[, step,], ...)``. This provides exact parity with NumPy's arange function.
+- The derivatives of :func:`~mygrad.absolute` and :func:`~mygrad.linalg.norm` have been revised such that in cases where the derivatives used to be ``nan``, those entries will now be ``0``. Both functions can now be passed ``nan_to_num=False`` to enable the previous, more rigorous behavior. See `PR #379 <https://github.com/rsokl/MyGrad/pull/379>`_ for more details.
+
 .. _v2.0.2:
 
 ------------------

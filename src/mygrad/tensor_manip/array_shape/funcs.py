@@ -296,7 +296,7 @@ def atleast_1d(
 
     Returns
     -------
-    ret : Tensor
+    ret : Tensor | List[Tensor]
         A tensor, or list of tensors, each with ``a.ndim >= 1``.
         Copies are made only if necessary.
 
@@ -373,7 +373,7 @@ def atleast_2d(
 
     Returns
     -------
-    ret : Tensor
+    ret : Tensor | List[Tensor]
         A tensor, or list of tensors, each with ``a.ndim >= 2``.
         Copies are made only if necessary.
 
@@ -406,7 +406,7 @@ def atleast_2d(
     >>> x.grad
     array(1.)
 
-    If any argument to ``numpy.atleast_2d`` is a Tensor, ``mygrad.atleast_1d``
+    If any argument to ``numpy.atleast_2d`` is a Tensor, ``mygrad.atleast_2d``
     will be dispatched on all of the arguments.
 
     >>> np.atleast_2d(x, 1.)
@@ -436,7 +436,7 @@ def atleast_3d(
     """
     Convert inputs to tensors with at least one dimension.
 
-    Scalar inputs are converted to 2-dimensional tensors, whilst
+    Scalar inputs are converted to 3-dimensional tensors, whilst
     higher-dimensional inputs are preserved.
 
     This docstring was adapted from ``numpy.atleast_3d``.
@@ -448,9 +448,11 @@ def atleast_3d(
 
     Returns
     -------
-    ret : Tensor
-        A tensor, or list of tensors, each with ``a.ndim >= 2``.
-        Copies are made only if necessary.
+    ret : Tensor | List[Tensor]
+        A tensor, or list of tensors, each with ``a.ndim >= 3``.
+        Copies are made only if necessary. For example, a 1-D tensor of shape ``(N,)``
+        becomes a view of shape ``(1, N, 1)``, and a 2-D tensor of shape ``(M, N)``
+        becomes a view of shape ``(M, N, 1)``.
 
     See Also
     --------
@@ -463,10 +465,14 @@ def atleast_3d(
     Tensor([[[3.]]])
 
     >>> x = mg.arange(3.0)
-    >>> mg.atleast_3d(x)
-    array([[0., 1., 2.]])
+    >>> mg.atleast_3d(x).shape
+    (1, 3, 1)
     >>> mg.atleast_3d(x).base is x
     True
+
+    >>> x = mg.arange(12.0).reshape(4,3)
+    >>> mg.atleast_3d(x).shape
+    (4, 3, 1)
 
     >>> mg.atleast_3d(1, [[1, 2]], [[[[1, 2]]]])
     [Tensor([[[1]]]), Tensor([[[1, 2]]]), Tensor([[[[1, 2]]]])]
@@ -481,7 +487,7 @@ def atleast_3d(
     >>> x.grad
     array(1.)
 
-    If any argument to ``numpy.atleast_3d`` is a Tensor, ``mygrad.atleast_1d``
+    If any argument to ``numpy.atleast_3d`` is a Tensor, ``mygrad.atleast_3d``
     will be dispatched on all of the arguments.
 
     >>> np.atleast_3d(x, 1.)
