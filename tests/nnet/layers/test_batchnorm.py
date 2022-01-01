@@ -163,6 +163,8 @@ def test_batchnorm_fwd():
     index_to_arr_shapes={0: hnp.array_shapes(min_dims=2, max_dims=4)},
     kwargs=lambda x: st.fixed_dictionaries(dict(eps=st.floats(1e-20, 1e0))),
     vary_each_element=True,
+    atol=1e-5,
+    rtol=1e-5,
 )
 def test_batchnorm_bkwd():
     pass
