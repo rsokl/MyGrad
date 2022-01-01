@@ -11,8 +11,8 @@ from pytest import raises
 import mygrad as mg
 from mygrad import Tensor
 from mygrad.errors import InvalidBackprop
-from mygrad.math.misc.ops import MatMul
 from mygrad.math.arithmetic.ops import Add, Divide, Multiply, Negative, Power, Subtract
+from mygrad.math.misc.ops import MatMul
 from mygrad.operation_base import Operation
 from tests.custom_strategies import tensors, valid_constant_arg
 from tests.utils.errors import does_not_raise
@@ -255,7 +255,7 @@ def test_init_data_rand(x: np.ndarray):
     | st.integers(-100, 100)
 )
 def test_items(x):
-    """ verify that tensor.item() mirrors array.item()"""
+    """verify that tensor.item() mirrors array.item()"""
     tensor = Tensor(x)
     try:
         value = np.asarray(x).item()
@@ -552,3 +552,23 @@ def test_no_hash():
         {Tensor(3): "this should not work"}
     except TypeError as e:
         assert str(e) == "unhashable type: 'Tensor'"
+
+
+@given(
+    hnp.arrays(
+        shape=hnp.array_shapes(min_dims=0, max_dims=2, min_side=0, max_side=2),
+        dtype=hnp.integer_dtypes() | hnp.floating_dtypes(),
+    )
+)
+def test_index(arr):
+    tens = mg.tensor(arr)
+
+    try:
+        arr_index = arr.__index__()
+    except TypeError as e:
+        with pytest.raises(type(e)):
+            _ = tens.__index__()
+        return
+
+    tens_index = tens.__index__()
+    assert arr_index == tens_index

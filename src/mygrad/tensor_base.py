@@ -2118,6 +2118,11 @@ class Tensor:
             raise TypeError("can only convert a tensor of size 1 to a Python scalar")
         return int(self.data)
 
+    def __index__(self) -> int:
+        """Return self converted to an integer, if self is suitable for use as an index
+        into a list."""
+        return self.data.__index__()
+
     def flatten(self, *, constant: bool = None) -> "Tensor":
         """Return a copy of the tensor collapsed into one dimension.
 
