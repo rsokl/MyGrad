@@ -3135,7 +3135,12 @@ class Tensor:
         return np.any(self.data, axis=axis, out=out, keepdims=keepdims)
 
     def clip(
-        self, a_min: ArrayLike, a_max: ArrayLike, *, constant: Optional[bool] = None
+        self,
+        a_min: ArrayLike,
+        a_max: ArrayLike,
+        out: Optional[Union[np.ndarray, "Tensor"]] = None,
+        *,
+        constant: Optional[bool] = None,
     ) -> "Tensor":  # pragma: no cover
         """Clip (limit) the values in an array.
 
@@ -3162,6 +3167,11 @@ class Tensor:
             interval edge. Not more than one of `a_min` and `a_max` may be
             `None`. If `a_min` or `a_max` are ArrayLike, then the three
             arrays will be broadcasted to match their shapes.
+
+        out : Optional[Union[ndarray, Tensor]]
+            A location into which the result is stored. If provided, it must have
+            a shape that the inputs broadcast to. If not provided or None, a
+            freshly-allocated tensor is returned.
 
         constant : bool, optional(default=False)
             If ``True``, the returned tensor is a constant (it
