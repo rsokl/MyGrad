@@ -21,13 +21,13 @@ def normal(*shape, mean=0, std=1, dtype=np.float32, constant=None):
         The data type of the output tensor; must be a floating-point type.
 
     constant : bool, optional (default=False)
-        If `True`, the returned tensor is a constant (it
+        If ``True``, the returned tensor is a constant (it
             does not back-propagate a gradient).
 
     Returns
     -------
-    mygrad.Tensor, shape=`shape`
-        A Tensor, with values drawn from Ɲ(μ, σ²), where μ=`mean` and σ=`std`.
+    mygrad.Tensor, shape=``shape``
+        A Tensor, with values drawn from Ɲ(μ, σ²), where μ=``mean`` and σ=``std``.
 
     Examples
     --------
