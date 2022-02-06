@@ -5,7 +5,7 @@ import pytest
 from hypothesis import given, settings
 from numpy.testing import assert_allclose
 
-from mygrad.nnet.layers.utils import sliding_window_view
+from mygrad.nnet.layers.operations.utils import sliding_window_view
 
 dtype_strat_numpy = st.sampled_from(
     (np.int8, np.int16, np.int32, np.int64, np.float16, np.float32, np.float64)

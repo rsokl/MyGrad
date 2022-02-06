@@ -6,7 +6,7 @@ import pytest
 
 from mygrad import Tensor
 from mygrad.nnet.initializers import dirac
-from mygrad.nnet.layers.conv import conv_nd
+from mygrad.nnet.layers.operations.conv import conv_nd
 
 
 @given(shape=hnp.array_shapes(max_dims=1))

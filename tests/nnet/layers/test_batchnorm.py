@@ -6,7 +6,7 @@ from numpy.testing import assert_allclose, assert_array_equal
 
 import mygrad as mg
 from mygrad import Tensor
-from mygrad.nnet.layers.batchnorm import batchnorm
+from mygrad.nnet.layers.operations.batchnorm import batchnorm
 from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 
