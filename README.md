@@ -3,7 +3,7 @@
 [![Documentation Status](https://readthedocs.org/projects/mygrad/badge/?version=latest)](https://mygrad.readthedocs.io/en/latest/?badge=latest)
 [![Automated tests status](https://github.com/rsokl/MyGrad/workflows/Tests/badge.svg)](https://github.com/rsokl/MyGrad/actions?query=workflow%3ATests+branch%3Amaster)
 [![PyPi version](https://img.shields.io/pypi/v/mygrad.svg)](https://pypi.python.org/pypi/mygrad)
-![Python version support](https://img.shields.io/badge/python-3.7%20&#8208;%203.9-blue.svg)
+![Python version support](https://img.shields.io/badge/python-3.7%20&#8208;%203.10-blue.svg)
 
 # [MyGrad's Documentation](https://mygrad.readthedocs.io/en/latest/)
 
@@ -22,8 +22,15 @@ MyGrad is a lightweight library that adds automatic differentiation to NumPy –
 array([2., 4., 6.])
 ```
 
-MyGrad's primary goal is to make automatic differentiation an accessible and easy to use across the Python/NumPy ecosystem.
-As such, it strives to behave and feel exactly like NumPy so that users need not learn yet another array-based math library.  
+MyGrad's primary goal is to make automatic differentiation accessible and easy to use across the Python/NumPy ecosystem.
+As such, it strives to behave and feel exactly like NumPy so that users need not learn yet another array-based math library.
+Of the various modes and flavors of auto-diff, MyGrad supports backpropagation from a scalar quantity.   
+
+Installing MyGrad:
+
+```shell script
+pip install mygrad
+```
 
 NumPy's ufuncs are richly supported; e.g. we can autodiff through in-place targets and boolean masks:  
 
@@ -102,9 +109,9 @@ array([-1.,  0., 10.])
 The following is an example of using `mygrad` to compute the [hinge loss](https://en.wikipedia.org/wiki/Hinge_loss) of classification scores and to "backpropagate" through (compute the gradient of) this loss. This example demonstrates some of mygrad's ability to perform backpropagation through broadcasted operations, basic indexing, advanced indexing, and in-place assignments.
 
 ```python
->>> from mygrad import Tensor
+>>> import mygrad as mg
 >>> import numpy as np
->>> class_scores = Tensor(10 * np.random.rand(100, 10))         # 100 samples, 10 possible classes for each
+>>> class_scores = 10 * mg.random.rand(100, 10) # 100 samples, 10 possible classes for each
 >>> class_labels = np.random.randint(low=0, high=10, size=100)  # correct label for each datum
 >>> class_labels = (range(len(class_labels)), class_labels)
 >>> correct_class_scores = class_scores[class_labels]

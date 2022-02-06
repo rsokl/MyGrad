@@ -396,7 +396,7 @@ _REGISTERED_CONST_ONLY_UFUNC = {
 }
 
 
-_REGISTERED_NO_DIFF_NUMPY_FUNCS: Set[Callable[..., np.ndarray]] = {
+_REGISTERED_NO_DIFF_NUMPY_FUNCS: Set[Callable] = {
     np.allclose,
     np.bincount,
     np.can_cast,
@@ -1528,17 +1528,20 @@ class Tensor:
         return self._constant
 
     @property
-    def creator(self) -> Operation:
+    def creator(self) -> Optional[Operation]:
         """The ``Operation`` instance that produced ``self``.
 
         Returns
         -------
-        Operation
+        creator : Optional[Operation]
+            The operation-instance that created the tensor, or `None`.
 
         Examples
         --------
         >>> import mygrad as mg
         >>> x = mg.Tensor(3)
+        >>> x.creator is None
+        True
         >>> y = mg.Tensor(2)
         >>> z = x * y  # Multiply(x, y) -> z
         >>> z.creator
@@ -1750,9 +1753,9 @@ class Tensor:
                     placeholder_mutant_view,  # gets passed through unchanged
                     # ~mask * grad  backprops to upstream placeholder
                     graph[self].placeholder,
-                    op_kwargs=dict(
-                        mask=placeholder_mutant_view.creator.where,
-                    ),
+                    op_kwargs={
+                        "mask": placeholder_mutant_view.creator.where,
+                    },
                 )
 
         # Connect public base tensor to placeholder graph via the mutated placeholder
@@ -1788,12 +1791,12 @@ class Tensor:
                 _dup.UnView,
                 graph.base.placeholder,
                 placeholder_mutant_view,
-                op_kwargs=dict(
+                op_kwargs={
                     # Copy to avoid upstream placeholder mutant view sharing memory
                     # with downstream mutant base
-                    mutant_base_data=mutant_base_data,
-                    view_fn_sequence=view_fn_sequence,
-                ),
+                    "mutant_base_data": mutant_base_data,
+                    "view_fn_sequence": view_fn_sequence,
+                },
             )
 
         del placeholder_mutant_view
@@ -2118,6 +2121,11 @@ class Tensor:
             raise TypeError("can only convert a tensor of size 1 to a Python scalar")
         return int(self.data)
 
+    def __index__(self) -> int:
+        """Return self converted to an integer, if self is suitable for use as an index
+        into a list."""
+        return self.data.__index__()
+
     def flatten(self, *, constant: bool = None) -> "Tensor":
         """Return a copy of the tensor collapsed into one dimension.
 
@@ -2427,7 +2435,7 @@ class Tensor:
         Tensor([1, 5])
         """
         return Tensor._op(
-            Sum, self, op_kwargs=dict(axis=axis, keepdims=keepdims), constant=constant
+            Sum, self, op_kwargs={"axis": axis, "keepdims": keepdims}, constant=constant
         )
 
     def prod(
@@ -2465,7 +2473,10 @@ class Tensor:
         product_along_axis : mygrad.Tensor
             A tensor shaped as `a` but with the specified axis removed."""
         return Tensor._op(
-            Prod, self, op_kwargs=dict(axis=axis, keepdims=keepdims), constant=constant
+            Prod,
+            self,
+            op_kwargs={"axis": axis, "keepdims": keepdims},
+            constant=constant,
         )
 
     def cumprod(
@@ -2508,7 +2519,7 @@ class Tensor:
         Arithmetic is modular when using integer types, and no error is
         raised on overflow."""
 
-        return Tensor._op(CumProd, self, op_kwargs=dict(axis=axis), constant=constant)
+        return Tensor._op(CumProd, self, op_kwargs={"axis": axis}, constant=constant)
 
     def cumsum(
         self,
@@ -2542,7 +2553,7 @@ class Tensor:
         mygrad.Tensor
         """
 
-        return Tensor._op(CumSum, self, op_kwargs=dict(axis=axis), constant=constant)
+        return Tensor._op(CumSum, self, op_kwargs={"axis": axis}, constant=constant)
 
     def mean(
         self,
@@ -2590,7 +2601,10 @@ class Tensor:
             a 0-dim Tensor is returned.
         """
         return Tensor._op(
-            Mean, self, op_kwargs=dict(axis=axis, keepdims=keepdims), constant=constant
+            Mean,
+            self,
+            op_kwargs={"axis": axis, "keepdims": keepdims},
+            constant=constant,
         )
 
     def std(
@@ -2652,7 +2666,7 @@ class Tensor:
         return Tensor._op(
             StdDev,
             self,
-            op_kwargs=dict(axis=axis, keepdims=keepdims, ddof=ddof),
+            op_kwargs={"axis": axis, "keepdims": keepdims, "ddof": ddof},
             constant=constant,
         )
 
@@ -2714,7 +2728,7 @@ class Tensor:
         return Tensor._op(
             Variance,
             self,
-            op_kwargs=dict(axis=axis, keepdims=keepdims, ddof=ddof),
+            op_kwargs={"axis": axis, "keepdims": keepdims, "ddof": ddof},
             constant=constant,
         )
 
@@ -2777,7 +2791,7 @@ class Tensor:
         return Tensor._op(
             Max,
             self,
-            op_kwargs=dict(axis=axis, keepdims=keepdims, dtype=_NoValue),
+            op_kwargs={"axis": axis, "keepdims": keepdims, "dtype": _NoValue},
             constant=constant,
         )
 
@@ -2838,7 +2852,7 @@ class Tensor:
         return Tensor._op(
             Min,
             self,
-            op_kwargs=dict(axis=axis, keepdims=keepdims, dtype=_NoValue),
+            op_kwargs={"axis": axis, "keepdims": keepdims, "dtype": _NoValue},
             constant=constant,
         )
 
@@ -3124,7 +3138,12 @@ class Tensor:
         return np.any(self.data, axis=axis, out=out, keepdims=keepdims)
 
     def clip(
-        self, a_min: ArrayLike, a_max: ArrayLike, *, constant: Optional[bool] = None
+        self,
+        a_min: ArrayLike,
+        a_max: ArrayLike,
+        out: Optional[Union[np.ndarray, "Tensor"]] = None,
+        *,
+        constant: Optional[bool] = None,
     ) -> "Tensor":  # pragma: no cover
         """Clip (limit) the values in an array.
 
@@ -3151,6 +3170,11 @@ class Tensor:
             interval edge. Not more than one of `a_min` and `a_max` may be
             `None`. If `a_min` or `a_max` are ArrayLike, then the three
             arrays will be broadcasted to match their shapes.
+
+        out : Optional[Union[ndarray, Tensor]]
+            A location into which the result is stored. If provided, it must have
+            a shape that the inputs broadcast to. If not provided or None, a
+            freshly-allocated tensor is returned.
 
         constant : bool, optional(default=False)
             If ``True``, the returned tensor is a constant (it

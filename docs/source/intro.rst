@@ -19,6 +19,7 @@ MyGrad is a lightweight library that adds automatic differentiation to NumPy –
 Its primary goal is to make automatic differentiation an accessible and easy to use across the Python/NumPy ecosystem.
 As such, it strives to behave and feel exactly like NumPy so that users need not learn yet another array-based math library.
 You can pass MyGrad's :class:`~mygrad.Tensor` to NumPy's functions in order to make them differentiable!
+Of the various modes and flavors of auto-diff, MyGrad supports backpropagation from a scalar quantity.
 
 
 A Simple Application

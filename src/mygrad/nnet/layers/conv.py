@@ -390,6 +390,6 @@ def conv_nd(
         ConvND,
         x,
         filter_bank,
-        op_kwargs=dict(stride=stride, padding=padding, dilation=dilation),
+        op_kwargs={"stride": stride, "padding": padding, "dilation": dilation},
         constant=constant,
     )

@@ -24,6 +24,11 @@ navigate to the MyGrad directory, then run:
 Support for Python and NumPy
 ----------------------------
 MyGrad abides by the `NEP 29 <https://numpy.org/neps/nep-0029-deprecation_policy.html>`_ recommendation, and adopts
-a common “time window-based” policy for support of Python and NumPy versions.
+a common “time window-based” policy for support of NumPy versions. Accordingly, MyGrad's drop schedule for NumPy versions can be found `here <https://numpy.org/neps/nep-0029-deprecation_policy.html#drop-schedule>`_. 
 
-Accordingly, MyGrad's drop schedule for Python and NumPy can be found `here <https://numpy.org/neps/nep-0029-deprecation_policy.html#drop-schedule>`_.
+Note, however, that MyGrad will maintain a wider window of support for minor Python 
+versions than is specified by NEP 29. Because our only dependency is NumPy, and because
+we strive to remain an exceptionally lightweight and flexible dependency to our users, 
+we will support minor versions of Python until their end of life, *or* until our lowest
+supported version of NumPy drops support for that version of Python -- whichever occurs
+first.

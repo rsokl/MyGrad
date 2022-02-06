@@ -1,14 +1,16 @@
 Writing Your Own Operations
 ***************************
 
-Let's write our own "multiply" operation.
+Let's write our own "multiply" operation. There are two components to doing this:
+ - Defining an operation class (a subclass of :class:`~mygrad.operation_base.Operation`)
+ - Writing a function that ultimately calls ``mygrad.execute_op(YourOp, ...)``
 
 .. code:: python
 
    import numpy as np
 
    import mygrad as mg
-   from mygrad import prepare_op
+   from mygrad import execute_op
    from mygrad.operation_base import Operation
    from mygrad.typing import ArrayLike
 
@@ -59,6 +61,9 @@ Let's write our own "multiply" operation.
            x_arr = x.data
            y_arr = y.data
 
+           # The operation need not incorporate specialized logic for
+           # broadcasting. The appropriate sum-reductions will be performed
+           # by MyGrad's autodiff system.
            if index == 0:  # backprop through a
                return grad * y.data  # ∂ℒ/∂x = (∂ℒ/∂f)(∂f/∂x)
            elif index == 1:  # backprop through b
@@ -67,22 +72,22 @@ Let's write our own "multiply" operation.
 
    # Our function stitches together our operation class with the
    # operation arguments via `mygrad.prepare_op`
-   def custom_multiply(x: ArrayLike, y: ArrayLike) -> mg.Tensor:
-       # `prepare_op` will take care of casting `x` and `y` to tensors if
-       # they are not already tensors.
-       return prepare_op(CustomMultiply, x, y)
+   def custom_multiply(x: ArrayLike, y: ArrayLike, constant=None) -> mg.Tensor:
+       # `execute_op` will take care of:
+       #  - casting `x` and `y` to tensors if they are instead array-likes
+       #  - propagating 'constant' status to the resulting output based on the inputs
+       #  - handling in-place operations (specified via the `out` parameter)
+       return execute_op(CustomMultiply, x, y, constant=constant)
 
-We can now use our differentiable function! It will automatically be compatible
-with broadcasting; out operation need not account for broadcasting in either the
-forward pass or the backward pass.
+We can now use our differentiable function!
 
 .. code:: pycon
 
-   >> x = mg.tensor(2.0)
-   >> y = mg.tensor([1.0, 2.0, 3.0])
+   >>> x = mg.tensor(2.0)
+   >>> y = mg.tensor([1.0, 2.0, 3.0])
 
-   >> custom_multiply(x, y).backward()
-   >> x.grad, y.grad
+   >>> custom_multiply(x, y).backward()
+   >>> x.grad, y.grad
    (array(6.), array([2., 2., 2.]))
 
 Documentation for mygrad.Operation

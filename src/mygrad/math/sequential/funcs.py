@@ -114,7 +114,7 @@ def sum(
     Tensor(-128)
     """
     return Tensor._op(
-        Sum, x, op_kwargs=dict(axis=axis, keepdims=keepdims), constant=constant
+        Sum, x, op_kwargs={"axis": axis, "keepdims": keepdims}, constant=constant
     )
 
 
@@ -191,7 +191,7 @@ def mean(
     Tensor(0.55000000074505806)
     """
     return Tensor._op(
-        Mean, x, op_kwargs=dict(axis=axis, keepdims=keepdims), constant=constant
+        Mean, x, op_kwargs={"axis": axis, "keepdims": keepdims}, constant=constant
     )
 
 
@@ -286,7 +286,7 @@ def var(
     return Tensor._op(
         Variance,
         x,
-        op_kwargs=dict(axis=axis, keepdims=keepdims, ddof=ddof),
+        op_kwargs={"axis": axis, "keepdims": keepdims, "ddof": ddof},
         constant=constant,
     )
 
@@ -381,7 +381,7 @@ def std(
     return Tensor._op(
         StdDev,
         x,
-        op_kwargs=dict(axis=axis, keepdims=keepdims, ddof=ddof),
+        op_kwargs={"axis": axis, "keepdims": keepdims, "ddof": ddof},
         constant=constant,
     )
 
@@ -446,7 +446,7 @@ def max(
     return Tensor._op(
         Max,
         x,
-        op_kwargs=dict(axis=axis, keepdims=keepdims, dtype=_NoValue),
+        op_kwargs={"axis": axis, "keepdims": keepdims, "dtype": _NoValue},
         constant=constant,
     )
 
@@ -509,7 +509,7 @@ def min(
     return Tensor._op(
         Min,
         x,
-        op_kwargs=dict(axis=axis, keepdims=keepdims, dtype=_NoValue),
+        op_kwargs={"axis": axis, "keepdims": keepdims, "dtype": _NoValue},
         constant=constant,
     )
 
@@ -588,7 +588,7 @@ def prod(
     ...          [3.,4.]], axis=1)
     Tensor([  2.,  12.])"""
     return Tensor._op(
-        Prod, a, op_kwargs=dict(axis=axis, keepdims=keepdims), constant=constant
+        Prod, a, op_kwargs={"axis": axis, "keepdims": keepdims}, constant=constant
     )
 
 
@@ -654,7 +654,7 @@ def cumprod(
     Tensor([[  1,   2,   6],
             [  4,  20, 120]])"""
 
-    return Tensor._op(CumProd, a, op_kwargs=dict(axis=axis), constant=constant)
+    return Tensor._op(CumProd, a, op_kwargs={"axis": axis}, constant=constant)
 
 
 @implements_numpy_override()
@@ -705,4 +705,4 @@ def cumsum(
             [ 4,  9, 15]])
     """
 
-    return Tensor._op(CumSum, a, op_kwargs=dict(axis=axis), constant=constant)
+    return Tensor._op(CumSum, a, op_kwargs={"axis": axis}, constant=constant)

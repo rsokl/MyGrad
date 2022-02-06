@@ -20,8 +20,8 @@ CLASSIFIERS = [
     "Topic :: Scientific/Engineering",
 ]
 
-INSTALL_REQUIRES = ["numpy >= 1.17"]
-TESTS_REQUIRE = ["pytest >= 3.8", "hypothesis >= 5.32.0", "scipy"]
+INSTALL_REQUIRES = ["numpy >= 1.19"]
+TESTS_REQUIRE = ["pytest >= 3.8", "hypothesis >= 6.17.1", "scipy"]
 
 DESCRIPTION = "Brings drop-in automatic differentiation to NumPy"
 LONG_DESCRIPTION = """

@@ -1,11 +1,22 @@
-from typing import Optional, Tuple, Union
+from typing import Callable, List, Optional, Tuple, TypeVar, Union, cast, overload
 
 from mygrad.tensor_base import Tensor, implements_numpy_override
 from mygrad.typing import ArrayLike, Shape
 
 from .ops import *
 
-__all__ = ["reshape", "squeeze", "ravel", "expand_dims", "broadcast_to"]
+__all__ = [
+    "reshape",
+    "squeeze",
+    "ravel",
+    "expand_dims",
+    "broadcast_to",
+    "atleast_1d",
+    "atleast_2d",
+    "atleast_3d",
+]
+
+_T = TypeVar("_T")
 
 
 @implements_numpy_override()
@@ -234,3 +245,252 @@ def broadcast_to(
     shapes [original->remapped]: (3,) and requested shape (4,4)
     """
     return Tensor._op(BroadcastTo, a, op_args=(shape,), constant=constant)
+
+
+def _dispatch_atleast_kd(func: Callable[..., _T], Op, *tensors, k: int, constant) -> _T:
+    if len(tensors) == 1:
+        (t,) = tensors
+        if (
+            isinstance(t, Tensor)
+            and t.ndim >= k
+            and (constant is None or t.constant is constant)
+        ):
+            # return tensor unchanged
+            return cast(_T, t)
+        return cast(_T, Tensor._op(Op, t, constant=constant))
+    else:
+        out = [func(t, constant=constant) for t in tensors]
+        return cast(_T, out)
+
+
+@overload
+def atleast_1d(
+    tensors: ArrayLike, *, constant: Optional[bool] = None
+) -> Tensor:  # pragma: no cover
+    ...
+
+
+@overload
+def atleast_1d(
+    *tensors: ArrayLike, constant: Optional[bool] = None
+) -> List[Tensor]:  # pragma: no cover
+    ...
+
+
+@implements_numpy_override()
+def atleast_1d(
+    *tensors: ArrayLike, constant: Optional[bool] = None
+) -> Union[Tensor, List[Tensor]]:
+    """
+    Convert inputs to tensors with at least one dimension.
+
+    Scalar inputs are converted to 1-dimensional tensors, whilst
+    higher-dimensional inputs are preserved.
+
+    This docstring was adapted from ``numpy.atleast_1d``.
+
+    Parameters
+    ----------
+    tens1, tens2, ... : ArrayLike
+        One or more input tensors.
+
+    Returns
+    -------
+    ret : Tensor | List[Tensor]
+        A tensor, or list of tensors, each with ``a.ndim >= 1``.
+        Copies are made only if necessary.
+
+    See Also
+    --------
+    atleast_2d, atleast_3d
+
+    Examples
+    --------
+    >>> import mygrad as mg
+    >>> mg.atleast_1d(1.0)
+    array([1.])
+
+    >>> x = mg.arange(9.0).reshape(3,3)
+    >>> np.atleast_1d(x)
+    Tensor([[0., 1., 2.],
+            [3., 4., 5.],
+            [6., 7., 8.]])
+    >>> mg.atleast_1d(x) is x
+    True
+
+    >>> mg.atleast_1d(1, [3, 4])
+    [Tensor([1]), Tensor([3, 4])]
+
+    ``numpy.atleast_1d`` will dispatch appropriately on tensors.
+
+    >>> x = mg.tensor(2.)
+    >>> np.atleast_1d(x)
+    Tensor([2.])
+
+    >>> np.atleast_1d(x).backward()
+    >>> x.grad
+    array(1.)
+
+    If any argument to ``numpy.atleast_1d`` is a Tensor, ``mygrad.atleast_1d``
+    will be dispatched on all of the arguments.
+
+    >>> np.atleast_1d(x, 1.)
+    [Tensor([2.]), Tensor([1.])]
+    """
+    return _dispatch_atleast_kd(atleast_1d, AtLeast1D, *tensors, k=1, constant=constant)
+
+
+@overload
+def atleast_2d(
+    tensors: ArrayLike, *, constant: Optional[bool] = None
+) -> Tensor:  # pragma: no cover
+    ...
+
+
+@overload
+def atleast_2d(
+    *tensors: ArrayLike, constant: Optional[bool] = None
+) -> List[Tensor]:  # pragma: no cover
+    ...
+
+
+@implements_numpy_override()
+def atleast_2d(
+    *tensors: ArrayLike, constant: Optional[bool] = None
+) -> Union[Tensor, List[Tensor]]:
+    """
+    Convert inputs to tensors with at least one dimension.
+
+    Scalar inputs are converted to 2-dimensional tensors, whilst
+    higher-dimensional inputs are preserved.
+
+    This docstring was adapted from ``numpy.atleast_2d``.
+
+    Parameters
+    ----------
+    tens1, tens2, ... : ArrayLike
+        One or more input tensors.
+
+    Returns
+    -------
+    ret : Tensor | List[Tensor]
+        A tensor, or list of tensors, each with ``a.ndim >= 2``.
+        Copies are made only if necessary.
+
+    See Also
+    --------
+    atleast_1d, atleast_3d
+
+    Examples
+    --------
+    >>> import mygrad as mg
+    >>> mg.atleast_2d(3.0)
+    Tensor([[3.]])
+
+    >>> x = mg.arange(3.0)
+    >>> mg.atleast_2d(x)
+    array([[0., 1., 2.]])
+    >>> mg.atleast_2d(x).base is x
+    True
+
+    >>> mg.atleast_2d(1, [1, 2], [[1, 2]])
+    [Tensor([[1]]), Tensor([[1, 2]]), Tensor([[1, 2]])]
+
+    ``numpy.atleast_2d`` will dispatch appropriately on tensors.
+
+    >>> x = mg.tensor(2.)
+    >>> np.atleast_2d(x)
+    Tensor([[2.]])
+
+    >>> np.atleast_2d(x).backward()
+    >>> x.grad
+    array(1.)
+
+    If any argument to ``numpy.atleast_2d`` is a Tensor, ``mygrad.atleast_2d``
+    will be dispatched on all of the arguments.
+
+    >>> np.atleast_2d(x, 1.)
+    [Tensor([[2.]]), Tensor([[1.]])]
+    """
+    return _dispatch_atleast_kd(atleast_2d, AtLeast2D, *tensors, k=2, constant=constant)
+
+
+@overload
+def atleast_3d(
+    tensors: ArrayLike, *, constant: Optional[bool] = None
+) -> Tensor:  # pragma: no cover
+    ...
+
+
+@overload
+def atleast_3d(
+    *tensors: ArrayLike, constant: Optional[bool] = None
+) -> List[Tensor]:  # pragma: no cover
+    ...
+
+
+@implements_numpy_override()
+def atleast_3d(
+    *tensors: ArrayLike, constant: Optional[bool] = None
+) -> Union[Tensor, List[Tensor]]:
+    """
+    Convert inputs to tensors with at least one dimension.
+
+    Scalar inputs are converted to 3-dimensional tensors, whilst
+    higher-dimensional inputs are preserved.
+
+    This docstring was adapted from ``numpy.atleast_3d``.
+
+    Parameters
+    ----------
+    tens1, tens2, ... : ArrayLike
+        One or more input tensors.
+
+    Returns
+    -------
+    ret : Tensor | List[Tensor]
+        A tensor, or list of tensors, each with ``a.ndim >= 3``.
+        Copies are made only if necessary. For example, a 1-D tensor of shape ``(N,)``
+        becomes a view of shape ``(1, N, 1)``, and a 2-D tensor of shape ``(M, N)``
+        becomes a view of shape ``(M, N, 1)``.
+
+    See Also
+    --------
+    atleast_1d, atleast_3d
+
+    Examples
+    --------
+    >>> import mygrad as mg
+    >>> mg.atleast_3d(3.0)
+    Tensor([[[3.]]])
+
+    >>> x = mg.arange(3.0)
+    >>> mg.atleast_3d(x).shape
+    (1, 3, 1)
+    >>> mg.atleast_3d(x).base is x
+    True
+
+    >>> x = mg.arange(12.0).reshape(4,3)
+    >>> mg.atleast_3d(x).shape
+    (4, 3, 1)
+
+    >>> mg.atleast_3d(1, [[1, 2]], [[[[1, 2]]]])
+    [Tensor([[[1]]]), Tensor([[[1, 2]]]), Tensor([[[[1, 2]]]])]
+
+    ``numpy.atleast_3d`` will dispatch appropriately on tensors.
+
+    >>> x = mg.tensor(2.)
+    >>> np.atleast_3d(x)
+    Tensor([[[2.]]])
+
+    >>> np.atleast_3d(x).backward()
+    >>> x.grad
+    array(1.)
+
+    If any argument to ``numpy.atleast_3d`` is a Tensor, ``mygrad.atleast_3d``
+    will be dispatched on all of the arguments.
+
+    >>> np.atleast_3d(x, 1.)
+    [Tensor([[[2.]]]), Tensor([[[1.]]])]
+    """
+    return _dispatch_atleast_kd(atleast_3d, AtLeast3D, *tensors, k=3, constant=constant)

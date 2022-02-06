@@ -183,6 +183,7 @@ class MyGradUnaryUfunc(MyGradUfunc):
         where: Mask = True,
         dtype: DTypeLikeReals = None,
         constant: Optional[bool] = None,
+        **kwargs,
     ) -> Tensor:
         # it is fastest to check if out is None, which is likely the
         # most common scenario, and this is a very "hot path" in the
@@ -191,7 +192,7 @@ class MyGradUnaryUfunc(MyGradUfunc):
             out._in_place_op(
                 cls._wrapped_op,
                 x,
-                op_kwargs={"where": where, "dtype": dtype},
+                op_kwargs={"where": where, "dtype": dtype, **kwargs},
                 constant=constant,
             )
             return out
@@ -199,7 +200,7 @@ class MyGradUnaryUfunc(MyGradUfunc):
             return Tensor._op(
                 cls._wrapped_op,
                 x,
-                op_kwargs={"where": where, "dtype": dtype},
+                op_kwargs={"where": where, "dtype": dtype, **kwargs},
                 constant=constant,
                 out=out,
             )
@@ -391,27 +392,27 @@ def _create_ufunc(
         decorated_func.__name__,
         (object,),
         (
-            dict(
-                _wrapped_op=op,
-                at=at,
-                accumulate=accumulate,
-                reduce=reduce,
-                reduceat=reduceat,
-                outer=outer,
-                signature=op.numpy_ufunc.signature,
-                identity=op.numpy_ufunc.identity,
-                nargs=op.numpy_ufunc.nargs,
-                nin=op.numpy_ufunc.nin,
-                nout=op.numpy_ufunc.nout,
-                ntypes=len(types),
-                types=types,
-                _decorated_func=decorated_func,
-                __name__=decorated_func.__name__,
-                __qualname__=decorated_func.__name__,
-                __signature__=signature(decorated_func),
-                __annotations__=get_type_hints(decorated_func),
-                __doc__=decorated_func.__doc__,
-            )
+            {
+                "_wrapped_op": op,
+                "at": at,
+                "accumulate": accumulate,
+                "reduce": reduce,
+                "reduceat": reduceat,
+                "outer": outer,
+                "signature": op.numpy_ufunc.signature,
+                "identity": op.numpy_ufunc.identity,
+                "nargs": op.numpy_ufunc.nargs,
+                "nin": op.numpy_ufunc.nin,
+                "nout": op.numpy_ufunc.nout,
+                "ntypes": len(types),
+                "types": types,
+                "_decorated_func": decorated_func,
+                "__name__": decorated_func.__name__,
+                "__qualname__": decorated_func.__name__,
+                "__signature__": signature(decorated_func),
+                "__annotations__": get_type_hints(decorated_func),
+                "__doc__": decorated_func.__doc__,
+            }
         ),
     )
     ufunc.register(out)

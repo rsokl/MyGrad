@@ -32,6 +32,7 @@ from mygrad.tensor_manip.tensor_joining.funcs import *
 from mygrad.tensor_manip.tiling.funcs import *
 from mygrad.tensor_manip.transpose_like.funcs import *
 from mygrad.ufuncs._ufunc_creators import ufunc
+from ._io import load, save
 
 from . import random
 from ._version import get_versions
@@ -41,4 +42,4 @@ del get_versions
 
 
 setattr(Tensor, "clip", clip)
-prepare_op = Tensor._op
+execute_op = Tensor._op

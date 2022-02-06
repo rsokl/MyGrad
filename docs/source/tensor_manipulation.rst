@@ -30,6 +30,9 @@ Changing number of dimensions
 .. autosummary::
    :toctree: generated/
 
+   atleast_1d
+   atleast_2d
+   atleast_3d
    broadcast_to
    expand_dims
    squeeze

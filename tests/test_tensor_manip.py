@@ -1,23 +1,30 @@
 from itertools import permutations
+from typing import List
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
-from hypothesis import given, settings
+import pytest
+from hypothesis import given, infer, settings
 from numpy.testing import assert_allclose
 from pytest import raises
 
 from mygrad import (
     Tensor,
+    atleast_1d,
+    atleast_2d,
+    atleast_3d,
     broadcast_to,
     expand_dims,
     moveaxis,
+    no_autodiff,
     ravel,
     repeat,
     roll,
     swapaxes,
     transpose,
 )
+from mygrad.typing import ArrayLike
 from tests.utils.functools import add_constant_passthrough
 from tests.utils.wrappers import adds_constant_arg
 
@@ -478,4 +485,75 @@ def test_repeat_tuple_repeats_only_fwd():
     vary_each_element=True,
 )
 def test_repeat_tuple_repeats_only_bkwd():
+    pass
+
+
+def _wrap_list(x):
+    return x if isinstance(x, list) else [x]
+
+
+@pytest.mark.parametrize("func", [atleast_1d, atleast_2d, atleast_3d])
+@given(x=infer, constant=st.none() | st.booleans())
+def test_atleast_kd_fixed_point(func, x: List[ArrayLike], constant):
+    with no_autodiff:
+        out1 = _wrap_list(func(*x, constant=constant))
+        out2 = _wrap_list(func(*out1, constant=constant))
+        assert len(out1) == len(out2)
+        assert all(x is y for x, y in zip(out1, out2))
+
+
+@fwdprop_test_factory(
+    mygrad_func=atleast_1d,
+    true_func=np.atleast_1d,
+    num_arrays=1,
+)
+def test_atleast_1d_fwd():
+    pass
+
+
+@backprop_test_factory(
+    mygrad_func=add_constant_passthrough(np.atleast_1d),  # exercises __array_function__
+    true_func=np.atleast_1d,
+    num_arrays=1,
+    vary_each_element=True,
+)
+def test_atleast_1d_only_bkwd():
+    pass
+
+
+@fwdprop_test_factory(
+    mygrad_func=atleast_2d,
+    true_func=np.atleast_2d,
+    num_arrays=1,
+)
+def test_atleast_2d_fwd():
+    pass
+
+
+@backprop_test_factory(
+    mygrad_func=add_constant_passthrough(np.atleast_2d),  # exercises __array_function__
+    true_func=np.atleast_2d,
+    num_arrays=1,
+    vary_each_element=True,
+)
+def test_atleast_2d_only_bkwd():
+    pass
+
+
+@fwdprop_test_factory(
+    mygrad_func=atleast_3d,
+    true_func=np.atleast_3d,
+    num_arrays=1,
+)
+def test_atleast_3d_fwd():
+    pass
+
+
+@backprop_test_factory(
+    mygrad_func=add_constant_passthrough(np.atleast_3d),  # exercises __array_function__
+    true_func=np.atleast_3d,
+    num_arrays=1,
+    vary_each_element=True,
+)
+def test_atleast_3d_only_bkwd():
     pass

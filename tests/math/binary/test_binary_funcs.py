@@ -7,7 +7,7 @@ import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
 import pytest
-from hypothesis import given
+from hypothesis import given, assume
 from numpy.testing import assert_allclose
 
 from tests.custom_strategies import tensors
@@ -20,17 +20,17 @@ def inplace_op(inplace_target, other, constant=False, *, op_name: str):
 
     op_name = "__" + op_name + "__"
 
-    # hack to make broadcastable shapes work for inplace op:
-    # 1. Ensure that inplace op has at least as many items as `other`.
-    # 2. `other` can't have excess leading dims
-    inplace_target, other = (
-        (inplace_target, other)
-        if inplace_target.size >= other.size
-        else (other, inplace_target)
-    )
-    if other.ndim > inplace_target.ndim:
-        other = other[(0,) * (other.ndim - inplace_target.ndim)]
-
+    # hack to make broadcastable shapes work for inplace op:    
+    x = inplace_target.copy()
+    check = False
+    
+    if np.broadcast(inplace_target, other).shape != inplace_target.shape:
+        inplace_target, other = other, inplace_target
+        check = True
+    
+    if check and np.broadcast(inplace_target, other).shape != inplace_target.shape:
+        assume(False)
+            
     # touch so that it doesn't look like the input
     # was mutated
     inplace_target = +inplace_target

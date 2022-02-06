@@ -32,6 +32,7 @@ def absolute(
     where: Mask = True,
     dtype: DTypeLikeReals = None,
     constant: Optional[bool] = None,
+    nan_to_num: bool = True,
 ) -> Tensor:  # pragma: no cover
     """The absolute value, computed elementwise.
 
@@ -56,6 +57,10 @@ def absolute(
         Defaults to ``True`` for integer-type data.
 
         Integer-type tensors must be constant.
+
+    nan_to_num : bool, optional (default=True)
+        If `True` then gradients that would store nans due to the presence of
+        zeros in `x` will instead store zeros in those places.
 
     where : Mask
         This condition is broadcast over the input. At locations where the
@@ -84,6 +89,22 @@ def absolute(
     >>> x = mg.array([-1.2, 1.2])
     >>> mg.absolute([-1.2, 1.2])
     Tensor([ 1.2,  1.2])
+
+    The absolute-value function is not differentiable at `x=0.0`.
+    By default the derivative at this point is treated as 0.
+
+    >>> x = mg.tensor([-2.0, 0.0, 2.0])
+    >>> mg.absolute(x).backward()
+    >>> x.grad
+    np.array([-1., 0., 1.])
+
+    However a more rigorous behavior can be enabled such that the
+    undefined derivative will be returned as `nan`.
+
+    >>> x = mg.tensor([-2.0, 0.0, 2.0])
+    >>> mg.absolute(x, nan_to_num=False).backward()
+    >>> x.grad
+    np.array([-1., nan, 1.])
 
     Plot the function and its derivate over ``[-10, 10]``:
 
@@ -418,7 +439,12 @@ def minimum(
 
 @implements_numpy_override()
 def clip(
-    a: ArrayLike, a_min: ArrayLike, a_max: ArrayLike, *, constant: Optional[bool] = None
+    a: ArrayLike,
+    a_min: ArrayLike,
+    a_max: ArrayLike,
+    out: Optional[Union[np.ndarray, Tensor]] = None,
+    *,
+    constant: Optional[bool] = None,
 ) -> Tensor:
     """Clip (limit) the values in an array.
 
@@ -449,6 +475,11 @@ def clip(
         `None`. If `a_min` or `a_max` are ArrayLike, then the three
         arrays will be broadcasted to match their shapes.
 
+    out : Optional[Union[ndarray, Tensor]]
+        A location into which the result is stored. If provided, it must have
+        a shape that the inputs broadcast to. If not provided or None, a
+        freshly-allocated tensor is returned.
+
     constant : bool, optional(default=False)
         If ``True``, the returned tensor is a constant (it
         does not backpropagate a gradient)
@@ -474,11 +505,10 @@ def clip(
         raise ValueError("`a_min` and `a_max` cannot both be set to `None`")
 
     if a_min is not None:
-        a = maximum(a_min, a, constant=constant)
+        a = maximum(a_min, a, out=out, constant=constant)
 
     if a_max is not None:
-        a = minimum(a_max, a, constant=constant)
-
+        a = minimum(a_max, a, out=out, constant=constant)
     return a
 
 
