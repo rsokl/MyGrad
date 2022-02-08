@@ -4,13 +4,13 @@ from mygrad import Tensor
 
 
 def glorot_normal(*shape, gain=1, dtype=np.float32, constant=None):
-    r"""Initialize a `Tensor` according to the normal initialization procedure
+    r"""Initialize a :class:`mygrad.Tensor` according to the normal initialization procedure
     described by Glorot and Bengio.
 
     Parameters
     ----------
     shape : Sequence[int]
-        The shape of the output Tensor. Note that `shape` must be at least two-dimensional.
+        The shape of the output Tensor. Note that ``shape`` must be at least two-dimensional.
 
     gain : Real, optional (default=1)
         The gain (scaling factor) to apply.
@@ -19,12 +19,12 @@ def glorot_normal(*shape, gain=1, dtype=np.float32, constant=None):
         The data type of the output tensor; must be a floating-point type.
 
     constant : bool, optional (default=False)
-        If `True`, the returned tensor is a constant (it
+        If ``True``, the returned tensor is a constant (it
             does not back-propagate a gradient).
 
     Returns
     -------
-    mygrad.Tensor, shape=`shape`
+    mygrad.Tensor, shape=``shape``
         A Tensor, with values initialized according to the glorot normal initialization.
 
     Notes

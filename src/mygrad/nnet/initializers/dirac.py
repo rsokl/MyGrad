@@ -6,12 +6,13 @@ from mygrad import Tensor
 
 
 def dirac(*shape: int, dtype=np.float32, constant: Optional[bool] = None) -> Tensor:
-    """Initialize a `Tensor` according to the Dirac initialization procedure described by Zagoruyko and Komodakis.
+    """Initialize a :class:`mygrad.Tensor` according to the Dirac initialization procedure described
+    by Zagoruyko and Komodakis.
 
     Parameters
     ----------
     shape : Sequence[int]
-        The shape of the output Tensor. Note that `shape` must be at least two-dimensional.
+        The shape of the output Tensor. Note that ``shape`` must be at least two-dimensional.
 
     dtype : data-type, optional (default=float32)
         The data type of the output tensor.
@@ -28,7 +29,7 @@ def dirac(*shape: int, dtype=np.float32, constant: Optional[bool] = None) -> Ten
 
     Returns
     -------
-    mygrad.Tensor, shape=`shape`
+    mygrad.Tensor, shape=``shape``
         A Tensor, with values initialized according to the Dirac initialization.
 
     Extended Description
@@ -40,8 +41,8 @@ def dirac(*shape: int, dtype=np.float32, constant: Optional[bool] = None) -> Ten
     A Tensor I initialized via this should satisfy:
         I ⋆ x = x
 
-    for compatible tensors x, where ⋆ indicates convolution. Note that this does not
-    guarantee that the convolution will produce x, but it will preserve as many channels of
+    for compatible tensors ``x``, where ``⋆`` indicates convolution. Note that this does not
+    guarantee that the convolution will produce ``x``, but it will preserve as many channels of
     the input as possible.
     """
     if len(shape) == 1:
