@@ -1,5 +1,4 @@
 from copy import copy
-from functools import wraps
 from itertools import combinations
 from numbers import Real
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
@@ -259,7 +258,6 @@ class fwdprop_test_factory:
 
     def __call__(self, f):
         @given(shapes=self.shapes, constant=st.booleans(), data=st.data())
-        @wraps(f)
         def wrapper(shapes: hnp.BroadcastableShapes, constant, data: st.DataObject):
             self.index_to_arr_shapes.update(
                 (k, v) for k, v in zip(sorted(self.missing_shapes), shapes.input_shapes)
@@ -679,7 +677,6 @@ class backprop_test_factory:
 
     def __call__(self, f):
         @given(shapes=self.shapes, data=st.data())
-        @wraps(f)
         def wrapper(shapes: hnp.BroadcastableShapes, data: st.DataObject):
             self.index_to_arr_shapes.update(
                 (k, v) for k, v in zip(sorted(self.missing_shapes), shapes.input_shapes)
@@ -758,7 +755,7 @@ class backprop_test_factory:
             if len(arrs) == 1 and out is arrs[0]:
                 # op returns reference of input
                 return
-            
+
             assert all(
                 a.data.flags.writeable is False for a in arrs
             ), "input array memory is not locked by op"
