@@ -54,7 +54,7 @@ setup(
         "rnn": ["numba>=0.34.0"]  # GRU and vanilla RNN require numba-acceleration
     },
     url=URL,
-    download_url="https://github.com/rsokl/mygrad/tarball/" + versioneer.get_version(),
+    download_url="https://github.com/rsokl/mygrad/tarball/v" + versioneer.get_version(),
     python_requires=">=3.7",
     packages=find_packages(where="src", exclude=["tests", "tests.*"]),
     package_dir={"": "src"},
