@@ -3,6 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+======
 MyGrad
 ======
 MyGrad is a lightweight library that adds automatic differentiation to NumPy – its only 
@@ -21,10 +22,36 @@ start differentiating!
    array([2., 4., 6.])
 
 
-MyGrad's primary goal is to make automatic differentiation an accessible and easy to use across the Python/NumPy ecosystem.
+MyGrad's primary goal is to make automatic differentiation accessible and easy to use across the Python/NumPy ecosystem.
 As such, it strives to behave and feel exactly like NumPy so that users need not learn yet another array-based math library.
-Of the various modes and flavors of auto-diff, MyGrad supports backpropagation from a scalar quantity.
 
+Of the various modes and flavors of auto-diff, MyGrad currently only supports back-propagation from a scalar quantity.
+
+
+"Drop in" automatic differentiation?
+====================================
+What we mean by drop in automatic differentiation is that you can take a third party function, which is written in NumPy, and pass MyGrad tensors as its inputs – this will coerce it into using MyGrad functions internally so that we can differentiate the function.
+
+.. code-block:: python
+   :caption: What we mean by drop in autodiff
+
+   from third_party_lib import some_numpy_func
+   
+   import mygrad as mg
+
+   arr1 = mg.tensor(...) # some MyGrad Tensor (instead of a NumPy array)
+   arr2 = mg.tensor(...) # some MyGrad Tensor (instead of a NumPy array)
+
+   output = some_numpy_func(arr1, arr2)  # "drop in" the MyGrad tensors
+
+   output.backward()  # output is a MyGrad tensor, not a NumPy array!
+
+   arr1.grad  # stores d(some_numpy_func) / d(arr1)
+   arr2.grad  # stores d(some_numpy_func) / d(arr2)
+
+
+MyGrad aims for parity with NumPy's major features
+==================================================
 NumPy's ufuncs are richly supported. We can even differentiate through an operation that occur in-place on a tensor and applies a boolean mask to
 the results:
 
@@ -98,6 +125,14 @@ during automatic differentiation
    array([-1.,  0., 10.])
 
 
+What About JAX?
+===============
+Doesn't JAX already provide drop in automatic differentiation? Not quite; JAX provides *swap-out* automatic differentiation: you must swap out the version of NumPy you are using *before* you write your code. Thus you cannot simply differentiate some third party function by passing it a JAX array.
+
+"Is MyGrad a competitor to JAX? Should I stop using JAX and start using MyGrad?"
+
+**Goodness gracious, no!** MyGrad is *not* meant to compete with the likes of JAX, which offers far more functionality in the way of computing higher-order derivatives, Jacobian vector projects, in terms of providing a jit... this list goes on. 
+MyGrad is meant to be a simple and highly accessible way to provide basic automatic differentiation capabilities to the NumPy ecosystem. Anyone who knows how to use NumPy can very easily learn to use MyGrad. It is especially great for teaching. But once your auto-diff needs extend beyond derivatives of scalars, it is time to graduate to JAX.
 
 
 .. toctree::
