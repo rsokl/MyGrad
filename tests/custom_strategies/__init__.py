@@ -172,7 +172,7 @@ def tensors(
     grad_dtype: Optional[Any] = None,
     grad_elements_bounds: Optional[Tuple[int, int]] = None,
     read_only: Union[bool, st.SearchStrategy[bool]] = False,
-) -> st.SearchStrategy[Tensor]:
+) -> Tensor:
     r"""Returns a strategy for generating :class:`mygrad:mygrad.Tensor`\ s.
 
     Parameters
@@ -355,6 +355,9 @@ def choices(seq, size, replace=True):
         A tuple of length `size` containing elements of `seq`"""
     if not isinstance(size, Integral) or size < 0:
         raise ValueError(f"`size` must be a non-negative integer. Got {size}")
+
+    size = int(size)
+
     if size > len(seq) and not replace:
         raise ValueError(
             "`size` must not exceed the length of `seq` when `replace` is `False`"
@@ -821,7 +824,7 @@ def _broadcast_shapes(*shapes):
 
 @st.composite
 def populates_ufunc(
-    draw: st.DataObject.draw,
+    draw: st.DrawFn,
     ufunc: Union[MyGradUnaryUfunc, MyGradBinaryUfunc],
     arg_index_to_elements: Optional[Mapping[int, st.SearchStrategy]] = None,
     include_where: bool = True,
@@ -831,7 +834,7 @@ def populates_ufunc(
     max_side=_NoValue,
     min_dims=_NoValue,
     max_dims=_NoValue,
-) -> st.SearchStrategy[SmartSignature]:
+) -> SmartSignature:
     ind_to_elements = defaultdict(lambda: st.floats(-1e-9, 1e9))
     shapes_args = SmartSignature(
         min_side=min_side, max_side=max_side, min_dims=min_dims, max_dims=max_dims

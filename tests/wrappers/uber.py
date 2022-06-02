@@ -425,11 +425,13 @@ class backprop_test_factory:
     def __init__(
         self,
         *,
-        mygrad_func: Callable[[Tensor], Tensor],
-        true_func: Callable[[np.ndarray], np.ndarray],
+        mygrad_func: Callable[..., Tensor],
+        true_func: Callable[..., np.ndarray],
         num_arrays: Optional[int] = None,
         shapes: Optional[MutuallyBroadcastableShapesStrategy] = None,
-        index_to_bnds: Optional[Dict[int, Tuple[int, int]]] = None,
+        index_to_bnds: Optional[
+            Union[Dict[int, Tuple[float, float]], Sequence[Any]]
+        ] = None,
         default_bnds: Tuple[float, float] = (-1e6, 1e6),
         index_to_no_go: Optional[Dict[int, Sequence[int]]] = None,
         index_to_arr_shapes: Optional[
