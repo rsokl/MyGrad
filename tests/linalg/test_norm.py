@@ -47,7 +47,7 @@ def manual_norm(x, ord=None, axis=None, keepdims=False):
 
 
 def manual_norm_2(x, ord=None, axis=None, keepdims=False):
-    return np.sqrt(np.sum(x ** 2, axis=axis, keepdims=keepdims))
+    return np.sqrt(np.sum(x**2, axis=axis, keepdims=keepdims))
 
 
 @given(
@@ -88,7 +88,7 @@ def test_norm_fwd():
 @backprop_test_factory(
     mygrad_func=mg.linalg.norm,
     true_func=manual_norm_2,
-    assumptions=lambda x, axis, ord, keepdims: x.ndim > 0 and np.all(x != 0),
+    assumptions=lambda x, axis, ord, keepdims: x.ndim > 0 and np.all(np.abs(x) > 1e-20),
     num_arrays=1,
     kwargs=dict(
         axis=partial(axis_strat, permit_none=False), ord=2, keepdims=keepdims_strat
