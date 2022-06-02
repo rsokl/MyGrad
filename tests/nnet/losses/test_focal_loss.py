@@ -104,7 +104,7 @@ def test_focal_no_graph_fwd():
     kwargs=dict(
         targets=lambda scores: targets(scores=scores),
         alpha=lambda scores: st.floats(-2, 2),
-        gamma=lambda scores: st.floats(0, 10) | st.sampled_from([0.0, 1.0]),
+        gamma=lambda scores: st.floats(1e-14, 10) | st.sampled_from([0.0, 1.0]),
     ),
     vary_each_element=True,
 )
