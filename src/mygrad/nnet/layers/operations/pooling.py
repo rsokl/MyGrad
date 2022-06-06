@@ -3,7 +3,7 @@ from typing import Optional, Tuple, Union
 
 import numpy as np
 
-from mygrad.nnet.layers.utils import sliding_window_view
+from mygrad.nnet.layers.operations.utils import sliding_window_view
 from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor
 from mygrad.typing import ArrayLike
