@@ -19,7 +19,7 @@ def _check_grad(t: mg.Tensor, expr: Union[None, np.ndarray, float]):
             assert t.grad is None
         else:
             assert t.grad is not None
-            assert_allclose(t.grad, expr)
+            assert_allclose(t.grad, expr, atol=1e-5)
 
 
 def _check_cleared_node(t: mg.Tensor):
@@ -144,7 +144,9 @@ def test_non_broadcastable(data, grad):
 
     assert_allclose(actual=v3.grad, desired=grad)
     assert_allclose(actual=v2.grad, desired=-np.sin(v2.data) * grad)
-    assert_allclose(actual=v1.grad, desired=np.exp(v1.data) * -np.sin(v2.data) * grad)
+    assert_allclose(
+        actual=v1.grad, desired=np.exp(v1.data) * -np.sin(v2.data) * grad, atol=1e-5
+    )
 
 
 @pytest.mark.parametrize("v1_const", [True, False])

@@ -3,11 +3,13 @@ This module defines the base tensor class along with all of its essential
 attributes and special methods. Public math methods, e.g. ``sum``, ``mean``,
 etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 """
+from collections import deque
 from numbers import Integral, Number
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
+    Deque,
     Dict,
     Iterator,
     List,
@@ -31,6 +33,7 @@ from mygrad._utils import (
     WeakRef,
     WeakRefIterable,
     collect_all_operations_and_clear_grads,
+    collect_all_tensors_and_clear_grads,
 )
 from mygrad.errors import DisconnectedView
 from mygrad.math.arithmetic.ops import (
@@ -1280,6 +1283,11 @@ class Tensor:
             self.clear_graph()
             return
 
+        topo_sorted_tensors: Deque["Tensor"] = deque([])
+        seen: Set[int] = set()
+
+        collect_all_tensors_and_clear_grads(self, seen, topo_sorted_tensors)
+
         # don't set self._grad yet because there is a grad-clearing step that
         # occurs during graph creation
         if grad is not None:
@@ -1308,21 +1316,29 @@ class Tensor:
         else:
             _grad = np.full_like(self.data, fill_value=1.0)
 
-        if self.creator is not None:
-            # stores a set of all the operation-instances that participate in
-            # the computational graph up to and including the present operation
-            graph = set()  # type: Set[WeakRef[Operation]]
+        self._grad = _grad
 
-            # populates graph and clears all grads
-            collect_all_operations_and_clear_grads(self, seen=graph)
-            self._grad = _grad
-            self._backward(graph=graph)
+        if self.creator is not None:
+            assert len(set(id(_t) for _t in topo_sorted_tensors)) == len(
+                topo_sorted_tensors
+            )
+            for t in topo_sorted_tensors:
+                t._backward()
+
+            # # stores a set of all the operation-instances that participate in
+            # # the computational graph up to and including the present operation
+            # graph = set()  # type: Set[WeakRef[Operation]]
+
+            # # populates graph and clears all grads
+            # collect_all_operations_and_clear_grads(self, seen=graph)
+            # self._grad = _grad
+            # self._backward(graph=graph)
         else:
             self._grad = _grad
 
         self.clear_graph()
 
-    def _backward(self, *, graph: Set[WeakRef[Operation]]):
+    def _backward(self):
         """
         **For dev-use only**
 
@@ -1356,10 +1372,13 @@ class Tensor:
             f"\ntensor-shape: {self.shape}"
             f"\ngrad-shape: {self._grad.shape}"
         )
-        self._ops.difference_update(self._accum_ops)
-        self._accum_ops.clear()
-        if self.creator is not None and self._ops.isdisjoint(graph):
-            self._creator.backward(self._grad, graph=graph)
+        if self._creator is not None:
+            self._creator.backward(self._grad)
+        return
+        # self._ops.difference_update(self._accum_ops)
+        # self._accum_ops.clear()
+        # if self.creator is not None and self._ops.isdisjoint(graph):
+        #     self._creator.backward(self._grad, graph=graph)
 
     def null_grad(self, *, _clear_view_info: bool = False) -> "Tensor":
         """Sets this tensor's gradient to be ``None``.

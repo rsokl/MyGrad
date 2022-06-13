@@ -3,6 +3,7 @@ from functools import wraps
 from typing import (
     TYPE_CHECKING,
     Callable,
+    Deque,
     Dict,
     Generator,
     Generic,
@@ -55,6 +56,37 @@ def collect_all_operations_and_clear_grads(
 
     for t in t.creator.variables:
         collect_all_operations_and_clear_grads(t, seen)
+
+
+def collect_all_tensors_and_clear_grads(
+    t: "Tensor", seen: Set[int], topo_sorted_tensors: Deque["Tensor"]
+):
+    """Recursively accumulates in `seen` all operations involved
+    in creating `t`.
+
+    `seen` is updated in-place
+    """
+    t._view_grad = None
+    t._grad = None
+
+    if t.constant:
+        return
+
+    id_ = id(t)
+
+    if id_ in seen:
+        return
+
+    if t.creator is not None:
+        for t_loop in t.creator.variables:
+            collect_all_tensors_and_clear_grads(t_loop, seen, topo_sorted_tensors)
+        del t_loop
+
+    if id_ in seen:
+        return
+
+    seen.add(id_)
+    topo_sorted_tensors.appendleft(t)
 
 
 class WeakRef(Generic[T]):
