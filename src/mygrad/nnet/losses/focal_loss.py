@@ -89,8 +89,8 @@ class FocalLoss(Operation):
             term2 = -log_pc
         elif gamma < 1:
             # For g < 1 and p -> 1, the 2nd term -> 0 via L'Hôpital's rule
-            term2 = np.zeros(pc.shape, dtype=np.float64)
-            pc_not_1 = ~np.isclose(one_m_pc, 0, atol=1e-15)
+            term2 = np.zeros(pc.shape, dtype=class_probs.dtype)
+            pc_not_1 = ~np.isclose(one_m_pc, 0, atol=1e-25)
             term2[pc_not_1] = (
                 -gamma * one_m_pc[pc_not_1] ** (gamma - 1) * log_pc[pc_not_1]
             )

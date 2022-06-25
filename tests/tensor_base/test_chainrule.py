@@ -19,7 +19,7 @@ def _check_grad(t: mg.Tensor, expr: Union[None, np.ndarray, float]):
             assert t.grad is None
         else:
             assert t.grad is not None
-            assert_allclose(t.grad, expr)
+            assert_allclose(t.grad, expr, atol=1e-7)
 
 
 def _check_cleared_node(t: mg.Tensor):
@@ -116,7 +116,7 @@ def test_chainrule_scalar(
 
     _check_grad(x, 1 + 2 * z.data * f.data * y.data)
     _check_grad(y, 2 * z.data * f.data * x.data)
-    _check_grad(z, f.data ** 2 + z.data * 2 * f.data)
+    _check_grad(z, f.data**2 + z.data * 2 * f.data)
 
 
 @given(st.booleans())
@@ -139,12 +139,14 @@ def test_non_broadcastable(data, grad):
     if grad is None:
         grad = 1.0
 
-    assert_allclose(actual=v2.data, desired=np.exp(v1.data))
-    assert_allclose(actual=v3.data, desired=np.cos(np.exp(v1.data)))
+    assert_allclose(actual=v2.data, desired=np.exp(v1.data), atol=1e-7)
+    assert_allclose(actual=v3.data, desired=np.cos(np.exp(v1.data)), atol=1e-7)
 
-    assert_allclose(actual=v3.grad, desired=grad)
-    assert_allclose(actual=v2.grad, desired=-np.sin(v2.data) * grad)
-    assert_allclose(actual=v1.grad, desired=np.exp(v1.data) * -np.sin(v2.data) * grad)
+    assert_allclose(actual=v3.grad, desired=grad, atol=1e-7)
+    assert_allclose(actual=v2.grad, desired=-np.sin(v2.data) * grad, atol=1e-7)
+    assert_allclose(
+        actual=v1.grad, desired=np.exp(v1.data) * -np.sin(v2.data) * grad, atol=1e-7
+    )
 
 
 @pytest.mark.parametrize("v1_const", [True, False])
@@ -185,8 +187,8 @@ def test_linear_graph(
     v4.backward(grad)
 
     # check fwd-pass produces reliable math
-    assert v2.data == v1_val ** 2
-    assert v3.data == np.exp(v1_val ** 2)
+    assert v2.data == v1_val**2
+    assert v3.data == np.exp(v1_val**2)
     assert v4.data == 2 * v3.data
 
     # check that constant propagates through graph reliably
@@ -265,7 +267,7 @@ def test_fanout_graph(
     v5.backward(grad)
 
     # check fwd-pass produces reliable math
-    assert v2.data == v1_val ** 2
+    assert v2.data == v1_val**2
     assert v3.data == np.exp(v1_val)
     assert v4.data == 2 * v1_val
     assert v5.data == v2.data * v3.data * v4.data
@@ -371,7 +373,7 @@ def test_interesting_graph(
     note(f"v5: {v5}")
 
     # check fwd-pass produces reliable math
-    assert v3.data == v1_val ** 2
+    assert v3.data == v1_val**2
     assert v4.data == (v2_val * v3.data)
     assert v5.data == (v4.data * v3.data)
 
@@ -398,7 +400,7 @@ def test_interesting_graph(
     _check_grad(v3, v3_grad)
 
     # dL/d2 = dL/d4 * p4/p2
-    v2_grad = None if (v5.constant or v4.constant) else grad * v3.data ** 2
+    v2_grad = None if (v5.constant or v4.constant) else grad * v3.data**2
     _check_grad(v2, v2_grad)
 
     # dL/d1 = dL/d3 * p3/p1
@@ -408,7 +410,7 @@ def test_interesting_graph(
         else (
             2 * grad * v1.data * v4.data
             if v4.constant
-            else grad * 4 * v1.data ** 3 * v2.data
+            else grad * 4 * v1.data**3 * v2.data
         )
     )
     _check_grad(v1, v1_grad)
@@ -491,7 +493,7 @@ def test_dynamic_interesting_graph(
     note(f"dead_leaf: {dead_leaf}")
 
     # check fwd-pass produces reliable math
-    assert v3.data == v1_val ** 2
+    assert v3.data == v1_val**2
     assert v4.data == (v1_val * v2_val * v3.data)
     assert v5.data == (v4.data * v3.data * v1_val)
     assert dead_leaf.data == dangling_site.data * 3.0
@@ -520,7 +522,7 @@ def test_dynamic_interesting_graph(
     _check_grad(v3, v3_grad)
 
     v2_grad = (
-        None if (v5.constant or v4.constant) else grad * v3.data ** 2 * v1.data ** 2
+        None if (v5.constant or v4.constant) else grad * v3.data**2 * v1.data**2
     )
     _check_grad(v2, v2_grad)
 

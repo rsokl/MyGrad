@@ -252,10 +252,10 @@ def test_mutation_doesnt_corrupt_upstream_op(inplace_on_view: bool, x: Tensor):
 
     z.backward()  # dz/dx = 6 * x ** 2
 
-    assert_allclose(z, x.data ** 4)
+    assert_allclose(z, x.data ** 4, atol=1e-7)
     assert_array_equal(view, y)
-    assert_allclose(z.grad, np.ones_like(y))
-    assert_allclose(x.grad, 4 * np.asarray(x) ** 3)
+    assert_allclose(z.grad, np.ones_like(y), atol=1e-7)
+    assert_allclose(x.grad, 4 * np.asarray(x) ** 3, atol=1e-7)
 
     assert y_base.grad is None
     assert y.grad is None

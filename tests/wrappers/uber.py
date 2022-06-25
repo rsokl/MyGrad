@@ -1,4 +1,5 @@
 from copy import copy
+from functools import partial
 from itertools import combinations
 from numbers import Real
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
@@ -425,11 +426,13 @@ class backprop_test_factory:
     def __init__(
         self,
         *,
-        mygrad_func: Callable[[Tensor], Tensor],
-        true_func: Callable[[np.ndarray], np.ndarray],
+        mygrad_func: Callable[..., Tensor],
+        true_func: Callable[..., np.ndarray],
         num_arrays: Optional[int] = None,
         shapes: Optional[MutuallyBroadcastableShapesStrategy] = None,
-        index_to_bnds: Optional[Dict[int, Tuple[int, int]]] = None,
+        index_to_bnds: Optional[
+            Union[Dict[int, Tuple[float, float]], Sequence[Any]]
+        ] = None,
         default_bnds: Tuple[float, float] = (-1e6, 1e6),
         index_to_no_go: Optional[Dict[int, Sequence[int]]] = None,
         index_to_arr_shapes: Optional[
@@ -526,8 +529,12 @@ class backprop_test_factory:
         index_to_no_go = _to_dict(index_to_no_go)
         index_to_arr_shapes = _to_dict(index_to_arr_shapes)
         index_to_unique = _to_dict(index_to_unique)
+
+        # TODO: enable subnormals
         self.elements_strategy = (
-            elements_strategy if elements_strategy is not None else st.floats
+            elements_strategy
+            if elements_strategy is not None
+            else partial(st.floats, allow_subnormal=False)
         )
         kwargs = _to_dict(kwargs)
         arrs_from_kwargs = _to_dict(arrs_from_kwargs)
@@ -768,7 +775,7 @@ class backprop_test_factory:
                 hnp.arrays(
                     shape=out.shape,
                     dtype=float,
-                    elements=st.floats(-10, 10),
+                    elements=st.floats(-10, 10, allow_subnormal=False),
                     unique=True,
                 ),
                 label="grad",

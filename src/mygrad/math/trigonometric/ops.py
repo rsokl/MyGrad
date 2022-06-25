@@ -34,7 +34,7 @@ def _dsinc(x):
 
 
 class Sinc(Operation):
-    """ f(a) -> sin(pi*a)/(pi*a)"""
+    """f(a) -> sin(pi*a)/(pi*a)"""
 
     def __call__(self, a):
         self.variables = (a,)
@@ -43,7 +43,12 @@ class Sinc(Operation):
     def backward_var(self, grad, index, **kwargs):
         (a,) = self.variables
         x = a.data
-        return np.pi * grad * np.piecewise(x, [x == 0, x != 0], [np.zeros_like, _dsinc])
+
+        # TODO: use tiny
+        near_0 = np.isclose(x, 0, atol=1e-20)
+        return (
+            np.pi * grad * np.piecewise(x, [near_0, ~near_0], [np.zeros_like, _dsinc])
+        )
 
 
 class Cos(UnaryUfunc):
@@ -63,7 +68,7 @@ class Tan(UnaryUfunc):
 
 
 class Csc(Operation):
-    """ f(a) -> csc(a)"""
+    """f(a) -> csc(a)"""
 
     def __call__(self, a):
         self.variables = (a,)
@@ -75,7 +80,7 @@ class Csc(Operation):
 
 
 class Sec(Operation):
-    """ f(a) -> sec(a)"""
+    """f(a) -> sec(a)"""
 
     def __call__(self, a):
         self.variables = (a,)
@@ -87,7 +92,7 @@ class Sec(Operation):
 
 
 class Cot(Operation):
-    """ f(a) -> cot(a)"""
+    """f(a) -> cot(a)"""
 
     def __call__(self, a):
         self.variables = (a,)
@@ -125,7 +130,7 @@ class Arctan(UnaryUfunc):
 
 
 class Arccsc(Operation):
-    """ f(a) -> arccsc(a)"""
+    """f(a) -> arccsc(a)"""
 
     def __call__(self, a):
         self.variables = (a,)
@@ -140,7 +145,7 @@ class Arccsc(Operation):
 
 
 class Arcsec(Operation):
-    """ f(a) -> arcsec(a)"""
+    """f(a) -> arcsec(a)"""
 
     def __call__(self, a):
         self.variables = (a,)
@@ -155,7 +160,7 @@ class Arcsec(Operation):
 
 
 class Arccot(Operation):
-    """ f(a) -> arccot(a)"""
+    """f(a) -> arccot(a)"""
 
     def __call__(self, a):
         self.variables = (a,)

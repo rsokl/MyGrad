@@ -161,9 +161,11 @@ def test_batchnorm_fwd():
     true_func=simple_batchnorm_numpy,
     num_arrays=1,
     index_to_arr_shapes={0: hnp.array_shapes(min_dims=2, max_dims=4)},
-    kwargs=lambda x: st.fixed_dictionaries(dict(eps=st.floats(1e-20, 1e0))),
+    kwargs=lambda x: st.fixed_dictionaries(
+        dict(eps=st.floats(1e-10, 1e0, allow_subnormal=False))
+    ),
     vary_each_element=True,
-    atol=1e-5,
+    atol=1e-3,
     rtol=1e-5,
 )
 def test_batchnorm_bkwd():

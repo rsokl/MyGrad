@@ -75,7 +75,9 @@ log_largest = np.log(np.finfo(np.float64).max)
 log2_largest = np.log2(np.finfo(np.float64).max)
 valid_log_inputs = st.floats(min_value=0, allow_infinity=False, exclude_min=True)
 valid_exp_inputs = st.floats(max_value=log_largest, allow_infinity=False)
-valid_exp2_inputs = st.floats(max_value=log2_largest, allow_infinity=False)
+valid_exp2_inputs = st.floats(
+    max_value=log2_largest, allow_infinity=False, exclude_max=True
+)
 
 # Specifies the domain from which ufunc numerical inputs are drawn to test fwd-prop.
 # These are generally meant to match the true domain for the given function.
@@ -271,6 +273,7 @@ def test_ufunc_bkwd(
             actual=actual,
             err_msg=f"the grad of tensor-{n} did not match the "
             f"numerically-computed gradient",
+            atol=1e-7,
         )
 
 
