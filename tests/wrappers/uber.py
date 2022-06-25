@@ -775,7 +775,7 @@ class backprop_test_factory:
                 hnp.arrays(
                     shape=out.shape,
                     dtype=float,
-                    elements=st.floats(-10, 10),
+                    elements=st.floats(-10, 10, allow_subnormal=False),
                     unique=True,
                 ),
                 label="grad",
