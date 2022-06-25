@@ -19,7 +19,7 @@ class KWARG1:
 name_to_pos = dict(a=0, b=1, c=2)
 
 
-@settings(deadline=None, max_examples=20)
+@settings(deadline=None, max_examples=10)
 @given(
     args_as_kwargs=st.fixed_dictionaries(
         {},
@@ -40,18 +40,18 @@ def test_arr_from_kwargs(args_as_kwargs):
 
     def sentinel(a, b, c, kwarg1=None, *, constant=None):
         assert_allclose(
-            np.real(a if isinstance(a, np.ndarray) else a.data),
+            np.ceil(np.real(a if isinstance(a, np.ndarray) else a.data)),
             expected_a,
             err_msg=f"Got bad value for `a`: {a}",
         )
 
         assert_allclose(
-            np.real(b if isinstance(b, np.ndarray) else b.data),
+            np.ceil(np.real(b if isinstance(b, np.ndarray) else b.data)),
             expected_b,
             err_msg=f"Got bad value for `b`: {b}",
         )
         assert_allclose(
-            np.real(c if isinstance(c, np.ndarray) else c.data),
+            np.ceil(np.real(c if isinstance(c, np.ndarray) else c.data)),
             expected_c,
             err_msg=f"Got bad value for `c`: {c}",
         )
@@ -62,13 +62,13 @@ def test_arr_from_kwargs(args_as_kwargs):
 
         return a * b * c
 
-    @settings(deadline=None, max_examples=20)
+    @settings(deadline=None)
     @backprop_test_factory(
         mygrad_func=sentinel,
         true_func=sentinel,
         num_arrays=3,
         index_to_arr_shapes={0: tuple(), 1: tuple(), 2: tuple()},
-        index_to_bnds={0: (-1, -1), 1: (-2, -2), 2: (-3, -3)},
+        index_to_bnds={0: (-1.2, -1), 1: (-2.2, -2), 2: (-3.2, -3)},
         arrs_from_kwargs=arrs_from_kwargs,
         kwargs=args_as_kwargs,
     )
