@@ -1009,7 +1009,7 @@ class Tensor:
         *input_vars: ArrayLike,
         op_args: Optional[Sequence] = None,
         op_kwargs: Optional[Dict[str, Any]] = None,
-        constant: bool = None,
+        constant: Optional[bool] = None,
         out: Optional[Union[np.ndarray, "Tensor"]] = None,
     ):
         """Wraps operations performed between tensors: f(a, b, ...).

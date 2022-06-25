@@ -28,7 +28,7 @@ gru = gru_module.gru
     | hnp.arrays(shape=(1, 2), dtype=float, elements=st.just(0)).map(
         lambda x: Tensor(x, constant=True)
     ),
-    dropout=st.floats(0, 1),
+    dropout=st.floats(0, 1, exclude_max=True),
     out_constant=st.booleans(),
 )
 @mem_guard_off

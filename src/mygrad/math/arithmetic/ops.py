@@ -131,7 +131,7 @@ class MultiplySequence(Operation):
         assert 2 <= len(self.variables)
 
         out = reduce(lambda x, y: x * y, (var.data for var in input_vars))
-        self._iszero = np.any(out == 0)
+        self._iszero = np.any(np.isclose(out, 0, 1e-25))
         return out
 
     def backward(self, grad, **kwargs):

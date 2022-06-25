@@ -80,6 +80,7 @@ def test_manual_norm_with_tuple_axis():
     true_func=np.linalg.norm,
     num_arrays=1,
     kwargs=dict(axis=axis_strat, ord=ord_strat, keepdims=keepdims_strat),
+    assumptions=lambda x, axis, ord, keepdims: np.all(np.abs(x) > 1e-20),
 )
 def test_norm_fwd():
     pass
@@ -88,7 +89,7 @@ def test_norm_fwd():
 @backprop_test_factory(
     mygrad_func=mg.linalg.norm,
     true_func=manual_norm_2,
-    assumptions=lambda x, axis, ord, keepdims: x.ndim > 0 and np.all(x != 0),
+    assumptions=lambda x, axis, ord, keepdims: x.ndim > 0 and np.all(np.abs(x) > 1e-20),
     num_arrays=1,
     kwargs=dict(
         axis=partial(axis_strat, permit_none=False), ord=2, keepdims=keepdims_strat

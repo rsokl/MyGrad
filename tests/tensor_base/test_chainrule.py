@@ -139,13 +139,13 @@ def test_non_broadcastable(data, grad):
     if grad is None:
         grad = 1.0
 
-    assert_allclose(actual=v2.data, desired=np.exp(v1.data))
-    assert_allclose(actual=v3.data, desired=np.cos(np.exp(v1.data)))
+    assert_allclose(actual=v2.data, desired=np.exp(v1.data), atol=1e-7)
+    assert_allclose(actual=v3.data, desired=np.cos(np.exp(v1.data)), atol=1e-7)
 
-    assert_allclose(actual=v3.grad, desired=grad)
-    assert_allclose(actual=v2.grad, desired=-np.sin(v2.data) * grad)
+    assert_allclose(actual=v3.grad, desired=grad, atol=1e-7)
+    assert_allclose(actual=v2.grad, desired=-np.sin(v2.data) * grad, atol=1e-7)
     assert_allclose(
-        actual=v1.grad, desired=np.exp(v1.data) * -np.sin(v2.data) * grad, atol=1e-5
+        actual=v1.grad, desired=np.exp(v1.data) * -np.sin(v2.data) * grad, atol=1e-7
     )
 
 

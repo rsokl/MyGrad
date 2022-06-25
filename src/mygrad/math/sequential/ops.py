@@ -199,7 +199,7 @@ class Prod(Sequential):
 def _reverse_cumsum(
     x: np.ndarray, axis: Optional[int] = None
 ) -> np.ndarray:  # pragma: no cover
-    """ (x0, x1, x2) -> (x0, x0 + x1, x0 + x1 + x2)"""
+    """(x0, x1, x2) -> (x0, x0 + x1, x0 + x1 + x2)"""
     if axis is None:
         axis = 0
     return np.flip(np.cumsum(np.flip(x, axis=axis), axis=axis), axis=axis)
@@ -282,8 +282,8 @@ class CumProd(Sequential):
 
         if axis is None:
             orig_shape = x.shape
-            x = x.flat
-            g = g.flat
+            x = x.ravel()
+            g = g.ravel()
         else:
             orig_shape = None
             if axis < 0:

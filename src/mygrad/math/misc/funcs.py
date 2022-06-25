@@ -440,8 +440,8 @@ def minimum(
 @implements_numpy_override()
 def clip(
     a: ArrayLike,
-    a_min: ArrayLike,
-    a_max: ArrayLike,
+    a_min: Union[ArrayLike, None],
+    a_max: Union[ArrayLike, None],
     out: Optional[Union[np.ndarray, Tensor]] = None,
     *,
     constant: Optional[bool] = None,
