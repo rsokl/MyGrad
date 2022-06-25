@@ -58,11 +58,8 @@ class BatchNorm(Operation):
         self.mean = x.mean(axis=normed_dims)
         self.var = x.var(axis=normed_dims)
 
-        if eps:
-            self.var += eps
-
         y = x - self.mean.reshape(keepdims_shape)
-        self._std = np.sqrt(self.var).reshape(keepdims_shape)  # sqrt(var + eps)
+        self._std = np.sqrt(self.var + eps).reshape(keepdims_shape)  # sqrt(var + eps)
         y /= self._std
         self.x_norm = y
         # optional affine transformation
