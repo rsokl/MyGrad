@@ -20,6 +20,14 @@ else:  # pragma: no cover
         HAS_PROTOCOL = True
 
 
+if sys.version_info >= (3, 10):  # pragma: no cover
+    from types import EllipsisType
+elif TYPE_CHECKING:  # pragma: no cover
+    from builtins import ellipsis as EllipsisType
+else:
+    EllipsisType = type(Ellipsis)
+
+
 if not TYPE_CHECKING and not HAS_PROTOCOL:  # pragma: no cover
 
     class ImplementsArray:
@@ -79,7 +87,8 @@ Index = Union[
     slice,
     ImplementsArray,
     np.ndarray,
+    EllipsisType,
     Sequence[int],
-    Tuple["Index"],
+    Tuple["Index", ...],
     List["Index"],
 ]
