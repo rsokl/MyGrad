@@ -58,7 +58,7 @@ def collect_all_tensors_and_clear_grads(
     if id_ in seen:
         return
 
-    if id_ in _marked:
+    if id_ in _marked:  # pragma: no cover
         assert False, "Computational graph is contains a cycle"
 
     _marked.add(id_)
