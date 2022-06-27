@@ -23,7 +23,7 @@ def _check_grad(t: mg.Tensor, expr: Union[None, np.ndarray, float]):
 
 
 def _check_cleared_node(t: mg.Tensor):
-    assert not t._ops and not t._accum_ops and t.creator is None
+    assert not t._ops and t.creator is None
     assert t.data.flags.writeable is True
 
 
@@ -214,12 +214,6 @@ def test_linear_graph(
         else grad * (2 * np.exp(v2.data)) * (2 * v1.data),
     )
 
-    # check that backprop metadata cleared appropriately upon completion of backprop
-    assert not v4._accum_ops
-    assert not v3._accum_ops
-    assert not v2._accum_ops
-    assert not v1._accum_ops
-
     # check the backprop clears graph & clear graph always propagates through the graph
     _check_cleared_node(v4)
     _check_cleared_node(v3)
@@ -308,13 +302,6 @@ def test_fanout_graph(
     _check_grad(
         v1, None if v5_const or (v2_const and v3_const and v4_const) else v1_grad
     )
-
-    # check that backprop metadata cleared appropriately upon completion of backprop
-    assert not v5._accum_ops
-    assert not v4._accum_ops
-    assert not v3._accum_ops
-    assert not v2._accum_ops
-    assert not v1._accum_ops
 
     # check the null grads & clear graph always propagates through the graph
     _check_cleared_node(v5)
@@ -414,13 +401,6 @@ def test_interesting_graph(
         )
     )
     _check_grad(v1, v1_grad)
-
-    # check that backprop metadata cleared appropriately upon completion of backprop
-    assert not v5._accum_ops
-    assert not v4._accum_ops
-    assert not v3._accum_ops
-    assert not v2._accum_ops
-    assert not v1._accum_ops
 
     # check the null grads & clear graph always propagates through the graph
     _check_cleared_node(v5)
@@ -537,12 +517,7 @@ def test_dynamic_interesting_graph(
     _check_grad(dead_leaf, None)
 
     # check that backprop metadata cleared appropriately upon completion of backprop
-    assert not v5._accum_ops
-    assert not v4._accum_ops
-    assert not v3._accum_ops
-    assert not v2._accum_ops
-    assert not v1._accum_ops
-    assert not dead_leaf._accum_ops and dead_leaf.creator is not None
+    assert dead_leaf.creator is not None
 
     assert dead_leaf.creator is not None
     del dead_leaf  # pruning the dead leaf should unlock all memory

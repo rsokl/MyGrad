@@ -33,33 +33,11 @@ __all__ = [
 T = TypeVar("T")
 
 
-def collect_all_operations_and_clear_grads(
-    t: "Tensor", seen: Set["WeakRef[Operation]"]
-):
-    """Recursively accumulates in `seen` all operations involved
-    in creating `t`.
-
-    `seen` is updated in-place
-    """
-    t._view_grad = None
-    t._grad = None
-
-    if t.creator is None or t.constant:
-        return
-
-    c = ReferenceType(t.creator)  # type: WeakRef[Operation]
-
-    if c in seen:
-        return
-
-    seen.add(c)
-
-    for t in t.creator.variables:
-        collect_all_operations_and_clear_grads(t, seen)
-
-
 def collect_all_tensors_and_clear_grads(
-    t: "Tensor", seen: Set[int], topo_sorted_tensors: Deque["Tensor"]
+    t: "Tensor",
+    seen: Set[int],
+    topo_sorted_tensors: Deque["Tensor"],
+    _marked: Optional[Set[int]] = None,
 ):
     """Recursively accumulates in `seen` all operations involved
     in creating `t`.
@@ -68,6 +46,9 @@ def collect_all_tensors_and_clear_grads(
     """
     t._view_grad = None
     t._grad = None
+
+    if _marked is None:
+        _marked = set()
 
     if t.constant:
         return
@@ -77,14 +58,17 @@ def collect_all_tensors_and_clear_grads(
     if id_ in seen:
         return
 
+    if id_ in _marked:
+        assert False, "Computational graph is contains a cycle"
+
+    _marked.add(id_)
+
     if t.creator is not None:
         for t_loop in t.creator.variables:
             collect_all_tensors_and_clear_grads(t_loop, seen, topo_sorted_tensors)
         del t_loop
 
-    if id_ in seen:
-        return
-
+    _marked.remove(id_)
     seen.add(id_)
     topo_sorted_tensors.appendleft(t)
 

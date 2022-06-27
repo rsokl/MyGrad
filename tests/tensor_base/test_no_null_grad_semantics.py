@@ -42,13 +42,10 @@ def test_backprop_clears_graph(x: Tensor):
             assert y.grad is None
             assert x.grad is None
         assert not f._ops
-        assert not f._accum_ops
         assert f.creator is None
 
         assert not y._ops
-        assert not y._accum_ops
         assert y.creator is None
 
         assert not x._ops
-        assert not x._accum_ops
         assert x.creator is None

@@ -29,12 +29,7 @@ import mygrad._utils.duplicating_graph as _dup
 import mygrad._utils.graph_tracking as _track
 import mygrad._utils.lock_management as _mem
 from mygrad._tensor_core_ops.indexing import GetItem, SetItem
-from mygrad._utils import (
-    WeakRef,
-    WeakRefIterable,
-    collect_all_operations_and_clear_grads,
-    collect_all_tensors_and_clear_grads,
-)
+from mygrad._utils import WeakRef, WeakRefIterable, collect_all_tensors_and_clear_grads
 from mygrad.errors import DisconnectedView
 from mygrad.math.arithmetic.ops import (
     Add,
@@ -827,9 +822,6 @@ class Tensor:
         # track all operations that this tensor participates in
         self._ops = set()  # type: Set[WeakRef[Operation]]
 
-        # track the operations that have contributed to this tensor's gradient during a back-prop
-        self._accum_ops = set()  # type: Set[WeakRef[Operation]]
-
         # base points to the initial tensor that owns the memory of this
         # tensor
         self._base = _base  # type: Optional[Tensor]
@@ -1319,21 +1311,9 @@ class Tensor:
         self._grad = _grad
 
         if self.creator is not None:
-            assert len(set(id(_t) for _t in topo_sorted_tensors)) == len(
-                topo_sorted_tensors
-            )
             for t in topo_sorted_tensors:
                 t._backward()
 
-            # # stores a set of all the operation-instances that participate in
-            # # the computational graph up to and including the present operation
-            # graph = set()  # type: Set[WeakRef[Operation]]
-
-            # # populates graph and clears all grads
-            # collect_all_operations_and_clear_grads(self, seen=graph)
-            # self._grad = _grad
-            # self._backward(graph=graph)
-        else:
             self._grad = _grad
 
         self.clear_graph()
@@ -1375,10 +1355,6 @@ class Tensor:
         if self._creator is not None:
             self._creator.backward(self._grad)
         return
-        # self._ops.difference_update(self._accum_ops)
-        # self._accum_ops.clear()
-        # if self.creator is not None and self._ops.isdisjoint(graph):
-        #     self._creator.backward(self._grad, graph=graph)
 
     def null_grad(self, *, _clear_view_info: bool = False) -> "Tensor":
         """Sets this tensor's gradient to be ``None``.
@@ -1497,7 +1473,7 @@ class Tensor:
         creator = self._creator
         self._creator = None  # marks tensor as "visited" during graph-traversal
 
-        for var in creator.variables:  # type: Tensor
+        for var in creator.variables:  # type: "Tensor"
             var.clear_graph()
 
     @property
@@ -1590,7 +1566,7 @@ class Tensor:
         *input_vars: ArrayLike,
         op_args: Optional[Sequence] = None,
         op_kwargs: Optional[Dict] = None,
-        constant: bool = None,
+        constant: Optional[bool] = None,
     ):
         if _track.TRACK_GRAPH is False:
             return self._op(
@@ -2145,7 +2121,7 @@ class Tensor:
         into a list."""
         return self.data.__index__()
 
-    def flatten(self, *, constant: bool = None) -> "Tensor":
+    def flatten(self, *, constant: Optional[bool] = None) -> "Tensor":
         """Return a copy of the tensor collapsed into one dimension.
 
         This docstring was adapted from ``numpy.ndarray.flatten``.
@@ -2282,7 +2258,9 @@ class Tensor:
         <type 'numpy.dtype'>"""
         return self.data.dtype
 
-    def reshape(self, *newshape: Union[int, Shape], constant: bool = None) -> "Tensor":
+    def reshape(
+        self, *newshape: Union[int, Shape], constant: Optional[bool] = None
+    ) -> "Tensor":
         """Returns a tensor with a new shape, without changing its data.
         This docstring was adapted from ``numpy.reshape``
 

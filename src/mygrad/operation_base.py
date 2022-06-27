@@ -158,8 +158,6 @@ class Operation(ABC):
     def backward(
         self,
         grad: np.ndarray,
-        # *,
-        # graph: Set["WeakRef[Operation]"],
         **kwargs,
     ):
         """Back-propagates the gradient through all of the operation's inputs,
@@ -223,21 +221,6 @@ class Operation(ABC):
                     var._grad = backed_grad
                 else:
                     var._grad += backed_grad
-
-        # # Avoid visiting the same node multiple times. Note that we don't store
-        # # these by the node itself, since Tensors are unhashable, but by its `id`.
-        # visited = set()
-        # ref_op = ReferenceType(self)
-
-        # for var in (
-        #     i for i in self.variables if not i.constant and i.creator is not None
-        # ):
-        #     var_id = id(var)
-        #     if var_id in visited:
-        #         continue
-        #     visited.add(var_id)
-        #     var._accum_ops.add(ref_op)
-        #     var._backward(graph=graph)
 
 
 class Ufunc(Operation, ABC):
