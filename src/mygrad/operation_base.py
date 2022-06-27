@@ -176,51 +176,53 @@ class Operation(ABC):
             which triggered back-propagation.
         """
         for index, var in enumerate(self.variables):
-            if not var.constant:
-                if not var._ops:
-                    raise InvalidBackprop(
-                        f"Part of the computational graph containing "
-                        f"this tensor, {var}, was 'cleared' prior to backprop.\n"
-                        f"It is recommended that you clear all computational graphs "
-                        f"and restart your computation."
-                    )
+            if var.constant:
+                continue
 
-                try:
-                    # don't cast to array here so that we have an easier time
-                    # doing type checking (e.g. avoid `None` -> `array(None, dtype=obj)`
-                    backed_grad = self.backward_var(grad, index, **kwargs)
-                except SkipGradient:
-                    continue
+            if not var._ops:
+                raise InvalidBackprop(
+                    f"Part of the computational graph containing "
+                    f"this tensor, {var}, was 'cleared' prior to backprop.\n"
+                    f"It is recommended that you clear all computational graphs "
+                    f"and restart your computation."
+                )
 
-                if not isinstance(backed_grad, (np.ndarray, np.number, Real)):
-                    raise InvalidGradient(
-                        f"An invalid gradient-value was passed to:"
-                        f"\n\t`{type(self).__name__}.backward_var(<gradient>, index={index})`"
-                        f"\nGradients are expected to be real-valued scalars or "
-                        f"numpy arrays, got a gradient of type: {type(backed_grad)}"
-                    )
+            try:
+                # don't cast to array here so that we have an easier time
+                # doing type checking (e.g. avoid `None` -> `array(None, dtype=obj)`
+                backed_grad = self.backward_var(grad, index, **kwargs)
+            except SkipGradient:
+                continue
 
-                backed_grad = np.array(backed_grad, copy=False)
+            if not isinstance(backed_grad, (np.ndarray, np.number, Real)):
+                raise InvalidGradient(
+                    f"An invalid gradient-value was passed to:"
+                    f"\n\t`{type(self).__name__}.backward_var(<gradient>, index={index})`"
+                    f"\nGradients are expected to be real-valued scalars or "
+                    f"numpy arrays, got a gradient of type: {type(backed_grad)}"
+                )
 
-                if self.where is not True:
-                    backed_grad = backed_grad * self.where
+            backed_grad = np.array(backed_grad, copy=False)
 
-                backed_grad = self.grad_post_process_fn(backed_grad, var.shape)
-                assert backed_grad.shape == var.shape, (backed_grad.shape, var.shape)
-                if var._grad is None:
-                    backed_grad = (
-                        np.copy(backed_grad)
-                        # `backed_grad` is view of grad; we want to be able to
-                        # augment tmp-grad inplace later
-                        if backed_grad.base is not None or (backed_grad is grad)
-                        else backed_grad
-                    )
-                    if backed_grad.dtype != var.dtype:
-                        backed_grad = backed_grad.astype(var.dtype, copy=False)
+            if self.where is not True:
+                backed_grad = backed_grad * self.where
 
-                    var._grad = backed_grad
-                else:
-                    var._grad += backed_grad
+            backed_grad = self.grad_post_process_fn(backed_grad, var.shape)
+            assert backed_grad.shape == var.shape, (backed_grad.shape, var.shape)
+            if var._grad is None:
+                backed_grad = (
+                    np.copy(backed_grad)
+                    # `backed_grad` is view of grad; we want to be able to
+                    # augment tmp-grad inplace later
+                    if backed_grad.base is not None or (backed_grad is grad)
+                    else backed_grad
+                )
+                if backed_grad.dtype != var.dtype:
+                    backed_grad = backed_grad.astype(var.dtype, copy=False)
+
+                var._grad = backed_grad
+            else:
+                var._grad += backed_grad
 
 
 class Ufunc(Operation, ABC):

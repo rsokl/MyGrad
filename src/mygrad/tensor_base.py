@@ -1314,8 +1314,6 @@ class Tensor:
             for t in topo_sorted_tensors:
                 t._backward()
 
-            self._grad = _grad
-
         self.clear_graph()
 
     def _backward(self):
