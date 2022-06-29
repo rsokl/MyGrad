@@ -9,7 +9,6 @@ from .he_uniform import he_uniform
 from .normal import normal
 from .uniform import uniform
 
-
 __all__ = [
     "constant",
     "dirac",

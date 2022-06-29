@@ -3,6 +3,7 @@ from functools import wraps
 from typing import (
     TYPE_CHECKING,
     Callable,
+    Deque,
     Dict,
     Generator,
     Generic,
@@ -32,8 +33,11 @@ __all__ = [
 T = TypeVar("T")
 
 
-def collect_all_operations_and_clear_grads(
-    t: "Tensor", seen: Set["WeakRef[Operation]"]
+def collect_all_tensors_and_clear_grads(
+    t: "Tensor",
+    seen: Set[int],
+    topo_sorted_tensors: Deque["Tensor"],
+    _marked: Optional[Set[int]] = None,
 ):
     """Recursively accumulates in `seen` all operations involved
     in creating `t`.
@@ -43,18 +47,30 @@ def collect_all_operations_and_clear_grads(
     t._view_grad = None
     t._grad = None
 
-    if t.creator is None or t.constant:
+    if _marked is None:
+        _marked = set()
+
+    if t.constant:
         return
 
-    c = ReferenceType(t.creator)  # type: WeakRef[Operation]
+    id_ = id(t)
 
-    if c in seen:
+    if id_ in seen:
         return
 
-    seen.add(c)
+    if id_ in _marked:  # pragma: no cover
+        assert False, "Computational graph is contains a cycle"
 
-    for t in t.creator.variables:
-        collect_all_operations_and_clear_grads(t, seen)
+    _marked.add(id_)
+
+    if t.creator is not None:
+        for t_loop in t.creator.variables:
+            collect_all_tensors_and_clear_grads(t_loop, seen, topo_sorted_tensors)
+        del t_loop
+
+    _marked.remove(id_)
+    seen.add(id_)
+    topo_sorted_tensors.appendleft(t)
 
 
 class WeakRef(Generic[T]):

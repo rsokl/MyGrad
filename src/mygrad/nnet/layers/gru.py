@@ -260,7 +260,7 @@ class GRUnit(Operation):
     def backward_var(self, grad, index, **kwargs):
         raise SkipGradient("Gradient computed in GRU.backward()")
 
-    def backward(self, grad, *, graph, **kwargs):
+    def backward(self, grad, **kwargs):
         hidden_seq = self._hidden_seq()
         if hidden_seq is None:  # pragma: no cover
             assert False, "should be unreachable"
@@ -418,7 +418,7 @@ class GRUnit(Operation):
         del self._r
         del self._h
 
-        super().backward(grad, graph=graph)
+        super().backward(grad)
 
 
 def gru(

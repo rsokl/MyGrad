@@ -134,7 +134,7 @@ class MultiplySequence(Operation):
         self._iszero = np.any(np.isclose(out, 0, 1e-25))
         return out
 
-    def backward(self, grad, *, graph, **kwargs):
+    def backward(self, grad, **kwargs):
         """Back-propagates the gradient through all of the operation's inputs. This needs to be updated
         by an operation if that operation takes more than 2 Tensor arguments."""
         if not self._iszero:
@@ -143,7 +143,7 @@ class MultiplySequence(Operation):
             )
         else:
             self._product = None
-        super().backward(grad, graph=graph, **kwargs)
+        super().backward(grad, **kwargs)
 
     def backward_var(self, grad, index, **kwargs):
         var = self.variables[index]

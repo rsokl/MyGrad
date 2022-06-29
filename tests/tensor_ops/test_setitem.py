@@ -159,9 +159,9 @@ class set_item_test_factory:
                 err_msg="After `x[index] = y`, y.grad does not match the expected numerical gradient",
             )
 
-            assert not mygrad_y._ops and not mygrad_y._accum_ops
-            assert not mygrad_x._ops and not mygrad_x._accum_ops
-            assert not mygrad_x1._ops and not mygrad_x1._accum_ops
+            assert not mygrad_y._ops
+            assert not mygrad_x._ops
+            assert not mygrad_x1._ops
 
         return wrapper
 
@@ -196,10 +196,10 @@ def test_setitem_multiple_input():
     assert_array_equal(o.grad, np.array([4.0]))
     assert_array_equal(y.grad, np.array([3.0]))
 
-    assert not x._ops and not x._accum_ops
-    assert not y._ops and not y._accum_ops
-    assert not o._ops and not o._accum_ops
-    assert not f._ops and not f._accum_ops
+    assert not x._ops
+    assert not y._ops
+    assert not o._ops
+    assert not f._ops
 
 
 @given(x_constant=st.booleans(), y_constant=st.booleans(), data=st.data())
@@ -235,11 +235,11 @@ def test_setitem_sanity_check(x_constant, y_constant, data):
         else:
             assert_allclose(y.grad, np.array([-1.0, -2.0]))
 
-    assert not w._ops and not w._accum_ops, "clear-graph with clear-graph failed"
-    assert not x._ops and not x._accum_ops, "clear-graph with clear-graph failed"
+    assert not w._ops, "clear-graph with clear-graph failed"
+    assert not x._ops, "clear-graph with clear-graph failed"
 
     if as_tensor:
-        assert not y._ops and not y._accum_ops, "clear-graph failed"
+        assert not y._ops, "clear-graph failed"
 
 
 def test_setitem_downstream_doesnt_affect_upstream_backprop():

@@ -98,7 +98,6 @@ class GraphCompare(RuleBasedStateMachine):
             assume(False)
         else:
             t.backward(grad)
-            assert not t._accum_ops
             assert not t._ops
             assert not t.creator
 
@@ -126,7 +125,6 @@ class GraphCompare(RuleBasedStateMachine):
                     rtol=1e-5,
                     err_msg=_node_ID_str(num),
                 )
-            assert not t._accum_ops, _node_ID_str(num)
 
     def teardown(self):
         clear_all_mem_locking_state()

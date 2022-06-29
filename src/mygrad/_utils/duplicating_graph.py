@@ -74,10 +74,6 @@ def make_placeholder_tensor(
         original._grad is None
     ), "A placeholder copy can not be created for a tensor with a gradient"
 
-    assert (
-        not original._accum_ops
-    ), "A placeholder copy cannot be created during backprop"
-
     placeholder = type(original)([])
     mirror_tensor(target=placeholder, source=original)
     placeholder._base = base
