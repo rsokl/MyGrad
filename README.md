@@ -9,7 +9,7 @@
 
 
 # Introducing mygrad
-MyGrad is a lightweight library that adds automatic differentiation to NumPy – its only dependency is NumPy! 
+MyGrad is a lightweight library that adds automatic differentiation to NumPy – its only dependency is NumPy! It is specifically able to compute gradients of scalar-valued functions via backpropagation (i.e. reverse-mode automatic differentiation).
 
 ```python
 >>> import mygrad as mg
