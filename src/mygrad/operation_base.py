@@ -3,8 +3,7 @@ Defines the base class for mathematical operations capable of back-propagating
 gradients to their input tensors."""
 from abc import ABC, abstractmethod
 from numbers import Real
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Set, Tuple, Union
-from weakref import ReferenceType
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
 
 import numpy as np
 
@@ -14,7 +13,7 @@ from mygrad.typing import DTypeLike, Mask
 
 if TYPE_CHECKING:  # pragma: no cover
     from mygrad import Tensor
-    from mygrad._utils import WeakRef
+
 
 __all__ = [
     "Operation",
@@ -71,7 +70,7 @@ class Operation(ABC):
 
     # Can be set to true if the operation is guaranteed to not returns a view
     # this will reduce some overhead on checking for shared memory
-    can_return_view = False  # type: bool
+    can_return_view: bool = False
 
     # Stores the input tensors that the operation will backprop through.
     variables: Tuple["Tensor", ...]
@@ -170,10 +169,6 @@ class Operation(ABC):
         grad : numpy.ndarray
             The back-propagated total derivative with respect to the present
             operation (`f`): d(out)/df
-
-        graph : Set[Operation]
-            The set of all operations relevant to the terminal node of the computational graph,
-            which triggered back-propagation.
         """
         for index, var in enumerate(self.variables):
             if var.constant:
@@ -373,7 +368,6 @@ class Sequential(Operation, ABC):
     back-prop through – numpy's sequential functions; e.g. `numpy.sum`, `numpy.var`,
     `numpy.max`"""
 
-    numpy_func: Callable[..., np.ndarray]
     _integer_axis_only: bool = False
 
     @staticmethod

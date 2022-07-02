@@ -3,7 +3,15 @@ Provides utilities responsible for locking/releasing array writeability.
 """
 import os
 from collections import Counter, defaultdict
-from typing import TYPE_CHECKING, DefaultDict, Dict, Generator, Iterable
+from typing import (
+    TYPE_CHECKING,
+    Counter as CounterType,
+    DefaultDict,
+    Dict,
+    Generator,
+    Iterable,
+    Set,
+)
 from weakref import finalize, ref
 
 import numpy as np
@@ -11,22 +19,22 @@ import numpy as np
 from mygrad._utils import ContextTracker, WeakRefIterable
 
 if TYPE_CHECKING:  # pragma: no cover
-    from typing import Set
-
-    from mygrad import Tensor
+    from mygrad import Tensor as TensorType
     from mygrad._utils import WeakRef
+else:  # pragma: no cover
+    Tensor = None
+    WeakRef = None
+
 
 # arr-id -> num active ops involving arr
-_array_counter = Counter()  # type: Counter[int, int]
+_array_counter: CounterType[int] = Counter()
 
 # arr-id -> weak-ref of arr, for arrays participating in live ops
-_array_tracker = dict()  # type: Dict[int, WeakRef[np.ndarray]]
+_array_tracker: Dict[int, WeakRef[np.ndarray]] = dict()
 
 # maps base-array ID to ID of view that can't be unlocked until
 # base is unlocked
-_views_waiting_for_unlock = defaultdict(
-    set
-)  # type: DefaultDict[int, Set[int]] # base-id -> set of view-ids
+_views_waiting_for_unlock: DefaultDict[int, Set[int]] = defaultdict(set)
 
 __all__ = [
     "lock_arr_writeability",
@@ -81,7 +89,7 @@ def lock_arr_writeability(arr: np.ndarray, force_lock: bool = False) -> np.ndarr
 
 
 def unique_arrs_and_bases(
-    tensors: Iterable["Tensor"],
+    tensors: Iterable["TensorType"],
 ) -> Generator[np.ndarray, None, None]:
     """
     Yields unique (by-ID) arrays from an iterable. If an array
@@ -389,7 +397,7 @@ def mem_guard_active() -> bool:
     return MEM_GUARD
 
 
-def force_lock_tensor_and_creators(tensor: "Tensor"):
+def force_lock_tensor_and_creators(tensor: "TensorType"):
     unique_arrs = tuple(
         lock_arr_writeability(arr)
         for arr in unique_arrs_and_bases(tensor.creator.variables)
