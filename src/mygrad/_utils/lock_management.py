@@ -16,14 +16,10 @@ from weakref import finalize, ref
 
 import numpy as np
 
-from mygrad._utils import ContextTracker, WeakRefIterable
+from mygrad._utils import ContextTracker, WeakRef, WeakRefIterable
 
 if TYPE_CHECKING:  # pragma: no cover
     from mygrad import Tensor as TensorType
-    from mygrad._utils import WeakRef
-else:  # pragma: no cover
-    Tensor = None
-    WeakRef = None
 
 
 # arr-id -> num active ops involving arr
