@@ -73,14 +73,18 @@ def collect_all_tensors_and_clear_grads(
     topo_sorted_tensors.appendleft(t)
 
 
-class WeakRef(Generic[T]):
-    __slots__ = ()
+if TYPE_CHECKING:  # pragma: no cover
+    from weakref import ReferenceType as WeakRef
+else:  # pragma: no cover
 
-    def __init__(self, ob: T, callback=None, **annotations):  # pragma: no cover
-        ...
+    class WeakRef(Generic[T]):
+        __slots__ = ()
 
-    def __call__(self) -> Union[None, T]:  # pragma: no cover
-        ...
+        def __init__(self, ob: T, callback=None, **annotations):  # pragma: no cover
+            ...
+
+        def __call__(self) -> Union[None, T]:  # pragma: no cover
+            ...
 
 
 class WeakRefIterable(Generic[T]):

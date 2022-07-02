@@ -1032,9 +1032,9 @@ class Tensor:
             Thus this raises if `out` is read-only.
 
             There is an exception to this if  a tensor is provided, in which case the
-            operation does not write to its underlying memory but rather triggers "in-place
-            semantics" so that the computational graph behaves as if the tensor was mutated.
-            See  ``Tensor._in_place_op`` for more details.
+            operation does not write to its underlying memory but rather triggers
+            "in-place semantics" so that the computational graph behaves as if the
+            tensor was mutated. See  ``Tensor._in_place_op`` for more details.
 
         Returns
         -------
@@ -1057,8 +1057,6 @@ class Tensor:
                     constant=constant,
                 )
                 return out
-
-        out: Optional[np.ndarray]
 
         _uniques_bases_then_arrs = ()
 
@@ -1585,8 +1583,8 @@ class Tensor:
         #
         # Once the placeholders have been created, they have permanently replaced the
         # rolls of their counterparts within the computational graph. Furthermore, they
-        # exist only internally to the computational graph and thus cannot be the targets
-        # of subsequent views or in-place updates.
+        # exist only internally to the computational graph and thus cannot be the
+        # targets of subsequent views or in-place updates.
         #
         # At this point, the "original" tensors merely reserve the publicly-available
         # Tensor-instances (husks) that the users will access. We eventually need to
@@ -1727,9 +1725,10 @@ class Tensor:
             # graph so that `~mask * dℒ/dz` backprops to it, whereas `~mask * dℒ/dz`
             # will backprop to `x` and `y`.
             #
-            # This is basically an alternative to treating `multiply(x, y, where=mask, out=z)`
-            # like a three-input operation, which adds complexity to the implementation of
-            # every op that supports `where` and `out`.
+            # This is basically an alternative to treating
+            # `multiply(x, y, where=mask, out=z)`
+            # like a three-input operation, which adds complexity to the implementation
+            # of every op that supports `where` and `out`.
             #
             #               old-z ---------------------
             #                 |                       |
