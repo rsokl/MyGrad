@@ -94,8 +94,7 @@ class set_item_test_factory:
     def __call__(self, f: Callable) -> Callable[[], None]:
         """Wraps an empty function to populate it with the test function"""
 
-        @given(data=st.data(), x=self.array_strat)
-        @wraps(f)
+        @given(x=self.array_strat, data=st.data())
         def wrapper(x: np.ndarray, data: st.DataObject):
 
             index = data.draw(self.index_strat(x), label="index")
@@ -204,7 +203,7 @@ def test_setitem_multiple_input():
 
 @given(x_constant=st.booleans(), y_constant=st.booleans(), data=st.data())
 def test_setitem_sanity_check(x_constant, y_constant, data):
-    """ Ensure proper setitem behavior for all combinations of constant/variable Tensors"""
+    """Ensure proper setitem behavior for all combinations of constant/variable Tensors"""
     x = Tensor([1.0, 2.0, 3.0, 4.0], constant=x_constant)
     w = 4 * x
 
@@ -261,7 +260,7 @@ def test_setitem_downstream_doesnt_affect_upstream_backprop():
 @pytest.mark.parametrize("x_constant", [True, False])
 @pytest.mark.parametrize("y_constant", [True, False])
 def test_setitem_doesnt_mutate_upstream_nodes(x_constant: bool, y_constant: bool):
-    """ Ensure setitem doesn't mutate variable non-constant tensor"""
+    """Ensure setitem doesn't mutate variable non-constant tensor"""
     x = Tensor([1.0, 2.0], constant=x_constant)
     y = Tensor([3.0, 4.0], constant=y_constant)
     z = x + y
@@ -393,7 +392,7 @@ index2 = (rows2, columns2)
     ),
 )
 def test_setitem_broadcast_bool_index():
-    """ index mixes boolean and int-array indexing"""
+    """index mixes boolean and int-array indexing"""
 
 
 @settings(deadline=None)
@@ -409,7 +408,7 @@ def test_setitem_broadcast_bool_index():
     ),
 )
 def test_setitem_bool_basic_index():
-    """ index mixes boolean and basic indexing"""
+    """index mixes boolean and basic indexing"""
 
 
 @settings(deadline=None)
@@ -427,7 +426,7 @@ def test_setitem_bool_basic_index():
     else st.floats(-10.0, 10.0).map(np.asarray),
 )
 def test_setitem_bool_axes_index():
-    """ index consists of boolean arrays specified for each axis """
+    """index consists of boolean arrays specified for each axis"""
 
 
 @settings(deadline=None, max_examples=1000)
@@ -456,4 +455,4 @@ def test_setitem_bool_axes_index():
     ),
 )
 def test_setitem_arbitrary_index():
-    """ test arbitrary indices"""
+    """test arbitrary indices"""
