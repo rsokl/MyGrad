@@ -41,7 +41,8 @@ numpy_ufunc_property_names = sorted(
 numpy_ufunc_method_names = sorted(
     name
     for name in dir(np.multiply)
-    if not name.startswith("_") and callable(getattr(np.multiply, name))
+    if not name.startswith("_")
+    and callable(getattr(np.multiply, name) and name != "resolve_dtypes")
 )
 
 mygrad_type_codes = sorted(set(code[0] for ufunc in ufuncs for code in ufunc.types))
