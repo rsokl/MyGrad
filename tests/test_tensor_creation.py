@@ -377,7 +377,6 @@ def test_tensor_mirrors_array(arr_like, dtype, copy, constant, ndmin):
     assert tens.dtype == arr.dtype
     assert tens.shape == arr.shape
     assert np.shares_memory(tens, tensor_like) is np.shares_memory(arr, arr_like)
-    assert (tens is tensor_like) is (arr is arr_like)
     assert (tens.base is tensor_like) is (arr.base is arr_like)
     if tens.base is None:
         # sometimes numpy makes internal views; mygrad should never do this
