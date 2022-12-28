@@ -67,7 +67,7 @@ class FocalLoss(Operation):
         one_m_pc = np.clip(1 - pc, a_min=0, a_max=1)
         log_pc = np.log(pc)
 
-        one_m_pc_gamma = one_m_pc ** gamma
+        one_m_pc_gamma = one_m_pc**gamma
         loss = -(alpha * one_m_pc_gamma * log_pc)
 
         if not _tracking.TRACK_GRAPH:

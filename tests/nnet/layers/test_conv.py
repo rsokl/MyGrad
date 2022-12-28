@@ -378,7 +378,7 @@ def test_conv_ND_fwd(data, shape, num_filters, num_batch, num_channel):
     num_channel=st.integers(1, 3),
 )
 def test_conv_ND_bkwd(data, shape, num_filters, num_batch, num_channel):
-    """ Test conv-backprop 1D-3D with various strides and dilations."""
+    """Test conv-backprop 1D-3D with various strides and dilations."""
     img_shape = (num_batch, num_channel) + shape
 
     padding = data.draw(

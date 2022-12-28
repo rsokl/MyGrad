@@ -32,9 +32,9 @@ from mygrad.tensor_manip.tensor_joining.funcs import *
 from mygrad.tensor_manip.tiling.funcs import *
 from mygrad.tensor_manip.transpose_like.funcs import *
 from mygrad.ufuncs._ufunc_creators import ufunc
-from ._io import load, save
 
 from . import random
+from ._io import load, save
 from ._version import get_versions
 
 __version__ = get_versions()["version"]

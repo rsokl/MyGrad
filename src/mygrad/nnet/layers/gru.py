@@ -45,7 +45,7 @@ def d_tanh(f):  # pragma: no cover
     """
     Calculates the derivative of a tanh function
     """
-    return 1 - f ** 2
+    return 1 - f**2
 
 
 @njit

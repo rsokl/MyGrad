@@ -35,7 +35,7 @@ class GraphCompare(RuleBasedStateMachine):
         # created via the unit test (through `create_node` or `fuse_nodes`)
         # `Node` is the naive implementation of `Tensor` that we are checking
         # against
-        self.node_list = []  # type: List[Tuple[Node, Tensor]]
+        self.node_list: List[Tuple[Node, Tensor]] = []
         self.str_to_tensor_op = {"add": add, "multiply": multiply}
         self.str_to_node_op = {"add": _add, "multiply": _multiply}
         self.raised = False

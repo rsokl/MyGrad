@@ -820,7 +820,7 @@ class Tensor:
         self._grad = None  # type: Union[None, np.ndarray]
 
         # track all operations that this tensor participates in
-        self._ops = set()  # type: Set[WeakRef[Operation]]
+        self._ops: Set[WeakRef[Operation]] = set()
 
         # base points to the initial tensor that owns the memory of this
         # tensor

@@ -1,1 +1,1 @@
-from .funcs import norm
+from .funcs import norm  # noqa: F401

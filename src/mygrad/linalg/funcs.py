@@ -4,7 +4,6 @@ from typing import Optional, Sequence, Tuple, Union
 import numpy as np
 from numpy.core.einsumfunc import _parse_einsum_input
 
-import mygrad as mg
 from mygrad.math.misc.funcs import absolute
 from mygrad.math.sequential.funcs import max as mg_max, min as mg_min
 from mygrad.tensor_base import Tensor, implements_numpy_override
@@ -118,7 +117,7 @@ def norm(
     >>> l2_norms
     Tensor([3.74165739, 1.        ])
 
-    The presence of the elementwise absolute values in the norm operation means that zero-valued entries in any of 
+    The presence of the elementwise absolute values in the norm operation means that zero-valued entries in any of
     input vectors have an undefined derivative. When `nan_to_num=False` is specified these derivatives will be reported
     as `nan`, otherwise they will be made to be 0.0.
 

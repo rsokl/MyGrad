@@ -1,6 +1,5 @@
 from functools import partial
 
-import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
 import pytest
@@ -9,7 +8,6 @@ from hypothesis import given
 import mygrad as mg
 from mygrad.math.arithmetic.ops import Positive, Square
 from tests.custom_strategies import tensors
-from tests.utils.checkers import expected_constant
 from tests.utils.wrappers import adds_constant_arg
 
 from ..wrappers.uber import backprop_test_factory, fwdprop_test_factory
@@ -17,7 +15,7 @@ from ..wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 @adds_constant_arg
 def custom_pow(x, p):
-    return x ** p
+    return x**p
 
 
 @adds_constant_arg
@@ -33,7 +31,7 @@ def any_scalar(*args, p):
 
 @given(x=tensors(elements=st.floats(-10, 10)), p=st.sampled_from([2, 3]))
 def test_special_pow_propagate_constant(x, p):
-    y = x ** p
+    y = x**p
     assert y.constant is x.constant
 
 

@@ -65,7 +65,7 @@ def test_reduce_broadcast_shape_consistency(shapes: hnp.BroadcastableShapes):
     )
 )
 def test_bad_gradient_dimensionality(shapes: Tuple[Tuple[int, ...], Tuple[int, ...]]):
-    """ test that grad.dim < len(var_shape) raises ValueError"""
+    """test that grad.dim < len(var_shape) raises ValueError"""
     var_shape = shapes[0]
     grad = np.empty(shapes[1])
     with raises(ValueError):
@@ -78,7 +78,7 @@ def test_bad_gradient_dimensionality(shapes: Tuple[Tuple[int, ...], Tuple[int, .
     )
 )
 def test_broadcast_scalar(grad):
-    """ test when grad was broadcasted from a scalar"""
+    """test when grad was broadcasted from a scalar"""
     assert_allclose(reduce_broadcast(grad, tuple()), grad.sum())
 
 
@@ -88,7 +88,7 @@ def test_broadcast_scalar(grad):
     )
 )
 def test_reduce_broadcast_same_shape(grad):
-    """ test when no broadcasting occurred"""
+    """test when no broadcasting occurred"""
     var_shape = grad.shape
     reduced_grad = reduce_broadcast(grad=grad, var_shape=var_shape)
     assert_allclose(actual=reduced_grad, desired=grad)
@@ -96,7 +96,7 @@ def test_reduce_broadcast_same_shape(grad):
 
 @given(var_shape=hnp.array_shapes(min_side=2), data=st.data())
 def test_reduce_broadcast_nokeepdim(var_shape, data):
-    """ example broadcasting: (2, 3) -> (5, 2, 3)"""
+    """example broadcasting: (2, 3) -> (5, 2, 3)"""
     grad_shape = data.draw(
         broadcastable_shapes(
             shape=var_shape,
@@ -117,7 +117,7 @@ def test_reduce_broadcast_nokeepdim(var_shape, data):
 
 @given(var_shape=hnp.array_shapes(), data=st.data())
 def test_reduce_broadcast_keepdim(var_shape, data):
-    """ example broadcasting: (2, 1, 4) -> (2, 5, 4)"""
+    """example broadcasting: (2, 1, 4) -> (2, 5, 4)"""
     grad = data.draw(
         hnp.arrays(
             dtype=float,

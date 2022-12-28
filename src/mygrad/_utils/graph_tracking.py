@@ -2,7 +2,7 @@
 Provides user interface for suspending computational graph tracking and back-propagation
 """
 from functools import wraps
-from typing import Callable, TypeVar, Any, cast, Optional
+from typing import Any, Callable, TypeVar, cast
 
 import numpy as np
 

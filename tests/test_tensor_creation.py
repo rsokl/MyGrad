@@ -6,7 +6,7 @@ import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
 import pytest
-from hypothesis import assume, given, infer, settings, note
+from hypothesis import assume, given, infer, note, settings
 from numpy.testing import assert_array_equal
 
 import mygrad as mg

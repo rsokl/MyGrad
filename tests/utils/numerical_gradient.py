@@ -106,7 +106,9 @@ def finite_difference(
     return grads
 
 
-def numerical_gradient(f, *args, back_grad, vary_ind=None, h=1e-20, kwargs=None) -> Tuple[Optional[np.ndarray], ...]:
+def numerical_gradient(
+    f, *args, back_grad, vary_ind=None, h=1e-20, kwargs=None
+) -> Tuple[Optional[np.ndarray], ...]:
     """Computes numerical partial derivatives of f(x0, x1, ...) in each
     of its variables, using the central difference method.
     This is a "fast" method - it varies entire arrays at once. Thus
@@ -237,7 +239,8 @@ def numerical_gradient_full(
         kwargs = {}
 
     args = tuple(i.astype(np.complex128) for i in args)
-    grads = [None] * len(args)  # type: List[Optional[np.ndarray]]
+    grads: List[Optional[np.ndarray]] = [None] * len(args)
+
     if isinstance(vary_ind, int):
         vary_ind = [vary_ind]
 

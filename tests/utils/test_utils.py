@@ -22,15 +22,15 @@ def test_is_float_arr():
 
 
 def unary_func(x):
-    return x ** 2
+    return x**2
 
 
 def binary_func(x, y):
-    return x * y ** 2
+    return x * y**2
 
 
 def ternary_func(x, y, z):
-    return z * x * y ** 2
+    return z * x * y**2
 
 
 @given(
@@ -65,13 +65,13 @@ def test_finite_difference_no_broadcast(data, x):
     assert_allclose(dx, grad * 2 * x, atol=atol, rtol=rtol)
 
     dx, dy = numerical_gradient(binary_func, x, y, back_grad=grad)
-    assert_allclose(dx, grad * y ** 2, atol=atol, rtol=rtol)
+    assert_allclose(dx, grad * y**2, atol=atol, rtol=rtol)
     assert_allclose(dy, grad * 2 * x * y, atol=atol, rtol=rtol)
 
     dx, dy, dz = numerical_gradient(ternary_func, x, y, z, back_grad=grad)
-    assert_allclose(dx, grad * z * y ** 2, atol=atol, rtol=rtol)
+    assert_allclose(dx, grad * z * y**2, atol=atol, rtol=rtol)
     assert_allclose(dy, grad * z * 2 * x * y, atol=atol, rtol=rtol)
-    assert_allclose(dz, grad * x * y ** 2, atol=atol, rtol=rtol)
+    assert_allclose(dz, grad * x * y**2, atol=atol, rtol=rtol)
 
 
 @given(
@@ -106,13 +106,13 @@ def test_numerical_gradient_no_broadcast(data, x):
     assert_allclose(dx, grad * 2 * x, atol=atol, rtol=rtol)
 
     dx, dy = numerical_gradient(binary_func, x, y, back_grad=grad)
-    assert_allclose(dx, grad * y ** 2, atol=atol, rtol=rtol)
+    assert_allclose(dx, grad * y**2, atol=atol, rtol=rtol)
     assert_allclose(dy, grad * 2 * x * y, atol=atol, rtol=rtol)
 
     dx, dy, dz = numerical_gradient(ternary_func, x, y, z, back_grad=grad)
-    assert_allclose(dx, grad * z * y ** 2, atol=atol, rtol=rtol)
+    assert_allclose(dx, grad * z * y**2, atol=atol, rtol=rtol)
     assert_allclose(dy, grad * z * 2 * x * y, atol=atol, rtol=rtol)
-    assert_allclose(dz, grad * x * y ** 2, atol=atol, rtol=rtol)
+    assert_allclose(dz, grad * x * y**2, atol=atol, rtol=rtol)
 
 
 @given(
@@ -125,7 +125,7 @@ def test_numerical_gradient_x_broadcast(x, y, grad):
 
     # broadcast x
     dx, dy = numerical_gradient(binary_func, x, y, back_grad=grad)
-    assert_allclose(dx, (grad * y ** 2).sum(axis=0), atol=atol, rtol=rtol)
+    assert_allclose(dx, (grad * y**2).sum(axis=0), atol=atol, rtol=rtol)
     assert_allclose(dy, grad * 2 * x * y, atol=atol, rtol=rtol)
 
 
@@ -139,7 +139,7 @@ def test_numerical_gradient_y_broadcast(x, y, grad):
 
     # broadcast x
     dx, dy = numerical_gradient(binary_func, x, y, back_grad=grad)
-    assert_allclose(dx, grad * y ** 2, atol=atol, rtol=rtol)
+    assert_allclose(dx, grad * y**2, atol=atol, rtol=rtol)
     assert_allclose(dy, (grad * 2 * x * y).sum(axis=0), atol=atol, rtol=rtol)
 
 
@@ -153,7 +153,7 @@ def test_numerical_gradient_xy_broadcast(x, y, grad):
 
     # broadcast x
     dx, dy = numerical_gradient(binary_func, x, y, back_grad=grad)
-    x_grad = (grad * y ** 2).sum(axis=1, keepdims=True)
+    x_grad = (grad * y**2).sum(axis=1, keepdims=True)
     y_grad = (grad * 2 * x * y).sum(axis=0, keepdims=True)
     assert_allclose(dx, x_grad, atol=atol, rtol=rtol)
     assert_allclose(dy, y_grad, atol=atol, rtol=rtol)
@@ -168,4 +168,3 @@ def test_numerical_gradient_vary_each(x, grad):
     (dx,) = numerical_gradient_full(lambda y: y[::-1], x, back_grad=np.array(grad))
     x_grad = grad[::-1]
     assert_allclose(actual=dx, desired=x_grad, atol=atol, rtol=rtol)
-

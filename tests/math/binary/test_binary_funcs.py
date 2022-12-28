@@ -7,7 +7,7 @@ import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
 import pytest
-from hypothesis import given, assume
+from hypothesis import assume, given
 from numpy.testing import assert_allclose
 
 from tests.custom_strategies import tensors
@@ -20,17 +20,17 @@ def inplace_op(inplace_target, other, constant=False, *, op_name: str):
 
     op_name = "__" + op_name + "__"
 
-    # hack to make broadcastable shapes work for inplace op:    
-    x = inplace_target.copy()
+    # hack to make broadcastable shapes work for inplace op:
+    _ = inplace_target.copy()
     check = False
-    
+
     if np.broadcast(inplace_target, other).shape != inplace_target.shape:
         inplace_target, other = other, inplace_target
         check = True
-    
+
     if check and np.broadcast(inplace_target, other).shape != inplace_target.shape:
         assume(False)
-            
+
     # touch so that it doesn't look like the input
     # was mutated
     inplace_target = +inplace_target
@@ -103,7 +103,7 @@ def test_inplace_arithmetic_bkwd(op_name: str, kwargs: Dict[str, Any]):
     )
 )
 def test_x_pow_0_special_case(t):
-    y = t ** 0
+    y = t**0
     y.backward()
     assert_allclose(y.data, np.ones_like(t))
     assert_allclose(t.grad, np.zeros_like(t))
@@ -118,7 +118,7 @@ def test_x_pow_0_special_case(t):
     )
 )
 def test_0_pow_y_special_case(t):
-    y = 0 ** t
+    y = 0**t
     y.backward()
     assert_allclose(y.data, np.zeros_like(t))
     assert_allclose(t.grad, np.zeros_like(t))

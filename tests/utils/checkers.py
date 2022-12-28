@@ -1,13 +1,13 @@
 from typing import Optional, Union
 
+import numpy as np
+
 import mygrad
 import mygrad as mg
-import numpy as np
 from mygrad import Tensor
-from mygrad.operation_base import _NoValueType, _NoValue
+from mygrad.operation_base import _NoValue, _NoValueType
 from mygrad.tensor_base import CONSTANT_ONLY_DTYPES
 from mygrad.typing import ArrayLike, DTypeLike, DTypeLikeReals
-
 from tests.utils.errors import InternalTestError
 
 

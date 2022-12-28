@@ -1,5 +1,3 @@
-from typing import Optional
-
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
@@ -48,8 +46,9 @@ def test_input_constant_checking(constant):
 
 @given(
     x=hnp.arrays(
-        shape=hnp.array_shapes(min_dims=0, min_side=0), dtype=hnp.floating_dtypes(),
-        elements=st.just(0)
+        shape=hnp.array_shapes(min_dims=0, min_side=0),
+        dtype=hnp.floating_dtypes(),
+        elements=st.just(0),
     ),
     dtype=hnp.floating_dtypes(),
     copy=st.booleans(),

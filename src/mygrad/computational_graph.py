@@ -97,7 +97,7 @@ def build_graph(
 
 
 def _add_node(node, graph, op_id=None, **kwargs):
-    """ Recursively traces computational graph and adds nodes to Digraph. """
+    """Recursively traces computational graph and adds nodes to Digraph."""
     node_id = str(id(node))
     node_lab = repr(node)
     if kwargs["names"] is not None:

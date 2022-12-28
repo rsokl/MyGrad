@@ -47,7 +47,7 @@ def manual_norm(x, ord=None, axis=None, keepdims=False):
 
 
 def manual_norm_2(x, ord=None, axis=None, keepdims=False):
-    return np.sqrt(np.sum(x ** 2, axis=axis, keepdims=keepdims))
+    return np.sqrt(np.sum(x**2, axis=axis, keepdims=keepdims))
 
 
 @given(

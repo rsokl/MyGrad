@@ -21,7 +21,7 @@ from ...wrappers.uber import (
 
 
 def axis_arg(*arrs, min_dim=0):
-    """ Wrapper for passing valid-axis search strategy to test factory"""
+    """Wrapper for passing valid-axis search strategy to test factory"""
     if arrs[0].ndim:
         return valid_axes(arrs[0].ndim, min_dim=min_dim)
     else:
@@ -38,7 +38,7 @@ def single_axis_arg(*arrs):
 
 
 def keepdims_arg(*arrs):
-    """ Wrapper for passing keep-dims strategy to test factory"""
+    """Wrapper for passing keep-dims strategy to test factory"""
     return st.booleans()
 
 
