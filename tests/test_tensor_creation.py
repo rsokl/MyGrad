@@ -41,9 +41,11 @@ def check_tensor_array(tensor, array, data_compare=True):
     assert tensor.dtype is array.dtype
 
 
-def clamp(val, min_=0.1):
+def clamp(val, min_=0.1, max_=None):
     if val is not _NoValue:
         val = max(val, min_)
+        if max_ is not None:
+            val = min(val, max_)
     return val
 
 
@@ -83,6 +85,11 @@ def test_arange_like_against_numpy_equivalent(
     if numpy_func is np.geomspace:
         start = clamp(start)
         stop = clamp(stop)
+        step = clamp(step)
+
+    if numpy_func is np.logspace:
+        start = clamp(start,max_=3)
+        stop = clamp(stop,max_=3)
         step = clamp(step)
 
     if as_kwargs:
@@ -385,7 +392,7 @@ def test_tensor_mirrors_array(arr_like, dtype, copy, constant, ndmin):
 
     if arr.dtype.byteorder != ">":
         # condition due to https://github.com/numpy/numpy/issues/22897
-        
+
         assert (tens is tensor_like) is (arr is arr_like)
         assert (tens.base is tensor_like) is (arr.base is arr_like)
         if tens.base is None:

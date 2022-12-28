@@ -1,7 +1,7 @@
 import numpy
 
 __all__ = [
-    "bool8",
+    "bool_",
     "int8",
     "int16",
     "int32",
@@ -21,10 +21,6 @@ __all__ = [
     "longdouble",
 ]
 
-try:
-    bool8 = numpy.bool8
-except AttributeError:  # pragma: no cover
-    pass
 
 bool_ = numpy.bool_
 int8 = numpy.int8
