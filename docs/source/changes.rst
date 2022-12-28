@@ -6,6 +6,16 @@ This is a record of all past mygrad releases and what went into them,
 in reverse chronological order. All previous releases should still be available
 on pip.
 
+.. _v2.2.0:
+
+--------------------
+2.2.0rc - 2022-XX-XX
+--------------------
+
+- MyGrad is now tested against Python 3.11
+- Adds ufunc support for `resolve_dtypes`
+- Modifies automatic differentiation framework to be more memory efficient
+
 .. _v2.1.0:
 
 ------------------
