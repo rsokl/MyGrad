@@ -104,7 +104,7 @@ def norm(
 
     References
     ----------
-    .. [1] Retrived from: https://numpy.org/doc/stable/reference/generated/numpy.linalg.norm.html
+    .. [1] Retrieved from: https://numpy.org/doc/stable/reference/generated/numpy.linalg.norm.html
     .. [2] G. H. Golub and C. F. Van Loan, *Matrix Computations*,
            Baltimore, MD, Johns Hopkins University Press, 1985, pg. 15
 
