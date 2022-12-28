@@ -23,7 +23,7 @@ __all__ = [
 
 try:
     bool8 = numpy.bool8
-except AttributeError:
+except AttributeError:  # pragma: no cover
     pass
 
 bool_ = numpy.bool_
