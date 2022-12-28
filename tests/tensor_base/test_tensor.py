@@ -48,7 +48,8 @@ def test_input_constant_checking(constant):
 
 @given(
     x=hnp.arrays(
-        shape=hnp.array_shapes(min_dims=0, min_side=0), dtype=hnp.floating_dtypes()
+        shape=hnp.array_shapes(min_dims=0, min_side=0), dtype=hnp.floating_dtypes(),
+        elements=st.just(0)
     ),
     dtype=hnp.floating_dtypes(),
     copy=st.booleans(),
