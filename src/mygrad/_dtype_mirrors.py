@@ -21,7 +21,12 @@ __all__ = [
     "longdouble",
 ]
 
-bool8 = numpy.bool8
+try:
+    bool8 = numpy.bool8
+except AttributeError:
+    pass
+
+bool_ = numpy.bool_
 int8 = numpy.int8
 int16 = numpy.int16
 int32 = numpy.int32
