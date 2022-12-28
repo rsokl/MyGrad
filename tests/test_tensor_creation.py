@@ -88,8 +88,8 @@ def test_arange_like_against_numpy_equivalent(
         step = clamp(step)
 
     if numpy_func is np.logspace:
-        start = clamp(start,max_=3)
-        stop = clamp(stop,max_=3)
+        start = clamp(start, max_=3)
+        stop = clamp(stop, max_=3)
         step = clamp(step)
 
     if as_kwargs:
@@ -266,7 +266,11 @@ def test_astensor_with_incompat_constant_still_passes_array_ref(
 
 
 @given(
-    t=tensors(dtype=hnp.floating_dtypes(), include_grad=st.booleans()),
+    t=tensors(
+        dtype=hnp.floating_dtypes(),
+        include_grad=st.booleans(),
+        elements=st.floats(-10, 10, width=16),
+    ),
     in_graph=st.booleans(),
     dtype=st.none() | hnp.floating_dtypes(),
     constant=st.none() | st.booleans(),
