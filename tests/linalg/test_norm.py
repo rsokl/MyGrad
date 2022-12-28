@@ -50,6 +50,7 @@ def manual_norm_2(x, ord=None, axis=None, keepdims=False):
     return np.sqrt(np.sum(x**2, axis=axis, keepdims=keepdims))
 
 
+@pytest.mark.filterwarnings("ignore:divide by zero")
 @given(
     st.integers(-2, 2).filter(lambda x: x != 0)
     | st.sampled_from([-np.inf, np.inf, "fro", "nuc"])
@@ -64,16 +65,14 @@ def test_matrix_norm_raises(ord):
         mg.linalg.norm(t, ord=ord, axis=(0, 1))
 
 
+@pytest.mark.filterwarnings("ignore:divide by zero")
 def test_ord_0_raises():
     with pytest.raises(NotImplementedError):
         t = mg.arange(1, 4.0)
         mg.linalg.norm(t, ord=0)
 
 
-def test_manual_norm_with_tuple_axis():
-    pass
-
-
+@pytest.mark.filterwarnings("ignore:divide by zero")
 @settings(max_examples=1000)
 @fwdprop_test_factory(
     mygrad_func=mg.linalg.norm,
@@ -86,6 +85,7 @@ def test_norm_fwd():
     pass
 
 
+@pytest.mark.filterwarnings("ignore:divide by zero")
 @backprop_test_factory(
     mygrad_func=mg.linalg.norm,
     true_func=manual_norm_2,
@@ -100,6 +100,7 @@ def test_norm_bkwd_ord_2():
     pass
 
 
+@pytest.mark.filterwarnings("ignore:divide by zero")
 @pytest.mark.parametrize("ord", [-1.0, 0.5, 1.0, 1.25, 1.5, 2.0, 2.5, -np.inf, np.inf])
 @given(
     x=hnp.arrays(
@@ -131,6 +132,7 @@ def test_norm_backward(x, data, ord):
     assert_allclose(t1.grad, t2.grad, atol=1e-7, rtol=1e-7)
 
 
+@pytest.mark.filterwarnings("ignore:divide by zero")
 @pytest.mark.parametrize("ord", [-1.0, 0.5, 1.0, 1.25, 1.5, 2.0, 2.5, -np.inf, np.inf])
 @given(
     x=hnp.arrays(
@@ -164,6 +166,7 @@ def test_norm_backward_1d(x, data, ord):
     assert_allclose(t1.grad, t2.grad, atol=1e-7, rtol=1e-7)
 
 
+@pytest.mark.filterwarnings("ignore:divide by zero")
 def test_nan_to_num_behavior():
     x = mg.tensor([[1.0, 2.0, 3.0], [1.0, 0.0, 0.0]])
     y = x.copy()
