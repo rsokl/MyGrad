@@ -32,6 +32,8 @@ integer_dtypes = st.sampled_from([int, "int32"]) | hnp.integer_dtypes()
 float_dtypes = st.sampled_from([float, "float32"]) | hnp.floating_dtypes()
 
 
+@pytest.mark.filterwarnings("ignore:invalid value encountered")
+@pytest.mark.filterwarnings("ignore:overflow")
 @given(
     data=st.data(),
     dtype=st.none() | integer_dtypes | hnp.boolean_dtypes(),

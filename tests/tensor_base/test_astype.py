@@ -14,7 +14,7 @@ real_types = (
 
 
 @given(
-    tensor=tensors(dtype=real_types),
+    tensor=tensors(dtype=real_types, elements=st.integers(0, 1)),
     dest_type=real_types,
     data=st.data(),
 )

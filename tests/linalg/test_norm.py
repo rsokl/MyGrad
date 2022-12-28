@@ -56,17 +56,17 @@ def manual_norm_2(x, ord=None, axis=None, keepdims=False):
 )
 def test_matrix_norm_raises(ord):
     with pytest.raises(NotImplementedError):
-        t = mg.arange(4.0).reshape((2, 2))
+        t = mg.arange(1, 5.0).reshape((2, 2)) + 1
         mg.linalg.norm(t, ord=ord)
 
     with pytest.raises(NotImplementedError):
-        t = mg.arange(12.0).reshape((3, 2, 2))
+        t = mg.arange(1, 13.0).reshape((3, 2, 2)) + 1
         mg.linalg.norm(t, ord=ord, axis=(0, 1))
 
 
 def test_ord_0_raises():
     with pytest.raises(NotImplementedError):
-        t = mg.arange(4.0)
+        t = mg.arange(1, 4.0)
         mg.linalg.norm(t, ord=0)
 
 
