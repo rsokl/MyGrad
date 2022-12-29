@@ -4,7 +4,7 @@ import numpy as np
 
 from mygrad import Tensor
 from mygrad.operation_base import Operation
-from mygrad.typing import ArrayLike, Real
+from mygrad.typing import ArrayLike
 
 __all__ = ["selu"]
 

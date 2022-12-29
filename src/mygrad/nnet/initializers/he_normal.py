@@ -42,7 +42,7 @@ def he_normal(*shape, gain=1, dtype=np.float32, constant=None):
     where :math:`a` is the slope of the rectifier following this layer, which is incorporated
     using the `gain` variable above.
 
-    The guidance put forward in that paper is that this initialization procedure should be prefered
+    The guidance put forward in that paper is that this initialization procedure should be preferred
     over the ``mygrad.nnet.initializers.glorot_*`` functions especially when rectifiers (e.g. ReLU,
     PReLU, leaky_relu) in very deep (> 1-20 or so layer) networks.
 

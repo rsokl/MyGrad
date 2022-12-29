@@ -33,7 +33,7 @@ _valid_gains = (
     1,
     5 / 3,
     np.sqrt(2),
-    np.sqrt(2 / (1.01 ** 2)),
+    np.sqrt(2 / (1.01**2)),
 )  # most activations, tanh, relu, leaky
 
 

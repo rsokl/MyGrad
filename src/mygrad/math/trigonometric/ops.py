@@ -30,7 +30,7 @@ class Sin(UnaryUfunc):
 
 def _dsinc(x):
     x = x * np.pi
-    return (x * np.cos(x) - np.sin(x)) / x ** 2
+    return (x * np.cos(x) - np.sin(x)) / x**2
 
 
 class Sinc(Operation):
@@ -109,7 +109,7 @@ class Arcsin(UnaryUfunc):
     def backward_var(self, grad, index, **kwargs):
         # d arcsin / dx at x = -1, 1 returns 0, not NaN
         (a,) = self.variables
-        return np.select([np.abs(a.data) != 1], [grad / np.sqrt(1 - a.data ** 2)])
+        return np.select([np.abs(a.data) != 1], [grad / np.sqrt(1 - a.data**2)])
 
 
 class Arccos(UnaryUfunc):
@@ -118,7 +118,7 @@ class Arccos(UnaryUfunc):
     def backward_var(self, grad, index, **kwargs):
         # d arccos / dx at x = -1, 1 returns 0, not NaN
         (a,) = self.variables
-        return np.select([np.abs(a.data) != 1], [-grad / np.sqrt(1 - a.data ** 2)])
+        return np.select([np.abs(a.data) != 1], [-grad / np.sqrt(1 - a.data**2)])
 
 
 class Arctan(UnaryUfunc):
@@ -126,7 +126,7 @@ class Arctan(UnaryUfunc):
 
     def backward_var(self, grad, index, **kwargs):
         (a,) = self.variables
-        return grad / (1 + a.data ** 2)
+        return grad / (1 + a.data**2)
 
 
 class Arccsc(Operation):
@@ -140,7 +140,7 @@ class Arccsc(Operation):
         # d arccsc / dx at x = -1, 1 returns 0, not NaN
         (a,) = self.variables
         return np.select(
-            [np.abs(a.data) != 1], [-grad / (np.abs(a.data) * np.sqrt(a.data ** 2 - 1))]
+            [np.abs(a.data) != 1], [-grad / (np.abs(a.data) * np.sqrt(a.data**2 - 1))]
         )
 
 
@@ -155,7 +155,7 @@ class Arcsec(Operation):
         # d arcsec / dx at x = -1, 1 returns 0, not NaN
         (a,) = self.variables
         return np.select(
-            [np.abs(a.data) != 1], [grad / (np.abs(a.data) * np.sqrt(a.data ** 2 - 1))]
+            [np.abs(a.data) != 1], [grad / (np.abs(a.data) * np.sqrt(a.data**2 - 1))]
         )
 
 
@@ -174,7 +174,7 @@ class Arccot(Operation):
 
     def backward_var(self, grad, index, **kwargs):
         (a,) = self.variables
-        return -grad / (1 + a.data ** 2)
+        return -grad / (1 + a.data**2)
 
 
 class Arctan2(BinaryUfunc):
@@ -187,7 +187,7 @@ class Arctan2(BinaryUfunc):
     def backward_var(self, grad, index, **kwargs):
         a, b = self.variables
         if self.cached_denom is None:
-            self.cached_denom = a.data ** 2 + b.data ** 2
+            self.cached_denom = a.data**2 + b.data**2
 
         if index == 0:
             return grad * b.data / self.cached_denom

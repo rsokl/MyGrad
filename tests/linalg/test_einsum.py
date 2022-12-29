@@ -104,7 +104,7 @@ def test_merge_mappings():
 
 @given(optimize=bool_strat())
 def test_einsum_static_fwd(optimize):
-    """ Check all einsum examples from numpy doc"""
+    """Check all einsum examples from numpy doc"""
     a = mg.arange(25).reshape(5, 5)
     b = mg.arange(5)
     c = mg.arange(6).reshape(2, 3)
@@ -152,7 +152,7 @@ def test_einsum_static_fwd(optimize):
 
 @given(optimize=bool_strat())
 def test_einsum_static_bkwd(optimize):
-    """ Check all einsum examples from numpy doc"""
+    """Check all einsum examples from numpy doc"""
     a = np.arange(25).reshape(5, 5)
     b = np.arange(5)
     c = np.arange(6).reshape(2, 3)

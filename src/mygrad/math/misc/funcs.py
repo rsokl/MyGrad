@@ -817,7 +817,7 @@ def _multi_matmul_chain_order(arrays):
     n = len(arrays)
     # p stores the dimensions of the matrices
     # Example for p: A_{10x100}, B_{100x5}, C_{5x50} --> p = [10, 100, 5, 50]
-    # Using -2 to generalize for shapes that are more than 2 dimmensions
+    # Using -2 to generalize for shapes that are more than 2 dimensions
     p = [a.shape[-2] for a in arrays] + [arrays[-1].shape[-1]]
     # m is a matrix of costs of the subproblems
     # m[i,j]: min number of scalar multiplications needed to compute A_{i..j}

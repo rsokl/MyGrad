@@ -34,7 +34,6 @@ if not TYPE_CHECKING and not HAS_PROTOCOL:  # pragma: no cover
         def __array__(self, dtype: None = ...) -> np.ndarray:
             ...
 
-
 else:  # pragma: no cover
 
     class ImplementsArray(Protocol):

@@ -14,8 +14,8 @@ from hypothesis import assume, given
 import mygrad as mg
 from mygrad.typing import DTypeLikeReals
 from tests.custom_strategies import real_dtypes
-from tests.utils.errors import InternalTestError
 from tests.utils.checkers import check_dtype_consistency, expected_constant
+from tests.utils.errors import InternalTestError
 
 
 @given(dest_dtype=real_dtypes, as_tensor=st.booleans())

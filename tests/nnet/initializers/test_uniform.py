@@ -2,7 +2,7 @@ import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
 import pytest
-from hypothesis import assume, given
+from hypothesis import given
 
 from mygrad import Tensor
 from mygrad.nnet.initializers import uniform

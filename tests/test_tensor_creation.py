@@ -6,7 +6,7 @@ import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
 import pytest
-from hypothesis import assume, given, infer, settings
+from hypothesis import assume, given, infer, note, settings
 from numpy.testing import assert_array_equal
 
 import mygrad as mg
@@ -41,9 +41,11 @@ def check_tensor_array(tensor, array, data_compare=True):
     assert tensor.dtype is array.dtype
 
 
-def clamp(val, min_=0.1):
+def clamp(val, min_=0.1, max_=None):
     if val is not _NoValue:
         val = max(val, min_)
+        if max_ is not None:
+            val = min(val, max_)
     return val
 
 
@@ -83,6 +85,11 @@ def test_arange_like_against_numpy_equivalent(
     if numpy_func is np.geomspace:
         start = clamp(start)
         stop = clamp(stop)
+        step = clamp(step)
+
+    if numpy_func is np.logspace:
+        start = clamp(start, max_=3)
+        stop = clamp(stop, max_=3)
         step = clamp(step)
 
     if as_kwargs:
@@ -259,7 +266,11 @@ def test_astensor_with_incompat_constant_still_passes_array_ref(
 
 
 @given(
-    t=tensors(dtype=hnp.floating_dtypes(), include_grad=st.booleans()),
+    t=tensors(
+        dtype=hnp.floating_dtypes(),
+        include_grad=st.booleans(),
+        elements=st.floats(-10, 10, width=16),
+    ),
     in_graph=st.booleans(),
     dtype=st.none() | hnp.floating_dtypes(),
     constant=st.none() | st.booleans(),
@@ -336,6 +347,7 @@ def test_as_tensor(
 general_arrays = hnp.arrays(
     shape=hnp.array_shapes(min_side=0, min_dims=0),
     dtype=hnp.floating_dtypes() | hnp.integer_dtypes(),
+    elements=st.integers(-2, 2),
 )
 
 
@@ -356,6 +368,9 @@ not_set = st.just(NotSet)
     ndmin=not_set | st.integers(-6, 6),
 )
 def test_tensor_mirrors_array(arr_like, dtype, copy, constant, ndmin):
+    if isinstance(arr_like, np.ndarray):
+        note(f"arr_like.dtype: {arr_like.dtype}")
+
     kwargs = {}
     for name, var_ in [("dtype", dtype), ("copy", copy), ("ndmin", ndmin)]:
         if var_ is not NotSet:
@@ -365,6 +380,7 @@ def test_tensor_mirrors_array(arr_like, dtype, copy, constant, ndmin):
         arr = np.array(arr_like, **kwargs)
     except (ValueError, OverflowError):
         assume(False)
+        return
 
     tensor_like = (
         Tensor(arr_like.copy(), constant=constant)
@@ -377,11 +393,15 @@ def test_tensor_mirrors_array(arr_like, dtype, copy, constant, ndmin):
     assert tens.dtype == arr.dtype
     assert tens.shape == arr.shape
     assert np.shares_memory(tens, tensor_like) is np.shares_memory(arr, arr_like)
-    assert (tens is tensor_like) is (arr is arr_like)
-    assert (tens.base is tensor_like) is (arr.base is arr_like)
-    if tens.base is None:
-        # sometimes numpy makes internal views; mygrad should never do this
-        assert arr.base is not arr_like
+
+    if arr.dtype.byteorder != ">":
+        # condition due to https://github.com/numpy/numpy/issues/22897
+
+        assert (tens is tensor_like) is (arr is arr_like)
+        assert (tens.base is tensor_like) is (arr.base is arr_like)
+        if tens.base is None:
+            # sometimes numpy makes internal views; mygrad should never do this
+            assert arr.base is not arr_like
 
 
 @given(

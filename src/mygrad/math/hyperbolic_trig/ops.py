@@ -42,7 +42,7 @@ class Tanh(UnaryUfunc):
 
 
 class Csch(Operation):
-    """ f(a) -> csch(a) """
+    """f(a) -> csch(a)"""
 
     def __call__(self, a):
         self.variables = (a,)
@@ -54,7 +54,7 @@ class Csch(Operation):
 
 
 class Sech(Operation):
-    """ f(a) -> sech(a) """
+    """f(a) -> sech(a)"""
 
     def __call__(self, a):
         self.variables = (a,)
@@ -66,7 +66,7 @@ class Sech(Operation):
 
 
 class Coth(Operation):
-    """ f(a) -> coth(a) """
+    """f(a) -> coth(a)"""
 
     def __call__(self, a):
         self.variables = (a,)
@@ -82,7 +82,7 @@ class Arcsinh(UnaryUfunc):
 
     def backward_var(self, grad, index, **kwargs):
         (a,) = self.variables
-        return grad / np.sqrt(1 + a.data ** 2)
+        return grad / np.sqrt(1 + a.data**2)
 
 
 class Arccosh(UnaryUfunc):
@@ -90,7 +90,7 @@ class Arccosh(UnaryUfunc):
 
     def backward_var(self, grad, index, **kwargs):
         (a,) = self.variables
-        return grad / np.sqrt(a.data ** 2 - 1)
+        return grad / np.sqrt(a.data**2 - 1)
 
 
 class Arctanh(UnaryUfunc):
@@ -98,11 +98,11 @@ class Arctanh(UnaryUfunc):
 
     def backward_var(self, grad, index, **kwargs):
         (a,) = self.variables
-        return grad / (1 - a.data ** 2)
+        return grad / (1 - a.data**2)
 
 
 class Arccsch(Operation):
-    """ f(a) -> arccsch(a) """
+    """f(a) -> arccsch(a)"""
 
     def __call__(self, a):
         self.variables = (a,)
@@ -110,11 +110,11 @@ class Arccsch(Operation):
 
     def backward_var(self, grad, index, **kwargs):
         (a,) = self.variables
-        return -grad / (np.abs(a.data) * np.sqrt(1 + a.data ** 2))
+        return -grad / (np.abs(a.data) * np.sqrt(1 + a.data**2))
 
 
 class Arccoth(Operation):
-    """ f(a) -> arccoth(a) """
+    """f(a) -> arccoth(a)"""
 
     def __call__(self, a):
         self.variables = (a,)
@@ -122,4 +122,4 @@ class Arccoth(Operation):
 
     def backward_var(self, grad, index, **kwargs):
         (a,) = self.variables
-        return grad / (1 - a.data ** 2)
+        return grad / (1 - a.data**2)

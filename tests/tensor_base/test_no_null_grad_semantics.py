@@ -1,8 +1,5 @@
-from typing import Callable
-
 import hypothesis.strategies as st
 import numpy as np
-import pytest
 from hypothesis import given, note
 from numpy.testing import assert_array_equal
 
@@ -23,9 +20,9 @@ def test_backprop_clears_graph(x: Tensor):
     for num_fwd_pass in range(2):
         note(f"Forward-pass iteration: {num_fwd_pass}")
         y = 2 * x
-        f = y + x ** 2
+        f = y + x**2
         f[...] = f[...]
-        x ** 3  # no-op
+        x**3  # no-op
         f.backward()
         if not x.constant:
             assert_array_equal(

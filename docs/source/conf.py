@@ -78,6 +78,16 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "**.ipynb_checkpoints"]
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = None
 
+_repo = "https://github.com/rsokl/MyGrad/"
+extlinks = {
+    "commit": (_repo + "commit/%s", "commit %s"),
+    "gh-file": (_repo + "blob/master/%s", "%s"),
+    "gh-link": (_repo + "%s", "%s"),
+    "issue": (_repo + "issues/%s", "issue #%s"),
+    "pull": (_repo + "pull/%s", "pull request #%s"),
+    "plymi": ("https://www.pythonlikeyoumeanit.com/%s", "%s"),
+    "hydra": ("https://hydra.cc/docs/%s", "%s"),
+}
 
 # -- Options for HTML output -------------------------------------------------
 

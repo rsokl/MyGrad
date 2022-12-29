@@ -2,9 +2,8 @@ from functools import wraps
 from typing import Callable
 
 from mygrad import Tensor
-
-from tests.utils.stateful import clear_all_mem_locking_state
 from tests.utils.checkers import expected_constant
+from tests.utils.stateful import clear_all_mem_locking_state
 
 
 def clears_mem_state(fn: Callable) -> Callable:

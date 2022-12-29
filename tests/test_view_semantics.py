@@ -20,7 +20,7 @@ def test_simple_view_grad_reflects_base_grad(view_pre_or_post_backward: str):
         view = base[:2]
         assert view.base is base
 
-    (base ** 2).backward()
+    (base**2).backward()
 
     if view_pre_or_post_backward == "post":
         view = base[:2]
@@ -42,7 +42,7 @@ def test_simple_view_grad_reflects_nulled_base_grad(view_pre_or_post_backward: s
     if view_pre_or_post_backward == "pre":
         view = base[:2]
 
-    (base ** 2).backward()
+    (base**2).backward()
 
     if view_pre_or_post_backward == "post":
         view = base[:2]
@@ -78,7 +78,7 @@ def test_nulling_base_grad_reflects_in_view(view_pre_or_post_backward):
     if view_pre_or_post_backward == "pre":
         view = base[...][:2]
 
-    (base ** 2).backward()
+    (base**2).backward()
 
     if view_pre_or_post_backward == "post":
         view = base[...][:2]
@@ -96,8 +96,8 @@ def test_nulling_base_grad_reflects_in_view(view_pre_or_post_backward):
 def test_simple_view_becomes_disconnected_from_base_via_clear_graph2():
     base = mg.Tensor([1.0, 2.0, 3.0])
     view = base[:2]
-    (view ** 2).backward()  # disconnects `view` from `base`
-    (base ** 3).backward()
+    (view**2).backward()  # disconnects `view` from `base`
+    (base**3).backward()
 
     assert view.base is base
     assert np.any(view.grad != base.grad[:2])

@@ -24,7 +24,7 @@ def dummy(a, b, constant=False):
 @pytest.mark.parametrize("y_const", [True, False])
 @pytest.mark.parametrize("op_const", [True, False])
 def test_constant_arg(x_const: bool, y_const: bool, op_const: bool):
-    """ test that the `constant` arg works as intended in Tensor._op"""
+    """test that the `constant` arg works as intended in Tensor._op"""
     x = Tensor(1.0, constant=x_const)
     y = Tensor(1.0, constant=y_const)
     out = dummy(x, y, constant=op_const)

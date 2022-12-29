@@ -326,5 +326,5 @@ def test_can_infer_Shape(shape: Shape):
 @given(no_value())
 def test_no_value(x):
     from mygrad.operation_base import _NoValue
-    assert x is _NoValue
 
+    assert x is _NoValue
