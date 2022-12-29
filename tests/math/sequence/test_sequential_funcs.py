@@ -171,7 +171,7 @@ def test_mean_bkwd():
 
 
 @pytest.mark.filterwarnings("ignore:Degrees of freedom")
-@pytest.mark.filterwarnings("ignore:invalid value encountered in true_divide")
+@pytest.mark.filterwarnings("ignore:invalid value encountered")
 @fwdprop_test_factory(
     mygrad_func=var,
     true_func=np.var,
