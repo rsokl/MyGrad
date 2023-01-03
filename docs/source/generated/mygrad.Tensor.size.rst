@@ -3,4 +3,4 @@ mygrad.Tensor.size
 
 .. currentmodule:: mygrad
 
-.. autoattribute:: Tensor.size
+.. autoproperty:: Tensor.size

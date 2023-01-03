@@ -1,5 +1,9 @@
 import numpy as np
-from graphviz import Digraph
+
+try:
+    from graphviz import Digraph
+except ImportError:
+    pass
 
 from mygrad.tensor_base import Tensor
 

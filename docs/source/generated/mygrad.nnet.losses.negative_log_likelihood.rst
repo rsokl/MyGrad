@@ -1,5 +1,5 @@
-mygrad.nnet.losses.negative_log_likelihood
-==========================================
+mygrad.nnet.losses.negative\_log\_likelihood
+============================================
 
 .. currentmodule:: mygrad.nnet.losses
 

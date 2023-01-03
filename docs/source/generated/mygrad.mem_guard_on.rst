@@ -1,6 +1,6 @@
-mygrad.mem_guard_on
-===================
+mygrad.mem\_guard\_on
+=====================
 
 .. currentmodule:: mygrad
 
-.. autofunction:: mem_guard_on
+.. autodata:: mem_guard_on

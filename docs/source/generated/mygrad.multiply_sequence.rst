@@ -1,5 +1,5 @@
-mygrad.multiply_sequence
-========================
+mygrad.multiply\_sequence
+=========================
 
 .. currentmodule:: mygrad
 

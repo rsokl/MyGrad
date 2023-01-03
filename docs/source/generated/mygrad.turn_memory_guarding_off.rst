@@ -1,5 +1,5 @@
-mygrad.turn_memory_guarding_off
-===============================
+mygrad.turn\_memory\_guarding\_off
+==================================
 
 .. currentmodule:: mygrad
 

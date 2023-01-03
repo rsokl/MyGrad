@@ -1,5 +1,5 @@
-mygrad.nnet.activations.soft_sign
-=================================
+mygrad.nnet.activations.soft\_sign
+==================================
 
 .. currentmodule:: mygrad.nnet.activations
 

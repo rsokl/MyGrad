@@ -1,6 +1,6 @@
-mygrad.no_autodiff
-==================
+mygrad.no\_autodiff
+===================
 
 .. currentmodule:: mygrad
 
-.. autofunction:: no_autodiff
+.. autodata:: no_autodiff

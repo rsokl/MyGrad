@@ -1,5 +1,5 @@
-mygrad.nnet.initializers.he_uniform
-===================================
+mygrad.nnet.initializers.he\_uniform
+====================================
 
 .. currentmodule:: mygrad.nnet.initializers
 

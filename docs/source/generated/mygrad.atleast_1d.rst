@@ -1,5 +1,5 @@
-mygrad.atleast_1d
-=================
+mygrad.atleast\_1d
+==================
 
 .. currentmodule:: mygrad
 
