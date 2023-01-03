@@ -8,9 +8,9 @@ on pip.
 
 .. _v2.2.0:
 
---------------------
-2.2.0rc - 2022-XX-XX
---------------------
+------------------
+2.2.0 - 2023-01-03
+------------------
 
 - MyGrad is now tested against Python 3.11. (:pull:`411`)
 - ``mygrad.bool8`` has been removed. Use ``mygrad.bool_`` instead. (:pull:`411`)
