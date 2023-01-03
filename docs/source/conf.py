@@ -22,7 +22,7 @@ import mygrad
 # -- Project information -----------------------------------------------------
 
 project = "MyGrad"
-copyright = "2021, Ryan Soklaski"
+copyright = "2023, Ryan Soklaski"
 author = "Ryan Soklaski"
 
 # The short X.Y version
