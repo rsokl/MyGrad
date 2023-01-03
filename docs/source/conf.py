@@ -30,7 +30,7 @@ author = "Ryan Soklaski"
 # The short X.Y version
 version = ".".join(mygrad.__version__.split(".")[:2])
 # The full version, including alpha/beta/rc tags
-release = mygrad.__version__
+release = mygrad.__version__.rsplit("+")[0]
 
 
 # -- General configuration ---------------------------------------------------
