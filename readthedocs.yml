@@ -24,3 +24,8 @@ build:
   jobs:
     post_create_environment:
       - pip install -r docs/requirements.txt
+
+# Explicitly set the version of Python and its requirements
+python:
+  install:
+    - requirements: docs/requirements.txt
