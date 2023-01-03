@@ -6,7 +6,6 @@ import os
 import sys
 
 import mygrad
-import mygrad.operation_base
 
 # -*- coding: utf-8 -*-
 #
