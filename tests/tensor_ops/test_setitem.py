@@ -96,7 +96,6 @@ class set_item_test_factory:
 
         @given(x=self.array_strat, data=st.data())
         def wrapper(x: np.ndarray, data: st.DataObject):
-
             index = data.draw(self.index_strat(x), label="index")
 
             try:

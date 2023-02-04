@@ -29,15 +29,12 @@ def test_dtype_casts_correctly(ufunc, dest_dtype):
     check_consistent_grad_dtype(out, x)
 
 
-simple_arr_likes = (
-    tensors(
-        dtype=st.sampled_from([np.float64, np.float32, int]),
-        shape=st.sampled_from([(1,), (1, 1)]),
-        elements=st.just(1),
-        constant=st.booleans(),
-    )
-    | st.just([1])
-)
+simple_arr_likes = tensors(
+    dtype=st.sampled_from([np.float64, np.float32, int]),
+    shape=st.sampled_from([(1,), (1, 1)]),
+    elements=st.just(1),
+    constant=st.booleans(),
+) | st.just([1])
 
 
 @pytest.mark.parametrize("ufunc", ufuncs)

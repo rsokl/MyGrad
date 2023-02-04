@@ -10,7 +10,6 @@ from numpy.testing import assert_array_equal
 
 import mygrad as mg
 from mygrad import Tensor
-from mygrad.math.misc.ops import MatMul
 from mygrad.math.arithmetic.ops import (
     Add,
     Divide,
@@ -20,6 +19,7 @@ from mygrad.math.arithmetic.ops import (
     Square,
     Subtract,
 )
+from mygrad.math.misc.ops import MatMul
 from mygrad.operation_base import Operation
 
 
@@ -40,7 +40,7 @@ def divide(x, y):
 
 
 def power(x, y):
-    return x ** y
+    return x**y
 
 
 def matmul(x, y):

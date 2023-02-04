@@ -18,8 +18,9 @@ __all__ = [
 
 
 class _PreservesOrder(Operation):
-    """Base class for operations that preserve an array's size 
+    """Base class for operations that preserve an array's size
     and flat-iteration element ordering"""
+
     def backward_var(self, grad: np.ndarray, index: int, **kwargs) -> np.ndarray:
         (a,) = self.variables
         return np.reshape(grad, a.shape)

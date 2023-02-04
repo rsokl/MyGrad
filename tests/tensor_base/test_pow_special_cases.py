@@ -17,7 +17,7 @@ from ..wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 @adds_constant_arg
 def custom_pow(x, p):
-    return x ** p
+    return x**p
 
 
 @adds_constant_arg
@@ -33,7 +33,7 @@ def any_scalar(*args, p):
 
 @given(x=tensors(elements=st.floats(-10, 10)), p=st.sampled_from([2, 3]))
 def test_special_pow_propagate_constant(x, p):
-    y = x ** p
+    y = x**p
     assert y.constant is x.constant
 
 

@@ -18,7 +18,6 @@ from tests.custom_strategies import valid_constant_arg
     data=st.data(),
 )
 def test_constant_initializer(array, data: st.DataObject):
-
     value = array.reshape(-1)[
         0
     ]  # let hypothesis do all the heavy lifting picking an acceptable value for the dtype

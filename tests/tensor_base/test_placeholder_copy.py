@@ -45,7 +45,7 @@ def test_placeholder_tensor(x: mg.Tensor, data: st.DataObject):
     assert x.grad is None
 
     if not y.constant:
-        assert_allclose(y.grad, 4 * x.data ** 3, atol=1e-7)
+        assert_allclose(y.grad, 4 * x.data**3, atol=1e-7)
 
     if not placeholder.constant:
-        assert_allclose(placeholder.grad, 6 * x.data ** 2)
+        assert_allclose(placeholder.grad, 6 * x.data**2)

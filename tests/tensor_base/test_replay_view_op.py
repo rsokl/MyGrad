@@ -96,7 +96,6 @@ def test_view_func_replay_op_mirrors_standard_op(
     op_constant: bool,
     data: st.DataObject,
 ):
-
     tensor_a = data.draw(tensor_a_strat, label="tensor_a")
     args, kwargs = arg_draw(tensor=tensor_a, data=data)
 

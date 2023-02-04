@@ -112,7 +112,6 @@ class DuplicatingGraph:
             return
 
         for child in tensor._view_children:
-
             self._record_mapping(
                 original=child,
                 placeholder=make_placeholder_tensor(
@@ -191,7 +190,7 @@ class DuplicatingGraph:
         yield from self._yield_children(self.base.placeholder)
 
     def get_path_to_base(self, tensor: "Tensor") -> List[Node]:
-        """ Returns [leaf, (parent), ..., base]"""
+        """Returns [leaf, (parent), ..., base]"""
         path = []
         node = self[tensor]
         while node.parent is not None:
@@ -201,7 +200,7 @@ class DuplicatingGraph:
         return path
 
     def restore_old_graph(self):
-        """ Reroute graph back to original tensors."""
+        """Reroute graph back to original tensors."""
         # call tuple to ensure iteration is completed
         # before information gets deleted / mutated
         for node in tuple(self):

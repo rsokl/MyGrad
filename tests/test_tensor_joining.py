@@ -107,7 +107,6 @@ def test_join_fwd(
     mygrad_func,
     constant: bool,
 ):
-
     arrs, axis = data.draw(strat)
     mygrad_out = mygrad_func(arrs, axis=axis, constant=constant)
 

@@ -38,7 +38,7 @@ class Cbrt(UnaryUfunc):
 
     def backward_var(self, grad, index, **kwargs):
         (a,) = self.variables
-        return grad / (3 * np.cbrt(a.data ** 2))
+        return grad / (3 * np.cbrt(a.data**2))
 
 
 class _MaxMin(BinaryUfunc, ABC):

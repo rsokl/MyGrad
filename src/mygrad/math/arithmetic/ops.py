@@ -61,7 +61,7 @@ class Divide(BinaryUfunc):
         if index == 0:  # backprop through a
             return grad / b.data
         else:  # broadcast through b
-            return -grad * a.data / (b.data ** 2)
+            return -grad * a.data / (b.data**2)
 
 
 class Power(BinaryUfunc):
@@ -73,7 +73,7 @@ class Power(BinaryUfunc):
         if index == 0:
             return grad * y * (x ** np.where(y, (y - 1), 1))
         else:
-            return grad * (x ** y) * np.log(np.where(x, x, 1))
+            return grad * (x**y) * np.log(np.where(x, x, 1))
 
 
 # Unary Ops
@@ -84,7 +84,7 @@ class Reciprocal(UnaryUfunc):
 
     def backward_var(self, grad, index, **kwargs):
         (a,) = self.variables
-        return -grad * np.reciprocal(a.data ** 2)
+        return -grad * np.reciprocal(a.data**2)
 
 
 class Square(UnaryUfunc):
@@ -124,7 +124,7 @@ class AddSequence(Operation):
 
 
 class MultiplySequence(Operation):
-    """ Performs f(a, b, ..., z) = a * b * ... * z"""
+    """Performs f(a, b, ..., z) = a * b * ... * z"""
 
     def __call__(self, *input_vars: "Tensor") -> np.ndarray:
         self.variables = input_vars

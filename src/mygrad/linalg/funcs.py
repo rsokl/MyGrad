@@ -118,7 +118,7 @@ def norm(
     >>> l2_norms
     Tensor([3.74165739, 1.        ])
 
-    The presence of the elementwise absolute values in the norm operation means that zero-valued entries in any of 
+    The presence of the elementwise absolute values in the norm operation means that zero-valued entries in any of
     input vectors have an undefined derivative. When `nan_to_num=False` is specified these derivatives will be reported
     as `nan`, otherwise they will be made to be 0.0.
 

@@ -169,7 +169,7 @@ def test_repr(tensor, repr_):
 @given(constant=st.booleans())
 def test_invalid_gradient_raises(constant: bool, bad_grads):
     x = Tensor(3.0, constant=constant) * 2
-    with (pytest.raises((TypeError, ValueError)) if not constant else does_not_raise()):
+    with pytest.raises((TypeError, ValueError)) if not constant else does_not_raise():
         x.backward(bad_grads)
 
 
