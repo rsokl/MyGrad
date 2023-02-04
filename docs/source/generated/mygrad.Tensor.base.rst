@@ -3,4 +3,4 @@ mygrad.Tensor.base
 
 .. currentmodule:: mygrad
 
-.. automethod:: Tensor.base
+.. autoproperty:: Tensor.base

@@ -3,4 +3,4 @@ mygrad.Tensor.creator
 
 .. currentmodule:: mygrad
 
-.. autoattribute:: Tensor.creator
+.. autoproperty:: Tensor.creator

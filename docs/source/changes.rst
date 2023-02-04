@@ -6,6 +6,18 @@ This is a record of all past mygrad releases and what went into them,
 in reverse chronological order. All previous releases should still be available
 on pip.
 
+.. _v2.2.0:
+
+------------------
+2.2.0 - 2023-01-03
+------------------
+
+- MyGrad is now tested against Python 3.11. (:pull:`411`)
+- ``mygrad.bool8`` has been removed. Use ``mygrad.bool_`` instead. (:pull:`411`)
+- Adds ufunc support for ``resolve_dtypes``. (:pull:`411`) 
+- Modifies automatic differentiation framework to be simpler and more memory efficient. In the future, MyGrad will be able to expose an API akin to `torch.autograd.grad <https://pytorch.org/docs/stable/generated/torch.autograd.grad.html>`_. (:pull:`407`)
+- MyGrad's CI now enforces formatting and spell check requirements on all pull requests. (:pull:`411`)
+
 .. _v2.1.0:
 
 ------------------

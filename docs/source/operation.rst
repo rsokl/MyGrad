@@ -101,4 +101,3 @@ Documentation for mygrad.Operation
    Operation
    Operation.backward
    Operation.backward_var
-   BroadcastableOp

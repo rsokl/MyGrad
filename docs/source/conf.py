@@ -1,3 +1,10 @@
+# If extensions (or modules to document with autodoc) are in another directory,
+# add these directories to sys.path here. If the directory is relative to the
+# documentation root, use os.path.abspath to make it absolute, like shown here.
+#
+import os
+import sys
+
 import mygrad
 
 # -*- coding: utf-8 -*-
@@ -10,25 +17,20 @@ import mygrad
 
 # -- Path setup --------------------------------------------------------------
 
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+
+sys.path.insert(0, os.path.abspath("."))
 
 
 # -- Project information -----------------------------------------------------
 
 project = "MyGrad"
-copyright = "2021, Ryan Soklaski"
+copyright = "2023, Ryan Soklaski"
 author = "Ryan Soklaski"
 
 # The short X.Y version
 version = ".".join(mygrad.__version__.split(".")[:2])
 # The full version, including alpha/beta/rc tags
-release = mygrad.__version__
+release = mygrad.__version__.rsplit("+")[0]
 
 
 # -- General configuration ---------------------------------------------------
@@ -43,6 +45,7 @@ release = mygrad.__version__
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.intersphinx",
+    "sphinx.ext.extlinks",
     "sphinx.ext.coverage",
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
@@ -68,7 +71,7 @@ master_doc = "index"
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = "en"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -78,13 +81,23 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "**.ipynb_checkpoints"]
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = None
 
+_repo = "https://github.com/rsokl/MyGrad/"
+extlinks = {
+    "commit": (_repo + "commit/%s", "commit %s"),
+    "gh-file": (_repo + "blob/master/%s", "%s"),
+    "gh-link": (_repo + "%s", "%s"),
+    "issue": (_repo + "issues/%s", "issue #%s"),
+    "pull": (_repo + "pull/%s", "pull request #%s"),
+    "plymi": ("https://www.pythonlikeyoumeanit.com/%s", "%s"),
+    "hydra": ("https://hydra.cc/docs/%s", "%s"),
+}
 
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = "pydata_sphinx_theme"
 
 
 def setup(app):

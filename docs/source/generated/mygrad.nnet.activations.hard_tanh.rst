@@ -1,5 +1,5 @@
-mygrad.nnet.activations.hard_tanh
-=================================
+mygrad.nnet.activations.hard\_tanh
+==================================
 
 .. currentmodule:: mygrad.nnet.activations
 

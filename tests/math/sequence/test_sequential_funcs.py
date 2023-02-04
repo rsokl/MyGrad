@@ -49,6 +49,8 @@ def ddof_arg(*arrs):
     return st.integers(0, min_side - 1) if min_side else st.just(0)
 
 
+@pytest.mark.filterwarnings("ignore:Degrees of freedom")
+@pytest.mark.filterwarnings("ignore:divide by zero")
 @fwdprop_test_factory(
     mygrad_func=amax,
     true_func=np.amax,
@@ -168,14 +170,14 @@ def test_mean_bkwd():
     pass
 
 
+@pytest.mark.filterwarnings("ignore:Degrees of freedom")
+@pytest.mark.filterwarnings("ignore:invalid value encountered")
 @fwdprop_test_factory(
     mygrad_func=var,
     true_func=np.var,
     num_arrays=1,
     kwargs=dict(axis=axis_arg, keepdims=keepdims_arg, ddof=ddof_arg),
 )
-@pytest.mark.filterwarnings("ignore: Degrees of freedom")
-@pytest.mark.filterwarnings("ignore: invalid value encountered in true_divide")
 def test_var_fwd():
     pass
 
@@ -261,14 +263,14 @@ def test_var_no_axis_bkwrd(x: mg.Tensor):
     assert np.all(x.grad == mg.zeros_like(x))
 
 
+@pytest.mark.filterwarnings("ignore:Degrees of freedom")
+@pytest.mark.filterwarnings("ignore:invalid value encountered")
 @fwdprop_test_factory(
     mygrad_func=std,
     true_func=np.std,
     num_arrays=1,
     kwargs=dict(axis=axis_arg, keepdims=keepdims_arg, ddof=ddof_arg),
 )
-@pytest.mark.filterwarnings("ignore: Degrees of freedom")
-@pytest.mark.filterwarnings("ignore: invalid value encountered in true_divide")
 def test_std_fwd():
     pass
 

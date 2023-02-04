@@ -8,7 +8,7 @@ from numpy.testing import assert_allclose
 import mygrad as mg
 from mygrad import Tensor
 from mygrad.errors import InvalidGradient
-from mygrad.operation_base import BinaryUfunc, Operation, UnaryUfunc
+from mygrad.operation_base import Operation
 from tests.utils.errors import does_not_raise
 
 

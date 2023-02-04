@@ -1,5 +1,5 @@
-mygrad.nnet.initializers.glorot_uniform
-=======================================
+mygrad.nnet.initializers.glorot\_uniform
+========================================
 
 .. currentmodule:: mygrad.nnet.initializers
 

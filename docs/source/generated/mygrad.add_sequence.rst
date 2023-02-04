@@ -1,5 +1,5 @@
-mygrad.add_sequence
-===================
+mygrad.add\_sequence
+====================
 
 .. currentmodule:: mygrad
 

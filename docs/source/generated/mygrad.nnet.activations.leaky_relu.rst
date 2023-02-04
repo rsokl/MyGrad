@@ -1,5 +1,5 @@
-mygrad.nnet.activations.leaky_relu
-==================================
+mygrad.nnet.activations.leaky\_relu
+===================================
 
 .. currentmodule:: mygrad.nnet.activations
 

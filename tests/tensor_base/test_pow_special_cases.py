@@ -1,6 +1,5 @@
 from functools import partial
 
-import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
 import pytest
@@ -9,7 +8,6 @@ from hypothesis import given
 import mygrad as mg
 from mygrad.math.arithmetic.ops import Positive, Square
 from tests.custom_strategies import tensors
-from tests.utils.checkers import expected_constant
 from tests.utils.wrappers import adds_constant_arg
 
 from ..wrappers.uber import backprop_test_factory, fwdprop_test_factory

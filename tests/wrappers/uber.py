@@ -210,7 +210,7 @@ class fwdprop_test_factory:
 
         assert num_arrays > 0
 
-        self.op = mygrad_func  # type: Operation
+        self.op: Operation = mygrad_func
         self.true_func = true_func
 
         self.index_to_bnds = index_to_bnds
@@ -689,7 +689,7 @@ class backprop_test_factory:
             )
 
             # list of drawn arrays to feed to functions
-            arrs = data.draw(
+            arrs: List[Tensor] = data.draw(
                 st.tuples(
                     *(
                         self.arrays(i).map(Tensor)
@@ -698,7 +698,7 @@ class backprop_test_factory:
                     )
                 ).map(list),
                 label="arrays",
-            )  # type: List[Tensor]
+            )
 
             if callable(self.kwargs):
                 kwargs = data.draw(self.kwargs(*arrs), label="kwargs")

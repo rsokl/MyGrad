@@ -239,7 +239,8 @@ def numerical_gradient_full(
         kwargs = {}
 
     args = tuple(i.astype(np.complex128) for i in args)
-    grads = [None] * len(args)  # type: List[Optional[np.ndarray]]
+    grads: List[Optional[np.ndarray]] = [None] * len(args)
+
     if isinstance(vary_ind, int):
         vary_ind = [vary_ind]
 

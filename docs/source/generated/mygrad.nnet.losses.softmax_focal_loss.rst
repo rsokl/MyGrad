@@ -1,5 +1,5 @@
-mygrad.nnet.losses.softmax_focal_loss
-=====================================
+mygrad.nnet.losses.softmax\_focal\_loss
+=======================================
 
 .. currentmodule:: mygrad.nnet.losses
 

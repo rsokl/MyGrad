@@ -1,5 +1,5 @@
-mygrad.nnet.losses.focal_loss
-=============================
+mygrad.nnet.losses.focal\_loss
+==============================
 
 .. currentmodule:: mygrad.nnet.losses
 

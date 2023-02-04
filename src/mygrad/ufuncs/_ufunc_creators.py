@@ -388,33 +388,34 @@ def _create_ufunc(
         for type_code in op.numpy_ufunc.types
         if _permitted_type_str(type_code)
     ]
-    out = MetaBuilder(
-        decorated_func.__name__,
-        (object,),
-        (
-            {
-                "_wrapped_op": op,
-                "at": at,
-                "accumulate": accumulate,
-                "reduce": reduce,
-                "reduceat": reduceat,
-                "outer": outer,
-                "signature": op.numpy_ufunc.signature,
-                "identity": op.numpy_ufunc.identity,
-                "nargs": op.numpy_ufunc.nargs,
-                "nin": op.numpy_ufunc.nin,
-                "nout": op.numpy_ufunc.nout,
-                "ntypes": len(types),
-                "types": types,
-                "_decorated_func": decorated_func,
-                "__name__": decorated_func.__name__,
-                "__qualname__": decorated_func.__name__,
-                "__signature__": signature(decorated_func),
-                "__annotations__": get_type_hints(decorated_func),
-                "__doc__": decorated_func.__doc__,
-            }
-        ),
-    )
+
+    _namespace = {
+        "_wrapped_op": op,
+        "at": at,
+        "accumulate": accumulate,
+        "reduce": reduce,
+        "reduceat": reduceat,
+        "outer": outer,
+        "signature": op.numpy_ufunc.signature,
+        "identity": op.numpy_ufunc.identity,
+        "nargs": op.numpy_ufunc.nargs,
+        "nin": op.numpy_ufunc.nin,
+        "nout": op.numpy_ufunc.nout,
+        "ntypes": len(types),
+        "types": types,
+        "_decorated_func": decorated_func,
+        "__name__": decorated_func.__name__,
+        "__qualname__": decorated_func.__name__,
+        "__signature__": signature(decorated_func),
+        "__annotations__": get_type_hints(decorated_func),
+        "__doc__": decorated_func.__doc__,
+    }
+    try:
+        _namespace["resolve_dtypes"] = op.numpy_ufunc.resolve_dtypes
+    except AttributeError:  # pragma: no cover
+        pass
+
+    out = MetaBuilder(decorated_func.__name__, (object,), _namespace)
     ufunc.register(out)
     return out
 

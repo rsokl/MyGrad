@@ -3,12 +3,12 @@ from typing import List, Tuple
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
-import mygrad.math.misc.funcs
 import numpy as np
 import pytest
 from hypothesis import given
 
 import mygrad as mg
+import mygrad.math.misc.funcs
 from tests.wrappers.uber import backprop_test_factory, fwdprop_test_factory
 
 

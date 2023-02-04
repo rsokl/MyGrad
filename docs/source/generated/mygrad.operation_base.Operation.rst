@@ -13,8 +13,10 @@ mygrad.operation\_base.Operation
 
    .. autosummary::
    
+      ~Operation.__init__
       ~Operation.backward
       ~Operation.backward_var
+      ~Operation.grad_post_process_fn
    
    
 
@@ -24,6 +26,7 @@ mygrad.operation\_base.Operation
 
    .. autosummary::
    
-      ~Operation.scalar_only
+      ~Operation.can_return_view
+      ~Operation.variables
    
    

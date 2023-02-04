@@ -203,7 +203,7 @@ def tensor(
 
     ndmin : int, optional
         Specifies the minimum number of dimensions that the resulting
-        tensor should have. Ones will be pre-pended to the shape as
+        tensor should have. Ones will be prepended to the shape as
         needed to meet this requirement.
 
     Returns
@@ -822,7 +822,7 @@ class Tensor:
         self._grad = None  # type: Union[None, np.ndarray]
 
         # track all operations that this tensor participates in
-        self._ops = set()  # type: Set[WeakRef[Operation]]
+        self._ops: Set[WeakRef[Operation]] = set()
 
         # base points to the initial tensor that owns the memory of this
         # tensor
@@ -1910,7 +1910,7 @@ class Tensor:
         del out
 
         # although `self` is a view of placeholder, placeholder
-        # is stricly an internal tensor, we won't expose it as
+        # is strictly an internal tensor, we won't expose it as
         # base
         graph.base.placeholder._view_children.append(self)
         base = graph.base.placeholder.base

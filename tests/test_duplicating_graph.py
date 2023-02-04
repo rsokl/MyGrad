@@ -130,7 +130,7 @@ class GraphDuplicationCompare(RuleBasedStateMachine):
     def __init__(self):
         super().__init__()
         self.base = mg.arange(6.0)
-        self.node_list = [id(self.base)]  # type: List[int]
+        self.node_list: List[int] = [id(self.base)]
         self.parent_child_pairs = set()
 
     nodes = Bundle("nodes")

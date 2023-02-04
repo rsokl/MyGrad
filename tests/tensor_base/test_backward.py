@@ -41,7 +41,7 @@ def test_simple_behavior():
 @given(
     tensor=tensors(
         dtype=hnp.floating_dtypes(endianness="="),
-        fill=st.just(0),
+        elements=st.just(0),
         constant=False,
         shape=hnp.array_shapes(min_dims=0, min_side=0, max_dims=3),
     ),
@@ -58,6 +58,7 @@ def test_tensor_backward_produces_grad_of_correct_dtype_and_shape(
             max_side=min(tensor.shape, default=0),
             max_dims=tensor.ndim,
         ),
+        elements=st.just(0),
     )
 
     grad = data.draw(

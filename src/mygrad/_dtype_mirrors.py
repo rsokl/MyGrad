@@ -1,7 +1,7 @@
 import numpy
 
 __all__ = [
-    "bool8",
+    "bool_",
     "int8",
     "int16",
     "int32",
@@ -21,7 +21,8 @@ __all__ = [
     "longdouble",
 ]
 
-bool8 = numpy.bool8
+
+bool_ = numpy.bool_
 int8 = numpy.int8
 int16 = numpy.int16
 int32 = numpy.int32

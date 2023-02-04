@@ -4,7 +4,6 @@ from typing import Optional, Sequence, Tuple, Union
 import numpy as np
 from numpy.core.einsumfunc import _parse_einsum_input
 
-import mygrad as mg
 from mygrad.math.misc.funcs import absolute
 from mygrad.math.sequential.funcs import max as mg_max, min as mg_min
 from mygrad.tensor_base import Tensor, implements_numpy_override
@@ -105,7 +104,7 @@ def norm(
 
     References
     ----------
-    .. [1] Retrived from: https://numpy.org/doc/stable/reference/generated/numpy.linalg.norm.html
+    .. [1] Retrieved from: https://numpy.org/doc/stable/reference/generated/numpy.linalg.norm.html
     .. [2] G. H. Golub and C. F. Van Loan, *Matrix Computations*,
            Baltimore, MD, Johns Hopkins University Press, 1985, pg. 15
 

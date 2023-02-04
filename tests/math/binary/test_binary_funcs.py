@@ -20,7 +20,8 @@ def inplace_op(inplace_target, other, constant=False, *, op_name: str):
     op_name = "__" + op_name + "__"
 
     # hack to make broadcastable shapes work for inplace op:
-    inplace_target.copy()
+    _ = inplace_target.copy()
+
     check = False
 
     if np.broadcast(inplace_target, other).shape != inplace_target.shape:

@@ -1,8 +1,5 @@
-from typing import Callable
-
 import hypothesis.strategies as st
 import numpy as np
-import pytest
 from hypothesis import given, note
 from numpy.testing import assert_array_equal
 

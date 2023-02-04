@@ -136,6 +136,7 @@ def test_dereferencing_tensor_restores_data_writeability(
     )
 
 
+@pytest.mark.filterwarnings("ignore:leak")
 @pytest.mark.xfail(
     condition=not COVERAGE_MODE, reason="documented state leak for edge case"
 )

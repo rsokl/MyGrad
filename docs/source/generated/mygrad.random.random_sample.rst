@@ -1,5 +1,5 @@
-mygrad.random.random_sample
-===========================
+mygrad.random.random\_sample
+============================
 
 .. currentmodule:: mygrad.random
 

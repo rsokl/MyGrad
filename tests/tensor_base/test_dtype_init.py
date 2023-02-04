@@ -16,16 +16,19 @@ def arrays_or_tensors(*args, **kwargs):
 generic_data = st.sampled_from([0, 0.0, [0], [0.0]]) | arrays_or_tensors(
     dtype=hnp.floating_dtypes() | hnp.integer_dtypes(),
     shape=hnp.array_shapes(min_dims=0, min_side=0),
+    elements=st.just(0),
 )
 
 integer_data = st.sampled_from([0, [0]]) | arrays_or_tensors(
     dtype=hnp.integer_dtypes(),
     shape=hnp.array_shapes(min_dims=0, min_side=0),
+    elements=st.just(0),
 )
 
 float_data = st.sampled_from([0.0, [0.0]]) | arrays_or_tensors(
     dtype=hnp.floating_dtypes(),
     shape=hnp.array_shapes(min_dims=0, min_side=0),
+    elements=st.just(0),
 )
 
 integer_dtypes = st.sampled_from([int, "int32"]) | hnp.integer_dtypes()
