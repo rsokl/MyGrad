@@ -44,8 +44,7 @@ class Sinc(Operation):
         (a,) = self.variables
         x = a.data
 
-        # TODO: use tiny
-        near_0 = np.isclose(x, 0, atol=1e-20)
+        near_0 = np.isclose(x, 0, atol=1e-162)  # crossover where dsinc is nan
         return (
             np.pi * grad * np.piecewise(x, [near_0, ~near_0], [np.zeros_like, _dsinc])
         )
