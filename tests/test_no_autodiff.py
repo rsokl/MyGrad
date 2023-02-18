@@ -28,7 +28,6 @@ def test_no_autodiff_doesnt_restrict_tensor_type():
 @pytest.mark.usefixtures("seal_graph_tracking")
 @given(x=tensors(shape=(1,), elements=st.floats(-100, 100)), constant=st.booleans())
 def test_no_autodiff_context_manager(x: Tensor, constant: bool):
-
     with no_autodiff:
         # test soft_sign so that we pass through multi-node
         # graph
@@ -105,7 +104,6 @@ def test_no_autodiff_on_in_place_op_does_not_track_graph(old_x: Tensor):
 
 @pytest.mark.usefixtures("seal_graph_tracking")
 def test_no_autodiff_context_manager_restores_state_via_finally_clause():
-
     with pytest.raises(ValueError):
         with no_autodiff:
             assert not _tracking.TRACK_GRAPH

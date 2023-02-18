@@ -170,7 +170,6 @@ class GraphDuplicationCompare(RuleBasedStateMachine):
             visited.add(id(node.tensor))
 
         for node in iter_nodes:
-
             assert_array_equal(
                 node.tensor,
                 node.placeholder,

@@ -112,7 +112,6 @@ class DuplicatingGraph:
             return
 
         for child in tensor._view_children:
-
             self._record_mapping(
                 original=child,
                 placeholder=make_placeholder_tensor(

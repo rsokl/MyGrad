@@ -542,7 +542,6 @@ class backprop_test_factory:
         if not set(arrs_from_kwargs) <= (
             set(range(num_arrays)) if num_arrays is not None else set()
         ):
-
             raise ValueError(
                 "`kwargs_to_arr` must map an array-ID to a kwarg-name. "
                 "Got invalid key(s): "

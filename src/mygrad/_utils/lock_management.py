@@ -97,7 +97,6 @@ def unique_arrs_and_bases(
         arr = t.data
         arr_id = id(arr)
         if arr_id not in seen:
-
             # important note!
             # We must yield array bases first so that base's
             # writeability is restored first.
@@ -155,7 +154,6 @@ def _release_lock_on_arr_writeability(arr: np.ndarray):
         #    or view can now get unlocked
         # under all conditions view will no longer be waiting to be unlocked
         for view_arr_id in tuple(_views_waiting_for_unlock[arr_id]):
-
             if _array_counter[view_arr_id] > 0:
                 # view involved in new op
                 continue

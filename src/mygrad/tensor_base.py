@@ -76,7 +76,8 @@ CONSTANT_ONLY_DTYPES = (np.integer, np.bool_)
 
 def _resolve_constant(*others: Any, constant: Optional[bool]) -> Optional[bool]:
     """Determines if `constant` should be resolved to True based on `others`.
-    Otherwise defers to a tensor-creator to handle further resolutions based on dtype."""
+    Otherwise defers to a tensor-creator to handle further resolutions based on dtype.
+    """
     if constant is not None:
         return constant
     for other in others:
@@ -433,7 +434,8 @@ class implements_numpy_override:
 
     References
     ----------
-    .. [1] https://numpy.org/devdocs/reference/arrays.classes.html?#numpy.class.__array_function__"""
+    .. [1] https://numpy.org/devdocs/reference/arrays.classes.html?#numpy.class.__array_function__
+    """
 
     __slots__ = ("numpy_func",)
 
@@ -3005,7 +3007,8 @@ class Tensor:
         Raises
         ------
         ValueError
-            If ``axis`` is not ``None``, and an axis being squeezed is not of length 1"""
+            If ``axis`` is not ``None``, and an axis being squeezed is not of length 1
+        """
         return Tensor._op(Squeeze, self, op_args=(axis,), constant=constant)
 
     def ravel(self, *, constant: Optional[bool] = None) -> "Tensor":

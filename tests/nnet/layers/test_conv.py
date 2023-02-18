@@ -176,7 +176,6 @@ def conv_bank(input_images, conv_filters, stride, dilation=None, padding=tuple()
 
 
 def test_convnd_fwd_trivial():
-
     # trivial by-hand test: 1-dimensional conv
     # x:
     # [ 1,  2,  3,  4]

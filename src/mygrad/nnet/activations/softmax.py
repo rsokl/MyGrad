@@ -9,7 +9,6 @@ from mygrad.typing import ArrayLike
 
 
 def _softmax(x, kwargs):
-
     if x.ndim > 0 and x.size > 0:
         x = x - x.max(**kwargs)
         target = x.astype(float) if issubclass(x.dtype.type, np.integer) else x

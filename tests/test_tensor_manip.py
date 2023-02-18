@@ -431,7 +431,6 @@ def gen_int_repeat_args(arr: Tensor) -> st.SearchStrategy[dict]:
 
 @st.composite
 def gen_tuple_repeat_args(draw: st.DataObject.draw, arr: Tensor):
-
     valid_axis = draw(
         st.none() | (st.integers(-arr.ndim, arr.ndim - 1) if arr.ndim else st.just(0))
     )

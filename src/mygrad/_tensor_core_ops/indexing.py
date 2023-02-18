@@ -40,7 +40,8 @@ def _is_bool_array_index(index):
 class GetItem(Operation):
     """Defines the __getitem__ interface for a Tensor, supporting back-propagation
 
-    Supports back-propagation through all valid numpy-indexing (basic, advanced, mixed, etc.)"""
+    Supports back-propagation through all valid numpy-indexing (basic, advanced, mixed, etc.)
+    """
 
     can_return_view = True
 
