@@ -1,6 +1,10 @@
-from typing import TYPE_CHECKING, Tuple, TypeVar
+from typing import TYPE_CHECKING, Tuple
 
-if TYPE_CHECKING:  # pragma: no cover
-    Shape = Tuple[int, ...]
-else:  # pragma: no cover
-    Shape = TypeVar("Shape", bound=Tuple[int, ...])
+from typing_extensions import TypeAlias
+
+if TYPE_CHECKING:
+    Shape: TypeAlias = Tuple[int, ...]
+else:
+
+    class Shape:
+        ...

@@ -2,6 +2,7 @@ import sys
 from typing import TYPE_CHECKING, List, Sequence, Tuple, TypeVar, Union
 
 import numpy as np
+from typing_extensions import runtime_checkable
 
 if TYPE_CHECKING:  # pragma: no cover
     from mygrad import Tensor
@@ -36,6 +37,7 @@ if not TYPE_CHECKING and not HAS_PROTOCOL:  # pragma: no cover
 
 else:  # pragma: no cover
 
+    @runtime_checkable
     class ImplementsArray(Protocol):
         def __array__(self, dtype: None = ...) -> np.ndarray:
             ...
@@ -58,9 +60,9 @@ SequenceNDReals = Union[sr1, sr2, sr3, sr4]
 if TYPE_CHECKING:  # pragma: no cover
     ArrayLike = Union[Real, "Tensor", np.ndarray, ImplementsArray, SequenceNDReals]
 else:  # pragma: no cover
-    ArrayLike = TypeVar(
-        "ArrayLike", Real, "Tensor", np.ndarray, ImplementsArray, SequenceNDReals
-    )
+
+    class ArrayLike:
+        ...
 
 
 sb1 = Sequence[bool]
