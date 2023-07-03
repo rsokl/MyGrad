@@ -885,3 +885,9 @@ def populates_ufunc(
         )
         args["out"] = np.full(out_shape, fill_value=fill_value, dtype=float)
     return args
+
+
+st.register_type_strategy(
+    Shape, st.lists(st.integers(0, 10), min_size=0, max_size=5).map(tuple)
+)
+ArrayLike
