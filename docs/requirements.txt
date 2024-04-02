@@ -1,5 +1,5 @@
 -e .
-numpy==1.24.2
+numpy==1.24.3
 numba==0.56.4
 sphinx==7.0.1
 numpydoc==1.5.0
