@@ -11,10 +11,9 @@ else:  # pragma: no cover
     )
 
 if TYPE_CHECKING:  # pragma: no cover
-    DTypeLikeReals = Union[dtype, None, Type[bool], Type[int], Type[float], str]
+    DTypeLikeReals = Union[dtype, None, Type[bool], Type[int], Type[float]]
 
 else:  # pragma: no cover
-    DTypeLikeReals = TypeVar(
-        "DTypeLikeReals",
-        bound=Union[dtype, None, Type[bool], Type[int], Type[float], str],
-    )
+
+    class DTypeLikeReals:
+        ...

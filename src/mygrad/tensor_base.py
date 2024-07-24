@@ -2346,7 +2346,7 @@ class Tensor:
     def __ge__(self, other: ArrayLike) -> np.ndarray:
         return np.ndarray.__ge__(self.data, asarray(other))
 
-    def __imatmul__(self, other):
+    def __imatmul__(self, other):  # pragma: no cover
         raise TypeError(
             "In-place matrix multiplication is not (yet) supported. "
             "Use 'a = a @ b' instead of 'a @= b'"
