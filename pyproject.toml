@@ -141,7 +141,7 @@ basepython = python3.10
 deps = {[testenv]deps}
        coverage
        pytest-cov
-commands = pytest -n auto --cov-report term-missing --cov-config=setup.cfg --cov-fail-under=100 --cov=mygrad tests
+commands = pytest -n auto --cov-report term-missing --cov-config=pyproject.toml --cov-fail-under=100 --cov=mygrad tests
 
 
 [testenv:format]

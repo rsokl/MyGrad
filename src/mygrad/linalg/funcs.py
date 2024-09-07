@@ -9,7 +9,8 @@ except ImportError:
     from numpy.core.einsumfunc import _parse_einsum_input
 
 from mygrad.math.misc.funcs import absolute
-from mygrad.math.sequential.funcs import max as mg_max, min as mg_min
+from mygrad.math.sequential.funcs import max as mg_max
+from mygrad.math.sequential.funcs import min as mg_min
 from mygrad.tensor_base import Tensor, implements_numpy_override
 from mygrad.typing import ArrayLike
 
