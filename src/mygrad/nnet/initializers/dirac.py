@@ -2,7 +2,7 @@ from typing import Optional
 
 import numpy as np
 
-from mygrad import Tensor
+from mygrad.tensor_base import Tensor
 
 
 def dirac(*shape: int, dtype=np.float32, constant: Optional[bool] = None) -> Tensor:

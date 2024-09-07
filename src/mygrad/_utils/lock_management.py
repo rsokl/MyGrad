@@ -4,15 +4,9 @@ Provides utilities responsible for locking/releasing array writeability.
 
 import os
 from collections import Counter, defaultdict
-from typing import (
-    TYPE_CHECKING,
-    Counter as CounterType,
-    DefaultDict,
-    Dict,
-    Generator,
-    Iterable,
-    Set,
-)
+from typing import TYPE_CHECKING
+from typing import Counter as CounterType
+from typing import DefaultDict, Dict, Generator, Iterable, Set
 from weakref import finalize, ref
 
 import numpy as np
@@ -20,7 +14,7 @@ import numpy as np
 from mygrad._utils import ContextTracker, WeakRef, WeakRefIterable
 
 if TYPE_CHECKING:  # pragma: no cover
-    from mygrad import Tensor as TensorType
+    from mygrad.tensor_base import Tensor as TensorType
 
 
 # arr-id -> num active ops involving arr

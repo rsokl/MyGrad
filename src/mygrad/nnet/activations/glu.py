@@ -2,7 +2,8 @@ from typing import Optional
 
 from numpy import ndarray
 
-from mygrad import Tensor, multiply
+from mygrad.math.arithmetic.funcs import multiply
+from mygrad.tensor_base import Tensor
 from mygrad.typing import ArrayLike
 
 from .sigmoid import sigmoid

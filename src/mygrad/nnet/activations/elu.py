@@ -3,8 +3,8 @@ from typing import Optional
 
 import numpy as np
 
-from mygrad import Tensor
 from mygrad.operation_base import Operation
+from mygrad.tensor_base import Tensor
 from mygrad.typing import ArrayLike
 
 __all__ = ["elu"]

@@ -1,6 +1,6 @@
 import numpy as np
 
-from mygrad import Tensor
+from mygrad.tensor_base import Tensor
 
 
 def glorot_normal(*shape, gain=1, dtype=np.float32, constant=None):

@@ -14,7 +14,7 @@ from mygrad.errors import InvalidBackprop, InvalidGradient
 from mygrad.typing import DTypeLike, Mask
 
 if TYPE_CHECKING:  # pragma: no cover
-    from mygrad import Tensor
+    from mygrad.tensor_base import Tensor
 
 
 __all__ = [
