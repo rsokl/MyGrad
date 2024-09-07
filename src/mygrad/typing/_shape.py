@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Tuple, TypeAlias
+from typing import TYPE_CHECKING, Tuple
 
 from typing_extensions import TypeAlias
 
