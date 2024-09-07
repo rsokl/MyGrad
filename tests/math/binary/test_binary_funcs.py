@@ -1,4 +1,5 @@
 """ Test all binary arithmetic operations, checks for appropriate broadcast behavior"""
+
 from functools import partial
 from numbers import Number
 from typing import Any, Dict

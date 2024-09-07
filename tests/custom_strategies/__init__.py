@@ -1,4 +1,5 @@
 """ Custom hypothesis search strategies """
+
 import math
 from collections import defaultdict
 from functools import lru_cache, partial, reduce

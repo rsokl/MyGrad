@@ -1,6 +1,7 @@
 """
 Defines the base class for mathematical operations capable of back-propagating
 gradients to their input tensors."""
+
 from abc import ABC, abstractmethod
 from numbers import Real
 from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union

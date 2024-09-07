@@ -1,6 +1,7 @@
 """
 Provides user interface for suspending computational graph tracking and back-propagation
 """
+
 from functools import wraps
 from typing import Any, Callable, TypeVar, cast
 

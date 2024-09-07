@@ -1,6 +1,5 @@
 """ Test `numerical_gradient`, `numerical_derivative`, and `broadcast_check`"""
 
-
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np

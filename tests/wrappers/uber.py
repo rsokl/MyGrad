@@ -302,10 +302,12 @@ class fwdprop_test_factory:
             if self.permit_0d_array_as_float:
                 # potentially cast a 0D array as a float
                 arrs = tuple(
-                    arr.item()
-                    if arr.ndim == 0
-                    and data.draw(st.booleans(), label=f"arr-{n} to float")
-                    else arr
+                    (
+                        arr.item()
+                        if arr.ndim == 0
+                        and data.draw(st.booleans(), label=f"arr-{n} to float")
+                        else arr
+                    )
                     for n, arr in enumerate(arrs)
                 )
 

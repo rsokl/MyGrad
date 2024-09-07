@@ -52,9 +52,11 @@ class Concatenate(Operation):
 
         return grad[
             tuple(
-                slice(None, None, None)
-                if dim != self.axis
-                else slice(self.indices[index], self.indices[index + 1])
+                (
+                    slice(None, None, None)
+                    if dim != self.axis
+                    else slice(self.indices[index], self.indices[index + 1])
+                )
                 for dim in range(var.data.ndim)
             )
         ]

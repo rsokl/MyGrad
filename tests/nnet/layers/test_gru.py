@@ -39,9 +39,11 @@ def test_nonconstant_s0_raises(s0, dropout: float, out_constant: bool):
     Uz, Ur, Uh = Tensor(np.random.rand(3, C, D))
     bz, br, bh = Tensor(np.random.rand(3, D))
 
-    with does_not_raise() if (
-        out_constant or s0 is None or isinstance(s0, np.ndarray) or s0.constant
-    ) else pytest.raises(ValueError):
+    with (
+        does_not_raise()
+        if (out_constant or s0 is None or isinstance(s0, np.ndarray) or s0.constant)
+        else pytest.raises(ValueError)
+    ):
         gru(
             X,
             Uz,
