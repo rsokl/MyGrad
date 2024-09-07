@@ -205,7 +205,7 @@ class Operation(ABC):
             if NP_IS_V2:
                 backed_grad = np.asarray(backed_grad)
             else:  # pragma: no cover
-                np.array(backed_grad, copy=False)
+                backed_grad = np.array(backed_grad, copy=False)
 
             if self.where is not True:
                 backed_grad = backed_grad * self.where
