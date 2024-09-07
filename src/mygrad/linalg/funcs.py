@@ -3,9 +3,9 @@ from typing import Optional, Sequence, Tuple, Union
 
 import numpy as np
 
-try:
+try:  # pragma: no cover
     from numpy._core.einsumfunc import _parse_einsum_input
-except ImportError:
+except ImportError:  # pragma: no cover
     from numpy.core.einsumfunc import _parse_einsum_input
 
 from mygrad.math.misc.funcs import absolute

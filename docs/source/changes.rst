@@ -6,6 +6,18 @@ This is a record of all past mygrad releases and what went into them,
 in reverse chronological order. All previous releases should still be available
 on pip.
 
+.. _v2.3.0:
+
+------------------
+2.3.0 - 2024-09-07
+------------------
+
+- Adds support for NumPy 2.0
+- Minimum supported NumPy version is now 1.24
+- Minimum supported Python version is now 3.9
+- Adds testing for Python 3.12
+- Drops typing-extensions dependency
+
 .. _v2.2.0:
 
 ------------------

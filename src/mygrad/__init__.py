@@ -40,7 +40,7 @@ from mygrad.tensor_base import (  # isort:skip  # avoid an import cycle
 )
 
 
-if not TYPE_CHECKING:
+if not TYPE_CHECKING:  # pragma: no cover
     try:
         from ._version import version as __version__
     except ImportError:

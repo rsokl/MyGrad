@@ -804,7 +804,7 @@ class Tensor:
 
         self._creator: Optional[Operation] = _creator
 
-        if not NP_IS_V2:
+        if not NP_IS_V2:  # pragma: no cover
             self.data = np.array(x, dtype=dtype, copy=copy, ndmin=ndmin)
         else:
             if copy is False:
