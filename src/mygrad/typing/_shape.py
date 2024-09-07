@@ -6,5 +6,4 @@ if TYPE_CHECKING:  # pragma: no cover
     Shape: TypeAlias = Tuple[int, ...]
 else:
 
-    class Shape:
-        ...
+    class Shape: ...

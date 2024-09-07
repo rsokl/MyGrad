@@ -65,7 +65,7 @@ def test_inplace_arithmetic_fwd(op_name: str, kwargs: Dict[str, Any]):
         true_func=iop,
         num_arrays=2,
         permit_0d_array_as_float=False,
-        **kwargs
+        **kwargs,
     )
     def iop_fwd():
         pass

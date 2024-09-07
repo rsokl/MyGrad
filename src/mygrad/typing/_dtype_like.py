@@ -15,5 +15,4 @@ if TYPE_CHECKING:  # pragma: no cover
 
 else:  # pragma: no cover
 
-    class DTypeLikeReals:
-        ...
+    class DTypeLikeReals: ...

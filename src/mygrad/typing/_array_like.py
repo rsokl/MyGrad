@@ -32,8 +32,7 @@ else:
 if not TYPE_CHECKING and not HAS_PROTOCOL:  # pragma: no cover
 
     class ImplementsArray:
-        def __array__(self, dtype: None = ...) -> np.ndarray:
-            ...
+        def __array__(self, dtype: None = ...) -> np.ndarray: ...
 
 else:  # pragma: no cover
 
@@ -41,8 +40,7 @@ else:  # pragma: no cover
     class ImplementsArray(Protocol):
         def __array__(
             self, dtype: None = ..., copy: Optional[bool] = ...
-        ) -> np.ndarray:
-            ...
+        ) -> np.ndarray: ...
 
 
 Real = Union[int, float]
@@ -63,8 +61,7 @@ if TYPE_CHECKING:  # pragma: no cover
     ArrayLike = Union[Real, "Tensor", np.ndarray, ImplementsArray, SequenceNDReals]
 else:  # pragma: no cover
 
-    class ArrayLike:
-        ...
+    class ArrayLike: ...
 
 
 sb1 = Sequence[bool]

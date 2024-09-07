@@ -392,7 +392,7 @@ def gen_roll_args(draw, arr):
                 dict(min_size=len(shift), max_size=len(shift))
                 if isinstance(shift, tuple)
                 else {}
-            )
+            ),
         )
         axis = draw(st.none() | st.integers(-arr.ndim, arr.ndim - 1) | ax_strat)
     else:

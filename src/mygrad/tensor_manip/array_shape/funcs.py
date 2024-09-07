@@ -72,7 +72,7 @@ def squeeze(
     a: ArrayLike,
     axis: Optional[Union[int, Tuple[int, ...]]] = None,
     *,
-    constant: Optional[bool] = None
+    constant: Optional[bool] = None,
 ) -> Tensor:
     """
     Remove single-dimensional entries from the shape of a tensor.
