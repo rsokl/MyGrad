@@ -21,7 +21,7 @@ if sys.version_info >= (3, 10):  # pragma: no cover
     from types import EllipsisType
 elif TYPE_CHECKING:  # pragma: no cover
     from builtins import ellipsis as EllipsisType
-else:
+else:  # pragma: no cover
     EllipsisType = type(Ellipsis)
 
 
