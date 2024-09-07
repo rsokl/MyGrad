@@ -16,7 +16,6 @@ on pip.
 - Minimum supported NumPy version is now 1.24
 - Minimum supported Python version is now 3.9
 - Adds testing for Python 3.12
-- Drops typing-extensions dependency
 
 .. _v2.2.0:
 
