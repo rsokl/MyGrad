@@ -3,6 +3,7 @@ This module defines the base tensor class along with all of its essential
 attributes and special methods. Public math methods, e.g. ``sum``, ``mean``,
 etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 """
+
 from collections import deque
 from numbers import Integral, Number
 from typing import (
@@ -734,8 +735,10 @@ class Tensor:
         else:  # pragma: no cover
             return NotImplemented
 
-    def __array__(self, dtype: DTypeLike = None) -> np.ndarray:
-        return np.array(self.data, dtype=dtype, copy=False)
+    def __array__(
+        self, dtype: DTypeLike = None, copy: Optional[bool] = None
+    ) -> np.ndarray:
+        return np.asarray(self.data, dtype=dtype, copy=copy)
 
     def __init__(
         self,
@@ -795,7 +798,18 @@ class Tensor:
 
         self._creator: Optional[Operation] = _creator
 
-        self.data = np.array(x, dtype=dtype, copy=copy, ndmin=ndmin)  # type: np.ndarray
+        if copy is False:
+            self.data = np.asarray(x, dtype=dtype)  # type: np.ndarray
+            if not isinstance(ndmin, Integral):
+                raise TypeError(
+                    f"'{type(ndmin)}' object cannot be interpreted as an integer"
+                )
+            if ndmin and self.data.ndim < ndmin:
+                self.data = self.data[(*(None for _ in range(ndmin - self.data.ndim)),)]
+        else:
+            self.data = np.array(
+                x, dtype=dtype, copy=copy, ndmin=ndmin
+            )  # type: np.ndarray
 
         dtype = self.data.dtype.type
         is_float = issubclass(dtype, np.floating)  # faster than `numpy.issubdtype`

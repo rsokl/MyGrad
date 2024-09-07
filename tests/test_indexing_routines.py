@@ -2,7 +2,7 @@ import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
 import pytest
-from hypothesis import given
+from hypothesis import assume, given
 
 import mygrad as mg
 from mygrad import where
@@ -50,9 +50,12 @@ def test_where_condition_only_fwd(condition):
     tensor_condition = (
         mg.Tensor(condition) if isinstance(condition, np.ndarray) else condition
     )
-    assert all(
-        np.all(x == y) for x, y in zip(np.where(tensor_condition), np.where(condition))
-    )
+    try:
+        c = np.where(condition)
+    except ValueError:
+        assume(False)
+    tc = np.where(tensor_condition)
+    assert all(np.all(x == y) for x, y in zip(tc, c))
 
 
 @given(

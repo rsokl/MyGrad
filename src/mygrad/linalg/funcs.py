@@ -2,7 +2,11 @@ from numbers import Real
 from typing import Optional, Sequence, Tuple, Union
 
 import numpy as np
-from numpy.core.einsumfunc import _parse_einsum_input
+
+try:
+    from numpy._core.einsumfunc import _parse_einsum_input
+except ImportError:
+    from numpy.core.einsumfunc import _parse_einsum_input
 
 from mygrad.math.misc.funcs import absolute
 from mygrad.math.sequential.funcs import max as mg_max, min as mg_min

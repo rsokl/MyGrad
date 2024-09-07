@@ -1,5 +1,5 @@
 import sys
-from typing import TYPE_CHECKING, List, Sequence, Tuple, TypeVar, Union
+from typing import TYPE_CHECKING, List, Optional, Sequence, Tuple, TypeVar, Union
 
 import numpy as np
 from typing_extensions import runtime_checkable
@@ -39,7 +39,9 @@ else:  # pragma: no cover
 
     @runtime_checkable
     class ImplementsArray(Protocol):
-        def __array__(self, dtype: None = ...) -> np.ndarray:
+        def __array__(
+            self, dtype: None = ..., copy: Optional[bool] = ...
+        ) -> np.ndarray:
             ...
 
 

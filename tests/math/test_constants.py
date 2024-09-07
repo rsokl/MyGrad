@@ -9,17 +9,9 @@ import mygrad as mg
 @pytest.mark.parametrize(
     ("mygrad_constant", "numpy_constant"),
     [
-        (mg.Infinity, np.Infinity),
-        (mg.NAN, np.NAN),
-        (mg.NINF, np.NINF),
-        (mg.NZERO, np.NZERO),
-        (mg.NaN, np.NaN),
-        (mg.PINF, np.PINF),
-        (mg.PZERO, np.PZERO),
         (mg.e, np.e),
         (mg.euler_gamma, np.euler_gamma),
         (mg.inf, np.inf),
-        (mg.infty, np.infty),
         (mg.nan, np.nan),
         (mg.newaxis, np.newaxis),
     ],

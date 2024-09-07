@@ -96,7 +96,7 @@ class Operation(ABC):
 
         if out.ndim == 0:
             # sum-reduction to a scalar produces a float
-            out = np.array(out, copy=False)
+            out = np.asarray(out)
         return out
 
     @abstractmethod
@@ -197,7 +197,7 @@ class Operation(ABC):
                     f"numpy arrays, got a gradient of type: {type(backed_grad)}"
                 )
 
-            backed_grad = np.array(backed_grad, copy=False)
+            backed_grad = np.asarray(backed_grad)
 
             if self.where is not True:
                 backed_grad = backed_grad * self.where

@@ -57,7 +57,10 @@ def test_input_constant_checking(constant):
 def test_ndmin(x: np.ndarray, copy: bool, dtype, ndmin: int):
     """Ensure Tensor(..., ndmin=<val>) mirrors numpy behavior and
     produces appropriate view behavior"""
-    arr = np.array(x, copy=copy, ndmin=ndmin, dtype=dtype)
+    try:
+        arr = np.array(x, copy=copy, ndmin=ndmin, dtype=dtype)
+    except ValueError:
+        assume(False)
     tensor = Tensor(x, copy=copy, ndmin=ndmin, dtype=dtype)
     assert_equal(tensor, arr)
 

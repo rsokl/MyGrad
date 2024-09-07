@@ -4,6 +4,7 @@ import numpy as np
 from numpy import ndarray
 
 import mygrad as mg
+from mygrad._numpy_version import NP_IS_V2
 from mygrad.math.misc.ops import MatMul
 from mygrad.tensor_base import Tensor, implements_numpy_override
 from mygrad.typing import ArrayLike, DTypeLikeReals, Mask
@@ -501,7 +502,7 @@ def clip(
     Tensor([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
     >>> mg.clip(a, [3, 4, 1, 1, 1, 4, 4, 4, 4, 4], 8)
     Tensor([3, 4, 2, 3, 4, 5, 6, 7, 8, 8])"""
-    if a_min is None and a_max is None:
+    if not NP_IS_V2 and a_min is None and a_max is None:
         raise ValueError("`a_min` and `a_max` cannot both be set to `None`")
 
     if a_min is not None:
@@ -509,7 +510,7 @@ def clip(
 
     if a_max is not None:
         a = minimum(a_max, a, out=out, constant=constant)
-    return a
+    return mg.astensor(a)
 
 
 @ufunc_creator(MatMul)
