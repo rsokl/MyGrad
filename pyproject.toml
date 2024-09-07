@@ -1,0 +1,183 @@
+[build-system]
+requires = [
+       "setuptools >= 35.0.2",
+       "wheel >= 0.29.0",
+       "setuptools_scm[toml]==7.0.5",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mygrad"
+dynamic = ["version"]
+description = "Drop-in automatic differentiation to NumPy"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = ["numpy >= 1.24, !=1.25.0", "typing-extensions >= 4.1.0, !=4.6.0"]
+license = { text = "MIT" }
+
+authors = [
+       { name = "Ryan Soklaski", email = "rsoklaski@gmail.com" },
+]
+maintainers = [{ name = "Ryan Soklaski", email = "rsoklaski@gmail.com" }]
+
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Education",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering",
+]
+
+
+[project.optional-dependencies]
+test = ["pytest >= 3.8", "hypothesis >= 6.17.1", "scipy"]
+rnn = ["numba>=0.34.0"]
+
+
+
+[project.urls]
+"Homepage" = "https://mygrad.readthedocs.io/en/latest/"
+"Bug Reports" = "https://github.com/rsokl/MyGrad/issues"
+"Source" = "https://github.com/rsokl/MyGrad"
+
+
+[tool.setuptools_scm]
+write_to = "src/mygrad/_version.py"
+version_scheme = "no-guess-dev"
+
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+exclude = ["tests*", "tests.*"]
+
+[tool.setuptools.package-data]
+mygrad = ["py.typed"]
+
+
+[tool.isort]
+known_third_party = ["graphviz", "hypothesis", "numpy", "numba", "pytest", "scipy"]
+known_first_party = ["mygrad", "tests"] 
+profile = "black"
+src_paths=["src/mygrad","tests"]
+
+[tool.coverage.run]
+omit = ["src/mygrad/_version.py", "src/mygrad/computational_graph.py"]
+
+[tool.coverage.report]
+omit = ["src/mygrad/_version.py"]
+
+[tool.codespell]
+skip = ["*.po","*.ts","**/_version.py","docs/source/generated/*"]
+ignore-words-list = ["ND","nd","nin","dout"]
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py39,py310,py311,py312,format,min_numpy
+
+[gh-actions]
+python =
+  3.9: py39
+  3.10: py310
+  3.11: py311
+  3.12: py312
+
+[testenv]
+deps =
+    pytest
+    hypothesis
+    scipy
+    pytest-xdist
+commands = pytest -n auto --hypothesis-profile ci \
+           {posargs}
+extras = rnn
+
+
+[testenv:min_numpy]
+deps = numpy==1.24
+       {[testenv]deps}
+basepython = python3.9
+commands = pytest -n auto --hypothesis-profile ci \
+           {posargs}
+extras =
+
+[testenv:py310]
+deps = {[testenv]deps}
+commands = pytest -n auto --hypothesis-profile ci \
+           {posargs}
+extras =
+
+[testenv:py311]
+deps = {[testenv]deps}
+commands = pytest -n auto --hypothesis-profile ci \
+           {posargs}
+extras =
+
+[testenv:py312]  # exclude numba dependency for now
+deps = pytest
+       pytest-xdist
+       hypothesis
+       scipy
+commands = pytest -n auto --hypothesis-profile ci \
+           {posargs}
+extras =
+
+
+[testenv:coverage]
+setenv = NUMBA_DISABLE_JIT=1
+         MYGRAD_COVERAGE_MODE=1
+usedevelop = true
+basepython = python3.10
+deps = {[testenv]deps}
+       coverage
+       pytest-cov
+commands = pytest -n auto --cov-report term-missing --cov-config=setup.cfg --cov-fail-under=100 --cov=mygrad tests
+
+
+[testenv:format]
+deps =
+    autoflake
+    black
+    isort
+commands =
+    autoflake --recursive --in-place --remove-duplicate-keys --remove-unused-variables .
+    isort .
+    black .
+
+
+[testenv:pre-release]  # test against pre-releases of dependencies
+pip_pre = true
+deps = pytest
+       hypothesis
+       scipy
+       pytest-xdist
+basepython = python3.11
+commands = pytest -n auto --hypothesis-profile ci \
+           {posargs}
+extras =
+
+
+[testenv:enforce-format]
+skip_install=true
+basepython=python3.11
+deps=black
+     isort
+     flake8
+     pytest
+     codespell
+commands=
+    black src/ tests/ --diff --check
+    isort src/ tests/ --diff --check
+    flake8 src/ tests/
+    codespell src/ docs/
+"""

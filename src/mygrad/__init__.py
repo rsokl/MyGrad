@@ -1,9 +1,5 @@
-from mygrad.tensor_base import (  # isort:skip  # avoid an import cycle
-    asarray,
-    astensor,
-    tensor,
-    Tensor,
-)
+from typing import TYPE_CHECKING
+
 from mygrad._dtype_mirrors import *
 from mygrad._utils.graph_tracking import no_autodiff
 from mygrad._utils.lock_management import (
@@ -35,11 +31,22 @@ from mygrad.ufuncs._ufunc_creators import ufunc
 
 from . import random
 from ._io import load, save
-from ._version import get_versions
 
-__version__ = get_versions()["version"]
-del get_versions
+from mygrad.tensor_base import (  # isort:skip  # avoid an import cycle
+    asarray,
+    astensor,
+    tensor,
+    Tensor,
+)
 
+
+if not TYPE_CHECKING:
+    try:
+        from ._version import version as __version__
+    except ImportError:
+        __version__ = "unknown version"
+else:  # pragma: no cover
+    __version__: str
 
 setattr(Tensor, "clip", clip)
 execute_op = Tensor._op
