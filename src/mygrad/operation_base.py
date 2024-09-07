@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
 
 import numpy as np
 
+from mygrad._numpy_version import NP_IS_V2
 from mygrad._utils import SkipGradient, reduce_broadcast
 from mygrad.errors import InvalidBackprop, InvalidGradient
 from mygrad.typing import DTypeLike, Mask
@@ -97,7 +98,10 @@ class Operation(ABC):
 
         if out.ndim == 0:
             # sum-reduction to a scalar produces a float
-            out = np.asarray(out)
+            if NP_IS_V2:
+                out = np.asarray(out)
+            else:  # pragma: no cover
+                np.array(out, copy=False)
         return out
 
     @abstractmethod
@@ -198,7 +202,10 @@ class Operation(ABC):
                     f"numpy arrays, got a gradient of type: {type(backed_grad)}"
                 )
 
-            backed_grad = np.asarray(backed_grad)
+            if NP_IS_V2:
+                backed_grad = np.asarray(backed_grad)
+            else:  # pragma: no cover
+                np.array(backed_grad, copy=False)
 
             if self.where is not True:
                 backed_grad = backed_grad * self.where

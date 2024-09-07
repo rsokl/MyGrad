@@ -29,6 +29,7 @@ import numpy as np
 import mygrad._utils.duplicating_graph as _dup
 import mygrad._utils.graph_tracking as _track
 import mygrad._utils.lock_management as _mem
+from mygrad._numpy_version import NP_IS_V2
 from mygrad._tensor_core_ops.indexing import GetItem, SetItem
 from mygrad._utils import WeakRef, WeakRefIterable, collect_all_tensors_and_clear_grads
 from mygrad.errors import DisconnectedView
@@ -738,7 +739,12 @@ class Tensor:
     def __array__(
         self, dtype: DTypeLike = None, copy: Optional[bool] = None
     ) -> np.ndarray:
-        return np.asarray(self.data, dtype=dtype, copy=copy)
+        if NP_IS_V2:
+            return np.asarray(self.data, dtype=dtype, copy=copy)
+        else:  # pragma: no cover
+            if copy is None:
+                copy = False
+            return np.array(self.data, dtype=dtype, copy=copy)
 
     def __init__(
         self,
@@ -798,18 +804,21 @@ class Tensor:
 
         self._creator: Optional[Operation] = _creator
 
-        if copy is False:
-            self.data = np.asarray(x, dtype=dtype)  # type: np.ndarray
-            if not isinstance(ndmin, Integral):
-                raise TypeError(
-                    f"'{type(ndmin)}' object cannot be interpreted as an integer"
-                )
-            if ndmin and self.data.ndim < ndmin:
-                self.data = self.data[(*(None for _ in range(ndmin - self.data.ndim)),)]
+        if not NP_IS_V2:
+            self.data = np.array(x, dtype=dtype, copy=copy, ndmin=ndmin)
         else:
-            self.data = np.array(
-                x, dtype=dtype, copy=copy, ndmin=ndmin
-            )  # type: np.ndarray
+            if copy is False:
+                self.data = np.asarray(x, dtype=dtype)
+                if not isinstance(ndmin, Integral):
+                    raise TypeError(
+                        f"'{type(ndmin)}' object cannot be interpreted as an integer"
+                    )
+                if ndmin and self.data.ndim < ndmin:
+                    self.data = self.data[
+                        (*(None for _ in range(ndmin - self.data.ndim)),)
+                    ]
+            else:
+                self.data = np.array(x, dtype=dtype, copy=copy, ndmin=ndmin)
 
         dtype = self.data.dtype.type
         is_float = issubclass(dtype, np.floating)  # faster than `numpy.issubdtype`
