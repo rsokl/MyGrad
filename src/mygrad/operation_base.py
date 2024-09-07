@@ -101,7 +101,7 @@ class Operation(ABC):
             if NP_IS_V2:
                 out = np.asarray(out)
             else:  # pragma: no cover
-                np.array(out, copy=False)
+                out = np.array(out, copy=False)
         return out
 
     @abstractmethod
