@@ -17,7 +17,7 @@ def where(
     x: ArrayLike = _NoValue,
     y: ArrayLike = _NoValue,
     *,
-    constant: Optional[bool] = None
+    constant: Optional[bool] = None,
 ) -> Tensor:
     """
     where(condition, [x, y])

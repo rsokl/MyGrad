@@ -17,8 +17,8 @@ from typing import (
 from weakref import ReferenceType
 
 if TYPE_CHECKING:  # pragma: no cover
-    from mygrad import Tensor
     from mygrad.operation_base import Operation  # noqa: F401
+    from mygrad.tensor_base import Tensor
 
 __all__ = [
     "collect_all_operations_and_clear_grads",

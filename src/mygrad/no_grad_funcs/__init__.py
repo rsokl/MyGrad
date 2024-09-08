@@ -123,9 +123,8 @@ if TYPE_CHECKING:  # pragma: no cover
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
-        subok: bool = True
-    ) -> Union[numpy.ndarray, bool]:
-        ...
+        subok: bool = True,
+    ) -> Union[numpy.ndarray, bool]: ...
 
     def isfinite(
         x: ArrayLike,
@@ -135,9 +134,8 @@ if TYPE_CHECKING:  # pragma: no cover
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
-        subok: bool = True
-    ) -> Union[numpy.ndarray, bool]:
-        ...
+        subok: bool = True,
+    ) -> Union[numpy.ndarray, bool]: ...
 
     def isinf(
         x: ArrayLike,
@@ -147,9 +145,8 @@ if TYPE_CHECKING:  # pragma: no cover
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
-        subok: bool = True
-    ) -> Union[numpy.ndarray, bool]:
-        ...
+        subok: bool = True,
+    ) -> Union[numpy.ndarray, bool]: ...
 
     def isnat(
         x: ArrayLike,
@@ -159,9 +156,8 @@ if TYPE_CHECKING:  # pragma: no cover
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
-        subok: bool = True
-    ) -> Union[numpy.ndarray, bool]:
-        ...
+        subok: bool = True,
+    ) -> Union[numpy.ndarray, bool]: ...
 
     def signbit(
         x: ArrayLike,
@@ -171,9 +167,8 @@ if TYPE_CHECKING:  # pragma: no cover
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
-        subok: bool = True
-    ) -> Union[numpy.ndarray, bool]:
-        ...
+        subok: bool = True,
+    ) -> Union[numpy.ndarray, bool]: ...
 
     def logical_not(
         x1: ArrayLike,
@@ -184,9 +179,8 @@ if TYPE_CHECKING:  # pragma: no cover
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
-        subok: bool = True
-    ) -> Union[numpy.ndarray, bool]:
-        ...
+        subok: bool = True,
+    ) -> Union[numpy.ndarray, bool]: ...
 
     def logical_and(
         x1: ArrayLike,
@@ -197,9 +191,8 @@ if TYPE_CHECKING:  # pragma: no cover
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
-        subok: bool = True
-    ) -> Union[numpy.ndarray, bool]:
-        ...
+        subok: bool = True,
+    ) -> Union[numpy.ndarray, bool]: ...
 
     def logical_or(
         x1: ArrayLike,
@@ -210,9 +203,8 @@ if TYPE_CHECKING:  # pragma: no cover
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
-        subok: bool = True
-    ) -> Union[numpy.ndarray, bool]:
-        ...
+        subok: bool = True,
+    ) -> Union[numpy.ndarray, bool]: ...
 
     def logical_xor(
         x1: ArrayLike,
@@ -223,9 +215,8 @@ if TYPE_CHECKING:  # pragma: no cover
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
-        subok: bool = True
-    ) -> Union[numpy.ndarray, bool]:
-        ...
+        subok: bool = True,
+    ) -> Union[numpy.ndarray, bool]: ...
 
     def greater(
         x1: ArrayLike,
@@ -236,9 +227,8 @@ if TYPE_CHECKING:  # pragma: no cover
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
-        subok: bool = True
-    ) -> Union[numpy.ndarray, bool]:
-        ...
+        subok: bool = True,
+    ) -> Union[numpy.ndarray, bool]: ...
 
     def greater_equal(
         x1: ArrayLike,
@@ -249,9 +239,8 @@ if TYPE_CHECKING:  # pragma: no cover
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
-        subok: bool = True
-    ) -> Union[numpy.ndarray, bool]:
-        ...
+        subok: bool = True,
+    ) -> Union[numpy.ndarray, bool]: ...
 
     def less(
         x1: ArrayLike,
@@ -262,9 +251,8 @@ if TYPE_CHECKING:  # pragma: no cover
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
-        subok: bool = True
-    ) -> Union[numpy.ndarray, bool]:
-        ...
+        subok: bool = True,
+    ) -> Union[numpy.ndarray, bool]: ...
 
     def less_equal(
         x1: ArrayLike,
@@ -275,9 +263,8 @@ if TYPE_CHECKING:  # pragma: no cover
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
-        subok: bool = True
-    ) -> Union[numpy.ndarray, bool]:
-        ...
+        subok: bool = True,
+    ) -> Union[numpy.ndarray, bool]: ...
 
     def equal(
         x1: ArrayLike,
@@ -288,9 +275,8 @@ if TYPE_CHECKING:  # pragma: no cover
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
-        subok: bool = True
-    ) -> Union[numpy.ndarray, bool]:
-        ...
+        subok: bool = True,
+    ) -> Union[numpy.ndarray, bool]: ...
 
     def not_equal(
         x1: ArrayLike,
@@ -301,9 +287,8 @@ if TYPE_CHECKING:  # pragma: no cover
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
-        subok: bool = True
-    ) -> Union[numpy.ndarray, bool]:
-        ...
+        subok: bool = True,
+    ) -> Union[numpy.ndarray, bool]: ...
 
     def floor_divide(
         x1: ArrayLike,
@@ -314,9 +299,8 @@ if TYPE_CHECKING:  # pragma: no cover
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
-        subok: bool = True
-    ) -> numpy.ndarray:
-        ...
+        subok: bool = True,
+    ) -> numpy.ndarray: ...
 
     def remainder(
         x1: ArrayLike,
@@ -327,9 +311,8 @@ if TYPE_CHECKING:  # pragma: no cover
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
-        subok: bool = True
-    ) -> numpy.ndarray:
-        ...
+        subok: bool = True,
+    ) -> numpy.ndarray: ...
 
     def divmod(
         x1: ArrayLike,
@@ -340,9 +323,8 @@ if TYPE_CHECKING:  # pragma: no cover
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
-        subok: bool = True
-    ) -> Tuple[numpy.ndarray, numpy.ndarray]:
-        ...
+        subok: bool = True,
+    ) -> Tuple[numpy.ndarray, numpy.ndarray]: ...
 
     def mod(
         x1: ArrayLike,
@@ -353,9 +335,8 @@ if TYPE_CHECKING:  # pragma: no cover
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
-        subok: bool = True
-    ) -> Tuple[numpy.ndarray, numpy.ndarray]:
-        ...
+        subok: bool = True,
+    ) -> Tuple[numpy.ndarray, numpy.ndarray]: ...
 
     def fmod(
         x1: ArrayLike,
@@ -366,9 +347,8 @@ if TYPE_CHECKING:  # pragma: no cover
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
-        subok: bool = True
-    ) -> Tuple[numpy.ndarray, numpy.ndarray]:
-        ...
+        subok: bool = True,
+    ) -> Tuple[numpy.ndarray, numpy.ndarray]: ...
 
     def rint(
         x: ArrayLike,
@@ -378,9 +358,8 @@ if TYPE_CHECKING:  # pragma: no cover
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
-        subok: bool = True
-    ) -> numpy.ndarray:
-        ...
+        subok: bool = True,
+    ) -> numpy.ndarray: ...
 
     def sign(
         x: ArrayLike,
@@ -390,9 +369,8 @@ if TYPE_CHECKING:  # pragma: no cover
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
-        subok: bool = True
-    ) -> numpy.ndarray:
-        ...
+        subok: bool = True,
+    ) -> numpy.ndarray: ...
 
     def floor(
         x: ArrayLike,
@@ -402,9 +380,8 @@ if TYPE_CHECKING:  # pragma: no cover
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
-        subok: bool = True
-    ) -> numpy.ndarray:
-        ...
+        subok: bool = True,
+    ) -> numpy.ndarray: ...
 
     def ceil(
         x: ArrayLike,
@@ -414,9 +391,8 @@ if TYPE_CHECKING:  # pragma: no cover
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
-        subok: bool = True
-    ) -> numpy.ndarray:
-        ...
+        subok: bool = True,
+    ) -> numpy.ndarray: ...
 
     def trunc(
         x: ArrayLike,
@@ -426,6 +402,5 @@ if TYPE_CHECKING:  # pragma: no cover
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
-        subok: bool = True
-    ) -> numpy.ndarray:
-        ...
+        subok: bool = True,
+    ) -> numpy.ndarray: ...

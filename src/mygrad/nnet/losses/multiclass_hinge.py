@@ -64,7 +64,7 @@ def multiclass_hinge(
     y_true: ArrayLike,
     hinge: float = 1.0,
     *,
-    constant: Optional[bool] = None
+    constant: Optional[bool] = None,
 ) -> Tensor:
     """Computes the average multiclass hinge loss.
 

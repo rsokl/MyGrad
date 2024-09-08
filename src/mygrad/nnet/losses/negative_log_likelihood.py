@@ -2,7 +2,8 @@ from typing import Optional
 
 import numpy as np
 
-from mygrad import Tensor, asarray, mean
+from mygrad.math.sequential.funcs import mean
+from mygrad.tensor_base import Tensor, asarray
 from mygrad.typing import ArrayLike
 
 from ._utils import check_loss_inputs

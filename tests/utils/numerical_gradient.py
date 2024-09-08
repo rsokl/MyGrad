@@ -13,7 +13,7 @@ def finite_difference(
     vary_ind=None,
     h=Decimal(1) / Decimal(int(1e8)),
     as_decimal=False,
-    kwargs=None
+    kwargs=None,
 ):
     """Computes numerical partial derivatives of f(x0, x1, ...) in each
     of its variables, using the central difference method.

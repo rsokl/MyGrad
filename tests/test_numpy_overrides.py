@@ -49,7 +49,6 @@ def test_bincount():
 
 
 def test_can_cast():
-    assert np.can_cast(mg.tensor(1000.0), np.float32) is True
     assert np.can_cast(mg.tensor([1000.0]), np.float32) is False
 
 

@@ -2,8 +2,8 @@ from typing import Optional
 
 import numpy as np
 
-from mygrad import Tensor
 from mygrad.operation_base import Operation
+from mygrad.tensor_base import Tensor
 from mygrad.typing import ArrayLike
 
 __all__ = ["batchnorm"]
@@ -114,7 +114,7 @@ def batchnorm(
     gamma: Optional[ArrayLike] = None,
     beta: Optional[ArrayLike] = None,
     eps: float,
-    constant: Optional[bool] = None
+    constant: Optional[bool] = None,
 ) -> Tensor:
     """
     Performs batch normalization on ``x``::

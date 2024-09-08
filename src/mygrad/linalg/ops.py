@@ -264,7 +264,7 @@ class Norm(Operation):
         axis=None,
         keepdims: bool = False,
         *,
-        nan_to_num: bool = True
+        nan_to_num: bool = True,
     ):
         self.variables = (tensor,)
         self._nan_to_num = nan_to_num

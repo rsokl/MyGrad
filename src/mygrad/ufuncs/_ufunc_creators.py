@@ -1,4 +1,3 @@
-import sys
 from abc import ABC, ABCMeta, abstractmethod
 from inspect import signature
 from typing import (
@@ -23,17 +22,10 @@ from mygrad.typing import ArrayLike, DTypeLikeReals, Index, Mask, Real
 __all__ = ["ufunc_creator"]
 
 
-if sys.version_info >= (3, 8):  # pragma: no cover
-    from typing import Literal
+from typing import Literal
 
-    HAS_LITERAL = True
-else:  # pragma: no cover
-    try:
-        from typing_extensions import Literal
-    except ImportError:
-        HAS_LITERAL = False
-    else:
-        HAS_LITERAL = True
+HAS_LITERAL = True
+
 
 if TYPE_CHECKING and HAS_LITERAL:  # pragma: no cover
     One = Literal[1]

@@ -4,7 +4,7 @@ from typing import Any
 
 import hypothesis.strategies as st
 import pytest
-from hypothesis import given, settings
+from hypothesis import HealthCheck, given, settings
 from numpy.testing import assert_array_equal
 
 from mygrad import Tensor, load, save
@@ -35,7 +35,7 @@ def test_save_load_roundtrip(fname: str, as_path: bool, tensor: Tensor):
         assert_array_equal(tensor.grad, loaded.grad)
 
 
-@settings(max_examples=10)
+@settings(max_examples=10, suppress_health_check=(HealthCheck.too_slow,))
 @given(
     fname=filenames,
     as_path=st.booleans(),

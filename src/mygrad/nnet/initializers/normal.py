@@ -1,6 +1,6 @@
 import numpy as np
 
-from mygrad import Tensor
+from mygrad.tensor_base import Tensor
 
 
 def normal(*shape, mean=0, std=1, dtype=np.float32, constant=None):

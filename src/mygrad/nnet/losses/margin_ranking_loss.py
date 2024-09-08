@@ -55,7 +55,7 @@ def margin_ranking_loss(
     y: ArrayLike,
     margin: float,
     *,
-    constant: Optional[bool] = None
+    constant: Optional[bool] = None,
 ) -> Tensor:
     r"""Computes the margin average margin ranking loss.
     Equivalent to::

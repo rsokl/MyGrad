@@ -1,46 +1,35 @@
 import sys
-from typing import TYPE_CHECKING, List, Sequence, Tuple, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    TypeVar,
+    Union,
+    runtime_checkable,
+)
 
 import numpy as np
-from typing_extensions import runtime_checkable
 
 if TYPE_CHECKING:  # pragma: no cover
     from mygrad import Tensor
 
-if sys.version_info >= (3, 8):  # pragma: no cover
-    from typing import Protocol
-
-    HAS_PROTOCOL = True
-else:  # pragma: no cover
-    try:
-        from typing_extensions import Protocol
-    except ImportError:
-        HAS_PROTOCOL = False
-        Protocol = object
-    else:
-        HAS_PROTOCOL = True
-
+from typing import Protocol
 
 if sys.version_info >= (3, 10):  # pragma: no cover
     from types import EllipsisType
 elif TYPE_CHECKING:  # pragma: no cover
     from builtins import ellipsis as EllipsisType
-else:
+else:  # pragma: no cover
     EllipsisType = type(Ellipsis)
 
 
-if not TYPE_CHECKING and not HAS_PROTOCOL:  # pragma: no cover
-
-    class ImplementsArray:
-        def __array__(self, dtype: None = ...) -> np.ndarray:
-            ...
-
-else:  # pragma: no cover
-
-    @runtime_checkable
-    class ImplementsArray(Protocol):
-        def __array__(self, dtype: None = ...) -> np.ndarray:
-            ...
+@runtime_checkable
+class ImplementsArray(Protocol):
+    def __array__(
+        self, dtype: None = ..., copy: Optional[bool] = ...
+    ) -> np.ndarray: ...
 
 
 Real = Union[int, float]
@@ -61,8 +50,7 @@ if TYPE_CHECKING:  # pragma: no cover
     ArrayLike = Union[Real, "Tensor", np.ndarray, ImplementsArray, SequenceNDReals]
 else:  # pragma: no cover
 
-    class ArrayLike:
-        ...
+    class ArrayLike: ...
 
 
 sb1 = Sequence[bool]

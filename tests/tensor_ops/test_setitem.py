@@ -415,13 +415,15 @@ def test_setitem_bool_basic_index():
     index_strat=lambda x: hnp.arrays(shape=(2, 3), dtype=bool).map(
         lambda _x: (_x[0], _x[1])
     ),
-    value_strat=lambda o: hnp.arrays(
-        shape=broadcastable_shapes(o.shape, max_dims=o.ndim, max_side=max(o.shape)),
-        dtype=float,
-        elements=st.floats(-10.0, 10.0),
-    )
-    if o.shape and o.size
-    else st.floats(-10.0, 10.0).map(np.asarray),
+    value_strat=lambda o: (
+        hnp.arrays(
+            shape=broadcastable_shapes(o.shape, max_dims=o.ndim, max_side=max(o.shape)),
+            dtype=float,
+            elements=st.floats(-10.0, 10.0),
+        )
+        if o.shape and o.size
+        else st.floats(-10.0, 10.0).map(np.asarray)
+    ),
 )
 def test_setitem_bool_axes_index():
     """index consists of boolean arrays specified for each axis"""

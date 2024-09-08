@@ -1,6 +1,6 @@
 import numpy as np
 
-from mygrad import Tensor
+from mygrad.tensor_base import Tensor
 
 
 def uniform(*shape, lower_bound=0, upper_bound=1, dtype=np.float32, constant=None):

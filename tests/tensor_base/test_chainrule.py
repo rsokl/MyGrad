@@ -209,9 +209,11 @@ def test_linear_graph(
     # dL/d2 = dL/d4 * d4/d3 * d3/d2 * d2/d1
     _check_grad(
         v1,
-        None
-        if (v4.constant or v3.constant or v2.constant)
-        else grad * (2 * np.exp(v2.data)) * (2 * v1.data),
+        (
+            None
+            if (v4.constant or v3.constant or v2.constant)
+            else grad * (2 * np.exp(v2.data)) * (2 * v1.data)
+        ),
     )
 
     # check the backprop clears graph & clear graph always propagates through the graph
@@ -501,9 +503,7 @@ def test_dynamic_interesting_graph(
     )
     _check_grad(v3, v3_grad)
 
-    v2_grad = (
-        None if (v5.constant or v4.constant) else grad * v3.data**2 * v1.data**2
-    )
+    v2_grad = None if (v5.constant or v4.constant) else grad * v3.data**2 * v1.data**2
     _check_grad(v2, v2_grad)
 
     v1_grad = None if v5.constant else grad * v4.data * v3.data

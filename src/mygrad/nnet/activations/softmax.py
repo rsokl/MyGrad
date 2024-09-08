@@ -41,7 +41,7 @@ def softmax(
     x: ArrayLike,
     axis: Union[None, int, Tuple[int, ...]] = -1,
     *,
-    constant: Optional[bool] = None
+    constant: Optional[bool] = None,
 ) -> Tensor:
     r"""
     Applies the softmax activation function::
@@ -115,7 +115,7 @@ def logsoftmax(
     x: ArrayLike,
     axis: Union[None, int, Tuple[int, ...]] = -1,
     *,
-    constant: Optional[bool] = None
+    constant: Optional[bool] = None,
 ) -> Tensor:
     r"""
     Applies the log-softmax activation function::

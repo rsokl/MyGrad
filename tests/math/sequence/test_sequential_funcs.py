@@ -14,10 +14,8 @@ from tests.utils.functools import add_constant_passthrough
 from tests.utils.numerical_gradient import numerical_gradient_full
 
 from ...custom_strategies import tensors, valid_axes
-from ...wrappers.uber import (
-    backprop_test_factory as backprop_test_factory,
-    fwdprop_test_factory as fwdprop_test_factory,
-)
+from ...wrappers.uber import backprop_test_factory as backprop_test_factory
+from ...wrappers.uber import fwdprop_test_factory as fwdprop_test_factory
 
 
 def axis_arg(*arrs, min_dim=0):
