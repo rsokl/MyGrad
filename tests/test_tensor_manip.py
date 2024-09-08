@@ -5,7 +5,7 @@ import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
 import pytest
-from hypothesis import given, infer, settings
+from hypothesis import HealthCheck, given, infer, settings
 from numpy.testing import assert_allclose
 from pytest import raises
 
@@ -262,6 +262,7 @@ def test_expand_dims_bkwd():
     pass
 
 
+@settings(deadline=None, suppress_health_check=(HealthCheck.filter_too_much,))
 @fwdprop_test_factory(
     mygrad_func=moveaxis,
     true_func=np.moveaxis,
@@ -277,7 +278,7 @@ def test_moveaxis_fwd():
     pass
 
 
-@settings(deadline=None)
+@settings(deadline=None, suppress_health_check=(HealthCheck.filter_too_much,))
 @backprop_test_factory(
     mygrad_func=add_constant_passthrough(np.moveaxis),  # exercises __array_function__
     true_func=np.moveaxis,
