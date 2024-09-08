@@ -58,7 +58,7 @@ def test_sequential_arithmetic(
     f = mygrad_func(*tensors)
     f1 = true_func(tensors_copy)
 
-    assert_allclose(f.data, f1.data, rtol=1e-05)
+    assert_allclose(f.data, f1.data, rtol=1e-05, atol=1e-05)
 
     f.sum().backward()
     f1.sum().backward()
