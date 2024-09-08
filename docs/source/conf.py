@@ -99,6 +99,20 @@ extlinks = {
 #
 html_theme = "pydata_sphinx_theme"
 
+html_theme_options = {
+    "collapse_navigation": True,
+    "navigation_depth": 4,
+    "pygment_light_style": "default",
+    "pygment_dark_style": "zenburn",
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/rsokl/MyGrad",
+            "icon": "fab fa-github-square",
+        },
+    ],
+}
+
 
 def setup(app):
     app.add_css_file("my_theme.css")
