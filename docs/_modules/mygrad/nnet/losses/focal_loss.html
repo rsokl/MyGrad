@@ -1,0 +1,793 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mygrad.nnet.losses.focal_loss &#8212; MyGrad 2.3.0.post1.dev6 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/my_theme.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/sphinx_highlight.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/mygrad/nnet/losses/focal_loss';</script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="../../../../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev6 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../install.html">
+                        Installing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../intro.html">
+                        Introducing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../tensor.html">
+                        MyGrad’s Tensor
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../views.html">
+                        Views and In-Place Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../performance_tips.html">
+                        Performance Tips
+                      </a>
+                    </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../operation.html">
+                        Writing Your Own Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../tensor_creation.html">
+                        Tensor creation routines (mygrad.tensor_creation)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../tensor_manipulation.html">
+                        Tensor manipulation routines (mygrad.tensor_manip)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../linalg.html">
+                        Linear algebra (mygrad.linalg)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../math.html">
+                        Mathematical functions (mygrad.math)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../indexing.html">
+                        Indexing Routines (mygrad.indexing_routines)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../nnet.html">
+                        Neural network operations (mygrad.nnet)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../io.html">
+                        Input and Output
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../graph_viz.html">
+                        Computational graph visualization(mygrad.computational_graph)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../changes.html">
+                        Changelog
+                      </a>
+                    </li>
+                
+                </div>
+            </div>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../install.html">
+                        Installing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../intro.html">
+                        Introducing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../tensor.html">
+                        MyGrad’s Tensor
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../views.html">
+                        Views and In-Place Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../performance_tips.html">
+                        Performance Tips
+                      </a>
+                    </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../operation.html">
+                        Writing Your Own Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../tensor_creation.html">
+                        Tensor creation routines (mygrad.tensor_creation)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../tensor_manipulation.html">
+                        Tensor manipulation routines (mygrad.tensor_manip)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../linalg.html">
+                        Linear algebra (mygrad.linalg)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../math.html">
+                        Mathematical functions (mygrad.math)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../indexing.html">
+                        Indexing Routines (mygrad.indexing_routines)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../nnet.html">
+                        Neural network operations (mygrad.nnet)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../io.html">
+                        Input and Output
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../graph_viz.html">
+                        Computational graph visualization(mygrad.computational_graph)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../changes.html">
+                        Changelog
+                      </a>
+                    </li>
+                
+                </div>
+            </div>
+            
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">mygrad.nnet.losses.focal_loss</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <h1>Source code for mygrad.nnet.losses.focal_loss</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">numbers</span> <span class="kn">import</span> <span class="n">Real</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">mygrad._utils.graph_tracking</span> <span class="k">as</span> <span class="nn">_tracking</span>
+<span class="kn">from</span> <span class="nn">mygrad.nnet.activations</span> <span class="kn">import</span> <span class="n">softmax</span>
+<span class="kn">from</span> <span class="nn">mygrad.operation_base</span> <span class="kn">import</span> <span class="n">Operation</span>
+<span class="kn">from</span> <span class="nn">mygrad.tensor_base</span> <span class="kn">import</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">asarray</span>
+<span class="kn">from</span> <span class="nn">mygrad.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span>
+
+<span class="kn">from</span> <span class="nn">._utils</span> <span class="kn">import</span> <span class="n">check_loss_inputs</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;softmax_focal_loss&quot;</span><span class="p">,</span> <span class="s2">&quot;focal_loss&quot;</span><span class="p">]</span>
+
+
+<span class="k">class</span> <span class="nc">FocalLoss</span><span class="p">(</span><span class="n">Operation</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Returns the per-datum focal loss as described in https://arxiv.org/abs/1708.02002</span>
+<span class="sd">    which is given by -ɑ(1-p)ˠlog(p).</span>
+
+<span class="sd">    Extended Description</span>
+<span class="sd">    --------------------</span>
+<span class="sd">    The focal loss is given by</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        \frac{1}{N}\sum\limits_{1}^{N}-\alpha \hat{y}_i(1-p_i)^\gamma\log(p_i)</span>
+
+<span class="sd">    where :math:`N` is the number of elements in `x` and `y` and :math:`\hat{y}_i` is</span>
+<span class="sd">    one where :math:`i` is the label of the element :math:`y_i` and 0 elsewhere. That is,</span>
+<span class="sd">    if the label :math:`y_k` is 1 and there are four possible label values, then</span>
+<span class="sd">    :math:`\hat{y}_k = (0, 1, 0, 0)`.</span>
+
+<span class="sd">    It is recommended in the paper that you normalize by the number of foreground samples.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">class_probs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">gamma</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        class_probs : mygrad.Tensor, shape=(N, C)</span>
+<span class="sd">            The C class scores for each of the N pieces of data.</span>
+
+<span class="sd">        targets : Union[mygrad.Tensor, ArrayLike], shape=(N,)</span>
+<span class="sd">            The correct class indices, in [0, C), for each datum.</span>
+
+<span class="sd">        alpha : Real</span>
+<span class="sd">            The ɑ weighting factor in the loss formulation.</span>
+
+<span class="sd">        gamma : Real</span>
+<span class="sd">            The ɣ focusing parameter.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        numpy.ndarray</span>
+<span class="sd">            The per-datum focal loss.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">):</span>  <span class="c1"># pragma: nocover</span>
+            <span class="n">targets</span> <span class="o">=</span> <span class="n">targets</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="n">check_loss_inputs</span><span class="p">(</span><span class="n">class_probs</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="p">(</span><span class="n">class_probs</span><span class="p">,)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label_locs</span> <span class="o">=</span> <span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">class_probs</span><span class="p">)),</span> <span class="n">targets</span><span class="p">)</span>
+
+        <span class="n">class_probs</span> <span class="o">=</span> <span class="n">asarray</span><span class="p">(</span><span class="n">class_probs</span><span class="p">)</span>
+        <span class="n">pc</span> <span class="o">=</span> <span class="n">class_probs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">label_locs</span><span class="p">]</span>
+        <span class="n">one_m_pc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">pc</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">log_pc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">pc</span><span class="p">)</span>
+
+        <span class="n">one_m_pc_gamma</span> <span class="o">=</span> <span class="n">one_m_pc</span><span class="o">**</span><span class="n">gamma</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">alpha</span> <span class="o">*</span> <span class="n">one_m_pc_gamma</span> <span class="o">*</span> <span class="n">log_pc</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_tracking</span><span class="o">.</span><span class="n">TRACK_GRAPH</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">loss</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">back</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">class_probs</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-15</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">back</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">label_locs</span><span class="p">]</span> <span class="o">-=</span> <span class="n">alpha</span> <span class="o">/</span> <span class="n">pc</span>
+            <span class="k">return</span> <span class="n">loss</span>
+
+        <span class="c1"># dL/dp = -alpha * ( (1 - p)**g / p - g * (1 - p)**(g - 1) * log(p) )</span>
+        <span class="c1">#</span>
+        <span class="c1"># term 1: (1 - p)**g / p</span>
+        <span class="n">term1</span> <span class="o">=</span> <span class="n">one_m_pc_gamma</span> <span class="o">/</span> <span class="n">pc</span>  <span class="c1"># (1 - p)**g / p</span>
+
+        <span class="c1"># term 2: - g * (1 - p)**(g - 1) * log(p)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1e-15</span><span class="p">):</span>
+            <span class="n">term2</span> <span class="o">=</span> <span class="o">-</span><span class="n">log_pc</span>
+        <span class="k">elif</span> <span class="n">gamma</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># For g &lt; 1 and p -&gt; 1, the 2nd term -&gt; 0 via L&#39;Hôpital&#39;s rule</span>
+            <span class="n">term2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">pc</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">class_probs</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="n">pc_not_1</span> <span class="o">=</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">one_m_pc</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-25</span><span class="p">)</span>
+            <span class="n">term2</span><span class="p">[</span><span class="n">pc_not_1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="o">-</span><span class="n">gamma</span> <span class="o">*</span> <span class="n">one_m_pc</span><span class="p">[</span><span class="n">pc_not_1</span><span class="p">]</span> <span class="o">**</span> <span class="p">(</span><span class="n">gamma</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">log_pc</span><span class="p">[</span><span class="n">pc_not_1</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">term2</span> <span class="o">=</span> <span class="o">-</span><span class="n">gamma</span> <span class="o">*</span> <span class="n">one_m_pc</span> <span class="o">**</span> <span class="p">(</span><span class="n">gamma</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">log_pc</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">back</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">label_locs</span><span class="p">]</span> <span class="o">-=</span> <span class="n">alpha</span> <span class="o">*</span> <span class="p">(</span><span class="n">term1</span> <span class="o">+</span> <span class="n">term2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">loss</span>
+
+    <span class="k">def</span> <span class="nf">backward_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grad</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">back</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">label_locs</span><span class="p">]</span> <span class="o">*=</span> <span class="n">grad</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">back</span>
+
+
+<div class="viewcode-block" id="focal_loss"><a class="viewcode-back" href="../../../../generated/mygrad.nnet.losses.focal_loss.html#mygrad.nnet.losses.focal_loss">[docs]</a><span class="k">def</span> <span class="nf">focal_loss</span><span class="p">(</span>
+    <span class="n">class_probs</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">targets</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">gamma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the per-datum focal loss.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    class_probs : ArrayLike, shape=(N, C)</span>
+<span class="sd">        The C class probabilities for each of the N pieces of data.</span>
+<span class="sd">        Each value is expected to lie on (0, 1]</span>
+
+<span class="sd">    targets : ArrayLike, shape=(N,)</span>
+<span class="sd">        The correct class indices, in [0, C), for each datum.</span>
+
+<span class="sd">    alpha : Real, optional (default=1)</span>
+<span class="sd">        The ɑ weighting factor in the loss formulation.</span>
+
+<span class="sd">    gamma : Real, optional (default=0)</span>
+<span class="sd">        The ɣ focusing parameter. Note that for Ɣ=0 and ɑ=1, this is cross-entropy loss.</span>
+<span class="sd">        Must be a non-negative value.</span>
+
+<span class="sd">    constant : Optional[bool]</span>
+<span class="sd">        If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">        does not back-propagate a gradient)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    mygrad.Tensor, shape=(N,)</span>
+<span class="sd">        The per-datum focal loss.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The formulation for the focal loss introduced in https://arxiv.org/abs/1708.02002.</span>
+<span class="sd">    It is given by -ɑ(1-p)ˠlog(p).</span>
+
+
+<span class="sd">    The focal loss for datum-:math:`i` is given by</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        -\alpha \hat{y}_i(1-p_i)^\gamma\log(p_i)</span>
+
+<span class="sd">    where :math:`\hat{y}_i` is one in correspondence to the label associated with the</span>
+<span class="sd">    datum and 0 elsewhere. That is, if the label :math:`y_k` is 2 and</span>
+<span class="sd">    there are four possible label values, then :math:`\hat{y}_k = (0, 0, 1, 0)`.</span>
+
+<span class="sd">    It is recommended in the paper that you normalize by the number of foreground samples.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="n">Real</span><span class="p">)</span> <span class="ow">or</span> <span class="n">gamma</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`gamma` must be a non-negative number, got: </span><span class="si">{</span><span class="n">gamma</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span>
+        <span class="n">FocalLoss</span><span class="p">,</span> <span class="n">class_probs</span><span class="p">,</span> <span class="n">op_args</span><span class="o">=</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">gamma</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="softmax_focal_loss"><a class="viewcode-back" href="../../../../generated/mygrad.nnet.losses.softmax_focal_loss.html#mygrad.nnet.losses.softmax_focal_loss">[docs]</a><span class="k">def</span> <span class="nf">softmax_focal_loss</span><span class="p">(</span>
+    <span class="n">scores</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">targets</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">gamma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Applies the softmax normalization to the input scores before computing the</span>
+<span class="sd">    per-datum focal loss.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    scores : ArrayLike, shape=(N, C)</span>
+<span class="sd">        The C class scores for each of the N pieces of data.</span>
+
+<span class="sd">    targets : ArrayLike, shape=(N,)</span>
+<span class="sd">        The correct class indices, in [0, C), for each datum.</span>
+
+<span class="sd">    alpha : Real, optional (default=1)</span>
+<span class="sd">        The ɑ weighting factor in the loss formulation.</span>
+
+<span class="sd">    gamma : Real, optional (default=0)</span>
+<span class="sd">        The ɣ focusing parameter. Note that for Ɣ=0 and ɑ=1, this is cross-entropy loss.</span>
+<span class="sd">        Must be a non-negative value.</span>
+
+<span class="sd">    constant : Optional[bool]</span>
+<span class="sd">        If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">        does not back-propagate a gradient)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    mygrad.Tensor, shape=(N,)</span>
+<span class="sd">        The per-datum focal loss.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The formulation for the focal loss introduced in https://arxiv.org/abs/1708.02002.</span>
+<span class="sd">    It is given by -ɑ(1-p)ˠlog(p).</span>
+
+<span class="sd">    The focal loss for datum-:math:`i` is given by</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        -\alpha \hat{y}_i(1-p_i)^\gamma\log(p_i)</span>
+
+<span class="sd">    where :math:`\hat{y}_i` is one in correspondence to the label associated with the</span>
+<span class="sd">    datum and 0 elsewhere. That is, if the label :math:`y_k` is 2 and</span>
+<span class="sd">    there are four possible label values, then :math:`\hat{y}_k = (0, 0, 1, 0)`.</span>
+
+<span class="sd">    It is recommended in the paper that you normalize by the number of foreground samples.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">focal_loss</span><span class="p">(</span>
+        <span class="n">softmax</span><span class="p">(</span><span class="n">scores</span><span class="p">),</span> <span class="n">targets</span><span class="o">=</span><span class="n">targets</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="n">gamma</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span>
+    <span class="p">)</span></div>
+</pre></div>
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2023, Ryan Soklaski.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.0.1.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

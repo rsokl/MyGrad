@@ -1,0 +1,799 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mygrad.nnet.layers.utils &#8212; MyGrad 2.3.0.post1.dev6 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/my_theme.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/sphinx_highlight.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/mygrad/nnet/layers/utils';</script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="../../../../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev6 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../install.html">
+                        Installing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../intro.html">
+                        Introducing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../tensor.html">
+                        MyGrad’s Tensor
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../views.html">
+                        Views and In-Place Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../performance_tips.html">
+                        Performance Tips
+                      </a>
+                    </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../operation.html">
+                        Writing Your Own Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../tensor_creation.html">
+                        Tensor creation routines (mygrad.tensor_creation)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../tensor_manipulation.html">
+                        Tensor manipulation routines (mygrad.tensor_manip)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../linalg.html">
+                        Linear algebra (mygrad.linalg)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../math.html">
+                        Mathematical functions (mygrad.math)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../indexing.html">
+                        Indexing Routines (mygrad.indexing_routines)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../nnet.html">
+                        Neural network operations (mygrad.nnet)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../io.html">
+                        Input and Output
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../graph_viz.html">
+                        Computational graph visualization(mygrad.computational_graph)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../changes.html">
+                        Changelog
+                      </a>
+                    </li>
+                
+                </div>
+            </div>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../install.html">
+                        Installing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../intro.html">
+                        Introducing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../tensor.html">
+                        MyGrad’s Tensor
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../views.html">
+                        Views and In-Place Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../performance_tips.html">
+                        Performance Tips
+                      </a>
+                    </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../operation.html">
+                        Writing Your Own Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../tensor_creation.html">
+                        Tensor creation routines (mygrad.tensor_creation)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../tensor_manipulation.html">
+                        Tensor manipulation routines (mygrad.tensor_manip)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../linalg.html">
+                        Linear algebra (mygrad.linalg)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../math.html">
+                        Mathematical functions (mygrad.math)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../indexing.html">
+                        Indexing Routines (mygrad.indexing_routines)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../nnet.html">
+                        Neural network operations (mygrad.nnet)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../io.html">
+                        Input and Output
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../graph_viz.html">
+                        Computational graph visualization(mygrad.computational_graph)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../changes.html">
+                        Changelog
+                      </a>
+                    </li>
+                
+                </div>
+            </div>
+            
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">mygrad.nnet.layers.utils</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <h1>Source code for mygrad.nnet.layers.utils</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">numbers</span> <span class="kn">import</span> <span class="n">Integral</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy.lib.stride_tricks</span> <span class="kn">import</span> <span class="n">as_strided</span>
+
+
+<div class="viewcode-block" id="sliding_window_view"><a class="viewcode-back" href="../../../../generated/mygrad.sliding_window_view.html#mygrad.sliding_window_view">[docs]</a><span class="k">def</span> <span class="nf">sliding_window_view</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">window_shape</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">dilation</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a sliding window view over the trailing dimensions of an array.</span>
+<span class="sd">    No copy is made unless the input array is not contiguous in memory.</span>
+
+<span class="sd">    The window is applied only to valid regions of ``arr``, but is applied greedily.</span>
+
+<span class="sd">    See Notes section for details.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    arr : numpy.ndarray, shape=(..., [x, (...), z])</span>
+<span class="sd">        C-contiguous array over which sliding view-window is applied along the trailing</span>
+<span class="sd">        dimensions ``[x, ..., z]``, as determined by the length of ``window_shape``.</span>
+
+<span class="sd">        If ``arr`` is not C-contiguous, it will be replaced by ``numpy.ascontiguousarray(arr)``</span>
+
+<span class="sd">    window_shape : Sequence[int]</span>
+<span class="sd">        Specifies the shape of the view-window: ``[Wx, (...), Wz]``.</span>
+<span class="sd">        The length of `window_shape` determines the length of ``[x, (...) , z]``.</span>
+
+<span class="sd">    step : Union[int, Sequence[int]]</span>
+<span class="sd">        The step sized used along the ``[x, (...), z]`` dimensions: ``[Sx, (...), Sz]``.</span>
+<span class="sd">        If a single integer is specified, a uniform step size is used.</span>
+
+<span class="sd">    dilation : Optional[Union[int, Sequence[int]]]</span>
+<span class="sd">        The dilation factor used along the ``[x, (...), z]`` directions: ``[Dx, (...), Dz]``.</span>
+<span class="sd">        If no value is specified, a dilation factor of 1 is used along each direction.</span>
+<span class="sd">        Dilation specifies the step size used when filling the window&#39;s elements</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">        A contiguous view of ``arr``, of shape ``([X, (...), Z], ..., [Wx, (...), Wz])``, where</span>
+<span class="sd">        ``[X, ..., Z]`` is the shape of the grid on which the window was applied. See Notes</span>
+<span class="sd">        sections for more details.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError, TypeError</span>
+<span class="sd">        Invalid step-size, window shape, or dilation</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Window placement:</span>
+<span class="sd">        Given a dimension of size x, with a window of size W along this dimension, applied</span>
+<span class="sd">        with stride S and dilation D, the window will be applied::</span>
+<span class="sd">                                  X = (x - (W - 1) * D + 1) // S + 1</span>
+<span class="sd">        number of times along that dimension.</span>
+
+<span class="sd">    Interpreting output:</span>
+<span class="sd">        In general, given an array ``arr`` of shape (..., x, (...), z), and::</span>
+
+<span class="sd">            out = sliding_window_view(arr, window_shape=[Wx, (...), Wz], step=[Sx, (...), Sz])</span>
+
+<span class="sd">        then indexing ``out`` with ``[ix, (...), iz]`` produces the following view of ``x``::</span>
+
+<span class="sd">            out[ix, (...), iz] ==</span>
+<span class="sd">                x[..., ix*Sx:(ix*Sx + Wx*Dx):Dx, (...), iz*Sz:(iz*Sz + Wz*Dz):Dz]</span>
+
+<span class="sd">        For example, suppose ``arr`` is an array of shape-(10, 12, 6). Specifying sliding</span>
+<span class="sd">        window of shape ``(3, 3)`` with step size ``(2, 2)``, dilation ``(2, 1)`` will create the view::</span>
+
+<span class="sd">                        [[arr[:,  0:6:2, 0:3], arr[:,   0:6:3, 3:6]]</span>
+<span class="sd">                         [arr[:, 6:12:2, 0:3], arr[:, 6:12:12, 3:6]]]</span>
+
+<span class="sd">        producing a view of shape ``(2, 2, 10, 3, 3)`` in total.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; x = np.arange(36).reshape(6, 6)</span>
+<span class="sd">    &gt;&gt;&gt; x</span>
+<span class="sd">    array([[ 0,  1,  2,  3,  4,  5],</span>
+<span class="sd">           [ 6,  7,  8,  9, 10, 11],</span>
+<span class="sd">           [12, 13, 14, 15, 16, 17],</span>
+<span class="sd">           [18, 19, 20, 21, 22, 23],</span>
+<span class="sd">           [24, 25, 26, 27, 28, 29],</span>
+<span class="sd">           [30, 31, 32, 33, 34, 35]])</span>
+
+<span class="sd">    Apply an 3x2 window with step-sizes of (2, 2). This results in</span>
+<span class="sd">    the window being placed twice along axis-0 and three times along axis-1.</span>
+
+<span class="sd">    &gt;&gt;&gt; y = sliding_window_view(x, step=(2, 2), window_shape=(3, 2))</span>
+<span class="sd">    &gt;&gt;&gt; y.shape</span>
+<span class="sd">    (2, 3, 3, 2)</span>
+
+<span class="sd">    window applied at (0, 0)</span>
+
+<span class="sd">    &gt;&gt;&gt; y[0, 0]</span>
+<span class="sd">    array([[ 0,  1],</span>
+<span class="sd">           [ 6,  7],</span>
+<span class="sd">           [12, 13]])</span>
+
+<span class="sd">    window applied at (2, 0)</span>
+
+<span class="sd">    &gt;&gt;&gt; y[1, 0]</span>
+<span class="sd">    array([[12, 13],</span>
+<span class="sd">           [18, 19],</span>
+<span class="sd">           [24, 25]])</span>
+
+<span class="sd">    window applied at (0, 2)</span>
+
+<span class="sd">    &gt;&gt;&gt; y[0, 1]</span>
+<span class="sd">    array([[ 2,  3],</span>
+<span class="sd">           [ 8,  9],</span>
+<span class="sd">           [14, 15]])</span>
+
+<span class="sd">    verify that an element in this window-view is correct</span>
+
+<span class="sd">    &gt;&gt;&gt; i, j = np.random.randint(0, 2, size=2)</span>
+<span class="sd">    &gt;&gt;&gt; wx, wy = (2, 2)</span>
+<span class="sd">    &gt;&gt;&gt; sx, sy = (2, 2)</span>
+<span class="sd">    &gt;&gt;&gt; np.all(y[i, j] == x[..., i*sx:(i*sx + wx), j*sy:(j*sy + wy)])</span>
+<span class="sd">    True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">window_shape</span><span class="p">,</span> <span class="s2">&quot;__iter__&quot;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;`window_shape` must be a sequence of positive integers, got: </span><span class="si">{</span><span class="n">window_shape</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+    <span class="n">window_shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">window_shape</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">Integral</span><span class="p">)</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">window_shape</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;`window_shape` must be a sequence of positive integers, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;got: </span><span class="si">{</span><span class="n">window_shape</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">window_shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">arr</span><span class="o">.</span><span class="n">ndim</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;`window_shape` (</span><span class="si">{</span><span class="n">window_shape</span><span class="si">}</span><span class="s2">) cannot specify more values than &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;`arr.ndim` (</span><span class="si">{</span><span class="n">arr</span><span class="o">.</span><span class="n">ndim</span><span class="si">}</span><span class="s2">).&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">Integral</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="s2">&quot;__iter__&quot;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;`step` must be a positive integer or a sequence of positive &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;integers, got: </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">step</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">step</span><span class="p">),)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">window_shape</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">Integral</span><span class="p">)</span> <span class="k">else</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">Integral</span><span class="p">)</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">step</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;`step` must be a positive integer or a sequence of positive &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;integers, got: </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">i</span> <span class="o">&gt;</span> <span class="n">j</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">window_shape</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Each size of the window-shape must fit within the trailing &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;dimensions of `arr`.&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">window_shape</span><span class="si">}</span><span class="s2"> does not fit in </span><span class="si">{</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">window_shape</span><span class="p">)</span><span class="w"> </span><span class="p">:]</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="n">dilation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dilation</span><span class="p">,</span> <span class="n">Integral</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">dilation</span><span class="p">,</span> <span class="s2">&quot;__iter__&quot;</span><span class="p">)</span>
+    <span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;`dilation` must be None, a positive integer, or a sequence of &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;positive integers, got: </span><span class="si">{</span><span class="n">dilation</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">dilation</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">dilation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">window_shape</span><span class="p">),),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dilation</span><span class="p">,</span> <span class="n">Integral</span><span class="p">):</span>
+            <span class="n">dilation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">window_shape</span><span class="p">),),</span> <span class="n">fill_value</span><span class="o">=</span><span class="n">dilation</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">dilation</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">Integral</span><span class="p">)</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">dilation</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span>
+            <span class="n">dilation</span>
+        <span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">window_shape</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;`dilation` must be None, a positive integer, or a sequence of &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;positive integers with the same length as `window_shape` &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">window_shape</span><span class="si">}</span><span class="s2">), got: </span><span class="si">{</span><span class="n">dilation</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span>
+            <span class="n">w</span> <span class="o">*</span> <span class="n">d</span> <span class="o">&gt;</span> <span class="n">s</span>
+            <span class="k">for</span> <span class="n">w</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">window_shape</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">dilation</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;The dilated window (</span><span class="si">{</span><span class="nb">tuple</span><span class="p">(</span><span class="n">w</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">w</span><span class="p">,</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nb">zip</span><span class="p">(</span><span class="n">window_shape</span><span class="p">,</span><span class="w"> </span><span class="n">dilation</span><span class="p">))</span><span class="si">}</span><span class="s2">) &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;must fit within the trailing &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;dimensions of `arr` (</span><span class="si">{</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">window_shape</span><span class="p">)</span><span class="w"> </span><span class="p">:]</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">arr</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s2">&quot;C_CONTIGUOUS&quot;</span><span class="p">]:</span>
+        <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+
+    <span class="n">step</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>  <span class="c1"># (Sx, ..., Sz)</span>
+    <span class="n">window_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">window_shape</span><span class="p">)</span>  <span class="c1"># (Wx, ..., Wz)</span>
+    <span class="n">in_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">step</span><span class="p">)</span> <span class="p">:])</span>  <span class="c1"># (x, ... , z)</span>
+    <span class="n">nbyte</span> <span class="o">=</span> <span class="n">arr</span><span class="o">.</span><span class="n">strides</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># size, in bytes, of element in `arr`</span>
+
+    <span class="c1"># per-byte strides required to fill a window</span>
+    <span class="n">win_stride</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cumprod</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="p">,)</span>
+
+    <span class="c1"># per-byte strides required to advance the window</span>
+    <span class="n">step_stride</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">win_stride</span><span class="p">[</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">step</span><span class="p">)</span> <span class="p">:]</span> <span class="o">*</span> <span class="n">step</span><span class="p">)</span>
+
+    <span class="c1"># update win_stride to accommodate dilation</span>
+    <span class="n">win_stride</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">win_stride</span><span class="p">)</span>
+    <span class="n">win_stride</span><span class="p">[</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">step</span><span class="p">)</span> <span class="p">:]</span> <span class="o">*=</span> <span class="n">dilation</span>
+    <span class="n">win_stride</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">win_stride</span><span class="p">)</span>
+
+    <span class="c1"># tuple of bytes to step to traverse corresponding dimensions of view</span>
+    <span class="c1"># see: &#39;internal memory layout of an ndarray&#39;</span>
+    <span class="n">stride</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">nbyte</span> <span class="o">*</span> <span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">step_stride</span> <span class="o">+</span> <span class="n">win_stride</span><span class="p">)</span>
+
+    <span class="c1"># number of window placements along x-dim: X = (x - (Wx - 1)*Dx + 1) // Sx + 1</span>
+    <span class="n">out_shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">in_shape</span> <span class="o">-</span> <span class="p">((</span><span class="n">window_shape</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">dilation</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span> <span class="o">//</span> <span class="n">step</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># ([X, (...), Z], ..., [Wx, (...), Wz])</span>
+    <span class="n">out_shape</span> <span class="o">=</span> <span class="n">out_shape</span> <span class="o">+</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span> <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">step</span><span class="p">)]</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">window_shape</span><span class="p">)</span>
+    <span class="n">out_shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">out_shape</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">as_strided</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">out_shape</span><span class="p">,</span> <span class="n">strides</span><span class="o">=</span><span class="n">stride</span><span class="p">,</span> <span class="n">writeable</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+</pre></div>
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2023, Ryan Soklaski.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.0.1.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

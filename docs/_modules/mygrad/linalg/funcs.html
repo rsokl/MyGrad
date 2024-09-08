@@ -1,0 +1,1022 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mygrad.linalg.funcs &#8212; MyGrad 2.3.0.post1.dev6 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/my_theme.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/mygrad/linalg/funcs';</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev6 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../install.html">
+                        Installing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../intro.html">
+                        Introducing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../tensor.html">
+                        MyGrad’s Tensor
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../views.html">
+                        Views and In-Place Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../performance_tips.html">
+                        Performance Tips
+                      </a>
+                    </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../operation.html">
+                        Writing Your Own Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../tensor_creation.html">
+                        Tensor creation routines (mygrad.tensor_creation)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../tensor_manipulation.html">
+                        Tensor manipulation routines (mygrad.tensor_manip)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../linalg.html">
+                        Linear algebra (mygrad.linalg)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../math.html">
+                        Mathematical functions (mygrad.math)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../indexing.html">
+                        Indexing Routines (mygrad.indexing_routines)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../nnet.html">
+                        Neural network operations (mygrad.nnet)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../io.html">
+                        Input and Output
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../graph_viz.html">
+                        Computational graph visualization(mygrad.computational_graph)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../changes.html">
+                        Changelog
+                      </a>
+                    </li>
+                
+                </div>
+            </div>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../install.html">
+                        Installing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../intro.html">
+                        Introducing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../tensor.html">
+                        MyGrad’s Tensor
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../views.html">
+                        Views and In-Place Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../performance_tips.html">
+                        Performance Tips
+                      </a>
+                    </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../operation.html">
+                        Writing Your Own Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../tensor_creation.html">
+                        Tensor creation routines (mygrad.tensor_creation)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../tensor_manipulation.html">
+                        Tensor manipulation routines (mygrad.tensor_manip)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../linalg.html">
+                        Linear algebra (mygrad.linalg)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../math.html">
+                        Mathematical functions (mygrad.math)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../indexing.html">
+                        Indexing Routines (mygrad.indexing_routines)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../nnet.html">
+                        Neural network operations (mygrad.nnet)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../io.html">
+                        Input and Output
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../graph_viz.html">
+                        Computational graph visualization(mygrad.computational_graph)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../changes.html">
+                        Changelog
+                      </a>
+                    </li>
+                
+                </div>
+            </div>
+            
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">mygrad.linalg.funcs</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <h1>Source code for mygrad.linalg.funcs</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">numbers</span> <span class="kn">import</span> <span class="n">Real</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="k">try</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="kn">from</span> <span class="nn">numpy._core.einsumfunc</span> <span class="kn">import</span> <span class="n">_parse_einsum_input</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="kn">from</span> <span class="nn">numpy.core.einsumfunc</span> <span class="kn">import</span> <span class="n">_parse_einsum_input</span>
+
+<span class="kn">from</span> <span class="nn">mygrad.math.misc.funcs</span> <span class="kn">import</span> <span class="n">absolute</span>
+<span class="kn">from</span> <span class="nn">mygrad.math.sequential.funcs</span> <span class="kn">import</span> <span class="nb">max</span> <span class="k">as</span> <span class="n">mg_max</span>
+<span class="kn">from</span> <span class="nn">mygrad.math.sequential.funcs</span> <span class="kn">import</span> <span class="nb">min</span> <span class="k">as</span> <span class="n">mg_min</span>
+<span class="kn">from</span> <span class="nn">mygrad.tensor_base</span> <span class="kn">import</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">implements_numpy_override</span>
+<span class="kn">from</span> <span class="nn">mygrad.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span>
+
+<span class="kn">from</span> <span class="nn">.ops</span> <span class="kn">import</span> <span class="n">EinSum</span><span class="p">,</span> <span class="n">Norm</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;einsum&quot;</span><span class="p">,</span> <span class="s2">&quot;norm&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="norm"><a class="viewcode-back" href="../../../generated/mygrad.linalg.norm.html#mygrad.norm">[docs]</a><span class="nd">@implements_numpy_override</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">norm</span><span class="p">(</span>
+    <span class="n">x</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="nb">ord</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">axis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">keepdims</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">nan_to_num</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Vector norm.</span>
+
+<span class="sd">    This function is an infinite number of vector norms (described below), depending</span>
+<span class="sd">    on the value of the ``ord`` parameter.</span>
+
+<span class="sd">    In contrast to ``numpy.linalg.norm``, matrix norms are not supported.</span>
+
+<span class="sd">    This docstring was adapted from that of ``numpy.linalg.norm`` [1]_.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : ArrayLike</span>
+<span class="sd">        Input tensor.  If `axis` is None, then `x` must be 1-D unless `ord`</span>
+<span class="sd">        is None. If both `axis` and `ord` are None, the 2-norm of</span>
+<span class="sd">        ``x.ravel`` will be returned.</span>
+
+<span class="sd">    ord : Optional[Union[int, float]]</span>
+<span class="sd">        Order of the norm (see table under ``Notes``). inf means numpy&#39;s</span>
+<span class="sd">        `inf` object. The default is None.</span>
+
+<span class="sd">    axis : Optional[Union[int, Tuple[int]]]</span>
+<span class="sd">        If `axis` is an integer, it specifies the axis of `x` along which to</span>
+<span class="sd">        compute the vector norms. The default is None.</span>
+
+<span class="sd">    keepdims : bool, optional (default=False)</span>
+<span class="sd">        If this is set to True, the axes which are normed over are left in the</span>
+<span class="sd">        result as dimensions with size one.  With this option the result will</span>
+<span class="sd">        broadcast correctly against the original `x`.</span>
+
+<span class="sd">    nan_to_num : bool, optional (default=True)</span>
+<span class="sd">        If `True` then gradients that would store nans due to the presence of</span>
+<span class="sd">        zeros in `x` will instead store zeros in those places.</span>
+
+<span class="sd">    constant : Optional[bool]</span>
+<span class="sd">        If ``True``, this tensor is treated as a constant, and thus does not</span>
+<span class="sd">        facilitate back propagation (i.e. ``constant.grad`` will always return</span>
+<span class="sd">        ``None``).</span>
+
+<span class="sd">        Defaults to ``False`` for float-type data.</span>
+<span class="sd">        Defaults to ``True`` for integer-type data.</span>
+
+<span class="sd">        Integer-type tensors must be constant.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Tensor</span>
+<span class="sd">        Norm(s) of the vector(s).</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    For values of ``ord &lt; 1``, the result is, strictly speaking, not a</span>
+<span class="sd">    mathematical &#39;norm&#39;, but it may still be useful for various numerical</span>
+<span class="sd">    purposes.</span>
+
+<span class="sd">    The following norms can be calculated:</span>
+
+<span class="sd">    =====  ==========================</span>
+<span class="sd">    ord    norm for vectors</span>
+<span class="sd">    =====  ==========================</span>
+<span class="sd">    inf    max(abs(x))</span>
+<span class="sd">    -inf   min(abs(x))</span>
+<span class="sd">    0      sum(x != 0)</span>
+<span class="sd">    1      as below</span>
+<span class="sd">    -1     as below</span>
+<span class="sd">    2      as below</span>
+<span class="sd">    -2     as below</span>
+<span class="sd">    other  sum(abs(x)**ord)**(1./ord)</span>
+<span class="sd">    =====  ==========================</span>
+
+<span class="sd">    The Frobenius norm is given by [1]_:</span>
+
+<span class="sd">        :math:`||A||_F = [\sum_{i,j} abs(a_{i,j})^2]^{1/2}`</span>
+
+<span class="sd">    The nuclear norm is the sum of the singular values.</span>
+
+<span class="sd">    Both the Frobenius and nuclear norm orders are only defined for</span>
+<span class="sd">    matrices and raise a ValueError when ``x.ndim != 2``.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] Retrieved from: https://numpy.org/doc/stable/reference/generated/numpy.linalg.norm.html</span>
+<span class="sd">    .. [2] G. H. Golub and C. F. Van Loan, *Matrix Computations*,</span>
+<span class="sd">           Baltimore, MD, Johns Hopkins University Press, 1985, pg. 15</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">    &gt;&gt;&gt; x = mg.tensor([[1.0, 2.0, 3.0],</span>
+<span class="sd">    ...                [1.0, 0.0, 0.0]])</span>
+<span class="sd">    &gt;&gt;&gt; l2_norms = mg.linalg.norm(x, axis=1, ord=2)</span>
+<span class="sd">    &gt;&gt;&gt; l2_norms</span>
+<span class="sd">    Tensor([3.74165739, 1.        ])</span>
+
+<span class="sd">    The presence of the elementwise absolute values in the norm operation means that zero-valued entries in any of</span>
+<span class="sd">    input vectors have an undefined derivative. When `nan_to_num=False` is specified these derivatives will be reported</span>
+<span class="sd">    as `nan`, otherwise they will be made to be 0.0.</span>
+
+<span class="sd">    &gt;&gt;&gt; l2_norms = mg.linalg.norm(x, axis=1, ord=2, nan_to_num=True)</span>
+<span class="sd">    &gt;&gt;&gt; l2_norms.backward()</span>
+<span class="sd">    &gt;&gt;&gt; x.grad</span>
+<span class="sd">    array([[0.26726124, 0.53452248, 0.80178373],</span>
+<span class="sd">           [1.        ,        nan,        nan]])</span>
+
+<span class="sd">    This is rigorously true, but is often not the desired behavior in autodiff applications.</span>
+<span class="sd">    Rather, it can be preferable to use `0.0` to fill these undefined derivatives.</span>
+<span class="sd">    This is the default behavior, when `nan_to_num` is not specified.</span>
+
+<span class="sd">    &gt;&gt;&gt; l2_norms = mg.linalg.norm(x, axis=1, ord=2, nan_to_num=False)  # default setting: `nan_to_num=False`</span>
+<span class="sd">    &gt;&gt;&gt; l2_norms.backward()</span>
+<span class="sd">    &gt;&gt;&gt; x.grad</span>
+<span class="sd">    array([[0.26726124, 0.53452248, 0.80178373],</span>
+<span class="sd">          [1.        ,          0.,         0.]])</span>
+
+<span class="sd">    L1 norms along each of the three columns:</span>
+
+<span class="sd">    &gt;&gt;&gt; mg.linalg.norm(x, axis=0, ord=1)</span>
+<span class="sd">    Tensor([2., 2., 3.])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">ord</span><span class="p">,</span> <span class="n">Real</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="nb">ord</span><span class="p">):</span>
+        <span class="n">op</span> <span class="o">=</span> <span class="n">mg_max</span> <span class="k">if</span> <span class="nb">ord</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">mg_min</span>
+        <span class="n">abs_</span> <span class="o">=</span> <span class="n">absolute</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">op</span><span class="p">(</span><span class="n">abs_</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="n">keepdims</span><span class="p">)</span>
+
+        <span class="n">in_ndim</span> <span class="o">=</span> <span class="n">abs_</span><span class="o">.</span><span class="n">creator</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">axis</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">ord</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">in_ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+            <span class="nb">hasattr</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="s2">&quot;__len__&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;mygrad.linalg.norm does not support matrix norms&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span>
+        <span class="n">Norm</span><span class="p">,</span>
+        <span class="n">x</span><span class="p">,</span>
+        <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;axis&quot;</span><span class="p">:</span> <span class="n">axis</span><span class="p">,</span>
+            <span class="s2">&quot;keepdims&quot;</span><span class="p">:</span> <span class="n">keepdims</span><span class="p">,</span>
+            <span class="s2">&quot;ord&quot;</span><span class="p">:</span> <span class="nb">ord</span><span class="p">,</span>
+            <span class="s2">&quot;nan_to_num&quot;</span><span class="p">:</span> <span class="n">nan_to_num</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="einsum"><a class="viewcode-back" href="../../../generated/mygrad.einsum.html#mygrad.einsum">[docs]</a><span class="nd">@implements_numpy_override</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">einsum</span><span class="p">(</span>
+    <span class="o">*</span><span class="n">operands</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]],</span>
+    <span class="n">optimize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">out</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    einsum(subscripts, *operands)</span>
+
+<span class="sd">    Evaluates the Einstein summation convention on the operands. This implementation</span>
+<span class="sd">    exactly mirrors that of ``numpy.einsum`` and supports back-propagation through</span>
+<span class="sd">    all variety of tensor-products, sums, traces, and views that it can perform.</span>
+
+<span class="sd">    The following docstring was adapted from the documentation for ``numpy.einsum``</span>
+
+<span class="sd">    Using the Einstein summation convention, many common multi-dimensional</span>
+<span class="sd">    array operations can be represented in a simple fashion.  This function</span>
+<span class="sd">    provides a way to compute such summations. The best way to understand this</span>
+<span class="sd">    function is to try the examples below, which show how many common NumPy/MyGrad</span>
+<span class="sd">    functions can be implemented as calls to ``einsum``.</span>
+
+<span class="sd">    Back-propagation via ``einsum`` is optimized such that any tensor that occurs</span>
+<span class="sd">    redundantly within the summation will only have its gradient computed once.</span>
+<span class="sd">    This optimization accommodates all number and combination of redundancies that can</span>
+<span class="sd">    be encountered.</span>
+
+<span class="sd">    E.g. back-propping through ``einsum(&#39;...,...-&gt;&#39;, x, x)`` will only incur a single</span>
+<span class="sd">    computation/accumulation for ``x.grad`` rather than two. This permits users to</span>
+<span class="sd">    leverage the efficiency of sum-reduction, where ``(x ** 2).sum()`` is sub-optimal,</span>
+<span class="sd">    without being penalized during back-propagation.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    subscripts : str</span>
+<span class="sd">        Specifies the subscripts for summation.</span>
+
+<span class="sd">    operands : array_like</span>
+<span class="sd">        The tensors used in the summation.</span>
+
+<span class="sd">    optimize : {False, True, &#39;greedy&#39;, &#39;optimal&#39;}, optional (default=False)</span>
+<span class="sd">        Controls if intermediate optimization should occur; also enables</span>
+<span class="sd">        the use of BLAS where possible. This can produce significant speedups</span>
+<span class="sd">        for computations like matrix multiplication.</span>
+
+<span class="sd">        No optimization will occur if False and True will default to the &#39;greedy&#39;</span>
+<span class="sd">        algorithm. Also accepts an explicit contraction list from the</span>
+<span class="sd">        ``np.einsum_path`` function. See ``np.einsum_path`` for more details.</span>
+
+<span class="sd">    constant : Optional[bool]</span>
+<span class="sd">        If ``True``, this tensor is treated as a constant, and thus does not</span>
+<span class="sd">        facilitate back propagation (i.e. ``constant.grad`` will always return</span>
+<span class="sd">        ``None``).</span>
+
+<span class="sd">        Defaults to ``False`` for float-type data.</span>
+<span class="sd">        Defaults to ``True`` for integer-type data.</span>
+
+<span class="sd">        Integer-type tensors must be constant.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    output : mygrad.Tensor</span>
+<span class="sd">        The calculation based on the Einstein summation convention.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The subscripts string is a comma-separated list of subscript labels,</span>
+<span class="sd">    where each label refers to a dimension of the corresponding operand.</span>
+<span class="sd">    Repeated subscripts labels in one operand take the diagonal.  For example,</span>
+<span class="sd">    ``einsum(&#39;ii&#39;, a)`` is equivalent to ``np.trace(a)`` (however, the former</span>
+<span class="sd">    supports back-propagation).</span>
+
+<span class="sd">    Whenever a label is repeated, it is summed, so ``einsum(&#39;i, i&#39;, a, b)``</span>
+<span class="sd">    is equivalent to ``np.inner(a, b)``.  If a label appears only once,</span>
+<span class="sd">    it is not summed, so ``einsum(&#39;i&#39;, a)`` produces a view of ``a``</span>
+<span class="sd">    with no changes.</span>
+
+<span class="sd">    The order of labels in the output is by default alphabetical.  This</span>
+<span class="sd">    means that ``np.einsum(&#39;ij&#39;, a)`` doesn&#39;t affect a 2D tensor, while</span>
+<span class="sd">    ``einsum(&#39;ji&#39;, a)`` takes its transpose.</span>
+
+<span class="sd">    The output can be controlled by specifying output subscript labels</span>
+<span class="sd">    as well.  This specifies the label order, and allows summing to</span>
+<span class="sd">    be disallowed or forced when desired.  The call ``einsum(&#39;i-&gt;&#39;, a)``</span>
+<span class="sd">    is like ``np.sum(a, axis=-1)``, and ``einsum(&#39;ii-&gt;i&#39;, a)``</span>
+<span class="sd">    is like ``np.diag(a)``.  The difference is that `einsum` does not</span>
+<span class="sd">    allow broadcasting by default.</span>
+
+<span class="sd">    To enable and control broadcasting, use an ellipsis.  Default</span>
+<span class="sd">    NumPy-style broadcasting is done by adding an ellipsis</span>
+<span class="sd">    to the left of each term, like ``einsum(&#39;...ii-&gt;...i&#39;, a)``.</span>
+<span class="sd">    To take the trace along the first and last axes,</span>
+<span class="sd">    you can do ``einsum(&#39;i...i&#39;, a)``, or to do a matrix-matrix</span>
+<span class="sd">    product with the left-most indices instead of rightmost, you can do</span>
+<span class="sd">    ``einsum(&#39;ij...,jk...-&gt;ik...&#39;, a, b)``.</span>
+
+<span class="sd">    When there is only one operand, no axes are summed, and no output</span>
+<span class="sd">    parameter is provided, a view into the operand is returned instead</span>
+<span class="sd">    of a new tensor.  Thus, taking the diagonal as ``einsum(&#39;ii-&gt;i&#39;, a)``</span>
+<span class="sd">    produces a view.</span>
+
+<span class="sd">    An alternative way to provide the subscripts and operands is as</span>
+<span class="sd">    ``einsum(op0, sublist0, op1, sublist1, ..., [sublistout])``. The examples</span>
+<span class="sd">    below have corresponding `einsum` calls with the two parameter methods.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; a = mg.arange(25).reshape(5,5)</span>
+<span class="sd">    &gt;&gt;&gt; b = mg.arange(5)</span>
+<span class="sd">    &gt;&gt;&gt; c = mg.arange(6).reshape(2,3)</span>
+
+<span class="sd">    Compute the trace of ``a``, :math:`\sum_{i}{A_{ii}} = f`:</span>
+
+<span class="sd">    &gt;&gt;&gt; einsum(&#39;ii&#39;, a)</span>
+<span class="sd">    Tensor(60)</span>
+<span class="sd">    &gt;&gt;&gt; einsum(a, [0, 0])</span>
+<span class="sd">    Tensor(60)</span>
+<span class="sd">    &gt;&gt;&gt; np.trace(a.data)</span>
+<span class="sd">    array(60)</span>
+
+<span class="sd">    Return a view along the diagonal of ``a``, :math:`A_{ii} = F_{i}`:</span>
+
+<span class="sd">    &gt;&gt;&gt; einsum(&#39;ii-&gt;i&#39;, a)</span>
+<span class="sd">    Tensor([ 0,  6, 12, 18, 24])</span>
+<span class="sd">    &gt;&gt;&gt; einsum(a, [0,0], [0])</span>
+<span class="sd">    Tensor([ 0,  6, 12, 18, 24])</span>
+<span class="sd">    &gt;&gt;&gt; np.diag(a.data)</span>
+<span class="sd">    array([ 0,  6, 12, 18, 24])</span>
+
+<span class="sd">    Compute the matrix-vector product of ``a`` with ``b``, :math:`\sum_{j}{A_{ij} B_{j}} = F_{i}`:</span>
+
+<span class="sd">    &gt;&gt;&gt; einsum(&#39;ij,j&#39;, a, b)</span>
+<span class="sd">    Tensor([ 30,  80, 130, 180, 230])</span>
+<span class="sd">    &gt;&gt;&gt; einsum(a, [0,1], b, [1])</span>
+<span class="sd">    Tensor([ 30,  80, 130, 180, 230])</span>
+<span class="sd">    &gt;&gt;&gt; mg.matmul(a, b)</span>
+<span class="sd">    Tensor([ 30,  80, 130, 180, 230])</span>
+<span class="sd">    &gt;&gt;&gt; einsum(&#39;...j,j&#39;, a, b)</span>
+<span class="sd">    Tensor([ 30,  80, 130, 180, 230])</span>
+
+<span class="sd">    Take the transpose of ``c``, :math:`C_{ji} = F_{ij}`:</span>
+
+<span class="sd">    &gt;&gt;&gt; einsum(&#39;ji&#39;, c)</span>
+<span class="sd">    Tensor([[0, 3],</span>
+<span class="sd">            [1, 4],</span>
+<span class="sd">            [2, 5]])</span>
+<span class="sd">    &gt;&gt;&gt; einsum(c, [1, 0])</span>
+<span class="sd">    Tensor([[0, 3],</span>
+<span class="sd">            [1, 4],</span>
+<span class="sd">            [2, 5]])</span>
+<span class="sd">    &gt;&gt;&gt; c.T</span>
+<span class="sd">    Tensor([[0, 3],</span>
+<span class="sd">            [1, 4],</span>
+<span class="sd">            [2, 5]])</span>
+
+<span class="sd">    Compute ``3 * c``:</span>
+
+<span class="sd">    &gt;&gt;&gt; einsum(&#39;..., ...&#39;, 3, c)</span>
+<span class="sd">    Tensor([[ 0,  3,  6],</span>
+<span class="sd">            [ 9, 12, 15]])</span>
+<span class="sd">    &gt;&gt;&gt; einsum(&#39;,ij&#39;, 3, c)</span>
+<span class="sd">    Tensor([[ 0,  3,  6],</span>
+<span class="sd">            [ 9, 12, 15]])</span>
+<span class="sd">    &gt;&gt;&gt; einsum(3, [Ellipsis], c, [Ellipsis])</span>
+<span class="sd">    Tensor([[ 0,  3,  6],</span>
+<span class="sd">            [ 9, 12, 15]])</span>
+<span class="sd">    &gt;&gt;&gt; 3 * c</span>
+<span class="sd">    Tensor([[ 0,  3,  6],</span>
+<span class="sd">            [ 9, 12, 15]])</span>
+
+<span class="sd">    Compute the inner product of ``b`` with itself, :math:`\sum_{i}{B_{i} B_{i}} = f`:</span>
+
+<span class="sd">    &gt;&gt;&gt; einsum(&#39;i,i&#39;, b, b)</span>
+<span class="sd">    Tensor(30)</span>
+<span class="sd">    &gt;&gt;&gt; einsum(b, [0], b, [0])</span>
+<span class="sd">    Tensor(30)</span>
+<span class="sd">    &gt;&gt;&gt; np.inner(b.data, b.data)</span>
+<span class="sd">    30</span>
+
+<span class="sd">    Compute the outer product of ``array([1, 2])`` with ``b``, :math:`A_{i}B_{j} = F_{ij}`:</span>
+
+<span class="sd">    &gt;&gt;&gt; einsum(&#39;i,j&#39;, np.arange(2)+1, b)</span>
+<span class="sd">    Tensor([[0, 1, 2, 3, 4],</span>
+<span class="sd">           [0, 2, 4, 6, 8]])</span>
+<span class="sd">    &gt;&gt;&gt; einsum(np.arange(2)+1, [0], b, [1])</span>
+<span class="sd">    Tensor([[0, 1, 2, 3, 4],</span>
+<span class="sd">           [0, 2, 4, 6, 8]])</span>
+<span class="sd">    &gt;&gt;&gt; np.outer(np.arange(2)+1, b)</span>
+<span class="sd">    array([[0, 1, 2, 3, 4],</span>
+<span class="sd">           [0, 2, 4, 6, 8]])</span>
+<span class="sd">    &gt;&gt;&gt; einsum(&#39;i...-&gt;...&#39;, a)</span>
+<span class="sd">    Tensor([50, 55, 60, 65, 70])</span>
+<span class="sd">    &gt;&gt;&gt; einsum(a, [0,Ellipsis], [Ellipsis])</span>
+<span class="sd">    Tensor([50, 55, 60, 65, 70])</span>
+<span class="sd">    &gt;&gt;&gt; np.sum(a, axis=0)</span>
+<span class="sd">    array([50, 55, 60, 65, 70])</span>
+
+<span class="sd">    Compute the tensor product :math:`\sum_{ij}{A_{ijk} B_{jil}} = F_{kl}`</span>
+
+<span class="sd">    &gt;&gt;&gt; a = mg.arange(60.).reshape(3,4,5)</span>
+<span class="sd">    &gt;&gt;&gt; b = mg.arange(24.).reshape(4,3,2)</span>
+<span class="sd">    &gt;&gt;&gt; einsum(&#39;ijk,jil-&gt;kl&#39;, a, b)</span>
+<span class="sd">    Tensor([[ 4400.,  4730.],</span>
+<span class="sd">            [ 4532.,  4874.],</span>
+<span class="sd">            [ 4664.,  5018.],</span>
+<span class="sd">            [ 4796.,  5162.],</span>
+<span class="sd">            [ 4928.,  5306.]])</span>
+<span class="sd">    &gt;&gt;&gt; einsum(a, [0,1,2], b, [1,0,3], [2,3])</span>
+<span class="sd">    Tensor([[ 4400.,  4730.],</span>
+<span class="sd">            [ 4532.,  4874.],</span>
+<span class="sd">            [ 4664.,  5018.],</span>
+<span class="sd">            [ 4796.,  5162.],</span>
+<span class="sd">            [ 4928.,  5306.]])</span>
+<span class="sd">    &gt;&gt;&gt; np.tensordot(a,b, axes=([1,0],[0,1]))</span>
+<span class="sd">    array([[ 4400.,  4730.],</span>
+<span class="sd">            [ 4532.,  4874.],</span>
+<span class="sd">            [ 4664.,  5018.],</span>
+<span class="sd">            [ 4796.,  5162.],</span>
+<span class="sd">            [ 4928.,  5306.]])</span>
+
+<span class="sd">    Matrix multiply ``a.T`` with ``b.T``, :math:`\sum_{k}{A_{ki} B_{jk}} = F_{ij}`</span>
+
+<span class="sd">    &gt;&gt;&gt; a = mg.arange(6).reshape((3,2))</span>
+<span class="sd">    &gt;&gt;&gt; b = mg.arange(12).reshape((4,3))</span>
+<span class="sd">    &gt;&gt;&gt; einsum(&#39;ki,jk-&gt;ij&#39;, a, b)</span>
+<span class="sd">    Tensor([[10, 28, 46, 64],</span>
+<span class="sd">            [13, 40, 67, 94]])</span>
+<span class="sd">    &gt;&gt;&gt; einsum(&#39;ki,...k-&gt;i...&#39;, a, b)</span>
+<span class="sd">    Tensor([[10, 28, 46, 64],</span>
+<span class="sd">            [13, 40, 67, 94]])</span>
+<span class="sd">    &gt;&gt;&gt; einsum(&#39;k...,jk&#39;, a, b)</span>
+<span class="sd">    Tensor([[10, 28, 46, 64],</span>
+<span class="sd">            [13, 40, 67, 94]])</span>
+
+<span class="sd">    Make an assignment to a view along the diagonal of ``a``:</span>
+
+<span class="sd">    &gt;&gt;&gt; a = mg.zeros((3, 3))</span>
+<span class="sd">    &gt;&gt;&gt; einsum(&#39;ii-&gt;i&#39;, a).data[:] = 1</span>
+<span class="sd">    &gt;&gt;&gt; a</span>
+<span class="sd">    Tensor([[ 1.,  0.,  0.],</span>
+<span class="sd">            [ 0.,  1.,  0.],</span>
+<span class="sd">            [ 0.,  0.,  1.]])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># TODO: normalize error handling for invalid inputs</span>
+    <span class="n">operands</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">operands</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">operands</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="c1"># operands form: &quot;ijk, ijk&quot;, x, y</span>
+        <span class="n">variables</span> <span class="o">=</span> <span class="n">operands</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">operands</span><span class="p">):</span>
+            <span class="n">operands</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">var</span><span class="o">.</span><span class="n">data</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">)</span> <span class="k">else</span> <span class="n">var</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">operands</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># operands form: op0, sublist0, op1, sublist1, ..., [sublistout]</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">operands</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span> <span class="k">else</span> <span class="kc">None</span>  <span class="c1"># -1 if sublistout is included</span>
+        <span class="n">variables</span> <span class="o">=</span> <span class="n">operands</span><span class="p">[:</span><span class="n">end</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">operands</span><span class="p">):</span>
+            <span class="n">operands</span><span class="p">[:</span><span class="n">end</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">var</span><span class="o">.</span><span class="n">data</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">)</span> <span class="k">else</span> <span class="n">var</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">operands</span><span class="p">[:</span><span class="n">end</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+            <span class="p">)</span>
+
+    <span class="n">in_lbls</span><span class="p">,</span> <span class="n">out_lbls</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_parse_einsum_input</span><span class="p">(</span><span class="n">operands</span><span class="p">)</span>
+
+    <span class="c1"># einsum doesn&#39;t handle out=None properly in numpy 1.17</span>
+
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span>
+        <span class="n">EinSum</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">variables</span><span class="p">,</span>
+        <span class="n">op_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">in_lbls</span><span class="o">=</span><span class="n">in_lbls</span><span class="p">,</span> <span class="n">out_lbls</span><span class="o">=</span><span class="n">out_lbls</span><span class="p">,</span> <span class="n">optimize</span><span class="o">=</span><span class="n">optimize</span><span class="p">),</span>
+        <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">,</span>
+        <span class="n">out</span><span class="o">=</span><span class="n">out</span><span class="p">,</span>
+    <span class="p">)</span></div>
+</pre></div>
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2023, Ryan Soklaski.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.0.1.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,1279 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mygrad.math.sequential.funcs &#8212; MyGrad 2.3.0.post1.dev6 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/my_theme.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/sphinx_highlight.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/mygrad/math/sequential/funcs';</script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="../../../../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev6 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../install.html">
+                        Installing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../intro.html">
+                        Introducing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../tensor.html">
+                        MyGrad’s Tensor
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../views.html">
+                        Views and In-Place Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../performance_tips.html">
+                        Performance Tips
+                      </a>
+                    </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../operation.html">
+                        Writing Your Own Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../tensor_creation.html">
+                        Tensor creation routines (mygrad.tensor_creation)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../tensor_manipulation.html">
+                        Tensor manipulation routines (mygrad.tensor_manip)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../linalg.html">
+                        Linear algebra (mygrad.linalg)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../math.html">
+                        Mathematical functions (mygrad.math)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../indexing.html">
+                        Indexing Routines (mygrad.indexing_routines)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../nnet.html">
+                        Neural network operations (mygrad.nnet)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../io.html">
+                        Input and Output
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../graph_viz.html">
+                        Computational graph visualization(mygrad.computational_graph)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../changes.html">
+                        Changelog
+                      </a>
+                    </li>
+                
+                </div>
+            </div>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../install.html">
+                        Installing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../intro.html">
+                        Introducing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../tensor.html">
+                        MyGrad’s Tensor
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../views.html">
+                        Views and In-Place Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../performance_tips.html">
+                        Performance Tips
+                      </a>
+                    </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../operation.html">
+                        Writing Your Own Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../tensor_creation.html">
+                        Tensor creation routines (mygrad.tensor_creation)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../tensor_manipulation.html">
+                        Tensor manipulation routines (mygrad.tensor_manip)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../linalg.html">
+                        Linear algebra (mygrad.linalg)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../math.html">
+                        Mathematical functions (mygrad.math)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../indexing.html">
+                        Indexing Routines (mygrad.indexing_routines)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../nnet.html">
+                        Neural network operations (mygrad.nnet)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../io.html">
+                        Input and Output
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../graph_viz.html">
+                        Computational graph visualization(mygrad.computational_graph)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../changes.html">
+                        Changelog
+                      </a>
+                    </li>
+                
+                </div>
+            </div>
+            
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">mygrad.math.sequential.funcs</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <h1>Source code for mygrad.math.sequential.funcs</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">mygrad.operation_base</span> <span class="kn">import</span> <span class="n">_NoValue</span>
+<span class="kn">from</span> <span class="nn">mygrad.tensor_base</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_REGISTERED_DIFFERENTIABLE_NUMPY_FUNCS</span><span class="p">,</span>
+    <span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">implements_numpy_override</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">mygrad.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span>
+
+<span class="kn">from</span> <span class="nn">.ops</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">Axis</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;sum&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;mean&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;var&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;std&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;amax&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;amin&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;max&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;min&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;prod&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;cumprod&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;cumsum&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="sum"><a class="viewcode-back" href="../../../../generated/mygrad.sum.html#mygrad.sum">[docs]</a><span class="nd">@implements_numpy_override</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">sum</span><span class="p">(</span>
+    <span class="n">x</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">axis</span><span class="p">:</span> <span class="n">Axis</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">keepdims</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum of tensor elements over a given axis.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : ArrayLike</span>
+
+<span class="sd">    axis : Optional[int, Tuple[ints, ...]]</span>
+<span class="sd">        Axis or axes along which a sum is performed.  The default,</span>
+<span class="sd">        axis=None, will sum all of the elements of the input tensor.  If</span>
+<span class="sd">        axis is negative it counts from the last to the first axis.</span>
+<span class="sd">        If axis is a tuple of ints, a sum is performed on all of the axes</span>
+<span class="sd">        specified in the tuple instead of a single axis or all the axes as</span>
+<span class="sd">        before.</span>
+
+<span class="sd">    keepdims : bool, optional</span>
+<span class="sd">        If this is set to True, the axes which are reduced are left</span>
+<span class="sd">        in the result as dimensions with size one. With this option,</span>
+<span class="sd">        the result will broadcast correctly against the input tensor.</span>
+
+<span class="sd">    constant : Optional[bool]</span>
+<span class="sd">        If ``True``, this tensor is treated as a constant, and thus does not</span>
+<span class="sd">        facilitate back propagation (i.e. ``constant.grad`` will always return</span>
+<span class="sd">        ``None``).</span>
+
+<span class="sd">        Defaults to ``False`` for float-type data.</span>
+<span class="sd">        Defaults to ``True`` for integer-type data.</span>
+
+<span class="sd">        Integer-type tensors must be constant.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    sum_along_axis : mygrad.Tensor</span>
+<span class="sd">        A Tensor with the same shape as `self`, with the specified</span>
+<span class="sd">        axis/axes removed. If `self` is a 0-d tensor, or if `axis` is None,</span>
+<span class="sd">        a 0-dim Tensor is returned.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    mygrad.Tensor.sum : Equivalent method.</span>
+
+<span class="sd">    cumsum : Cumulative sum of array elements.</span>
+
+<span class="sd">    mean, average</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Arithmetic is modular when using integer types, and no error is</span>
+<span class="sd">    raised on overflow.</span>
+
+<span class="sd">    The sum of an empty tensor is the neutral element 0:</span>
+
+<span class="sd">    &gt;&gt;&gt; mygrad.sum([])</span>
+<span class="sd">    Tensor(0.0)</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; mg.sum([0.5, 1.5])</span>
+<span class="sd">    Tensor(2.0)</span>
+<span class="sd">    &gt;&gt;&gt; mg.sum([0.5, 0.7, 0.2, 1.5], dtype=np.int32)</span>
+<span class="sd">    Tensor(1)</span>
+<span class="sd">    &gt;&gt;&gt; mg.sum([[0, 1], [0, 5]])</span>
+<span class="sd">    Tensor(6)</span>
+<span class="sd">    &gt;&gt;&gt; mg.sum([[0, 1], [0, 5]], axis=0)</span>
+<span class="sd">    Tensor([0, 6])</span>
+<span class="sd">    &gt;&gt;&gt; mg.sum([[0, 1], [0, 5]], axis=1)</span>
+<span class="sd">    Tensor([1, 5])</span>
+
+<span class="sd">    If the accumulator is too small, overflow occurs:</span>
+
+<span class="sd">    &gt;&gt;&gt; mg.ones(128, dtype=mg.int8).sum(dtype=np.int8)</span>
+<span class="sd">    Tensor(-128)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span>
+        <span class="n">Sum</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;axis&quot;</span><span class="p">:</span> <span class="n">axis</span><span class="p">,</span> <span class="s2">&quot;keepdims&quot;</span><span class="p">:</span> <span class="n">keepdims</span><span class="p">},</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="mean"><a class="viewcode-back" href="../../../../generated/mygrad.mean.html#mygrad.mean">[docs]</a><span class="nd">@implements_numpy_override</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">mean</span><span class="p">(</span>
+    <span class="n">x</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">axis</span><span class="p">:</span> <span class="n">Axis</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">keepdims</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Mean of tensor elements over a given axis.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : ArrayLike</span>
+
+<span class="sd">    axis : Optional[int, Tuple[ints, ...]</span>
+<span class="sd">        Axis or axes along which a mean is performed.  The default,</span>
+<span class="sd">        axis=None, will mean all of the elements of the input tensor.  If</span>
+<span class="sd">        axis is negative it counts from the last to the first axis.</span>
+
+<span class="sd">        If axis is a tuple of ints, a mean is performed on all of the axes</span>
+<span class="sd">        specified in the tuple instead of a single axis or all the axes as</span>
+<span class="sd">        before.</span>
+
+<span class="sd">    keepdims : bool, optional</span>
+<span class="sd">        If this is set to True, the axes which are reduced are left</span>
+<span class="sd">        in the result as dimensions with size one. With this option,</span>
+<span class="sd">        the result will broadcast correctly against the input tensor.</span>
+
+<span class="sd">    constant : Optional[bool]</span>
+<span class="sd">        If ``True``, this tensor is treated as a constant, and thus does not</span>
+<span class="sd">        facilitate back propagation (i.e. ``constant.grad`` will always return</span>
+<span class="sd">        ``None``).</span>
+
+<span class="sd">        Defaults to ``False`` for float-type data.</span>
+<span class="sd">        Defaults to ``True`` for integer-type data.</span>
+
+<span class="sd">        Integer-type tensors must be constant.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    mean_along_axis : Tensor</span>
+<span class="sd">        A Tensor with the same shape as `self`, with the specified</span>
+<span class="sd">        axis/axes removed. If `self` is a 0-d tensor, or if `axis` is None,</span>
+<span class="sd">        a 0-dim Tensor is returned.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; a = mg.Tensor([[1, 2],</span>
+<span class="sd">    ...                [3, 4]])</span>
+<span class="sd">    &gt;&gt;&gt; mg.mean(a)</span>
+<span class="sd">    Tensor(2.5)</span>
+<span class="sd">    &gt;&gt;&gt; mg.mean(a, axis=0)</span>
+<span class="sd">    Tensor([ 2.,  3.])</span>
+<span class="sd">    &gt;&gt;&gt; mg.mean(a, axis=1)</span>
+<span class="sd">    Tensor([ 1.5,  3.5])</span>
+
+<span class="sd">    In single precision, `mean` can be inaccurate:</span>
+
+<span class="sd">    &gt;&gt;&gt; a = mg.zeros((2, 512*512), dtype=np.float32)</span>
+<span class="sd">    &gt;&gt;&gt; a[0, :] = 1.0</span>
+<span class="sd">    &gt;&gt;&gt; a[1, :] = 0.1</span>
+<span class="sd">    &gt;&gt;&gt; mg.mean(a)</span>
+<span class="sd">    Tensor(0.54999924)</span>
+
+<span class="sd">    Computing the mean in float64 is more accurate:</span>
+
+<span class="sd">    &gt;&gt;&gt; mg.mean(a, dtype=np.float64)</span>
+<span class="sd">    Tensor(0.55000000074505806)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span>
+        <span class="n">Mean</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;axis&quot;</span><span class="p">:</span> <span class="n">axis</span><span class="p">,</span> <span class="s2">&quot;keepdims&quot;</span><span class="p">:</span> <span class="n">keepdims</span><span class="p">},</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="var"><a class="viewcode-back" href="../../../../generated/mygrad.var.html#mygrad.var">[docs]</a><span class="nd">@implements_numpy_override</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">var</span><span class="p">(</span>
+    <span class="n">x</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">axis</span><span class="p">:</span> <span class="n">Axis</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">ddof</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">keepdims</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the variance along the specified axis.</span>
+
+<span class="sd">    Returns the variance of the array elements, a measure of the spread of a</span>
+<span class="sd">    distribution.  The variance is computed for the flattened array by</span>
+<span class="sd">    default, otherwise over the specified axis.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : ArrayLike</span>
+<span class="sd">        Array containing numbers whose variance is desired.</span>
+
+<span class="sd">    axis : Optional[int, Tuple[int, ...]]</span>
+<span class="sd">        Axis or axes along which the variance is computed.  The default is to</span>
+<span class="sd">        compute the variance of the flattened array.</span>
+
+<span class="sd">    ddof : int, optional (default=0)</span>
+<span class="sd">        &quot;Delta Degrees of Freedom&quot;: the divisor used in the calculation is</span>
+<span class="sd">        ``N - ddof``, where ``N`` represents the number of elements. By</span>
+<span class="sd">        default `ddof` is zero.</span>
+
+<span class="sd">    keepdims : bool, optional (default=False)</span>
+<span class="sd">        If this is set to True, the axes which are reduced are left</span>
+<span class="sd">        in the result as dimensions with size one. With this option,</span>
+<span class="sd">        the result will broadcast correctly against the input array..</span>
+
+<span class="sd">    constant : Optional[bool]</span>
+<span class="sd">        If ``True``, this tensor is treated as a constant, and thus does not</span>
+<span class="sd">        facilitate back propagation (i.e. ``constant.grad`` will always return</span>
+<span class="sd">        ``None``).</span>
+
+<span class="sd">        Defaults to ``False`` for float-type data.</span>
+<span class="sd">        Defaults to ``True`` for integer-type data.</span>
+
+<span class="sd">        Integer-type tensors must be constant.</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    variance : mygrad.Tensor</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The variance is the average of the squared deviations from the mean,</span>
+<span class="sd">    i.e.,  ``var = mean(abs(x - x.mean())**2)``.</span>
+
+<span class="sd">    The mean is normally calculated as ``x.sum() / N``, where ``N = len(x)``.</span>
+<span class="sd">    If, however, `ddof` is specified, the divisor ``N - ddof`` is used</span>
+<span class="sd">    instead.  In standard statistical practice, ``ddof=1`` provides an</span>
+<span class="sd">    unbiased estimator of the variance of a hypothetical infinite population.</span>
+<span class="sd">    ``ddof=0`` provides a maximum likelihood estimate of the variance for</span>
+<span class="sd">    normally distributed variables.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; a = mg.Tensor([[1, 2],</span>
+<span class="sd">    ...                [3, 4]])</span>
+<span class="sd">    &gt;&gt;&gt; mg.var(a)</span>
+<span class="sd">    Tensor(1.25)</span>
+<span class="sd">    &gt;&gt;&gt; mg.var(a, axis=0)</span>
+<span class="sd">    Tensor([ 1.,  1.])</span>
+<span class="sd">    &gt;&gt;&gt; mg.var(a, axis=1)</span>
+<span class="sd">    Tensor([ 0.25,  0.25])</span>
+
+<span class="sd">    In single precision, ``var()`` can be inaccurate:</span>
+
+<span class="sd">    &gt;&gt;&gt; a = mg.zeros((2, 512*512), dtype=np.float32)</span>
+<span class="sd">    &gt;&gt;&gt; a[0, :] = 1.0</span>
+<span class="sd">    &gt;&gt;&gt; a[1, :] = 0.1</span>
+<span class="sd">    &gt;&gt;&gt; mg.var(a)</span>
+<span class="sd">    Tensor(0.20250003)</span>
+
+<span class="sd">    Computing the variance in float64 is more accurate:</span>
+
+<span class="sd">    &gt;&gt;&gt; mg.var(a, dtype=np.float64)</span>
+<span class="sd">    Tensor(0.20249999932944759)</span>
+<span class="sd">    &gt;&gt;&gt; ((1-0.55)**2 + (0.1-0.55)**2)/2</span>
+<span class="sd">    Tensor(0.2025)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span>
+        <span class="n">Variance</span><span class="p">,</span>
+        <span class="n">x</span><span class="p">,</span>
+        <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;axis&quot;</span><span class="p">:</span> <span class="n">axis</span><span class="p">,</span> <span class="s2">&quot;keepdims&quot;</span><span class="p">:</span> <span class="n">keepdims</span><span class="p">,</span> <span class="s2">&quot;ddof&quot;</span><span class="p">:</span> <span class="n">ddof</span><span class="p">},</span>
+        <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="std"><a class="viewcode-back" href="../../../../generated/mygrad.std.html#mygrad.std">[docs]</a><span class="nd">@implements_numpy_override</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">std</span><span class="p">(</span>
+    <span class="n">x</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">axis</span><span class="p">:</span> <span class="n">Axis</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">ddof</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">keepdims</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the standard deviation along the specified axis.</span>
+
+<span class="sd">    Returns the variance of the array elements, a measure of the spread of a</span>
+<span class="sd">    distribution.  The variance is computed for the flattened array by</span>
+<span class="sd">    default, otherwise over the specified axis.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : ArrayLike</span>
+<span class="sd">        Array containing numbers whose standard deviation is desired.</span>
+
+<span class="sd">    axis : Optional[int, Tuple[int, ...]]</span>
+<span class="sd">        Axis or axes along which the variance is computed.  The default is to</span>
+<span class="sd">        compute the variance of the flattened array.</span>
+
+<span class="sd">    ddof : int, optional (default=0)</span>
+<span class="sd">        &quot;Delta Degrees of Freedom&quot;: the divisor used in the calculation is</span>
+<span class="sd">        ``N - ddof``, where ``N`` represents the number of elements. By</span>
+<span class="sd">        default `ddof` is zero.</span>
+
+<span class="sd">    keepdims : bool, optional (default=False)</span>
+<span class="sd">        If this is set to True, the axes which are reduced are left</span>
+<span class="sd">        in the result as dimensions with size one. With this option,</span>
+<span class="sd">        the result will broadcast correctly against the input array.</span>
+
+<span class="sd">    constant : Optional[bool]</span>
+<span class="sd">        If ``True``, this tensor is treated as a constant, and thus does not</span>
+<span class="sd">        facilitate back propagation (i.e. ``constant.grad`` will always return</span>
+<span class="sd">        ``None``).</span>
+
+<span class="sd">        Defaults to ``False`` for float-type data.</span>
+<span class="sd">        Defaults to ``True`` for integer-type data.</span>
+
+<span class="sd">        Integer-type tensors must be constant.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    std : mygrad.Tensor</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The variance is the average of the squared deviations from the mean,</span>
+<span class="sd">    i.e.,  ``var = mean(abs(x - x.mean())**2)``.</span>
+
+<span class="sd">    The mean is normally calculated as ``x.sum() / N``, where ``N = len(x)``.</span>
+<span class="sd">    If, however, `ddof` is specified, the divisor ``N - ddof`` is used</span>
+<span class="sd">    instead.  In standard statistical practice, ``ddof=1`` provides an</span>
+<span class="sd">    unbiased estimator of the variance of a hypothetical infinite population.</span>
+<span class="sd">    ``ddof=0`` provides a maximum likelihood estimate of the variance for</span>
+<span class="sd">    normally distributed variables.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; a = mg.Tensor([[1, 2],</span>
+<span class="sd">    ...                [3, 4]])</span>
+<span class="sd">    &gt;&gt;&gt; mg.std(a)</span>
+<span class="sd">    Tensor(1.1180339887498949)</span>
+<span class="sd">    &gt;&gt;&gt; mg.std(a, axis=0)</span>
+<span class="sd">    Tensor([ 1.,  1.])</span>
+<span class="sd">    &gt;&gt;&gt; mg.std(a, axis=1)</span>
+<span class="sd">    Tensor([ 0.5,  0.5])</span>
+
+<span class="sd">    In single precision, ``var()`` can be inaccurate:</span>
+
+<span class="sd">    &gt;&gt;&gt; a = mg.zeros((2, 512*512), dtype=np.float32)</span>
+<span class="sd">    &gt;&gt;&gt; a[0, :] = 1.0</span>
+<span class="sd">    &gt;&gt;&gt; a[1, :] = 0.1</span>
+<span class="sd">    &gt;&gt;&gt; mg.std(a)</span>
+<span class="sd">    Tensor(0.45000005)</span>
+
+<span class="sd">    Computing the variance in float64 is more accurate:</span>
+
+<span class="sd">    &gt;&gt;&gt; mg.std(a, dtype=np.float64)</span>
+<span class="sd">    Tensor(0.44999999925494177)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span>
+        <span class="n">StdDev</span><span class="p">,</span>
+        <span class="n">x</span><span class="p">,</span>
+        <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;axis&quot;</span><span class="p">:</span> <span class="n">axis</span><span class="p">,</span> <span class="s2">&quot;keepdims&quot;</span><span class="p">:</span> <span class="n">keepdims</span><span class="p">,</span> <span class="s2">&quot;ddof&quot;</span><span class="p">:</span> <span class="n">ddof</span><span class="p">},</span>
+        <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="max"><a class="viewcode-back" href="../../../../generated/mygrad.max.html#mygrad.max">[docs]</a><span class="nd">@implements_numpy_override</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">max</span><span class="p">(</span>
+    <span class="n">x</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">axis</span><span class="p">:</span> <span class="n">Axis</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">keepdims</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the maximum of a tensor or maximum along its axes.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : ArrayLike</span>
+
+<span class="sd">    axis : Optional[int, Tuple[int, ...]]</span>
+<span class="sd">        Axis or axes along which to operate. By default, flattened input is used.</span>
+
+<span class="sd">    keepdims : bool, optional</span>
+<span class="sd">        If this is set to True, the axes which are reduced are left</span>
+<span class="sd">        in the result as dimensions with size one. With this option,</span>
+<span class="sd">        the result will broadcast correctly against the original `arr`.</span>
+
+<span class="sd">    constant : Optional[bool]</span>
+<span class="sd">        If ``True``, this tensor is treated as a constant, and thus does not</span>
+<span class="sd">        facilitate back propagation (i.e. ``constant.grad`` will always return</span>
+<span class="sd">        ``None``).</span>
+
+<span class="sd">        Defaults to ``False`` for float-type data.</span>
+<span class="sd">        Defaults to ``True`` for integer-type data.</span>
+
+<span class="sd">        Integer-type tensors must be constant.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    max : mygrad.Tensor</span>
+<span class="sd">        Maximum of `a`. If `axis` is None, the result is a 0-D tensor.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; a = mg.arange(4).reshape((2,2))</span>
+<span class="sd">    &gt;&gt;&gt; a</span>
+<span class="sd">    Tensor([[0, 1],</span>
+<span class="sd">            [2, 3]])</span>
+<span class="sd">    &gt;&gt;&gt; mg.amax(a)           # Maximum of the flattened array</span>
+<span class="sd">    Tensor(3)</span>
+<span class="sd">    &gt;&gt;&gt; mg.amax(a, axis=0)   # Maxima along the first axis</span>
+<span class="sd">    Tensor([2, 3])</span>
+<span class="sd">    &gt;&gt;&gt; mg.amax(a, axis=1)   # Maxima along the second axis</span>
+<span class="sd">    Tensor([1, 3])</span>
+<span class="sd">    &gt;&gt;&gt; b = mg.arange(5, dtype=float)</span>
+<span class="sd">    &gt;&gt;&gt; b[2] = np.NaN</span>
+<span class="sd">    &gt;&gt;&gt; mg.amax(b)</span>
+<span class="sd">    Tensor(nan)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span>
+        <span class="n">Max</span><span class="p">,</span>
+        <span class="n">x</span><span class="p">,</span>
+        <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;axis&quot;</span><span class="p">:</span> <span class="n">axis</span><span class="p">,</span> <span class="s2">&quot;keepdims&quot;</span><span class="p">:</span> <span class="n">keepdims</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">:</span> <span class="n">_NoValue</span><span class="p">},</span>
+        <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="min"><a class="viewcode-back" href="../../../../generated/mygrad.min.html#mygrad.min">[docs]</a><span class="nd">@implements_numpy_override</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">min</span><span class="p">(</span>
+    <span class="n">x</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">axis</span><span class="p">:</span> <span class="n">Axis</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">keepdims</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the minimum of a tensor or minimum along its axes.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    axis : Optional[int, Tuple[int, ...]]</span>
+<span class="sd">        Axis or axes along which to operate. By default, flattened input is used.</span>
+
+<span class="sd">    keepdims : bool, optional</span>
+<span class="sd">        If this is set to True, the axes which are reduced are left</span>
+<span class="sd">        in the result as dimensions with size one. With this option,</span>
+<span class="sd">        the result will broadcast correctly against the original `arr`.</span>
+
+<span class="sd">    constant : Optional[bool]</span>
+<span class="sd">        If ``True``, this tensor is treated as a constant, and thus does not</span>
+<span class="sd">        facilitate back propagation (i.e. ``constant.grad`` will always return</span>
+<span class="sd">        ``None``).</span>
+
+<span class="sd">        Defaults to ``False`` for float-type data.</span>
+<span class="sd">        Defaults to ``True`` for integer-type data.</span>
+
+<span class="sd">        Integer-type tensors must be constant.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    min : mygrad.Tensor</span>
+<span class="sd">        Minimum of `a`. If `axis` is None, the result is a 0-D tensor.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; a = mg.arange(4).reshape((2,2))</span>
+<span class="sd">    &gt;&gt;&gt; a</span>
+<span class="sd">    Tensor([[0, 1],</span>
+<span class="sd">            [2, 3]])</span>
+<span class="sd">    &gt;&gt;&gt; mg.amin(a)           # Minimum of the flattened array</span>
+<span class="sd">    Tensor(0)</span>
+<span class="sd">    &gt;&gt;&gt; mg.amin(a, axis=0)   # Minima along the first axis</span>
+<span class="sd">    Tensor([0, 1])</span>
+<span class="sd">    &gt;&gt;&gt; mg.amin(a, axis=1)   # Minima along the second axis</span>
+<span class="sd">    Tensor([0, 2])</span>
+<span class="sd">    &gt;&gt;&gt; b = mg.arange(5, dtype=float)</span>
+<span class="sd">    &gt;&gt;&gt; b[2] = np.NaN</span>
+<span class="sd">    &gt;&gt;&gt; mg.amin(b)</span>
+<span class="sd">    Tensor(nan)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span>
+        <span class="n">Min</span><span class="p">,</span>
+        <span class="n">x</span><span class="p">,</span>
+        <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;axis&quot;</span><span class="p">:</span> <span class="n">axis</span><span class="p">,</span> <span class="s2">&quot;keepdims&quot;</span><span class="p">:</span> <span class="n">keepdims</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">:</span> <span class="n">_NoValue</span><span class="p">},</span>
+        <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+<span class="c1"># aliases</span>
+<span class="n">amin</span> <span class="o">=</span> <span class="nb">min</span>
+<span class="n">amax</span> <span class="o">=</span> <span class="nb">max</span>
+<span class="n">_REGISTERED_DIFFERENTIABLE_NUMPY_FUNCS</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">]</span> <span class="o">=</span> <span class="n">amin</span>
+<span class="n">_REGISTERED_DIFFERENTIABLE_NUMPY_FUNCS</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">]</span> <span class="o">=</span> <span class="n">amax</span>
+
+
+<div class="viewcode-block" id="prod"><a class="viewcode-back" href="../../../../generated/mygrad.prod.html#mygrad.prod">[docs]</a><span class="nd">@implements_numpy_override</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">prod</span><span class="p">(</span>
+    <span class="n">a</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">axis</span><span class="p">:</span> <span class="n">Axis</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">keepdims</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the product of array elements over given axes.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a : ArrayLike</span>
+<span class="sd">        Input data.</span>
+
+<span class="sd">    axis : Optional[int, Tuple[int, ...]]</span>
+<span class="sd">        Axis or axes along which to operate. By default, flattened input is used.</span>
+
+<span class="sd">    keepdims : bool, optional (default=False)</span>
+<span class="sd">        If this is set to True, the axes which are reduced are left in the</span>
+<span class="sd">        result as dimensions with size one. With this option, the result</span>
+<span class="sd">        will broadcast correctly against the input array.</span>
+
+<span class="sd">    constant : Optional[bool]</span>
+<span class="sd">        If ``True``, this tensor is treated as a constant, and thus does not</span>
+<span class="sd">        facilitate back propagation (i.e. ``constant.grad`` will always return</span>
+<span class="sd">        ``None``).</span>
+
+<span class="sd">        Defaults to ``False`` for float-type data.</span>
+<span class="sd">        Defaults to ``True`` for integer-type data.</span>
+
+<span class="sd">        Integer-type tensors must be constant.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    product_along_axis : mygrad.Tensor</span>
+<span class="sd">        A tensor shaped as `a` but with the specified axis removed.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The product of an empty tensor is the neutral element 1:</span>
+
+<span class="sd">    &gt;&gt;&gt; import mygrad</span>
+<span class="sd">    &gt;&gt;&gt; mygrad.prod([])</span>
+<span class="sd">    Tensor(1.0)</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    By default, calculate the product of all elements:</span>
+
+<span class="sd">    &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">    &gt;&gt;&gt; mg.prod([1.,2.])</span>
+<span class="sd">    Tensor(2.0)</span>
+
+<span class="sd">    Even when the input array is two-dimensional:</span>
+
+<span class="sd">    &gt;&gt;&gt; mg.prod([[1.,2.],</span>
+<span class="sd">    ...          [3.,4.]])</span>
+<span class="sd">    Tensor(24.0)</span>
+
+<span class="sd">    But we can also specify the axis over which to multiply:</span>
+
+<span class="sd">    &gt;&gt;&gt; mg.prod([[1.,2.],</span>
+<span class="sd">    ...          [3.,4.]], axis=1)</span>
+<span class="sd">    Tensor([  2.,  12.])&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span>
+        <span class="n">Prod</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;axis&quot;</span><span class="p">:</span> <span class="n">axis</span><span class="p">,</span> <span class="s2">&quot;keepdims&quot;</span><span class="p">:</span> <span class="n">keepdims</span><span class="p">},</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="cumprod"><a class="viewcode-back" href="../../../../generated/mygrad.cumprod.html#mygrad.cumprod">[docs]</a><span class="nd">@implements_numpy_override</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">cumprod</span><span class="p">(</span>
+    <span class="n">a</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="n">Axis</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the cumulative product of elements along a given axis.</span>
+
+<span class="sd">    This docstring was adapted from the official numpy documentation</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a : ArrayLike</span>
+<span class="sd">        Input array.</span>
+
+<span class="sd">    axis : Optional[int]</span>
+<span class="sd">        Axis along which the cumulative product is computed.  By default</span>
+<span class="sd">        the input is flattened.</span>
+
+<span class="sd">    constant : bool, optional(default=False)</span>
+<span class="sd">        If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">        does not back-propagate a gradient)</span>
+
+<span class="sd">    constant : Optional[bool]</span>
+<span class="sd">        If ``True``, this tensor is treated as a constant, and thus does not</span>
+<span class="sd">        facilitate back propagation (i.e. ``constant.grad`` will always return</span>
+<span class="sd">        ``None``).</span>
+
+<span class="sd">        Defaults to ``False`` for float-type data.</span>
+<span class="sd">        Defaults to ``True`` for integer-type data.</span>
+
+<span class="sd">        Integer-type tensors must be constant.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    mygrad.Tensor</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Arithmetic is modular when using integer types, and no error is</span>
+<span class="sd">    raised on overflow.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from mygrad import cumprod, Tensor</span>
+<span class="sd">    &gt;&gt;&gt; a = Tensor([[1, 2, 3],</span>
+<span class="sd">    ...             [4, 5, 6]])</span>
+
+<span class="sd">    &gt;&gt;&gt; cumprod(a)</span>
+<span class="sd">    Tensor([  1   2   6  24 120 720])</span>
+
+<span class="sd">    The cumulative product for each column (i.e., over the rows) of `a`:</span>
+
+<span class="sd">    &gt;&gt;&gt; cumprod(a, axis=0)</span>
+<span class="sd">    Tensor([[ 1,  2,  3],</span>
+<span class="sd">           [ 4, 10, 18]])</span>
+
+<span class="sd">    The cumulative product for each row (i.e. over the columns) of `a`:</span>
+
+<span class="sd">    &gt;&gt;&gt; cumprod(a, axis=1)</span>
+<span class="sd">    Tensor([[  1,   2,   6],</span>
+<span class="sd">            [  4,  20, 120]])&quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">CumProd</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;axis&quot;</span><span class="p">:</span> <span class="n">axis</span><span class="p">},</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="cumsum"><a class="viewcode-back" href="../../../../generated/mygrad.cumsum.html#mygrad.cumsum">[docs]</a><span class="nd">@implements_numpy_override</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">cumsum</span><span class="p">(</span>
+    <span class="n">a</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="n">Axis</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the cumulative sum of the elements along a given axis.</span>
+
+<span class="sd">    This docstring was adapted from the official numpy documentation</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a : ArrayLike</span>
+<span class="sd">        Input array.</span>
+
+<span class="sd">    axis : int, optional</span>
+<span class="sd">        Axis along which the cumulative sum is computed. The default</span>
+<span class="sd">        (None) is to compute the cumsum over the flattened array.</span>
+
+<span class="sd">    constant : Optional[bool]</span>
+<span class="sd">        If ``True``, this tensor is treated as a constant, and thus does not</span>
+<span class="sd">        facilitate back propagation (i.e. ``constant.grad`` will always return</span>
+<span class="sd">        ``None``).</span>
+
+<span class="sd">        Defaults to ``False`` for float-type data.</span>
+<span class="sd">        Defaults to ``True`` for integer-type data.</span>
+
+<span class="sd">        Integer-type tensors must be constant.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    mygrad.Tensor</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from mygrad import cumsum, Tensor</span>
+<span class="sd">    &gt;&gt;&gt; a = Tensor([[1, 2, 3],</span>
+<span class="sd">    ...             [4, 5, 6]])</span>
+<span class="sd">    &gt;&gt;&gt; cumsum(a)</span>
+<span class="sd">    Tensor([ 1,  3,  6, 10, 15, 21])</span>
+
+<span class="sd">    &gt;&gt;&gt; cumsum(a, axis=0)      # sum over rows for each of the 3 columns</span>
+<span class="sd">    Tensor([[1, 2, 3],</span>
+<span class="sd">            [5, 7, 9]])</span>
+<span class="sd">    &gt;&gt;&gt; cumsum(a, axis=1)      # sum over columns for each of the 2 rows</span>
+<span class="sd">    Tensor([[ 1,  3,  6],</span>
+<span class="sd">            [ 4,  9, 15]])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">CumSum</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;axis&quot;</span><span class="p">:</span> <span class="n">axis</span><span class="p">},</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
+</pre></div>
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2023, Ryan Soklaski.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.0.1.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

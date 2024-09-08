@@ -1,0 +1,801 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>MyGrad &#8212; MyGrad 2.3.0.post1.dev6 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="_static/my_theme.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'index';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installing MyGrad" href="install.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="#">
+  
+  
+  
+  
+  
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev6 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="install.html">
+                        Installing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="intro.html">
+                        Introducing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="tensor.html">
+                        MyGrad’s Tensor
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="views.html">
+                        Views and In-Place Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="performance_tips.html">
+                        Performance Tips
+                      </a>
+                    </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="operation.html">
+                        Writing Your Own Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="tensor_creation.html">
+                        Tensor creation routines (mygrad.tensor_creation)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="tensor_manipulation.html">
+                        Tensor manipulation routines (mygrad.tensor_manip)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="linalg.html">
+                        Linear algebra (mygrad.linalg)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="math.html">
+                        Mathematical functions (mygrad.math)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="indexing.html">
+                        Indexing Routines (mygrad.indexing_routines)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="nnet.html">
+                        Neural network operations (mygrad.nnet)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="io.html">
+                        Input and Output
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="graph_viz.html">
+                        Computational graph visualization(mygrad.computational_graph)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="changes.html">
+                        Changelog
+                      </a>
+                    </li>
+                
+                </div>
+            </div>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="install.html">
+                        Installing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="intro.html">
+                        Introducing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="tensor.html">
+                        MyGrad’s Tensor
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="views.html">
+                        Views and In-Place Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="performance_tips.html">
+                        Performance Tips
+                      </a>
+                    </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="operation.html">
+                        Writing Your Own Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="tensor_creation.html">
+                        Tensor creation routines (mygrad.tensor_creation)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="tensor_manipulation.html">
+                        Tensor manipulation routines (mygrad.tensor_manip)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="linalg.html">
+                        Linear algebra (mygrad.linalg)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="math.html">
+                        Mathematical functions (mygrad.math)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="indexing.html">
+                        Indexing Routines (mygrad.indexing_routines)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="nnet.html">
+                        Neural network operations (mygrad.nnet)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="io.html">
+                        Input and Output
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="graph_viz.html">
+                        Computational graph visualization(mygrad.computational_graph)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="changes.html">
+                        Changelog
+                      </a>
+                    </li>
+                
+                </div>
+            </div>
+            
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article"></div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="mygrad">
+<h1>MyGrad<a class="headerlink" href="#mygrad" title="Permalink to this heading">#</a></h1>
+<p>MyGrad is a lightweight library that adds automatic differentiation to NumPy – its only
+dependency is NumPy. Simply “drop in” a MyGrad tensor into your NumPy-based code, and
+start differentiating!</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">mygrad</span> <span class="k">as</span> <span class="nn">mg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">3.</span><span class="p">])</span>  <span class="c1"># like numpy.array, but supports backprop</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span>  <span class="c1"># tensors can be passed directly to native numpy functions!</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span> <span class="c1"># triggers automatic differentiation</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">grad</span>  <span class="c1"># stores [df/dx0, df/dx1, df/dx2]</span>
+<span class="go">array([2., 4., 6.])</span>
+</pre></div>
+</div>
+<p>MyGrad’s primary goal is to make automatic differentiation accessible and easy to use across the Python/NumPy ecosystem.
+As such, it strives to behave and feel exactly like NumPy so that users need not learn yet another array-based math library.</p>
+<p>Of the various modes and flavors of auto-diff, MyGrad currently only supports back-propagation from a scalar quantity.</p>
+<section id="drop-in-automatic-differentiation">
+<h2>“Drop in” automatic differentiation?<a class="headerlink" href="#drop-in-automatic-differentiation" title="Permalink to this heading">#</a></h2>
+<p>What we mean by drop in automatic differentiation is that you can take a third party function, which is written in NumPy, and pass MyGrad tensors as its inputs – this will coerce it into using MyGrad functions internally so that we can differentiate the function.</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">What we mean by drop in autodiff</span><a class="headerlink" href="#id1" title="Permalink to this code">#</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">third_party_lib</span> <span class="kn">import</span> <span class="n">some_numpy_func</span>
+
+<span class="kn">import</span> <span class="nn">mygrad</span> <span class="k">as</span> <span class="nn">mg</span>
+
+<span class="n">arr1</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="o">...</span><span class="p">)</span> <span class="c1"># some MyGrad Tensor (instead of a NumPy array)</span>
+<span class="n">arr2</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="o">...</span><span class="p">)</span> <span class="c1"># some MyGrad Tensor (instead of a NumPy array)</span>
+
+<span class="n">output</span> <span class="o">=</span> <span class="n">some_numpy_func</span><span class="p">(</span><span class="n">arr1</span><span class="p">,</span> <span class="n">arr2</span><span class="p">)</span>  <span class="c1"># &quot;drop in&quot; the MyGrad tensors</span>
+
+<span class="n">output</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>  <span class="c1"># output is a MyGrad tensor, not a NumPy array!</span>
+
+<span class="n">arr1</span><span class="o">.</span><span class="n">grad</span>  <span class="c1"># stores d(some_numpy_func) / d(arr1)</span>
+<span class="n">arr2</span><span class="o">.</span><span class="n">grad</span>  <span class="c1"># stores d(some_numpy_func) / d(arr2)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="mygrad-aims-for-parity-with-numpy-s-major-features">
+<h2>MyGrad aims for parity with NumPy’s major features<a class="headerlink" href="#mygrad-aims-for-parity-with-numpy-s-major-features" title="Permalink to this heading">#</a></h2>
+<p>NumPy’s ufuncs are richly supported. We can even differentiate through an operation that occur in-place on a tensor and applies a boolean mask to
+the results:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">3.</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">where</span><span class="o">=</span><span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">],</span> <span class="n">out</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">grad</span>
+<span class="go">array([2., 0., 6.])</span>
+</pre></div>
+</div>
+<p>NumPy’s <a class="reference external" href="https://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/BasicIndexing.html#Producing-a-View-of-an-Array">view semantics</a> are also mirrored to a high fidelity: performing basic
+indexing and similar operations on tensors will produce a “view” of that tensor’s data, thus a tensor and its view share memory.
+This relationship will also manifest between the derivatives stored by a tensor and its views!</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">9.</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">diag_view</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ii-&gt;i&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>  <span class="c1"># returns a view of the diagonal elements of `x`</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="p">,</span> <span class="n">diag_view</span>
+<span class="go">(Tensor([[0., 1., 2.],</span>
+<span class="go">[3., 4., 5.],</span>
+<span class="go">[6., 7., 8.]]),</span>
+<span class="go">Tensor([0., 4., 8.]))</span>
+
+<span class="go"># views share memory</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">shares_memory</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">diag_view</span><span class="p">)</span>
+<span class="go">True</span>
+
+<span class="go"># mutating a view affects its base (and all other views)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">diag_view</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>  <span class="c1"># mutates x in-place</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span>
+<span class="go">Tensor([[-0.,  1.,  2.],</span>
+<span class="go">        [ 3., -4.,  5.],</span>
+<span class="go">        [ 6.,  7., -8.]])</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">grad</span><span class="p">,</span> <span class="n">diag_view</span><span class="o">.</span><span class="n">grad</span>
+<span class="go">(array([[ -0.,   2.,   4.],</span>
+<span class="go">        [  6.,  -8.,  10.],</span>
+<span class="go">        [ 12.,  14., -16.]]),</span>
+<span class="go"> array([ -0.,  -8., -16.]))</span>
+
+<span class="go"># the gradients have the same view relationship!</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">shares_memory</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">grad</span><span class="p">,</span> <span class="n">diag_view</span><span class="o">.</span><span class="n">grad</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p>Basic and advanced indexing is fully supported</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">x</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">grad</span>
+<span class="go">array([[0., 2., 4.],</span>
+<span class="go">       [6., 0., 0.],</span>
+<span class="go">       [0., 0., 0.]])</span>
+</pre></div>
+</div>
+<p>NumPy arrays and other array-likes play nicely with MyGrad’s tensor. These behave like constants
+during automatic differentiation</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">3.</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">constant</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span>  <span class="c1"># can be a numpy array, list, or any other array-like</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">constant</span><span class="p">)</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>  <span class="c1"># all array-likes are treated as constants</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">grad</span>
+<span class="go">array([-1.,  0., 10.])</span>
+</pre></div>
+</div>
+</section>
+<section id="what-about-jax">
+<h2>What About JAX?<a class="headerlink" href="#what-about-jax" title="Permalink to this heading">#</a></h2>
+<p>Doesn’t JAX already provide drop in automatic differentiation? Not quite; JAX provides <em>swap-out</em> automatic differentiation: you must swap out the version of NumPy you are using <em>before</em> you write your code. Thus you cannot simply differentiate some third party function by passing it a JAX array.</p>
+<p>“Is MyGrad a competitor to JAX? Should I stop using JAX and start using MyGrad?”</p>
+<p><strong>Goodness gracious, no!</strong> MyGrad is <em>not</em> meant to compete with the likes of JAX, which offers far more functionality in the way of computing higher-order derivatives, Jacobian vector projects, in terms of providing a jit… this list goes on.
+MyGrad is meant to be a simple and highly accessible way to provide basic automatic differentiation capabilities to the NumPy ecosystem. Anyone who knows how to use NumPy can very easily learn to use MyGrad. It is especially great for teaching. But once your auto-diff needs extend beyond derivatives of scalars, it is time to graduate to JAX.</p>
+<div class="toctree-wrapper compound">
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installing MyGrad</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install.html#support-for-python-and-numpy">Support for Python and NumPy</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introducing MyGrad</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#a-simple-application">A Simple Application</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#gradient-descent-with-mygrad">Gradient Descent with MyGrad</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#some-bells-and-whistles">Some Bells and Whistles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#advanced-example">Advanced Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#computational-graph-visualization">Computational Graph Visualization</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tensor.html">MyGrad’s Tensor</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tensor.html#creating-a-tensor">Creating a Tensor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tensor.html#forward-and-back-propagation">Forward and Back-Propagation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tensor.html#accessing-the-underlying-numpy-array">Accessing the Underlying NumPy Array</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tensor.html#producing-a-view-of-a-tensor">Producing a “View” of a Tensor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tensor.html#documentation-for-mygrad-tensor">Documentation for mygrad.Tensor</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="views.html">Views and In-Place Operations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="views.html#producing-a-view-of-a-tensor">Producing a “View” of a Tensor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="views.html#in-place-operations-are-not-efficient">In-Place Operations are not Efficient</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="performance_tips.html">Performance Tips</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="performance_tips.html#suspending-graph-tracking-for-automatic-differentiation">Suspending Graph-Tracking for Automatic Differentiation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance_tips.html#controlling-memory-guarding-behavior">Controlling Memory-Guarding Behavior</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance_tips.html#make-use-of-views-but-avoid-involving-them-in-in-place-operations">Make Use of Views but Avoid Involving them in In-Place Operations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="operation.html">Writing Your Own Operations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="operation.html#documentation-for-mygrad-operation">Documentation for mygrad.Operation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tensor_creation.html">Tensor creation routines (<code class="xref py py-mod docutils literal notranslate"><span class="pre">mygrad.tensor_creation</span></code>)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tensor_creation.html#array-like">Array-Like</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tensor_creation.html#ones-and-zeros">Ones and zeros</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tensor_creation.html#numerical-ranges">Numerical ranges</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tensor_manipulation.html">Tensor manipulation routines (<code class="xref py py-mod docutils literal notranslate"><span class="pre">mygrad.tensor_manip</span></code>)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tensor_manipulation.html#changing-array-shape">Changing array shape</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tensor_manipulation.html#transpose-like-operations">Transpose-like operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tensor_manipulation.html#changing-number-of-dimensions">Changing number of dimensions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tensor_manipulation.html#joining-tensors">Joining tensors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tensor_manipulation.html#tiling-tensors">Tiling tensors</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="linalg.html">Linear algebra (<code class="xref py py-mod docutils literal notranslate"><span class="pre">mygrad.linalg</span></code>)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="linalg.html#matrix-and-vector-products">Matrix and vector products</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linalg.html#norms-and-other-numbers">Norms and other numbers</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="math.html">Mathematical functions (<code class="xref py py-mod docutils literal notranslate"><span class="pre">mygrad.math</span></code>)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="math.html#trigonometric-functions">Trigonometric functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="math.html#hyperbolic-functions">Hyperbolic functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="math.html#sums-products-differences">Sums, products, differences</a></li>
+<li class="toctree-l2"><a class="reference internal" href="math.html#exponents-and-logarithms">Exponents and logarithms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="math.html#other-special-functions">Other special functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="math.html#arithmetic-operations">Arithmetic operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="math.html#miscellaneous">Miscellaneous</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="indexing.html">Indexing Routines (<code class="xref py py-mod docutils literal notranslate"><span class="pre">mygrad.indexing_routines</span></code>)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="indexing.html#generating-index-tensors">Generating index tensors</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="nnet.html">Neural network operations (<code class="xref py py-mod docutils literal notranslate"><span class="pre">mygrad.nnet</span></code>)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="nnet.html#layer-operations">Layer operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nnet.html#losses">Losses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nnet.html#activations">Activations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nnet.html#initializers">Initializers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nnet.html#sliding-window-view-utility">Sliding Window View Utility</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="io.html">Input and Output</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="io.html#numpy-binary-files-npy-npz">NumPy binary files (NPY, NPZ)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="graph_viz.html">Computational graph visualization(<code class="xref py py-mod docutils literal notranslate"><span class="pre">mygrad.computational_graph</span></code>)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/mygrad.computational_graph.build_graph.html">mygrad.computational_graph.build_graph</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="changes.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#v2-3-0">2.3.0 - 2024-09-07</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#v2-2-0">2.2.0 - 2023-01-03</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#v2-1-0">2.1.0 - 2022-01-01</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#v2-0-2">2.0.2 - 2021-04-10</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#v2-0-1">2.0.1 - 2021-04-03</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#v2-0-0">2.0.0 - 2021-03-30</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#v1-9-0">1.9.0 - 2020-08-28</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#v1-8-1">1.8.1 - 2020-07-28</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#v1-8-0">1.8.0 - 2020-07-25</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#v1-7-1">1.7.1 - 2020-07-11</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#v1-7-0">1.7.0 - 2020-07-11</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#v1-6-0">1.6.0 - 2020-06-21</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#v1-5-0">1.5.0 - 2020-02-16</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#v1-4-1">1.4.1 - 2020-01-09</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#v1-4-0">1.4.0 - 2019-12-19</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#v1-3-0">1.3.0 - 2019-11-30</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#v1-2-0">1.2.0 - 2019-08-03</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="right-next"
+       href="install.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Installing MyGrad</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#drop-in-automatic-differentiation">“Drop in” automatic differentiation?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mygrad-aims-for-parity-with-numpy-s-major-features">MyGrad aims for parity with NumPy’s major features</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-about-jax">What About JAX?</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="_sources/index.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2023, Ryan Soklaski.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.0.1.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

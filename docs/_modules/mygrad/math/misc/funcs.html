@@ -1,0 +1,1421 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mygrad.math.misc.funcs &#8212; MyGrad 2.3.0.post1.dev6 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/my_theme.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/sphinx_highlight.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/mygrad/math/misc/funcs';</script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="../../../../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev6 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../install.html">
+                        Installing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../intro.html">
+                        Introducing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../tensor.html">
+                        MyGrad’s Tensor
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../views.html">
+                        Views and In-Place Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../performance_tips.html">
+                        Performance Tips
+                      </a>
+                    </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../operation.html">
+                        Writing Your Own Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../tensor_creation.html">
+                        Tensor creation routines (mygrad.tensor_creation)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../tensor_manipulation.html">
+                        Tensor manipulation routines (mygrad.tensor_manip)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../linalg.html">
+                        Linear algebra (mygrad.linalg)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../math.html">
+                        Mathematical functions (mygrad.math)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../indexing.html">
+                        Indexing Routines (mygrad.indexing_routines)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../nnet.html">
+                        Neural network operations (mygrad.nnet)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../io.html">
+                        Input and Output
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../graph_viz.html">
+                        Computational graph visualization(mygrad.computational_graph)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../changes.html">
+                        Changelog
+                      </a>
+                    </li>
+                
+                </div>
+            </div>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../install.html">
+                        Installing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../intro.html">
+                        Introducing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../tensor.html">
+                        MyGrad’s Tensor
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../views.html">
+                        Views and In-Place Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../performance_tips.html">
+                        Performance Tips
+                      </a>
+                    </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../operation.html">
+                        Writing Your Own Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../tensor_creation.html">
+                        Tensor creation routines (mygrad.tensor_creation)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../tensor_manipulation.html">
+                        Tensor manipulation routines (mygrad.tensor_manip)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../linalg.html">
+                        Linear algebra (mygrad.linalg)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../math.html">
+                        Mathematical functions (mygrad.math)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../indexing.html">
+                        Indexing Routines (mygrad.indexing_routines)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../nnet.html">
+                        Neural network operations (mygrad.nnet)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../io.html">
+                        Input and Output
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../graph_viz.html">
+                        Computational graph visualization(mygrad.computational_graph)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../changes.html">
+                        Changelog
+                      </a>
+                    </li>
+                
+                </div>
+            </div>
+            
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">mygrad.math.misc.funcs</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <h1>Source code for mygrad.math.misc.funcs</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">ndarray</span>
+
+<span class="kn">import</span> <span class="nn">mygrad</span> <span class="k">as</span> <span class="nn">mg</span>
+<span class="kn">from</span> <span class="nn">mygrad.math.misc.ops</span> <span class="kn">import</span> <span class="n">MatMul</span>
+<span class="kn">from</span> <span class="nn">mygrad.tensor_base</span> <span class="kn">import</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">implements_numpy_override</span>
+<span class="kn">from</span> <span class="nn">mygrad.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">DTypeLikeReals</span><span class="p">,</span> <span class="n">Mask</span>
+<span class="kn">from</span> <span class="nn">mygrad.ufuncs</span> <span class="kn">import</span> <span class="n">ufunc_creator</span>
+
+<span class="kn">from</span> <span class="nn">.ops</span> <span class="kn">import</span> <span class="n">Abs</span><span class="p">,</span> <span class="n">Cbrt</span><span class="p">,</span> <span class="n">Maximum</span><span class="p">,</span> <span class="n">Minimum</span><span class="p">,</span> <span class="n">Sqrt</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;abs&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;absolute&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;cbrt&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;clip&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sqrt&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;maximum&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;minimum&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;matmul&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;multi_matmul&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<span class="nd">@ufunc_creator</span><span class="p">(</span><span class="n">Abs</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">absolute</span><span class="p">(</span>
+    <span class="n">x</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">out</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">where</span><span class="p">:</span> <span class="n">Mask</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLikeReals</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">nan_to_num</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The absolute value, computed elementwise.</span>
+
+<span class="sd">    This docstring was adapted from that of numpy.absolute [1]_</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : ArrayLike</span>
+<span class="sd">        Input array.</span>
+
+<span class="sd">    out : Optional[Union[Tensor, ndarray]]</span>
+<span class="sd">        A location into which the result is stored. If provided, it must have</span>
+<span class="sd">        a shape that the inputs broadcast to. If not provided or None,</span>
+<span class="sd">        a freshly-allocated tensor is returned.</span>
+
+<span class="sd">    constant : Optional[bool]</span>
+<span class="sd">        If ``True``, this tensor is treated as a constant, and thus does not</span>
+<span class="sd">        facilitate back propagation (i.e. ``constant.grad`` will always return</span>
+<span class="sd">        ``None``).</span>
+
+<span class="sd">        Defaults to ``False`` for float-type data.</span>
+<span class="sd">        Defaults to ``True`` for integer-type data.</span>
+
+<span class="sd">        Integer-type tensors must be constant.</span>
+
+<span class="sd">    nan_to_num : bool, optional (default=True)</span>
+<span class="sd">        If `True` then gradients that would store nans due to the presence of</span>
+<span class="sd">        zeros in `x` will instead store zeros in those places.</span>
+
+<span class="sd">    where : Mask</span>
+<span class="sd">        This condition is broadcast over the input. At locations where the</span>
+<span class="sd">        condition is True, the ``out`` tensor will be set to the ufunc result.</span>
+<span class="sd">        Elsewhere, the ``out`` tensor will retain its original value.</span>
+<span class="sd">        Note that if an uninitialized `out` tensor is created via the default</span>
+<span class="sd">        ``out=None``, locations within it where the condition is False will</span>
+<span class="sd">        remain uninitialized.</span>
+
+<span class="sd">    dtype : Optional[DTypeLikeReals]</span>
+<span class="sd">        The dtype of the resulting tensor.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    absolute : Tensor</span>
+<span class="sd">        An ndarray containing the absolute value of</span>
+<span class="sd">        each element in `x`.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] Retrieved from https://numpy.org/doc/stable/reference/generated/numpy.absolute.html</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">    &gt;&gt;&gt; x = mg.array([-1.2, 1.2])</span>
+<span class="sd">    &gt;&gt;&gt; mg.absolute([-1.2, 1.2])</span>
+<span class="sd">    Tensor([ 1.2,  1.2])</span>
+
+<span class="sd">    The absolute-value function is not differentiable at `x=0.0`.</span>
+<span class="sd">    By default the derivative at this point is treated as 0.</span>
+
+<span class="sd">    &gt;&gt;&gt; x = mg.tensor([-2.0, 0.0, 2.0])</span>
+<span class="sd">    &gt;&gt;&gt; mg.absolute(x).backward()</span>
+<span class="sd">    &gt;&gt;&gt; x.grad</span>
+<span class="sd">    np.array([-1., 0., 1.])</span>
+
+<span class="sd">    However a more rigorous behavior can be enabled such that the</span>
+<span class="sd">    undefined derivative will be returned as `nan`.</span>
+
+<span class="sd">    &gt;&gt;&gt; x = mg.tensor([-2.0, 0.0, 2.0])</span>
+<span class="sd">    &gt;&gt;&gt; mg.absolute(x, nan_to_num=False).backward()</span>
+<span class="sd">    &gt;&gt;&gt; x.grad</span>
+<span class="sd">    np.array([-1., nan, 1.])</span>
+
+<span class="sd">    Plot the function and its derivate over ``[-10, 10]``:</span>
+
+<span class="sd">    .. plot::</span>
+
+<span class="sd">       &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">       &gt;&gt;&gt; import matplotlib.pyplot as plt</span>
+<span class="sd">       &gt;&gt;&gt; x = mg.linspace(-5, 5, 100)</span>
+<span class="sd">       &gt;&gt;&gt; y = mg.absolute(x)</span>
+<span class="sd">       &gt;&gt;&gt; plt.title(&quot;absolute(x)&quot;)</span>
+<span class="sd">       &gt;&gt;&gt; y.backward()</span>
+<span class="sd">       &gt;&gt;&gt; plt.plot(x, x.grad, label=&quot;df/dx&quot;)</span>
+<span class="sd">       &gt;&gt;&gt; plt.plot(x, y, label=&quot;f(x)&quot;)</span>
+<span class="sd">       &gt;&gt;&gt; plt.legend()</span>
+<span class="sd">       &gt;&gt;&gt; plt.grid()</span>
+<span class="sd">       &gt;&gt;&gt; plt.show()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="o">...</span>
+
+
+<span class="nb">abs</span> <span class="o">=</span> <span class="n">absolute</span>
+
+
+<span class="nd">@ufunc_creator</span><span class="p">(</span><span class="n">Sqrt</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">sqrt</span><span class="p">(</span>
+    <span class="n">x</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">out</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">where</span><span class="p">:</span> <span class="n">Mask</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLikeReals</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The square root, elementwise.</span>
+
+<span class="sd">    This docstring was adapted from that of numpy.sqrt [1]_</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : ArrayLike</span>
+<span class="sd">        The values whose square-roots are required.</span>
+
+<span class="sd">    out : Optional[Union[Tensor, ndarray]]</span>
+<span class="sd">        A location into which the result is stored. If provided, it must have</span>
+<span class="sd">        a shape that the inputs broadcast to. If not provided or None,</span>
+<span class="sd">        a freshly-allocated tensor is returned.</span>
+
+
+<span class="sd">    constant : Optional[bool]</span>
+<span class="sd">        If ``True``, this tensor is treated as a constant, and thus does not</span>
+<span class="sd">        facilitate back propagation (i.e. ``constant.grad`` will always return</span>
+<span class="sd">        ``None``).</span>
+
+<span class="sd">        Defaults to ``False`` for float-type data.</span>
+<span class="sd">        Defaults to ``True`` for integer-type data.</span>
+
+<span class="sd">        Integer-type tensors must be constant.</span>
+
+<span class="sd">    where : Mask</span>
+<span class="sd">        This condition is broadcast over the input. At locations where the</span>
+<span class="sd">        condition is True, the ``out`` tensor will be set to the ufunc result.</span>
+<span class="sd">        Elsewhere, the ``out`` tensor will retain its original value.</span>
+<span class="sd">        Note that if an uninitialized `out` tensor is created via the default</span>
+<span class="sd">        ``out=None``, locations within it where the condition is False will</span>
+<span class="sd">        remain uninitialized.</span>
+
+<span class="sd">    dtype : Optional[DTypeLikeReals]</span>
+<span class="sd">        The dtype of the resulting tensor.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    y : ndarray</span>
+<span class="sd">        A tensor of the same shape as `x`, containing the positive</span>
+<span class="sd">        square-root of each element in `x`. Negative-valued inputs</span>
+<span class="sd">        produce nans.</span>
+
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    *sqrt* has--consistent with common convention--as its branch cut the</span>
+<span class="sd">    real &quot;interval&quot; [`-inf`, 0), and is continuous from above on it.</span>
+<span class="sd">    A branch cut is a curve in the complex plane across which a given</span>
+<span class="sd">    complex function fails to be continuous.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] Retrieved from https://numpy.org/doc/stable/reference/generated/numpy.sqrt.html</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">    &gt;&gt;&gt; mg.sqrt([1, 4, 9])</span>
+<span class="sd">    Tensor([ 1.,  2.,  3.])</span>
+
+<span class="sd">    &gt;&gt;&gt; mg.sqrt([4, -1, mg.inf])</span>
+<span class="sd">    Tensor([ 2., nan, inf])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="o">...</span>
+
+
+<span class="nd">@ufunc_creator</span><span class="p">(</span><span class="n">Cbrt</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">cbrt</span><span class="p">(</span>
+    <span class="n">x</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">out</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">where</span><span class="p">:</span> <span class="n">Mask</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLikeReals</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The cube root elementwise.</span>
+
+<span class="sd">    This docstring was adapted from that of numpy.cbrt [1]_</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : ArrayLike</span>
+<span class="sd">        The values whose cube-roots are computed.</span>
+
+<span class="sd">    out : Optional[Union[Tensor, ndarray]]</span>
+<span class="sd">        A location into which the result is stored. If provided, it must have</span>
+<span class="sd">        a shape that the inputs broadcast to. If not provided or None,</span>
+<span class="sd">        a freshly-allocated tensor is returned.</span>
+
+<span class="sd">    constant : Optional[bool]</span>
+<span class="sd">        If ``True``, this tensor is treated as a constant, and thus does not</span>
+<span class="sd">        facilitate back propagation (i.e. ``constant.grad`` will always return</span>
+<span class="sd">        ``None``).</span>
+
+<span class="sd">        Defaults to ``False`` for float-type data.</span>
+<span class="sd">        Defaults to ``True`` for integer-type data.</span>
+
+<span class="sd">        Integer-type tensors must be constant.</span>
+
+<span class="sd">    where : Mask</span>
+<span class="sd">        This condition is broadcast over the input. At locations where the</span>
+<span class="sd">        condition is True, the ``out`` tensor will be set to the ufunc result.</span>
+<span class="sd">        Elsewhere, the ``out`` tensor will retain its original value.</span>
+<span class="sd">        Note that if an uninitialized `out` tensor is created via the default</span>
+<span class="sd">        ``out=None``, locations within it where the condition is False will</span>
+<span class="sd">        remain uninitialized.</span>
+
+<span class="sd">    dtype : Optional[DTypeLikeReals]</span>
+<span class="sd">        The dtype of the resulting tensor.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    y : ndarray</span>
+<span class="sd">        A tensor of the same shape as `x`, containing the cube</span>
+<span class="sd">        cube-root of each element in `x`.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] Retrieved from https://numpy.org/doc/stable/reference/generated/numpy.cbrt.html</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">    &gt;&gt;&gt; mg.cbrt([1, 8, 27])</span>
+<span class="sd">    Tensor([ 1.,  2.,  3.])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="o">...</span>
+
+
+<span class="nd">@ufunc_creator</span><span class="p">(</span><span class="n">Maximum</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">maximum</span><span class="p">(</span>
+    <span class="n">x1</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">x2</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">out</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">where</span><span class="p">:</span> <span class="n">Mask</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLikeReals</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Pair-wise maximum of tensor elements.</span>
+
+<span class="sd">    This docstring was adapted from that of numpy.maximum [1]_</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x1, x2 : ArrayLike</span>
+<span class="sd">        The tensors holding the elements to be compared.</span>
+<span class="sd">        If ``x1.shape != x2.shape``, they must be broadcastable to a common</span>
+<span class="sd">        shape (which becomes the shape of the output).</span>
+
+<span class="sd">    out : Optional[Union[Tensor, ndarray]]</span>
+<span class="sd">        A location into which the result is stored. If provided, it must have</span>
+<span class="sd">        a shape that the inputs broadcast to. If not provided or None,</span>
+<span class="sd">        a freshly-allocated tensor is returned.</span>
+
+<span class="sd">    constant : Optional[bool]</span>
+<span class="sd">        If ``True``, this tensor is treated as a constant, and thus does not</span>
+<span class="sd">        facilitate back propagation (i.e. ``constant.grad`` will always return</span>
+<span class="sd">        ``None``).</span>
+
+<span class="sd">        Defaults to ``False`` for float-type data.</span>
+<span class="sd">        Defaults to ``True`` for integer-type data.</span>
+
+<span class="sd">        Integer-type tensors must be constant.</span>
+
+<span class="sd">    where : Mask</span>
+<span class="sd">        This condition is broadcast over the input. At locations where the</span>
+<span class="sd">        condition is True, the ``out`` tensor will be set to the ufunc result.</span>
+<span class="sd">        Elsewhere, the ``out`` tensor will retain its original value.</span>
+<span class="sd">        Note that if an uninitialized `out` tensor is created via the default</span>
+<span class="sd">        ``out=None``, locations within it where the condition is False will</span>
+<span class="sd">        remain uninitialized.</span>
+
+<span class="sd">    dtype : Optional[DTypeLikeReals]</span>
+<span class="sd">        The dtype of the resulting tensor.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    y : Tensor</span>
+<span class="sd">        The maximum of `x1` and `x2`, element-wise.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    minimum :</span>
+<span class="sd">        Element-wise minimum of two arrays, propagates NaNs.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The maximum is equivalent to ``mg.where(x1 &gt;= x2, x1, x2)`` when</span>
+<span class="sd">    neither x1 nor x2 are nans, but it is faster and does proper</span>
+<span class="sd">    broadcasting.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] Retrieved from https://numpy.org/doc/stable/reference/generated/numpy.maximum.html</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">    &gt;&gt;&gt; mg.maximum([2, 3, 4], [1, 5, 2])</span>
+<span class="sd">    Tensor([2, 5, 4])</span>
+
+<span class="sd">    &gt;&gt;&gt; mg.maximum(mg.eye(2), [0.5, 2]) # broadcasting</span>
+<span class="sd">    Tensor([[ 1. ,  2. ],</span>
+<span class="sd">           [ 0.5,  2. ]])</span>
+
+<span class="sd">    &gt;&gt;&gt; mg.maximum([mg.nan, 0, mg.nan], [0, mg.nan, mg.nan])</span>
+<span class="sd">    Tensor([nan, nan, nan])</span>
+<span class="sd">    &gt;&gt;&gt; mg.maximum(mg.Inf, 1)</span>
+<span class="sd">    Tensor(inf)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="o">...</span>
+
+
+<span class="nd">@ufunc_creator</span><span class="p">(</span><span class="n">Minimum</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">minimum</span><span class="p">(</span>
+    <span class="n">x1</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">x2</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">out</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">where</span><span class="p">:</span> <span class="n">Mask</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLikeReals</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Pair-wise minimum of tensor elements.</span>
+
+<span class="sd">    This docstring was adapted from that of numpy.minimum [1]_</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x1, x2 : ArrayLike</span>
+<span class="sd">        The tensors holding the elements to be compared.</span>
+<span class="sd">        If ``x1.shape != x2.shape``, they must be broadcastable to a common</span>
+<span class="sd">        shape (which becomes the shape of the output).</span>
+
+<span class="sd">    out : Optional[Union[Tensor, ndarray]]</span>
+<span class="sd">        A location into which the result is stored. If provided, it must have</span>
+<span class="sd">        a shape that the inputs broadcast to. If not provided or None,</span>
+<span class="sd">        a freshly-allocated tensor is returned.</span>
+
+<span class="sd">    constant : Optional[bool]</span>
+<span class="sd">        If ``True``, this tensor is treated as a constant, and thus does not</span>
+<span class="sd">        facilitate back propagation (i.e. ``constant.grad`` will always return</span>
+<span class="sd">        ``None``).</span>
+
+<span class="sd">        Defaults to ``False`` for float-type data.</span>
+<span class="sd">        Defaults to ``True`` for integer-type data.</span>
+
+<span class="sd">        Integer-type tensors must be constant.</span>
+
+<span class="sd">    where : Mask</span>
+<span class="sd">        This condition is broadcast over the input. At locations where the</span>
+<span class="sd">        condition is True, the ``out`` tensor will be set to the ufunc result.</span>
+<span class="sd">        Elsewhere, the ``out`` tensor will retain its original value.</span>
+<span class="sd">        Note that if an uninitialized `out` tensor is created via the default</span>
+<span class="sd">        ``out=None``, locations within it where the condition is False will</span>
+<span class="sd">        remain uninitialized.</span>
+
+<span class="sd">    dtype : Optional[DTypeLikeReals]</span>
+<span class="sd">        The dtype of the resulting tensor.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    y : Tensor</span>
+<span class="sd">        The minimum of `x1` and `x2`, element-wise.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    maximum :</span>
+<span class="sd">        Element-wise maximum of two arrays, propagates NaNs.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The minimum is equivalent to ``mg.where(x1 &lt;= x2, x1, x2)`` when</span>
+<span class="sd">    neither x1 nor x2 are NaNs, but it is faster and does proper</span>
+<span class="sd">    broadcasting.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] Retrieved from https://numpy.org/doc/stable/reference/generated/numpy.minimum.html</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">    &gt;&gt;&gt; mg.minimum([2, 3, 4], [1, 5, 2])</span>
+<span class="sd">    Tensor([1, 3, 2])</span>
+
+<span class="sd">    &gt;&gt;&gt; mg.minimum(mg.eye(2), [0.5, 2]) # broadcasting</span>
+<span class="sd">    Tensor([[ 0.5,  0. ],</span>
+<span class="sd">           [ 0. ,  1. ]])</span>
+
+<span class="sd">    &gt;&gt;&gt; mg.minimum([mg.nan, 0, mg.nan],[0, mg.nan, mg.nan])</span>
+<span class="sd">    Tensor([nan, nan, nan])</span>
+<span class="sd">    &gt;&gt;&gt; mg.minimum(-mg.Inf, 1)</span>
+<span class="sd">    Tensor(-inf)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="o">...</span>
+
+
+<div class="viewcode-block" id="clip"><a class="viewcode-back" href="../../../../generated/mygrad.clip.html#mygrad.clip">[docs]</a><span class="nd">@implements_numpy_override</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">clip</span><span class="p">(</span>
+    <span class="n">a</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">a_min</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+    <span class="n">a_max</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+    <span class="n">out</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Clip (limit) the values in an array.</span>
+
+<span class="sd">    Given an interval, values outside the interval are clipped to</span>
+<span class="sd">    the interval edges.  For example, if an interval of ``[0, 1]``</span>
+<span class="sd">    is specified, values smaller than 0 become 0, and values larger</span>
+<span class="sd">    than 1 become 1.</span>
+
+<span class="sd">    Equivalent to `mg.minimum(a_max, mg.maximum(a, a_min))``.</span>
+
+<span class="sd">    No check is performed to ensure ``a_min &lt; a_max``.</span>
+
+<span class="sd">    This docstring was adapted from that of `numpy.clip`</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a : ArrayLike</span>
+<span class="sd">        Array containing elements to clip.</span>
+
+<span class="sd">    a_min : Optional[float, ArrayLike]</span>
+<span class="sd">        Minimum value. If `None`, clipping is not performed on lower</span>
+<span class="sd">        interval edge. Not more than one of `a_min` and `a_max` may be</span>
+<span class="sd">        `None`.</span>
+
+<span class="sd">    a_max : Optional[float, ArrayLike]</span>
+<span class="sd">        Maximum value. If `None`, clipping is not performed on upper</span>
+<span class="sd">        interval edge. Not more than one of `a_min` and `a_max` may be</span>
+<span class="sd">        `None`. If `a_min` or `a_max` are ArrayLike, then the three</span>
+<span class="sd">        arrays will be broadcasted to match their shapes.</span>
+
+<span class="sd">    out : Optional[Union[ndarray, Tensor]]</span>
+<span class="sd">        A location into which the result is stored. If provided, it must have</span>
+<span class="sd">        a shape that the inputs broadcast to. If not provided or None, a</span>
+<span class="sd">        freshly-allocated tensor is returned.</span>
+
+<span class="sd">    constant : bool, optional(default=False)</span>
+<span class="sd">        If ``True``, the returned tensor is a constant (it</span>
+<span class="sd">        does not backpropagate a gradient)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Tensor</span>
+<span class="sd">        A tensor with the elements of `a`, but where values</span>
+<span class="sd">        &lt; `a_min` are replaced with `a_min`, and those &gt; `a_max`</span>
+<span class="sd">        with `a_max`.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">    &gt;&gt;&gt; a = mg.arange(10)</span>
+<span class="sd">    &gt;&gt;&gt; mg.clip(a, 1, 8)</span>
+<span class="sd">    Tensor([1, 1, 2, 3, 4, 5, 6, 7, 8, 8])</span>
+<span class="sd">    &gt;&gt;&gt; a</span>
+<span class="sd">    Tensor([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])</span>
+<span class="sd">    &gt;&gt;&gt; mg.clip(a, [3, 4, 1, 1, 1, 4, 4, 4, 4, 4], 8)</span>
+<span class="sd">    Tensor([3, 4, 2, 3, 4, 5, 6, 7, 8, 8])&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">__version__</span> <span class="o">&lt;</span> <span class="s2">&quot;2.1.0&quot;</span> <span class="ow">and</span> <span class="n">a_min</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">a_max</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;`a_min` and `a_max` cannot both be set to `None`&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">a_min</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">maximum</span><span class="p">(</span><span class="n">a_min</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">out</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">a_max</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">minimum</span><span class="p">(</span><span class="n">a_max</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">out</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">mg</span><span class="o">.</span><span class="n">astensor</span><span class="p">(</span><span class="n">a</span><span class="p">)</span></div>
+
+
+<span class="nd">@ufunc_creator</span><span class="p">(</span><span class="n">MatMul</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">matmul</span><span class="p">(</span>
+    <span class="n">x1</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">x2</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">out</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLikeReals</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Matrix product of two tensors:</span>
+
+<span class="sd">    ``matmul(x, y)`` is equivalent to ``x @ y``.</span>
+
+<span class="sd">    This documentation was adapted from ``numpy.matmul``</span>
+
+<span class="sd">    The behavior depends on the arguments in the following way.</span>
+
+<span class="sd">    - If both arguments are 2-D they are multiplied like conventional</span>
+<span class="sd">      matrices.</span>
+<span class="sd">    - If either argument is N-D, N &gt; 2, it is treated as a stack of</span>
+<span class="sd">      matrices residing in the last two indexes and broadcast accordingly.</span>
+<span class="sd">    - If the first argument is 1-D, it is promoted to a matrix by</span>
+<span class="sd">      prepending a 1 to its dimensions. After matrix multiplication</span>
+<span class="sd">      the prepended 1 is removed.</span>
+<span class="sd">    - If the second argument is 1-D, it is promoted to a matrix by</span>
+<span class="sd">      appending a 1 to its dimensions. After matrix multiplication</span>
+<span class="sd">      the appended 1 is removed.</span>
+
+<span class="sd">    Multiplication by a scalar is not allowed, use ``*`` instead. Note that</span>
+<span class="sd">    multiplying a stack of matrices with a vector will result in a stack of</span>
+<span class="sd">    vectors, but matmul will not recognize it as such.</span>
+
+<span class="sd">    ``matmul`` differs from ``numpy.dot`` in two important ways.</span>
+
+<span class="sd">    - Multiplication by scalars is not allowed.</span>
+<span class="sd">    - Stacks of matrices are broadcast together as if the matrices</span>
+<span class="sd">      were elements.</span>
+
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x1 : ArrayLike</span>
+
+<span class="sd">    x2 : ArrayLike</span>
+
+<span class="sd">    constant : Optional[bool]</span>
+<span class="sd">        If ``True``, this tensor is treated as a constant, and thus does not</span>
+<span class="sd">        facilitate back propagation (i.e. ``constant.grad`` will always return</span>
+<span class="sd">        ``None``).</span>
+
+<span class="sd">        Defaults to ``False`` for float-type data.</span>
+<span class="sd">        Defaults to ``True`` for integer-type data.</span>
+
+<span class="sd">        Integer-type tensors must be constant.</span>
+
+<span class="sd">    dtype : Optional[DTypeLikeReals]</span>
+<span class="sd">        The dtype of the resulting tensor.</span>
+
+<span class="sd">    out : Optional[Union[ndarray, Tensor]]</span>
+<span class="sd">        A location into which the result is stored. If provided, it must have</span>
+<span class="sd">        a shape that the inputs broadcast to. If not provided or None,</span>
+<span class="sd">        a freshly-allocated tensor is returned.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    output : mygrad.Tensor</span>
+<span class="sd">        Returns the matrix product of ``x1`` and `x2``.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If :</span>
+<span class="sd">         - The last dimension of ``x1`` is not the same size as</span>
+<span class="sd">           the second-to-last dimension of ``x2``.</span>
+<span class="sd">         - If scalar value is passed.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    einsum : Einstein summation convention.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The matmul function implements the semantics of the `@` operator introduced</span>
+<span class="sd">    in Python 3.5 following PEP465.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    For two 2D tensors, ``matmul(a, b)`` is the matrix product :math:`\sum_{j}{A_{ij} B_{jk}} = F_{ik}`:</span>
+
+<span class="sd">    &gt;&gt;&gt; import mygrad as mg</span>
+<span class="sd">    &gt;&gt;&gt; a = [[1, 0], [0, 1]]</span>
+<span class="sd">    &gt;&gt;&gt; b = [[4, 1], [2, 2]]</span>
+<span class="sd">    &gt;&gt;&gt; mg.matmul(a, b)</span>
+<span class="sd">    Tensor([[4, 1],</span>
+<span class="sd">            [2, 2]])</span>
+
+<span class="sd">    For 2-D mixed with 1-D, the result is the matrix-vector product, :math:`\sum_{j}{A_{ij} B_{j}} = F_{i}`:</span>
+
+<span class="sd">    &gt;&gt;&gt; a = [[1, 0], [0, 1]]</span>
+<span class="sd">    &gt;&gt;&gt; b = [1, 2]</span>
+<span class="sd">    &gt;&gt;&gt; mg.matmul(a, b)</span>
+<span class="sd">    Tensor([1, 2])</span>
+
+<span class="sd">    Broadcasting is conventional for stacks of arrays. Here ``a`` is treated</span>
+<span class="sd">    like a stack of three 5x6 matrices, and the 6x4 matrix ``b`` is broadcast</span>
+<span class="sd">    matrix-multiplied against each one. This produces a shape-(3, 5, 4) tensor</span>
+<span class="sd">    as a result.</span>
+
+<span class="sd">    &gt;&gt;&gt; a = mg.arange(3*5*6).reshape((3,5,6))</span>
+<span class="sd">    &gt;&gt;&gt; b = mg.arange(6*4).reshape((6,4))</span>
+<span class="sd">    &gt;&gt;&gt; mg.matmul(a,b).shape</span>
+<span class="sd">    (3, 5, 4)</span>
+
+<span class="sd">    Scalar multiplication raises an error.</span>
+
+<span class="sd">    &gt;&gt;&gt; mg.matmul(a, 3)</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">    ...</span>
+<span class="sd">    ValueError: Scalar operands are not allowed, use &#39;*&#39; instead&quot;&quot;&quot;</span>
+    <span class="o">...</span>
+
+
+<div class="viewcode-block" id="multi_matmul"><a class="viewcode-back" href="../../../../generated/mygrad.multi_matmul.html#mygrad.multi_matmul">[docs]</a><span class="k">def</span> <span class="nf">multi_matmul</span><span class="p">(</span><span class="n">tensors</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Matrix product of two or more tensors calculated in the optimal ordering</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    tensors: Sequence[array_like]</span>
+<span class="sd">        The sequence of tensors to be matrix-multiplied.</span>
+
+<span class="sd">    constant : Optional[bool]</span>
+<span class="sd">        If ``True``, this tensor is treated as a constant, and thus does not</span>
+<span class="sd">        facilitate back propagation (i.e. ``constant.grad`` will always return</span>
+<span class="sd">        ``None``).</span>
+
+<span class="sd">        Defaults to ``False`` for float-type data.</span>
+<span class="sd">        Defaults to ``True`` for integer-type data.</span>
+
+<span class="sd">        Integer-type tensors must be constant.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    mygrad.Tensor</span>
+<span class="sd">        Returns the matrix product of the tensors provided</span>
+
+
+<span class="sd">    Extended Summary</span>
+<span class="sd">    ----------------</span>
+<span class="sd">    This documentation was adapted from ``numpy.linalg.multi_dot``</span>
+
+<span class="sd">    Compute the matrix multiplication of two or more arrays in a single function</span>
+<span class="sd">    call, while automatically selecting the fastest evaluation order.</span>
+<span class="sd">    ``multi_matmul`` chains ``matmul`` and uses optimal parenthesization  [1]_ [2]_.</span>
+<span class="sd">    Depending on the shapes of the matrices, this can speed up the multiplication a lot.</span>
+
+<span class="sd">    If the first argument is 1-D it is treated as a row vector.</span>
+
+<span class="sd">    If the last argument is 1-D it is treated as a column vector.</span>
+
+<span class="sd">    The other arguments must be 2-D or greater.</span>
+
+<span class="sd">    Think of `multi_dot` as an optimized version of::</span>
+
+<span class="sd">        def multi_dot(tensors): return functools.reduce(mg.matmul, tensors)</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If ``tensors`` contains less than two array_like items.</span>
+
+<span class="sd">    ValueError</span>
+<span class="sd">        If ``tensor`` other than the first or last is less than two dimensional</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    matmul : matrix multiplication with two arguments.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    .. [1] Cormen, &quot;Introduction to Algorithms&quot;, Chapter 15.2, p. 370-378</span>
+<span class="sd">    .. [2] http://en.wikipedia.org/wiki/Matrix_chain_multiplication</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The cost for a matrix multiplication can be calculated with the</span>
+<span class="sd">    following function::</span>
+
+<span class="sd">        def cost(A, B):</span>
+<span class="sd">            return A.shape[0] * A.shape[1] * B.shape[1]</span>
+
+<span class="sd">    Let&#39;s assume we have three matrices :math:`A_{10x100}, B_{100x5}, C_{5x50}`.</span>
+
+<span class="sd">    The costs for the two different parenthesizations are as follows::</span>
+
+<span class="sd">        cost((AB)C) = 10*100*5 + 10*5*50   = 5000 + 2500   = 7500</span>
+<span class="sd">        cost(A(BC)) = 10*100*50 + 100*5*50 = 50000 + 25000 = 75000</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    ``multi_matmul`` allows you to write:</span>
+
+<span class="sd">    &gt;&gt;&gt; from mygrad.math.misc.funcs import matmul    &gt;&gt;&gt; from mygrad import multi_matmul,  Tensor</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; # Prepare some random tensors</span>
+<span class="sd">    &gt;&gt;&gt; A = Tensor(np.random.random((10000, 100)))</span>
+<span class="sd">    &gt;&gt;&gt; B = Tensor(np.random.random((100, 1000)))</span>
+<span class="sd">    &gt;&gt;&gt; C = Tensor(np.random.random((1000, 5)))</span>
+<span class="sd">    &gt;&gt;&gt; D = Tensor(np.random.random((5, 333)))</span>
+<span class="sd">    &gt;&gt;&gt; # the actual matrix multiplication</span>
+<span class="sd">    &gt;&gt;&gt; multi_matmul([A, B, C, D]) # computes (A @ (B @ C)) @ D</span>
+
+<span class="sd">    instead of:</span>
+
+<span class="sd">    &gt;&gt;&gt; matmul(matmul(matmul(A, B), C), D)</span>
+<span class="sd">    &gt;&gt;&gt; # or</span>
+<span class="sd">    &gt;&gt;&gt; A @ B @ C @ D</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">tensors</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">a</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="si">%d</span><span class="s2">-dimensional tensor given. Tensor must be one or two-dimensional&quot;</span>
+                <span class="o">%</span> <span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">ndim</span><span class="p">,)</span>
+            <span class="p">)</span>
+
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tensors</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Expecting at least two arrays.&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">matmul</span><span class="p">(</span><span class="n">tensors</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tensors</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
+
+    <span class="n">tensors</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">tensors</span><span class="p">]</span>
+
+    <span class="c1"># save original ndim to reshape the result array into the proper form later</span>
+    <span class="n">ndim_first</span><span class="p">,</span> <span class="n">ndim_last</span> <span class="o">=</span> <span class="n">tensors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span><span class="p">,</span> <span class="n">tensors</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span>
+
+    <span class="c1"># Explicitly convert vectors to 2D arrays to keep the logic of this function simpler</span>
+    <span class="k">if</span> <span class="n">tensors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">tensors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span>
+            <span class="n">tensors</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">constant</span><span class="o">=</span><span class="n">tensors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">constant</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tensors</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Tensor</span><span class="p">)</span> <span class="k">else</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">tensors</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">tensors</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span>
+            <span class="n">tensors</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">constant</span><span class="o">=</span><span class="n">tensors</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">constant</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tensors</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">Tensor</span><span class="p">)</span> <span class="k">else</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">_multi_matmul_three</span><span class="p">(</span>
+            <span class="n">tensors</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tensors</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">tensors</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="n">_multi_matmul_chain_order</span><span class="p">(</span><span class="n">tensors</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">_multi_matmul</span><span class="p">(</span><span class="n">tensors</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
+
+    <span class="c1"># return proper shape since we possibly added dimensions to the first</span>
+    <span class="c1"># and last arrays</span>
+    <span class="k">if</span> <span class="n">ndim_first</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">ndim_last</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">result</span>
+    <span class="k">elif</span> <span class="n">ndim_first</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">ndim_last</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+
+<span class="k">def</span> <span class="nf">_multi_matmul_three</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find the best order for three arrays and do the multiplication.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">a0</span><span class="p">,</span> <span class="n">a1b0</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span>
+    <span class="n">b1c0</span><span class="p">,</span> <span class="n">c1</span> <span class="o">=</span> <span class="n">C</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span>
+    <span class="n">cost1</span> <span class="o">=</span> <span class="n">a0</span> <span class="o">*</span> <span class="n">b1c0</span> <span class="o">*</span> <span class="p">(</span><span class="n">a1b0</span> <span class="o">+</span> <span class="n">c1</span><span class="p">)</span>
+    <span class="n">cost2</span> <span class="o">=</span> <span class="n">a1b0</span> <span class="o">*</span> <span class="n">c1</span> <span class="o">*</span> <span class="p">(</span><span class="n">a0</span> <span class="o">+</span> <span class="n">b1c0</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">cost1</span> <span class="o">&lt;</span> <span class="n">cost2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">matmul</span><span class="p">(</span><span class="n">matmul</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">),</span> <span class="n">C</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">matmul</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">matmul</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_multi_matmul_chain_order</span><span class="p">(</span><span class="n">arrays</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a np.array that encodes the optimal order of multiplications.</span>
+<span class="sd">    The optimal order array is then used by `_multi_matmul()` to do the</span>
+<span class="sd">    multiplication.</span>
+
+<span class="sd">    The implementation CLOSELY follows Cormen, &quot;Introduction to Algorithms&quot;,</span>
+<span class="sd">    Chapter 15.2, p. 370-378.  Note that Cormen uses 1-based indices.</span>
+
+<span class="sd">        cost[i, j] = min([</span>
+<span class="sd">            cost[prefix] + cost[suffix] + cost_mult(prefix, suffix)</span>
+<span class="sd">            for k in range(i, j)])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">arrays</span><span class="p">)</span>
+    <span class="c1"># p stores the dimensions of the matrices</span>
+    <span class="c1"># Example for p: A_{10x100}, B_{100x5}, C_{5x50} --&gt; p = [10, 100, 5, 50]</span>
+    <span class="c1"># Using -2 to generalize for shapes that are more than 2 dimensions</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">arrays</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">arrays</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+    <span class="c1"># m is a matrix of costs of the subproblems</span>
+    <span class="c1"># m[i,j]: min number of scalar multiplications needed to compute A_{i..j}</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">)</span>
+    <span class="c1"># s is the actual ordering</span>
+    <span class="c1"># s[i, j] is the value of k at which we split the product A_i..A_j</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">intp</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="n">ind</span><span class="p">):</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">ind</span>
+            <span class="n">m</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
+                <span class="n">q</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">+</span> <span class="n">m</span><span class="p">[</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">p</span><span class="p">[</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">p</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">q</span> <span class="o">&lt;</span> <span class="n">m</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]:</span>
+                    <span class="n">m</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">q</span>
+                    <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">k</span>  <span class="c1"># Note that Cormen uses 1-based index</span>
+    <span class="k">return</span> <span class="n">s</span>
+
+
+<span class="k">def</span> <span class="nf">_multi_matmul</span><span class="p">(</span><span class="n">arrays</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Actually do the multiplication with the given order.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">j</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">arrays</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">matmul</span><span class="p">(</span>
+            <span class="n">_multi_matmul</span><span class="p">(</span><span class="n">arrays</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">order</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">),</span>
+            <span class="n">_multi_matmul</span><span class="p">(</span><span class="n">arrays</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">order</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">),</span>
+            <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">,</span>
+        <span class="p">)</span>
+</pre></div>
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2023, Ryan Soklaski.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.0.1.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

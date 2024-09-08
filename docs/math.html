@@ -1,0 +1,898 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Mathematical functions (mygrad.math) &#8212; MyGrad 2.3.0.post1.dev6 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="_static/my_theme.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'math';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="mygrad.sin" href="generated/mygrad.sin.html" />
+    <link rel="prev" title="mygrad.linalg.norm" href="generated/mygrad.linalg.norm.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev6 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="install.html">
+                        Installing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="intro.html">
+                        Introducing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="tensor.html">
+                        MyGrad’s Tensor
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="views.html">
+                        Views and In-Place Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="performance_tips.html">
+                        Performance Tips
+                      </a>
+                    </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="operation.html">
+                        Writing Your Own Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="tensor_creation.html">
+                        Tensor creation routines (mygrad.tensor_creation)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="tensor_manipulation.html">
+                        Tensor manipulation routines (mygrad.tensor_manip)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="linalg.html">
+                        Linear algebra (mygrad.linalg)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="#">
+                        Mathematical functions (mygrad.math)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="indexing.html">
+                        Indexing Routines (mygrad.indexing_routines)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="nnet.html">
+                        Neural network operations (mygrad.nnet)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="io.html">
+                        Input and Output
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="graph_viz.html">
+                        Computational graph visualization(mygrad.computational_graph)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="changes.html">
+                        Changelog
+                      </a>
+                    </li>
+                
+                </div>
+            </div>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="install.html">
+                        Installing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="intro.html">
+                        Introducing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="tensor.html">
+                        MyGrad’s Tensor
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="views.html">
+                        Views and In-Place Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="performance_tips.html">
+                        Performance Tips
+                      </a>
+                    </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="operation.html">
+                        Writing Your Own Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="tensor_creation.html">
+                        Tensor creation routines (mygrad.tensor_creation)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="tensor_manipulation.html">
+                        Tensor manipulation routines (mygrad.tensor_manip)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="linalg.html">
+                        Linear algebra (mygrad.linalg)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="#">
+                        Mathematical functions (mygrad.math)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="indexing.html">
+                        Indexing Routines (mygrad.indexing_routines)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="nnet.html">
+                        Neural network operations (mygrad.nnet)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="io.html">
+                        Input and Output
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="graph_viz.html">
+                        Computational graph visualization(mygrad.computational_graph)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="changes.html">
+                        Changelog
+                      </a>
+                    </li>
+                
+                </div>
+            </div>
+            
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.sin.html">mygrad.sin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.cos.html">mygrad.cos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.tan.html">mygrad.tan</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.arcsin.html">mygrad.arcsin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.arccos.html">mygrad.arccos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.arctan.html">mygrad.arctan</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.arctan2.html">mygrad.arctan2</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.sinh.html">mygrad.sinh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.cosh.html">mygrad.cosh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.tanh.html">mygrad.tanh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.arcsinh.html">mygrad.arcsinh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.arccosh.html">mygrad.arccosh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.arctanh.html">mygrad.arctanh</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.prod.html">mygrad.prod</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.sum.html">mygrad.sum</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.cumprod.html">mygrad.cumprod</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.cumsum.html">mygrad.cumsum</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.mean.html">mygrad.mean</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.var.html">mygrad.var</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.std.html">mygrad.std</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.amax.html">mygrad.amax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.amin.html">mygrad.amin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.max.html">mygrad.max</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.min.html">mygrad.min</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.exp.html">mygrad.exp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.expm1.html">mygrad.expm1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.exp2.html">mygrad.exp2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.log.html">mygrad.log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.log10.html">mygrad.log10</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.log2.html">mygrad.log2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.log1p.html">mygrad.log1p</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.logaddexp.html">mygrad.logaddexp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.logaddexp2.html">mygrad.logaddexp2</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.add_sequence.html">mygrad.add_sequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.multiply_sequence.html">mygrad.multiply_sequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.sinc.html">mygrad.sinc</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.add.html">mygrad.add</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.reciprocal.html">mygrad.reciprocal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.positive.html">mygrad.positive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.negative.html">mygrad.negative</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.multiply.html">mygrad.multiply</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.divide.html">mygrad.divide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.power.html">mygrad.power</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.subtract.html">mygrad.subtract</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.clip.html">mygrad.clip</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.sqrt.html">mygrad.sqrt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.cbrt.html">mygrad.cbrt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.square.html">mygrad.square</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.absolute.html">mygrad.absolute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.maximum.html">mygrad.maximum</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.minimum.html">mygrad.minimum</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">Mathematical functions (<code class="xref py py-mod docutils literal notranslate"><span class="pre">mygrad.math</span></code>)</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="mathematical-functions-mygrad-math">
+<h1>Mathematical functions (<code class="xref py py-mod docutils literal notranslate"><span class="pre">mygrad.math</span></code>)<a class="headerlink" href="#mathematical-functions-mygrad-math" title="Permalink to this heading">#</a></h1>
+<section id="trigonometric-functions">
+<h2>Trigonometric functions<a class="headerlink" href="#trigonometric-functions" title="Permalink to this heading">#</a></h2>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.sin.html#mygrad.sin" title="mygrad.sin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sin</span></code></a>(x[, out, where, dtype, constant])</p></td>
+<td><p>Trigonometric sine, element-wise.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/mygrad.cos.html#mygrad.cos" title="mygrad.cos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cos</span></code></a>(x[, out, where, dtype, constant])</p></td>
+<td><p>Trigonometric cosine, element-wise.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.tan.html#mygrad.tan" title="mygrad.tan"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tan</span></code></a>(x[, out, where, dtype, constant])</p></td>
+<td><p>Trigonometric tangent, element-wise.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/mygrad.arcsin.html#mygrad.arcsin" title="mygrad.arcsin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">arcsin</span></code></a>(x[, out, where, dtype, constant])</p></td>
+<td><p>Inverse sine, element-wise.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.arccos.html#mygrad.arccos" title="mygrad.arccos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">arccos</span></code></a>(x[, out, where, dtype, constant])</p></td>
+<td><p>Inverse cosine, element-wise.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/mygrad.arctan.html#mygrad.arctan" title="mygrad.arctan"><code class="xref py py-obj docutils literal notranslate"><span class="pre">arctan</span></code></a>(x[, out, where, dtype, constant])</p></td>
+<td><p>Inverse tangent, element-wise.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.arctan2.html#mygrad.arctan2" title="mygrad.arctan2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">arctan2</span></code></a>(x1, x2[, out, where, dtype, constant])</p></td>
+<td><p>Element-wise arc tangent of <code class="docutils literal notranslate"><span class="pre">x1/x2</span></code> choosing the quadrant correctly.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="hyperbolic-functions">
+<h2>Hyperbolic functions<a class="headerlink" href="#hyperbolic-functions" title="Permalink to this heading">#</a></h2>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.sinh.html#mygrad.sinh" title="mygrad.sinh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sinh</span></code></a>(x[, out, where, dtype, constant])</p></td>
+<td><p>Hyperbolic sine, element-wise.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/mygrad.cosh.html#mygrad.cosh" title="mygrad.cosh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosh</span></code></a>(x[, out, where, dtype, constant])</p></td>
+<td><p>Hyperbolic cosine, element-wise.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.tanh.html#mygrad.tanh" title="mygrad.tanh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tanh</span></code></a>(x[, out, where, dtype, constant])</p></td>
+<td><p>Hyperbolic tangent, element-wise.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/mygrad.arcsinh.html#mygrad.arcsinh" title="mygrad.arcsinh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">arcsinh</span></code></a>(x[, out, where, dtype, constant])</p></td>
+<td><p>Inverse hyperbolic sine, element-wise.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.arccosh.html#mygrad.arccosh" title="mygrad.arccosh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">arccosh</span></code></a>(x[, out, where, dtype, constant])</p></td>
+<td><p>Inverse hyperbolic cosine, element-wise.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/mygrad.arctanh.html#mygrad.arctanh" title="mygrad.arctanh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">arctanh</span></code></a>(x[, out, where, dtype, constant])</p></td>
+<td><p>Inverse hyperbolic tangent, element-wise.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="sums-products-differences">
+<h2>Sums, products, differences<a class="headerlink" href="#sums-products-differences" title="Permalink to this heading">#</a></h2>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.prod.html#mygrad.prod" title="mygrad.prod"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prod</span></code></a>(a[, axis, keepdims, constant])</p></td>
+<td><p>Return the product of array elements over given axes.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/mygrad.sum.html#mygrad.sum" title="mygrad.sum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sum</span></code></a>(x[, axis, keepdims, constant])</p></td>
+<td><p>Sum of tensor elements over a given axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.cumprod.html#mygrad.cumprod" title="mygrad.cumprod"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cumprod</span></code></a>(a[, axis, constant])</p></td>
+<td><p>Return the cumulative product of elements along a given axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/mygrad.cumsum.html#mygrad.cumsum" title="mygrad.cumsum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cumsum</span></code></a>(a[, axis, constant])</p></td>
+<td><p>Return the cumulative sum of the elements along a given axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.mean.html#mygrad.mean" title="mygrad.mean"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean</span></code></a>(x[, axis, keepdims, constant])</p></td>
+<td><p>Mean of tensor elements over a given axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/mygrad.var.html#mygrad.var" title="mygrad.var"><code class="xref py py-obj docutils literal notranslate"><span class="pre">var</span></code></a>(x[, axis, ddof, keepdims, constant])</p></td>
+<td><p>Compute the variance along the specified axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.std.html#mygrad.std" title="mygrad.std"><code class="xref py py-obj docutils literal notranslate"><span class="pre">std</span></code></a>(x[, axis, ddof, keepdims, constant])</p></td>
+<td><p>Compute the standard deviation along the specified axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/mygrad.amax.html#mygrad.amax" title="mygrad.amax"><code class="xref py py-obj docutils literal notranslate"><span class="pre">amax</span></code></a>(x[, axis, keepdims, constant])</p></td>
+<td><p>Return the maximum of a tensor or maximum along its axes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.amin.html#mygrad.amin" title="mygrad.amin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">amin</span></code></a>(x[, axis, keepdims, constant])</p></td>
+<td><p>Return the minimum of a tensor or minimum along its axes.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/mygrad.max.html#mygrad.max" title="mygrad.max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max</span></code></a>(x[, axis, keepdims, constant])</p></td>
+<td><p>Return the maximum of a tensor or maximum along its axes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.min.html#mygrad.min" title="mygrad.min"><code class="xref py py-obj docutils literal notranslate"><span class="pre">min</span></code></a>(x[, axis, keepdims, constant])</p></td>
+<td><p>Return the minimum of a tensor or minimum along its axes.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="exponents-and-logarithms">
+<h2>Exponents and logarithms<a class="headerlink" href="#exponents-and-logarithms" title="Permalink to this heading">#</a></h2>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.exp.html#mygrad.exp" title="mygrad.exp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">exp</span></code></a>(x1[, out, where, dtype, constant])</p></td>
+<td><p>Calculate the exponential of all elements in the input tensor.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/mygrad.expm1.html#mygrad.expm1" title="mygrad.expm1"><code class="xref py py-obj docutils literal notranslate"><span class="pre">expm1</span></code></a>(x1[, out, where, dtype, constant])</p></td>
+<td><p>Calculate <code class="docutils literal notranslate"><span class="pre">exp(x)</span> <span class="pre">-</span> <span class="pre">1</span></code> for all elements in the tensor.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.exp2.html#mygrad.exp2" title="mygrad.exp2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">exp2</span></code></a>(x1[, out, where, dtype, constant])</p></td>
+<td><p>Calculate <cite>2**p</cite> for all <cite>p</cite> in the input tensor.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/mygrad.log.html#mygrad.log" title="mygrad.log"><code class="xref py py-obj docutils literal notranslate"><span class="pre">log</span></code></a>(x1[, out, where, dtype, constant])</p></td>
+<td><p>Natural logarithm, element-wise.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.log10.html#mygrad.log10" title="mygrad.log10"><code class="xref py py-obj docutils literal notranslate"><span class="pre">log10</span></code></a>(x1[, out, where, dtype, constant])</p></td>
+<td><p>Return the base 10 logarithm of the input tensor, element-wise.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/mygrad.log2.html#mygrad.log2" title="mygrad.log2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">log2</span></code></a>(x1[, out, where, dtype, constant])</p></td>
+<td><p>Base-2 logarithm applied elementwise to the tensor.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.log1p.html#mygrad.log1p" title="mygrad.log1p"><code class="xref py py-obj docutils literal notranslate"><span class="pre">log1p</span></code></a>(x1[, out, where, dtype, constant])</p></td>
+<td><p>Return the natural logarithm of one plus the input tensor, element-wise.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/mygrad.logaddexp.html#mygrad.logaddexp" title="mygrad.logaddexp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logaddexp</span></code></a>(x1, x2[, out, where, dtype, constant])</p></td>
+<td><p>Logarithm of the sum of exponentiations of the inputs.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.logaddexp2.html#mygrad.logaddexp2" title="mygrad.logaddexp2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logaddexp2</span></code></a>(x1, x2[, out, where, dtype, constant])</p></td>
+<td><p>Logarithm of the sum of exponentiations of the inputs in base-2.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="other-special-functions">
+<h2>Other special functions<a class="headerlink" href="#other-special-functions" title="Permalink to this heading">#</a></h2>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.add_sequence.html#mygrad.add_sequence" title="mygrad.add_sequence"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_sequence</span></code></a>(*variables[, constant])</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">f(a,</span> <span class="pre">b,</span> <span class="pre">...)</span> <span class="pre">-&gt;</span> <span class="pre">a</span> <span class="pre">+</span> <span class="pre">b</span> <span class="pre">+</span> <span class="pre">...</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/mygrad.multiply_sequence.html#mygrad.multiply_sequence" title="mygrad.multiply_sequence"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multiply_sequence</span></code></a>(*variables[, constant])</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">f(a,</span> <span class="pre">b,</span> <span class="pre">...)</span> <span class="pre">-&gt;</span> <span class="pre">a</span> <span class="pre">*</span> <span class="pre">b</span> <span class="pre">*</span> <span class="pre">...</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.sinc.html#mygrad.sinc" title="mygrad.sinc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sinc</span></code></a>(a, *[, constant])</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">f(a)</span> <span class="pre">-&gt;</span> <span class="pre">sin(a)</span> <span class="pre">/</span> <span class="pre">a</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="arithmetic-operations">
+<h2>Arithmetic operations<a class="headerlink" href="#arithmetic-operations" title="Permalink to this heading">#</a></h2>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.add.html#mygrad.add" title="mygrad.add"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add</span></code></a>(x1, x2[, out, where, dtype, constant])</p></td>
+<td><p>Add the arguments element-wise.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/mygrad.reciprocal.html#mygrad.reciprocal" title="mygrad.reciprocal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reciprocal</span></code></a>(x[, out, where, dtype, constant])</p></td>
+<td><p>Return the reciprocal of the argument element-wise.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.positive.html#mygrad.positive" title="mygrad.positive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">positive</span></code></a>(x[, out, where, dtype, constant])</p></td>
+<td><p>Returns a copy of the tensor.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/mygrad.negative.html#mygrad.negative" title="mygrad.negative"><code class="xref py py-obj docutils literal notranslate"><span class="pre">negative</span></code></a>(x[, out, where, dtype, constant])</p></td>
+<td><p>Negates the tensor element-wise.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.multiply.html#mygrad.multiply" title="mygrad.multiply"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multiply</span></code></a>(x1, x2[, out, where, dtype, constant])</p></td>
+<td><p>Multiply the arguments element-wise.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/mygrad.divide.html#mygrad.divide" title="mygrad.divide"><code class="xref py py-obj docutils literal notranslate"><span class="pre">divide</span></code></a></p></td>
+<td><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">true_divide</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.power.html#mygrad.power" title="mygrad.power"><code class="xref py py-obj docutils literal notranslate"><span class="pre">power</span></code></a>(x1, x2[, out, where, dtype, constant])</p></td>
+<td><p>First tensor elements raised to powers from second tensor, element-wise.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/mygrad.subtract.html#mygrad.subtract" title="mygrad.subtract"><code class="xref py py-obj docutils literal notranslate"><span class="pre">subtract</span></code></a>(x1, x2[, out, where, dtype, constant])</p></td>
+<td><p>Subtract the arguments element-wise.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="miscellaneous">
+<h2>Miscellaneous<a class="headerlink" href="#miscellaneous" title="Permalink to this heading">#</a></h2>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.clip.html#mygrad.clip" title="mygrad.clip"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clip</span></code></a>(a, a_min, a_max[, out, constant])</p></td>
+<td><p>Clip (limit) the values in an array.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/mygrad.sqrt.html#mygrad.sqrt" title="mygrad.sqrt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sqrt</span></code></a>(x[, out, where, dtype, constant])</p></td>
+<td><p>The square root, elementwise.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.cbrt.html#mygrad.cbrt" title="mygrad.cbrt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cbrt</span></code></a>(x[, out, where, dtype, constant])</p></td>
+<td><p>The cube root elementwise.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/mygrad.square.html#mygrad.square" title="mygrad.square"><code class="xref py py-obj docutils literal notranslate"><span class="pre">square</span></code></a>(x[, out, where, dtype, constant])</p></td>
+<td><p>Return the square of the argument element-wise.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.absolute.html#mygrad.absolute" title="mygrad.absolute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">absolute</span></code></a>(x[, out, where, dtype, constant, ...])</p></td>
+<td><p>The absolute value, computed elementwise.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/mygrad.maximum.html#mygrad.maximum" title="mygrad.maximum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">maximum</span></code></a>(x1, x2[, out, where, dtype, constant])</p></td>
+<td><p>Pair-wise maximum of tensor elements.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.minimum.html#mygrad.minimum" title="mygrad.minimum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">minimum</span></code></a>(x1, x2[, out, where, dtype, constant])</p></td>
+<td><p>Pair-wise minimum of tensor elements.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="generated/mygrad.linalg.norm.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">mygrad.linalg.norm</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="generated/mygrad.sin.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">mygrad.sin</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trigonometric-functions">Trigonometric functions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hyperbolic-functions">Hyperbolic functions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#sums-products-differences">Sums, products, differences</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exponents-and-logarithms">Exponents and logarithms</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#other-special-functions">Other special functions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arithmetic-operations">Arithmetic operations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#miscellaneous">Miscellaneous</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="_sources/math.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2023, Ryan Soklaski.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.0.1.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

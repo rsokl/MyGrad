@@ -1,0 +1,722 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Tensor creation routines (mygrad.tensor_creation) &#8212; MyGrad 2.3.0.post1.dev6 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="_static/my_theme.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tensor_creation';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="mygrad.tensor" href="generated/mygrad.tensor.html" />
+    <link rel="prev" title="mygrad.operation_base.Operation.backward_var" href="generated/mygrad.operation_base.Operation.backward_var.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev6 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="install.html">
+                        Installing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="intro.html">
+                        Introducing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="tensor.html">
+                        MyGrad’s Tensor
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="views.html">
+                        Views and In-Place Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="performance_tips.html">
+                        Performance Tips
+                      </a>
+                    </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="operation.html">
+                        Writing Your Own Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="#">
+                        Tensor creation routines (mygrad.tensor_creation)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="tensor_manipulation.html">
+                        Tensor manipulation routines (mygrad.tensor_manip)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="linalg.html">
+                        Linear algebra (mygrad.linalg)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="math.html">
+                        Mathematical functions (mygrad.math)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="indexing.html">
+                        Indexing Routines (mygrad.indexing_routines)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="nnet.html">
+                        Neural network operations (mygrad.nnet)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="io.html">
+                        Input and Output
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="graph_viz.html">
+                        Computational graph visualization(mygrad.computational_graph)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="changes.html">
+                        Changelog
+                      </a>
+                    </li>
+                
+                </div>
+            </div>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="install.html">
+                        Installing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="intro.html">
+                        Introducing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="tensor.html">
+                        MyGrad’s Tensor
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="views.html">
+                        Views and In-Place Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="performance_tips.html">
+                        Performance Tips
+                      </a>
+                    </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="operation.html">
+                        Writing Your Own Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="#">
+                        Tensor creation routines (mygrad.tensor_creation)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="tensor_manipulation.html">
+                        Tensor manipulation routines (mygrad.tensor_manip)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="linalg.html">
+                        Linear algebra (mygrad.linalg)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="math.html">
+                        Mathematical functions (mygrad.math)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="indexing.html">
+                        Indexing Routines (mygrad.indexing_routines)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="nnet.html">
+                        Neural network operations (mygrad.nnet)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="io.html">
+                        Input and Output
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="graph_viz.html">
+                        Computational graph visualization(mygrad.computational_graph)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="changes.html">
+                        Changelog
+                      </a>
+                    </li>
+                
+                </div>
+            </div>
+            
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.tensor.html">mygrad.tensor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.asarray.html">mygrad.asarray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.astensor.html">mygrad.astensor</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.ones.html">mygrad.ones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.ones_like.html">mygrad.ones_like</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.zeros.html">mygrad.zeros</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.zeros_like.html">mygrad.zeros_like</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.eye.html">mygrad.eye</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.identity.html">mygrad.identity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.full.html">mygrad.full</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.full_like.html">mygrad.full_like</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.empty.html">mygrad.empty</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.empty_like.html">mygrad.empty_like</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.arange.html">mygrad.arange</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.linspace.html">mygrad.linspace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.logspace.html">mygrad.logspace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mygrad.geomspace.html">mygrad.geomspace</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">Tensor creation routines (<code class="xref py py-mod docutils literal notranslate"><span class="pre">mygrad.tensor_creation</span></code>)</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="tensor-creation-routines-mygrad-tensor-creation">
+<h1>Tensor creation routines (<code class="xref py py-mod docutils literal notranslate"><span class="pre">mygrad.tensor_creation</span></code>)<a class="headerlink" href="#tensor-creation-routines-mygrad-tensor-creation" title="Permalink to this heading">#</a></h1>
+<section id="array-like">
+<h2>Array-Like<a class="headerlink" href="#array-like" title="Permalink to this heading">#</a></h2>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.tensor.html#mygrad.tensor" title="mygrad.tensor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tensor</span></code></a>(arr_like[, dtype, constant, copy, ndmin])</p></td>
+<td><p>Create a tensor</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/mygrad.asarray.html#mygrad.asarray" title="mygrad.asarray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">asarray</span></code></a>(a[, dtype, order])</p></td>
+<td><p>Convert the input to an array.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.astensor.html#mygrad.astensor" title="mygrad.astensor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">astensor</span></code></a>(t[, dtype, constant])</p></td>
+<td><p>Convert the input to a tensor.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="ones-and-zeros">
+<h2>Ones and zeros<a class="headerlink" href="#ones-and-zeros" title="Permalink to this heading">#</a></h2>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.ones.html#mygrad.ones" title="mygrad.ones"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ones</span></code></a>(shape[, dtype, constant])</p></td>
+<td><p>Return a Tensor of the given shape and type, filled with ones.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/mygrad.ones_like.html#mygrad.ones_like" title="mygrad.ones_like"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ones_like</span></code></a>(other[, dtype, shape, constant])</p></td>
+<td><p>Return a Tensor of the same shape and type as the given, filled with ones.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.zeros.html#mygrad.zeros" title="mygrad.zeros"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zeros</span></code></a>(shape[, dtype, constant])</p></td>
+<td><p>Return a Tensor of the given shape and type, filled with zeros.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/mygrad.zeros_like.html#mygrad.zeros_like" title="mygrad.zeros_like"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zeros_like</span></code></a>(other[, dtype, shape, constant])</p></td>
+<td><p>Return a Tensor of the same shape and type as the given, filled with zeros.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.eye.html#mygrad.eye" title="mygrad.eye"><code class="xref py py-obj docutils literal notranslate"><span class="pre">eye</span></code></a>(N[, M, k, dtype, constant])</p></td>
+<td><p>Return a 2D Tensor with ones on the diagonal and zeros elsewhere.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/mygrad.identity.html#mygrad.identity" title="mygrad.identity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">identity</span></code></a>(n[, dtype, constant])</p></td>
+<td><p>Return the identity Tensor; a square Tensor with 1s on the main diagonal and 0s elsewhere.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.full.html#mygrad.full" title="mygrad.full"><code class="xref py py-obj docutils literal notranslate"><span class="pre">full</span></code></a>(shape, fill_value[, dtype, constant])</p></td>
+<td><p>Return a Tensor of the given shape and type, filled with <cite>fill_value</cite>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/mygrad.full_like.html#mygrad.full_like" title="mygrad.full_like"><code class="xref py py-obj docutils literal notranslate"><span class="pre">full_like</span></code></a>(other, fill_value[, dtype, shape, ...])</p></td>
+<td><p>Return a Tensor of the same shape and type as the given, filled with <cite>fill_value</cite>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.empty.html#mygrad.empty" title="mygrad.empty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">empty</span></code></a>(shape[, dtype, constant])</p></td>
+<td><p>Return a new Tensor of the given shape and type, without initializing entries.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/mygrad.empty_like.html#mygrad.empty_like" title="mygrad.empty_like"><code class="xref py py-obj docutils literal notranslate"><span class="pre">empty_like</span></code></a>(other[, dtype, shape, constant])</p></td>
+<td><p>Return a new Tensor of the same shape and type as the given array.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="numerical-ranges">
+<h2>Numerical ranges<a class="headerlink" href="#numerical-ranges" title="Permalink to this heading">#</a></h2>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.arange.html#mygrad.arange" title="mygrad.arange"><code class="xref py py-obj docutils literal notranslate"><span class="pre">arange</span></code></a>([start,] stop[, step,][, dtype, constant])</p></td>
+<td><p>Return a Tensor with evenly-spaced values within a given interval.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/mygrad.linspace.html#mygrad.linspace" title="mygrad.linspace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">linspace</span></code></a>(start, stop[, num, endpoint, ...])</p></td>
+<td><p>Return a Tensor with evenly-spaced numbers over a specified interval.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mygrad.logspace.html#mygrad.logspace" title="mygrad.logspace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logspace</span></code></a>(start, stop[, num, endpoint, base, ...])</p></td>
+<td><p>Return a Tensor with evenly-spaced numbers over a specified interval on a log scale.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/mygrad.geomspace.html#mygrad.geomspace" title="mygrad.geomspace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geomspace</span></code></a>(start, stop[, num, endpoint, ...])</p></td>
+<td><p>Return a Tensor with evenly-spaced values in a geometric progression.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="generated/mygrad.operation_base.Operation.backward_var.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">mygrad.operation_base.Operation.backward_var</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="generated/mygrad.tensor.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">mygrad.tensor</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#array-like">Array-Like</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ones-and-zeros">Ones and zeros</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#numerical-ranges">Numerical ranges</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="_sources/tensor_creation.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2023, Ryan Soklaski.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.0.1.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

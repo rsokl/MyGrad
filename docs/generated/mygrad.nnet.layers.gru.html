@@ -1,0 +1,759 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>mygrad.nnet.layers.gru &#8212; MyGrad 2.3.0.post1.dev6 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/my_theme.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/mygrad.nnet.layers.gru';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="mygrad.nnet.losses.focal_loss" href="mygrad.nnet.losses.focal_loss.html" />
+    <link rel="prev" title="mygrad.nnet.layers.max_pool" href="mygrad.nnet.layers.max_pool.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev6 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../install.html">
+                        Installing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../intro.html">
+                        Introducing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../tensor.html">
+                        MyGrad’s Tensor
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../views.html">
+                        Views and In-Place Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../performance_tips.html">
+                        Performance Tips
+                      </a>
+                    </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../operation.html">
+                        Writing Your Own Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../tensor_creation.html">
+                        Tensor creation routines (mygrad.tensor_creation)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../tensor_manipulation.html">
+                        Tensor manipulation routines (mygrad.tensor_manip)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../linalg.html">
+                        Linear algebra (mygrad.linalg)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../math.html">
+                        Mathematical functions (mygrad.math)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../indexing.html">
+                        Indexing Routines (mygrad.indexing_routines)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../nnet.html">
+                        Neural network operations (mygrad.nnet)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../io.html">
+                        Input and Output
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../graph_viz.html">
+                        Computational graph visualization(mygrad.computational_graph)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../changes.html">
+                        Changelog
+                      </a>
+                    </li>
+                
+                </div>
+            </div>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../install.html">
+                        Installing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../intro.html">
+                        Introducing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../tensor.html">
+                        MyGrad’s Tensor
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../views.html">
+                        Views and In-Place Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../performance_tips.html">
+                        Performance Tips
+                      </a>
+                    </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../operation.html">
+                        Writing Your Own Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../tensor_creation.html">
+                        Tensor creation routines (mygrad.tensor_creation)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../tensor_manipulation.html">
+                        Tensor manipulation routines (mygrad.tensor_manip)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../linalg.html">
+                        Linear algebra (mygrad.linalg)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../math.html">
+                        Mathematical functions (mygrad.math)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../indexing.html">
+                        Indexing Routines (mygrad.indexing_routines)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../nnet.html">
+                        Neural network operations (mygrad.nnet)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../io.html">
+                        Input and Output
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../graph_viz.html">
+                        Computational graph visualization(mygrad.computational_graph)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../changes.html">
+                        Changelog
+                      </a>
+                    </li>
+                
+                </div>
+            </div>
+            
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.layers.batchnorm.html">mygrad.nnet.layers.batchnorm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.layers.conv_nd.html">mygrad.nnet.layers.conv_nd</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.layers.max_pool.html">mygrad.nnet.layers.max_pool</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">mygrad.nnet.layers.gru</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.losses.focal_loss.html">mygrad.nnet.losses.focal_loss</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.losses.margin_ranking_loss.html">mygrad.nnet.losses.margin_ranking_loss</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.losses.multiclass_hinge.html">mygrad.nnet.losses.multiclass_hinge</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.losses.negative_log_likelihood.html">mygrad.nnet.losses.negative_log_likelihood</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.losses.softmax_crossentropy.html">mygrad.nnet.losses.softmax_crossentropy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.losses.softmax_focal_loss.html">mygrad.nnet.losses.softmax_focal_loss</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.activations.elu.html">mygrad.nnet.activations.elu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.activations.glu.html">mygrad.nnet.activations.glu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.activations.hard_tanh.html">mygrad.nnet.activations.hard_tanh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.activations.leaky_relu.html">mygrad.nnet.activations.leaky_relu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.activations.logsoftmax.html">mygrad.nnet.activations.logsoftmax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.activations.selu.html">mygrad.nnet.activations.selu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.activations.sigmoid.html">mygrad.nnet.activations.sigmoid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.activations.softmax.html">mygrad.nnet.activations.softmax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.activations.soft_sign.html">mygrad.nnet.activations.soft_sign</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.activations.relu.html">mygrad.nnet.activations.relu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.activations.tanh.html">mygrad.nnet.activations.tanh</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.initializers.dirac.html">mygrad.nnet.initializers.dirac</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.initializers.glorot_normal.html">mygrad.nnet.initializers.glorot_normal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.initializers.glorot_uniform.html">mygrad.nnet.initializers.glorot_uniform</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.initializers.he_normal.html">mygrad.nnet.initializers.he_normal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.initializers.he_uniform.html">mygrad.nnet.initializers.he_uniform</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.initializers.normal.html">mygrad.nnet.initializers.normal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.initializers.uniform.html">mygrad.nnet.initializers.uniform</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="mygrad.sliding_window_view.html">mygrad.sliding_window_view</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../nnet.html" class="nav-link">Neural network operations (<code class="xref py py-mod docutils literal notranslate"><span class="pre">mygrad.nnet</span></code>)</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">mygrad.nnet.layers.gru</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="mygrad-nnet-layers-gru">
+<h1>mygrad.nnet.layers.gru<a class="headerlink" href="#mygrad-nnet-layers-gru" title="Permalink to this heading">#</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="mygrad.nnet.layers.gru">
+<span class="sig-prename descclassname"><span class="pre">mygrad.nnet.layers.</span></span><span class="sig-name descname"><span class="pre">gru</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Uz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Wz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ur</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Wr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">br</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Uh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Wh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bp_lim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constant</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mygrad/nnet/layers/gru.html#gru"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mygrad.nnet.layers.gru" title="Permalink to this definition">#</a></dt>
+<dd><p>Performs a forward pass of sequential data through a Gated Recurrent Unit layer, returning
+the ‘hidden-descriptors’ arrived at by utilizing the trainable parameters as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Z_</span><span class="p">{</span><span class="n">t</span><span class="p">}</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">X_</span><span class="p">{</span><span class="n">t</span><span class="p">}</span> <span class="n">Uz</span> <span class="o">+</span> <span class="n">S_</span><span class="p">{</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">}</span> <span class="n">Wz</span> <span class="o">+</span> <span class="n">bz</span><span class="p">)</span>
+<span class="n">R_</span><span class="p">{</span><span class="n">t</span><span class="p">}</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">X_</span><span class="p">{</span><span class="n">t</span><span class="p">}</span> <span class="n">Ur</span> <span class="o">+</span> <span class="n">S_</span><span class="p">{</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">}</span> <span class="n">Wr</span> <span class="o">+</span> <span class="n">br</span><span class="p">)</span>
+<span class="n">H_</span><span class="p">{</span><span class="n">t</span><span class="p">}</span> <span class="o">=</span>    <span class="n">tanh</span><span class="p">(</span><span class="n">X_</span><span class="p">{</span><span class="n">t</span><span class="p">}</span> <span class="n">Uh</span> <span class="o">+</span> <span class="p">(</span><span class="n">R</span><span class="p">{</span><span class="n">t</span><span class="p">}</span> <span class="o">*</span> <span class="n">S_</span><span class="p">{</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">})</span> <span class="n">Wh</span> <span class="o">+</span> <span class="n">bh</span><span class="p">)</span>
+<span class="n">S_</span><span class="p">{</span><span class="n">t</span><span class="p">}</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Z</span><span class="p">{</span><span class="n">t</span><span class="p">})</span> <span class="o">*</span> <span class="n">H</span><span class="p">{</span><span class="n">t</span><span class="p">}</span> <span class="o">+</span> <span class="n">Z</span><span class="p">{</span><span class="n">t</span><span class="p">}</span> <span class="o">*</span> <span class="n">S_</span><span class="p">{</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">}</span>
+</pre></div>
+</div>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>X</strong><span class="classifier">array_like, shape=(T, N, C)</span></dt><dd><p>The sequential data to be passed forward.</p>
+</dd>
+<dt><strong>Uz</strong><span class="classifier">array_like, shape=(C, D)</span></dt><dd><p>The weights used to map sequential data to its hidden-descriptor representation</p>
+</dd>
+<dt><strong>Wz</strong><span class="classifier">array_like, shape=(D, D)</span></dt><dd><p>The weights used to map a hidden-descriptor to a hidden-descriptor.</p>
+</dd>
+<dt><strong>bz</strong><span class="classifier">array_like, shape=(D,)</span></dt><dd><p>The biases used to scale a hidden-descriptor.</p>
+</dd>
+<dt><strong>Ur</strong><span class="classifier">array_like, shape=(C, D)</span></dt><dd><p>The weights used to map sequential data to its hidden-descriptor representation</p>
+</dd>
+<dt><strong>Wr</strong><span class="classifier">array_like, shape=(D, D)</span></dt><dd><p>The weights used to map a hidden-descriptor to a hidden-descriptor.</p>
+</dd>
+<dt><strong>br</strong><span class="classifier">array_like, shape=(D,)</span></dt><dd><p>The biases used to scale a hidden-descriptor.</p>
+</dd>
+<dt><strong>Uh</strong><span class="classifier">array_like, shape=(C, D)</span></dt><dd><p>The weights used to map sequential data to its hidden-descriptor representation</p>
+</dd>
+<dt><strong>Wh</strong><span class="classifier">array_like, shape=(D, D)</span></dt><dd><p>The weights used to map a hidden-descriptor to a hidden-descriptor.</p>
+</dd>
+<dt><strong>bh</strong><span class="classifier">array_like, shape=(D,)</span></dt><dd><p>The biases used to scale a hidden-descriptor.</p>
+</dd>
+<dt><strong>s0</strong><span class="classifier">Optional[array_like], shape=(N, D)</span></dt><dd><p>The ‘seed’ hidden descriptors to feed into the RNN. If None, a Tensor
+of zeros of shape (N, D) is created.</p>
+</dd>
+<dt><strong>bp_lim</strong><span class="classifier">Optional[int]</span></dt><dd><p><em>This feature is experimental and is currently untested</em>.
+The (non-zero) limit of the depth of back propagation through time to be
+performed. If <cite>None</cite> back propagation is passed back through the entire sequence.</p>
+<p>E.g. <cite>bp_lim=3</cite> will propagate gradients only up to 3 steps backward through the
+recursive sequence.</p>
+</dd>
+<dt><strong>dropout</strong><span class="classifier">float (default=0.), 0 &lt;= dropout &lt; 1</span></dt><dd><p>If non-zero, the dropout scheme described in <a class="reference internal" href="#r3b79fd323862-1" id="id1">[1]</a> is applied. See Notes
+for more details.</p>
+</dd>
+<dt><strong>constant</strong><span class="classifier">bool, optional (default=False)</span></dt><dd><p>If True, the resulting Tensor is a constant.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>mygrad.Tensor, shape=(T+1, N, D)</dt><dd><p>The sequence of ‘hidden-descriptors’ produced by the forward pass of the RNN.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(T\)</span> : Sequence length</p></li>
+<li><p><span class="math notranslate nohighlight">\(N\)</span> : Batch size</p></li>
+<li><p><span class="math notranslate nohighlight">\(C\)</span> : Length of single datum</p></li>
+<li><p><span class="math notranslate nohighlight">\(D\)</span> : Length of ‘hidden’ descriptor</p></li>
+</ul>
+<p>The GRU system of equations is given by:</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}Z_{t} = \sigma (X_{t} U_z + S_{t-1} Wz + bz)\\R_{t} = \sigma (X_{t} U_r + S_{t-1} Wr + br)\\H_{t} =    tanh(X_{t} U_h + (R_{t} * S_{t-1}) W_h + b_h)\\S_{t} = (1 - Z_{t}) * H_{t} + Z_{t} * S_{t-1}\end{aligned}\end{align} \]</div>
+<p>Following the dropout scheme specified in <a class="reference internal" href="#r3b79fd323862-1" id="id2">[1]</a>, the hidden-hidden weights (Wz/Wr/Wh)
+randomly have their weights dropped prior to forward/back-prop. The input connections
+(via Uz/Ur/Uh) have variational dropout (<a class="reference internal" href="#r3b79fd323862-2" id="id3">[2]</a>) applied to them with a common dropout
+mask across all t. That is three static dropout masks, each with shape-(N,D), are
+applied to</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}X_{t} U_z\\X_{t} U_r\\X_{t} U_h\end{aligned}\end{align} \]</div>
+<p>respectively, for all <span class="math notranslate nohighlight">\(t\)</span>.</p>
+<p class="rubric">References</p>
+<div role="list" class="citation-list">
+<div class="citation" id="r3b79fd323862-1" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id2">2</a>)</span>
+<p>S. Merity, et. al. “Regularizing and Optimizing LSTM Language Models”,
+arXiv:1708.02182v1, 2017.</p>
+</div>
+<div class="citation" id="r3b79fd323862-2" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">2</a><span class="fn-bracket">]</span></span>
+<p>Y. Gal, Z. Ghahramani “A Theoretically Grounded Application of Dropout
+in Recurrent Neural Networks” arXiv:1512.05287v5, 2016.</p>
+</div>
+</div>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="mygrad.nnet.layers.max_pool.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">mygrad.nnet.layers.max_pool</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="mygrad.nnet.losses.focal_loss.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">mygrad.nnet.losses.focal_loss</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mygrad.nnet.layers.gru"><code class="docutils literal notranslate"><span class="pre">gru()</span></code></a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="../_sources/generated/mygrad.nnet.layers.gru.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2023, Ryan Soklaski.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.0.1.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

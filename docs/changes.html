@@ -1,0 +1,1463 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Changelog &#8212; MyGrad 2.3.0.post1.dev6 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="_static/my_theme.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'changes';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="mygrad.computational_graph.build_graph" href="generated/mygrad.computational_graph.build_graph.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev6 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="install.html">
+                        Installing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="intro.html">
+                        Introducing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="tensor.html">
+                        MyGrad’s Tensor
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="views.html">
+                        Views and In-Place Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="performance_tips.html">
+                        Performance Tips
+                      </a>
+                    </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="operation.html">
+                        Writing Your Own Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="tensor_creation.html">
+                        Tensor creation routines (mygrad.tensor_creation)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="tensor_manipulation.html">
+                        Tensor manipulation routines (mygrad.tensor_manip)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="linalg.html">
+                        Linear algebra (mygrad.linalg)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="math.html">
+                        Mathematical functions (mygrad.math)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="indexing.html">
+                        Indexing Routines (mygrad.indexing_routines)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="nnet.html">
+                        Neural network operations (mygrad.nnet)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="io.html">
+                        Input and Output
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="graph_viz.html">
+                        Computational graph visualization(mygrad.computational_graph)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="#">
+                        Changelog
+                      </a>
+                    </li>
+                
+                </div>
+            </div>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="install.html">
+                        Installing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="intro.html">
+                        Introducing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="tensor.html">
+                        MyGrad’s Tensor
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="views.html">
+                        Views and In-Place Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="performance_tips.html">
+                        Performance Tips
+                      </a>
+                    </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="operation.html">
+                        Writing Your Own Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="tensor_creation.html">
+                        Tensor creation routines (mygrad.tensor_creation)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="tensor_manipulation.html">
+                        Tensor manipulation routines (mygrad.tensor_manip)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="linalg.html">
+                        Linear algebra (mygrad.linalg)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="math.html">
+                        Mathematical functions (mygrad.math)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="indexing.html">
+                        Indexing Routines (mygrad.indexing_routines)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="nnet.html">
+                        Neural network operations (mygrad.nnet)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="io.html">
+                        Input and Output
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="graph_viz.html">
+                        Computational graph visualization(mygrad.computational_graph)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="#">
+                        Changelog
+                      </a>
+                    </li>
+                
+                </div>
+            </div>
+            
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">Changelog</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="changelog">
+<h1>Changelog<a class="headerlink" href="#changelog" title="Permalink to this heading">#</a></h1>
+<p>This is a record of all past mygrad releases and what went into them,
+in reverse chronological order. All previous releases should still be available
+on pip.</p>
+<section id="v2-3-0">
+<span id="id1"></span><h2>2.3.0 - 2024-09-07<a class="headerlink" href="#v2-3-0" title="Permalink to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Adds support for NumPy 2.0</p></li>
+<li><p>Minimum supported NumPy version is now 1.24</p></li>
+<li><p>Minimum supported Python version is now 3.9</p></li>
+<li><p>Adds testing for Python 3.12</p></li>
+</ul>
+</section>
+<section id="v2-2-0">
+<span id="id2"></span><h2>2.2.0 - 2023-01-03<a class="headerlink" href="#v2-2-0" title="Permalink to this heading">#</a></h2>
+<ul class="simple">
+<li><p>MyGrad is now tested against Python 3.11. (<a class="reference external" href="https://github.com/rsokl/MyGrad/pull/411">pull request #411</a>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mygrad.bool8</span></code> has been removed. Use <code class="docutils literal notranslate"><span class="pre">mygrad.bool_</span></code> instead. (<a class="reference external" href="https://github.com/rsokl/MyGrad/pull/411">pull request #411</a>)</p></li>
+<li><p>Adds ufunc support for <code class="docutils literal notranslate"><span class="pre">resolve_dtypes</span></code>. (<a class="reference external" href="https://github.com/rsokl/MyGrad/pull/411">pull request #411</a>)</p></li>
+<li><p>Modifies automatic differentiation framework to be simpler and more memory efficient. In the future, MyGrad will be able to expose an API akin to <a class="reference external" href="https://pytorch.org/docs/stable/generated/torch.autograd.grad.html">torch.autograd.grad</a>. (<a class="reference external" href="https://github.com/rsokl/MyGrad/pull/407">pull request #407</a>)</p></li>
+<li><p>MyGrad’s CI now enforces formatting and spell check requirements on all pull requests. (<a class="reference external" href="https://github.com/rsokl/MyGrad/pull/411">pull request #411</a>)</p></li>
+</ul>
+</section>
+<section id="v2-1-0">
+<span id="id3"></span><h2>2.1.0 - 2022-01-01<a class="headerlink" href="#v2-1-0" title="Permalink to this heading">#</a></h2>
+<section id="new-functions-and-utilities">
+<h3>New Functions and Utilities<a class="headerlink" href="#new-functions-and-utilities" title="Permalink to this heading">#</a></h3>
+<p>The following differentiable functions are now supported by MyGrad, and “drop-in” overrides for their NumPy counterparts are supported as well.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="generated/mygrad.atleast_1d.html#mygrad.atleast_1d" title="mygrad.atleast_1d"><code class="xref py py-func docutils literal notranslate"><span class="pre">atleast_1d()</span></code></a></p></li>
+<li><p><a class="reference internal" href="generated/mygrad.atleast_2d.html#mygrad.atleast_2d" title="mygrad.atleast_2d"><code class="xref py py-func docutils literal notranslate"><span class="pre">atleast_2d()</span></code></a></p></li>
+<li><p><a class="reference internal" href="generated/mygrad.atleast_3d.html#mygrad.atleast_3d" title="mygrad.atleast_3d"><code class="xref py py-func docutils literal notranslate"><span class="pre">atleast_3d()</span></code></a></p></li>
+</ul>
+</div></blockquote>
+<p>Basic tensor save/load functionality has been added (thanks to &#64;kw-0).</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="generated/mygrad.save.html#mygrad.save" title="mygrad.save"><code class="xref py py-func docutils literal notranslate"><span class="pre">save()</span></code></a></p></li>
+<li><p><a class="reference internal" href="generated/mygrad.load.html#mygrad.load" title="mygrad.load"><code class="xref py py-func docutils literal notranslate"><span class="pre">load()</span></code></a></p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="improvements">
+<h3>Improvements<a class="headerlink" href="#improvements" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="generated/mygrad.clip.html#mygrad.clip" title="mygrad.clip"><code class="xref py py-func docutils literal notranslate"><span class="pre">clip()</span></code></a> and <code class="docutils literal notranslate"><span class="pre">Tensor.clip</span></code> now accept an <code class="docutils literal notranslate"><span class="pre">out</span></code> target, permitting in-place operations.</p></li>
+<li><p>The method <code class="docutils literal notranslate"><span class="pre">Tensor.__index__()</span></code> is now implemented, which permits scalar integer-valued tensors to be used to index into Python sequences.</p></li>
+<li><p>Added Python 3.10 to our automated test matrix.</p></li>
+</ul>
+</section>
+<section id="compatibility-breaking-changes">
+<h3>Compatibility-Breaking Changes<a class="headerlink" href="#compatibility-breaking-changes" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>In accordance with <a class="reference external" href="https://numpy.org/neps/nep-0029-deprecation_policy.html">NEP 29</a> we are dropping support for NumPy versions below 1.19. However, MyGrad will not drop support for Python 3.7; to remain as lightweight and flexible as possible we will support minor versions of Python up until their EOL or until our minimal NumPy dependency drops support – whichever occurs first.</p></li>
+<li><p>The interface to <a class="reference internal" href="generated/mygrad.arange.html#mygrad.arange" title="mygrad.arange"><code class="xref py py-func docutils literal notranslate"><span class="pre">arange()</span></code></a> was changed from <code class="docutils literal notranslate"><span class="pre">arange(start,</span> <span class="pre">stop=None,</span> <span class="pre">step=None,</span> <span class="pre">...)</span></code> to <code class="docutils literal notranslate"><span class="pre">arange([start,]</span> <span class="pre">stop[,</span> <span class="pre">step,],</span> <span class="pre">...)</span></code>. This provides exact parity with NumPy’s arange function.</p></li>
+<li><p>The derivatives of <a class="reference internal" href="generated/mygrad.absolute.html#mygrad.absolute" title="mygrad.absolute"><code class="xref py py-func docutils literal notranslate"><span class="pre">absolute()</span></code></a> and <a class="reference internal" href="generated/mygrad.linalg.norm.html#mygrad.linalg.norm" title="mygrad.linalg.norm"><code class="xref py py-func docutils literal notranslate"><span class="pre">norm()</span></code></a> have been revised such that in cases where the derivatives used to be <code class="docutils literal notranslate"><span class="pre">nan</span></code>, those entries will now be <code class="docutils literal notranslate"><span class="pre">0</span></code>. Both functions can now be passed <code class="docutils literal notranslate"><span class="pre">nan_to_num=False</span></code> to enable the previous, more rigorous behavior. See <a class="reference external" href="https://github.com/rsokl/MyGrad/pull/379">PR #379</a> for more details.</p></li>
+</ul>
+</section>
+</section>
+<section id="v2-0-2">
+<span id="id4"></span><h2>2.0.2 - 2021-04-10<a class="headerlink" href="#v2-0-2" title="Permalink to this heading">#</a></h2>
+<p>Exposes <code class="xref py py-func docutils literal notranslate"><span class="pre">execute_op()</span></code> at top-level namespace</p>
+</section>
+<section id="v2-0-1">
+<span id="id5"></span><h2>2.0.1 - 2021-04-03<a class="headerlink" href="#v2-0-1" title="Permalink to this heading">#</a></h2>
+<section id="bug-fixes">
+<h3>Bug Fixes<a class="headerlink" href="#bug-fixes" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="generated/mygrad.matmul.html#mygrad.matmul" title="mygrad.matmul"><code class="xref py py-func docutils literal notranslate"><span class="pre">matmul()</span></code></a> and <a class="reference internal" href="generated/mygrad.multi_matmul.html#mygrad.multi_matmul" title="mygrad.multi_matmul"><code class="xref py py-func docutils literal notranslate"><span class="pre">multi_matmul()</span></code></a> were missing from the top-level namespace of <code class="docutils literal notranslate"><span class="pre">mygrad</span></code>.</p></li>
+<li><p>A 0D tensor involved in a broadcasted operation would have a numpy-float set for its gradient instead of a 0D
+array.</p></li>
+</ul>
+</section>
+<section id="new-functions">
+<h3>New Functions<a class="headerlink" href="#new-functions" title="Permalink to this heading">#</a></h3>
+<p>The following non-differentiable NumPy functions now work on mygrad tensors (and return ndarrays).
+Aliases of these are available at the top-level namespace of <code class="docutils literal notranslate"><span class="pre">mygrad</span></code></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>np.isnan</p></li>
+<li><p>np.isfinite</p></li>
+<li><p>np.isinf</p></li>
+<li><p>np.isnat</p></li>
+<li><p>np.signbit</p></li>
+<li><p>np.logical_not</p></li>
+<li><p>np.logical_and</p></li>
+<li><p>np.logical_or</p></li>
+<li><p>np.logical_xor</p></li>
+<li><p>np.greater</p></li>
+<li><p>np.greater_equal</p></li>
+<li><p>np.less</p></li>
+<li><p>np.less_equal</p></li>
+<li><p>np.equal</p></li>
+<li><p>np.not_equal</p></li>
+<li><p>np.floor_divide</p></li>
+<li><p>np.remainder</p></li>
+<li><p>np.mod</p></li>
+<li><p>np.fmod</p></li>
+<li><p>np.divmod</p></li>
+<li><p>np.rint</p></li>
+<li><p>np.sign</p></li>
+<li><p>np.floor</p></li>
+<li><p>np.ceil</p></li>
+<li><p>np.trunc</p></li>
+<li><p>np.isclose</p></li>
+</ul>
+</div></blockquote>
+</section>
+</section>
+<section id="v2-0-0">
+<span id="id6"></span><h2>2.0.0 - 2021-03-30<a class="headerlink" href="#v2-0-0" title="Permalink to this heading">#</a></h2>
+<p>🎉🎉🎉</p>
+<p>This is a compatibility-breaking update to MyGrad, and it’s great!
+MyGrad 2.0 represents a major overhaul to this project.
+This release creates near parity between the experiences of using MyGrad and using NumPy, and uses NumPy’s new
+mechanisms for overriding functions so that NumPy functions can operate “directly” on MyGrad’s tensors, and thus
+can be used to construct differentiable computational graphs!</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mygrad</span> <span class="kn">import</span> <span class="n">tensor</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">tensor</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>  <span class="c1"># backprop through NumPy functions!</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">grad</span>
+<span class="go">array([2., 4.])</span>
+</pre></div>
+</div>
+<p>Another important, but less exciting, feature is that MyGrad now protects users from inadvertently
+corrupting the state of a computational graph by, say, mutating a NumPy array that is participating in
+the graph.
+This is very useful for protecting people – especially students – from unwittingly poisoning the results
+of their calculations.</p>
+<p>Lastly… no more “nulling” gradients! MyGrad will now handle deleting gradients for you in a way that
+is nicely compatible with gradient-based optimization work flows.</p>
+<section id="id7">
+<h3>New Functions and Utilities<a class="headerlink" href="#id7" title="Permalink to this heading">#</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="generated/mygrad.tensor.html#mygrad.tensor" title="mygrad.tensor"><code class="xref py py-func docutils literal notranslate"><span class="pre">tensor()</span></code></a></p></li>
+<li><p><a class="reference internal" href="generated/mygrad.astensor.html#mygrad.astensor" title="mygrad.astensor"><code class="xref py py-func docutils literal notranslate"><span class="pre">astensor()</span></code></a></p></li>
+<li><p><a class="reference internal" href="generated/mygrad.asarray.html#mygrad.asarray" title="mygrad.asarray"><code class="xref py py-func docutils literal notranslate"><span class="pre">asarray()</span></code></a></p></li>
+<li><p><a class="reference internal" href="generated/mygrad.no_autodiff.html#mygrad.no_autodiff" title="mygrad.no_autodiff"><code class="xref py py-func docutils literal notranslate"><span class="pre">no_autodiff()</span></code></a></p></li>
+<li><p><a class="reference internal" href="generated/mygrad.mem_guard_off.html#mygrad.mem_guard_off" title="mygrad.mem_guard_off"><code class="xref py py-func docutils literal notranslate"><span class="pre">mem_guard_off()</span></code></a></p></li>
+<li><p><a class="reference internal" href="generated/mygrad.mem_guard_on.html#mygrad.mem_guard_on" title="mygrad.mem_guard_on"><code class="xref py py-func docutils literal notranslate"><span class="pre">mem_guard_on()</span></code></a></p></li>
+<li><p><a class="reference internal" href="generated/mygrad.turn_memory_guarding_off.html#mygrad.turn_memory_guarding_off" title="mygrad.turn_memory_guarding_off"><code class="xref py py-func docutils literal notranslate"><span class="pre">turn_memory_guarding_off()</span></code></a></p></li>
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">turn_memory_guarding_on()</span></code></p></li>
+<li><p><a class="reference internal" href="generated/mygrad.concatenate.html#mygrad.concatenate" title="mygrad.concatenate"><code class="xref py py-func docutils literal notranslate"><span class="pre">concatenate()</span></code></a></p></li>
+<li><p><a class="reference internal" href="generated/mygrad.stack.html#mygrad.stack" title="mygrad.stack"><code class="xref py py-func docutils literal notranslate"><span class="pre">stack()</span></code></a></p></li>
+<li><p><a class="reference internal" href="generated/mygrad.linalg.norm.html#mygrad.linalg.norm" title="mygrad.linalg.norm"><code class="xref py py-func docutils literal notranslate"><span class="pre">norm()</span></code></a></p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="dropping-support-for-python-3-6-and-numpy-1-17">
+<h3>Dropping Support for Python 3.6 and Numpy &lt; 1.17<a class="headerlink" href="#dropping-support-for-python-3-6-and-numpy-1-17" title="Permalink to this heading">#</a></h3>
+<p>MyGrad now abides by the <a class="reference external" href="https://numpy.org/neps/nep-0029-deprecation_policy.html">NEP 29</a> recommendation, and adopts
+a common “time window-based” policy for support of Python and NumPy versions.</p>
+<p>As such the Python 3.7 and Numpy 1.17 are the minimum versions supported by MyGrad 2.0.</p>
+</section>
+<section id="the-interfaces-between-mygrad-tensor-and-numpy-array-match">
+<h3>The Interfaces Between <code class="docutils literal notranslate"><span class="pre">mygrad.Tensor</span></code> and <code class="docutils literal notranslate"><span class="pre">numpy.array</span></code> Match<a class="headerlink" href="#the-interfaces-between-mygrad-tensor-and-numpy-array-match" title="Permalink to this heading">#</a></h3>
+<p>You can now control the dimensionality of a tensor and whether or not a tensor copies its data upon initialization, via the
+<a class="reference internal" href="generated/mygrad.tensor.html#mygrad.tensor" title="mygrad.tensor"><code class="xref py py-func docutils literal notranslate"><span class="pre">tensor()</span></code></a> interface. This mirrors the behavior of <code class="xref py py-func docutils literal notranslate"><span class="pre">array()</span></code></p>
+<table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Numpy</p></th>
+<th class="head"><p>MyGrad 1.X</p></th>
+<th class="head"><p>MyGrad 2.0</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">],</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">array([[1., 2.]])</span>
+</pre></div>
+</div>
+</td>
+<td><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mg</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">],</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">&lt;TypeError&gt;</span>
+</pre></div>
+</div>
+</td>
+<td><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mg</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">],</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">Tensor([[1., 2.]])</span>
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="support-for-dtype-where-and-out-in-ufuncs">
+<h3>Support for dtype, where, and out in ufuncs<a class="headerlink" href="#support-for-dtype-where-and-out-in-ufuncs" title="Permalink to this heading">#</a></h3>
+<p>MyGrad now implements ufuncs with support for specifying dtype, boolean masks, and in-place targets. The
+additional methods, such as <code class="docutils literal notranslate"><span class="pre">mygrad.add.reduce</span></code>, are not yet implemented.</p>
+<table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>MyGrad 2.0</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mg</span><span class="o">.</span><span class="n">add</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">where</span><span class="o">=</span><span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+<span class="go">Tensor([3., 1.])</span>
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="augmented-updates-on-tensors-now-match-numpy-s-behavior">
+<h3>Augmented Updates on Tensors Now Match NumPy’s Behavior<a class="headerlink" href="#augmented-updates-on-tensors-now-match-numpy-s-behavior" title="Permalink to this heading">#</a></h3>
+<p>Previously, augmented assignment expressions, such as <code class="docutils literal notranslate"><span class="pre">tensor</span> <span class="pre">*=</span> <span class="pre">2</span></code>, behaved merely
+as a shorthand for the simple assignment <code class="docutils literal notranslate"><span class="pre">tensor</span> <span class="pre">=</span> <span class="pre">tensor</span> <span class="pre">*</span> <span class="pre">2</span></code>.
+This is in stark contrast to the behavior of an augmented assignment on a NumPy array, which
+<a class="reference external" href="https://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/BasicIndexing.html#Augmented-Assignments">mutates the array in-place</a>.</p>
+<p>This meant that there was a major discrepancy between how these expressions behaved across MyGrad and
+NumPy.
+This has changed in MyGrad 2.0: all augmented assignment expressions operate in-place on tensors and
+mutate their underlying data.</p>
+<table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Numpy</p></th>
+<th class="head"><p>MyGrad 1.X</p></th>
+<th class="head"><p>MyGrad 2.0</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">x</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">*=</span> <span class="mi">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="ow">is</span> <span class="n">y</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</td>
+<td><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">x</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">*=</span> <span class="mi">2</span>  <span class="c1"># x = 2 * x</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="ow">is</span> <span class="n">y</span>  <span class="c1"># doesn&#39;t match!</span>
+<span class="go">False</span>
+</pre></div>
+</div>
+</td>
+<td><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">x</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">*=</span> <span class="mi">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="ow">is</span> <span class="n">y</span>  <span class="c1"># matches!</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="creating-and-augmenting-views-of-tensors">
+<h3>Creating and Augmenting Views of Tensors<a class="headerlink" href="#creating-and-augmenting-views-of-tensors" title="Permalink to this heading">#</a></h3>
+<p>MyGrad now provides rich support for creating and manipulating views of tensors.</p>
+<p>All <a class="reference external" href="https://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/BasicIndexing.html#">basic indexing</a> operations
+performed on a tensor will produce a view of said tensor.
+This means that these two tensors share memory
+(While MyGrad 1.X created a view of the underlying NumPy array under the hood for basic indexing, its notion
+of supporting views went no further than that.)
+As with NumPy arrays the “parent” of a view can be accessed through the tensor’s <code class="docutils literal notranslate"><span class="pre">.base</span></code>
+attribute</p>
+<table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Numpy</p></th>
+<th class="head"><p>MyGrad 1.X</p></th>
+<th class="head"><p>MyGrad 2.0</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">3.</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">shares_memory</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span><span class="o">.</span><span class="n">base</span> <span class="ow">is</span> <span class="n">x</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</td>
+<td><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">3.</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">shares_memory</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span><span class="o">.</span><span class="n">base</span> <span class="ow">is</span> <span class="n">x</span>  <span class="c1"># doesn&#39;t match!</span>
+<span class="go">&lt;AttributeError&gt;</span>
+</pre></div>
+</div>
+</td>
+<td><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">3.</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">shares_memory</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span><span class="o">.</span><span class="n">base</span> <span class="ow">is</span> <span class="n">x</span>  <span class="c1"># matches!</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Mutating shared data will propagate through views:</p>
+<table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Numpy</p></th>
+<th class="head"><p>MyGrad 1.X</p></th>
+<th class="head"><p>MyGrad 2.0</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span>
+<span class="go">array([-1., -2.])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span>
+<span class="go">array([-1., -2., 3.])</span>
+</pre></div>
+</div>
+</td>
+<td><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span>
+<span class="go">Tensor([-1., -2.])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span>  <span class="c1"># doesn&#39;t match!</span>
+<span class="go">Tensor([1., 2., 3.])</span>
+</pre></div>
+</div>
+</td>
+<td><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span>
+<span class="go">Tensor([-1., -2.])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span>  <span class="c1"># matches!</span>
+<span class="go">Tensor([-1., -2., 3.])</span>
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Furthermore, views of tensors now propagate corresponding gradient information as well!
+This means that if <code class="docutils literal notranslate"><span class="pre">y</span></code> is a view of <code class="docutils literal notranslate"><span class="pre">x</span></code>, then <code class="docutils literal notranslate"><span class="pre">y.grad</span></code> will be a corresponding view of <code class="docutils literal notranslate"><span class="pre">x.grad</span></code>.
+This is true for all varieties of views, views of views, etc., of <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Because `y` is a view of `x`, `y.grad` will be</span>
+<span class="c1"># a corresponding view of `x.grad`</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">x</span><span class="o">.</span><span class="n">grad</span>
+<span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">2.</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.</span><span class="p">,</span>  <span class="mf">6.</span><span class="p">,</span>  <span class="mf">8.</span><span class="p">])</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">y</span><span class="o">.</span><span class="n">grad</span>
+<span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">2.</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.</span><span class="p">])</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">y</span><span class="o">.</span><span class="n">grad</span><span class="o">.</span><span class="n">base</span> <span class="ow">is</span> <span class="n">x</span><span class="o">.</span><span class="n">grad</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+<p>This rich support for views, augmented assignments, and in-place updates on tensors enables much more sophisticated
+operations on tensors now.
+For example, let’s make a shape-(3, 3) tensor and perform and operations involving views of its diagonal and
+its anti-diagonal. (Note that <a class="reference internal" href="generated/mygrad.einsum.html#mygrad.einsum" title="mygrad.einsum"><code class="xref py py-func docutils literal notranslate"><span class="pre">einsum()</span></code></a> is capable of returning a view of a tensor’s diagonal,
+and that  MyGrad fully supports backpropagation through all flavors of einsum!)</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">],</span>
+<span class="gp">... </span>               <span class="p">[</span><span class="mf">3.</span><span class="p">,</span> <span class="mf">4.</span><span class="p">,</span> <span class="mf">5.</span><span class="p">],</span>
+<span class="gp">... </span>               <span class="p">[</span><span class="mf">6.</span><span class="p">,</span> <span class="mf">7.</span><span class="p">,</span> <span class="mf">8.</span><span class="p">]])</span>
+
+<span class="go"># view of diagonal of `x`</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">diag</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ii-&gt;i&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">diag</span>
+<span class="go">Tensor([0., 4., 8.])</span>
+
+<span class="go"># view of anti-diagonal of `x`</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">anti_diag</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ii-&gt;i&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">[:,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">anti_diag</span>
+<span class="go">Tensor([2., 4., 6.])</span>
+
+<span class="go"># Compute derivatives of their summed difference</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">diag</span> <span class="o">-</span> <span class="n">anti_diag</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">grad</span>
+<span class="go">array([[ 1.,  0., -1.],</span>
+<span class="go">       [ 0.,  0.,  0.],</span>
+<span class="go">       [-1.,  0.,  1.]])</span>
+
+<span class="go"># The views of `x` have the appropriate corresponding</span>
+<span class="go"># views of `x.grad`</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">diag</span><span class="o">.</span><span class="n">grad</span>
+<span class="go">array([1., 0., 1.])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">anti_diag</span><span class="o">.</span><span class="n">grad</span>
+<span class="go">array([-1.,  0., -1.])</span>
+</pre></div>
+</div>
+</section>
+<section id="bye-bye-null-gradients">
+<h3>Bye-Bye Null Gradients!<a class="headerlink" href="#bye-bye-null-gradients" title="Permalink to this heading">#</a></h3>
+<p>Gone are the days of having to manually clear your tensors’ gradients and the computational graph that they were
+in; now MyGrad does it for you!
+This means that <code class="docutils literal notranslate"><span class="pre">Tensor.null_gradients()</span></code> no longer does anything other than emit a deprecation warning.
+In an upcoming minor release this method will be removed entirely.</p>
+<p>In MyGrad 2.0, calling <a class="reference internal" href="generated/mygrad.Tensor.backward.html#mygrad.Tensor.backward" title="mygrad.Tensor.backward"><code class="xref py py-func docutils literal notranslate"><span class="pre">backward()</span></code></a> will finish its computation by clearing the computational graph that was involved
+in the backpropagation.
+Thus any internally-referenced tensors associated with that computational graph become free for garbage collection.
+This is very nice behavior to help prevent students from filling up their RAM unwittingly.</p>
+<p>And instead of worrying about nulling gradients manually, a tensor will automatically have its gradient cleared any time that it is
+involved in a new mathematical operation.
+This enables the following common workflow for performing gradient-based optimization:</p>
+<table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>MyGrad 1.X</p></th>
+<th class="head"><p>MyGrad 2.0</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">y</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">x</span>
+<span class="gp">... </span>    <span class="k">assert</span> <span class="n">x</span><span class="o">.</span><span class="n">grad</span> <span class="ow">is</span> <span class="kc">None</span>
+<span class="gp">... </span>    <span class="n">y</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">grad</span> <span class="o">==</span> <span class="mf">3.</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">y</span><span class="o">.</span><span class="n">null_gradients</span><span class="p">()</span>
+</pre></div>
+</div>
+</td>
+<td><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">y</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">x</span>  <span class="c1"># nulls grad</span>
+<span class="gp">... </span>    <span class="k">assert</span> <span class="n">x</span><span class="o">.</span><span class="n">grad</span> <span class="ow">is</span> <span class="kc">None</span>
+<span class="gp">... </span>    <span class="n">y</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">grad</span> <span class="o">==</span> <span class="mf">3.</span><span class="p">)</span>
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_optimization_steps</span><span class="p">):</span>
+    <span class="c1"># using `model_params` in a function will automatically</span>
+    <span class="c1"># set its gradients to `None`</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="n">compute_loss</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">model_params</span><span class="p">)</span>  <span class="c1"># gradients cleared</span>
+    <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>         <span class="c1"># compute gradients</span>
+    <span class="n">optimize</span><span class="p">(</span><span class="n">model_params</span><span class="p">)</span>  <span class="c1"># do stuff with gradients</span>
+</pre></div>
+</div>
+<p>You can also call <a class="reference internal" href="generated/mygrad.Tensor.null_grad.html#mygrad.Tensor.null_grad" title="mygrad.Tensor.null_grad"><code class="xref py py-func docutils literal notranslate"><span class="pre">null_grad()</span></code></a> to manually clear an individual tensor’s gradient.</p>
+</section>
+<section id="safety-first-memory-guarding-behavior-in-mygrad-2-0">
+<h3>Safety First: Memory Guarding Behavior in MyGrad 2.0<a class="headerlink" href="#safety-first-memory-guarding-behavior-in-mygrad-2-0" title="Permalink to this heading">#</a></h3>
+<p>In MyGrad 1.X it was all too easy to unwittingly corrupt the state of a computational graph by mutating
+a NumPy array mid-computation.
+This could lead to incorrect calculations of gradients! This is the stuff of horrifying nightmares.</p>
+<p>Now MyGrad tracks all of the arrays that are involved in active computational graphs and locks their memory
+so that they are read-only (except for when the user mutates the array explicitly with a MyGrad operation).
+This means that the sort of mutation that could have lurked silently in the dimly-lit alleyways of bugs-ville will
+now get loudly narc’d on by MyGrad’s merciless memory guard!</p>
+<table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>MyGrad 1.X</p></th>
+<th class="head"><p>MyGrad 2.0</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tn</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mf">1.</span> <span class="mf">1.</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">z</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y</span>
+<span class="go"># mutating x will corrupt</span>
+<span class="go"># backprop through z...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="p">[:]</span> <span class="o">=</span> <span class="mf">0.</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">z</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span> <span class="c1"># uh oh...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tn</span><span class="o">.</span><span class="n">grad</span> <span class="c1"># should be: (1., 2.)</span>
+<span class="go">array([0., 0.])</span>
+</pre></div>
+</div>
+</td>
+<td><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tn</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.</span> <span class="mf">1.</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">z</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y</span>
+<span class="go"># mutating x will corrupt</span>
+<span class="go"># backprop through z...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="p">[:]</span> <span class="o">=</span> <span class="mf">0.</span> <span class="c1"># you shall not pass!</span>
+<span class="go">ValueError: read-only!</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">z</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tn</span><span class="o">.</span><span class="n">grad</span>
+<span class="go">array([1., 2.])</span>
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Any tensor or array that is no longer participating in an active computational graph will automatically
+have its write-ability restored to its original state.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># memory guarding is released once an array is no</span>
+<span class="c1"># longer involved in an active computational graph</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">mygrad</span> <span class="k">as</span> <span class="nn">mg</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">])</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">y</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">z</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y</span>     <span class="c1"># x and y are locked</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">z</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>  <span class="c1"># graph cleared; x and y are &quot;released&quot;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">x</span><span class="p">[:]</span> <span class="o">=</span> <span class="mi">0</span>      <span class="c1"># can write to x</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">x</span>
+<span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">])</span>
+
+<span class="c1"># This result is not referenced, thus</span>
+<span class="c1"># x and y are immediately released by the</span>
+<span class="c1"># memory-guard; no graph-clearing is needed</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y</span>
+<span class="n">Tensor</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">])</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">x</span><span class="p">[:]</span> <span class="o">=</span> <span class="mf">1.</span>
+</pre></div>
+</div>
+<p>But with great responsibility comes great …uhh… slowness? This memory-guarding feature can lead to slowdowns
+of <strong>up to 50% for computations involving many small tensors</strong>
+(It used to be <strong>a lot</strong> worse… like 5x worse. I worked really hard to speed it up! I promise!).
+That being said, computations involving beefy tensors (e.g. standard neural networks) will not be significantly
+affected by the overhead associated with the memory guard.
+Please refer to <a class="reference internal" href="performance_tips.html#performance-tips"><span class="std std-ref">Performance Tips</span></a> for responsible ways to disable this memory-guarding mechanism.</p>
+<p>Speaking of optimizations…</p>
+</section>
+<section id="disabling-automatic-differentiation">
+<h3>Disabling Automatic Differentiation<a class="headerlink" href="#disabling-automatic-differentiation" title="Permalink to this heading">#</a></h3>
+<p>Sometimes you want to use your MyGrad code to do calculations, but you don’t actually need to compute
+any derivatives.
+A common example of this is evaluating the test-time performance of a machine learning model that you are
+in the process of optimizing – you don’t actually need to perform backpropagation when you are processing
+the test data.</p>
+<p>In these circumstances, you can greatly reduce the overhead cost associated with building a computational
+graph by using the <a class="reference internal" href="generated/mygrad.no_autodiff.html#mygrad.no_autodiff" title="mygrad.no_autodiff"><code class="xref py py-func docutils literal notranslate"><span class="pre">no_autodiff()</span></code></a> decorator / context manager. See the linked documentation
+for extensive examples of its usage.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># demonstrating mygrad in no-autodiff mode</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">mygrad</span> <span class="k">as</span> <span class="nn">mg</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">3.</span><span class="p">,</span> <span class="mf">4.</span><span class="p">])</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">mg</span><span class="o">.</span><span class="n">no_autodiff</span><span class="p">:</span>
+<span class="o">...</span>     <span class="n">y</span> <span class="o">=</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">2</span>  <span class="c1"># operation not tracked</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">y</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">y</span><span class="o">.</span><span class="n">grad</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">grad</span>  <span class="c1"># x is not &quot;connected&quot; to y</span>
+<span class="p">(</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]),</span> <span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For computations involving many small tensors, this can produce <strong>up to a 3x speedup</strong>! So make sure you
+make keen use of this when you don’t actually need to perform autodiff.</p>
+</section>
+<section id="revamping-constant-semantics-to-be-explicit">
+<h3>Revamping Constant Semantics to be Explicit<a class="headerlink" href="#revamping-constant-semantics-to-be-explicit" title="Permalink to this heading">#</a></h3>
+<p>Previously, specifying <code class="docutils literal notranslate"><span class="pre">constant=False</span></code> in a mygrad function did not actually mean
+that the function would necessarily produce a non-constant tensor. Rather, it simply
+meant that the output would not be _forced_ to be a constant – whether or not the result
+was a constant depended on the inputs (i.e. a function whose inputs were all constants
+would thus produce a constant).</p>
+<p>This was a very bad design decision! Now, specifying <code class="docutils literal notranslate"><span class="pre">constant=False</span></code> guarantees that
+the output of a function is a non-constant (meaning that it facilitates backpropagation
+through a computational graph).</p>
+<p>That being said, we usually _do_ want constant information to propagate through functions.
+Thus <code class="docutils literal notranslate"><span class="pre">constant=None</span></code> is now the default value – its behavior matches that of <code class="docutils literal notranslate"><span class="pre">constant=False</span></code>
+from MyGrad 1.X – for all functions that accept the argument.</p>
+<p>It is also now standard to require that this argument be a keyword-only argument.</p>
+<table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>MyGrad 1.X</p></th>
+<th class="head"><p>MyGrad 2.0</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">t1</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t2</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">out</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">out</span><span class="o">.</span><span class="n">constant</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</td>
+<td><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">t1</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t2</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">out</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">out</span><span class="o">.</span><span class="n">constant</span>
+<span class="go">False</span>
+
+<span class="go"># constant = None</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">out</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">out</span><span class="o">.</span><span class="n">constant</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">t1</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t2</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p># old behavior
+&gt;&gt;&gt; out = mg.add(t1, t2, constant=False)
+&gt;&gt;&gt; out.constant
+True</p>
+<p># new behavior
+&gt;&gt;&gt; out = mg.add(t1, t2, constant=False)
+&gt;&gt;&gt; out.constant
+False</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">out</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">out</span><span class="o">.</span><span class="n">constant</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</section>
+<section id="remove-scalar-only-conditions-on-backpropagation">
+<h3>Remove Scalar-Only Conditions on Backpropagation<a class="headerlink" href="#remove-scalar-only-conditions-on-backpropagation" title="Permalink to this heading">#</a></h3>
+<p>Previously, one could only invoke backpropagation from a non-scalar tensor only if that tensor was
+the culmination of operations that preserved a one-to-one mapping between the elements of an upstream
+tensor with its downstream neighbor. Otherwise an error was raised. This ensured that <code class="docutils literal notranslate"><span class="pre">tensor.grad</span></code>
+would always be the same shape as <code class="docutils literal notranslate"><span class="pre">tensor</span></code>, and not represent a higher-dimensional tensor.</p>
+<p>Now calling <code class="docutils literal notranslate"><span class="pre">tensor.backward()</span></code> from a non-scalar tensor will behave as if the tensor was summed prior
+to invoking backpropagation. This is simple, easy-to-understand behavior, which ensures that <code class="docutils literal notranslate"><span class="pre">tensor.grad</span></code>
+can always be interpreted as an array of scalar-valued derivatives.</p>
+<table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>MyGrad 1.X</p></th>
+<th class="head"><p>MyGrad 2.0</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">t1</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">],</span>
+<span class="gp">... </span>                <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t2</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span>
+<span class="gp">... </span>                <span class="p">[</span><span class="mf">3.</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">z</span> <span class="o">=</span> <span class="n">t1</span> <span class="o">@</span> <span class="n">t2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">z</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+<span class="go">&lt;InvalidBackprop: Scalar-only&gt;</span>
+</pre></div>
+</div>
+</td>
+<td><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">t1</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">],</span>
+<span class="gp">... </span>                <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t2</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span>
+<span class="gp">... </span>                <span class="p">[</span><span class="mf">3.</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">z</span> <span class="o">=</span> <span class="n">t1</span> <span class="o">@</span> <span class="n">t2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">z</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t1</span><span class="o">.</span><span class="n">grad</span>
+<span class="go">array([[1., 2.],</span>
+<span class="go">       [1., 2.]])</span>
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="integer-valued-tensors-are-treated-as-constants">
+<h3>Integer-valued Tensors Are Treated as Constants<a class="headerlink" href="#integer-valued-tensors-are-treated-as-constants" title="Permalink to this heading">#</a></h3>
+<p>Derivatives involving integer-valued tensors are typically ill-defined, and in MyGrad 1.X they
+were generally just wrong. Now integer-valued tensors can only be involved in computational
+graphs as constants.</p>
+<table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>MyGrad 1.X</p></th>
+<th class="head"><p>MyGrad 2.0</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">t1</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">constant</span>
+<span class="go">False</span>
+</pre></div>
+</div>
+</td>
+<td><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">t1</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]])</span><span class="o">.</span><span class="n">constant</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="is-this-code-well-tested">
+<h3>Is This Code Well-Tested?<a class="headerlink" href="#is-this-code-well-tested" title="Permalink to this heading">#</a></h3>
+<p>Yes! I consider MyGrad’s test suite to be the most important part of the library. It is
+the only reason why I feel comfortable releasing this code for students, teachers, and others to use.
+I leverage thorough <a class="reference external" href="https://increment.com/testing/in-praise-of-property-based-testing/">property-based testing</a> using the <a class="reference external" href="https://hypothesis.readthedocs.io/en/latest/">Hypothesis library</a>
+to exercise this code as rigorously as I can manage. These tests <a class="reference external" href="https://github.com/numpy/numpy/issues/10930">even found bugs in NumPy</a>!</p>
+</section>
+<section id="special-thanks">
+<h3>Special Thanks<a class="headerlink" href="#special-thanks" title="Permalink to this heading">#</a></h3>
+<p>Special thanks to Alex Silverstein, Zac Dodds, and Petar Griggs for all of the fruitful discussions, ideas, and influence that you provided
+throughout this major update.</p>
+</section>
+</section>
+<section id="v1-9-0">
+<span id="id9"></span><h2>1.9.0 - 2020-08-28<a class="headerlink" href="#v1-9-0" title="Permalink to this heading">#</a></h2>
+<p>The most significant aspect of this release is the implementation of <code class="docutils literal notranslate"><span class="pre">Tensor.__array__</span></code>, which enables a huge amount
+of cross-compatibility with numpy utilities (<a class="reference external" href="https://github.com/rsokl/MyGrad/pull/288">#288</a>). Note that any previous
+reliance of a numpy function to produce an array of tensor-scalars will likely produce a standard numpy array instead.</p>
+<p>Improvements:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">x**1</span></code> and <code class="docutils literal notranslate"><span class="pre">x**2</span></code> are now special-cased in order to make these common operations more efficient (<a class="reference external" href="https://github.com/rsokl/MyGrad/pull/266">#266</a>)</p></li>
+<li><p>The derivative of <a class="reference internal" href="generated/mygrad.nnet.losses.focal_loss.html#mygrad.nnet.losses.focal_loss" title="mygrad.nnet.losses.focal_loss"><code class="xref py py-func docutils literal notranslate"><span class="pre">focal_loss()</span></code></a> was refactored to handle special edge-cases and the tests for focal loss were improved to exercise these edge cases (<a class="reference external" href="https://github.com/rsokl/MyGrad/pull/269">#269</a>)</p></li>
+<li><p>Various improvements to the tests (<a class="reference external" href="https://github.com/rsokl/MyGrad/pull/271">#271</a>, <a class="reference external" href="https://github.com/rsokl/MyGrad/pull/277">#277</a>, <a class="reference external" href="https://github.com/rsokl/MyGrad/pull/290">#290</a>, <a class="reference external" href="https://github.com/rsokl/MyGrad/pull/284">#284</a>, <a class="reference external" href="https://github.com/rsokl/MyGrad/pull/289">#289</a>, <a class="reference external" href="https://github.com/rsokl/MyGrad/pull/282">#282</a>, <a class="reference external" href="https://github.com/rsokl/MyGrad/pull/292">#292</a>, <a class="reference external" href="https://github.com/rsokl/MyGrad/pull/293">#293</a>)</p></li>
+<li><p>The internal mechanism for tracking tensors in computational graph now depends on hashing tensor-IDs instead of hashing tensors directly. The fact that tensors could be hashed was due to the fact that its equality specialty methods were being monkey-patched (<a class="reference external" href="https://github.com/rsokl/MyGrad/pull/276">#276</a>)</p></li>
+<li><p><a class="reference internal" href="generated/mygrad.nnet.activations.softmax.html#mygrad.nnet.activations.softmax" title="mygrad.nnet.activations.softmax"><code class="xref py py-func docutils literal notranslate"><span class="pre">softmax()</span></code></a> and <a class="reference internal" href="generated/mygrad.nnet.activations.logsoftmax.html#mygrad.nnet.activations.logsoftmax" title="mygrad.nnet.activations.logsoftmax"><code class="xref py py-func docutils literal notranslate"><span class="pre">logsoftmax()</span></code></a> both expose <code class="docutils literal notranslate"><span class="pre">axis</span></code> arguments (<a class="reference external" href="https://github.com/rsokl/MyGrad/pull/268">#268</a>)</p></li>
+</ul>
+<p>Bug fixes:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/rsokl/MyGrad/issues/272">0D tensors could not be indexed into</a> – e.g. to insert a newaxis (<a class="reference external" href="https://github.com/rsokl/MyGrad/pull/273">#273</a>)</p></li>
+<li><p>There was a potential numerical instability in <a class="reference internal" href="generated/mygrad.nnet.layers.batchnorm.html#mygrad.nnet.layers.batchnorm" title="mygrad.nnet.layers.batchnorm"><code class="xref py py-func docutils literal notranslate"><span class="pre">mygrad.nnet.layers.batchnorm()</span></code></a> (<a class="reference external" href="https://github.com/rsokl/MyGrad/pull/285">#285</a>)</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">dtype</span></code> argument in <code class="docutils literal notranslate"><span class="pre">Tensor.__init__</span></code> was ignored when the array-like argument, x, was another Tensor-instance (<a class="reference external" href="https://github.com/rsokl/MyGrad/pull/294">#294</a>)</p></li>
+</ul>
+<p>New features:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Tensor.__array__</span></code> now exposes the tensor’s underlying numpy array – this enables a huge amount of cross-compatibility with numpy utilities (<a class="reference external" href="https://github.com/rsokl/MyGrad/pull/288">#288</a>)</p></li>
+<li><p>Adds <a class="reference internal" href="generated/mygrad.asarray.html#mygrad.asarray" title="mygrad.asarray"><code class="xref py py-func docutils literal notranslate"><span class="pre">asarray()</span></code></a> (<a class="reference external" href="https://github.com/rsokl/MyGrad/pull/279">#279</a>)</p></li>
+<li><p>Adds <a class="reference internal" href="generated/mygrad.astensor.html#mygrad.astensor" title="mygrad.astensor"><code class="xref py py-func docutils literal notranslate"><span class="pre">astensor()</span></code></a> (<a class="reference external" href="https://github.com/rsokl/MyGrad/pull/294">#294</a>)</p></li>
+</ul>
+</section>
+<section id="v1-8-1">
+<span id="id29"></span><h2>1.8.1 - 2020-07-28<a class="headerlink" href="#v1-8-1" title="Permalink to this heading">#</a></h2>
+<p>This is an <a class="reference external" href="https://github.com/rsokl/MyGrad/pull/265">internal change</a> to the backprop
+mechanism for <code class="docutils literal notranslate"><span class="pre">Tensor.__getitem__</span></code>, which produces considerable speedups (2x-4x) for backprop
+through basic indexing and boolean indexing. Thanks to Petar Griggs for finding this.</p>
+</section>
+<section id="v1-8-0">
+<span id="id30"></span><h2>1.8.0 - 2020-07-25<a class="headerlink" href="#v1-8-0" title="Permalink to this heading">#</a></h2>
+<p>New features:</p>
+<ul class="simple">
+<li><p>Adds <code class="xref py py-func docutils literal notranslate"><span class="pre">any()</span></code> and <code class="xref py py-func docutils literal notranslate"><span class="pre">any()</span></code></p></li>
+<li><p>Adds <a class="reference internal" href="generated/mygrad.random.rand.html#mygrad.random.rand" title="mygrad.random.rand"><code class="xref py py-func docutils literal notranslate"><span class="pre">rand()</span></code></a></p></li>
+<li><p>Adds <a class="reference internal" href="generated/mygrad.random.randint.html#mygrad.random.randint" title="mygrad.random.randint"><code class="xref py py-func docutils literal notranslate"><span class="pre">randint()</span></code></a></p></li>
+<li><p>Adds <a class="reference internal" href="generated/mygrad.random.randn.html#mygrad.random.randn" title="mygrad.random.randn"><code class="xref py py-func docutils literal notranslate"><span class="pre">randn()</span></code></a></p></li>
+<li><p>Adds <a class="reference internal" href="generated/mygrad.random.random.html#mygrad.random.random" title="mygrad.random.random"><code class="xref py py-func docutils literal notranslate"><span class="pre">random()</span></code></a></p></li>
+<li><p>Adds <code class="xref py py-func docutils literal notranslate"><span class="pre">random_integers()</span></code></p></li>
+<li><p>Adds <a class="reference internal" href="generated/mygrad.random.random_sample.html#mygrad.random.random_sample" title="mygrad.random.random_sample"><code class="xref py py-func docutils literal notranslate"><span class="pre">random_sample()</span></code></a></p></li>
+<li><p>Adds <a class="reference internal" href="generated/mygrad.random.ranf.html#mygrad.random.ranf" title="mygrad.random.ranf"><code class="xref py py-func docutils literal notranslate"><span class="pre">ranf()</span></code></a></p></li>
+<li><p>Adds <a class="reference internal" href="generated/mygrad.random.sample.html#mygrad.random.sample" title="mygrad.random.sample"><code class="xref py py-func docutils literal notranslate"><span class="pre">sample()</span></code></a></p></li>
+<li><p>Adds <a class="reference internal" href="generated/mygrad.random.seed.html#mygrad.random.seed" title="mygrad.random.seed"><code class="xref py py-func docutils literal notranslate"><span class="pre">seed()</span></code></a></p></li>
+</ul>
+<p>Thanks to Darshan Krishnaswamy and Sam Carpenter for adding this functionality!</p>
+<p>Fixes a bug in the GRU layer where mixed floating point precision dtypes between data and weights raised an error.
+Thanks to Petar Griggs for the fix!</p>
+</section>
+<section id="v1-7-1">
+<span id="id31"></span><h2>1.7.1 - 2020-07-11<a class="headerlink" href="#v1-7-1" title="Permalink to this heading">#</a></h2>
+<p>Fixes a bug in <a class="reference internal" href="generated/mygrad.nnet.losses.negative_log_likelihood.html#mygrad.nnet.losses.negative_log_likelihood" title="mygrad.nnet.losses.negative_log_likelihood"><code class="xref py py-func docutils literal notranslate"><span class="pre">negative_log_likelihood()</span></code></a>, where setting <code class="docutils literal notranslate"><span class="pre">constant=True</span></code> had no effect.</p>
+</section>
+<section id="v1-7-0">
+<span id="id32"></span><h2>1.7.0 - 2020-07-11<a class="headerlink" href="#v1-7-0" title="Permalink to this heading">#</a></h2>
+<p>This release continues the process of integrating functions from <a class="reference external" href="https://github.com/davidmascharka/MyNN">mynn</a>.</p>
+<p>New features:</p>
+<ul class="simple">
+<li><p>Adds <a class="reference internal" href="generated/mygrad.nnet.initializers.glorot_normal.html#mygrad.nnet.initializers.glorot_normal" title="mygrad.nnet.initializers.glorot_normal"><code class="xref py py-func docutils literal notranslate"><span class="pre">glorot_normal()</span></code></a></p></li>
+<li><p>Adds <a class="reference internal" href="generated/mygrad.nnet.initializers.glorot_uniform.html#mygrad.nnet.initializers.glorot_uniform" title="mygrad.nnet.initializers.glorot_uniform"><code class="xref py py-func docutils literal notranslate"><span class="pre">glorot_uniform()</span></code></a></p></li>
+<li><p>Adds <a class="reference internal" href="generated/mygrad.nnet.initializers.he_normal.html#mygrad.nnet.initializers.he_normal" title="mygrad.nnet.initializers.he_normal"><code class="xref py py-func docutils literal notranslate"><span class="pre">he_normal()</span></code></a></p></li>
+<li><p>Adds <a class="reference internal" href="generated/mygrad.nnet.initializers.he_uniform.html#mygrad.nnet.initializers.he_uniform" title="mygrad.nnet.initializers.he_uniform"><code class="xref py py-func docutils literal notranslate"><span class="pre">he_uniform()</span></code></a></p></li>
+<li><p>Adds <a class="reference internal" href="generated/mygrad.nnet.initializers.normal.html#mygrad.nnet.initializers.normal" title="mygrad.nnet.initializers.normal"><code class="xref py py-func docutils literal notranslate"><span class="pre">normal()</span></code></a></p></li>
+<li><p>Adds <a class="reference internal" href="generated/mygrad.nnet.initializers.uniform.html#mygrad.nnet.initializers.uniform" title="mygrad.nnet.initializers.uniform"><code class="xref py py-func docutils literal notranslate"><span class="pre">uniform()</span></code></a></p></li>
+<li><p>Adds <a class="reference internal" href="generated/mygrad.nnet.losses.focal_loss.html#mygrad.nnet.losses.focal_loss" title="mygrad.nnet.losses.focal_loss"><code class="xref py py-func docutils literal notranslate"><span class="pre">focal_loss()</span></code></a></p></li>
+<li><p>Adds <a class="reference internal" href="generated/mygrad.nnet.losses.negative_log_likelihood.html#mygrad.nnet.losses.negative_log_likelihood" title="mygrad.nnet.losses.negative_log_likelihood"><code class="xref py py-func docutils literal notranslate"><span class="pre">negative_log_likelihood()</span></code></a></p></li>
+</ul>
+<p>Big thanks to David Mascharka!</p>
+<p>Improvements:</p>
+<p>The interfaces to <a class="reference internal" href="generated/mygrad.reshape.html#mygrad.reshape" title="mygrad.reshape"><code class="xref py py-func docutils literal notranslate"><span class="pre">reshape()</span></code></a> and <code class="xref py py-func docutils literal notranslate"><span class="pre">reshape()</span></code> were adjusted to match exactly the interfaces to their NumPy counterparts.
+I.e. <a class="reference internal" href="generated/mygrad.reshape.html#mygrad.reshape" title="mygrad.reshape"><code class="xref py py-func docutils literal notranslate"><span class="pre">reshape()</span></code></a> now requires <code class="docutils literal notranslate"><span class="pre">newshape</span></code> to be a sequence, whereas <code class="xref py py-func docutils literal notranslate"><span class="pre">reshape()</span></code> can accept an unpacked sequence for its
+<code class="docutils literal notranslate"><span class="pre">newshape</span></code>.</p>
+<p><a class="reference internal" href="generated/mygrad.Tensor.shape.html#mygrad.Tensor.shape" title="mygrad.Tensor.shape"><code class="xref py py-func docutils literal notranslate"><span class="pre">shape()</span></code></a> is now settable - triggering an in-place reshape of a tensor, matching the corresponding behavior in NumPy.</p>
+<p>Internal changes:</p>
+<p>The logic for writing an in-place operation has been consolidated into a convenient wrapper: <code class="xref py py-func docutils literal notranslate"><span class="pre">_in_place_op()</span></code>.</p>
+</section>
+<section id="v1-6-0">
+<span id="id33"></span><h2>1.6.0 - 2020-06-21<a class="headerlink" href="#v1-6-0" title="Permalink to this heading">#</a></h2>
+<p>New features:</p>
+<ul class="simple">
+<li><p>Adds <a class="reference internal" href="generated/mygrad.nnet.activations.elu.html#mygrad.nnet.activations.elu" title="mygrad.nnet.activations.elu"><code class="xref py py-func docutils literal notranslate"><span class="pre">elu()</span></code></a></p></li>
+<li><p>Adds <a class="reference internal" href="generated/mygrad.nnet.activations.glu.html#mygrad.nnet.activations.glu" title="mygrad.nnet.activations.glu"><code class="xref py py-func docutils literal notranslate"><span class="pre">glu()</span></code></a></p></li>
+<li><p>Adds <a class="reference internal" href="generated/mygrad.nnet.activations.leaky_relu.html#mygrad.nnet.activations.leaky_relu" title="mygrad.nnet.activations.leaky_relu"><code class="xref py py-func docutils literal notranslate"><span class="pre">leaky_relu()</span></code></a></p></li>
+<li><p>Adds <a class="reference internal" href="generated/mygrad.nnet.activations.selu.html#mygrad.nnet.activations.selu" title="mygrad.nnet.activations.selu"><code class="xref py py-func docutils literal notranslate"><span class="pre">selu()</span></code></a></p></li>
+<li><p>Adds <a class="reference internal" href="generated/mygrad.nnet.activations.soft_sign.html#mygrad.nnet.activations.soft_sign" title="mygrad.nnet.activations.soft_sign"><code class="xref py py-func docutils literal notranslate"><span class="pre">soft_sign()</span></code></a></p></li>
+</ul>
+<p>Big thanks to David Mascharka!</p>
+</section>
+<section id="v1-5-0">
+<span id="id34"></span><h2>1.5.0 - 2020-02-16<a class="headerlink" href="#v1-5-0" title="Permalink to this heading">#</a></h2>
+<p>New features:</p>
+<ul class="simple">
+<li><p>Adds <a class="reference internal" href="generated/mygrad.Tensor.astype.html#mygrad.Tensor.astype" title="mygrad.Tensor.astype"><code class="xref py py-func docutils literal notranslate"><span class="pre">astype()</span></code></a> method.</p></li>
+<li><p>Adds <a class="reference internal" href="generated/mygrad.nnet.activations.hard_tanh.html#mygrad.nnet.activations.hard_tanh" title="mygrad.nnet.activations.hard_tanh"><code class="xref py py-func docutils literal notranslate"><span class="pre">hard_tanh()</span></code></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">y_true</span></code> can now be passed as a <code class="docutils literal notranslate"><span class="pre">Tensor</span></code> to <a class="reference internal" href="generated/mygrad.nnet.losses.softmax_crossentropy.html#mygrad.nnet.losses.softmax_crossentropy" title="mygrad.nnet.losses.softmax_crossentropy"><code class="xref py py-func docutils literal notranslate"><span class="pre">softmax_crossentropy()</span></code></a></p></li>
+</ul>
+<p>This update also includes various improvements to the library’s test suite.</p>
+</section>
+<section id="v1-4-1">
+<span id="id35"></span><h2>1.4.1 - 2020-01-09<a class="headerlink" href="#v1-4-1" title="Permalink to this heading">#</a></h2>
+<p>This release performs an internal refactor in the <code class="docutils literal notranslate"><span class="pre">nnet</span></code> module of the library, as well as
+an analogous refactor in the test suite. This also fixes a docstring in the <code class="docutils literal notranslate"><span class="pre">multiclass_hinge</span></code>
+loss to properly show a description in the readthedocs page.</p>
+</section>
+<section id="v1-4-0">
+<span id="id36"></span><h2>1.4.0 - 2019-12-19<a class="headerlink" href="#v1-4-0" title="Permalink to this heading">#</a></h2>
+<p>This release adds the <a class="reference internal" href="generated/mygrad.repeat.html#mygrad.repeat" title="mygrad.repeat"><code class="xref py py-func docutils literal notranslate"><span class="pre">repeat()</span></code></a> operation. It also includes some minor
+improvements to mygrad’s test suite.</p>
+</section>
+<section id="v1-3-0">
+<span id="id37"></span><h2>1.3.0 - 2019-11-30<a class="headerlink" href="#v1-3-0" title="Permalink to this heading">#</a></h2>
+<p>This release adds <a class="reference internal" href="generated/mygrad.clip.html#mygrad.clip" title="mygrad.clip"><code class="xref py py-func docutils literal notranslate"><span class="pre">clip()</span></code></a> and <a class="reference internal" href="generated/mygrad.where.html#mygrad.where" title="mygrad.where"><code class="xref py py-func docutils literal notranslate"><span class="pre">where()</span></code></a>.</p>
+<p>It also includes a major fix to the graph-traversal mechanism for null-gradients and clear-graph,
+eliminating an exponentially-scaling runtime.</p>
+<p><code class="docutils literal notranslate"><span class="pre">+x</span></code> will now invoke <code class="docutils literal notranslate"><span class="pre">mygrad.positive</span></code>, mirroring the numpy behavior</p>
+<p>There are improvements to user-facing error messages and input validation in addition to major
+improvements to mygrad’s test suite. There is now a 100% line-coverage gate in mygrad’s CI system.</p>
+</section>
+<section id="v1-2-0">
+<span id="id38"></span><h2>1.2.0 - 2019-08-03<a class="headerlink" href="#v1-2-0" title="Permalink to this heading">#</a></h2>
+<p>We’re finally keeping a formal changelog!</p>
+<p>This release makes substantial improvements to MyGrad’s error-checking and handling, in order to make much simpler the process of debugging issues with buggy custom operations. Specifically, <a class="reference internal" href="generated/mygrad.operation_base.Operation.backward.html#mygrad.operation_base.Operation.backward" title="mygrad.operation_base.Operation.backward"><code class="xref py py-func docutils literal notranslate"><span class="pre">backward()</span></code></a> now checks for an invalid-gradients on each call of <a class="reference internal" href="generated/mygrad.operation_base.Operation.backward_var.html#mygrad.operation_base.Operation.backward_var" title="mygrad.operation_base.Operation.backward_var"><code class="xref py py-func docutils literal notranslate"><span class="pre">backward_var()</span></code></a>, and raises a descriptive error message.</p>
+<p><code class="docutils literal notranslate"><span class="pre">mygrad.errors</span></code> was introduced to provide descriptive, MyGrad-specific exceptions. For example, we no longer raise bare exceptions for scenarios like invalid backprop through a scalar-only graph; rather, we now raise a descriptive <code class="docutils literal notranslate"><span class="pre">InvalidBackprop</span></code> exception.</p>
+<p>MyGrad’s testing framework received wide-ranging improvements, yielding complete test coverage and fewer flaky tests. Coverage checks were added to the project’s CI process.</p>
+<p><a class="reference internal" href="generated/mygrad.maximum.html#mygrad.maximum" title="mygrad.maximum"><code class="xref py py-func docutils literal notranslate"><span class="pre">maximum()</span></code></a> and <a class="reference internal" href="generated/mygrad.minimum.html#mygrad.minimum" title="mygrad.minimum"><code class="xref py py-func docutils literal notranslate"><span class="pre">minimum()</span></code></a> were patched to permit backpropagation through scalar inputs.</p>
+<p>Internal implementation details of <a class="reference internal" href="generated/mygrad.einsum.html#mygrad.einsum" title="mygrad.einsum"><code class="xref py py-func docutils literal notranslate"><span class="pre">einsum()</span></code></a> were adjusted to remove redundant code in its backpropagation machinery.</p>
+<p><a class="reference internal" href="generated/mygrad.Tensor.null_gradients.html#mygrad.Tensor.null_gradients" title="mygrad.Tensor.null_gradients"><code class="xref py py-func docutils literal notranslate"><span class="pre">null_gradients()</span></code></a> was refactored to ensure that only a single traversal of the computational graph is performed to null all of the tensors’ gradients. Furthermore, <cite>Tensor.null_gradients(clear_graph=True)</cite> now only performs a single graph traversal, instead of two.</p>
+<p>In keeping with NumPy’s behavior, performing <cite>+x</cite> (where <cite>x</cite> is a mygrad-tensor) no longer returns a reference of <cite>x</cite>, but returns <cite>mygrad.positive(x)</cite>.</p>
+<p>Backpropagation through <a class="reference internal" href="generated/mygrad.max.html#mygrad.max" title="mygrad.max"><code class="xref py py-func docutils literal notranslate"><span class="pre">max()</span></code></a> and <a class="reference internal" href="generated/mygrad.min.html#mygrad.min" title="mygrad.min"><code class="xref py py-func docutils literal notranslate"><span class="pre">min()</span></code></a> now works for 0D tensors.</p>
+<p>Input validation was added to <code class="xref py py-func docutils literal notranslate"><span class="pre">mygrad.nnet.layers.utils.sliding_window_view()</span></code>.</p>
+<p>Fixed backpropagation through basic indexing, <cite>x[ind] = b</cite>, in which broadcasting occurred and <cite>b</cite> possess “excess” leading singleton dimensions.</p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="generated/mygrad.computational_graph.build_graph.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">mygrad.computational_graph.build_graph</p>
+      </div>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v2-3-0">2.3.0 - 2024-09-07</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v2-2-0">2.2.0 - 2023-01-03</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v2-1-0">2.1.0 - 2022-01-01</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#new-functions-and-utilities">New Functions and Utilities</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#improvements">Improvements</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compatibility-breaking-changes">Compatibility-Breaking Changes</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v2-0-2">2.0.2 - 2021-04-10</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v2-0-1">2.0.1 - 2021-04-03</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bug-fixes">Bug Fixes</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#new-functions">New Functions</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v2-0-0">2.0.0 - 2021-03-30</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">New Functions and Utilities</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dropping-support-for-python-3-6-and-numpy-1-17">Dropping Support for Python 3.6 and Numpy &lt; 1.17</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-interfaces-between-mygrad-tensor-and-numpy-array-match">The Interfaces Between <code class="docutils literal notranslate"><span class="pre">mygrad.Tensor</span></code> and <code class="docutils literal notranslate"><span class="pre">numpy.array</span></code> Match</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#support-for-dtype-where-and-out-in-ufuncs">Support for dtype, where, and out in ufuncs</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#augmented-updates-on-tensors-now-match-numpy-s-behavior">Augmented Updates on Tensors Now Match NumPy’s Behavior</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-and-augmenting-views-of-tensors">Creating and Augmenting Views of Tensors</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bye-bye-null-gradients">Bye-Bye Null Gradients!</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#safety-first-memory-guarding-behavior-in-mygrad-2-0">Safety First: Memory Guarding Behavior in MyGrad 2.0</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#disabling-automatic-differentiation">Disabling Automatic Differentiation</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#revamping-constant-semantics-to-be-explicit">Revamping Constant Semantics to be Explicit</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#remove-scalar-only-conditions-on-backpropagation">Remove Scalar-Only Conditions on Backpropagation</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#integer-valued-tensors-are-treated-as-constants">Integer-valued Tensors Are Treated as Constants</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#is-this-code-well-tested">Is This Code Well-Tested?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#special-thanks">Special Thanks</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v1-9-0">1.9.0 - 2020-08-28</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v1-8-1">1.8.1 - 2020-07-28</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v1-8-0">1.8.0 - 2020-07-25</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v1-7-1">1.7.1 - 2020-07-11</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v1-7-0">1.7.0 - 2020-07-11</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v1-6-0">1.6.0 - 2020-06-21</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v1-5-0">1.5.0 - 2020-02-16</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v1-4-1">1.4.1 - 2020-01-09</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v1-4-0">1.4.0 - 2019-12-19</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v1-3-0">1.3.0 - 2019-11-30</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v1-2-0">1.2.0 - 2019-08-03</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="_sources/changes.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2023, Ryan Soklaski.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.0.1.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,846 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>mygrad.nnet.layers.conv_nd &#8212; MyGrad 2.3.0.post1.dev6 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/my_theme.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/mygrad.nnet.layers.conv_nd';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="mygrad.nnet.layers.max_pool" href="mygrad.nnet.layers.max_pool.html" />
+    <link rel="prev" title="mygrad.nnet.layers.batchnorm" href="mygrad.nnet.layers.batchnorm.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev6 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../install.html">
+                        Installing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../intro.html">
+                        Introducing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../tensor.html">
+                        MyGrad’s Tensor
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../views.html">
+                        Views and In-Place Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../performance_tips.html">
+                        Performance Tips
+                      </a>
+                    </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../operation.html">
+                        Writing Your Own Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../tensor_creation.html">
+                        Tensor creation routines (mygrad.tensor_creation)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../tensor_manipulation.html">
+                        Tensor manipulation routines (mygrad.tensor_manip)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../linalg.html">
+                        Linear algebra (mygrad.linalg)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../math.html">
+                        Mathematical functions (mygrad.math)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../indexing.html">
+                        Indexing Routines (mygrad.indexing_routines)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../nnet.html">
+                        Neural network operations (mygrad.nnet)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../io.html">
+                        Input and Output
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../graph_viz.html">
+                        Computational graph visualization(mygrad.computational_graph)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../changes.html">
+                        Changelog
+                      </a>
+                    </li>
+                
+                </div>
+            </div>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../install.html">
+                        Installing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../intro.html">
+                        Introducing MyGrad
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../tensor.html">
+                        MyGrad’s Tensor
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../views.html">
+                        Views and In-Place Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../performance_tips.html">
+                        Performance Tips
+                      </a>
+                    </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../operation.html">
+                        Writing Your Own Operations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../tensor_creation.html">
+                        Tensor creation routines (mygrad.tensor_creation)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../tensor_manipulation.html">
+                        Tensor manipulation routines (mygrad.tensor_manip)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../linalg.html">
+                        Linear algebra (mygrad.linalg)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../math.html">
+                        Mathematical functions (mygrad.math)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../indexing.html">
+                        Indexing Routines (mygrad.indexing_routines)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../nnet.html">
+                        Neural network operations (mygrad.nnet)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../io.html">
+                        Input and Output
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../graph_viz.html">
+                        Computational graph visualization(mygrad.computational_graph)
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../changes.html">
+                        Changelog
+                      </a>
+                    </li>
+                
+                </div>
+            </div>
+            
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.layers.batchnorm.html">mygrad.nnet.layers.batchnorm</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">mygrad.nnet.layers.conv_nd</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.layers.max_pool.html">mygrad.nnet.layers.max_pool</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.layers.gru.html">mygrad.nnet.layers.gru</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.losses.focal_loss.html">mygrad.nnet.losses.focal_loss</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.losses.margin_ranking_loss.html">mygrad.nnet.losses.margin_ranking_loss</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.losses.multiclass_hinge.html">mygrad.nnet.losses.multiclass_hinge</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.losses.negative_log_likelihood.html">mygrad.nnet.losses.negative_log_likelihood</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.losses.softmax_crossentropy.html">mygrad.nnet.losses.softmax_crossentropy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.losses.softmax_focal_loss.html">mygrad.nnet.losses.softmax_focal_loss</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.activations.elu.html">mygrad.nnet.activations.elu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.activations.glu.html">mygrad.nnet.activations.glu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.activations.hard_tanh.html">mygrad.nnet.activations.hard_tanh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.activations.leaky_relu.html">mygrad.nnet.activations.leaky_relu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.activations.logsoftmax.html">mygrad.nnet.activations.logsoftmax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.activations.selu.html">mygrad.nnet.activations.selu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.activations.sigmoid.html">mygrad.nnet.activations.sigmoid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.activations.softmax.html">mygrad.nnet.activations.softmax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.activations.soft_sign.html">mygrad.nnet.activations.soft_sign</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.activations.relu.html">mygrad.nnet.activations.relu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.activations.tanh.html">mygrad.nnet.activations.tanh</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.initializers.dirac.html">mygrad.nnet.initializers.dirac</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.initializers.glorot_normal.html">mygrad.nnet.initializers.glorot_normal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.initializers.glorot_uniform.html">mygrad.nnet.initializers.glorot_uniform</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.initializers.he_normal.html">mygrad.nnet.initializers.he_normal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.initializers.he_uniform.html">mygrad.nnet.initializers.he_uniform</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.initializers.normal.html">mygrad.nnet.initializers.normal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygrad.nnet.initializers.uniform.html">mygrad.nnet.initializers.uniform</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="mygrad.sliding_window_view.html">mygrad.sliding_window_view</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../nnet.html" class="nav-link">Neural network operations (<code class="xref py py-mod docutils literal notranslate"><span class="pre">mygrad.nnet</span></code>)</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">mygrad.nnet.layers.conv_nd</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="mygrad-nnet-layers-conv-nd">
+<h1>mygrad.nnet.layers.conv_nd<a class="headerlink" href="#mygrad-nnet-layers-conv-nd" title="Permalink to this heading">#</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="mygrad.nnet.layers.conv_nd">
+<span class="sig-prename descclassname"><span class="pre">mygrad.nnet.layers.</span></span><span class="sig-name descname"><span class="pre">conv_nd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ArrayLike</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ArrayLike</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.12)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.12)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dilation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.12)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constant</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="../_modules/mygrad/nnet/layers/conv.html#conv_nd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mygrad.nnet.layers.conv_nd" title="Permalink to this definition">#</a></dt>
+<dd><p>Use <code class="docutils literal notranslate"><span class="pre">filter_bank</span></code> (<code class="docutils literal notranslate"><span class="pre">w</span></code>) to perform strided N-dimensional neural network-style
+convolutions (see Notes) over <code class="docutils literal notranslate"><span class="pre">x</span></code>.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>f(x, w) -&gt; x ⋆ w
+
+shapes:
+(N, C, X0, ...) ⋆ (F, C, W0, ...) -&gt; (N, F, G0, ...)
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">x</span></code> represents a batch of data over which the filters
+are convolved. Specifically, it must be a tensor of shape
+<span class="math notranslate nohighlight">\((N, C, X_0, ...)\)</span>, where <span class="math notranslate nohighlight">\(N\)</span> is the number of samples in the batch,
+C is the channel-depth of each datum, and <span class="math notranslate nohighlight">\((X_0, ...)\)</span> are the
+dimensions over which the filters are convolved. Accordingly,
+each filter must have a channel depth of <span class="math notranslate nohighlight">\(C\)</span>.</p>
+<p>Thus convolving <span class="math notranslate nohighlight">\(F\)</span> filters, each with a shape <span class="math notranslate nohighlight">\((C, W_0, ...)\)</span>,
+over the data batch will produce a tensor of shape
+<span class="math notranslate nohighlight">\((N, F, G_0, ...)\)</span>, where <span class="math notranslate nohighlight">\((G_0, ...)\)</span> is the shape of the grid
+commensurate with the filter placements</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>x</strong><span class="classifier">ArrayLike, shape=(N, C, Xo, …)</span></dt><dd><p>The data batch to be convolved over.</p>
+</dd>
+<dt><strong>filter_bank</strong><span class="classifier">Union[Tensor, array_like], shape=(F, C, Wo, …)</span></dt><dd><p>The filters used to perform the convolutions.</p>
+</dd>
+<dt><strong>stride</strong><span class="classifier">Union[int, Tuple[int, …]]</span></dt><dd><p>(keyword-only argument) The step-size with which each
+filter is placed along the H and W axes during the
+convolution. The tuple indicates (stride-0, …). If a
+single integer is provided, this stride is used for all
+convolved dimensions</p>
+</dd>
+<dt><strong>padding</strong><span class="classifier">Union[int, Tuple[int, …]]</span></dt><dd><p>(keyword-only argument) The number of zeros to be padded
+to both ends of each convolved dimension, respectively.
+If a single integer is provided, this padding is used for
+all of the convolved axes</p>
+</dd>
+<dt><strong>dilation</strong><span class="classifier">Union[int, Tuple[int, …]], optional (default=1)</span></dt><dd><p>(keyword-only argument) The spacing used when placing kernel
+elements along the data. E.g. for a 1D convolution the ith
+placement of the kernel multiplied  against the dilated-window:
+<code class="docutils literal notranslate"><span class="pre">x[:,</span> <span class="pre">:,</span> <span class="pre">i*s:(i*s</span> <span class="pre">+</span> <span class="pre">w*d):d]</span></code>, where <code class="docutils literal notranslate"><span class="pre">s</span></code> is
+the stride, <code class="docutils literal notranslate"><span class="pre">w</span></code> is the kernel-size, and <code class="docutils literal notranslate"><span class="pre">d</span></code> is the dilation factor.</p>
+<p>If a single integer is provided, that dilation value is used for all
+of the convolved axes</p>
+</dd>
+<dt><strong>constant</strong><span class="classifier">Optional[None]</span></dt><dd><p>If True, the resulting Tensor is a constant.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>Tensor, shape=(N, F, G0, …)</dt><dd><p>The result of each filter being convolved over each datum in
+the batch.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The filters are <em>not</em> flipped by this operation, meaning that
+an auto-correlation is being performed rather than a true convolution.</p></li>
+<li><p>Only ‘valid’ filter placements – where the filters overlap
+completely with the (padded) data – are permitted.</p></li>
+</ul>
+<p class="rubric">Examples</p>
+<p>Here we perform a 1D convolution of a constant-valued kernel, <code class="docutils literal notranslate"><span class="pre">k</span></code>, with a
+‘square-wave’ signal, <code class="docutils literal notranslate"><span class="pre">x</span></code>, using stride-1. Note that because we are constrained
+to doing deep learning-style convolutions, that we prepend the dimensions
+<span class="math notranslate nohighlight">\((N=1, C=1)\)</span> to <code class="docutils literal notranslate"><span class="pre">x</span></code>, and <span class="math notranslate nohighlight">\((F=1, C=1)\)</span> and to <code class="docutils literal notranslate"><span class="pre">k</span></code>. That is,
+we are performing a convolution on one, single-channeled signal using
+one kernel.</p>
+<p>See that this convolution produces the expected triangle-shaped
+response. The shape of the resulting tensor is <span class="math notranslate nohighlight">\((N=1, F=1, G_0=12)\)</span>.
+That is, the length-5 kernel can be placed in 12 valid positions, using a
+stride of 1.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">mygrad</span> <span class="k">as</span> <span class="nn">mg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mygrad.nnet</span> <span class="kn">import</span> <span class="n">conv_nd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">16</span><span class="p">))</span>  <span class="c1"># a square-wave signal</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span><span class="mi">11</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">k</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>    <span class="c1"># a constant-valued kernel</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conv_nd</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>   <span class="c1"># performing a stride-1, 1D convolution</span>
+<span class="go">Tensor([[[0., 1., 2., 3., 4., 5., 5., 4., 3., 2., 1., 0.]]], dtype=float32)</span>
+</pre></div>
+</div>
+<p>Back-propagating through the (summed) convolution:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conv_nd</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>  <span class="c1"># sum to a scalar to perform back-prop</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">grad</span>  <span class="c1"># d(summed_conv)/dx</span>
+<span class="go">array([[[1., 2., 3., 4., 5., 5., 5., 5., 5., 5., 5., 5., 4., 3., 2., 1.]]],</span>
+<span class="go">      dtype=float32)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">k</span><span class="o">.</span><span class="n">grad</span>  <span class="c1"># d(summed_conv)/dk</span>
+<span class="go">array([[[6., 6., 6., 6., 6.]]])</span>
+</pre></div>
+</div>
+<p>(<a class="reference external" href="../generated/mygrad-nnet-layers-conv_nd-1.py">Source code</a>, <a class="reference external" href="../generated/mygrad-nnet-layers-conv_nd-1.png">png</a>, <a class="reference external" href="../generated/mygrad-nnet-layers-conv_nd-1.hires.png">hires.png</a>, <a class="reference external" href="../generated/mygrad-nnet-layers-conv_nd-1.pdf">pdf</a>)</p>
+<figure class="align-default">
+<img alt="../_images/mygrad-nnet-layers-conv_nd-1.png" class="plot-directive" src="../_images/mygrad-nnet-layers-conv_nd-1.png" />
+</figure>
+<p>Let’s apply a edge-detection kernel to each color channel of an RGB image.</p>
+<blockquote>
+<div><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.image</span> <span class="k">as</span> <span class="nn">mpimg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mygrad.nnet.layers</span> <span class="kn">import</span> <span class="n">conv_nd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># A shape-(H, W, 3) RGB image</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">img</span> <span class="o">=</span> <span class="n">mpimg</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="s1">&#39;../_static/meerkat.png&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># We&#39;ll treat this like a batch of three greyscale images</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># where each &quot;image&quot; is actually a color channel</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># shape-(H, W, 3) -&gt; shape-(3, 1, H, W)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># edge detection kernel</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">kernel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+<span class="gp">... </span>                   <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span>  <span class="mi">8</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+<span class="gp">... </span>                   <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># (Hf, Wf) --&gt; (1, 1, Hf, Wf)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">kernel</span> <span class="o">=</span> <span class="n">kernel</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">kernel</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># conv: (3, 1, H, W) w/ (1, 1, Hf, Wf) --&gt; (3, 1, H&#39;, W&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># squeeze + transpose: (3, 1, H&#39;, W&#39;) --&gt; (H&#39;, W&#39;, 3)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">processed</span> <span class="o">=</span> <span class="n">conv_nd</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">kernel</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">processed</span> <span class="o">=</span> <span class="n">processed</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">processed</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>(<a class="reference external" href="../generated/mygrad-nnet-layers-conv_nd-2.py">Source code</a>)</p>
+<figure class="align-default" id="id1">
+<img alt="../_images/mygrad-nnet-layers-conv_nd-2_00.png" class="plot-directive" src="../_images/mygrad-nnet-layers-conv_nd-2_00.png" />
+<figcaption>
+<p><span class="caption-text">(<a class="reference external" href="../generated/mygrad-nnet-layers-conv_nd-2_00.png">png</a>, <a class="reference external" href="../generated/mygrad-nnet-layers-conv_nd-2_00.hires.png">hires.png</a>, <a class="reference external" href="../generated/mygrad-nnet-layers-conv_nd-2_00.pdf">pdf</a>)</span><a class="headerlink" href="#id1" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
+<figure class="align-default" id="id2">
+<img alt="../_images/mygrad-nnet-layers-conv_nd-2_01.png" class="plot-directive" src="../_images/mygrad-nnet-layers-conv_nd-2_01.png" />
+<figcaption>
+<p><span class="caption-text">(<a class="reference external" href="../generated/mygrad-nnet-layers-conv_nd-2_01.png">png</a>, <a class="reference external" href="../generated/mygrad-nnet-layers-conv_nd-2_01.hires.png">hires.png</a>, <a class="reference external" href="../generated/mygrad-nnet-layers-conv_nd-2_01.pdf">pdf</a>)</span><a class="headerlink" href="#id2" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
+</div></blockquote>
+<p>Now, let’s demonstrate a more typical usage for <code class="docutils literal notranslate"><span class="pre">conv_nd</span></code> in the context of
+neural networks. <code class="docutils literal notranslate"><span class="pre">x</span></code> will represent 10, 32x32 RGB images, and we will use
+5 distinct 2x2 kernels to convolve over each of these images . Note that
+each kernel must possess 3-channel - one for each RGB channel.</p>
+<p>That is, we will be performing NxF channel-wise 2D convolutions. Supposing
+that we don’t want the kernel placements to overlap, we can use a stride of 2. In
+total, this will produce a shape-<span class="math notranslate nohighlight">\((N=10, F=5, G_0=16, G_1=16)\)</span> tensor as a
+result.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">mygrad</span> <span class="k">as</span> <span class="nn">mg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">))</span>  <span class="c1"># creating 10 random 32x32 RGB images</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">k</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>     <span class="c1"># creating 5 random 3-channel 2x2 kernels</span>
+</pre></div>
+</div>
+<p>Given the shapes of <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">k</span></code>, <code class="docutils literal notranslate"><span class="pre">conv_nd</span></code> automatically executes a 2D convolution:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conv_nd</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(10, 5, 16, 16)</span>
+</pre></div>
+</div>
+<p>Extrapolating further, <code class="docutils literal notranslate"><span class="pre">conv_nd</span></code> is capable of performing ND convolutions!</p>
+<p>Performing a convolution over a batch of single-channel, “spatial-3D” tensor data:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># shape-(N=1, C=1, X=10, Y=12, Z=10)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># shape-(F=2, C=1, Wx=3, Wy=1, Wz=2)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">k</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">32</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conv_nd</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(1, 2, 8, 12, 9)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="mygrad.nnet.layers.batchnorm.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">mygrad.nnet.layers.batchnorm</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="mygrad.nnet.layers.max_pool.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">mygrad.nnet.layers.max_pool</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mygrad.nnet.layers.conv_nd"><code class="docutils literal notranslate"><span class="pre">conv_nd()</span></code></a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="../_sources/generated/mygrad.nnet.layers.conv_nd.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2023, Ryan Soklaski.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.0.1.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
