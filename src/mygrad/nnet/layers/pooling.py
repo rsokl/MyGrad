@@ -76,9 +76,9 @@ class MaxPoolND(Operation):
         x_shape = np.array(x.shape[num_no_pool:])
         w_shape = pool
 
-        out_shape = (x_shape - w_shape) / stride + 1
+        out_shape = (x_shape - w_shape) // stride + 1
 
-        if not all(i.is_integer() and i > 0 for i in out_shape):
+        if not all(i > 0 for i in out_shape):
             msg = "Stride and kernel dimensions are incompatible: \n"
             msg += f"Input dimensions: {(tuple(x_shape))}\n"
             msg += f"Stride dimensions: {(tuple(stride))}\n"
