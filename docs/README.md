@@ -1,12 +1,14 @@
 # Building MyGrad's Docs
 
-Install the the following:
+Install the following:
 
 ```shell
 pip install sphinx
 pip install sphinx_rtd_theme
 pip install nbsphinx
 pip install numpydoc
+pip install matplotlib
+pip install pydata_sphinx_theme
 ```
 
 To build the docs for the first time, navigate to `mygrad/docs/source/` 
@@ -14,6 +16,12 @@ and generate the proper `.rst` files via:
 
 ```shell
 sphinx-autogen -o generated/ *.rst
+```
+
+In the case of Windows, Powershell might have trouble with the wildcard, so use:
+
+```shell
+Get-ChildItem -Filter "*.rst" | ForEach-Object { sphinx-autogen -o generated/ $_.FullName }
 ```
 
 Then navigate to `mygrad/docs/` and run:

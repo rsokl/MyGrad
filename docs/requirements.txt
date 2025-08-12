@@ -5,3 +5,4 @@ sphinx==7.0.1
 numpydoc==1.5.0
 pydata-sphinx-theme==0.13.3
 matplotlib==3.6.3
+sphinx-copybutton==0.5.2
