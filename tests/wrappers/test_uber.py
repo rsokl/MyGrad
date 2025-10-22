@@ -1,7 +1,7 @@
 import hypothesis.strategies as st
 import numpy as np
 import pytest
-from hypothesis import given, settings
+from hypothesis import HealthCheck, given, settings
 from numpy.testing import assert_allclose
 
 import mygrad as mg
@@ -19,7 +19,9 @@ class KWARG1:
 name_to_pos = dict(a=0, b=1, c=2)
 
 
-@settings(deadline=None, max_examples=10)
+@settings(
+    deadline=None, max_examples=10, suppress_health_check=[HealthCheck.nested_given]
+)
 @given(
     args_as_kwargs=st.fixed_dictionaries(
         {},
