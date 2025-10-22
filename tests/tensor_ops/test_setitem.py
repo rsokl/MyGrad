@@ -221,7 +221,6 @@ def test_setitem_sanity_check(x_constant, y_constant, data):
     assert w.constant is x.constant
 
     if x.constant:
-        pass
         assert x.grad is None
     else:
         assert_allclose(x.grad, np.array([0.0, 4.0, 0.0, 4.0]))

@@ -351,7 +351,7 @@ class GRUnit(Operation):
         # backprop through Ur
         if not self.Ur.constant:
             if self._dropout:
-                dr *= (
+                dr *= (  # pragma: no cover
                     self._dropUr
                 )  # IMPORTANT augmented update: this must come after Wr and br backprop
             _backprop(

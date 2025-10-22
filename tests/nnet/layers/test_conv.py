@@ -1,4 +1,4 @@
-""" Test conv fwd-prop and back-prop for ND convs"""
+"""Test conv fwd-prop and back-prop for ND convs"""
 
 from typing import Tuple
 
