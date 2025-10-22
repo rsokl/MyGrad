@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>mygrad.mem_guard_off &#8212; MyGrad 2.3.0.post1.dev10 documentation</title>
+    <title>mygrad.mem_guard_off &#8212; MyGrad 2.3.0.post1.dev14 documentation</title>
   
   
   
@@ -105,7 +105,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev10 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev14 documentation</p>
   
 </a></div>
     
@@ -558,7 +558,7 @@ document.write(`
 <span class="sig-prename descclassname"><span class="pre">mygrad.</span></span><span class="sig-name descname"><span class="pre">mem_guard_off</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;mygrad._utils.lock_management._NoMemGuard</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#mygrad.mem_guard_off" title="Permalink to this definition">#</a></dt>
 <dd><p>A context manager used to suspend memory-locking behavior</p>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mygrad</span> <span class="kn">import</span>  <span class="n">mem_guard_off</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mygrad</span><span class="w"> </span><span class="kn">import</span>  <span class="n">mem_guard_off</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">mem_guard_off</span><span class="p">:</span>
 <span class="gp">... </span>    <span class="c1"># array-memory locking is turned off</span>
 <span class="gp">... </span>    <span class="k">pass</span>
@@ -567,7 +567,7 @@ document.write(`
 </div>
 <p>This can also be used as a decorator</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@mem_guard_off</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">f</span><span class="p">():</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">f</span><span class="p">():</span>
 <span class="gp">... </span>    <span class="c1"># array-memory locking is turned off within function</span>
 <span class="gp">... </span>    <span class="k">return</span>
 </pre></div>

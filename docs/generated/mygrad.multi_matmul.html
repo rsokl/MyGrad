@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>mygrad.multi_matmul &#8212; MyGrad 2.3.0.post1.dev10 documentation</title>
+    <title>mygrad.multi_matmul &#8212; MyGrad 2.3.0.post1.dev14 documentation</title>
   
   
   
@@ -106,7 +106,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev10 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev14 documentation</p>
   
 </a></div>
     
@@ -555,7 +555,7 @@ document.write(`
 <h1>mygrad.multi_matmul<a class="headerlink" href="#mygrad-multi-matmul" title="Permalink to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="mygrad.multi_matmul">
-<span class="sig-prename descclassname"><span class="pre">mygrad.</span></span><span class="sig-name descname"><span class="pre">multi_matmul</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ArrayLike</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constant</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="../_modules/mygrad/math/misc/funcs.html#multi_matmul"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mygrad.multi_matmul" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mygrad.</span></span><span class="sig-name descname"><span class="pre">multi_matmul</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ArrayLike</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constant</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="../_modules/mygrad/math/misc/funcs.html#multi_matmul"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mygrad.multi_matmul" title="Permalink to this definition">#</a></dt>
 <dd><p>Matrix product of two or more tensors calculated in the optimal ordering</p>
 <p>This documentation was adapted from <code class="docutils literal notranslate"><span class="pre">numpy.linalg.multi_dot</span></code></p>
 <p>Compute the matrix multiplication of two or more arrays in a single function
@@ -566,7 +566,7 @@ Depending on the shapes of the matrices, this can speed up the multiplication a 
 <p>If the last argument is 1-D it is treated as a column vector.</p>
 <p>The other arguments must be 2-D or greater.</p>
 <p>Think of <cite>multi_dot</cite> as an optimized version of:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">multi_dot</span><span class="p">(</span><span class="n">tensors</span><span class="p">):</span> <span class="k">return</span> <span class="n">functools</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">mg</span><span class="o">.</span><span class="n">matmul</span><span class="p">,</span> <span class="n">tensors</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">multi_dot</span><span class="p">(</span><span class="n">tensors</span><span class="p">):</span> <span class="k">return</span> <span class="n">functools</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">mg</span><span class="o">.</span><span class="n">matmul</span><span class="p">,</span> <span class="n">tensors</span><span class="p">)</span>
 </pre></div>
 </div>
 <dl class="field-list">
@@ -608,7 +608,7 @@ Defaults to <code class="docutils literal notranslate"><span class="pre">True</s
 <p class="rubric">Notes</p>
 <p>The cost for a matrix multiplication can be calculated with the
 following function:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">cost</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">):</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">cost</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">B</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 </pre></div>
 </div>
@@ -631,8 +631,8 @@ following function:</p>
 </div>
 <p class="rubric">Examples</p>
 <p><code class="docutils literal notranslate"><span class="pre">multi_matmul</span></code> allows you to write:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mygrad.math.misc.funcs</span> <span class="kn">import</span> <span class="n">matmul</span>    <span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">mygrad</span> <span class="kn">import</span> <span class="n">multi_matmul</span><span class="p">,</span>  <span class="n">Tensor</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.math.misc.funcs</span><span class="w"> </span><span class="kn">import</span> <span class="n">matmul</span>    <span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span><span class="w"> </span><span class="nn">mygrad</span><span class="w"> </span><span class="kn">import</span> <span class="n">multi_matmul</span><span class="p">,</span>  <span class="n">Tensor</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Prepare some random tensors</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">A</span> <span class="o">=</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">((</span><span class="mi">10000</span><span class="p">,</span> <span class="mi">100</span><span class="p">)))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">B</span> <span class="o">=</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">((</span><span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)))</span>

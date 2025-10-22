@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>mygrad.no_autodiff &#8212; MyGrad 2.3.0.post1.dev10 documentation</title>
+    <title>mygrad.no_autodiff &#8212; MyGrad 2.3.0.post1.dev14 documentation</title>
   
   
   
@@ -105,7 +105,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev10 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev14 documentation</p>
   
 </a></div>
     
@@ -562,7 +562,7 @@ all computational graph tracking.</p>
 so there is no need to nest this context with <cite>mem_guard_off</cite>.</p>
 <p class="rubric">Examples</p>
 <p>Demonstrating <code class="docutils literal notranslate"><span class="pre">no_autodiff</span></code> as a context-manager</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">mygrad</span> <span class="k">as</span> <span class="nn">mg</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">mygrad</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mg</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">mg</span><span class="o">.</span><span class="n">no_autodiff</span><span class="p">:</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="c1"># all computational graph tracking is suspended</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="c1"># within the context</span>
@@ -573,7 +573,7 @@ so there is no need to nest this context with <cite>mem_guard_off</cite>.</p>
 </div>
 <p>Demonstrating <code class="docutils literal notranslate"><span class="pre">no_autodiff</span></code> as a decorator</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@mg</span><span class="o">.</span><span class="n">no_autodiff</span>
-<span class="gp">... </span><span class="k">def</span> <span class="nf">func</span><span class="p">():</span>
+<span class="gp">... </span><span class="k">def</span><span class="w"> </span><span class="nf">func</span><span class="p">():</span>
 <span class="gp">... </span>    <span class="c1"># No graph-tracking will occur within</span>
 <span class="gp">... </span>    <span class="c1"># the body of this function</span>
 <span class="gp">... </span>    <span class="k">pass</span>

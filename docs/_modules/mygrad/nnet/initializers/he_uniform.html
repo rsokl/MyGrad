@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad.nnet.initializers.he_uniform &#8212; MyGrad 2.3.0.post1.dev10 documentation</title>
+    <title>mygrad.nnet.initializers.he_uniform &#8212; MyGrad 2.3.0.post1.dev14 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev10 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev14 documentation</p>
   
 </a></div>
     
@@ -528,12 +528,12 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <h1>Source code for mygrad.nnet.initializers.he_uniform</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">mygrad.nnet.initializers.uniform</span> <span class="kn">import</span> <span class="n">uniform</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.nnet.initializers.uniform</span><span class="w"> </span><span class="kn">import</span> <span class="n">uniform</span>
 
 
-<div class="viewcode-block" id="he_uniform"><a class="viewcode-back" href="../../../../generated/mygrad.nnet.initializers.he_uniform.html#mygrad.nnet.initializers.he_uniform">[docs]</a><span class="k">def</span> <span class="nf">he_uniform</span><span class="p">(</span><span class="o">*</span><span class="n">shape</span><span class="p">,</span> <span class="n">gain</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="he_uniform"><a class="viewcode-back" href="../../../../generated/mygrad.nnet.initializers.he_uniform.html#mygrad.nnet.initializers.he_uniform">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">he_uniform</span><span class="p">(</span><span class="o">*</span><span class="n">shape</span><span class="p">,</span> <span class="n">gain</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Initialize a :class:`mygrad.Tensor` according to the uniform initialization procedure</span>
 <span class="sd">    described by He et al.</span>
 

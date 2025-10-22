@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>mygrad.nnet.activations.glu &#8212; MyGrad 2.3.0.post1.dev10 documentation</title>
+    <title>mygrad.nnet.activations.glu &#8212; MyGrad 2.3.0.post1.dev14 documentation</title>
   
   
   
@@ -105,7 +105,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev10 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev14 documentation</p>
   
 </a></div>
     
@@ -585,7 +585,7 @@ document.write(`
 <h1>mygrad.nnet.activations.glu<a class="headerlink" href="#mygrad-nnet-activations-glu" title="Permalink to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="mygrad.nnet.activations.glu">
-<span class="sig-prename descclassname"><span class="pre">mygrad.nnet.activations.</span></span><span class="sig-name descname"><span class="pre">glu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ArrayLike</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constant</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="../_modules/mygrad/nnet/activations/glu.html#glu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mygrad.nnet.activations.glu" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mygrad.nnet.activations.</span></span><span class="sig-name descname"><span class="pre">glu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ArrayLike</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constant</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="../_modules/mygrad/nnet/activations/glu.html#glu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mygrad.nnet.activations.glu" title="Permalink to this definition">#</a></dt>
 <dd><p>Returns the Gated Linear Unit A * σ(B), where A and B are split from <cite>x</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -617,8 +617,8 @@ Yann Dauphin, Angela Fan, Michael Auli, David Grangier</p>
 second in B. The return value is then A ⊙ σ(B), where ⊙ is elementwise multiplication and σ is
 the sigmoid function.</p>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">mygrad</span> <span class="k">as</span> <span class="nn">mg</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mygrad.nnet.activations</span> <span class="kn">import</span> <span class="n">glu</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">mygrad</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.nnet.activations</span><span class="w"> </span><span class="kn">import</span> <span class="n">glu</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mf">5.</span><span class="p">,</span> <span class="mf">5.</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span>
 <span class="go">Tensor([-5., -4., -3., -2., -1.,  0.,  1.,  2.,  3.,  4.])</span>

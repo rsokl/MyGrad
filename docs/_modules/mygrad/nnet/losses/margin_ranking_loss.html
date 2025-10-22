@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad.nnet.losses.margin_ranking_loss &#8212; MyGrad 2.3.0.post1.dev10 documentation</title>
+    <title>mygrad.nnet.losses.margin_ranking_loss &#8212; MyGrad 2.3.0.post1.dev14 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev10 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev14 documentation</p>
   
 </a></div>
     
@@ -528,19 +528,19 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <h1>Source code for mygrad.nnet.losses.margin_ranking_loss</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">numbers</span> <span class="kn">import</span> <span class="n">Real</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Real</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="kn">import</span> <span class="nn">mygrad._utils.graph_tracking</span> <span class="k">as</span> <span class="nn">_tracking</span>
-<span class="kn">from</span> <span class="nn">mygrad.operation_base</span> <span class="kn">import</span> <span class="n">Operation</span>
-<span class="kn">from</span> <span class="nn">mygrad.tensor_base</span> <span class="kn">import</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">asarray</span>
-<span class="kn">from</span> <span class="nn">mygrad.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">mygrad._utils.graph_tracking</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">_tracking</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.operation_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Operation</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.tensor_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">asarray</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArrayLike</span>
 
 
-<span class="k">class</span> <span class="nc">MarginRanking</span><span class="p">(</span><span class="n">Operation</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">margin</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MarginRanking</span><span class="p">(</span><span class="n">Operation</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">margin</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Computes the margin ranking loss between ``x1``</span>
 <span class="sd">        and ``x2``.</span>
 
@@ -574,12 +574,12 @@ document.write(`
             <span class="bp">self</span><span class="o">.</span><span class="n">_grad</span> <span class="o">/=</span> <span class="n">M</span><span class="o">.</span><span class="n">size</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">backward_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grad</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">backward_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grad</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">sign</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="k">if</span> <span class="n">index</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span>
         <span class="k">return</span> <span class="n">grad</span> <span class="o">*</span> <span class="p">(</span><span class="n">sign</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grad</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="margin_ranking_loss"><a class="viewcode-back" href="../../../../generated/mygrad.nnet.losses.margin_ranking_loss.html#mygrad.nnet.losses.margin_ranking_loss">[docs]</a><span class="k">def</span> <span class="nf">margin_ranking_loss</span><span class="p">(</span>
+<div class="viewcode-block" id="margin_ranking_loss"><a class="viewcode-back" href="../../../../generated/mygrad.nnet.losses.margin_ranking_loss.html#mygrad.nnet.losses.margin_ranking_loss">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">margin_ranking_loss</span><span class="p">(</span>
     <span class="n">x1</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
     <span class="n">x2</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
     <span class="n">y</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>

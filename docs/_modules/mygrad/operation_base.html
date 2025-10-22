@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad.operation_base &#8212; MyGrad 2.3.0.post1.dev10 documentation</title>
+    <title>mygrad.operation_base &#8212; MyGrad 2.3.0.post1.dev14 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev10 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev14 documentation</p>
   
 </a></div>
     
@@ -532,19 +532,19 @@ document.write(`
 <span class="sd">Defines the base class for mathematical operations capable of back-propagating</span>
 <span class="sd">gradients to their input tensors.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span> <span class="nn">numbers</span> <span class="kn">import</span> <span class="n">Real</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Real</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">mygrad._numpy_version</span> <span class="kn">import</span> <span class="n">NP_IS_V2</span>
-<span class="kn">from</span> <span class="nn">mygrad._utils</span> <span class="kn">import</span> <span class="n">SkipGradient</span><span class="p">,</span> <span class="n">reduce_broadcast</span>
-<span class="kn">from</span> <span class="nn">mygrad.errors</span> <span class="kn">import</span> <span class="n">InvalidBackprop</span><span class="p">,</span> <span class="n">InvalidGradient</span>
-<span class="kn">from</span> <span class="nn">mygrad.typing</span> <span class="kn">import</span> <span class="n">DTypeLike</span><span class="p">,</span> <span class="n">Mask</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mygrad._numpy_version</span><span class="w"> </span><span class="kn">import</span> <span class="n">NP_IS_V2</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mygrad._utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">SkipGradient</span><span class="p">,</span> <span class="n">reduce_broadcast</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">InvalidBackprop</span><span class="p">,</span> <span class="n">InvalidGradient</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTypeLike</span><span class="p">,</span> <span class="n">Mask</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-    <span class="kn">from</span> <span class="nn">mygrad.tensor_base</span> <span class="kn">import</span> <span class="n">Tensor</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.tensor_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tensor</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
@@ -558,7 +558,7 @@ document.write(`
 <span class="n">Axis</span> <span class="o">=</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]]]</span>
 
 
-<span class="k">class</span> <span class="nc">_NoValueType</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_NoValueType</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Special keyword value.</span>
 
 <span class="sd">    The instance of this class may be used as the default value assigned to a</span>
@@ -568,20 +568,20 @@ document.write(`
 
     <span class="n">__instance</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
         <span class="c1"># ensure that only one instance exists</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__instance</span><span class="p">:</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">__instance</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">_NoValueType</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__instance</span>
 
-    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
         <span class="k">return</span> <span class="s2">&quot;&lt;no value&gt;&quot;</span>
 
 
 <span class="n">_NoValue</span> <span class="o">=</span> <span class="n">_NoValueType</span><span class="p">()</span>
 
 
-<div class="viewcode-block" id="Operation"><a class="viewcode-back" href="../../generated/mygrad.operation_base.Operation.html#mygrad.operation_base.Operation">[docs]</a><span class="k">class</span> <span class="nc">Operation</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="Operation"><a class="viewcode-back" href="../../generated/mygrad.operation_base.Operation.html#mygrad.operation_base.Operation">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Operation</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for all tensor operations that support back-propagation</span>
 <span class="sd">    of gradients.</span>
 
@@ -607,7 +607,7 @@ document.write(`
     <span class="c1"># Stores the input tensors that the operation will backprop through.</span>
     <span class="n">variables</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="s2">&quot;Tensor&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
 
-<div class="viewcode-block" id="Operation.__init__"><a class="viewcode-back" href="../../generated/mygrad.operation_base.Operation.html#mygrad.operation_base.Operation.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Operation.__init__"><a class="viewcode-back" href="../../generated/mygrad.operation_base.Operation.html#mygrad.operation_base.Operation.__init__">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Stores positional and keyword arguments used to call op.</span>
         <span class="c1"># Can be set optionally - only if op needs to be &quot;replayed&quot;,</span>
         <span class="c1"># e.g. with a view</span>
@@ -617,7 +617,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">where</span><span class="p">:</span> <span class="n">Mask</span> <span class="o">=</span> <span class="kc">True</span></div>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">grad_post_process_fn</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">grad_post_process_fn</span><span class="p">(</span>
         <span class="n">grad</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">var_shape</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="c1"># this function gets called all of the time; we can avoid</span>
@@ -635,7 +635,7 @@ document.write(`
         <span class="k">return</span> <span class="n">out</span>
 
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">input_vars</span><span class="p">:</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">input_vars</span><span class="p">:</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs a forward pass, f, of this Operation::</span>
 
 <span class="sd">                         f(x1, ...., xn)</span>
@@ -662,7 +662,7 @@ document.write(`
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>  <span class="c1"># pragma: no cover</span>
 
 <div class="viewcode-block" id="Operation.backward_var"><a class="viewcode-back" href="../../generated/mygrad.operation_base.Operation.backward_var.html#mygrad.operation_base.Operation.backward_var">[docs]</a>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">backward_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grad</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">backward_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grad</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Given ``grad = dℒ/df``, computes ``∂ℒ/∂x_{i}``, where ``x_{i}`` is one</span>
 <span class="sd">        of ``x1, ...., xn``.</span>
 
@@ -689,7 +689,7 @@ document.write(`
 <span class="sd">        SkipGradient&quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>  <span class="c1"># pragma: no cover</span></div>
 
-<div class="viewcode-block" id="Operation.backward"><a class="viewcode-back" href="../../generated/mygrad.operation_base.Operation.backward.html#mygrad.operation_base.Operation.backward">[docs]</a>    <span class="k">def</span> <span class="nf">backward</span><span class="p">(</span>
+<div class="viewcode-block" id="Operation.backward"><a class="viewcode-back" href="../../generated/mygrad.operation_base.Operation.backward.html#mygrad.operation_base.Operation.backward">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">backward</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">grad</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
@@ -758,7 +758,7 @@ document.write(`
                 <span class="n">var</span><span class="o">.</span><span class="n">_grad</span> <span class="o">+=</span> <span class="n">backed_grad</span></div></div>
 
 
-<span class="k">class</span> <span class="nc">Ufunc</span><span class="p">(</span><span class="n">Operation</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Ufunc</span><span class="p">(</span><span class="n">Operation</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;The base class for mygrad&#39;s universal functions.</span>
 
 <span class="sd">    &#39;A universal function (or ufunc for short) is a function that operates on</span>
@@ -775,12 +775,12 @@ document.write(`
     <span class="n">_supports_where</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
 
-<span class="k">class</span> <span class="nc">UnaryUfunc</span><span class="p">(</span><span class="n">Ufunc</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">UnaryUfunc</span><span class="p">(</span><span class="n">Ufunc</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A base class that specifies the common interface to – and facilitates</span>
 <span class="sd">    back-prop through – ufuncs that operate on a single array argument;</span>
 <span class="sd">    e.g. `mygrad.sin`, `mygrad.negative`.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">x1</span><span class="p">:</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">,</span>
         <span class="n">out</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -831,13 +831,13 @@ document.write(`
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">numpy_ufunc</span><span class="p">(</span><span class="n">x1</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">out</span><span class="p">,</span> <span class="n">where</span><span class="o">=</span><span class="n">where</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
 
 
-<span class="k">class</span> <span class="nc">BinaryUfunc</span><span class="p">(</span><span class="n">Ufunc</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BinaryUfunc</span><span class="p">(</span><span class="n">Ufunc</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A base class that specifies the common interface to – and facilitates</span>
 <span class="sd">    back-prop through – mygrad&#39;s ufuncs that operate on a two array arguments;</span>
 <span class="sd">    e.g. `mygrad.add`, `mygrad.multiply`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">x1</span><span class="p">:</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">,</span>
         <span class="n">x2</span><span class="p">:</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">,</span>
@@ -901,7 +901,7 @@ document.write(`
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">numpy_ufunc</span><span class="p">(</span><span class="n">x1</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">x2</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">out</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
 
 
-<span class="k">class</span> <span class="nc">Sequential</span><span class="p">(</span><span class="n">Operation</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Sequential</span><span class="p">(</span><span class="n">Operation</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A base class that specifies the common interface to – and facilitates</span>
 <span class="sd">    back-prop through – numpy&#39;s sequential functions; e.g. `numpy.sum`, `numpy.var`,</span>
 <span class="sd">    `numpy.max`&quot;&quot;&quot;</span>
@@ -910,7 +910,7 @@ document.write(`
 
     <span class="nd">@staticmethod</span>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">numpy_func</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">numpy_func</span><span class="p">(</span>
         <span class="n">a</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">axis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -920,14 +920,14 @@ document.write(`
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>  <span class="c1"># pragma: no cover</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">:</span> <span class="n">Axis</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">keepdims</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">initial</span><span class="p">:</span> <span class="n">Real</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">out_shape</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">a</span><span class="p">:</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">,</span>
         <span class="n">axis</span><span class="p">:</span> <span class="n">Axis</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>

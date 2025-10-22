@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>mygrad.Tensor.grad &#8212; MyGrad 2.3.0.post1.dev10 documentation</title>
+    <title>mygrad.Tensor.grad &#8212; MyGrad 2.3.0.post1.dev14 documentation</title>
   
   
   
@@ -105,7 +105,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev10 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev14 documentation</p>
   
 </a></div>
     
@@ -564,7 +564,7 @@ document.write(`
 <h1>mygrad.Tensor.grad<a class="headerlink" href="#mygrad-tensor-grad" title="Permalink to this heading">#</a></h1>
 <dl class="py property">
 <dt class="sig sig-object py" id="mygrad.Tensor.grad">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Tensor.</span></span><span class="sig-name descname"><span class="pre">grad</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></em><a class="headerlink" href="#mygrad.Tensor.grad" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Tensor.</span></span><span class="sig-name descname"><span class="pre">grad</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><a class="headerlink" href="#mygrad.Tensor.grad" title="Permalink to this definition">#</a></dt>
 <dd><p>Returns the derivative of <code class="docutils literal notranslate"><span class="pre">ℒ</span></code> with respect to this tensor.</p>
 <p><code class="docutils literal notranslate"><span class="pre">ℒ</span></code> is the terminal node in the compuational graph from which
 <code class="docutils literal notranslate"><span class="pre">ℒ.backward()</span></code> was invoked.</p>
@@ -581,7 +581,7 @@ matches <code class="docutils literal notranslate"><span class="pre">self.shape<
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">mygrad</span> <span class="k">as</span> <span class="nn">mg</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">mygrad</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mg</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">])</span>
 </pre></div>
 </div>

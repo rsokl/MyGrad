@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Changelog &#8212; MyGrad 2.3.0.post1.dev10 documentation</title>
+    <title>Changelog &#8212; MyGrad 2.3.0.post1.dev14 documentation</title>
   
   
   
@@ -104,7 +104,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev10 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev14 documentation</p>
   
 </a></div>
     
@@ -649,8 +649,8 @@ MyGrad 2.0 represents a major overhaul to this project.
 This release creates near parity between the experiences of using MyGrad and using NumPy, and uses NumPy’s new
 mechanisms for overriding functions so that NumPy functions can operate “directly” on MyGrad’s tensors, and thus
 can be used to construct differentiable computational graphs!</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mygrad</span> <span class="kn">import</span> <span class="n">tensor</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mygrad</span><span class="w"> </span><span class="kn">import</span> <span class="n">tensor</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">tensor</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>  <span class="c1"># backprop through NumPy functions!</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">grad</span>
@@ -1018,8 +1018,8 @@ now get loudly narc’d on by MyGrad’s merciless memory guard!</p>
 have its write-ability restored to its original state.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># memory guarding is released once an array is no</span>
 <span class="c1"># longer involved in an active computational graph</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">mygrad</span> <span class="k">as</span> <span class="nn">mg</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span><span class="w"> </span><span class="nn">mygrad</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mg</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">])</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">y</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">z</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y</span>     <span class="c1"># x and y are locked</span>
@@ -1055,7 +1055,7 @@ the test data.</p>
 graph by using the <a class="reference internal" href="generated/mygrad.no_autodiff.html#mygrad.no_autodiff" title="mygrad.no_autodiff"><code class="xref py py-func docutils literal notranslate"><span class="pre">no_autodiff()</span></code></a> decorator / context manager. See the linked documentation
 for extensive examples of its usage.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># demonstrating mygrad in no-autodiff mode</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">mygrad</span> <span class="k">as</span> <span class="nn">mg</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span><span class="w"> </span><span class="nn">mygrad</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mg</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">3.</span><span class="p">,</span> <span class="mf">4.</span><span class="p">])</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">mg</span><span class="o">.</span><span class="n">no_autodiff</span><span class="p">:</span>
 <span class="o">...</span>     <span class="n">y</span> <span class="o">=</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">2</span>  <span class="c1"># operation not tracked</span>

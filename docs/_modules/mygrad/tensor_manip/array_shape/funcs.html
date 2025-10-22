@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad.tensor_manip.array_shape.funcs &#8212; MyGrad 2.3.0.post1.dev10 documentation</title>
+    <title>mygrad.tensor_manip.array_shape.funcs &#8212; MyGrad 2.3.0.post1.dev14 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev10 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev14 documentation</p>
   
 </a></div>
     
@@ -528,12 +528,12 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <h1>Source code for mygrad.tensor_manip.array_shape.funcs</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
 
-<span class="kn">from</span> <span class="nn">mygrad.tensor_base</span> <span class="kn">import</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">implements_numpy_override</span>
-<span class="kn">from</span> <span class="nn">mygrad.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">Shape</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.tensor_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">implements_numpy_override</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">Shape</span>
 
-<span class="kn">from</span> <span class="nn">.ops</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.ops</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s2">&quot;reshape&quot;</span><span class="p">,</span>
@@ -550,7 +550,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="reshape"><a class="viewcode-back" href="../../../../generated/mygrad.reshape.html#mygrad.reshape">[docs]</a><span class="nd">@implements_numpy_override</span><span class="p">()</span>
-<span class="k">def</span> <span class="nf">reshape</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">reshape</span><span class="p">(</span>
     <span class="n">a</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">newshape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Shape</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a tensor with a new shape, without changing its data.</span>
@@ -598,7 +598,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="squeeze"><a class="viewcode-back" href="../../../../generated/mygrad.squeeze.html#mygrad.squeeze">[docs]</a><span class="nd">@implements_numpy_override</span><span class="p">()</span>
-<span class="k">def</span> <span class="nf">squeeze</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">squeeze</span><span class="p">(</span>
     <span class="n">a</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
     <span class="n">axis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
@@ -652,7 +652,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="ravel"><a class="viewcode-back" href="../../../../generated/mygrad.ravel.html#mygrad.ravel">[docs]</a><span class="nd">@implements_numpy_override</span><span class="p">()</span>
-<span class="k">def</span> <span class="nf">ravel</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ravel</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Flattens contents of a tensor into a contiguous 1-D array.  A copy is made only if needed.</span>
 
@@ -689,7 +689,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="expand_dims"><a class="viewcode-back" href="../../../../generated/mygrad.expand_dims.html#mygrad.expand_dims">[docs]</a><span class="nd">@implements_numpy_override</span><span class="p">()</span>
-<span class="k">def</span> <span class="nf">expand_dims</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">expand_dims</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Expand the dimensions of a tensor by adding a new axis.</span>
 
@@ -728,7 +728,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="broadcast_to"><a class="viewcode-back" href="../../../../generated/mygrad.broadcast_to.html#mygrad.broadcast_to">[docs]</a><span class="nd">@implements_numpy_override</span><span class="p">()</span>
-<span class="k">def</span> <span class="nf">broadcast_to</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">broadcast_to</span><span class="p">(</span>
     <span class="n">a</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <span class="n">Shape</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -777,7 +777,7 @@ document.write(`
     <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">BroadcastTo</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">op_args</span><span class="o">=</span><span class="p">(</span><span class="n">shape</span><span class="p">,),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
 
 
-<span class="k">def</span> <span class="nf">_dispatch_atleast_kd</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">_T</span><span class="p">],</span> <span class="n">Op</span><span class="p">,</span> <span class="o">*</span><span class="n">tensors</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">constant</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_T</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_dispatch_atleast_kd</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">_T</span><span class="p">],</span> <span class="n">Op</span><span class="p">,</span> <span class="o">*</span><span class="n">tensors</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">constant</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_T</span><span class="p">:</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tensors</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="p">(</span><span class="n">t</span><span class="p">,)</span> <span class="o">=</span> <span class="n">tensors</span>
         <span class="k">if</span> <span class="p">(</span>
@@ -794,21 +794,21 @@ document.write(`
 
 
 <span class="nd">@overload</span>
-<span class="k">def</span> <span class="nf">atleast_1d</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">atleast_1d</span><span class="p">(</span>
     <span class="n">tensors</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
     <span class="o">...</span>
 
 
 <span class="nd">@overload</span>
-<span class="k">def</span> <span class="nf">atleast_1d</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">atleast_1d</span><span class="p">(</span>
     <span class="o">*</span><span class="n">tensors</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tensor</span><span class="p">]:</span>  <span class="c1"># pragma: no cover</span>
     <span class="o">...</span>
 
 
 <div class="viewcode-block" id="atleast_1d"><a class="viewcode-back" href="../../../../generated/mygrad.atleast_1d.html#mygrad.atleast_1d">[docs]</a><span class="nd">@implements_numpy_override</span><span class="p">()</span>
-<span class="k">def</span> <span class="nf">atleast_1d</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">atleast_1d</span><span class="p">(</span>
     <span class="o">*</span><span class="n">tensors</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tensor</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -871,21 +871,21 @@ document.write(`
 
 
 <span class="nd">@overload</span>
-<span class="k">def</span> <span class="nf">atleast_2d</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">atleast_2d</span><span class="p">(</span>
     <span class="n">tensors</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
     <span class="o">...</span>
 
 
 <span class="nd">@overload</span>
-<span class="k">def</span> <span class="nf">atleast_2d</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">atleast_2d</span><span class="p">(</span>
     <span class="o">*</span><span class="n">tensors</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tensor</span><span class="p">]:</span>  <span class="c1"># pragma: no cover</span>
     <span class="o">...</span>
 
 
 <div class="viewcode-block" id="atleast_2d"><a class="viewcode-back" href="../../../../generated/mygrad.atleast_2d.html#mygrad.atleast_2d">[docs]</a><span class="nd">@implements_numpy_override</span><span class="p">()</span>
-<span class="k">def</span> <span class="nf">atleast_2d</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">atleast_2d</span><span class="p">(</span>
     <span class="o">*</span><span class="n">tensors</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tensor</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -946,21 +946,21 @@ document.write(`
 
 
 <span class="nd">@overload</span>
-<span class="k">def</span> <span class="nf">atleast_3d</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">atleast_3d</span><span class="p">(</span>
     <span class="n">tensors</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
     <span class="o">...</span>
 
 
 <span class="nd">@overload</span>
-<span class="k">def</span> <span class="nf">atleast_3d</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">atleast_3d</span><span class="p">(</span>
     <span class="o">*</span><span class="n">tensors</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tensor</span><span class="p">]:</span>  <span class="c1"># pragma: no cover</span>
     <span class="o">...</span>
 
 
 <div class="viewcode-block" id="atleast_3d"><a class="viewcode-back" href="../../../../generated/mygrad.atleast_3d.html#mygrad.atleast_3d">[docs]</a><span class="nd">@implements_numpy_override</span><span class="p">()</span>
-<span class="k">def</span> <span class="nf">atleast_3d</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">atleast_3d</span><span class="p">(</span>
     <span class="o">*</span><span class="n">tensors</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tensor</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>

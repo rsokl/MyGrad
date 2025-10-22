@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad.tensor_creation.funcs &#8212; MyGrad 2.3.0.post1.dev10 documentation</title>
+    <title>mygrad.tensor_creation.funcs &#8212; MyGrad 2.3.0.post1.dev14 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev10 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev14 documentation</p>
   
 </a></div>
     
@@ -528,17 +528,17 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <h1>Source code for mygrad.tensor_creation.funcs</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">mygrad.tensor_base</span> <span class="kn">import</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">_resolve_constant</span><span class="p">,</span> <span class="n">implements_numpy_override</span>
-<span class="kn">from</span> <span class="nn">mygrad.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">DTypeLikeReals</span><span class="p">,</span> <span class="n">Real</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.tensor_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">_resolve_constant</span><span class="p">,</span> <span class="n">implements_numpy_override</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">DTypeLikeReals</span><span class="p">,</span> <span class="n">Real</span>
 
 <span class="n">Shape</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">int</span><span class="p">]</span>
 
 
-<span class="k">def</span> <span class="nf">_anything_but_tensor</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_anything_but_tensor</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">):</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">data</span>
     <span class="k">return</span> <span class="n">x</span>
@@ -562,7 +562,7 @@ document.write(`
 <span class="p">]</span>
 
 
-<div class="viewcode-block" id="empty"><a class="viewcode-back" href="../../../generated/mygrad.empty.html#mygrad.empty">[docs]</a><span class="k">def</span> <span class="nf">empty</span><span class="p">(</span>
+<div class="viewcode-block" id="empty"><a class="viewcode-back" href="../../../generated/mygrad.empty.html#mygrad.empty">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">empty</span><span class="p">(</span>
     <span class="n">shape</span><span class="p">:</span> <span class="n">Shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLikeReals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a new Tensor of the given shape and type, without initializing entries.</span>
@@ -625,7 +625,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="empty_like"><a class="viewcode-back" href="../../../generated/mygrad.empty_like.html#mygrad.empty_like">[docs]</a><span class="nd">@implements_numpy_override</span><span class="p">()</span>
-<span class="k">def</span> <span class="nf">empty_like</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">empty_like</span><span class="p">(</span>
     <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
     <span class="n">dtype</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DTypeLikeReals</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">shape</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -691,7 +691,7 @@ document.write(`
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="eye"><a class="viewcode-back" href="../../../generated/mygrad.eye.html#mygrad.eye">[docs]</a><span class="k">def</span> <span class="nf">eye</span><span class="p">(</span>
+<div class="viewcode-block" id="eye"><a class="viewcode-back" href="../../../generated/mygrad.eye.html#mygrad.eye">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">eye</span><span class="p">(</span>
     <span class="n">N</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">M</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
@@ -754,7 +754,7 @@ document.write(`
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="identity"><a class="viewcode-back" href="../../../generated/mygrad.identity.html#mygrad.identity">[docs]</a><span class="k">def</span> <span class="nf">identity</span><span class="p">(</span>
+<div class="viewcode-block" id="identity"><a class="viewcode-back" href="../../../generated/mygrad.identity.html#mygrad.identity">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">identity</span><span class="p">(</span>
     <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLikeReals</span> <span class="o">=</span> <span class="nb">float</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the identity Tensor; a square Tensor with 1s on the main diagonal and 0s elsewhere.</span>
@@ -798,7 +798,7 @@ document.write(`
     <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="ones"><a class="viewcode-back" href="../../../generated/mygrad.ones.html#mygrad.ones">[docs]</a><span class="k">def</span> <span class="nf">ones</span><span class="p">(</span>
+<div class="viewcode-block" id="ones"><a class="viewcode-back" href="../../../generated/mygrad.ones.html#mygrad.ones">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">ones</span><span class="p">(</span>
     <span class="n">shape</span><span class="p">:</span> <span class="n">Shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLikeReals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -860,7 +860,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="ones_like"><a class="viewcode-back" href="../../../generated/mygrad.ones_like.html#mygrad.ones_like">[docs]</a><span class="nd">@implements_numpy_override</span><span class="p">()</span>
-<span class="k">def</span> <span class="nf">ones_like</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ones_like</span><span class="p">(</span>
     <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
     <span class="n">dtype</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DTypeLikeReals</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">shape</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -929,7 +929,7 @@ document.write(`
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="zeros"><a class="viewcode-back" href="../../../generated/mygrad.zeros.html#mygrad.zeros">[docs]</a><span class="k">def</span> <span class="nf">zeros</span><span class="p">(</span>
+<div class="viewcode-block" id="zeros"><a class="viewcode-back" href="../../../generated/mygrad.zeros.html#mygrad.zeros">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">zeros</span><span class="p">(</span>
     <span class="n">shape</span><span class="p">:</span> <span class="n">Shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLikeReals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -991,7 +991,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="zeros_like"><a class="viewcode-back" href="../../../generated/mygrad.zeros_like.html#mygrad.zeros_like">[docs]</a><span class="nd">@implements_numpy_override</span><span class="p">()</span>
-<span class="k">def</span> <span class="nf">zeros_like</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">zeros_like</span><span class="p">(</span>
     <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
     <span class="n">dtype</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DTypeLikeReals</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">shape</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Shape</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1067,7 +1067,7 @@ document.write(`
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="full"><a class="viewcode-back" href="../../../generated/mygrad.full.html#mygrad.full">[docs]</a><span class="k">def</span> <span class="nf">full</span><span class="p">(</span>
+<div class="viewcode-block" id="full"><a class="viewcode-back" href="../../../generated/mygrad.full.html#mygrad.full">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">full</span><span class="p">(</span>
     <span class="n">shape</span><span class="p">:</span> <span class="n">Shape</span><span class="p">,</span>
     <span class="n">fill_value</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
     <span class="n">dtype</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DTypeLikeReals</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1131,7 +1131,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="full_like"><a class="viewcode-back" href="../../../generated/mygrad.full_like.html#mygrad.full_like">[docs]</a><span class="nd">@implements_numpy_override</span><span class="p">()</span>
-<span class="k">def</span> <span class="nf">full_like</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">full_like</span><span class="p">(</span>
     <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
     <span class="n">fill_value</span><span class="p">:</span> <span class="n">Real</span><span class="p">,</span>
     <span class="n">dtype</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DTypeLikeReals</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1204,7 +1204,7 @@ document.write(`
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="arange"><a class="viewcode-back" href="../../../generated/mygrad.arange.html#mygrad.arange">[docs]</a><span class="k">def</span> <span class="nf">arange</span><span class="p">(</span>
+<div class="viewcode-block" id="arange"><a class="viewcode-back" href="../../../generated/mygrad.arange.html#mygrad.arange">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">arange</span><span class="p">(</span>
     <span class="o">*</span><span class="n">args</span><span class="p">,</span>
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
@@ -1266,7 +1266,7 @@ document.write(`
     <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="linspace"><a class="viewcode-back" href="../../../generated/mygrad.linspace.html#mygrad.linspace">[docs]</a><span class="k">def</span> <span class="nf">linspace</span><span class="p">(</span>
+<div class="viewcode-block" id="linspace"><a class="viewcode-back" href="../../../generated/mygrad.linspace.html#mygrad.linspace">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">linspace</span><span class="p">(</span>
     <span class="n">start</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
     <span class="n">stop</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
     <span class="n">num</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
@@ -1348,7 +1348,7 @@ document.write(`
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="logspace"><a class="viewcode-back" href="../../../generated/mygrad.logspace.html#mygrad.logspace">[docs]</a><span class="k">def</span> <span class="nf">logspace</span><span class="p">(</span>
+<div class="viewcode-block" id="logspace"><a class="viewcode-back" href="../../../generated/mygrad.logspace.html#mygrad.logspace">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">logspace</span><span class="p">(</span>
     <span class="n">start</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
     <span class="n">stop</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
     <span class="n">num</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
@@ -1444,7 +1444,7 @@ document.write(`
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="geomspace"><a class="viewcode-back" href="../../../generated/mygrad.geomspace.html#mygrad.geomspace">[docs]</a><span class="k">def</span> <span class="nf">geomspace</span><span class="p">(</span>
+<div class="viewcode-block" id="geomspace"><a class="viewcode-back" href="../../../generated/mygrad.geomspace.html#mygrad.geomspace">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">geomspace</span><span class="p">(</span>
     <span class="n">start</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
     <span class="n">stop</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
     <span class="n">num</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>

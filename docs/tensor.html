@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>MyGrad’s Tensor &#8212; MyGrad 2.3.0.post1.dev10 documentation</title>
+    <title>MyGrad’s Tensor &#8212; MyGrad 2.3.0.post1.dev14 documentation</title>
   
   
   
@@ -105,7 +105,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev10 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev14 documentation</p>
   
 </a></div>
     
@@ -565,7 +565,7 @@ graph that supports back-propagation of derivatives via the chain rule.</p>
 <p>You can effectively do a drop-in replacement of a numpy array with a <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>
 for all basic mathematical operations. This includes <a class="reference external" href="https://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/BasicIndexing.html#Introducing-Basic-and-Advanced-Indexing">basic and advanced indexing</a>,
 <a class="reference external" href="https://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/Broadcasting.html">broadcasting</a>, sums <a class="reference external" href="https://www.pythonlikeyoumeanit.com/Module3_IntroducingNumpy/VectorizedOperations.html#Specifying-the-axis-Keyword-Argument-in-Sequential-NumPy-Functions">over axes</a>, etc; it will simply just work.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">mygrad</span> <span class="k">as</span> <span class="nn">mg</span>  <span class="c1"># note that we replace numpy with mygrad here</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">mygrad</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mg</span>  <span class="c1"># note that we replace numpy with mygrad here</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span>
 <span class="go">Tensor([[0, 1, 2],</span>
@@ -584,7 +584,7 @@ and their skills will transfer seamlessly when using this autograd library.</p>
 This includes numbers, sequences (e.g. lists), nested sequences, numpy-ndarrays,
 and other mygrad-tensors. mygrad also provides familiar numpy-style tensor-creation
 functions (e.g. <a class="reference internal" href="generated/mygrad.arange.html#mygrad.arange" title="mygrad.arange"><code class="xref py py-func docutils literal notranslate"><span class="pre">arange()</span></code></a>, <a class="reference internal" href="generated/mygrad.linspace.html#mygrad.linspace" title="mygrad.linspace"><code class="xref py py-func docutils literal notranslate"><span class="pre">linspace()</span></code></a>, etc.)</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">mygrad</span> <span class="k">as</span> <span class="nn">mg</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">mygrad</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mg</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">mg</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">2.3</span><span class="p">)</span>  <span class="c1"># creating a 0-dimensional tensor</span>
 <span class="go">Tensor(2.3)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">mg</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.2</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">]))</span>  <span class="c1"># casting a numpy-array to a tensor</span>
@@ -661,7 +661,7 @@ a direct reference to the numpy array.</p>
 <span class="go">array([1, 2])</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 <span class="go">array([1, 2])</span>
 </pre></div>

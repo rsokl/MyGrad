@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad._utils.lock_management &#8212; MyGrad 2.3.0.post1.dev10 documentation</title>
+    <title>mygrad._utils.lock_management &#8212; MyGrad 2.3.0.post1.dev14 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev10 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev14 documentation</p>
   
 </a></div>
     
@@ -532,19 +532,19 @@ document.write(`
 <span class="sd">Provides utilities responsible for locking/releasing array writeability.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span><span class="p">,</span> <span class="n">defaultdict</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Counter</span> <span class="k">as</span> <span class="n">CounterType</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Set</span>
-<span class="kn">from</span> <span class="nn">weakref</span> <span class="kn">import</span> <span class="n">finalize</span><span class="p">,</span> <span class="n">ref</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span><span class="p">,</span> <span class="n">defaultdict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span> <span class="k">as</span> <span class="n">CounterType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Set</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">weakref</span><span class="w"> </span><span class="kn">import</span> <span class="n">finalize</span><span class="p">,</span> <span class="n">ref</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">mygrad._utils</span> <span class="kn">import</span> <span class="n">ContextTracker</span><span class="p">,</span> <span class="n">WeakRef</span><span class="p">,</span> <span class="n">WeakRefIterable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mygrad._utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContextTracker</span><span class="p">,</span> <span class="n">WeakRef</span><span class="p">,</span> <span class="n">WeakRefIterable</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-    <span class="kn">from</span> <span class="nn">mygrad.tensor_base</span> <span class="kn">import</span> <span class="n">Tensor</span> <span class="k">as</span> <span class="n">TensorType</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.tensor_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tensor</span> <span class="k">as</span> <span class="n">TensorType</span>
 
 
 <span class="c1"># arr-id -&gt; num active ops involving arr</span>
@@ -566,14 +566,14 @@ document.write(`
 <span class="p">]</span>
 
 
-<span class="k">def</span> <span class="nf">array_is_tracked</span><span class="p">(</span><span class="n">arr</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">array_is_tracked</span><span class="p">(</span><span class="n">arr</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns True if the provided array, or a view of it, is currently</span>
 <span class="sd">    involved in one or more mygrad operation.&quot;&quot;&quot;</span>
     <span class="n">arr_id</span> <span class="o">=</span> <span class="nb">id</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">arr_id</span> <span class="ow">in</span> <span class="n">_array_tracker</span> <span class="ow">and</span> <span class="n">_array_tracker</span><span class="p">[</span><span class="n">arr_id</span><span class="p">]()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 
 
-<span class="k">def</span> <span class="nf">lock_arr_writeability</span><span class="p">(</span><span class="n">arr</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">force_lock</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">lock_arr_writeability</span><span class="p">(</span><span class="n">arr</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">force_lock</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Increments the count of active ops that an array is involved in</span>
 <span class="sd">    and makes the array read-only</span>
 
@@ -609,7 +609,7 @@ document.write(`
     <span class="k">return</span> <span class="n">arr</span>
 
 
-<span class="k">def</span> <span class="nf">unique_arrs_and_bases</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">unique_arrs_and_bases</span><span class="p">(</span>
     <span class="n">tensors</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="s2">&quot;TensorType&quot;</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -635,7 +635,7 @@ document.write(`
             <span class="k">yield</span> <span class="n">arr</span>
 
 
-<span class="k">def</span> <span class="nf">_release_lock_on_arr_writeability</span><span class="p">(</span><span class="n">arr</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_release_lock_on_arr_writeability</span><span class="p">(</span><span class="n">arr</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Decrements the number of active ops the array participates in.</span>
 <span class="sd">    An array no longer participating in any ops will have its</span>
@@ -704,7 +704,7 @@ document.write(`
             <span class="n">_views_waiting_for_unlock</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">arr_id</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">release_writeability_lock_on_op</span><span class="p">(</span><span class="n">arr_refs</span><span class="p">:</span> <span class="n">WeakRefIterable</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">release_writeability_lock_on_op</span><span class="p">(</span><span class="n">arr_refs</span><span class="p">:</span> <span class="n">WeakRefIterable</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Marks each array (and for a view, its base) to have its</span>
 <span class="sd">    writeability lock released.</span>
 
@@ -728,7 +728,7 @@ document.write(`
 <span class="k">elif</span> <span class="n">MEM_GUARD</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;False&quot;</span><span class="p">,</span> <span class="s2">&quot;false&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">}:</span>  <span class="c1"># pragma: no cover</span>
     <span class="n">MEM_GUARD</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-    <span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">warn</span>
 
     <span class="n">warn</span><span class="p">(</span>
         <span class="sa">f</span><span class="s2">&quot;Environment variable MYGRAD_MEM_GUARD was set to an unknown value </span><span class="si">{</span><span class="n">MEM_GUARD</span><span class="si">}</span><span class="s2">. &quot;</span>
@@ -737,13 +737,13 @@ document.write(`
     <span class="n">MEM_GUARD</span> <span class="o">=</span> <span class="kc">True</span>
 
 
-<span class="k">class</span> <span class="nc">MemStateContext</span><span class="p">(</span><span class="n">ContextTracker</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MemStateContext</span><span class="p">(</span><span class="n">ContextTracker</span><span class="p">):</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">MEM_GUARD</span>
 
     <span class="nd">@state</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;MEM_GUARD must be set to a boolean value, got </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> (type=</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
@@ -753,7 +753,7 @@ document.write(`
         <span class="n">MEM_GUARD</span> <span class="o">=</span> <span class="n">value</span>
 
 
-<span class="k">class</span> <span class="nc">_NoMemGuard</span><span class="p">(</span><span class="n">MemStateContext</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_NoMemGuard</span><span class="p">(</span><span class="n">MemStateContext</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A context manager used to suspend memory-locking behavior</span>
 
 <span class="sd">    Examples</span>
@@ -776,7 +776,7 @@ document.write(`
     <span class="n">_enter_set_value</span> <span class="o">=</span> <span class="kc">False</span>
 
 
-<span class="k">class</span> <span class="nc">_WithMemGuard</span><span class="p">(</span><span class="n">MemStateContext</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_WithMemGuard</span><span class="p">(</span><span class="n">MemStateContext</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A context manager used to enable memory-locking behavior</span>
 
 <span class="sd">    Examples</span>
@@ -803,7 +803,7 @@ document.write(`
 <span class="n">mem_guard_on</span> <span class="o">=</span> <span class="n">_WithMemGuard</span><span class="p">()</span>
 
 
-<div class="viewcode-block" id="turn_memory_guarding_off"><a class="viewcode-back" href="../../../generated/mygrad.turn_memory_guarding_off.html#mygrad.turn_memory_guarding_off">[docs]</a><span class="k">def</span> <span class="nf">turn_memory_guarding_off</span><span class="p">():</span>
+<div class="viewcode-block" id="turn_memory_guarding_off"><a class="viewcode-back" href="../../../generated/mygrad.turn_memory_guarding_off.html#mygrad.turn_memory_guarding_off">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">turn_memory_guarding_off</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Globally disables all memory-guarding mechanisms, except</span>
 <span class="sd">    for in contexts where they are explicitly enabled.</span>
 
@@ -848,7 +848,7 @@ document.write(`
     <span class="n">MEM_GUARD</span> <span class="o">=</span> <span class="kc">False</span></div>
 
 
-<span class="k">def</span> <span class="nf">turn_memory_guarding_on</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">turn_memory_guarding_on</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Globally enables all memory-guarding mechanisms, except</span>
 <span class="sd">    for in contexts where they are explicitly disabled.</span>
 
@@ -903,7 +903,7 @@ document.write(`
     <span class="n">MEM_GUARD</span> <span class="o">=</span> <span class="kc">True</span>
 
 
-<span class="k">def</span> <span class="nf">mem_guard_active</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">mem_guard_active</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Indicates whether or not memory guarding is active.</span>
 
 <span class="sd">    See Also</span>
@@ -916,7 +916,7 @@ document.write(`
     <span class="k">return</span> <span class="n">MEM_GUARD</span>
 
 
-<span class="k">def</span> <span class="nf">force_lock_tensor_and_creators</span><span class="p">(</span><span class="n">tensor</span><span class="p">:</span> <span class="s2">&quot;TensorType&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">force_lock_tensor_and_creators</span><span class="p">(</span><span class="n">tensor</span><span class="p">:</span> <span class="s2">&quot;TensorType&quot;</span><span class="p">):</span>
     <span class="n">unique_arrs</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
         <span class="n">lock_arr_writeability</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">arr</span> <span class="ow">in</span> <span class="n">unique_arrs_and_bases</span><span class="p">(</span><span class="n">tensor</span><span class="o">.</span><span class="n">creator</span><span class="o">.</span><span class="n">variables</span><span class="p">)</span>

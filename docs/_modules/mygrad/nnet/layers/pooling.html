@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad.nnet.layers.pooling &#8212; MyGrad 2.3.0.post1.dev10 documentation</title>
+    <title>mygrad.nnet.layers.pooling &#8212; MyGrad 2.3.0.post1.dev14 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev10 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev14 documentation</p>
   
 </a></div>
     
@@ -528,19 +528,19 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <h1>Source code for mygrad.nnet.layers.pooling</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">numbers</span> <span class="kn">import</span> <span class="n">Integral</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Integral</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">mygrad.nnet.layers.utils</span> <span class="kn">import</span> <span class="n">sliding_window_view</span>
-<span class="kn">from</span> <span class="nn">mygrad.operation_base</span> <span class="kn">import</span> <span class="n">Operation</span>
-<span class="kn">from</span> <span class="nn">mygrad.tensor_base</span> <span class="kn">import</span> <span class="n">Tensor</span>
-<span class="kn">from</span> <span class="nn">mygrad.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.nnet.layers.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">sliding_window_view</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.operation_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Operation</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.tensor_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tensor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArrayLike</span>
 
 
-<span class="k">class</span> <span class="nc">MaxPoolND</span><span class="p">(</span><span class="n">Operation</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">pool</span><span class="p">,</span> <span class="n">stride</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MaxPoolND</span><span class="p">(</span><span class="n">Operation</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">pool</span><span class="p">,</span> <span class="n">stride</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform max-pooling over the last N dimensions of a data batch.</span>
 
 <span class="sd">        Extended Summary</span>
@@ -627,7 +627,7 @@ document.write(`
         <span class="n">out</span> <span class="o">=</span> <span class="n">maxed</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="o">-</span><span class="n">num_no_pool</span><span class="p">:]</span> <span class="o">+</span> <span class="n">axes</span><span class="p">[:</span><span class="o">-</span><span class="n">num_no_pool</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">out</span> <span class="k">if</span> <span class="n">out</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s2">&quot;C_CONTIGUOUS&quot;</span><span class="p">]</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">backward_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grad</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">backward_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grad</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        grad : numpy.ndarray, shape=((N0, ...), G0, ...),</span>
@@ -679,7 +679,7 @@ document.write(`
         <span class="k">return</span> <span class="n">dx</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="max_pool"><a class="viewcode-back" href="../../../../generated/mygrad.nnet.layers.max_pool.html#mygrad.nnet.layers.max_pool">[docs]</a><span class="k">def</span> <span class="nf">max_pool</span><span class="p">(</span>
+<div class="viewcode-block" id="max_pool"><a class="viewcode-back" href="../../../../generated/mygrad.nnet.layers.max_pool.html#mygrad.nnet.layers.max_pool">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">max_pool</span><span class="p">(</span>
     <span class="n">x</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
     <span class="n">pool</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
     <span class="n">stride</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>

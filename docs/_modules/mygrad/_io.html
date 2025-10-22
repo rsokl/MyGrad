@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad._io &#8212; MyGrad 2.3.0.post1.dev10 documentation</title>
+    <title>mygrad._io &#8212; MyGrad 2.3.0.post1.dev14 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev10 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev14 documentation</p>
   
 </a></div>
     
@@ -528,17 +528,17 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <h1>Source code for mygrad._io</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">BinaryIO</span><span class="p">,</span> <span class="n">Union</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">BinaryIO</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="kn">import</span> <span class="nn">mygrad.tensor_base</span> <span class="k">as</span> <span class="nn">tb</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">mygrad.tensor_base</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tb</span>
 
 <span class="n">_FileLike</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">BinaryIO</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="save"><a class="viewcode-back" href="../../generated/mygrad.save.html#mygrad.save">[docs]</a><span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">_FileLike</span><span class="p">,</span> <span class="n">tensor</span><span class="p">:</span> <span class="n">tb</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="save"><a class="viewcode-back" href="../../generated/mygrad.save.html#mygrad.save">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">_FileLike</span><span class="p">,</span> <span class="n">tensor</span><span class="p">:</span> <span class="n">tb</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Saves a tensor and its gradient information.</span>
 
 <span class="sd">    This docstring was adapted from that of numpy.save()</span>
@@ -600,7 +600,7 @@ document.write(`
         <span class="n">np</span><span class="o">.</span><span class="n">savez</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">tensor</span><span class="o">.</span><span class="n">data</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="load"><a class="viewcode-back" href="../../generated/mygrad.load.html#mygrad.load">[docs]</a><span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">_FileLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tb</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<div class="viewcode-block" id="load"><a class="viewcode-back" href="../../generated/mygrad.load.html#mygrad.load">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">_FileLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tb</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Loads a saved Tensor and its gradient information (if applicable).</span>
 
 <span class="sd">    This docstring was adapted from that of numpy.load()</span>

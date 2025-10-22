@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Writing Your Own Operations &#8212; MyGrad 2.3.0.post1.dev10 documentation</title>
+    <title>Writing Your Own Operations &#8212; MyGrad 2.3.0.post1.dev14 documentation</title>
   
   
   
@@ -105,7 +105,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev10 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev14 documentation</p>
   
 </a></div>
     
@@ -553,18 +553,18 @@ document.write(`
 </ul>
 </dd>
 </dl>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="kn">import</span> <span class="nn">mygrad</span> <span class="k">as</span> <span class="nn">mg</span>
-<span class="kn">from</span> <span class="nn">mygrad</span> <span class="kn">import</span> <span class="n">execute_op</span>
-<span class="kn">from</span> <span class="nn">mygrad.operation_base</span> <span class="kn">import</span> <span class="n">Operation</span>
-<span class="kn">from</span> <span class="nn">mygrad.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">mygrad</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mg</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mygrad</span><span class="w"> </span><span class="kn">import</span> <span class="n">execute_op</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.operation_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Operation</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArrayLike</span>
 
 <span class="c1"># All operations should inherit from Operation, or one of its subclasses</span>
-<span class="k">class</span> <span class="nc">CustomMultiply</span><span class="p">(</span><span class="n">Operation</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CustomMultiply</span><span class="p">(</span><span class="n">Operation</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Performs f(x, y) = x * y &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">mg</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">mg</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">mg</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">mg</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="c1"># This method defines the &quot;forward pass&quot; of the operation.</span>
         <span class="c1"># It must bind the variable tensors to the op and compute</span>
         <span class="c1"># the output of the operation as a numpy array</span>
@@ -579,7 +579,7 @@ document.write(`
         <span class="n">y_arr</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">data</span>
         <span class="k">return</span> <span class="n">x_arr</span> <span class="o">*</span> <span class="n">y_arr</span>
 
-    <span class="k">def</span> <span class="nf">backward_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grad</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">backward_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grad</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Given ``grad = dℒ/df``, computes ``∂ℒ/∂x`` and ``∂ℒ/∂y``</span>
 
 <span class="sd">        ``ℒ`` is assumed to be the terminal node from which ``ℒ.backward()`` was</span>
@@ -618,7 +618,7 @@ document.write(`
 
 <span class="c1"># Our function stitches together our operation class with the</span>
 <span class="c1"># operation arguments via `mygrad.prepare_op`</span>
-<span class="k">def</span> <span class="nf">custom_multiply</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">mg</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">custom_multiply</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">mg</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
     <span class="c1"># `execute_op` will take care of:</span>
     <span class="c1">#  - casting `x` and `y` to tensors if they are instead array-likes</span>
     <span class="c1">#  - propagating &#39;constant&#39; status to the resulting output based on the inputs</span>

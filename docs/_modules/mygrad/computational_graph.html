@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad.computational_graph &#8212; MyGrad 2.3.0.post1.dev10 documentation</title>
+    <title>mygrad.computational_graph &#8212; MyGrad 2.3.0.post1.dev14 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev10 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev14 documentation</p>
   
 </a></div>
     
@@ -528,19 +528,19 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <h1>Source code for mygrad.computational_graph</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">graphviz</span> <span class="kn">import</span> <span class="n">Digraph</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">graphviz</span><span class="w"> </span><span class="kn">import</span> <span class="n">Digraph</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="k">pass</span>
 
-<span class="kn">from</span> <span class="nn">mygrad.tensor_base</span> <span class="kn">import</span> <span class="n">Tensor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.tensor_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tensor</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;build_graph&quot;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="build_graph"><a class="viewcode-back" href="../../generated/mygrad.computational_graph.build_graph.html#mygrad.computational_graph.build_graph">[docs]</a><span class="k">def</span> <span class="nf">build_graph</span><span class="p">(</span>
+<div class="viewcode-block" id="build_graph"><a class="viewcode-back" href="../../generated/mygrad.computational_graph.build_graph.html#mygrad.computational_graph.build_graph">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">build_graph</span><span class="p">(</span>
     <span class="n">fin</span><span class="p">,</span>
     <span class="n">names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
@@ -630,7 +630,7 @@ document.write(`
         <span class="k">return</span> <span class="n">graph</span></div>
 
 
-<span class="k">def</span> <span class="nf">_add_node</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">op_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_add_node</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">op_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Recursively traces computational graph and adds nodes to Digraph.&quot;&quot;&quot;</span>
     <span class="n">node_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">node</span><span class="p">))</span>
     <span class="n">node_lab</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>

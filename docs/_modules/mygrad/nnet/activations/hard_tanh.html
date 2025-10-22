@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad.nnet.activations.hard_tanh &#8212; MyGrad 2.3.0.post1.dev10 documentation</title>
+    <title>mygrad.nnet.activations.hard_tanh &#8212; MyGrad 2.3.0.post1.dev14 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev10 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev14 documentation</p>
   
 </a></div>
     
@@ -528,19 +528,19 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <h1>Source code for mygrad.nnet.activations.hard_tanh</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">numbers</span> <span class="kn">import</span> <span class="n">Real</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Real</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
 
-<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">ndarray</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">ndarray</span>
 
-<span class="kn">from</span> <span class="nn">mygrad.math.misc.funcs</span> <span class="kn">import</span> <span class="n">maximum</span><span class="p">,</span> <span class="n">minimum</span>
-<span class="kn">from</span> <span class="nn">mygrad.tensor_base</span> <span class="kn">import</span> <span class="n">Tensor</span>
-<span class="kn">from</span> <span class="nn">mygrad.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.math.misc.funcs</span><span class="w"> </span><span class="kn">import</span> <span class="n">maximum</span><span class="p">,</span> <span class="n">minimum</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.tensor_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tensor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArrayLike</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;hard_tanh&quot;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="hard_tanh"><a class="viewcode-back" href="../../../../generated/mygrad.nnet.activations.hard_tanh.html#mygrad.nnet.activations.hard_tanh">[docs]</a><span class="k">def</span> <span class="nf">hard_tanh</span><span class="p">(</span>
+<div class="viewcode-block" id="hard_tanh"><a class="viewcode-back" href="../../../../generated/mygrad.nnet.activations.hard_tanh.html#mygrad.nnet.activations.hard_tanh">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">hard_tanh</span><span class="p">(</span>
     <span class="n">x</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">lower_bound</span><span class="p">:</span> <span class="n">Real</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>

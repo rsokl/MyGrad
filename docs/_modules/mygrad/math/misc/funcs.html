@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad.math.misc.funcs &#8212; MyGrad 2.3.0.post1.dev10 documentation</title>
+    <title>mygrad.math.misc.funcs &#8212; MyGrad 2.3.0.post1.dev14 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev10 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev14 documentation</p>
   
 </a></div>
     
@@ -528,18 +528,18 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <h1>Source code for mygrad.math.misc.funcs</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">ndarray</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">ndarray</span>
 
-<span class="kn">import</span> <span class="nn">mygrad</span> <span class="k">as</span> <span class="nn">mg</span>
-<span class="kn">from</span> <span class="nn">mygrad.math.misc.ops</span> <span class="kn">import</span> <span class="n">MatMul</span>
-<span class="kn">from</span> <span class="nn">mygrad.tensor_base</span> <span class="kn">import</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">implements_numpy_override</span>
-<span class="kn">from</span> <span class="nn">mygrad.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">DTypeLikeReals</span><span class="p">,</span> <span class="n">Mask</span>
-<span class="kn">from</span> <span class="nn">mygrad.ufuncs</span> <span class="kn">import</span> <span class="n">ufunc_creator</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">mygrad</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mg</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.math.misc.ops</span><span class="w"> </span><span class="kn">import</span> <span class="n">MatMul</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.tensor_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">implements_numpy_override</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">DTypeLikeReals</span><span class="p">,</span> <span class="n">Mask</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.ufuncs</span><span class="w"> </span><span class="kn">import</span> <span class="n">ufunc_creator</span>
 
-<span class="kn">from</span> <span class="nn">.ops</span> <span class="kn">import</span> <span class="n">Abs</span><span class="p">,</span> <span class="n">Cbrt</span><span class="p">,</span> <span class="n">Maximum</span><span class="p">,</span> <span class="n">Minimum</span><span class="p">,</span> <span class="n">Sqrt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.ops</span><span class="w"> </span><span class="kn">import</span> <span class="n">Abs</span><span class="p">,</span> <span class="n">Cbrt</span><span class="p">,</span> <span class="n">Maximum</span><span class="p">,</span> <span class="n">Minimum</span><span class="p">,</span> <span class="n">Sqrt</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s2">&quot;abs&quot;</span><span class="p">,</span>
@@ -555,7 +555,7 @@ document.write(`
 
 
 <span class="nd">@ufunc_creator</span><span class="p">(</span><span class="n">Abs</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">absolute</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">absolute</span><span class="p">(</span>
     <span class="n">x</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
     <span class="n">out</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
@@ -659,7 +659,7 @@ document.write(`
 
 
 <span class="nd">@ufunc_creator</span><span class="p">(</span><span class="n">Sqrt</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">sqrt</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">sqrt</span><span class="p">(</span>
     <span class="n">x</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
     <span class="n">out</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
@@ -735,7 +735,7 @@ document.write(`
 
 
 <span class="nd">@ufunc_creator</span><span class="p">(</span><span class="n">Cbrt</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">cbrt</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cbrt</span><span class="p">(</span>
     <span class="n">x</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
     <span class="n">out</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
@@ -798,7 +798,7 @@ document.write(`
 
 
 <span class="nd">@ufunc_creator</span><span class="p">(</span><span class="n">Maximum</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">maximum</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">maximum</span><span class="p">(</span>
     <span class="n">x1</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
     <span class="n">x2</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
     <span class="n">out</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -883,7 +883,7 @@ document.write(`
 
 
 <span class="nd">@ufunc_creator</span><span class="p">(</span><span class="n">Minimum</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">minimum</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">minimum</span><span class="p">(</span>
     <span class="n">x1</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
     <span class="n">x2</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
     <span class="n">out</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -968,7 +968,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="clip"><a class="viewcode-back" href="../../../../generated/mygrad.clip.html#mygrad.clip">[docs]</a><span class="nd">@implements_numpy_override</span><span class="p">()</span>
-<span class="k">def</span> <span class="nf">clip</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">clip</span><span class="p">(</span>
     <span class="n">a</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
     <span class="n">a_min</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
     <span class="n">a_max</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
@@ -1043,7 +1043,7 @@ document.write(`
 
 
 <span class="nd">@ufunc_creator</span><span class="p">(</span><span class="n">MatMul</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">matmul</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">matmul</span><span class="p">(</span>
     <span class="n">x1</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
     <span class="n">x2</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
     <span class="n">out</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1165,7 +1165,7 @@ document.write(`
     <span class="o">...</span>
 
 
-<div class="viewcode-block" id="multi_matmul"><a class="viewcode-back" href="../../../../generated/mygrad.multi_matmul.html#mygrad.multi_matmul">[docs]</a><span class="k">def</span> <span class="nf">multi_matmul</span><span class="p">(</span><span class="n">tensors</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<div class="viewcode-block" id="multi_matmul"><a class="viewcode-back" href="../../../../generated/mygrad.multi_matmul.html#mygrad.multi_matmul">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">multi_matmul</span><span class="p">(</span><span class="n">tensors</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Matrix product of two or more tensors calculated in the optimal ordering</span>
 
@@ -1315,7 +1315,7 @@ document.write(`
         <span class="k">return</span> <span class="n">result</span></div>
 
 
-<span class="k">def</span> <span class="nf">_multi_matmul_three</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_multi_matmul_three</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Find the best order for three arrays and do the multiplication.</span>
 
@@ -1331,7 +1331,7 @@ document.write(`
         <span class="k">return</span> <span class="n">matmul</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">matmul</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_multi_matmul_chain_order</span><span class="p">(</span><span class="n">arrays</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_multi_matmul_chain_order</span><span class="p">(</span><span class="n">arrays</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a np.array that encodes the optimal order of multiplications.</span>
 <span class="sd">    The optimal order array is then used by `_multi_matmul()` to do the</span>
@@ -1368,7 +1368,7 @@ document.write(`
     <span class="k">return</span> <span class="n">s</span>
 
 
-<span class="k">def</span> <span class="nf">_multi_matmul</span><span class="p">(</span><span class="n">arrays</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_multi_matmul</span><span class="p">(</span><span class="n">arrays</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Actually do the multiplication with the given order.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">j</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">arrays</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
