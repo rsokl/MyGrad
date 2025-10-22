@@ -1,4 +1,4 @@
-""" Custom hypothesis search strategies """
+"""Custom hypothesis search strategies"""
 
 import math
 from collections import defaultdict
@@ -67,7 +67,7 @@ real_dtypes = (
 
 
 def everything_except(
-    excluded_types: Union[type, Tuple[type, ...]]
+    excluded_types: Union[type, Tuple[type, ...]],
 ) -> st.SearchStrategy[Any]:
     """Returns hypothesis strategy that generates values of any type other than
     those specified in ``excluded_types``."""
