@@ -105,3 +105,6 @@ venv.bak/
 
 # vim
 *.swp
+
+# setuptools_scm generated version file
+src/mygrad/_version.py
