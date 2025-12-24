@@ -21,7 +21,12 @@ def positional_reshape(arr, newshape, reshaper, **kwargs):
 
 
 def keyword_reshape(arr, newshape, reshaper, **kwargs):
-    return reshaper(arr, newshape=newshape, **kwargs)
+    # NumPy 2.4+ uses 'shape' parameter instead of 'newshape'
+    # Try 'shape' first (for newer NumPy), fall back to 'newshape' (for MyGrad)
+    try:
+        return reshaper(arr, shape=newshape, **kwargs)
+    except TypeError:  # pragma: no cover
+        return reshaper(arr, newshape=newshape, **kwargs)
 
 
 def method_tuple_reshape(arr, newshape, reshaper, **kwargs):

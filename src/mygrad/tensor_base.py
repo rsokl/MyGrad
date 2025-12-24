@@ -2131,12 +2131,12 @@ class Tensor:
     def __float__(self) -> float:
         if self.size > 1:
             raise TypeError("can only convert a tensor of size 1 to a Python scalar")
-        return float(self.data)
+        return float(self.data.item())
 
     def __int__(self) -> int:
         if self.size > 1:
             raise TypeError("can only convert a tensor of size 1 to a Python scalar")
-        return int(self.data)
+        return int(self.data.item())
 
     def __index__(self) -> int:
         """Return self converted to an integer, if self is suitable for use as an index
