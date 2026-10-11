@@ -67,7 +67,7 @@ def leaky_relu(
 
     if not isinstance(slope, Real):
         raise TypeError(
-            f"`slope` must be a real-valued scalar, got {slope} (type { type(slope)})"
+            f"`slope` must be a real-valued scalar, got {slope} (type {type(slope)})"
         )
 
     return maximum(x, 0, constant=constant) + slope * minimum(x, 0, constant=constant)
