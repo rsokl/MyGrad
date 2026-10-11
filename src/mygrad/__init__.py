@@ -39,7 +39,6 @@ from mygrad.tensor_base import (  # isort:skip  # avoid an import cycle
     Tensor,
 )
 
-
 if not TYPE_CHECKING:  # pragma: no cover
     try:
         from ._version import version as __version__
