@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad.nnet.activations.leaky_relu &#8212; MyGrad 2.3.0.post1.dev31 documentation</title>
+    <title>mygrad.nnet.activations.leaky_relu &#8212; MyGrad 2.3.0.post1.dev35 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev31 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev35 documentation</p>
   
 </a></div>
     
@@ -537,13 +537,13 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.tensor_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tensor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArrayLike</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;leaky_relu&quot;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"leaky_relu"</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="leaky_relu"><a class="viewcode-back" href="../../../../generated/mygrad.nnet.activations.leaky_relu.html#mygrad.nnet.activations.leaky_relu">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">leaky_relu</span><span class="p">(</span>
     <span class="n">x</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">slope</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the leaky rectified linear activation elementwise along x.</span>
+<span class="w">    </span><span class="sd">"""Returns the leaky rectified linear activation elementwise along x.</span>
 
 <span class="sd">    The leaky ReLU is given by `max(x, 0) + slope*min(x, 0)`.</span>
 
@@ -562,7 +562,7 @@ document.write(`
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    mygrad.Tensor</span>
-<span class="sd">        The result of apply the &quot;leaky relu&quot; function elementwise to `x`.</span>
+<span class="sd">        The result of apply the "leaky relu" function elementwise to `x`.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -584,20 +584,20 @@ document.write(`
 <span class="sd">       &gt;&gt;&gt; import matplotlib.pyplot as plt</span>
 <span class="sd">       &gt;&gt;&gt; x = mg.linspace(-2, 2, 100)</span>
 <span class="sd">       &gt;&gt;&gt; y = leaky_relu(x, slope=0.1)</span>
-<span class="sd">       &gt;&gt;&gt; plt.title(&quot;leaky_relu(x, slope=0.1)&quot;)</span>
+<span class="sd">       &gt;&gt;&gt; plt.title("leaky_relu(x, slope=0.1)")</span>
 <span class="sd">       &gt;&gt;&gt; y.backward()</span>
-<span class="sd">       &gt;&gt;&gt; plt.plot(x, x.grad, label=&quot;df/dx&quot;)</span>
-<span class="sd">       &gt;&gt;&gt; plt.plot(x, y, label=&quot;f(x)&quot;)</span>
+<span class="sd">       &gt;&gt;&gt; plt.plot(x, x.grad, label="df/dx")</span>
+<span class="sd">       &gt;&gt;&gt; plt.plot(x, y, label="f(x)")</span>
 <span class="sd">       &gt;&gt;&gt; plt.legend()</span>
 <span class="sd">       &gt;&gt;&gt; plt.grid()</span>
 <span class="sd">       &gt;&gt;&gt; plt.show()</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">slope</span><span class="p">,</span> <span class="p">(</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">)):</span>
         <span class="n">slope</span> <span class="o">=</span> <span class="n">slope</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">slope</span><span class="p">,</span> <span class="n">Real</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;`slope` must be a real-valued scalar, got </span><span class="si">{</span><span class="n">slope</span><span class="si">}</span><span class="s2"> (type </span><span class="si">{</span><span class="w"> </span><span class="nb">type</span><span class="p">(</span><span class="n">slope</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="sa">f</span><span class="s2">"`slope` must be a real-valued scalar, got </span><span class="si">{</span><span class="n">slope</span><span class="si">}</span><span class="s2"> (type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">slope</span><span class="p">)</span><span class="si">}</span><span class="s2">)"</span>
         <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">maximum</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span> <span class="o">+</span> <span class="n">slope</span> <span class="o">*</span> <span class="n">minimum</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>

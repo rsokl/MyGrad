@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad.tensor_manip.tiling.funcs &#8212; MyGrad 2.3.0.post1.dev31 documentation</title>
+    <title>mygrad.tensor_manip.tiling.funcs &#8212; MyGrad 2.3.0.post1.dev35 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev31 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev35 documentation</p>
   
 </a></div>
     
@@ -535,7 +535,7 @@ document.write(`
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.ops</span><span class="w"> </span><span class="kn">import</span> <span class="n">Repeat</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;repeat&quot;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"repeat"</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="repeat"><a class="viewcode-back" href="../../../../generated/mygrad.repeat.html#mygrad.repeat">[docs]</a><span class="nd">@implements_numpy_override</span><span class="p">()</span>
@@ -546,7 +546,7 @@ document.write(`
     <span class="o">*</span><span class="p">,</span>
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Repeat elements of a tensor.</span>
 
 <span class="sd">    This docstring was adapted from ``numpy.repeat``</span>
@@ -594,7 +594,7 @@ document.write(`
 <span class="sd">    Tensor([[1, 2],</span>
 <span class="sd">            [3, 4],</span>
 <span class="sd">            [3, 4]])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Repeat</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">op_args</span><span class="o">=</span><span class="p">(</span><span class="n">repeats</span><span class="p">,</span> <span class="n">axis</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
 </pre></div>
 

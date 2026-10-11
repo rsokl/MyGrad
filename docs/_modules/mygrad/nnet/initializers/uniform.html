@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad.nnet.initializers.uniform &#8212; MyGrad 2.3.0.post1.dev31 documentation</title>
+    <title>mygrad.nnet.initializers.uniform &#8212; MyGrad 2.3.0.post1.dev35 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev31 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev35 documentation</p>
   
 </a></div>
     
@@ -534,7 +534,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="uniform"><a class="viewcode-back" href="../../../../generated/mygrad.nnet.initializers.uniform.html#mygrad.nnet.initializers.uniform">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">uniform</span><span class="p">(</span><span class="o">*</span><span class="n">shape</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a :class:`mygrad.Tensor` by drawing from a uniform distribution.</span>
+<span class="w">    </span><span class="sd">"""Initialize a :class:`mygrad.Tensor` by drawing from a uniform distribution.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -570,13 +570,13 @@ document.write(`
 <span class="sd">    Tensor([[ 1.9151938 , -0.28968155],</span>
 <span class="sd">            [-0.01240687, -0.24448799]], dtype=float32)</span>
 
-<span class="sd">    &gt;&gt;&gt; uniform(5, dtype=&quot;float16&quot;, constant=True)</span>
+<span class="sd">    &gt;&gt;&gt; uniform(5, dtype="float16", constant=True)</span>
 <span class="sd">    Tensor([0.5186, 0.1481, 0.3745, 0.941 , 0.331 ], dtype=float16)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">lower_bound</span> <span class="o">&gt;=</span> <span class="n">upper_bound</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Uniform lower bound cannot be greater than upper bound&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Uniform lower bound cannot be greater than upper bound"</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Uniform initialization requires a floating-point dtype&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Uniform initialization requires a floating-point dtype"</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">shape</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>

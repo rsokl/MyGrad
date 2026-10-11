@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Changelog &#8212; MyGrad 2.3.0.post1.dev31 documentation</title>
+    <title>Changelog &#8212; MyGrad 2.3.0.post1.dev35 documentation</title>
   
   
   
@@ -104,7 +104,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev31 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev35 documentation</p>
   
 </a></div>
     
@@ -767,7 +767,7 @@ mutate their underlying data.</p>
 <td><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">x</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">*=</span> <span class="mi">2</span>  <span class="c1"># x = 2 * x</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="ow">is</span> <span class="n">y</span>  <span class="c1"># doesn&#39;t match!</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="ow">is</span> <span class="n">y</span>  <span class="c1"># doesn't match!</span>
 <span class="go">False</span>
 </pre></div>
 </div>
@@ -815,7 +815,7 @@ attribute</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">shares_memory</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 <span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span><span class="o">.</span><span class="n">base</span> <span class="ow">is</span> <span class="n">x</span>  <span class="c1"># doesn&#39;t match!</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span><span class="o">.</span><span class="n">base</span> <span class="ow">is</span> <span class="n">x</span>  <span class="c1"># doesn't match!</span>
 <span class="go">&lt;AttributeError&gt;</span>
 </pre></div>
 </div>
@@ -852,7 +852,7 @@ attribute</p>
 <td><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">y</span>
 <span class="go">Tensor([-1., -2.])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span>  <span class="c1"># doesn&#39;t match!</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span>  <span class="c1"># doesn't match!</span>
 <span class="go">Tensor([1., 2., 3.])</span>
 </pre></div>
 </div>
@@ -892,12 +892,12 @@ and that  MyGrad fully supports backpropagation through all flavors of einsum!)<
 <span class="gp">... </span>               <span class="p">[</span><span class="mf">6.</span><span class="p">,</span> <span class="mf">7.</span><span class="p">,</span> <span class="mf">8.</span><span class="p">]])</span>
 
 <span class="go"># view of diagonal of `x`</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">diag</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ii-&gt;i&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">diag</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">"ii-&gt;i"</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">diag</span>
 <span class="go">Tensor([0., 4., 8.])</span>
 
 <span class="go"># view of anti-diagonal of `x`</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">anti_diag</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ii-&gt;i&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">[:,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">anti_diag</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">"ii-&gt;i"</span><span class="p">,</span> <span class="n">x</span><span class="p">[:,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">anti_diag</span>
 <span class="go">Tensor([2., 4., 6.])</span>
 
@@ -1023,7 +1023,7 @@ have its write-ability restored to its original state.</p>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">])</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">y</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">z</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y</span>     <span class="c1"># x and y are locked</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">z</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>  <span class="c1"># graph cleared; x and y are &quot;released&quot;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">z</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>  <span class="c1"># graph cleared; x and y are "released"</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">x</span><span class="p">[:]</span> <span class="o">=</span> <span class="mi">0</span>      <span class="c1"># can write to x</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">x</span>
 <span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">])</span>
@@ -1060,7 +1060,7 @@ for extensive examples of its usage.</p>
 <span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">mg</span><span class="o">.</span><span class="n">no_autodiff</span><span class="p">:</span>
 <span class="o">...</span>     <span class="n">y</span> <span class="o">=</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">2</span>  <span class="c1"># operation not tracked</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">y</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">y</span><span class="o">.</span><span class="n">grad</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">grad</span>  <span class="c1"># x is not &quot;connected&quot; to y</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">y</span><span class="o">.</span><span class="n">grad</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">grad</span>  <span class="c1"># x is not "connected" to y</span>
 <span class="p">(</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]),</span> <span class="kc">None</span><span class="p">)</span>
 </pre></div>
 </div>

@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad.nnet.layers.pooling &#8212; MyGrad 2.3.0.post1.dev31 documentation</title>
+    <title>mygrad.nnet.layers.pooling &#8212; MyGrad 2.3.0.post1.dev35 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev31 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev35 documentation</p>
   
 </a></div>
     
@@ -541,7 +541,7 @@ document.write(`
 
 <span class="k">class</span><span class="w"> </span><span class="nc">MaxPoolND</span><span class="p">(</span><span class="n">Operation</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">pool</span><span class="p">,</span> <span class="n">stride</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform max-pooling over the last N dimensions of a data batch.</span>
+<span class="w">        </span><span class="sd">"""Perform max-pooling over the last N dimensions of a data batch.</span>
 
 <span class="sd">        Extended Summary</span>
 <span class="sd">        ----------------</span>
@@ -572,10 +572,10 @@ document.write(`
 
 <span class="sd">        Notes</span>
 <span class="sd">        -----</span>
-<span class="sd">        Only &#39;valid&#39; placements of the pooling window are permitted - the pooling</span>
-<span class="sd">        window cannot extend passed the &quot;boundaries&quot; of the data</span>
+<span class="sd">        Only 'valid' placements of the pooling window are permitted - the pooling</span>
+<span class="sd">        window cannot extend passed the "boundaries" of the data</span>
 <span class="sd">        dimensions.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="p">,)</span>  <span class="c1"># data: ((N0, ...), C0, ...)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">data</span>
 
@@ -586,7 +586,7 @@ document.write(`
         <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">pool</span><span class="p">)</span>
         <span class="k">assert</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span>
             <span class="n">pool</span>
-        <span class="p">),</span> <span class="s2">&quot;The number of pooled dimensions cannot exceed the dimensionality of the data.&quot;</span>
+        <span class="p">),</span> <span class="s2">"The number of pooled dimensions cannot exceed the dimensionality of the data."</span>
 
         <span class="n">stride</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">stride</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">pool</span><span class="p">))</span>
@@ -609,10 +609,10 @@ document.write(`
         <span class="n">out_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">x_shape</span> <span class="o">-</span> <span class="n">w_shape</span><span class="p">)</span> <span class="o">/</span> <span class="n">stride</span> <span class="o">+</span> <span class="mi">1</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">is_integer</span><span class="p">()</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">out_shape</span><span class="p">):</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Stride and kernel dimensions are incompatible: </span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Input dimensions: </span><span class="si">{</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">x_shape</span><span class="p">))</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Stride dimensions: </span><span class="si">{</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">stride</span><span class="p">))</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Pooling dimensions: </span><span class="si">{</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">w_shape</span><span class="p">))</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">"Stride and kernel dimensions are incompatible: </span><span class="se">\n</span><span class="s2">"</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">"Input dimensions: </span><span class="si">{</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">x_shape</span><span class="p">))</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">"Stride dimensions: </span><span class="si">{</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">stride</span><span class="p">))</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">"Pooling dimensions: </span><span class="si">{</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">w_shape</span><span class="p">))</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
         <span class="n">pool_axes</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_pool</span><span class="p">))</span>
@@ -625,13 +625,13 @@ document.write(`
 
         <span class="c1"># (G0, ..., (N0, ...)) -&gt; ((N0, ...), G0, ...)</span>
         <span class="n">out</span> <span class="o">=</span> <span class="n">maxed</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="o">-</span><span class="n">num_no_pool</span><span class="p">:]</span> <span class="o">+</span> <span class="n">axes</span><span class="p">[:</span><span class="o">-</span><span class="n">num_no_pool</span><span class="p">])</span>
-        <span class="k">return</span> <span class="n">out</span> <span class="k">if</span> <span class="n">out</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s2">&quot;C_CONTIGUOUS&quot;</span><span class="p">]</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span> <span class="k">if</span> <span class="n">out</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s2">"C_CONTIGUOUS"</span><span class="p">]</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">backward_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grad</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Parameters</span>
+<span class="w">        </span><span class="sd">"""Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        grad : numpy.ndarray, shape=((N0, ...), G0, ...),</span>
-<span class="sd">        index : int&quot;&quot;&quot;</span>
+<span class="sd">        index : int"""</span>
         <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">data</span>
         <span class="n">num_pool</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">)</span>
@@ -686,7 +686,7 @@ document.write(`
     <span class="o">*</span><span class="p">,</span>
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Perform max-pooling over the last N dimensions of a data batch.</span>
+<span class="w">    </span><span class="sd">"""Perform max-pooling over the last N dimensions of a data batch.</span>
 
 <span class="sd">    Extended Summary</span>
 <span class="sd">    ----------------</span>
@@ -719,8 +719,8 @@ document.write(`
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
-<span class="sd">    Only &quot;valid&quot; placements of the pooling window are permitted - the pooling</span>
-<span class="sd">    window cannot extend passed the &quot;boundaries&quot; of the data</span>
+<span class="sd">    Only "valid" placements of the pooling window are permitted - the pooling</span>
+<span class="sd">    window cannot extend passed the "boundaries" of the data</span>
 <span class="sd">    dimensions.</span>
 
 <span class="sd">    Examples</span>
@@ -743,8 +743,8 @@ document.write(`
 <span class="sd">           [0., 1., 0.],</span>
 <span class="sd">           [0., 0., 1.]])</span>
 
-<span class="sd">    Let&#39;s perform 1D pooling on a 2D tensor. Each row of the tensor</span>
-<span class="sd">    will be pooled over independently. Let&#39;s apply a size-2 max-pool</span>
+<span class="sd">    Let's perform 1D pooling on a 2D tensor. Each row of the tensor</span>
+<span class="sd">    will be pooled over independently. Let's apply a size-2 max-pool</span>
 <span class="sd">    window to each row of ``x``, using a stride of 1:</span>
 
 <span class="sd">    &gt;&gt;&gt; x = mg.Tensor([[0., 10., 8.],</span>
@@ -758,7 +758,7 @@ document.write(`
 <span class="sd">    Here we perform pooling over the trailing two dimensions of a</span>
 <span class="sd">    4D tensor, ``x``. By specifying ``pool = (2, 2)``, we instruct</span>
 <span class="sd">    ``max_pool`` to tile a 2x2 pooling window along these last two</span>
-<span class="sd">    axes. Let&#39;s apply the window every two rows, and for each column;</span>
+<span class="sd">    axes. Let's apply the window every two rows, and for each column;</span>
 <span class="sd">    i.e. we specify ``stride = (2, 1)``:</span>
 
 <span class="sd">    &gt;&gt;&gt; import numpy as np</span>
@@ -772,7 +772,7 @@ document.write(`
 <span class="sd">    Had we specified, say, ``pool = (3, 2, 2)``, then a 3x2x2</span>
 <span class="sd">    pooling window would have been tiled along the last *three* axes</span>
 <span class="sd">    of ``x``.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">MaxPoolND</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">op_args</span><span class="o">=</span><span class="p">(</span><span class="n">pool</span><span class="p">,</span> <span class="n">stride</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
 </pre></div>
 

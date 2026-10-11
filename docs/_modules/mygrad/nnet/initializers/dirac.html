@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad.nnet.initializers.dirac &#8212; MyGrad 2.3.0.post1.dev31 documentation</title>
+    <title>mygrad.nnet.initializers.dirac &#8212; MyGrad 2.3.0.post1.dev35 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev31 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev35 documentation</p>
   
 </a></div>
     
@@ -536,7 +536,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="dirac"><a class="viewcode-back" href="../../../../generated/mygrad.nnet.initializers.dirac.html#mygrad.nnet.initializers.dirac">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">dirac</span><span class="p">(</span><span class="o">*</span><span class="n">shape</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a :class:`mygrad.Tensor` according to the Dirac initialization procedure described</span>
+<span class="w">    </span><span class="sd">"""Initialize a :class:`mygrad.Tensor` according to the Dirac initialization procedure described</span>
 <span class="sd">    by Zagoruyko and Komodakis.</span>
 
 <span class="sd">    Parameters</span>
@@ -565,7 +565,7 @@ document.write(`
 <span class="sd">    Extended Description</span>
 <span class="sd">    --------------------</span>
 <span class="sd">    Zagoruyko and Komodakis put forward the Dirac initialization in the paper</span>
-<span class="sd">        &quot;DiracNets: Training Very Deep Neural Networks without Skip Connections&quot;</span>
+<span class="sd">        "DiracNets: Training Very Deep Neural Networks without Skip Connections"</span>
 <span class="sd">    https://arxiv.org/abs/1706.00388</span>
 
 <span class="sd">    A Tensor I initialized via this should satisfy:</span>
@@ -574,12 +574,12 @@ document.write(`
 <span class="sd">    for compatible tensors ``x``, where ``⋆`` indicates convolution. Note that this does not</span>
 <span class="sd">    guarantee that the convolution will produce ``x``, but it will preserve as many channels of</span>
 <span class="sd">    the input as possible.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">shape</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Dirac initialization requires at least two dimensions&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Dirac initialization requires at least two dimensions"</span><span class="p">)</span>
 
     <span class="n">tensor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
     <span class="n">minimum_depth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>  <span class="c1"># out dim, in dim</span>

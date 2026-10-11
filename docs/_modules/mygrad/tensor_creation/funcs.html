@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad.tensor_creation.funcs &#8212; MyGrad 2.3.0.post1.dev31 documentation</title>
+    <title>mygrad.tensor_creation.funcs &#8212; MyGrad 2.3.0.post1.dev35 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev31 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev35 documentation</p>
   
 </a></div>
     
@@ -545,27 +545,27 @@ document.write(`
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;arange&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;empty&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;empty_like&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;eye&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;geomspace&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;identity&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;linspace&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;logspace&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;ones&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;ones_like&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;full&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;full_like&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;zeros&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;zeros_like&quot;</span><span class="p">,</span>
+    <span class="s2">"arange"</span><span class="p">,</span>
+    <span class="s2">"empty"</span><span class="p">,</span>
+    <span class="s2">"empty_like"</span><span class="p">,</span>
+    <span class="s2">"eye"</span><span class="p">,</span>
+    <span class="s2">"geomspace"</span><span class="p">,</span>
+    <span class="s2">"identity"</span><span class="p">,</span>
+    <span class="s2">"linspace"</span><span class="p">,</span>
+    <span class="s2">"logspace"</span><span class="p">,</span>
+    <span class="s2">"ones"</span><span class="p">,</span>
+    <span class="s2">"ones_like"</span><span class="p">,</span>
+    <span class="s2">"full"</span><span class="p">,</span>
+    <span class="s2">"full_like"</span><span class="p">,</span>
+    <span class="s2">"zeros"</span><span class="p">,</span>
+    <span class="s2">"zeros_like"</span><span class="p">,</span>
 <span class="p">]</span>
 
 
 <div class="viewcode-block" id="empty"><a class="viewcode-back" href="../../../generated/mygrad.empty.html#mygrad.empty">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">empty</span><span class="p">(</span>
     <span class="n">shape</span><span class="p">:</span> <span class="n">Shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLikeReals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a new Tensor of the given shape and type, without initializing entries.</span>
+<span class="w">    </span><span class="sd">"""Return a new Tensor of the given shape and type, without initializing entries.</span>
 
 <span class="sd">    This docstring was adapted from ``numpy.empty`` [1]_</span>
 
@@ -620,7 +620,7 @@ document.write(`
 <span class="sd">    &gt;&gt;&gt; mg.empty([2, 2], dtype=int)</span>
 <span class="sd">    Tensor([[-1073741821, -1067949133],</span>
 <span class="sd">            [  496041986,    19249760]])                     #random</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 
@@ -632,7 +632,7 @@ document.write(`
     <span class="o">*</span><span class="p">,</span>
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a new Tensor of the same shape and type as the given array.</span>
+<span class="w">    </span><span class="sd">"""Return a new Tensor of the same shape and type as the given array.</span>
 
 <span class="sd">    This docstring was adapted from ``numpy.empty_like`` [1]_</span>
 
@@ -682,7 +682,7 @@ document.write(`
 <span class="sd">    &gt;&gt;&gt; mg.empty_like(x, dtype=int)</span>
 <span class="sd">    Tensor([[-1073741821, -1067949133],</span>
 <span class="sd">            [  496041986,    19249760]])                     #random</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">constant</span> <span class="o">=</span> <span class="n">_resolve_constant</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span>
         <span class="n">np</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">_anything_but_tensor</span><span class="p">(</span><span class="n">other</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">),</span>
@@ -699,7 +699,7 @@ document.write(`
     <span class="o">*</span><span class="p">,</span>
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a 2D Tensor with ones on the diagonal and zeros elsewhere.</span>
+<span class="w">    </span><span class="sd">"""Return a 2D Tensor with ones on the diagonal and zeros elsewhere.</span>
 
 <span class="sd">    This docstring was adapted from ``numpy.eye`` [1]_</span>
 
@@ -746,7 +746,7 @@ document.write(`
 <span class="sd">    Tensor([[ 0.,  1.,  0.],</span>
 <span class="sd">            [ 0.,  0.,  1.],</span>
 <span class="sd">            [ 0.,  0.,  0.]])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span>
         <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">M</span><span class="o">=</span><span class="n">M</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">),</span>
         <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">,</span>
@@ -757,7 +757,7 @@ document.write(`
 <div class="viewcode-block" id="identity"><a class="viewcode-back" href="../../../generated/mygrad.identity.html#mygrad.identity">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">identity</span><span class="p">(</span>
     <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLikeReals</span> <span class="o">=</span> <span class="nb">float</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the identity Tensor; a square Tensor with 1s on the main diagonal and 0s elsewhere.</span>
+<span class="w">    </span><span class="sd">"""Return the identity Tensor; a square Tensor with 1s on the main diagonal and 0s elsewhere.</span>
 
 <span class="sd">    This docstring was adapted from ``numpy.identity`` [1]_</span>
 
@@ -794,14 +794,14 @@ document.write(`
 <span class="sd">    Tensor([[ 1.,  0.,  0.],</span>
 <span class="sd">            [ 0.,  1.,  0.],</span>
 <span class="sd">            [ 0.,  0.,  1.]])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ones"><a class="viewcode-back" href="../../../generated/mygrad.ones.html#mygrad.ones">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">ones</span><span class="p">(</span>
     <span class="n">shape</span><span class="p">:</span> <span class="n">Shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLikeReals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Return a Tensor of the given shape and type, filled with ones.</span>
 
 <span class="sd">    This docstring was adapted from ``numpy.ones`` [1]_</span>
@@ -855,7 +855,7 @@ document.write(`
 <span class="sd">    &gt;&gt;&gt; mg.ones((2, 2))</span>
 <span class="sd">    Tensor([[ 1.,  1.],</span>
 <span class="sd">            [ 1.,  1.]])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 
@@ -867,7 +867,7 @@ document.write(`
     <span class="o">*</span><span class="p">,</span>
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Return a Tensor of the same shape and type as the given, filled with ones.</span>
 
 <span class="sd">    This docstring was adapted from ``numpy.ones_like`` [1]_</span>
@@ -919,7 +919,7 @@ document.write(`
 
 <span class="sd">    &gt;&gt;&gt; mg.ones_like(y)</span>
 <span class="sd">    Tensor([ 1.,  1.,  1.])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">constant</span> <span class="o">=</span> <span class="n">_resolve_constant</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span>
@@ -932,7 +932,7 @@ document.write(`
 <div class="viewcode-block" id="zeros"><a class="viewcode-back" href="../../../generated/mygrad.zeros.html#mygrad.zeros">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">zeros</span><span class="p">(</span>
     <span class="n">shape</span><span class="p">:</span> <span class="n">Shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLikeReals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Return a Tensor of the given shape and type, filled with zeros.</span>
 
 <span class="sd">    This docstring was adapted from ``numpy.zeros`` [1]_</span>
@@ -986,7 +986,7 @@ document.write(`
 <span class="sd">    &gt;&gt;&gt; mg.zeros((2, 2))</span>
 <span class="sd">    Tensor([[ 0.,  0.],</span>
 <span class="sd">            [ 0.,  0.]])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 
@@ -998,7 +998,7 @@ document.write(`
     <span class="o">*</span><span class="p">,</span>
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Return a Tensor of the same shape and type as the given, filled with zeros.</span>
 
 <span class="sd">    This docstring was adapted from ``numpy.zeros_like`` [1]_</span>
@@ -1058,7 +1058,7 @@ document.write(`
 
 <span class="sd">    &gt;&gt;&gt; mg.zeros_like(y)</span>
 <span class="sd">    Tensor([ 0.,  0.,  0.])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">constant</span> <span class="o">=</span> <span class="n">_resolve_constant</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span>
         <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">_anything_but_tensor</span><span class="p">(</span><span class="n">other</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">),</span>
@@ -1074,7 +1074,7 @@ document.write(`
     <span class="o">*</span><span class="p">,</span>
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Return a Tensor of the given shape and type, filled with `fill_value`.</span>
 
 <span class="sd">    This docstring was adapted from ``numpy.full`` [1]_</span>
@@ -1122,7 +1122,7 @@ document.write(`
 <span class="sd">    &gt;&gt;&gt; mg.full((2, 2), 10)</span>
 <span class="sd">    Tensor([[10, 10],</span>
 <span class="sd">            [10, 10]])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span>
         <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="n">fill_value</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">),</span>
         <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">,</span>
@@ -1138,7 +1138,7 @@ document.write(`
     <span class="n">shape</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Shape</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a Tensor of the same shape and type as the given, filled with `fill_value`.</span>
+<span class="w">    </span><span class="sd">"""Return a Tensor of the same shape and type as the given, filled with `fill_value`.</span>
 
 <span class="sd">    This docstring was adapted from ``numpy.full_like`` [1]_</span>
 
@@ -1189,7 +1189,7 @@ document.write(`
 <span class="sd">    &gt;&gt;&gt; y = mg.arange(6, dtype=np.double)</span>
 <span class="sd">    &gt;&gt;&gt; mg.full_like(y, 0.1)</span>
 <span class="sd">    Tensor([ 0.1,  0.1,  0.1,  0.1,  0.1,  0.1])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">constant</span> <span class="o">=</span> <span class="n">_resolve_constant</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span>
@@ -1209,7 +1209,7 @@ document.write(`
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    arange([start,] stop[, step,], dtype=None, *, constant=None)</span>
 
 <span class="sd">    Return a Tensor with evenly-spaced values within a given interval.</span>
@@ -1262,7 +1262,7 @@ document.write(`
 <span class="sd">    Tensor([3, 4, 5, 6])</span>
 <span class="sd">    &gt;&gt;&gt; mg.arange(3,7,2)</span>
 <span class="sd">    Tensor([3, 5])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 
@@ -1276,7 +1276,7 @@ document.write(`
     <span class="o">*</span><span class="p">,</span>
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a Tensor with evenly-spaced numbers over a specified interval.</span>
+<span class="w">    </span><span class="sd">"""Return a Tensor with evenly-spaced numbers over a specified interval.</span>
 
 <span class="sd">    Values are generated within [start, stop], with the endpoint optionally excluded.</span>
 
@@ -1333,7 +1333,7 @@ document.write(`
 <span class="sd">    Tensor([ 2.  ,  2.25,  2.5 ,  2.75,  3.  ])</span>
 <span class="sd">    &gt;&gt;&gt; mg.linspace(2.0, 3.0, num=5, endpoint=False)</span>
 <span class="sd">    Tensor([ 2. ,  2.2,  2.4,  2.6,  2.8])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span>
         <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span>
             <span class="n">start</span><span class="p">,</span>
@@ -1359,7 +1359,7 @@ document.write(`
     <span class="o">*</span><span class="p">,</span>
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a Tensor with evenly-spaced numbers over a specified interval on a log scale.</span>
+<span class="w">    </span><span class="sd">"""Return a Tensor with evenly-spaced numbers over a specified interval on a log scale.</span>
 <span class="sd">    This is not a differentiable function - it does not propagate gradients to its inputs.</span>
 
 <span class="sd">    In linear space, values are generated within [base**start, base**stop], with the endpoint</span>
@@ -1428,7 +1428,7 @@ document.write(`
 <span class="sd">    &gt;&gt;&gt; mg.logspace(2.0, 3.0, num=4, base=2.0)</span>
 <span class="sd">    Tensor([ 4.        ,  5.0396842 ,  6.34960421,  8.        ])</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span>
         <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span>
             <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span>
@@ -1454,7 +1454,7 @@ document.write(`
     <span class="o">*</span><span class="p">,</span>
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a Tensor with evenly-spaced values in a geometric progression.</span>
+<span class="w">    </span><span class="sd">"""Return a Tensor with evenly-spaced values in a geometric progression.</span>
 
 <span class="sd">    Each output sample is a constant multiple of the previous output.</span>
 
@@ -1532,7 +1532,7 @@ document.write(`
 <span class="sd">    Tensor([ 1000.,   100.,    10.,     1.])</span>
 <span class="sd">    &gt;&gt;&gt; mg.geomspace(-1000, -1, num=4)</span>
 <span class="sd">    Tensor([-1000.,  -100.,   -10.,    -1.])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span>
         <span class="n">np</span><span class="o">.</span><span class="n">geomspace</span><span class="p">(</span>
             <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span>

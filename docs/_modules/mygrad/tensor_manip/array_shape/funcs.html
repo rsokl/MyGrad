@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad.tensor_manip.array_shape.funcs &#8212; MyGrad 2.3.0.post1.dev31 documentation</title>
+    <title>mygrad.tensor_manip.array_shape.funcs &#8212; MyGrad 2.3.0.post1.dev35 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev31 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev35 documentation</p>
   
 </a></div>
     
@@ -536,24 +536,24 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">.ops</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;reshape&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;squeeze&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;ravel&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;expand_dims&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;broadcast_to&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;atleast_1d&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;atleast_2d&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;atleast_3d&quot;</span><span class="p">,</span>
+    <span class="s2">"reshape"</span><span class="p">,</span>
+    <span class="s2">"squeeze"</span><span class="p">,</span>
+    <span class="s2">"ravel"</span><span class="p">,</span>
+    <span class="s2">"expand_dims"</span><span class="p">,</span>
+    <span class="s2">"broadcast_to"</span><span class="p">,</span>
+    <span class="s2">"atleast_1d"</span><span class="p">,</span>
+    <span class="s2">"atleast_2d"</span><span class="p">,</span>
+    <span class="s2">"atleast_3d"</span><span class="p">,</span>
 <span class="p">]</span>
 
-<span class="n">_T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;_T&quot;</span><span class="p">)</span>
+<span class="n">_T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">"_T"</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="reshape"><a class="viewcode-back" href="../../../../generated/mygrad.reshape.html#mygrad.reshape">[docs]</a><span class="nd">@implements_numpy_override</span><span class="p">()</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">reshape</span><span class="p">(</span>
     <span class="n">a</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">newshape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Shape</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a tensor with a new shape, without changing its data.</span>
+<span class="w">    </span><span class="sd">"""Returns a tensor with a new shape, without changing its data.</span>
 
 <span class="sd">    This docstring was adapted from ``numpy.reshape``</span>
 
@@ -593,7 +593,7 @@ document.write(`
 <span class="sd">    &gt;&gt;&gt; mg.reshape(a, (3,-1))   # the unspecified value is inferred to be 2</span>
 <span class="sd">    Tensor([[1, 2],</span>
 <span class="sd">            [3, 4],</span>
-<span class="sd">            [5, 6]])&quot;&quot;&quot;</span>
+<span class="sd">            [5, 6]])"""</span>
     <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Reshape</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">op_args</span><span class="o">=</span><span class="p">(</span><span class="n">newshape</span><span class="p">,),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
 
 
@@ -604,7 +604,7 @@ document.write(`
     <span class="o">*</span><span class="p">,</span>
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Remove single-dimensional entries from the shape of a tensor.</span>
 
 <span class="sd">    This docstring was adapted from ``numpy.squeeze``</span>
@@ -647,13 +647,13 @@ document.write(`
 <span class="sd">    ...</span>
 <span class="sd">    ValueError: cannot select an axis to squeeze out which has size not equal to one</span>
 <span class="sd">    &gt;&gt;&gt; mg.squeeze(x, axis=2).shape</span>
-<span class="sd">    (1, 3)&quot;&quot;&quot;</span>
+<span class="sd">    (1, 3)"""</span>
     <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Squeeze</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">op_args</span><span class="o">=</span><span class="p">(</span><span class="n">axis</span><span class="p">,),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ravel"><a class="viewcode-back" href="../../../../generated/mygrad.ravel.html#mygrad.ravel">[docs]</a><span class="nd">@implements_numpy_override</span><span class="p">()</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">ravel</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Flattens contents of a tensor into a contiguous 1-D array.  A copy is made only if needed.</span>
 
 <span class="sd">    This docstring was adapted from ``numpy.ravel``.</span>
@@ -684,13 +684,13 @@ document.write(`
 <span class="sd">    ...                [3, 4]])</span>
 <span class="sd">    &gt;&gt;&gt; mg.ravel(x)</span>
 <span class="sd">    Tensor([1, 2, 3, 4])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Ravel</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="expand_dims"><a class="viewcode-back" href="../../../../generated/mygrad.expand_dims.html#mygrad.expand_dims">[docs]</a><span class="nd">@implements_numpy_override</span><span class="p">()</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">expand_dims</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Expand the dimensions of a tensor by adding a new axis.</span>
 
 <span class="sd">    This docstring was adapted from ``numpy.expand_dims``.</span>
@@ -723,7 +723,7 @@ document.write(`
 <span class="sd">    &gt;&gt;&gt; z = mg.expand_dims(y, 0)</span>
 <span class="sd">    &gt;&gt;&gt; z.shape</span>
 <span class="sd">    (1, 2, 1)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">ExpandDims</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">op_args</span><span class="o">=</span><span class="p">(</span><span class="n">axis</span><span class="p">,),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
 
 
@@ -731,7 +731,7 @@ document.write(`
 <span class="k">def</span><span class="w"> </span><span class="nf">broadcast_to</span><span class="p">(</span>
     <span class="n">a</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <span class="n">Shape</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Broadcast a tensor to a new shape.</span>
 
 <span class="sd">    This docstring was adapted from ``numpy.broadcast_to``.</span>
@@ -758,7 +758,7 @@ document.write(`
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
 <span class="sd">        If the array is not compatible with the new shape</span>
-<span class="sd">        according to Numpy&#39;s broadcasting rules.</span>
+<span class="sd">        according to Numpy's broadcasting rules.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -773,7 +773,7 @@ document.write(`
 <span class="sd">    ...</span>
 <span class="sd">    ValueError: operands could not be broadcast together with remapped</span>
 <span class="sd">    shapes [original-&gt;remapped]: (3,) and requested shape (4,4)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">BroadcastTo</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">op_args</span><span class="o">=</span><span class="p">(</span><span class="n">shape</span><span class="p">,),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
 
 
@@ -811,7 +811,7 @@ document.write(`
 <span class="k">def</span><span class="w"> </span><span class="nf">atleast_1d</span><span class="p">(</span>
     <span class="o">*</span><span class="n">tensors</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tensor</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Convert inputs to tensors with at least one dimension.</span>
 
 <span class="sd">    Scalar inputs are converted to 1-dimensional tensors, whilst</span>
@@ -866,7 +866,7 @@ document.write(`
 
 <span class="sd">    &gt;&gt;&gt; np.atleast_1d(x, 1.)</span>
 <span class="sd">    [Tensor([2.]), Tensor([1.])]</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">_dispatch_atleast_kd</span><span class="p">(</span><span class="n">atleast_1d</span><span class="p">,</span> <span class="n">AtLeast1D</span><span class="p">,</span> <span class="o">*</span><span class="n">tensors</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
 
 
@@ -888,7 +888,7 @@ document.write(`
 <span class="k">def</span><span class="w"> </span><span class="nf">atleast_2d</span><span class="p">(</span>
     <span class="o">*</span><span class="n">tensors</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tensor</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Convert inputs to tensors with at least one dimension.</span>
 
 <span class="sd">    Scalar inputs are converted to 2-dimensional tensors, whilst</span>
@@ -941,7 +941,7 @@ document.write(`
 
 <span class="sd">    &gt;&gt;&gt; np.atleast_2d(x, 1.)</span>
 <span class="sd">    [Tensor([[2.]]), Tensor([[1.]])]</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">_dispatch_atleast_kd</span><span class="p">(</span><span class="n">atleast_2d</span><span class="p">,</span> <span class="n">AtLeast2D</span><span class="p">,</span> <span class="o">*</span><span class="n">tensors</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
 
 
@@ -963,7 +963,7 @@ document.write(`
 <span class="k">def</span><span class="w"> </span><span class="nf">atleast_3d</span><span class="p">(</span>
     <span class="o">*</span><span class="n">tensors</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tensor</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Convert inputs to tensors with at least one dimension.</span>
 
 <span class="sd">    Scalar inputs are converted to 3-dimensional tensors, whilst</span>
@@ -1022,7 +1022,7 @@ document.write(`
 
 <span class="sd">    &gt;&gt;&gt; np.atleast_3d(x, 1.)</span>
 <span class="sd">    [Tensor([[[2.]]]), Tensor([[[1.]]])]</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">_dispatch_atleast_kd</span><span class="p">(</span><span class="n">atleast_3d</span><span class="p">,</span> <span class="n">AtLeast3D</span><span class="p">,</span> <span class="o">*</span><span class="n">tensors</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
 </pre></div>
 

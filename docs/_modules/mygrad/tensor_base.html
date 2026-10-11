@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad.tensor_base &#8212; MyGrad 2.3.0.post1.dev31 documentation</title>
+    <title>mygrad.tensor_base &#8212; MyGrad 2.3.0.post1.dev35 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev31 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev35 documentation</p>
   
 </a></div>
     
@@ -528,11 +528,11 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <h1>Source code for mygrad.tensor_base</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">This module defines the base tensor class along with all of its essential</span>
 <span class="sd">attributes and special methods. Public math methods, e.g. ``sum``, ``mean``,</span>
 <span class="sd">etc., are bound to the Tensor class in ``mygrad.__init__.py``.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">deque</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Integral</span><span class="p">,</span> <span class="n">Number</span>
@@ -595,21 +595,21 @@ document.write(`
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">DTypeLike</span><span class="p">,</span> <span class="n">DTypeLikeReals</span><span class="p">,</span> <span class="n">Index</span><span class="p">,</span> <span class="n">Shape</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Tensor&quot;</span><span class="p">,</span> <span class="s2">&quot;asarray&quot;</span><span class="p">,</span> <span class="s2">&quot;astensor&quot;</span><span class="p">,</span> <span class="s2">&quot;implements_numpy_override&quot;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"Tensor"</span><span class="p">,</span> <span class="s2">"asarray"</span><span class="p">,</span> <span class="s2">"astensor"</span><span class="p">,</span> <span class="s2">"implements_numpy_override"</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.ufuncs._ufunc_creators</span><span class="w"> </span><span class="kn">import</span> <span class="n">ufunc</span> <span class="k">as</span> <span class="n">mygrad_ufunc</span>
 
 
-<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">)</span>
+<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">"T"</span><span class="p">)</span>
 
 <span class="n">CONSTANT_ONLY_DTYPES</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_resolve_constant</span><span class="p">(</span><span class="o">*</span><span class="n">others</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Determines if `constant` should be resolved to True based on `others`.</span>
+<span class="w">    </span><span class="sd">"""Determines if `constant` should be resolved to True based on `others`.</span>
 <span class="sd">    Otherwise defers to a tensor-creator to handle further resolutions based on dtype.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">constant</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">constant</span>
     <span class="k">for</span> <span class="n">other</span> <span class="ow">in</span> <span class="n">others</span><span class="p">:</span>
@@ -621,7 +621,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="asarray"><a class="viewcode-back" href="../../generated/mygrad.asarray.html#mygrad.asarray">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">asarray</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">order</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert the input to an array.</span>
+<span class="w">    </span><span class="sd">"""Convert the input to an array.</span>
 
 <span class="sd">    This docstring is adapted from that of ``numpy.asarray``</span>
 
@@ -635,10 +635,10 @@ document.write(`
 <span class="sd">    dtype : data-type, optional</span>
 <span class="sd">        By default, the data-type is inferred from the input data.</span>
 
-<span class="sd">    order : {&#39;C&#39;, &#39;F&#39;}, optional</span>
+<span class="sd">    order : {'C', 'F'}, optional</span>
 <span class="sd">        Whether to use row-major (C-style) or</span>
 <span class="sd">        column-major (Fortran-style) memory representation.</span>
-<span class="sd">        Defaults to &#39;C&#39;.</span>
+<span class="sd">        Defaults to 'C'.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -683,12 +683,12 @@ document.write(`
 
 <span class="sd">    &gt;&gt;&gt; issubclass(np.recarray, np.ndarray)</span>
 <span class="sd">    True</span>
-<span class="sd">    &gt;&gt;&gt; a = np.array([(1.0, 2), (3.0, 4)], dtype=&#39;f4,i4&#39;).view(np.recarray)</span>
+<span class="sd">    &gt;&gt;&gt; a = np.array([(1.0, 2), (3.0, 4)], dtype='f4,i4').view(np.recarray)</span>
 <span class="sd">    &gt;&gt;&gt; mg.asarray(a) is a</span>
 <span class="sd">    False</span>
 <span class="sd">    &gt;&gt;&gt; np.asanyarray(a) is a</span>
 <span class="sd">    True</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">):</span>
         <span class="n">a</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">data</span>  <span class="c1"># faster than passing the tensor directly</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span></div>
@@ -701,8 +701,8 @@ document.write(`
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">copy</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">ndmin</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Create a tensor</span>
 
 <span class="sd">    This documentation was adapted from that of ``numpy.array`</span>
@@ -778,9 +778,9 @@ document.write(`
 
 <span class="sd">    Type provided:</span>
 
-<span class="sd">    &gt;&gt;&gt; mg.tensor([1, 2, 3], dtype=&quot;float32&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; mg.tensor([1, 2, 3], dtype="float32")</span>
 <span class="sd">    Tensor([1., 2., 3.], dtype=float32)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arr_like</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">)</span> <span class="ow">and</span> <span class="n">copy</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">constant</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">arr_like</span><span class="o">.</span><span class="n">constant</span> <span class="ow">is</span> <span class="n">constant</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
@@ -788,7 +788,7 @@ document.write(`
         <span class="p">):</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ndmin</span><span class="p">,</span> <span class="n">Integral</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;TypeError: `ndmin` requires a non-negative integer (got type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">ndmin</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
+                    <span class="sa">f</span><span class="s2">"TypeError: `ndmin` requires a non-negative integer (got type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">ndmin</span><span class="p">)</span><span class="si">}</span><span class="s2">)"</span>
                 <span class="p">)</span>
             <span class="k">if</span> <span class="n">ndmin</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">ndmin</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># numpy does this</span>
@@ -802,8 +802,8 @@ document.write(`
 
 <div class="viewcode-block" id="astensor"><a class="viewcode-back" href="../../generated/mygrad.astensor.html#mygrad.astensor">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">astensor</span><span class="p">(</span>
     <span class="n">t</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLikeReals</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert the input to a tensor.</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Convert the input to a tensor.</span>
 
 <span class="sd">    A tensor `t` is returned unchanged - its gradient and computational</span>
 <span class="sd">    graph state preserved - if dtype and constant are compatible.</span>
@@ -874,7 +874,7 @@ document.write(`
 <span class="sd">    False</span>
 
 <span class="sd">    Otherwise, if `constant` is set, a new tensor is created (with</span>
-<span class="sd">    no copy of the underlying data) only if constant doesn&#39;t match.</span>
+<span class="sd">    no copy of the underlying data) only if constant doesn't match.</span>
 
 <span class="sd">    &gt;&gt;&gt; t1 = mg.tensor([1, 2], constant=False)</span>
 <span class="sd">    &gt;&gt;&gt; mg.astensor(t1, constant=False) is t</span>
@@ -883,13 +883,13 @@ document.write(`
 <span class="sd">    False</span>
 <span class="sd">    &gt;&gt;&gt; mg.astensor(t1, constant=True).data is t1.data</span>
 <span class="sd">    True</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">tensor</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
 
 
-<span class="n">_REGISTERED_UFUNC</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ufunc</span><span class="p">,</span> <span class="n">Type</span><span class="p">[</span><span class="s2">&quot;mygrad_ufunc&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">_REGISTERED_UFUNC</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ufunc</span><span class="p">,</span> <span class="n">Type</span><span class="p">[</span><span class="s2">"mygrad_ufunc"</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
 <span class="n">_REGISTERED_DIFFERENTIABLE_NUMPY_FUNCS</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span>
-    <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">]</span>
+    <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="s2">"Tensor"</span><span class="p">]</span>
 <span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
 <span class="n">_REGISTERED_BOOL_ONLY_UFUNC</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ufunc</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
@@ -942,7 +942,7 @@ document.write(`
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">implements_numpy_override</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Registers a mygrad-based override for a NumPy function of the same name, via</span>
+<span class="w">    </span><span class="sd">"""Registers a mygrad-based override for a NumPy function of the same name, via</span>
 <span class="sd">    the standard __array_function__ interface. [1]_</span>
 
 <span class="sd">    Examples</span>
@@ -950,12 +950,12 @@ document.write(`
 <span class="sd">    &gt;&gt;&gt; @implements_numpy_override()  # np.reshape to be overridden</span>
 <span class="sd">    ... def reshape(x, shape):</span>
 <span class="sd">    ...    # a mygrad-based implementation of numpy.reshape</span>
-<span class="sd">    ...    print(&quot;hello world&quot;)</span>
+<span class="sd">    ...    print("hello world")</span>
 
 <span class="sd">    &gt;&gt;&gt; import numpy as np</span>
 <span class="sd">    &gt;&gt;&gt; import mygrad as mg</span>
 <span class="sd">    &gt;&gt;&gt; np.reshape(mg.tensor(1.), 2)</span>
-<span class="sd">    &#39;hello world&#39;</span>
+<span class="sd">    'hello world'</span>
 
 <span class="sd">    You can also explicit provide the numpy function explicitly</span>
 
@@ -967,9 +967,9 @@ document.write(`
 <span class="sd">    References</span>
 <span class="sd">    ----------</span>
 <span class="sd">    .. [1] https://numpy.org/devdocs/reference/arrays.classes.html?#numpy.class.__array_function__</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
-    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;numpy_func&quot;</span><span class="p">,)</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"numpy_func"</span><span class="p">,)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numpy_func</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="c1"># if None, `numpy_func` is inferred from the name of the decorated function</span>
@@ -981,8 +981,8 @@ document.write(`
                 <span class="bp">self</span><span class="o">.</span><span class="n">numpy_func</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">np</span><span class="p">,</span> <span class="n">wrapped_func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;@implements_numpy_override tried to register an override for the function numpy.</span><span class="si">{</span><span class="n">wrapped_func</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">, but no &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;such function exists.&quot;</span>
+                    <span class="sa">f</span><span class="s2">"@implements_numpy_override tried to register an override for the function numpy.</span><span class="si">{</span><span class="n">wrapped_func</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">, but no "</span>
+                    <span class="sa">f</span><span class="s2">"such function exists."</span>
                 <span class="p">)</span>
 
         <span class="n">_REGISTERED_DIFFERENTIABLE_NUMPY_FUNCS</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">numpy_func</span><span class="p">]</span> <span class="o">=</span> <span class="n">wrapped_func</span>
@@ -993,9 +993,9 @@ document.write(`
     <span class="k">pass</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_as_constant_array</span><span class="p">(</span><span class="n">t</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;Tensor&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Passes through all non-tensor objects and constant tensors. Raises on</span>
-<span class="sd">    non-constant tensors.&quot;&quot;&quot;</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_as_constant_array</span><span class="p">(</span><span class="n">t</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="s2">"Tensor"</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Passes through all non-tensor objects and constant tensors. Raises on</span>
+<span class="sd">    non-constant tensors."""</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">constant</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">_ConstantOnly</span><span class="p">()</span>
@@ -1004,11 +1004,11 @@ document.write(`
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A numpy-array-like object capable of serving as a node in a computational</span>
+<span class="w">    </span><span class="sd">"""A numpy-array-like object capable of serving as a node in a computational</span>
 <span class="sd">    graph that supports back-propagation of derivatives via the chain rule.</span>
 <span class="sd">    See the Examples section of the docstring for more details.</span>
 
-<span class="sd">    Like the numpy array, mygrad&#39;s tensor stores data as an N-dimensional array</span>
+<span class="sd">    Like the numpy array, mygrad's tensor stores data as an N-dimensional array</span>
 <span class="sd">    and provides an interface accessing, setting, and performing vectorized</span>
 <span class="sd">    operations along the various dimensions of this array. Vectorized operations</span>
 <span class="sd">    support numpy-style broadcasting semantics.</span>
@@ -1018,7 +1018,7 @@ document.write(`
 
 <span class="sd">    Creating a Tensor</span>
 <span class="sd">    -----------------</span>
-<span class="sd">    ``mygrad.Tensor`` can be passed any &quot;array-like&quot; object of numerical data.</span>
+<span class="sd">    ``mygrad.Tensor`` can be passed any "array-like" object of numerical data.</span>
 <span class="sd">    This includes numbers, sequences (e.g. lists), nested sequences, numpy-ndarrays,</span>
 <span class="sd">    and other mygrad-tensors. mygrad also provides familiar numpy-style tensor-creation</span>
 <span class="sd">    functions (e.g. ``mygrad.arange``, ``mygrad.linspace``, etc.)</span>
@@ -1050,9 +1050,9 @@ document.write(`
 
 <span class="sd">    Forward and Back-Propagation</span>
 <span class="sd">    ----------------------------</span>
-<span class="sd">    Let&#39;s construct a computational graph consisting of two zero-dimensional</span>
+<span class="sd">    Let's construct a computational graph consisting of two zero-dimensional</span>
 <span class="sd">    tensors, ``x`` and ``y``, which are used to compute an output tensor,</span>
-<span class="sd">    ````. This is a &quot;forward pass imperative&quot; style for creating a computational</span>
+<span class="sd">    ````. This is a "forward pass imperative" style for creating a computational</span>
 <span class="sd">    graph - the graph is constructed as we carry out the forward-pass computation.</span>
 
 <span class="sd">    &gt;&gt;&gt; x = mg.tensor(3.0)</span>
@@ -1085,7 +1085,7 @@ document.write(`
 <span class="sd">    True</span>
 
 <span class="sd">    Or, you can use the ``tensor.null_grad()`` method to manually clear a</span>
-<span class="sd">    tensor&#39;s gradient</span>
+<span class="sd">    tensor's gradient</span>
 
 <span class="sd">    &gt;&gt;&gt; y.null_grad()</span>
 <span class="sd">    Tensor(2.)</span>
@@ -1094,7 +1094,7 @@ document.write(`
 
 <span class="sd">    Accessing the Underlying NumPy Array</span>
 <span class="sd">    ------------------------------------</span>
-<span class="sd">    ``mygrad.Tensor`` is a thin wrapper on ``numpy.ndarray``. A tensor&#39;s</span>
+<span class="sd">    ``mygrad.Tensor`` is a thin wrapper on ``numpy.ndarray``. A tensor's</span>
 <span class="sd">    underlying numpy-array can be accessed via ``.data``:</span>
 
 <span class="sd">    &gt;&gt;&gt; x = mg.tensor([1, 2])</span>
@@ -1105,9 +1105,9 @@ document.write(`
 <span class="sd">    array will not be tracked by any computational graph involving that tensor, thus</span>
 <span class="sd">    back-propagation through that tensor will likely be incorrect.</span>
 
-<span class="sd">    Producing a &quot;View&quot; of a Tensor</span>
+<span class="sd">    Producing a "View" of a Tensor</span>
 <span class="sd">    ------------------------------</span>
-<span class="sd">    MyGrad&#39;s tensors exhibit the same view semantics and memory-sharing relationships</span>
+<span class="sd">    MyGrad's tensors exhibit the same view semantics and memory-sharing relationships</span>
 <span class="sd">    as NumPy arrays. I.e. any (non-scalar) tensor produced via basic indexing will share</span>
 <span class="sd">    memory with its parent.</span>
 
@@ -1126,7 +1126,7 @@ document.write(`
 <span class="sd">    &gt;&gt;&gt; y</span>
 <span class="sd">    Tensor([-1., -2.])</span>
 
-<span class="sd">    And this view relationship will also manifest between the tensors&#39; gradients</span>
+<span class="sd">    And this view relationship will also manifest between the tensors' gradients</span>
 
 <span class="sd">    &gt;&gt;&gt; (x ** 2).backward()</span>
 <span class="sd">    &gt;&gt;&gt; x.grad</span>
@@ -1136,14 +1136,14 @@ document.write(`
 
 <span class="sd">    In-Place Operations are not Efficient</span>
 <span class="sd">    =====================================</span>
-<span class="sd">    It is important to note that while MyGrad&#39;s view semantics promote a rich parity</span>
+<span class="sd">    It is important to note that while MyGrad's view semantics promote a rich parity</span>
 <span class="sd">    with NumPy, that certain aspects should be avoided in the interest of optimized performance.</span>
 <span class="sd">    Namely, performing in-place operations on tensors is generally not more efficient than</span>
 <span class="sd">    their non-mutating counterparts.</span>
 
 <span class="sd">    This is because MyGrad has to track the state of tensors that are involved in a computational</span>
 <span class="sd">    graph. Thus a mutated tensor must have its pre-augmented state stored for future reference; this</span>
-<span class="sd">    defeats the performance benefit of writing to an array&#39;s memory in-place. This is especially</span>
+<span class="sd">    defeats the performance benefit of writing to an array's memory in-place. This is especially</span>
 <span class="sd">    inefficient if you are mutating a tensor involved with multiple views of the same memory(</span>
 <span class="sd">    By contrast, producing a view of a tensor _is_ efficient as one would expect).</span>
 
@@ -1152,17 +1152,17 @@ document.write(`
 <span class="sd">    port NumPy code to MyGrad (or, in the future, inject MyGrad tensors into NumPy!!) and get</span>
 <span class="sd">    the exact same behavior.</span>
 
-<span class="sd">    A final note: MyGrad&#39;s in-place operations, when run under :func:`~mygrad.no_autodiff` mode,</span>
+<span class="sd">    A final note: MyGrad's in-place operations, when run under :func:`~mygrad.no_autodiff` mode,</span>
 <span class="sd">    do not incur the extra costs noted above, and thus your code will benefit from the performance</span>
 <span class="sd">    benefits of in-place operations.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">__array_priority__</span> <span class="o">=</span> <span class="mf">15.0</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__array_ufunc__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">ufunc</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ufunc</span><span class="p">],</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">inputs</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;Tensor&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;An interface provided by NumPy to override the behavior of its ufuncs [1]_.</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s2">"Tensor"</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""An interface provided by NumPy to override the behavior of its ufuncs [1]_.</span>
 
 <span class="sd">        MyGrad implements its own ufuncs for all differentiable NumPy ufuncs.</span>
 
@@ -1215,15 +1215,15 @@ document.write(`
 <span class="sd">        &gt;&gt;&gt; x = mg.tensor([1., 2.])</span>
 <span class="sd">        &gt;&gt;&gt; np.less_equal(x, 1)</span>
 <span class="sd">        array([ True, False])</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;out&quot;</span><span class="p">,</span> <span class="p">(</span><span class="kc">None</span><span class="p">,))</span>
+<span class="sd">        """</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"out"</span><span class="p">,</span> <span class="p">(</span><span class="kc">None</span><span class="p">,))</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;mygrad does not support in-place operations with more that one target&quot;</span>
+                <span class="s2">"mygrad does not support in-place operations with more that one target"</span>
             <span class="p">)</span>
         <span class="p">(</span><span class="n">out</span><span class="p">,)</span> <span class="o">=</span> <span class="n">out</span>
 
-        <span class="n">out</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">]]</span>
+        <span class="n">out</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="s2">"Tensor"</span><span class="p">]]</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># differentiable ufunc implemented by mygrad</span>
@@ -1242,17 +1242,17 @@ document.write(`
 
         <span class="k">try</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;out&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">caster</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="s2">"out"</span><span class="p">]</span> <span class="o">=</span> <span class="n">caster</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
             <span class="c1"># returns ndarray</span>
             <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ufunc</span><span class="p">,</span> <span class="n">method</span><span class="p">)(</span><span class="o">*</span><span class="p">(</span><span class="n">caster</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">_ConstantOnly</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">repr</span><span class="p">(</span><span class="n">ufunc</span><span class="p">)</span><span class="si">}</span><span class="s2"> cannot involve non-constant mygrad tensors.&quot;</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">repr</span><span class="p">(</span><span class="n">ufunc</span><span class="p">)</span><span class="si">}</span><span class="s2"> cannot involve non-constant mygrad tensors."</span>
             <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__array_function__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">types</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;Tensor&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s2">"Tensor"</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
         <span class="k">if</span> <span class="n">func</span> <span class="ow">in</span> <span class="n">_REGISTERED_DIFFERENTIABLE_NUMPY_FUNCS</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">_REGISTERED_DIFFERENTIABLE_NUMPY_FUNCS</span><span class="p">[</span><span class="n">func</span><span class="p">](</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">func</span> <span class="ow">in</span> <span class="n">_REGISTERED_NO_DIFF_NUMPY_FUNCS</span><span class="p">:</span>
@@ -1285,9 +1285,9 @@ document.write(`
         <span class="n">copy</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">ndmin</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
         <span class="n">_creator</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Operation</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">_base</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="s2">&quot;Tensor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">_base</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="s2">"Tensor"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        x : ArrayLike</span>
@@ -1327,10 +1327,10 @@ document.write(`
 
 <span class="sd">        _base : Optional[Tensor]</span>
 <span class="sd">            Points to the tensor that ``self`` shares memory with.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="k">if</span> <span class="n">constant</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">constant</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`constant` must be a boolean value, got: </span><span class="si">{</span><span class="n">constant</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"`constant` must be a boolean value, got: </span><span class="si">{</span><span class="n">constant</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_creator</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Operation</span><span class="p">]</span> <span class="o">=</span> <span class="n">_creator</span>
 
@@ -1341,7 +1341,7 @@ document.write(`
                 <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ndmin</span><span class="p">,</span> <span class="n">Integral</span><span class="p">):</span>
                     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">ndmin</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39; object cannot be interpreted as an integer&quot;</span>
+                        <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">ndmin</span><span class="p">)</span><span class="si">}</span><span class="s2">' object cannot be interpreted as an integer"</span>
                     <span class="p">)</span>
                 <span class="k">if</span> <span class="n">ndmin</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&lt;</span> <span class="n">ndmin</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span>
@@ -1353,17 +1353,17 @@ document.write(`
         <span class="n">dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span>
         <span class="n">is_float</span> <span class="o">=</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">)</span>  <span class="c1"># faster than `numpy.issubdtype`</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">is_float</span> <span class="ow">and</span> <span class="n">_track</span><span class="o">.</span><span class="n">TRACK_GRAPH</span><span class="p">:</span>
-            <span class="c1"># No need to constrain dtypes if we aren&#39;t tracking the graph.</span>
+            <span class="c1"># No need to constrain dtypes if we aren't tracking the graph.</span>
             <span class="c1"># Also, it is nice to enable complex arithmetic through mygrad</span>
             <span class="c1"># functions that are wrapped in no_autodiff</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">dtype</span><span class="p">,</span> <span class="n">CONSTANT_ONLY_DTYPES</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Tensor data must be of an floating type, integer type, or boolean type, &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;received </span><span class="si">{</span><span class="n">dtype</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Tensor data must be of an floating type, integer type, or boolean type, "</span>
+                    <span class="sa">f</span><span class="s2">"received </span><span class="si">{</span><span class="n">dtype</span><span class="si">}</span><span class="s2">"</span>
                 <span class="p">)</span>
 
             <span class="k">elif</span> <span class="n">constant</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Integer-valued tensors must be treated as constants.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Integer-valued tensors must be treated as constants."</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">constant</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># non-float: default constant -&gt; True</span>
@@ -1390,7 +1390,7 @@ document.write(`
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">grad</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Returns the derivative of ``ℒ`` with respect to this tensor.</span>
 
 <span class="sd">        ``ℒ`` is the terminal node in the compuational graph from which</span>
@@ -1439,7 +1439,7 @@ document.write(`
 <span class="sd">        Although ``view`` is not directly involved in the computation in ``ℒ``,</span>
 <span class="sd">        and thus would not typically store a gradient in due to ``ℒ.backward()``,</span>
 <span class="sd">        it shares memory with ``base`` and thus it stores a gradient in correspondence</span>
-<span class="sd">        to this &quot;view relationship&quot;. I.e. because ``view == base[:2]``, then we expect</span>
+<span class="sd">        to this "view relationship". I.e. because ``view == base[:2]``, then we expect</span>
 <span class="sd">        to find that ``view.grad == base.grad[:2]``.</span>
 
 <span class="sd">        &gt;&gt;&gt; base.grad</span>
@@ -1453,10 +1453,10 @@ document.write(`
 <span class="sd">        The reasoning here is that, because a base tensor and its view share the same</span>
 <span class="sd">        array data, then varying an element in that data implies that both the base</span>
 <span class="sd">        tensor and the view will change (assuming the variation occurs specifically in</span>
-<span class="sd">        a shared region). It follows that the base tensor&#39;s gradient must share the same</span>
-<span class="sd">        relationship with the view-tensor since these are measures of &quot;cause and effects&quot;</span>
+<span class="sd">        a shared region). It follows that the base tensor's gradient must share the same</span>
+<span class="sd">        relationship with the view-tensor since these are measures of "cause and effects"</span>
 <span class="sd">        associated with varying elements of data (albeit infinitesmaly).</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grad</span>
 
@@ -1466,7 +1466,7 @@ document.write(`
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">_grad</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_creator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1">#  ``self`` had its graph, connecting it to its base, cleared.</span>
-            <span class="c1">#  ``self._view_grad`` can&#39;t be computed without this info.</span>
+            <span class="c1">#  ``self._view_grad`` can't be computed without this info.</span>
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="p">(</span><span class="n">view_parent</span><span class="p">,)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_creator</span><span class="o">.</span><span class="n">variables</span>
@@ -1480,12 +1480,12 @@ document.write(`
 <div class="viewcode-block" id="Tensor.astype"><a class="viewcode-back" href="../../generated/mygrad.Tensor.astype.html#mygrad.Tensor.astype">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">astype</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLikeReals</span><span class="p">,</span>
-        <span class="n">casting</span><span class="o">=</span><span class="s2">&quot;unsafe&quot;</span><span class="p">,</span>
+        <span class="n">casting</span><span class="o">=</span><span class="s2">"unsafe"</span><span class="p">,</span>
         <span class="n">copy</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Copy of the tensor with the specified dtype.</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Copy of the tensor with the specified dtype.</span>
 
 <span class="sd">        The resulting tensor is not involved in any computational graph</span>
 <span class="sd">        and has no gradient associated with it.</span>
@@ -1498,7 +1498,7 @@ document.write(`
 <span class="sd">            The real-valued numeric data type. This can be a numpy dtype or</span>
 <span class="sd">            a corresponding string identifier.</span>
 
-<span class="sd">        casting : Literal[&#39;no&#39;, &#39;equiv&#39;, &#39;safe&#39;, &#39;same_kind&#39;, &#39;unsafe&#39;]</span>
+<span class="sd">        casting : Literal['no', 'equiv', 'safe', 'same_kind', 'unsafe']</span>
 <span class="sd">            Controls what kind of data casting may occur. Defaults to ‘unsafe’ for backwards compatibility.</span>
 <span class="sd">                - ‘no’ means the data types should not be cast at all.</span>
 <span class="sd">                - ‘equiv’ means only byte-order changes are allowed.</span>
@@ -1533,7 +1533,7 @@ document.write(`
 
 <span class="sd">        Using a string to specify the data type:</span>
 
-<span class="sd">        &gt;&gt;&gt; x.astype(&quot;float32&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; x.astype("float32")</span>
 <span class="sd">        Tensor([0., 1., 2., 3., 4., 5., 6., 7., 8., 9.], dtype=float32)</span>
 
 <span class="sd">        Specifying a numpy data type object, and specifying that the</span>
@@ -1541,7 +1541,7 @@ document.write(`
 
 <span class="sd">        &gt;&gt;&gt; x.astype(np.int8, constant=True)</span>
 <span class="sd">        Tensor([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype=int8)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">cast_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">casting</span><span class="o">=</span><span class="n">casting</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="n">copy</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">cast_data</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">and</span> <span class="p">(</span><span class="n">constant</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant</span> <span class="ow">is</span> <span class="n">constant</span><span class="p">):</span>
@@ -1557,9 +1557,9 @@ document.write(`
         <span class="n">op_args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">op_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">out</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">out</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="s2">"Tensor"</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Wraps operations performed between tensors: f(a, b, ...).</span>
+<span class="w">        </span><span class="sd">"""Wraps operations performed between tensors: f(a, b, ...).</span>
 
 <span class="sd">        For developer use only.</span>
 
@@ -1574,32 +1574,32 @@ document.write(`
 <span class="sd">            numerical sequences, numpy-ndarrays, and mygrad-tensors.</span>
 
 <span class="sd">        op_args : Optional[Tuple[Any, ...]]</span>
-<span class="sd">            Arbitrary positional arguments passed to the operation&#39;s forward pass.</span>
+<span class="sd">            Arbitrary positional arguments passed to the operation's forward pass.</span>
 
 <span class="sd">        op_kwargs : Optional[Dict[str, Any]]</span>
-<span class="sd">            Arbitrary keyword arguments passed to the operation&#39;s forward pass.</span>
+<span class="sd">            Arbitrary keyword arguments passed to the operation's forward pass.</span>
 
 <span class="sd">        constant : bool, optional (default=False)</span>
 <span class="sd">            If True, the resulting Tensor is a constant.</span>
 
-<span class="sd">        out: Optional[Union[np.ndarray, &quot;Tensor&quot;]]</span>
+<span class="sd">        out: Optional[Union[np.ndarray, "Tensor"]]</span>
 <span class="sd">            The target where the output (an ndarray) of the operation will be written.</span>
 <span class="sd">            Thus this raises if `out` is read-only.</span>
 
 <span class="sd">            There is an exception to this if  a tensor is provided, in which case the</span>
 <span class="sd">            operation does not write to its underlying memory but rather triggers</span>
-<span class="sd">            &quot;in-place semantics&quot; so that the computational graph behaves as if the</span>
+<span class="sd">            "in-place semantics" so that the computational graph behaves as if the</span>
 <span class="sd">            tensor was mutated. See  ``Tensor._in_place_op`` for more details.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        mygrad.Tensor</span>
-<span class="sd">            The tensor-result of the operation&#39;s forward-pass.&quot;&quot;&quot;</span>
+<span class="sd">            The tensor-result of the operation's forward-pass."""</span>
         <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="s2">&quot;mygrad does not support in-place operations with more that one target&quot;</span>
+                        <span class="s2">"mygrad does not support in-place operations with more that one target"</span>
                     <span class="p">)</span>
                 <span class="p">(</span><span class="n">out</span><span class="p">,)</span> <span class="o">=</span> <span class="n">out</span>
 
@@ -1692,7 +1692,7 @@ document.write(`
 
         <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">input_vars</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">):</span>
-                <span class="c1"># tensor&#39;s graph has been cleared, but its base lingers</span>
+                <span class="c1"># tensor's graph has been cleared, but its base lingers</span>
                 <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">_base</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">v</span><span class="o">.</span><span class="n">_creator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">v</span><span class="o">.</span><span class="n">_base</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -1741,15 +1741,15 @@ document.write(`
             <span class="n">finalize</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">_mem</span><span class="o">.</span><span class="n">release_writeability_lock_on_op</span><span class="p">,</span> <span class="n">tensor_refs</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">tensor_out</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_replay_op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">input_vars</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;*dev use only*</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_replay_op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">input_vars</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""*dev use only*</span>
 
 <span class="sd">        Replays the op that produced `self` - called on the specified</span>
-<span class="sd">        input vars&quot;&quot;&quot;</span>
+<span class="sd">        input vars"""</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">creator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">DisconnectedView</span><span class="p">(</span>
-                <span class="s2">&quot;``Tensor._replay_op(...)`` was called on a tensor without a creator.&quot;</span>
-                <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Please report this error at: https://github.com/rsokl/MyGrad/issues&quot;</span>
+                <span class="s2">"``Tensor._replay_op(...)`` was called on a tensor without a creator."</span>
+                <span class="s2">"</span><span class="se">\n</span><span class="s2">Please report this error at: https://github.com/rsokl/MyGrad/issues"</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span>
             <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">creator</span><span class="p">),</span>
@@ -1760,7 +1760,7 @@ document.write(`
         <span class="p">)</span>
 
 <div class="viewcode-block" id="Tensor.backward"><a class="viewcode-back" href="../../generated/mygrad.Tensor.backward.html#mygrad.Tensor.backward">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">backward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grad</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Trigger backpropagation and compute the derivatives of this tensor.</span>
+<span class="w">        </span><span class="sd">"""Trigger backpropagation and compute the derivatives of this tensor.</span>
 
 <span class="sd">        Designating this tensor as the tensor ℒ, compute dℒ/dx for all (non-constant) tensors</span>
 <span class="sd">        that preceded ℒ in its computational graph, and store each of these derivatives in ``x.grad``</span>
@@ -1778,7 +1778,7 @@ document.write(`
 <span class="sd">        ----------</span>
 <span class="sd">        grad : Optional[array_like], (must be broadcast-compatible with ``self``</span>
 <span class="sd">            By default, the present tensor is treated as the terminus of the computational graph (ℒ).</span>
-<span class="sd">            Otherwise, one can specify a &quot;downstream&quot; derivative, representing ``dℒ/d(self)``.</span>
+<span class="sd">            Otherwise, one can specify a "downstream" derivative, representing ``dℒ/d(self)``.</span>
 <span class="sd">            This can be used to effectively connect otherwise separate computational graphs.</span>
 
 <span class="sd">        Examples</span>
@@ -1820,7 +1820,7 @@ document.write(`
 <span class="sd">        &gt;&gt;&gt; x.backward(2.)</span>
 <span class="sd">        &gt;&gt;&gt; x.grad  # Would normally be dℒ/dℒ == 1</span>
 <span class="sd">        array(2.)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">_track</span><span class="o">.</span><span class="n">TRACK_GRAPH</span><span class="p">:</span>
             <span class="k">return</span>
 
@@ -1828,12 +1828,12 @@ document.write(`
             <span class="bp">self</span><span class="o">.</span><span class="n">clear_graph</span><span class="p">()</span>
             <span class="k">return</span>
 
-        <span class="n">topo_sorted_tensors</span><span class="p">:</span> <span class="n">Deque</span><span class="p">[</span><span class="s2">&quot;Tensor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">deque</span><span class="p">([])</span>
+        <span class="n">topo_sorted_tensors</span><span class="p">:</span> <span class="n">Deque</span><span class="p">[</span><span class="s2">"Tensor"</span><span class="p">]</span> <span class="o">=</span> <span class="n">deque</span><span class="p">([])</span>
         <span class="n">seen</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
         <span class="n">collect_all_tensors_and_clear_grads</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seen</span><span class="p">,</span> <span class="n">topo_sorted_tensors</span><span class="p">)</span>
 
-        <span class="c1"># don&#39;t set self._grad yet because there is a grad-clearing step that</span>
+        <span class="c1"># don't set self._grad yet because there is a grad-clearing step that</span>
         <span class="c1"># occurs during graph creation</span>
         <span class="k">if</span> <span class="n">grad</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># `self` is guaranteed to be a tensor of floats</span>
@@ -1854,9 +1854,9 @@ document.write(`
                         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">()</span>
                 <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;`tensor.backward(grad)` was passed a gradient with an incompatible shape.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;`grad` must be broadcast-compatible with `tensor.shape=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">`</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;Got `grad.shape=</span><span class="si">{</span><span class="n">_grad</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">`&quot;</span>
+                        <span class="sa">f</span><span class="s2">"`tensor.backward(grad)` was passed a gradient with an incompatible shape.</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="sa">f</span><span class="s2">"`grad` must be broadcast-compatible with `tensor.shape=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">`</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="sa">f</span><span class="s2">"Got `grad.shape=</span><span class="si">{</span><span class="n">_grad</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">`"</span>
                     <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">_grad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
@@ -1870,10 +1870,10 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">clear_graph</span><span class="p">()</span></div>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_backward</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        **For dev-use only**</span>
 
-<span class="sd">        If `self` has accumulated incoming gradients from all operations in the terminal node&#39;s</span>
+<span class="sd">        If `self` has accumulated incoming gradients from all operations in the terminal node's</span>
 <span class="sd">        computational graph, back-propagate the accumulated gradient to the creator of `self`.</span>
 
 <span class="sd">        Parameters</span>
@@ -1887,28 +1887,28 @@ document.write(`
 <span class="sd">        AssertionError</span>
 <span class="sd">            Raises if the tensor and its associated gradient possess different shapes.</span>
 <span class="sd">            Raises if `_backward` triggered on a tensor with gradient of `None`.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grad</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;backprop, post grad-accumulation, was triggered &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;on a tensor with no gradient&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">id </span><span class="si">{</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ops</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">grad: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">creator: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">creator</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">ops: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_ops</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">base: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"backprop, post grad-accumulation, was triggered "</span>
+            <span class="sa">f</span><span class="s2">"on a tensor with no gradient"</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">id </span><span class="si">{</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ops</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">grad: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="si">}</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">creator: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">creator</span><span class="si">}</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">ops: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_ops</span><span class="si">}</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">base: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grad</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;A tensor and its associated gradient must possess the same shape. Got:&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">tensor-shape: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">grad-shape: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_grad</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"A tensor and its associated gradient must possess the same shape. Got:"</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">tensor-shape: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">grad-shape: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_grad</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_creator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_creator</span><span class="o">.</span><span class="n">backward</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_grad</span><span class="p">)</span>
         <span class="k">return</span>
 
-<div class="viewcode-block" id="Tensor.null_grad"><a class="viewcode-back" href="../../generated/mygrad.Tensor.null_grad.html#mygrad.Tensor.null_grad">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">null_grad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">_clear_view_info</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets this tensor&#39;s gradient to be ``None``.</span>
+<div class="viewcode-block" id="Tensor.null_grad"><a class="viewcode-back" href="../../generated/mygrad.Tensor.null_grad.html#mygrad.Tensor.null_grad">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">null_grad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">_clear_view_info</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Sets this tensor's gradient to be ``None``.</span>
 
 <span class="sd">        This operation is performed in-place, but a reference to the</span>
 <span class="sd">        tensor is returned in order to permit mapping semantics.</span>
@@ -1929,7 +1929,7 @@ document.write(`
 <span class="sd">        &gt;&gt;&gt; x.null_grad()  # returns a reference of `x`</span>
 <span class="sd">        Tensor(2.0)</span>
 <span class="sd">        &gt;&gt;&gt; x.grad is None</span>
-<span class="sd">        True&quot;&quot;&quot;</span>
+<span class="sd">        True"""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_view_grad</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_grad</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -1940,7 +1940,7 @@ document.write(`
         <span class="k">return</span> <span class="bp">self</span></div>
 
 <div class="viewcode-block" id="Tensor.null_gradients"><a class="viewcode-back" href="../../generated/mygrad.Tensor.null_gradients.html#mygrad.Tensor.null_gradients">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">null_gradients</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clear_graph</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        **Deprecated: Tensors will automatically have their computational graphs cleared during backprop.</span>
 <span class="sd">        Simply involving a tensor in a new computational graph will null its gradient.**</span>
 
@@ -1976,20 +1976,20 @@ document.write(`
 <span class="sd">        &gt;&gt;&gt; f.null_gradients()  # set tensor.grad to None for all tensors in the graph</span>
 <span class="sd">        &gt;&gt;&gt; all(tensor.grad is None for tensor in (f, w , x, y))</span>
 <span class="sd">        True</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-            <span class="s2">&quot;`tensor.null_gradients()` is deprecated. Calling it will raise an error &quot;</span>
-            <span class="s2">&quot;in future versions of MyGrad. A tensor will automatically &quot;</span>
-            <span class="s2">&quot;have its gradient nulled if you use it in a new computational graph. &quot;</span>
-            <span class="s2">&quot;Or, you can call `tensor.null_grad()` to null that individual tensor&#39;s &quot;</span>
-            <span class="s2">&quot;gradient.&quot;</span><span class="p">,</span>
+            <span class="s2">"`tensor.null_gradients()` is deprecated. Calling it will raise an error "</span>
+            <span class="s2">"in future versions of MyGrad. A tensor will automatically "</span>
+            <span class="s2">"have its gradient nulled if you use it in a new computational graph. "</span>
+            <span class="s2">"Or, you can call `tensor.null_grad()` to null that individual tensor's "</span>
+            <span class="s2">"gradient."</span><span class="p">,</span>
             <span class="ne">FutureWarning</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Tensor.clear_graph"><a class="viewcode-back" href="../../generated/mygrad.Tensor.clear_graph.html#mygrad.Tensor.clear_graph">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">clear_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Removes the current tensor – and tensors above it – from their shared</span>
 <span class="sd">        computational graph.</span>
 
@@ -2008,9 +2008,9 @@ document.write(`
 <span class="sd">        &gt;&gt;&gt; y.clear_graph()</span>
 <span class="sd">        &gt;&gt;&gt; x.flags.writeable, y.creator</span>
 <span class="sd">        (True, None)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># &quot;pull&quot; on grad to force views to update their</span>
+            <span class="c1"># "pull" on grad to force views to update their</span>
             <span class="c1"># gradients from upstream before the graph info</span>
             <span class="c1"># gets cleared</span>
             <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad</span>
@@ -2022,14 +2022,14 @@ document.write(`
             <span class="k">return</span>
 
         <span class="n">creator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_creator</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_creator</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># marks tensor as &quot;visited&quot; during graph-traversal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_creator</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># marks tensor as "visited" during graph-traversal</span>
 
-        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">creator</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span>  <span class="c1"># type: &quot;Tensor&quot;</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">creator</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span>  <span class="c1"># type: "Tensor"</span>
             <span class="n">var</span><span class="o">.</span><span class="n">clear_graph</span><span class="p">()</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">constant</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;If ``True``, this tensor is a constant; it will not propagate any gradient.</span>
+<span class="w">        </span><span class="sd">"""If ``True``, this tensor is a constant; it will not propagate any gradient.</span>
 
 <span class="sd">        Additionally, any tensor that is a descendant of constant tensors will also</span>
 <span class="sd">        be a constant.</span>
@@ -2070,12 +2070,12 @@ document.write(`
 
 <span class="sd">        &gt;&gt;&gt; mg.Tensor([1, 2]).constant</span>
 <span class="sd">        True</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_constant</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">creator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Operation</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;The ``Operation`` instance that produced ``self``.</span>
+<span class="w">        </span><span class="sd">"""The ``Operation`` instance that produced ``self``.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -2092,7 +2092,7 @@ document.write(`
 <span class="sd">        &gt;&gt;&gt; z = x * y  # Multiply(x, y) -&gt; z</span>
 <span class="sd">        &gt;&gt;&gt; z.creator</span>
 <span class="sd">         &lt;mygrad.math.arithmetic.ops.Multiply at 0x2df5a130438&gt;</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_creator</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
@@ -2101,14 +2101,14 @@ document.write(`
     <span class="k">def</span><span class="w"> </span><span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="fm">__contains__</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">Index</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">Index</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">GetItem</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">op_args</span><span class="o">=</span><span class="p">(</span><span class="n">item</span><span class="p">,))</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="s2">&quot;Tensor&quot;</span><span class="p">]:</span>
-        <span class="c1"># In the same way that numpy doesn&#39;t let you iterate over 0-dimensional</span>
-        <span class="c1"># arrays, don&#39;t allow iteration over 0-dimensional arrays.</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="s2">"Tensor"</span><span class="p">]:</span>
+        <span class="c1"># In the same way that numpy doesn't let you iterate over 0-dimensional</span>
+        <span class="c1"># arrays, don't allow iteration over 0-dimensional arrays.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;iteration over a 0-d tensor&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"iteration over a 0-d tensor"</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_in_place_op</span><span class="p">(</span>
@@ -2131,7 +2131,7 @@ document.write(`
         <span class="c1">#</span>
         <span class="c1"># **********************************************************************************</span>
         <span class="c1"># The way that in-place updates work in MyGrad is that any tensor that</span>
-        <span class="c1"># is about to undergo a mutation gets &quot;cloned&quot;. Each resulting &quot;placeholder&quot;</span>
+        <span class="c1"># is about to undergo a mutation gets "cloned". Each resulting "placeholder"</span>
         <span class="c1"># is used to represent that tensor in any non-view operations that the tensor</span>
         <span class="c1"># was participating in. This ensures that the stateful computational graph</span>
         <span class="c1"># is not corrupted by this mutation.</span>
@@ -2141,7 +2141,7 @@ document.write(`
         <span class="c1"># exist only internally to the computational graph and thus cannot be the</span>
         <span class="c1"># targets of subsequent views or in-place updates.</span>
         <span class="c1">#</span>
-        <span class="c1"># At this point, the &quot;original&quot; tensors merely reserve the publicly-available</span>
+        <span class="c1"># At this point, the "original" tensors merely reserve the publicly-available</span>
         <span class="c1"># Tensor-instances (husks) that the users will access. We eventually need to</span>
         <span class="c1"># populate these husks with the appropriate augmented contents and graph-history.</span>
         <span class="c1">#</span>
@@ -2157,7 +2157,7 @@ document.write(`
         <span class="c1"># Finally we mirror each of these new tensors into the husks of the publicly</span>
         <span class="c1"># -available tensors and reroute the computational graph through them so that</span>
         <span class="c1"># the user sees that all of the relevant tensors have been augmented, and that</span>
-        <span class="c1"># they are connected to the appropriate &quot;history&quot; such that backprop occurs</span>
+        <span class="c1"># they are connected to the appropriate "history" such that backprop occurs</span>
         <span class="c1"># without error or inaccuracy.</span>
         <span class="c1">#</span>
         <span class="c1">#</span>
@@ -2173,7 +2173,7 @@ document.write(`
         <span class="c1"># mutating a view of `x`, since `x` is already the base tensor.</span>
         <span class="c1">#  - This should not affect `y`</span>
         <span class="c1">#  - It should affect `view_x`</span>
-        <span class="c1">#  - It should *not* affect `w`, which depends on `view_x` in a &quot;static&quot; way.</span>
+        <span class="c1">#  - It should *not* affect `w`, which depends on `view_x` in a "static" way.</span>
         <span class="c1">#    I.e. the value for `w` is already resolved and is not a view of z or x.</span>
         <span class="c1">#</span>
         <span class="c1">#</span>
@@ -2202,7 +2202,7 @@ document.write(`
         <span class="c1">#</span>
         <span class="c1"># **********************************************************************************</span>
         <span class="c1">#</span>
-        <span class="c1"># Replace base and all of its views with &quot;placeholder&quot; tensors;</span>
+        <span class="c1"># Replace base and all of its views with "placeholder" tensors;</span>
         <span class="c1"># they serve as internal references to all tensors pre-mutation</span>
         <span class="c1"># and will preserve ops relying on the un-mutated tensors.</span>
         <span class="c1">#</span>
@@ -2301,7 +2301,7 @@ document.write(`
                     <span class="c1"># ~mask * grad  backprops to upstream placeholder</span>
                     <span class="n">graph</span><span class="p">[</span><span class="bp">self</span><span class="p">]</span><span class="o">.</span><span class="n">placeholder</span><span class="p">,</span>
                     <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span>
-                        <span class="s2">&quot;mask&quot;</span><span class="p">:</span> <span class="n">placeholder_mutant_view</span><span class="o">.</span><span class="n">creator</span><span class="o">.</span><span class="n">where</span><span class="p">,</span>
+                        <span class="s2">"mask"</span><span class="p">:</span> <span class="n">placeholder_mutant_view</span><span class="o">.</span><span class="n">creator</span><span class="o">.</span><span class="n">where</span><span class="p">,</span>
                     <span class="p">},</span>
                 <span class="p">)</span>
 
@@ -2309,9 +2309,9 @@ document.write(`
         <span class="c1"># tensor `out`.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># The current graph:</span>
-            <span class="c1">#    base-p --&gt; | inplace | --&gt; vp&#39;</span>
+            <span class="c1">#    base-p --&gt; | inplace | --&gt; vp'</span>
             <span class="c1"># Becomes:</span>
-            <span class="c1">#    base-p --&gt; | inplace | --&gt; base&#39;</span>
+            <span class="c1">#    base-p --&gt; | inplace | --&gt; base'</span>
             <span class="c1">#</span>
             <span class="c1"># The base tensor itself was the target of the in-place operation,</span>
             <span class="c1"># thus we need simply mirror original base against the mutant placeholder.</span>
@@ -2323,12 +2323,12 @@ document.write(`
             <span class="c1"># to graph and then reproduce downstream views</span>
             <span class="c1">#</span>
             <span class="c1"># The current graph:</span>
-            <span class="c1">#    vp --&gt; | inplace | --&gt; vp&#39;</span>
+            <span class="c1">#    vp --&gt; | inplace | --&gt; vp'</span>
             <span class="c1">#</span>
             <span class="c1"># Becomes:</span>
             <span class="c1">#</span>
-            <span class="c1">#    vp --&gt; | inplace | --&gt; vp&#39; --&gt; |        |</span>
-            <span class="c1">#                                   | unview | --&gt; base&#39;</span>
+            <span class="c1">#    vp --&gt; | inplace | --&gt; vp' --&gt; |        |</span>
+            <span class="c1">#                                   | unview | --&gt; base'</span>
             <span class="c1">#   base-p -----------------------&gt; |        |</span>
             <span class="c1">#</span>
             <span class="c1"># I.e. the mutated base is a combination of the placeholder</span>
@@ -2341,8 +2341,8 @@ document.write(`
                 <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span>
                     <span class="c1"># Copy to avoid upstream placeholder mutant view sharing memory</span>
                     <span class="c1"># with downstream mutant base</span>
-                    <span class="s2">&quot;mutant_base_data&quot;</span><span class="p">:</span> <span class="n">mutant_base_data</span><span class="p">,</span>
-                    <span class="s2">&quot;view_fn_sequence&quot;</span><span class="p">:</span> <span class="n">view_fn_sequence</span><span class="p">,</span>
+                    <span class="s2">"mutant_base_data"</span><span class="p">:</span> <span class="n">mutant_base_data</span><span class="p">,</span>
+                    <span class="s2">"view_fn_sequence"</span><span class="p">:</span> <span class="n">view_fn_sequence</span><span class="p">,</span>
                 <span class="p">},</span>
             <span class="p">)</span>
 
@@ -2361,7 +2361,7 @@ document.write(`
         <span class="c1"># Note that iterating in a topologically-ordered way is critical</span>
         <span class="c1"># here: each parent is updated before creating one of its children</span>
         <span class="c1">#</span>
-        <span class="c1"># Iteration is always based off of the placeholders&#39; relative positions</span>
+        <span class="c1"># Iteration is always based off of the placeholders' relative positions</span>
         <span class="c1"># in the graph since this will never be mutated.</span>
         <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">graph</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -2372,7 +2372,7 @@ document.write(`
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Shape</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tuple of tensor dimension-sizes.</span>
+<span class="w">        </span><span class="sd">"""Tuple of tensor dimension-sizes.</span>
 
 <span class="sd">        Sizes are reported in row-major order.</span>
 
@@ -2405,7 +2405,7 @@ document.write(`
 <span class="sd">        See Also</span>
 <span class="sd">        --------</span>
 <span class="sd">        mygrad.reshape : similar function</span>
-<span class="sd">        Tensor.reshape : similar method&quot;&quot;&quot;</span>
+<span class="sd">        Tensor.reshape : similar method"""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span>
 
     <span class="nd">@shape</span><span class="o">.</span><span class="n">setter</span>
@@ -2463,13 +2463,13 @@ document.write(`
         <span class="k">del</span> <span class="n">out</span>
 
         <span class="c1"># although `self` is a view of placeholder, placeholder</span>
-        <span class="c1"># is strictly an internal tensor, we won&#39;t expose it as</span>
+        <span class="c1"># is strictly an internal tensor, we won't expose it as</span>
         <span class="c1"># base</span>
         <span class="n">graph</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">placeholder</span><span class="o">.</span><span class="n">_view_children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">base</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">placeholder</span><span class="o">.</span><span class="n">base</span>
 
         <span class="k">if</span> <span class="n">base</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># if `self` was a view, we need to update that parent&#39;s</span>
+            <span class="c1"># if `self` was a view, we need to update that parent's</span>
             <span class="c1"># view children so that it points to the placeholder</span>
             <span class="n">creator</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">placeholder</span><span class="o">.</span><span class="n">creator</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">creator</span><span class="o">.</span><span class="n">_view_children</span> <span class="o">=</span> <span class="n">WeakRefIterable</span><span class="p">(</span>
@@ -2498,30 +2498,30 @@ document.write(`
     <span class="k">def</span><span class="w"> </span><span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Index</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_in_place_op</span><span class="p">(</span><span class="n">SetItem</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">op_args</span><span class="o">=</span><span class="p">(</span><span class="n">key</span><span class="p">,))</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Add</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__iadd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iadd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_in_place_op</span><span class="p">(</span><span class="n">Add</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Add</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Subtract</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__isub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__isub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_in_place_op</span><span class="p">(</span><span class="n">Subtract</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__rsub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__rsub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Subtract</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__truediv__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__truediv__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Divide</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__rtruediv__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__rtruediv__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Divide</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__floordiv__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
@@ -2530,24 +2530,24 @@ document.write(`
     <span class="k">def</span><span class="w"> </span><span class="fm">__rfloordiv__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">floor_divide</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__itruediv__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__itruediv__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_in_place_op</span><span class="p">(</span><span class="n">Divide</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Multiply</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__imul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__imul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_in_place_op</span><span class="p">(</span><span class="n">Multiply</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__rmul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__rmul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Multiply</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__matmul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__matmul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">MatMul</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__rmatmul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__rmatmul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">MatMul</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__pow__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">):</span>
@@ -2561,7 +2561,7 @@ document.write(`
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Power</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__ipow__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__ipow__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Number</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
             <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">other</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">0</span>
         <span class="p">):</span>
@@ -2585,25 +2585,25 @@ document.write(`
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Positive</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;array&quot;</span><span class="p">,</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> &quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"array"</span><span class="p">,</span> <span class="s2">"Tensor"</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"</span><span class="se">\n</span><span class="s2"> "</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">__copy__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Produces a copy of ``self`` with ``copy.creator=None``.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__copy__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Produces a copy of ``self`` with ``copy.creator=None``.</span>
 
 <span class="sd">        Copies of the underlying numpy data array and gradient array are created.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        Tensor</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
-<div class="viewcode-block" id="Tensor.copy"><a class="viewcode-back" href="../../generated/mygrad.Tensor.copy.html#mygrad.Tensor.copy">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Produces a copy of ``self`` with ``copy.creator=None``.</span>
+<div class="viewcode-block" id="Tensor.copy"><a class="viewcode-back" href="../../generated/mygrad.Tensor.copy.html#mygrad.Tensor.copy">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Produces a copy of ``self`` with ``copy.creator=None``.</span>
 
 <span class="sd">        Copies of the underlying numpy data array and gradient array are created.</span>
 
-<span class="sd">        No information regarding the tensor&#39;s participation in the computational</span>
+<span class="sd">        No information regarding the tensor's participation in the computational</span>
 <span class="sd">        graph are copied.</span>
 
 <span class="sd">        Parameters</span>
@@ -2627,7 +2627,7 @@ document.write(`
 <span class="sd">        array(1.)</span>
 <span class="sd">        &gt;&gt;&gt; y_copy.creator is None</span>
 <span class="sd">        True</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">copy</span> <span class="o">=</span> <span class="n">Tensor</span><span class="p">(</span>
             <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">),</span>
             <span class="n">constant</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constant</span> <span class="k">if</span> <span class="n">constant</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">constant</span><span class="p">),</span>
@@ -2636,7 +2636,7 @@ document.write(`
         <span class="k">return</span> <span class="n">copy</span></div>
 
 <div class="viewcode-block" id="Tensor.item"><a class="viewcode-back" href="../../generated/mygrad.Tensor.item.html#mygrad.Tensor.item">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">item</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Copy an element of a tensor to a standard Python scalar and return it.</span>
+<span class="w">        </span><span class="sd">"""Copy an element of a tensor to a standard Python scalar and return it.</span>
 
 <span class="sd">        Note that the returned object does not support back-propagation.</span>
 
@@ -2653,28 +2653,28 @@ document.write(`
 <span class="sd">        &gt;&gt;&gt; x.item()</span>
 <span class="sd">        22.2</span>
 <span class="sd">        &gt;&gt;&gt; type(x.item())</span>
-<span class="sd">        float&quot;&quot;&quot;</span>
+<span class="sd">        float"""</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;can only convert a tensor of size 1 to a Python scalar&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"can only convert a tensor of size 1 to a Python scalar"</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">item</span><span class="p">()</span></div>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__float__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;can only convert a tensor of size 1 to a Python scalar&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"can only convert a tensor of size 1 to a Python scalar"</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__int__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;can only convert a tensor of size 1 to a Python scalar&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"can only convert a tensor of size 1 to a Python scalar"</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__index__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return self converted to an integer, if self is suitable for use as an index</span>
-<span class="sd">        into a list.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Return self converted to an integer, if self is suitable for use as an index</span>
+<span class="sd">        into a list."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="fm">__index__</span><span class="p">()</span>
 
-<div class="viewcode-block" id="Tensor.flatten"><a class="viewcode-back" href="../../generated/mygrad.Tensor.flatten.html#mygrad.Tensor.flatten">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">flatten</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a copy of the tensor collapsed into one dimension.</span>
+<div class="viewcode-block" id="Tensor.flatten"><a class="viewcode-back" href="../../generated/mygrad.Tensor.flatten.html#mygrad.Tensor.flatten">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">flatten</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return a copy of the tensor collapsed into one dimension.</span>
 
 <span class="sd">        This docstring was adapted from ``numpy.ndarray.flatten``.</span>
 
@@ -2700,12 +2700,12 @@ document.write(`
 <span class="sd">        ...                [3, 4]])</span>
 <span class="sd">        &gt;&gt;&gt; x.flatten()</span>
 <span class="sd">        Tensor([1, 2, 3, 4])</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Flatten</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">base</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="s2">&quot;Tensor&quot;</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">base</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="s2">"Tensor"</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        A reference to the base tensor that the present tensor is a view of.</span>
 
 <span class="sd">        It this tensor owns its memory, then this returns ``None``.</span>
@@ -2727,14 +2727,14 @@ document.write(`
 <span class="sd">        &gt;&gt;&gt; y.data.base is x.data</span>
 <span class="sd">        True</span>
 
-<span class="sd">        A view of a view has the same base as its &quot;parent&quot;</span>
+<span class="sd">        A view of a view has the same base as its "parent"</span>
 
 <span class="sd">        &gt;&gt;&gt; z = y[:]</span>
 <span class="sd">        &gt;&gt;&gt; z.base is x</span>
 <span class="sd">        True</span>
 
 <span class="sd">        The behavior of ``Tensor.base`` departs from that of ``ndarray.base`` in that</span>
-<span class="sd">        mygrad will never create an &quot;internal&quot; tensor to serve as a base; e.g.</span>
+<span class="sd">        mygrad will never create an "internal" tensor to serve as a base; e.g.</span>
 
 <span class="sd">        &gt;&gt;&gt; import numpy as np</span>
 <span class="sd">        &gt;&gt;&gt; np.reshape(2., (1,)).base</span>
@@ -2742,13 +2742,13 @@ document.write(`
 
 <span class="sd">        &gt;&gt;&gt; mg.reshape(2., (1,)).base is None</span>
 <span class="sd">        True</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Number of elements in the tensor. i.e., the product of the tensor&#39;s</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Number of elements in the tensor. i.e., the product of the tensor's</span>
 <span class="sd">        dimensions.</span>
 
 <span class="sd">        Returns</span>
@@ -2761,12 +2761,12 @@ document.write(`
 <span class="sd">        &gt;&gt;&gt; x = mg.zeros((3, 5, 2))  # creates a tensor with 3x5x2 (= 30) elements</span>
 <span class="sd">        &gt;&gt;&gt; x.size</span>
 <span class="sd">        30</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">size</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">ndim</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Number of tensor dimensions. I.e. the number</span>
+<span class="w">        </span><span class="sd">"""Number of tensor dimensions. I.e. the number</span>
 <span class="sd">        of indices that must be supplied to uniquely specify</span>
 <span class="sd">        an element in the tensor.</span>
 
@@ -2788,12 +2788,12 @@ document.write(`
 <span class="sd">        &gt;&gt;&gt; y.ndim</span>
 <span class="sd">        2</span>
 <span class="sd">        &gt;&gt;&gt; y[0, 0]  # two indices are required to identify an element in `x`</span>
-<span class="sd">        Tensor(1)&quot;&quot;&quot;</span>
+<span class="sd">        Tensor(1)"""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">ndim</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Data-type of the tensor&#39;s elements.</span>
+<span class="w">        </span><span class="sd">"""Data-type of the tensor's elements.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -2805,15 +2805,15 @@ document.write(`
 <span class="sd">        &gt;&gt;&gt; x = mg.Tensor([[0, 1],</span>
 <span class="sd">        ...                [2, 3]])</span>
 <span class="sd">        &gt;&gt;&gt; x.dtype</span>
-<span class="sd">        dtype(&#39;int32&#39;)</span>
+<span class="sd">        dtype('int32')</span>
 <span class="sd">        &gt;&gt;&gt; type(x.dtype)</span>
-<span class="sd">        &lt;type &#39;numpy.dtype&#39;&gt;&quot;&quot;&quot;</span>
+<span class="sd">        &lt;type 'numpy.dtype'&gt;"""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dtype</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">reshape</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">newshape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Shape</span><span class="p">],</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a tensor with a new shape, without changing its data.</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Returns a tensor with a new shape, without changing its data.</span>
 <span class="sd">        This docstring was adapted from ``numpy.reshape``</span>
 
 <span class="sd">        Parameters</span>
@@ -2850,19 +2850,19 @@ document.write(`
 <span class="sd">        Tensor([[1, 2],</span>
 <span class="sd">                [3, 4],</span>
 <span class="sd">                [5, 6]])</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">newshape</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;reshape() takes at least 1 argument (0 given)&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">newshape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;__iter__&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"reshape() takes at least 1 argument (0 given)"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">newshape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">"__iter__"</span><span class="p">):</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">newshape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;an integer is required&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"an integer is required"</span><span class="p">)</span>
             <span class="n">newshape</span> <span class="o">=</span> <span class="n">newshape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Reshape</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">op_args</span><span class="o">=</span><span class="p">(</span><span class="n">newshape</span><span class="p">,),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">T</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Same as self.transpose(), except that self is returned if self.ndim &lt; 2 and</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">T</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Same as self.transpose(), except that self is returned if self.ndim &lt; 2 and</span>
 <span class="sd">        a view of the underlying data is utilized whenever possible.</span>
 
 <span class="sd">        Returns</span>
@@ -2878,7 +2878,7 @@ document.write(`
 <span class="sd">        Tensor([[1, 4],</span>
 <span class="sd">                [2, 5],</span>
 <span class="sd">                [3, 6]])</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Tensor_Transpose_Property</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
@@ -2901,8 +2901,8 @@ document.write(`
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__imatmul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-            <span class="s2">&quot;In-place matrix multiplication is not (yet) supported. &quot;</span>
-            <span class="s2">&quot;Use &#39;a = a @ b&#39; instead of &#39;a @= b&#39;&quot;</span>
+            <span class="s2">"In-place matrix multiplication is not (yet) supported. "</span>
+            <span class="s2">"Use 'a = a @ b' instead of 'a @= b'"</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">sum</span><span class="p">(</span>
@@ -2911,8 +2911,8 @@ document.write(`
         <span class="n">keepdims</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Sum of tensor elements over a given axis.</span>
 
 <span class="sd">        Parameters</span>
@@ -2982,9 +2982,9 @@ document.write(`
 <span class="sd">        Tensor([0, 6])</span>
 <span class="sd">        &gt;&gt;&gt; x.sum(axis=1)</span>
 <span class="sd">        Tensor([1, 5])</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span>
-            <span class="n">Sum</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;axis&quot;</span><span class="p">:</span> <span class="n">axis</span><span class="p">,</span> <span class="s2">&quot;keepdims&quot;</span><span class="p">:</span> <span class="n">keepdims</span><span class="p">},</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span>
+            <span class="n">Sum</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"axis"</span><span class="p">:</span> <span class="n">axis</span><span class="p">,</span> <span class="s2">"keepdims"</span><span class="p">:</span> <span class="n">keepdims</span><span class="p">},</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">prod</span><span class="p">(</span>
@@ -2993,8 +2993,8 @@ document.write(`
         <span class="n">keepdims</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Return the product of array elements over given axes.</span>
 
 <span class="sd">        Parameters</span>
@@ -3020,11 +3020,11 @@ document.write(`
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        product_along_axis : mygrad.Tensor</span>
-<span class="sd">            A tensor shaped as `a` but with the specified axis removed.&quot;&quot;&quot;</span>
+<span class="sd">            A tensor shaped as `a` but with the specified axis removed."""</span>
         <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span>
             <span class="n">Prod</span><span class="p">,</span>
             <span class="bp">self</span><span class="p">,</span>
-            <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;axis&quot;</span><span class="p">:</span> <span class="n">axis</span><span class="p">,</span> <span class="s2">&quot;keepdims&quot;</span><span class="p">:</span> <span class="n">keepdims</span><span class="p">},</span>
+            <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"axis"</span><span class="p">:</span> <span class="n">axis</span><span class="p">,</span> <span class="s2">"keepdims"</span><span class="p">:</span> <span class="n">keepdims</span><span class="p">},</span>
             <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -3033,8 +3033,8 @@ document.write(`
         <span class="n">axis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Return the cumulative product of elements along a given axis.</span>
 
 <span class="sd">        This docstring was adapted from the official numpy documentation</span>
@@ -3066,17 +3066,17 @@ document.write(`
 <span class="sd">        Notes</span>
 <span class="sd">        -----</span>
 <span class="sd">        Arithmetic is modular when using integer types, and no error is</span>
-<span class="sd">        raised on overflow.&quot;&quot;&quot;</span>
+<span class="sd">        raised on overflow."""</span>
 
-        <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">CumProd</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;axis&quot;</span><span class="p">:</span> <span class="n">axis</span><span class="p">},</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">CumProd</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"axis"</span><span class="p">:</span> <span class="n">axis</span><span class="p">},</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">cumsum</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">axis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Return the cumulative sum of the elements along a given axis.</span>
 
 <span class="sd">        This docstring was adapted from the official numpy documentation</span>
@@ -3100,9 +3100,9 @@ document.write(`
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        mygrad.Tensor</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
-        <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">CumSum</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;axis&quot;</span><span class="p">:</span> <span class="n">axis</span><span class="p">},</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">CumSum</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"axis"</span><span class="p">:</span> <span class="n">axis</span><span class="p">},</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">mean</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -3110,8 +3110,8 @@ document.write(`
         <span class="n">keepdims</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Mean of tensor elements over a given axis.</span>
 
 <span class="sd">        Parameters</span>
@@ -3148,11 +3148,11 @@ document.write(`
 <span class="sd">            A Tensor with the same shape as `self`, with the specified</span>
 <span class="sd">            axis/axes removed. If `self` is a 0-d tensor, or if `axis` is None,</span>
 <span class="sd">            a 0-dim Tensor is returned.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span>
             <span class="n">Mean</span><span class="p">,</span>
             <span class="bp">self</span><span class="p">,</span>
-            <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;axis&quot;</span><span class="p">:</span> <span class="n">axis</span><span class="p">,</span> <span class="s2">&quot;keepdims&quot;</span><span class="p">:</span> <span class="n">keepdims</span><span class="p">},</span>
+            <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"axis"</span><span class="p">:</span> <span class="n">axis</span><span class="p">,</span> <span class="s2">"keepdims"</span><span class="p">:</span> <span class="n">keepdims</span><span class="p">},</span>
             <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -3163,8 +3163,8 @@ document.write(`
         <span class="n">keepdims</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Compute the standard deviation along the specified axis.</span>
 
 <span class="sd">        Returns the variance of the array elements, a measure of the spread of a</span>
@@ -3178,7 +3178,7 @@ document.write(`
 <span class="sd">            compute the variance of the flattened array.</span>
 
 <span class="sd">        ddof : int, optional (default=0)</span>
-<span class="sd">            &quot;Delta Degrees of Freedom&quot;: the divisor used in the calculation is</span>
+<span class="sd">            "Delta Degrees of Freedom": the divisor used in the calculation is</span>
 <span class="sd">            ``N - ddof``, where ``N`` represents the number of elements. By</span>
 <span class="sd">            default `ddof` is zero.</span>
 
@@ -3211,11 +3211,11 @@ document.write(`
 <span class="sd">        instead.  In standard statistical practice, ``ddof=1`` provides an</span>
 <span class="sd">        unbiased estimator of the variance of a hypothetical infinite population.</span>
 <span class="sd">        ``ddof=0`` provides a maximum likelihood estimate of the variance for</span>
-<span class="sd">        normally distributed variables.&quot;&quot;&quot;</span>
+<span class="sd">        normally distributed variables."""</span>
         <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span>
             <span class="n">StdDev</span><span class="p">,</span>
             <span class="bp">self</span><span class="p">,</span>
-            <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;axis&quot;</span><span class="p">:</span> <span class="n">axis</span><span class="p">,</span> <span class="s2">&quot;keepdims&quot;</span><span class="p">:</span> <span class="n">keepdims</span><span class="p">,</span> <span class="s2">&quot;ddof&quot;</span><span class="p">:</span> <span class="n">ddof</span><span class="p">},</span>
+            <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"axis"</span><span class="p">:</span> <span class="n">axis</span><span class="p">,</span> <span class="s2">"keepdims"</span><span class="p">:</span> <span class="n">keepdims</span><span class="p">,</span> <span class="s2">"ddof"</span><span class="p">:</span> <span class="n">ddof</span><span class="p">},</span>
             <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -3226,8 +3226,8 @@ document.write(`
         <span class="n">keepdims</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Compute the variance along the specified axis.</span>
 
 <span class="sd">        Returns the variance of the array elements, a measure of the spread of a</span>
@@ -3241,7 +3241,7 @@ document.write(`
 <span class="sd">            compute the variance of the flattened array.</span>
 
 <span class="sd">        ddof : int, optional (default=0)</span>
-<span class="sd">            &quot;Delta Degrees of Freedom&quot;: the divisor used in the calculation is</span>
+<span class="sd">            "Delta Degrees of Freedom": the divisor used in the calculation is</span>
 <span class="sd">            ``N - ddof``, where ``N`` represents the number of elements. By</span>
 <span class="sd">            default `ddof` is zero.</span>
 
@@ -3273,11 +3273,11 @@ document.write(`
 <span class="sd">        instead.  In standard statistical practice, ``ddof=1`` provides an</span>
 <span class="sd">        unbiased estimator of the variance of a hypothetical infinite population.</span>
 <span class="sd">        ``ddof=0`` provides a maximum likelihood estimate of the variance for</span>
-<span class="sd">        normally distributed variables.&quot;&quot;&quot;</span>
+<span class="sd">        normally distributed variables."""</span>
         <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span>
             <span class="n">Variance</span><span class="p">,</span>
             <span class="bp">self</span><span class="p">,</span>
-            <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;axis&quot;</span><span class="p">:</span> <span class="n">axis</span><span class="p">,</span> <span class="s2">&quot;keepdims&quot;</span><span class="p">:</span> <span class="n">keepdims</span><span class="p">,</span> <span class="s2">&quot;ddof&quot;</span><span class="p">:</span> <span class="n">ddof</span><span class="p">},</span>
+            <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"axis"</span><span class="p">:</span> <span class="n">axis</span><span class="p">,</span> <span class="s2">"keepdims"</span><span class="p">:</span> <span class="n">keepdims</span><span class="p">,</span> <span class="s2">"ddof"</span><span class="p">:</span> <span class="n">ddof</span><span class="p">},</span>
             <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -3287,8 +3287,8 @@ document.write(`
         <span class="n">keepdims</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Return the maximum of a tensor or maximum along its axes.</span>
 
 <span class="sd">        Parameters</span>
@@ -3336,11 +3336,11 @@ document.write(`
 <span class="sd">        &gt;&gt;&gt; b[2] = np.NaN</span>
 <span class="sd">        &gt;&gt;&gt; mg.amax(b)</span>
 <span class="sd">        Tensor(nan)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span>
             <span class="n">Max</span><span class="p">,</span>
             <span class="bp">self</span><span class="p">,</span>
-            <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;axis&quot;</span><span class="p">:</span> <span class="n">axis</span><span class="p">,</span> <span class="s2">&quot;keepdims&quot;</span><span class="p">:</span> <span class="n">keepdims</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">:</span> <span class="n">_NoValue</span><span class="p">},</span>
+            <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"axis"</span><span class="p">:</span> <span class="n">axis</span><span class="p">,</span> <span class="s2">"keepdims"</span><span class="p">:</span> <span class="n">keepdims</span><span class="p">,</span> <span class="s2">"dtype"</span><span class="p">:</span> <span class="n">_NoValue</span><span class="p">},</span>
             <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -3350,8 +3350,8 @@ document.write(`
         <span class="n">keepdims</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Return the minimum of a tensor or minimum along its axes.</span>
 
 <span class="sd">        Parameters</span>
@@ -3397,18 +3397,18 @@ document.write(`
 <span class="sd">        &gt;&gt;&gt; b[2] = np.NaN</span>
 <span class="sd">        &gt;&gt;&gt; mg.amin(b)</span>
 <span class="sd">        Tensor(nan)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span>
             <span class="n">Min</span><span class="p">,</span>
             <span class="bp">self</span><span class="p">,</span>
-            <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;axis&quot;</span><span class="p">:</span> <span class="n">axis</span><span class="p">,</span> <span class="s2">&quot;keepdims&quot;</span><span class="p">:</span> <span class="n">keepdims</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">:</span> <span class="n">_NoValue</span><span class="p">},</span>
+            <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"axis"</span><span class="p">:</span> <span class="n">axis</span><span class="p">,</span> <span class="s2">"keepdims"</span><span class="p">:</span> <span class="n">keepdims</span><span class="p">,</span> <span class="s2">"dtype"</span><span class="p">:</span> <span class="n">_NoValue</span><span class="p">},</span>
             <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">swapaxes</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">axis1</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">axis2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Interchange two axes of a tensor.</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Interchange two axes of a tensor.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -3431,13 +3431,13 @@ document.write(`
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        mygrad.Tensor</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">SwapAxes</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">op_args</span><span class="o">=</span><span class="p">(</span><span class="n">axis1</span><span class="p">,</span> <span class="n">axis2</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">transpose</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="o">*</span><span class="n">axes</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Permute the dimensions of a tensor.</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Permute the dimensions of a tensor.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -3475,13 +3475,13 @@ document.write(`
 <span class="sd">                [2, 4]])</span>
 <span class="sd">        &gt;&gt;&gt; a.transpose(1, 0)</span>
 <span class="sd">        Tensor([[1, 3],</span>
-<span class="sd">                [2, 4]])&quot;&quot;&quot;</span>
+<span class="sd">                [2, 4]])"""</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">axes</span><span class="p">:</span>
             <span class="n">axes</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;__iter__&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">"__iter__"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span><span class="s2">&#39; object cannot be interpreted as an integer&quot;</span>
+                    <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span><span class="s2">' object cannot be interpreted as an integer"</span>
                 <span class="p">)</span>
             <span class="n">axes</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Transpose</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">op_args</span><span class="o">=</span><span class="p">(</span><span class="n">axes</span><span class="p">,),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
@@ -3492,8 +3492,8 @@ document.write(`
         <span class="n">destination</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Move axes of a tensor to new positions. Other axes remain in their</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Move axes of a tensor to new positions. Other axes remain in their</span>
 <span class="sd">        original order.</span>
 
 
@@ -3519,7 +3519,7 @@ document.write(`
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        result : mygrad.Tensor</span>
-<span class="sd">            Array with moved axes. This array is a view of the input array..&quot;&quot;&quot;</span>
+<span class="sd">            Array with moved axes. This array is a view of the input array.."""</span>
         <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span>
             <span class="n">MoveAxis</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">op_args</span><span class="o">=</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">destination</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span>
         <span class="p">)</span>
@@ -3529,8 +3529,8 @@ document.write(`
         <span class="n">axis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Remove single-dimensional entries from the shape of a tensor.</span>
 
 <span class="sd">        This docstring was adapted from ``numpy.squeeze``</span>
@@ -3561,11 +3561,11 @@ document.write(`
 <span class="sd">        ------</span>
 <span class="sd">        ValueError</span>
 <span class="sd">            If ``axis`` is not ``None``, and an axis being squeezed is not of length 1</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Squeeze</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">op_args</span><span class="o">=</span><span class="p">(</span><span class="n">axis</span><span class="p">,),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">ravel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ravel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Flattens contents of a tensor into a contiguous 1-D array.  A copy is made only if needed.</span>
 
 <span class="sd">        This docstring was adapted from ``numpy.ravel``.</span>
@@ -3592,13 +3592,13 @@ document.write(`
 <span class="sd">        ``ravel`` utilizes C-ordering, meaning that it reads &amp; writes elements using</span>
 <span class="sd">        C-like index ordering; the last axis index changing fastest, and, proceeding</span>
 <span class="sd">        in reverse order, the first axis index changing slowest.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Ravel</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">argmax</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the indices of the maximum values along an axis.</span>
+<span class="w">        </span><span class="sd">"""Returns the indices of the maximum values along an axis.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -3612,14 +3612,14 @@ document.write(`
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        numpy.ndarray[int]&quot;&quot;&quot;</span>
+<span class="sd">        numpy.ndarray[int]"""</span>
 
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">argmin</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the indices of the minimum values along an axis.</span>
+<span class="w">        </span><span class="sd">"""Returns the indices of the minimum values along an axis.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -3631,7 +3631,7 @@ document.write(`
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        numpy.ndarray[int]&quot;&quot;&quot;</span>
+<span class="sd">        numpy.ndarray[int]"""</span>
 
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span>
 
@@ -3641,7 +3641,7 @@ document.write(`
         <span class="n">out</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">keepdims</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test whether any array or Tensor element along a given axis evaluates to True.</span>
+<span class="w">        </span><span class="sd">"""Test whether any array or Tensor element along a given axis evaluates to True.</span>
 
 <span class="sd">        Returns single boolean if `axis` is ``None``</span>
 
@@ -3671,7 +3671,7 @@ document.write(`
 <span class="sd">            If the default value is passed, then `keepdims` will not be</span>
 <span class="sd">            passed through to the `any` method of sub-classes of</span>
 <span class="sd">            `ndarray`, however any non-default value will be.  If the</span>
-<span class="sd">            sub-class&#39; method does not implement `keepdims` any</span>
+<span class="sd">            sub-class' method does not implement `keepdims` any</span>
 <span class="sd">            exceptions will be raised.</span>
 
 <span class="sd">        Returns</span>
@@ -3684,18 +3684,18 @@ document.write(`
 <span class="sd">        --------</span>
 <span class="sd">        Tensor.any : equivalent method</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">out</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="n">keepdims</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">clip</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">a_min</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
         <span class="n">a_max</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
-        <span class="n">out</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">out</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="s2">"Tensor"</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clip (limit) the values in an array.</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+<span class="w">        </span><span class="sd">"""Clip (limit) the values in an array.</span>
 
 <span class="sd">        Given an interval, values outside the interval are clipped to</span>
 <span class="sd">        the interval edges.  For example, if an interval of ``[0, 1]``</span>
@@ -3746,7 +3746,7 @@ document.write(`
 <span class="sd">        &gt;&gt;&gt; a.clip(1, 8)</span>
 <span class="sd">        Tensor([1, 1, 2, 3, 4, 5, 6, 7, 8, 8])</span>
 <span class="sd">        &gt;&gt;&gt; a.clip([3, 4, 1, 1, 1, 4, 4, 4, 4, 4], 8)</span>
-<span class="sd">        Tensor([3, 4, 2, 3, 4, 5, 6, 7, 8, 8])&quot;&quot;&quot;</span>
+<span class="sd">        Tensor([3, 4, 2, 3, 4, 5, 6, 7, 8, 8])"""</span>
         <span class="c1"># set in added in mygrad.__init__</span>
         <span class="o">...</span>
 </pre></div>

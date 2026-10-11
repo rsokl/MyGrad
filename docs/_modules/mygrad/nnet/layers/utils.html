@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad.nnet.layers.utils &#8212; MyGrad 2.3.0.post1.dev31 documentation</title>
+    <title>mygrad.nnet.layers.utils &#8212; MyGrad 2.3.0.post1.dev35 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev31 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev35 documentation</p>
   
 </a></div>
     
@@ -535,7 +535,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="sliding_window_view"><a class="viewcode-back" href="../../../../generated/mygrad.sliding_window_view.html#mygrad.sliding_window_view">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">sliding_window_view</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">window_shape</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">dilation</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a sliding window view over the trailing dimensions of an array.</span>
+<span class="w">    </span><span class="sd">"""Create a sliding window view over the trailing dimensions of an array.</span>
 <span class="sd">    No copy is made unless the input array is not contiguous in memory.</span>
 
 <span class="sd">    The window is applied only to valid regions of ``arr``, but is applied greedily.</span>
@@ -561,7 +561,7 @@ document.write(`
 <span class="sd">    dilation : Optional[Union[int, Sequence[int]]]</span>
 <span class="sd">        The dilation factor used along the ``[x, (...), z]`` directions: ``[Dx, (...), Dz]``.</span>
 <span class="sd">        If no value is specified, a dilation factor of 1 is used along each direction.</span>
-<span class="sd">        Dilation specifies the step size used when filling the window&#39;s elements</span>
+<span class="sd">        Dilation specifies the step size used when filling the window's elements</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -648,29 +648,29 @@ document.write(`
 <span class="sd">    &gt;&gt;&gt; sx, sy = (2, 2)</span>
 <span class="sd">    &gt;&gt;&gt; np.all(y[i, j] == x[..., i*sx:(i*sx + wx), j*sy:(j*sy + wy)])</span>
 <span class="sd">    True</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">window_shape</span><span class="p">,</span> <span class="s2">&quot;__iter__&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">window_shape</span><span class="p">,</span> <span class="s2">"__iter__"</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;`window_shape` must be a sequence of positive integers, got: </span><span class="si">{</span><span class="n">window_shape</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"`window_shape` must be a sequence of positive integers, got: </span><span class="si">{</span><span class="n">window_shape</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
     <span class="n">window_shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">window_shape</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">Integral</span><span class="p">)</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">window_shape</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;`window_shape` must be a sequence of positive integers, &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;got: </span><span class="si">{</span><span class="n">window_shape</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"`window_shape` must be a sequence of positive integers, "</span>
+            <span class="sa">f</span><span class="s2">"got: </span><span class="si">{</span><span class="n">window_shape</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">window_shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">arr</span><span class="o">.</span><span class="n">ndim</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;`window_shape` (</span><span class="si">{</span><span class="n">window_shape</span><span class="si">}</span><span class="s2">) cannot specify more values than &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;`arr.ndim` (</span><span class="si">{</span><span class="n">arr</span><span class="o">.</span><span class="n">ndim</span><span class="si">}</span><span class="s2">).&quot;</span>
+            <span class="sa">f</span><span class="s2">"`window_shape` (</span><span class="si">{</span><span class="n">window_shape</span><span class="si">}</span><span class="s2">) cannot specify more values than "</span>
+            <span class="sa">f</span><span class="s2">"`arr.ndim` (</span><span class="si">{</span><span class="n">arr</span><span class="o">.</span><span class="n">ndim</span><span class="si">}</span><span class="s2">)."</span>
         <span class="p">)</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">Integral</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="s2">&quot;__iter__&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">Integral</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="s2">"__iter__"</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;`step` must be a positive integer or a sequence of positive &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;integers, got: </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"`step` must be a positive integer or a sequence of positive "</span>
+            <span class="sa">f</span><span class="s2">"integers, got: </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
 
     <span class="n">step</span> <span class="o">=</span> <span class="p">(</span>
@@ -679,25 +679,25 @@ document.write(`
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">Integral</span><span class="p">)</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">step</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;`step` must be a positive integer or a sequence of positive &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;integers, got: </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"`step` must be a positive integer or a sequence of positive "</span>
+            <span class="sa">f</span><span class="s2">"integers, got: </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">i</span> <span class="o">&gt;</span> <span class="n">j</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">window_shape</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Each size of the window-shape must fit within the trailing &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;dimensions of `arr`.&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">window_shape</span><span class="si">}</span><span class="s2"> does not fit in </span><span class="si">{</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">window_shape</span><span class="p">)</span><span class="w"> </span><span class="p">:]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"Each size of the window-shape must fit within the trailing "</span>
+            <span class="sa">f</span><span class="s2">"dimensions of `arr`."</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">window_shape</span><span class="si">}</span><span class="s2"> does not fit in </span><span class="si">{</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">window_shape</span><span class="p">)</span><span class="w"> </span><span class="p">:]</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="p">(</span>
         <span class="n">dilation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dilation</span><span class="p">,</span> <span class="n">Integral</span><span class="p">)</span>
-        <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">dilation</span><span class="p">,</span> <span class="s2">&quot;__iter__&quot;</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">dilation</span><span class="p">,</span> <span class="s2">"__iter__"</span><span class="p">)</span>
     <span class="p">):</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;`dilation` must be None, a positive integer, or a sequence of &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;positive integers, got: </span><span class="si">{</span><span class="n">dilation</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"`dilation` must be None, a positive integer, or a sequence of "</span>
+            <span class="sa">f</span><span class="s2">"positive integers, got: </span><span class="si">{</span><span class="n">dilation</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
     <span class="k">if</span> <span class="n">dilation</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">dilation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">window_shape</span><span class="p">),),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
@@ -711,21 +711,21 @@ document.write(`
             <span class="n">dilation</span>
         <span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">window_shape</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;`dilation` must be None, a positive integer, or a sequence of &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;positive integers with the same length as `window_shape` &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">window_shape</span><span class="si">}</span><span class="s2">), got: </span><span class="si">{</span><span class="n">dilation</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">"`dilation` must be None, a positive integer, or a sequence of "</span>
+                <span class="sa">f</span><span class="s2">"positive integers with the same length as `window_shape` "</span>
+                <span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="n">window_shape</span><span class="si">}</span><span class="s2">), got: </span><span class="si">{</span><span class="n">dilation</span><span class="si">}</span><span class="s2">"</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="nb">any</span><span class="p">(</span>
             <span class="n">w</span> <span class="o">*</span> <span class="n">d</span> <span class="o">&gt;</span> <span class="n">s</span>
             <span class="k">for</span> <span class="n">w</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">window_shape</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">dilation</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
         <span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;The dilated window (</span><span class="si">{</span><span class="nb">tuple</span><span class="p">(</span><span class="n">w</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">w</span><span class="p">,</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nb">zip</span><span class="p">(</span><span class="n">window_shape</span><span class="p">,</span><span class="w"> </span><span class="n">dilation</span><span class="p">))</span><span class="si">}</span><span class="s2">) &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;must fit within the trailing &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;dimensions of `arr` (</span><span class="si">{</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">window_shape</span><span class="p">)</span><span class="w"> </span><span class="p">:]</span><span class="si">}</span><span class="s2">)&quot;</span>
+                <span class="sa">f</span><span class="s2">"The dilated window (</span><span class="si">{</span><span class="nb">tuple</span><span class="p">(</span><span class="n">w</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">w</span><span class="p">,</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nb">zip</span><span class="p">(</span><span class="n">window_shape</span><span class="p">,</span><span class="w"> </span><span class="n">dilation</span><span class="p">))</span><span class="si">}</span><span class="s2">) "</span>
+                <span class="sa">f</span><span class="s2">"must fit within the trailing "</span>
+                <span class="sa">f</span><span class="s2">"dimensions of `arr` (</span><span class="si">{</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">window_shape</span><span class="p">)</span><span class="w"> </span><span class="p">:]</span><span class="si">}</span><span class="s2">)"</span>
             <span class="p">)</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">arr</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s2">&quot;C_CONTIGUOUS&quot;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">arr</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s2">"C_CONTIGUOUS"</span><span class="p">]:</span>
         <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
 
     <span class="n">step</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>  <span class="c1"># (Sx, ..., Sz)</span>
@@ -745,7 +745,7 @@ document.write(`
     <span class="n">win_stride</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">win_stride</span><span class="p">)</span>
 
     <span class="c1"># tuple of bytes to step to traverse corresponding dimensions of view</span>
-    <span class="c1"># see: &#39;internal memory layout of an ndarray&#39;</span>
+    <span class="c1"># see: 'internal memory layout of an ndarray'</span>
     <span class="n">stride</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">nbyte</span> <span class="o">*</span> <span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">step_stride</span> <span class="o">+</span> <span class="n">win_stride</span><span class="p">)</span>
 
     <span class="c1"># number of window placements along x-dim: X = (x - (Wx - 1)*Dx + 1) // Sx + 1</span>

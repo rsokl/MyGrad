@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad.computational_graph &#8212; MyGrad 2.3.0.post1.dev31 documentation</title>
+    <title>mygrad.computational_graph &#8212; MyGrad 2.3.0.post1.dev35 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev31 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev35 documentation</p>
   
 </a></div>
     
@@ -537,7 +537,7 @@ document.write(`
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.tensor_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tensor</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;build_graph&quot;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"build_graph"</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="build_graph"><a class="viewcode-back" href="../../generated/mygrad.computational_graph.build_graph.html#mygrad.computational_graph.build_graph">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">build_graph</span><span class="p">(</span>
@@ -550,7 +550,7 @@ document.write(`
     <span class="n">dtypes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">sum_stats</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Builds and renders a computational graph.</span>
+<span class="w">    </span><span class="sd">"""Builds and renders a computational graph.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -562,7 +562,7 @@ document.write(`
 <span class="sd">        A dictionary that maps names of Tensors to Tensor objects. If</span>
 <span class="sd">        an argument is passed to names, the key name that maps to a Tensor</span>
 <span class="sd">        included in the computational graph will be used as a label for the</span>
-<span class="sd">        Tensor&#39;s node. If no argument is passed, the nodes on the</span>
+<span class="sd">        Tensor's node. If no argument is passed, the nodes on the</span>
 <span class="sd">        computational graph will display the full Tensor.</span>
 
 <span class="sd">        To use the names assigned in the local environment,</span>
@@ -580,7 +580,7 @@ document.write(`
 <span class="sd">        a unique Node will be created for each time it is used.</span>
 
 <span class="sd">        A scalar will always be used as the label for a 0-dimensional</span>
-<span class="sd">        Tensor&#39;s Node.</span>
+<span class="sd">        Tensor's Node.</span>
 
 <span class="sd">    render : bool, optional (default=True)</span>
 <span class="sd">        If True, build_graph will return a graphviz Digraph object that,</span>
@@ -609,8 +609,8 @@ document.write(`
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
 <span class="sd">    build_graph requires that Graphviz is installed.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fin</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">),</span> <span class="s2">&quot;fin must be a Tensor&quot;</span>
+<span class="sd">    """</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fin</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">),</span> <span class="s2">"fin must be a Tensor"</span>
     <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)))</span>
     <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">render</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
     <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">save</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
@@ -619,53 +619,53 @@ document.write(`
     <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sum_stats</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
 
     <span class="n">graph</span> <span class="o">=</span> <span class="n">Digraph</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">graph</span><span class="o">.</span><span class="n">node_attr</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="s2">&quot;12&quot;</span><span class="p">)</span>
+    <span class="n">graph</span><span class="o">.</span><span class="n">node_attr</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="s2">"12"</span><span class="p">)</span>
 
     <span class="n">_add_node</span><span class="p">(</span><span class="n">fin</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="n">names</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="n">dims</span><span class="p">,</span> <span class="n">dtypes</span><span class="o">=</span><span class="n">dtypes</span><span class="p">,</span> <span class="n">sum_stats</span><span class="o">=</span><span class="n">sum_stats</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">save</span><span class="p">:</span>
-        <span class="n">graph</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;computational_graph&quot;</span><span class="p">,</span> <span class="n">cleanup</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">graph</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">"computational_graph"</span><span class="p">,</span> <span class="n">cleanup</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">render</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">graph</span></div>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_add_node</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">op_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Recursively traces computational graph and adds nodes to Digraph.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Recursively traces computational graph and adds nodes to Digraph."""</span>
     <span class="n">node_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">node</span><span class="p">))</span>
     <span class="n">node_lab</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;names&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;names&quot;</span><span class="p">]:</span>
-            <span class="k">if</span> <span class="nb">id</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;names&quot;</span><span class="p">][</span><span class="n">key</span><span class="p">])</span> <span class="o">==</span> <span class="nb">id</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">"names"</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">"names"</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="nb">id</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">"names"</span><span class="p">][</span><span class="n">key</span><span class="p">])</span> <span class="o">==</span> <span class="nb">id</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
                 <span class="n">node_lab</span> <span class="o">=</span> <span class="n">key</span>
                 <span class="k">break</span>
-            <span class="k">elif</span> <span class="nb">id</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;names&quot;</span><span class="p">][</span><span class="n">key</span><span class="p">])</span> <span class="o">==</span> <span class="nb">id</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
-                <span class="n">node_lab</span> <span class="o">=</span> <span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">*Constant*&quot;</span>
+            <span class="k">elif</span> <span class="nb">id</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">"names"</span><span class="p">][</span><span class="n">key</span><span class="p">])</span> <span class="o">==</span> <span class="nb">id</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
+                <span class="n">node_lab</span> <span class="o">=</span> <span class="n">key</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">*Constant*"</span>
                 <span class="n">node_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
                 <span class="k">break</span>
         <span class="k">if</span> <span class="n">node_lab</span> <span class="o">==</span> <span class="nb">repr</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">node</span><span class="o">.</span><span class="n">ndim</span><span class="p">:</span>
                 <span class="n">node_lab</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">node</span><span class="o">.</span><span class="n">_constant</span><span class="p">:</span>
-                <span class="n">node_lab</span> <span class="o">=</span> <span class="s2">&quot;*Constant*&quot;</span>
+                <span class="n">node_lab</span> <span class="o">=</span> <span class="s2">"*Constant*"</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">node_lab</span> <span class="o">=</span> <span class="s2">&quot;Intermediary Tensor&quot;</span>
+                <span class="n">node_lab</span> <span class="o">=</span> <span class="s2">"Intermediary Tensor"</span>
 
     <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">ndim</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;dims&quot;</span><span class="p">]:</span>
-            <span class="n">node_lab</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Dims: </span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;dtypes&quot;</span><span class="p">]:</span>
-            <span class="n">node_lab</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Dtype: </span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;sum_stats&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">"dims"</span><span class="p">]:</span>
+            <span class="n">node_lab</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Dims: </span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">"</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">"dtypes"</span><span class="p">]:</span>
+            <span class="n">node_lab</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Dtype: </span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">"</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">"sum_stats"</span><span class="p">]:</span>
             <span class="n">node_lab</span> <span class="o">+=</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Min: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Median: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Mean: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Max: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Min: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Median: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Mean: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Max: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
             <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;dtypes&quot;</span><span class="p">]:</span>
-            <span class="n">node_lab</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Dtype: </span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">"dtypes"</span><span class="p">]:</span>
+            <span class="n">node_lab</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Dtype: </span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">"</span>
 
     <span class="n">graph</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">node_id</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">node_lab</span><span class="p">)</span>
 
@@ -674,12 +674,12 @@ document.write(`
             <span class="n">graph</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">node_id</span><span class="p">,</span> <span class="n">op_id</span><span class="p">)</span>
         <span class="k">return</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">op_lab</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">_creator</span><span class="p">)</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">op_lab</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">_creator</span><span class="p">)</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">" "</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">op_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">graph</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">node_id</span><span class="p">,</span> <span class="n">op_id</span><span class="p">)</span>
         <span class="n">op_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">_creator</span><span class="p">))</span>
 
-        <span class="n">graph</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">op_id</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">op_lab</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;filled&quot;</span><span class="p">,</span> <span class="n">fillcolor</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
+        <span class="n">graph</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">op_id</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">op_lab</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">"filled"</span><span class="p">,</span> <span class="n">fillcolor</span><span class="o">=</span><span class="s2">"red"</span><span class="p">)</span>
         <span class="n">graph</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">op_id</span><span class="p">,</span> <span class="n">node_id</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">_creator</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span>

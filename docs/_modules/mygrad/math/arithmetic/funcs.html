@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad.math.arithmetic.funcs &#8212; MyGrad 2.3.0.post1.dev31 documentation</title>
+    <title>mygrad.math.arithmetic.funcs &#8212; MyGrad 2.3.0.post1.dev35 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev31 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev35 documentation</p>
   
 </a></div>
     
@@ -551,18 +551,18 @@ document.write(`
 <span class="p">)</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;add&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;add_sequence&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;divide&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;multiply&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;multiply_sequence&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;negative&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;positive&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;power&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;reciprocal&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;square&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;subtract&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;true_divide&quot;</span><span class="p">,</span>
+    <span class="s2">"add"</span><span class="p">,</span>
+    <span class="s2">"add_sequence"</span><span class="p">,</span>
+    <span class="s2">"divide"</span><span class="p">,</span>
+    <span class="s2">"multiply"</span><span class="p">,</span>
+    <span class="s2">"multiply_sequence"</span><span class="p">,</span>
+    <span class="s2">"negative"</span><span class="p">,</span>
+    <span class="s2">"positive"</span><span class="p">,</span>
+    <span class="s2">"power"</span><span class="p">,</span>
+    <span class="s2">"reciprocal"</span><span class="p">,</span>
+    <span class="s2">"square"</span><span class="p">,</span>
+    <span class="s2">"subtract"</span><span class="p">,</span>
+    <span class="s2">"true_divide"</span><span class="p">,</span>
 <span class="p">]</span>
 
 
@@ -576,7 +576,7 @@ document.write(`
     <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLikeReals</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add the arguments element-wise.</span>
+<span class="w">    </span><span class="sd">"""Add the arguments element-wise.</span>
 
 <span class="sd">    This docstring was adapted from that of numpy.add [1]_</span>
 
@@ -640,7 +640,7 @@ document.write(`
 <span class="sd">    Tensor([[  0.,   2.,   4.],</span>
 <span class="sd">            [  3.,   5.,   7.],</span>
 <span class="sd">            [  6.,   8.,  10.]])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="o">...</span>
 
 
@@ -654,7 +654,7 @@ document.write(`
     <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLikeReals</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Subtract the arguments element-wise.</span>
+<span class="w">    </span><span class="sd">"""Subtract the arguments element-wise.</span>
 
 <span class="sd">    This docstring was adapted from that of numpy.subtract [1]_</span>
 
@@ -719,7 +719,7 @@ document.write(`
 <span class="sd">    Tensor([[ 0.,  0.,  0.],</span>
 <span class="sd">            [ 3.,  3.,  3.],</span>
 <span class="sd">            [ 6.,  6.,  6.]])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="o">...</span>
 
 
@@ -733,7 +733,7 @@ document.write(`
     <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLikeReals</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Multiply the arguments element-wise.</span>
+<span class="w">    </span><span class="sd">"""Multiply the arguments element-wise.</span>
 
 <span class="sd">    This docstring was adapted from that of numpy.multiply [1]_</span>
 
@@ -798,7 +798,7 @@ document.write(`
 <span class="sd">    Tensor([[  0.,   1.,   4.],</span>
 <span class="sd">            [  0.,   4.,  10.],</span>
 <span class="sd">            [  0.,   7.,  16.]])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="o">...</span>
 
 
@@ -812,7 +812,7 @@ document.write(`
     <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLikeReals</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Divide the arguments element-wise.</span>
+<span class="w">    </span><span class="sd">"""Divide the arguments element-wise.</span>
 
 <span class="sd">    This docstring was adapted from that of numpy.true_divide [1]_</span>
 
@@ -885,7 +885,7 @@ document.write(`
 
 <span class="sd">    &gt;&gt;&gt; (x // 4).constant</span>
 <span class="sd">    True</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="o">...</span>
 
 
@@ -902,7 +902,7 @@ document.write(`
     <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLikeReals</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;First tensor elements raised to powers from second tensor, element-wise.</span>
+<span class="w">    </span><span class="sd">"""First tensor elements raised to powers from second tensor, element-wise.</span>
 
 <span class="sd">    Raise each base in `x1` to the positionally-corresponding power in</span>
 <span class="sd">    `x2`.  `x1` and `x2` must be broadcastable to the same shape. Note that an</span>
@@ -986,7 +986,7 @@ document.write(`
 <span class="sd">    &gt;&gt;&gt; mg.power(x1, x2)</span>
 <span class="sd">    Tensor([[ 0,  1,  8, 27, 16,  5],</span>
 <span class="sd">            [ 0,  1,  8, 27, 16,  5]])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="o">...</span>
 
 
@@ -999,7 +999,7 @@ document.write(`
     <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLikeReals</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Negates the tensor element-wise.</span>
+<span class="w">    </span><span class="sd">"""Negates the tensor element-wise.</span>
 
 <span class="sd">    This docstring was adapted from that of numpy.negative [1]_</span>
 
@@ -1048,7 +1048,7 @@ document.write(`
 <span class="sd">    &gt;&gt;&gt; import mygrad as mg</span>
 <span class="sd">    &gt;&gt;&gt; mg.negative([1.,-1.])</span>
 <span class="sd">    Tensor([-1.,  1.])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="o">...</span>
 
 
@@ -1061,7 +1061,7 @@ document.write(`
     <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLikeReals</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a copy of the tensor.</span>
+<span class="w">    </span><span class="sd">"""Returns a copy of the tensor.</span>
 
 <span class="sd">    This docstring was adapted from that of numpy.positive [1]_</span>
 
@@ -1108,7 +1108,7 @@ document.write(`
 <span class="sd">    References</span>
 <span class="sd">    ----------</span>
 <span class="sd">    .. [1] Retrieved from https://numpy.org/doc/stable/reference/generated/numpy.positive.html</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="o">...</span>
 
 
@@ -1121,7 +1121,7 @@ document.write(`
     <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLikeReals</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the reciprocal of the argument element-wise.</span>
+<span class="w">    </span><span class="sd">"""Return the reciprocal of the argument element-wise.</span>
 
 <span class="sd">    This docstring was adapted from that of numpy.reciprocal [1]_</span>
 
@@ -1180,7 +1180,7 @@ document.write(`
 <span class="sd">    Tensor(0.5)</span>
 <span class="sd">    &gt;&gt;&gt; mg.reciprocal([1, 2., 3.33])</span>
 <span class="sd">    Tensor([ 1.       ,  0.5      ,  0.3003003])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="o">...</span>
 
 
@@ -1193,7 +1193,7 @@ document.write(`
     <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLikeReals</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the square of the argument element-wise.</span>
+<span class="w">    </span><span class="sd">"""Return the square of the argument element-wise.</span>
 
 <span class="sd">    This docstring was adapted from that of numpy.square [1]_</span>
 
@@ -1246,12 +1246,12 @@ document.write(`
 <span class="sd">    &gt;&gt;&gt; import mygrad as mg</span>
 <span class="sd">    &gt;&gt;&gt; mg.square([100., 1000.])</span>
 <span class="sd">    array([10.,  100.])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="o">...</span>
 
 
 <div class="viewcode-block" id="multiply_sequence"><a class="viewcode-back" href="../../../../generated/mygrad.multiply_sequence.html#mygrad.multiply_sequence">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">multiply_sequence</span><span class="p">(</span><span class="o">*</span><span class="n">variables</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;``f(a, b, ...) -&gt; a * b * ...``</span>
+<span class="w">    </span><span class="sd">"""``f(a, b, ...) -&gt; a * b * ...``</span>
 
 <span class="sd">    Multiply a sequence of tensors.</span>
 
@@ -1297,16 +1297,16 @@ document.write(`
 <span class="sd">    array([3.])</span>
 <span class="sd">    &gt;&gt;&gt; z.grad</span>
 <span class="sd">    array([[-3.]])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;`multiply_sequence` requires at least two inputs, got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span><span class="si">}</span><span class="s2"> inputs&quot;</span>
+            <span class="sa">f</span><span class="s2">"`multiply_sequence` requires at least two inputs, got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span><span class="si">}</span><span class="s2"> inputs"</span>
         <span class="p">)</span>
     <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">MultiplySequence</span><span class="p">,</span> <span class="o">*</span><span class="n">variables</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="add_sequence"><a class="viewcode-back" href="../../../../generated/mygrad.add_sequence.html#mygrad.add_sequence">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">add_sequence</span><span class="p">(</span><span class="o">*</span><span class="n">variables</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;``f(a, b, ...) -&gt; a + b + ...``</span>
+<span class="w">    </span><span class="sd">"""``f(a, b, ...) -&gt; a + b + ...``</span>
 
 <span class="sd">    Add a sequence of tensors.</span>
 
@@ -1353,10 +1353,10 @@ document.write(`
 <span class="sd">    array([2.])</span>
 <span class="sd">    &gt;&gt;&gt; z.grad</span>
 <span class="sd">    array([[2.]])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;`add_sequence` requires at least two inputs, got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span><span class="si">}</span><span class="s2"> inputs&quot;</span>
+            <span class="sa">f</span><span class="s2">"`add_sequence` requires at least two inputs, got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span><span class="si">}</span><span class="s2"> inputs"</span>
         <span class="p">)</span>
     <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">AddSequence</span><span class="p">,</span> <span class="o">*</span><span class="n">variables</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
 </pre></div>

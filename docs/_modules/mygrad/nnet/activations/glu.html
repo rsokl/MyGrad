@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad.nnet.activations.glu &#8212; MyGrad 2.3.0.post1.dev31 documentation</title>
+    <title>mygrad.nnet.activations.glu &#8212; MyGrad 2.3.0.post1.dev35 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev31 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev35 documentation</p>
   
 </a></div>
     
@@ -540,7 +540,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="glu"><a class="viewcode-back" href="../../../../generated/mygrad.nnet.activations.glu.html#mygrad.nnet.activations.glu">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">glu</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the Gated Linear Unit A * σ(B), where A and B are split from `x`.</span>
+<span class="w">    </span><span class="sd">"""Returns the Gated Linear Unit A * σ(B), where A and B are split from `x`.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -562,7 +562,7 @@ document.write(`
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
 <span class="sd">    The Gated Linear Unit was proposed in the paper</span>
-<span class="sd">        &quot;Language Modeling with Gated Convolutional Networks&quot;</span>
+<span class="sd">        "Language Modeling with Gated Convolutional Networks"</span>
 <span class="sd">        Yann Dauphin, Angela Fan, Michael Auli, David Grangier</span>
 <span class="sd">    available at https://arxiv.org/abs/1612.08083</span>
 
@@ -582,13 +582,13 @@ document.write(`
 <span class="sd">    &gt;&gt;&gt; y.backward()</span>
 <span class="sd">    &gt;&gt;&gt; x.grad</span>
 <span class="sd">    array([ 0,  0,  0,  0,  0, -1,  0,  0,  0,  0])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="p">(</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">)):</span>
         <span class="n">axis</span> <span class="o">=</span> <span class="n">axis</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;`axis` must be an integer-valued scalar, got </span><span class="si">{</span><span class="n">axis</span><span class="si">}</span><span class="s2"> (type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="sa">f</span><span class="s2">"`axis` must be an integer-valued scalar, got </span><span class="si">{</span><span class="n">axis</span><span class="si">}</span><span class="s2"> (type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span><span class="si">}</span><span class="s2">)"</span>
         <span class="p">)</span>
 
     <span class="n">first_idx</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
@@ -601,8 +601,8 @@ document.write(`
 
     <span class="k">if</span> <span class="n">first_half</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">second_half</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;The shapes after splitting must be the same but got </span><span class="si">{</span><span class="n">first_half</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> &quot;</span>
-            <span class="s2">&quot;and </span><span class="si">{second_half.shape}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"The shapes after splitting must be the same but got </span><span class="si">{</span><span class="n">first_half</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> "</span>
+            <span class="s2">"and </span><span class="si">{second_half.shape}</span><span class="s2">"</span>
         <span class="p">)</span>
     <span class="k">return</span> <span class="n">multiply</span><span class="p">(</span><span class="n">first_half</span><span class="p">,</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">second_half</span><span class="p">),</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
 </pre></div>

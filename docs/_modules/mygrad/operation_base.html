@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad.operation_base &#8212; MyGrad 2.3.0.post1.dev31 documentation</title>
+    <title>mygrad.operation_base &#8212; MyGrad 2.3.0.post1.dev35 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev31 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev35 documentation</p>
   
 </a></div>
     
@@ -528,9 +528,9 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <h1>Source code for mygrad.operation_base</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">Defines the base class for mathematical operations capable of back-propagating</span>
-<span class="sd">gradients to their input tensors.&quot;&quot;&quot;</span>
+<span class="sd">gradients to their input tensors."""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Real</span>
@@ -548,23 +548,23 @@ document.write(`
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;Operation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Ufunc&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;UnaryUfunc&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;BinaryUfunc&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Sequential&quot;</span><span class="p">,</span>
+    <span class="s2">"Operation"</span><span class="p">,</span>
+    <span class="s2">"Ufunc"</span><span class="p">,</span>
+    <span class="s2">"UnaryUfunc"</span><span class="p">,</span>
+    <span class="s2">"BinaryUfunc"</span><span class="p">,</span>
+    <span class="s2">"Sequential"</span><span class="p">,</span>
 <span class="p">]</span>
 
 <span class="n">Axis</span> <span class="o">=</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]]]</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">_NoValueType</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Special keyword value.</span>
+<span class="w">    </span><span class="sd">"""Special keyword value.</span>
 
 <span class="sd">    The instance of this class may be used as the default value assigned to a</span>
 <span class="sd">    deprecated keyword in order to check if it has been given a user defined</span>
 <span class="sd">    value.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">__instance</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -575,19 +575,19 @@ document.write(`
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__instance</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
-        <span class="k">return</span> <span class="s2">&quot;&lt;no value&gt;&quot;</span>
+        <span class="k">return</span> <span class="s2">"&lt;no value&gt;"</span>
 
 
 <span class="n">_NoValue</span> <span class="o">=</span> <span class="n">_NoValueType</span><span class="p">()</span>
 
 
 <div class="viewcode-block" id="Operation"><a class="viewcode-back" href="../../generated/mygrad.operation_base.Operation.html#mygrad.operation_base.Operation">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Operation</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for all tensor operations that support back-propagation</span>
+<span class="w">    </span><span class="sd">"""Base class for all tensor operations that support back-propagation</span>
 <span class="sd">    of gradients.</span>
 
 <span class="sd">    Consider the Operation-instance ``f``. A forward-pass through ``f`` is defined</span>
 <span class="sd">    via ``f.__call__(...)``. Thus, given tensors ``a`` and ``b``, a computational</span>
-<span class="sd">    graph is defined ``f.__call__(a, b) -&gt; c``, where the &quot;creator&quot; of tensor ``c``</span>
+<span class="sd">    graph is defined ``f.__call__(a, b) -&gt; c``, where the "creator" of tensor ``c``</span>
 <span class="sd">    is recorded as ``f``::</span>
 
 <span class="sd">          (node: a) --+</span>
@@ -598,18 +598,18 @@ document.write(`
 <span class="sd">    the gradient to its inputs, which are recorded as ``a`` and ``b``. Each</span>
 <span class="sd">    node then back-propagates to any Operation-instance that is recorded</span>
 <span class="sd">    as its creator, and so on.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1"># Can be set to true if the operation is guaranteed to not returns a view</span>
     <span class="c1"># this will reduce some overhead on checking for shared memory</span>
     <span class="n">can_return_view</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="c1"># Stores the input tensors that the operation will backprop through.</span>
-    <span class="n">variables</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="s2">&quot;Tensor&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+    <span class="n">variables</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="s2">"Tensor"</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
 
 <div class="viewcode-block" id="Operation.__init__"><a class="viewcode-back" href="../../generated/mygrad.operation_base.Operation.html#mygrad.operation_base.Operation.__init__">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Stores positional and keyword arguments used to call op.</span>
-        <span class="c1"># Can be set optionally - only if op needs to be &quot;replayed&quot;,</span>
+        <span class="c1"># Can be set optionally - only if op needs to be "replayed",</span>
         <span class="c1"># e.g. with a view</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">replay_args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">replay_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -635,8 +635,8 @@ document.write(`
         <span class="k">return</span> <span class="n">out</span>
 
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">input_vars</span><span class="p">:</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs a forward pass, f, of this Operation::</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">input_vars</span><span class="p">:</span> <span class="s2">"Tensor"</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Performs a forward pass, f, of this Operation::</span>
 
 <span class="sd">                         f(x1, ...., xn)</span>
 
@@ -657,13 +657,13 @@ document.write(`
 <span class="sd">        Notes</span>
 <span class="sd">        -----</span>
 <span class="sd">        This method should set the ``self.variables`` attribute</span>
-<span class="sd">        with a tuple storing all of the input tensors of this operations&quot;&quot;&quot;</span>
+<span class="sd">        with a tuple storing all of the input tensors of this operations"""</span>
 
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>  <span class="c1"># pragma: no cover</span>
 
 <div class="viewcode-block" id="Operation.backward_var"><a class="viewcode-back" href="../../generated/mygrad.operation_base.Operation.backward_var.html#mygrad.operation_base.Operation.backward_var">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">backward_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grad</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Given ``grad = dℒ/df``, computes ``∂ℒ/∂x_{i}``, where ``x_{i}`` is one</span>
+<span class="w">        </span><span class="sd">"""Given ``grad = dℒ/df``, computes ``∂ℒ/∂x_{i}``, where ``x_{i}`` is one</span>
 <span class="sd">        of ``x1, ...., xn``.</span>
 
 <span class="sd">        ``ℒ`` is assumed to be the terminal node from which ``ℒ.backward()`` was</span>
@@ -686,7 +686,7 @@ document.write(`
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
-<span class="sd">        SkipGradient&quot;&quot;&quot;</span>
+<span class="sd">        SkipGradient"""</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>  <span class="c1"># pragma: no cover</span></div>
 
 <div class="viewcode-block" id="Operation.backward"><a class="viewcode-back" href="../../generated/mygrad.operation_base.Operation.backward.html#mygrad.operation_base.Operation.backward">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">backward</span><span class="p">(</span>
@@ -694,7 +694,7 @@ document.write(`
         <span class="n">grad</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Back-propagates the gradient through all of the operation&#39;s inputs,</span>
+<span class="w">        </span><span class="sd">"""Back-propagates the gradient through all of the operation's inputs,</span>
 <span class="sd">        which are stored in the tuple `self.variables`.</span>
 
 <span class="sd">        Constant tensors (`tensor.constant is True`) skipped by this process.</span>
@@ -704,21 +704,21 @@ document.write(`
 <span class="sd">        grad : numpy.ndarray</span>
 <span class="sd">            The back-propagated total derivative with respect to the present</span>
 <span class="sd">            operation (`f`): d(out)/df</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">constant</span><span class="p">:</span>
                 <span class="k">continue</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">var</span><span class="o">.</span><span class="n">_ops</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">InvalidBackprop</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Part of the computational graph containing &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;this tensor, </span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s2">, was &#39;cleared&#39; prior to backprop.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;It is recommended that you clear all computational graphs &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;and restart your computation.&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Part of the computational graph containing "</span>
+                    <span class="sa">f</span><span class="s2">"this tensor, </span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s2">, was 'cleared' prior to backprop.</span><span class="se">\n</span><span class="s2">"</span>
+                    <span class="sa">f</span><span class="s2">"It is recommended that you clear all computational graphs "</span>
+                    <span class="sa">f</span><span class="s2">"and restart your computation."</span>
                 <span class="p">)</span>
 
             <span class="k">try</span><span class="p">:</span>
-                <span class="c1"># don&#39;t cast to array here so that we have an easier time</span>
+                <span class="c1"># don't cast to array here so that we have an easier time</span>
                 <span class="c1"># doing type checking (e.g. avoid `None` -&gt; `array(None, dtype=obj)`</span>
                 <span class="n">backed_grad</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">backward_var</span><span class="p">(</span><span class="n">grad</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="k">except</span> <span class="n">SkipGradient</span><span class="p">:</span>
@@ -726,10 +726,10 @@ document.write(`
 
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">backed_grad</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">,</span> <span class="n">Real</span><span class="p">)):</span>
                 <span class="k">raise</span> <span class="n">InvalidGradient</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;An invalid gradient-value was passed to:&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n\t</span><span class="s2">`</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.backward_var(&lt;gradient&gt;, index=</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">)`&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Gradients are expected to be real-valued scalars or &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;numpy arrays, got a gradient of type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">backed_grad</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">"An invalid gradient-value was passed to:"</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="se">\n\t</span><span class="s2">`</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.backward_var(&lt;gradient&gt;, index=</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">)`"</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Gradients are expected to be real-valued scalars or "</span>
+                    <span class="sa">f</span><span class="s2">"numpy arrays, got a gradient of type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">backed_grad</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
                 <span class="p">)</span>
 
             <span class="k">if</span> <span class="n">NP_IS_V2</span><span class="p">:</span>
@@ -759,36 +759,36 @@ document.write(`
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">Ufunc</span><span class="p">(</span><span class="n">Operation</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The base class for mygrad&#39;s universal functions.</span>
+<span class="w">    </span><span class="sd">"""The base class for mygrad's universal functions.</span>
 
-<span class="sd">    &#39;A universal function (or ufunc for short) is a function that operates on</span>
+<span class="sd">    'A universal function (or ufunc for short) is a function that operates on</span>
 <span class="sd">    ndarrays in an element-by-element fashion, supporting array broadcasting, type casting,</span>
 <span class="sd">    and several other standard features. That is, a ufunc is a “vectorized” wrapper for a</span>
 <span class="sd">    function that takes a fixed number of specific inputs and produces a fixed number of</span>
-<span class="sd">    specific outputs.&#39; [1]_</span>
+<span class="sd">    specific outputs.' [1]_</span>
 
 <span class="sd">    References</span>
 <span class="sd">    ----------</span>
-<span class="sd">    .. [1] Retrieved from https://numpy.org/doc/stable/reference/ufuncs.html&quot;&quot;&quot;</span>
+<span class="sd">    .. [1] Retrieved from https://numpy.org/doc/stable/reference/ufuncs.html"""</span>
 
     <span class="n">numpy_ufunc</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ufunc</span>
     <span class="n">_supports_where</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">UnaryUfunc</span><span class="p">(</span><span class="n">Ufunc</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A base class that specifies the common interface to – and facilitates</span>
+<span class="w">    </span><span class="sd">"""A base class that specifies the common interface to – and facilitates</span>
 <span class="sd">    back-prop through – ufuncs that operate on a single array argument;</span>
-<span class="sd">    e.g. `mygrad.sin`, `mygrad.negative`.&quot;&quot;&quot;</span>
+<span class="sd">    e.g. `mygrad.sin`, `mygrad.negative`."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">x1</span><span class="p">:</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">,</span>
+        <span class="n">x1</span><span class="p">:</span> <span class="s2">"Tensor"</span><span class="p">,</span>
         <span class="n">out</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">where</span><span class="p">:</span> <span class="n">Mask</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;f(x1, out=None, *, where=True, dtype=None)</span>
+<span class="w">        </span><span class="sd">"""f(x1, out=None, *, where=True, dtype=None)</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -819,34 +819,34 @@ document.write(`
 
 <span class="sd">        Notes</span>
 <span class="sd">        -----</span>
-<span class="sd">        This docstring was adapted from numpy&#39;s documentation [1]_.</span>
+<span class="sd">        This docstring was adapted from numpy's documentation [1]_.</span>
 
 <span class="sd">        References</span>
 <span class="sd">        ----------</span>
 <span class="sd">        .. [1] Retrieved from https://numpy.org/doc/stable/reference/generated/numpy.sqrt.html</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="s2">&quot;Tensor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">x1</span><span class="p">,)</span>
+<span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="s2">"Tensor"</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">x1</span><span class="p">,)</span>
         <span class="k">if</span> <span class="n">where</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">True</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">where</span> <span class="o">=</span> <span class="n">where</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">numpy_ufunc</span><span class="p">(</span><span class="n">x1</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">out</span><span class="p">,</span> <span class="n">where</span><span class="o">=</span><span class="n">where</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">BinaryUfunc</span><span class="p">(</span><span class="n">Ufunc</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A base class that specifies the common interface to – and facilitates</span>
-<span class="sd">    back-prop through – mygrad&#39;s ufuncs that operate on a two array arguments;</span>
+<span class="w">    </span><span class="sd">"""A base class that specifies the common interface to – and facilitates</span>
+<span class="sd">    back-prop through – mygrad's ufuncs that operate on a two array arguments;</span>
 <span class="sd">    e.g. `mygrad.add`, `mygrad.multiply`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">x1</span><span class="p">:</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">,</span>
-        <span class="n">x2</span><span class="p">:</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">,</span>
+        <span class="n">x1</span><span class="p">:</span> <span class="s2">"Tensor"</span><span class="p">,</span>
+        <span class="n">x2</span><span class="p">:</span> <span class="s2">"Tensor"</span><span class="p">,</span>
         <span class="n">out</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">where</span><span class="p">:</span> <span class="n">Mask</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;f(x1, x2, out=None, *, where=True, dtype=None)</span>
+<span class="w">        </span><span class="sd">"""f(x1, x2, out=None, *, where=True, dtype=None)</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -886,14 +886,14 @@ document.write(`
 
 <span class="sd">        Notes</span>
 <span class="sd">        -----</span>
-<span class="sd">        This docstring was adapted from numpy&#39;s documentation [2]_.</span>
+<span class="sd">        This docstring was adapted from numpy's documentation [2]_.</span>
 
 <span class="sd">        References</span>
 <span class="sd">        ----------</span>
 <span class="sd">        .. [1] https://numpy.org/doc/stable/user/basics.broadcasting.html</span>
 <span class="sd">        .. [2] Retrieved from https://numpy.org/doc/stable/reference/generated/numpy.add.html</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="s2">&quot;Tensor&quot;</span><span class="p">,</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">)</span>
+<span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="s2">"Tensor"</span><span class="p">,</span> <span class="s2">"Tensor"</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">where</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">where</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_NoValue</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">where</span> <span class="o">=</span> <span class="n">where</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">numpy_ufunc</span><span class="p">(</span><span class="n">x1</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">x2</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">out</span><span class="p">,</span> <span class="n">where</span><span class="o">=</span><span class="n">where</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
@@ -902,9 +902,9 @@ document.write(`
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">Sequential</span><span class="p">(</span><span class="n">Operation</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A base class that specifies the common interface to – and facilitates</span>
-<span class="sd">    back-prop through – numpy&#39;s sequential functions; e.g. `numpy.sum`, `numpy.var`,</span>
-<span class="sd">    `numpy.max`&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""A base class that specifies the common interface to – and facilitates</span>
+<span class="sd">    back-prop through – numpy's sequential functions; e.g. `numpy.sum`, `numpy.var`,</span>
+<span class="sd">    `numpy.max`"""</span>
 
     <span class="n">_integer_axis_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 
@@ -929,7 +929,7 @@ document.write(`
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">a</span><span class="p">:</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">,</span>
+        <span class="n">a</span><span class="p">:</span> <span class="s2">"Tensor"</span><span class="p">,</span>
         <span class="n">axis</span><span class="p">:</span> <span class="n">Axis</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">out</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -939,7 +939,7 @@ document.write(`
         <span class="n">where</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="n">_NoValue</span><span class="p">,</span>
         <span class="n">ddof</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">_NoValue</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="s2">&quot;Tensor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span><span class="p">,)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="s2">"Tensor"</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span><span class="p">,)</span>
 
         <span class="k">if</span> <span class="n">where</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">where</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_NoValue</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">where</span> <span class="o">=</span> <span class="n">where</span>
@@ -953,7 +953,7 @@ document.write(`
         <span class="k">if</span> <span class="p">(</span>
             <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_integer_axis_only</span>
             <span class="ow">and</span> <span class="n">axis</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-            <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="s2">&quot;__iter__&quot;</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="s2">"__iter__"</span><span class="p">)</span>
         <span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">=</span> <span class="p">(</span><span class="n">axis</span><span class="p">,)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -962,19 +962,19 @@ document.write(`
         <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="k">if</span> <span class="n">keepdims</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_NoValue</span><span class="p">:</span>
-            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;keepdims&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">keepdims</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">"keepdims"</span><span class="p">]</span> <span class="o">=</span> <span class="n">keepdims</span>
 
         <span class="k">if</span> <span class="n">initial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_NoValue</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;initial&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">initial</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">"initial"</span><span class="p">]</span> <span class="o">=</span> <span class="n">initial</span>
 
         <span class="k">if</span> <span class="n">where</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_NoValue</span><span class="p">:</span>
-            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;where&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">where</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">"where"</span><span class="p">]</span> <span class="o">=</span> <span class="n">where</span>
 
         <span class="k">if</span> <span class="n">ddof</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_NoValue</span><span class="p">:</span>
-            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;ddof&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ddof</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">"ddof"</span><span class="p">]</span> <span class="o">=</span> <span class="n">ddof</span>
 
         <span class="k">if</span> <span class="n">dtype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_NoValue</span><span class="p">:</span>
-            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;dtype&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dtype</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">"dtype"</span><span class="p">]</span> <span class="o">=</span> <span class="n">dtype</span>
 
         <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">numpy_func</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">out</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">out_shape</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">shape</span>

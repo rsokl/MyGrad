@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad.nnet.initializers.he_normal &#8212; MyGrad 2.3.0.post1.dev31 documentation</title>
+    <title>mygrad.nnet.initializers.he_normal &#8212; MyGrad 2.3.0.post1.dev35 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev31 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev35 documentation</p>
   
 </a></div>
     
@@ -534,7 +534,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="he_normal"><a class="viewcode-back" href="../../../../generated/mygrad.nnet.initializers.he_normal.html#mygrad.nnet.initializers.he_normal">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">he_normal</span><span class="p">(</span><span class="o">*</span><span class="n">shape</span><span class="p">,</span> <span class="n">gain</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Initialize a :class:`mygrad.Tensor` according to the normal initialization procedure</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Initialize a :class:`mygrad.Tensor` according to the normal initialization procedure</span>
 <span class="sd">    described by He et al.</span>
 
 <span class="sd">    Parameters</span>
@@ -560,8 +560,8 @@ document.write(`
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
 <span class="sd">    He, Zhang, Ren, and Sun put forward this initialization in the paper</span>
-<span class="sd">        &quot;Delving Deep into Rectifiers: Surpassing Human-Level Performance</span>
-<span class="sd">        on ImageNet Classification&quot;</span>
+<span class="sd">        "Delving Deep into Rectifiers: Surpassing Human-Level Performance</span>
+<span class="sd">        on ImageNet Classification"</span>
 <span class="sd">    https://arxiv.org/abs/1502.01852</span>
 
 <span class="sd">    A Tensor :math:`W` initialized in this way should be drawn from a distribution about</span>
@@ -583,20 +583,20 @@ document.write(`
 <span class="sd">    Tensor([[-2.3194842 ,  0.45956254, -0.28709933],</span>
 <span class="sd">            [-0.15776408,  0.6777564 , -0.05587448]], dtype=float32)</span>
 
-<span class="sd">    &gt;&gt;&gt; he_normal(4, 2, gain=5/3, dtype=&quot;float64&quot;, constant=True)</span>
+<span class="sd">    &gt;&gt;&gt; he_normal(4, 2, gain=5/3, dtype="float64", constant=True)</span>
 <span class="sd">    Tensor([[ 0.25962918,  1.1503933 ],</span>
 <span class="sd">            [-0.13638746,  0.10581096],</span>
 <span class="sd">            [ 1.44805926,  0.51367645],</span>
 <span class="sd">            [-0.32018705, -0.80306442]])</span>
 
-<span class="sd">    &gt;&gt;&gt; he_normal(2, 1, 2, dtype=&quot;float16&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; he_normal(2, 1, 2, dtype="float16")</span>
 <span class="sd">    Tensor([[[ 0.8057 , -0.2922 ]],</span>
 <span class="sd">            [[ 0.12213, -0.715  ]]], dtype=float16)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">shape</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;He Normal initialization requires at least two dimensions&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"He Normal initialization requires at least two dimensions"</span><span class="p">)</span>
 
     <span class="n">std</span> <span class="o">=</span> <span class="n">gain</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="k">else</span> <span class="mi">1</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">normal</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="n">std</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>

@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>MyGrad &#8212; MyGrad 2.3.0.post1.dev31 documentation</title>
+    <title>MyGrad &#8212; MyGrad 2.3.0.post1.dev35 documentation</title>
   
   
   
@@ -104,7 +104,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev31 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev35 documentation</p>
   
 </a></div>
     
@@ -534,7 +534,7 @@ As such, it strives to behave and feel exactly like NumPy so that users need not
 <span class="n">arr1</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="o">...</span><span class="p">)</span> <span class="c1"># some MyGrad Tensor (instead of a NumPy array)</span>
 <span class="n">arr2</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="o">...</span><span class="p">)</span> <span class="c1"># some MyGrad Tensor (instead of a NumPy array)</span>
 
-<span class="n">output</span> <span class="o">=</span> <span class="n">some_numpy_func</span><span class="p">(</span><span class="n">arr1</span><span class="p">,</span> <span class="n">arr2</span><span class="p">)</span>  <span class="c1"># &quot;drop in&quot; the MyGrad tensors</span>
+<span class="n">output</span> <span class="o">=</span> <span class="n">some_numpy_func</span><span class="p">(</span><span class="n">arr1</span><span class="p">,</span> <span class="n">arr2</span><span class="p">)</span>  <span class="c1"># "drop in" the MyGrad tensors</span>
 
 <span class="n">output</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>  <span class="c1"># output is a MyGrad tensor, not a NumPy array!</span>
 
@@ -560,7 +560,7 @@ the results:</p>
 indexing and similar operations on tensors will produce a “view” of that tensor’s data, thus a tensor and its view share memory.
 This relationship will also manifest between the derivatives stored by a tensor and its views!</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">9.</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">diag_view</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ii-&gt;i&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>  <span class="c1"># returns a view of the diagonal elements of `x`</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">diag_view</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">"ii-&gt;i"</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>  <span class="c1"># returns a view of the diagonal elements of `x`</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="p">,</span> <span class="n">diag_view</span>
 <span class="go">(Tensor([[0., 1., 2.],</span>
 <span class="go">[3., 4., 5.],</span>

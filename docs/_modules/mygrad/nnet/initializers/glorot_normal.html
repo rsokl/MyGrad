@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad.nnet.initializers.glorot_normal &#8212; MyGrad 2.3.0.post1.dev31 documentation</title>
+    <title>mygrad.nnet.initializers.glorot_normal &#8212; MyGrad 2.3.0.post1.dev35 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev31 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev35 documentation</p>
   
 </a></div>
     
@@ -534,7 +534,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="glorot_normal"><a class="viewcode-back" href="../../../../generated/mygrad.nnet.initializers.glorot_normal.html#mygrad.nnet.initializers.glorot_normal">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">glorot_normal</span><span class="p">(</span><span class="o">*</span><span class="n">shape</span><span class="p">,</span> <span class="n">gain</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Initialize a :class:`mygrad.Tensor` according to the normal initialization procedure</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Initialize a :class:`mygrad.Tensor` according to the normal initialization procedure</span>
 <span class="sd">    described by Glorot and Bengio.</span>
 
 <span class="sd">    Parameters</span>
@@ -560,22 +560,22 @@ document.write(`
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
 <span class="sd">    Glorot and Bengio put forward this initialization in the paper</span>
-<span class="sd">        &quot;Understanding the Difficulty of Training Deep Feedforward Neural Networks&quot;</span>
+<span class="sd">        "Understanding the Difficulty of Training Deep Feedforward Neural Networks"</span>
 <span class="sd">    http://proceedings.mlr.press/v9/glorot10a/glorot10a.pdf</span>
 
 <span class="sd">    A Tensor :math:`W` initialized in this way should be drawn from a distribution about</span>
 
 <span class="sd">    .. math::</span>
 <span class="sd">        \mathcal{N}(0, \frac{\sqrt{2}}{\sqrt{n_j+n_{j+1}}})</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Glorot Normal initialization requires a floating-point dtype&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Glorot Normal initialization requires a floating-point dtype"</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">shape</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s2">&quot;Glorot Normal initialization requires at least two dimensions&quot;</span>
+            <span class="s2">"Glorot Normal initialization requires at least two dimensions"</span>
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gain</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">):</span>

@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad.nnet.layers.conv &#8212; MyGrad 2.3.0.post1.dev31 documentation</title>
+    <title>mygrad.nnet.layers.conv &#8212; MyGrad 2.3.0.post1.dev35 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev31 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev35 documentation</p>
   
 </a></div>
     
@@ -538,7 +538,7 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.tensor_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tensor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mygrad.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArrayLike</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;conv_nd&quot;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"conv_nd"</span><span class="p">]</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">ConvND</span><span class="p">(</span><span class="n">Operation</span><span class="p">):</span>
@@ -554,7 +554,7 @@ document.write(`
         <span class="k">assert</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="n">w</span><span class="o">.</span><span class="n">ndim</span>
         <span class="k">assert</span> <span class="p">(</span>
             <span class="n">w</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="p">),</span> <span class="s2">&quot;The channel-depth of the batch and filters must agree&quot;</span>
+        <span class="p">),</span> <span class="s2">"The channel-depth of the batch and filters must agree"</span>
 
         <span class="n">num_conv_channels</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">2</span>
         <span class="n">x_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
@@ -595,12 +595,12 @@ document.write(`
         <span class="p">)</span> <span class="o">/</span> <span class="n">stride</span> <span class="o">+</span> <span class="mi">1</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">is_integer</span><span class="p">()</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">out_shape</span><span class="p">):</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Stride and kernel dimensions are incompatible: </span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Input dimensions: </span><span class="si">{</span><span class="nb">tuple</span><span class="p">(</span><span class="n">x_shape</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Stride dimensions: </span><span class="si">{</span><span class="nb">tuple</span><span class="p">(</span><span class="n">stride</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Kernel dimensions: </span><span class="si">{</span><span class="nb">tuple</span><span class="p">(</span><span class="n">w_shape</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Padding dimensions: </span><span class="si">{</span><span class="nb">tuple</span><span class="p">(</span><span class="n">padding</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Dilation dimensions: </span><span class="si">{</span><span class="nb">tuple</span><span class="p">(</span><span class="n">dilation</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">"Stride and kernel dimensions are incompatible: </span><span class="se">\n</span><span class="s2">"</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">"Input dimensions: </span><span class="si">{</span><span class="nb">tuple</span><span class="p">(</span><span class="n">x_shape</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">"Stride dimensions: </span><span class="si">{</span><span class="nb">tuple</span><span class="p">(</span><span class="n">stride</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">"Kernel dimensions: </span><span class="si">{</span><span class="nb">tuple</span><span class="p">(</span><span class="n">w_shape</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">"Padding dimensions: </span><span class="si">{</span><span class="nb">tuple</span><span class="p">(</span><span class="n">padding</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">"Dilation dimensions: </span><span class="si">{</span><span class="nb">tuple</span><span class="p">(</span><span class="n">dilation</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">padding</span> <span class="o">=</span> <span class="n">padding</span>
@@ -609,7 +609,7 @@ document.write(`
 
         <span class="c1"># symmetric 0-padding for X0, X1, ... dimensions</span>
         <span class="n">axis_pad</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">*</span><span class="n">padding</span><span class="p">))</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis_pad</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;constant&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">padding</span><span class="p">)</span> <span class="k">else</span> <span class="n">x</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis_pad</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"constant"</span><span class="p">)</span> <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">padding</span><span class="p">)</span> <span class="k">else</span> <span class="n">x</span>
 
         <span class="c1"># (G0, ...) is the tuple of grid-positions for placing each window (not including stride)</span>
         <span class="c1"># (N, C, X0, ...) -&gt; (G0, ..., N, C, W0, ...)</span>
@@ -630,14 +630,14 @@ document.write(`
 
         <span class="c1"># (F, G0, ..., N) -&gt; (N, F, G0, ...)</span>
         <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">conv_out</span><span class="p">,</span> <span class="n">source</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">out</span> <span class="k">if</span> <span class="n">out</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s2">&quot;C_CONTIGUOUS&quot;</span><span class="p">]</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span> <span class="k">if</span> <span class="n">out</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s2">"C_CONTIGUOUS"</span><span class="p">]</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">backward_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grad</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Computes dX, where X is the data batch</span>
+<span class="w">        </span><span class="sd">"""Computes dX, where X is the data batch</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        grad : numpy.ndarray, shape=(N, F, G0, ...)&quot;&quot;&quot;</span>
+<span class="sd">        grad : numpy.ndarray, shape=(N, F, G0, ...)"""</span>
         <span class="n">x</span><span class="p">,</span> <span class="n">w</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">data</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">)</span>
         <span class="n">num_conv_channels</span> <span class="o">=</span> <span class="n">grad</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">2</span>
 
@@ -671,7 +671,7 @@ document.write(`
             <span class="c1"># backprop into f</span>
             <span class="c1"># symmetric 0-padding for H, W dimensions</span>
             <span class="n">axis_pad</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">))</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis_pad</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;constant&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">)</span> <span class="k">else</span> <span class="n">x</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis_pad</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"constant"</span><span class="p">)</span> <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">)</span> <span class="k">else</span> <span class="n">x</span>
 
             <span class="c1"># (G0, ...) is the tuple of grid-indices for placing each window (not including stride)</span>
             <span class="c1"># (N, C, X0, ...) -&gt; (G0, ..., N, C, W0, ...)</span>
@@ -694,7 +694,7 @@ document.write(`
     <span class="n">dilation</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Use ``filter_bank`` (``w``) to perform strided N-dimensional neural network-style</span>
+<span class="w">    </span><span class="sd">"""Use ``filter_bank`` (``w``) to perform strided N-dimensional neural network-style</span>
 <span class="sd">    convolutions (see Notes) over ``x``.::</span>
 
 <span class="sd">            f(x, w) -&gt; x ⋆ w</span>
@@ -759,13 +759,13 @@ document.write(`
 <span class="sd">     - The filters are *not* flipped by this operation, meaning that</span>
 <span class="sd">       an auto-correlation is being performed rather than a true convolution.</span>
 
-<span class="sd">     - Only &#39;valid&#39; filter placements – where the filters overlap</span>
+<span class="sd">     - Only 'valid' filter placements – where the filters overlap</span>
 <span class="sd">       completely with the (padded) data – are permitted.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    Here we perform a 1D convolution of a constant-valued kernel, ``k``, with a</span>
-<span class="sd">    &#39;square-wave&#39; signal, ``x``, using stride-1. Note that because we are constrained</span>
+<span class="sd">    'square-wave' signal, ``x``, using stride-1. Note that because we are constrained</span>
 <span class="sd">    to doing deep learning-style convolutions, that we prepend the dimensions</span>
 <span class="sd">    :math:`(N=1, C=1)` to ``x``, and :math:`(F=1, C=1)` and to ``k``. That is,</span>
 <span class="sd">    we are performing a convolution on one, single-channeled signal using</span>
@@ -803,26 +803,26 @@ document.write(`
 <span class="sd">       &gt;&gt;&gt; x[..., 5:11] = 1</span>
 <span class="sd">       &gt;&gt;&gt; k = mg.ones((1, 1, 5))    # a constant-valued kernel</span>
 <span class="sd">       &gt;&gt;&gt; y = conv_nd(x, k, stride=1)   # performing a stride-1, 1D convolution</span>
-<span class="sd">       &gt;&gt;&gt; plt.title(&quot;conv(f, g); stride: 1&quot;)</span>
+<span class="sd">       &gt;&gt;&gt; plt.title("conv(f, g); stride: 1")</span>
 <span class="sd">       &gt;&gt;&gt; y.backward()</span>
-<span class="sd">       &gt;&gt;&gt; plt.plot(x.data[0,0], label=&quot;f&quot;, ls=&quot;--&quot;, lw=3, drawstyle=&#39;steps-pre&#39;)</span>
-<span class="sd">       &gt;&gt;&gt; plt.plot(kernel, label=&quot;g&quot;, ls=&quot;--&quot;, lw=3, drawstyle=&#39;steps-pre&#39;)</span>
-<span class="sd">       &gt;&gt;&gt; plt.plot(y.data[0,0], label=&quot;f * g&quot;)</span>
-<span class="sd">       &gt;&gt;&gt; plt.plot(mg.arange(16.), x.grad[0, 0], label=&quot;d[sum(f * g)]/df&quot;)</span>
+<span class="sd">       &gt;&gt;&gt; plt.plot(x.data[0,0], label="f", ls="--", lw=3, drawstyle='steps-pre')</span>
+<span class="sd">       &gt;&gt;&gt; plt.plot(kernel, label="g", ls="--", lw=3, drawstyle='steps-pre')</span>
+<span class="sd">       &gt;&gt;&gt; plt.plot(y.data[0,0], label="f * g")</span>
+<span class="sd">       &gt;&gt;&gt; plt.plot(mg.arange(16.), x.grad[0, 0], label="d[sum(f * g)]/df")</span>
 <span class="sd">       &gt;&gt;&gt; kernel = mg.ones(5)  # a square-wave signal</span>
 <span class="sd">       &gt;&gt;&gt; plt.legend()</span>
 <span class="sd">       &gt;&gt;&gt; plt.grid()</span>
 <span class="sd">       &gt;&gt;&gt; plt.show()</span>
 
-<span class="sd">    Let&#39;s apply a edge-detection kernel to each color channel of an RGB image.</span>
+<span class="sd">    Let's apply a edge-detection kernel to each color channel of an RGB image.</span>
 
 <span class="sd">     &gt;&gt;&gt; import matplotlib.pyplot as plt</span>
 <span class="sd">     &gt;&gt;&gt; import matplotlib.image as mpimg</span>
 <span class="sd">     &gt;&gt;&gt; from mygrad.nnet.layers import conv_nd</span>
 <span class="sd">     &gt;&gt;&gt; # A shape-(H, W, 3) RGB image</span>
-<span class="sd">     &gt;&gt;&gt; img = mpimg.imread(&#39;../_static/meerkat.png&#39;)</span>
-<span class="sd">     &gt;&gt;&gt; # We&#39;ll treat this like a batch of three greyscale images</span>
-<span class="sd">     &gt;&gt;&gt; # where each &quot;image&quot; is actually a color channel</span>
+<span class="sd">     &gt;&gt;&gt; img = mpimg.imread('../_static/meerkat.png')</span>
+<span class="sd">     &gt;&gt;&gt; # We'll treat this like a batch of three greyscale images</span>
+<span class="sd">     &gt;&gt;&gt; # where each "image" is actually a color channel</span>
 <span class="sd">     &gt;&gt;&gt; # shape-(H, W, 3) -&gt; shape-(3, 1, H, W)</span>
 <span class="sd">     &gt;&gt;&gt; x = img.transpose(2, 0, 1)[:, None, :, :]</span>
 
@@ -833,8 +833,8 @@ document.write(`
 <span class="sd">     &gt;&gt;&gt; # (Hf, Wf) --&gt; (1, 1, Hf, Wf)</span>
 <span class="sd">     &gt;&gt;&gt; kernel = kernel.reshape(1, 1, *kernel.shape)</span>
 
-<span class="sd">     &gt;&gt;&gt; # conv: (3, 1, H, W) w/ (1, 1, Hf, Wf) --&gt; (3, 1, H&#39;, W&#39;)</span>
-<span class="sd">     &gt;&gt;&gt; # squeeze + transpose: (3, 1, H&#39;, W&#39;) --&gt; (H&#39;, W&#39;, 3)</span>
+<span class="sd">     &gt;&gt;&gt; # conv: (3, 1, H, W) w/ (1, 1, Hf, Wf) --&gt; (3, 1, H', W')</span>
+<span class="sd">     &gt;&gt;&gt; # squeeze + transpose: (3, 1, H', W') --&gt; (H', W', 3)</span>
 <span class="sd">     &gt;&gt;&gt; processed = conv_nd(x, kernel, stride=(1, 1))</span>
 <span class="sd">     &gt;&gt;&gt; processed = processed.data.squeeze().transpose(1, 2, 0)</span>
 
@@ -849,7 +849,7 @@ document.write(`
 <span class="sd">        &gt;&gt;&gt; import matplotlib.pyplot as plt</span>
 <span class="sd">        &gt;&gt;&gt; import matplotlib.image as mpimg</span>
 <span class="sd">        &gt;&gt;&gt; from mygrad.nnet.layers import conv_nd</span>
-<span class="sd">        &gt;&gt;&gt; img = mpimg.imread(&#39;../_static/meerkat.png&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; img = mpimg.imread('../_static/meerkat.png')</span>
 
 <span class="sd">        &gt;&gt;&gt; # edge detection</span>
 <span class="sd">        &gt;&gt;&gt; kernel = np.array([[-1, -1, -1],</span>
@@ -860,8 +860,8 @@ document.write(`
 <span class="sd">        &gt;&gt;&gt; # (Hf, Wf) --&gt; (1, 1, Hf, Wf)</span>
 <span class="sd">        &gt;&gt;&gt; kernel = kernel.reshape(1, 1, *kernel.shape)</span>
 
-<span class="sd">        &gt;&gt;&gt; # conv: (C, 1, H, W) w/ (1, 1, Hf, Wf) --&gt; (C, 1, H&#39;, W&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; # squeeze + transpose: (C, 1, H&#39;, W&#39;) --&gt; (H&#39;, W&#39;, C)</span>
+<span class="sd">        &gt;&gt;&gt; # conv: (C, 1, H, W) w/ (1, 1, Hf, Wf) --&gt; (C, 1, H', W')</span>
+<span class="sd">        &gt;&gt;&gt; # squeeze + transpose: (C, 1, H', W') --&gt; (H', W', C)</span>
 <span class="sd">        &gt;&gt;&gt; processed = conv_nd(x, kernel, stride=(1, 1)).data.squeeze().transpose(1, 2, 0)</span>
 
 <span class="sd">        &gt;&gt;&gt; fig, ax = plt.subplots()</span>
@@ -870,13 +870,13 @@ document.write(`
 <span class="sd">        &gt;&gt;&gt; fig, ax = plt.subplots()</span>
 <span class="sd">        &gt;&gt;&gt; ax.imshow(processed)</span>
 
-<span class="sd">    Now, let&#39;s demonstrate a more typical usage for ``conv_nd`` in the context of</span>
+<span class="sd">    Now, let's demonstrate a more typical usage for ``conv_nd`` in the context of</span>
 <span class="sd">    neural networks. ``x`` will represent 10, 32x32 RGB images, and we will use</span>
 <span class="sd">    5 distinct 2x2 kernels to convolve over each of these images . Note that</span>
 <span class="sd">    each kernel must possess 3-channel - one for each RGB channel.</span>
 
 <span class="sd">    That is, we will be performing NxF channel-wise 2D convolutions. Supposing</span>
-<span class="sd">    that we don&#39;t want the kernel placements to overlap, we can use a stride of 2. In</span>
+<span class="sd">    that we don't want the kernel placements to overlap, we can use a stride of 2. In</span>
 <span class="sd">    total, this will produce a shape-:math:`(N=10, F=5, G_0=16, G_1=16)` tensor as a</span>
 <span class="sd">    result.</span>
 
@@ -891,7 +891,7 @@ document.write(`
 
 <span class="sd">    Extrapolating further, ``conv_nd`` is capable of performing ND convolutions!</span>
 
-<span class="sd">    Performing a convolution over a batch of single-channel, &quot;spatial-3D&quot; tensor data:</span>
+<span class="sd">    Performing a convolution over a batch of single-channel, "spatial-3D" tensor data:</span>
 
 <span class="sd">    &gt;&gt;&gt; # shape-(N=1, C=1, X=10, Y=12, Z=10)</span>
 <span class="sd">    &gt;&gt;&gt; x = mg.random.rand(1, 1, 10, 12, 10)</span>
@@ -899,28 +899,28 @@ document.write(`
 <span class="sd">    &gt;&gt;&gt; k = mg.random.rand(2, 1, 3, 1, 32)</span>
 <span class="sd">    &gt;&gt;&gt; conv_nd(x, k, stride=1).shape</span>
 <span class="sd">    (1, 2, 8, 12, 9)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;`x` must possess at least three &quot;</span> <span class="sa">f</span><span class="s2">&quot;dimensions, got </span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">ndim</span><span class="si">}</span><span class="s2"> dimensions&quot;</span>
+            <span class="sa">f</span><span class="s2">"`x` must possess at least three "</span> <span class="sa">f</span><span class="s2">"dimensions, got </span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">ndim</span><span class="si">}</span><span class="s2"> dimensions"</span>
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="n">filter_bank</span><span class="o">.</span><span class="n">ndim</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;`x` (</span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">ndim</span><span class="si">}</span><span class="s2">-dimensions) must have the same dimensionality as &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;`filter_bank` (</span><span class="si">{</span><span class="n">filter_bank</span><span class="o">.</span><span class="n">ndim</span><span class="si">}</span><span class="s2">-dimensions)&quot;</span>
+            <span class="sa">f</span><span class="s2">"`x` (</span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">ndim</span><span class="si">}</span><span class="s2">-dimensions) must have the same dimensionality as "</span>
+            <span class="sa">f</span><span class="s2">"`filter_bank` (</span><span class="si">{</span><span class="n">filter_bank</span><span class="o">.</span><span class="n">ndim</span><span class="si">}</span><span class="s2">-dimensions)"</span>
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">filter_bank</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;`x.shape[1]` (</span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">) must match `filter_bank.shape[1]` (</span><span class="si">{</span><span class="n">filter_bank</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="sa">f</span><span class="s2">"`x.shape[1]` (</span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">) must match `filter_bank.shape[1]` (</span><span class="si">{</span><span class="n">filter_bank</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">)"</span>
         <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span>
         <span class="n">ConvND</span><span class="p">,</span>
         <span class="n">x</span><span class="p">,</span>
         <span class="n">filter_bank</span><span class="p">,</span>
-        <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;stride&quot;</span><span class="p">:</span> <span class="n">stride</span><span class="p">,</span> <span class="s2">&quot;padding&quot;</span><span class="p">:</span> <span class="n">padding</span><span class="p">,</span> <span class="s2">&quot;dilation&quot;</span><span class="p">:</span> <span class="n">dilation</span><span class="p">},</span>
+        <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"stride"</span><span class="p">:</span> <span class="n">stride</span><span class="p">,</span> <span class="s2">"padding"</span><span class="p">:</span> <span class="n">padding</span><span class="p">,</span> <span class="s2">"dilation"</span><span class="p">:</span> <span class="n">dilation</span><span class="p">},</span>
         <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">,</span>
     <span class="p">)</span></div>
 </pre></div>

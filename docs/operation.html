@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Writing Your Own Operations &#8212; MyGrad 2.3.0.post1.dev31 documentation</title>
+    <title>Writing Your Own Operations &#8212; MyGrad 2.3.0.post1.dev35 documentation</title>
   
   
   
@@ -105,7 +105,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev31 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev35 documentation</p>
   
 </a></div>
     
@@ -562,10 +562,10 @@ document.write(`
 
 <span class="c1"># All operations should inherit from Operation, or one of its subclasses</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CustomMultiply</span><span class="p">(</span><span class="n">Operation</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Performs f(x, y) = x * y &quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">""" Performs f(x, y) = x * y """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">mg</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">mg</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="c1"># This method defines the &quot;forward pass&quot; of the operation.</span>
+        <span class="c1"># This method defines the "forward pass" of the operation.</span>
         <span class="c1"># It must bind the variable tensors to the op and compute</span>
         <span class="c1"># the output of the operation as a numpy array</span>
 
@@ -580,7 +580,7 @@ document.write(`
         <span class="k">return</span> <span class="n">x_arr</span> <span class="o">*</span> <span class="n">y_arr</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">backward_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grad</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Given ``grad = dℒ/df``, computes ``∂ℒ/∂x`` and ``∂ℒ/∂y``</span>
+<span class="w">        </span><span class="sd">"""Given ``grad = dℒ/df``, computes ``∂ℒ/∂x`` and ``∂ℒ/∂y``</span>
 
 <span class="sd">        ``ℒ`` is assumed to be the terminal node from which ``ℒ.backward()`` was</span>
 <span class="sd">        called.</span>
@@ -602,14 +602,14 @@ document.write(`
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
-<span class="sd">        SkipGradient&quot;&quot;&quot;</span>
+<span class="sd">        SkipGradient"""</span>
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span>
         <span class="n">x_arr</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">data</span>
         <span class="n">y_arr</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">data</span>
 
         <span class="c1"># The operation need not incorporate specialized logic for</span>
         <span class="c1"># broadcasting. The appropriate sum-reductions will be performed</span>
-        <span class="c1"># by MyGrad&#39;s autodiff system.</span>
+        <span class="c1"># by MyGrad's autodiff system.</span>
         <span class="k">if</span> <span class="n">index</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># backprop through a</span>
             <span class="k">return</span> <span class="n">grad</span> <span class="o">*</span> <span class="n">y</span><span class="o">.</span><span class="n">data</span>  <span class="c1"># ∂ℒ/∂x = (∂ℒ/∂f)(∂f/∂x)</span>
         <span class="k">elif</span> <span class="n">index</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># backprop through b</span>
@@ -621,7 +621,7 @@ document.write(`
 <span class="k">def</span><span class="w"> </span><span class="nf">custom_multiply</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">mg</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
     <span class="c1"># `execute_op` will take care of:</span>
     <span class="c1">#  - casting `x` and `y` to tensors if they are instead array-likes</span>
-    <span class="c1">#  - propagating &#39;constant&#39; status to the resulting output based on the inputs</span>
+    <span class="c1">#  - propagating 'constant' status to the resulting output based on the inputs</span>
     <span class="c1">#  - handling in-place operations (specified via the `out` parameter)</span>
     <span class="k">return</span> <span class="n">execute_op</span><span class="p">(</span><span class="n">CustomMultiply</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
 </pre></div>

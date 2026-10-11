@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad.linalg.funcs &#8212; MyGrad 2.3.0.post1.dev31 documentation</title>
+    <title>mygrad.linalg.funcs &#8212; MyGrad 2.3.0.post1.dev35 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev31 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev35 documentation</p>
   
 </a></div>
     
@@ -546,7 +546,7 @@ document.write(`
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.ops</span><span class="w"> </span><span class="kn">import</span> <span class="n">EinSum</span><span class="p">,</span> <span class="n">Norm</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;einsum&quot;</span><span class="p">,</span> <span class="s2">&quot;norm&quot;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"einsum"</span><span class="p">,</span> <span class="s2">"norm"</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="norm"><a class="viewcode-back" href="../../../generated/mygrad.linalg.norm.html#mygrad.norm">[docs]</a><span class="nd">@implements_numpy_override</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">)</span>
@@ -559,7 +559,7 @@ document.write(`
     <span class="n">nan_to_num</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Vector norm.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Vector norm.</span>
 
 <span class="sd">    This function is an infinite number of vector norms (described below), depending</span>
 <span class="sd">    on the value of the ``ord`` parameter.</span>
@@ -576,7 +576,7 @@ document.write(`
 <span class="sd">        ``x.ravel`` will be returned.</span>
 
 <span class="sd">    ord : Optional[Union[int, float]]</span>
-<span class="sd">        Order of the norm (see table under ``Notes``). inf means numpy&#39;s</span>
+<span class="sd">        Order of the norm (see table under ``Notes``). inf means numpy's</span>
 <span class="sd">        `inf` object. The default is None.</span>
 
 <span class="sd">    axis : Optional[Union[int, Tuple[int]]]</span>
@@ -610,7 +610,7 @@ document.write(`
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
 <span class="sd">    For values of ``ord &lt; 1``, the result is, strictly speaking, not a</span>
-<span class="sd">    mathematical &#39;norm&#39;, but it may still be useful for various numerical</span>
+<span class="sd">    mathematical 'norm', but it may still be useful for various numerical</span>
 <span class="sd">    purposes.</span>
 
 <span class="sd">    The following norms can be calculated:</span>
@@ -676,7 +676,7 @@ document.write(`
 
 <span class="sd">    &gt;&gt;&gt; mg.linalg.norm(x, axis=0, ord=1)</span>
 <span class="sd">    Tensor([2., 2., 3.])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">ord</span><span class="p">,</span> <span class="n">Real</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="nb">ord</span><span class="p">):</span>
         <span class="n">op</span> <span class="o">=</span> <span class="n">mg_max</span> <span class="k">if</span> <span class="nb">ord</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">mg_min</span>
         <span class="n">abs_</span> <span class="o">=</span> <span class="n">absolute</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
@@ -685,20 +685,20 @@ document.write(`
         <span class="n">in_ndim</span> <span class="o">=</span> <span class="n">abs_</span><span class="o">.</span><span class="n">creator</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span>
 
         <span class="k">if</span> <span class="p">(</span><span class="n">axis</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">ord</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">in_ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
-            <span class="nb">hasattr</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="s2">&quot;__len__&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>
+            <span class="nb">hasattr</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="s2">"__len__"</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>
         <span class="p">):</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-                <span class="s2">&quot;mygrad.linalg.norm does not support matrix norms&quot;</span>
+                <span class="s2">"mygrad.linalg.norm does not support matrix norms"</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">out</span>
     <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span>
         <span class="n">Norm</span><span class="p">,</span>
         <span class="n">x</span><span class="p">,</span>
         <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;axis&quot;</span><span class="p">:</span> <span class="n">axis</span><span class="p">,</span>
-            <span class="s2">&quot;keepdims&quot;</span><span class="p">:</span> <span class="n">keepdims</span><span class="p">,</span>
-            <span class="s2">&quot;ord&quot;</span><span class="p">:</span> <span class="nb">ord</span><span class="p">,</span>
-            <span class="s2">&quot;nan_to_num&quot;</span><span class="p">:</span> <span class="n">nan_to_num</span><span class="p">,</span>
+            <span class="s2">"axis"</span><span class="p">:</span> <span class="n">axis</span><span class="p">,</span>
+            <span class="s2">"keepdims"</span><span class="p">:</span> <span class="n">keepdims</span><span class="p">,</span>
+            <span class="s2">"ord"</span><span class="p">:</span> <span class="nb">ord</span><span class="p">,</span>
+            <span class="s2">"nan_to_num"</span><span class="p">:</span> <span class="n">nan_to_num</span><span class="p">,</span>
         <span class="p">},</span>
         <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">,</span>
     <span class="p">)</span></div>
@@ -711,7 +711,7 @@ document.write(`
     <span class="n">out</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""</span>
 <span class="sd">    einsum(subscripts, *operands)</span>
 
 <span class="sd">    Evaluates the Einstein summation convention on the operands. This implementation</span>
@@ -731,7 +731,7 @@ document.write(`
 <span class="sd">    This optimization accommodates all number and combination of redundancies that can</span>
 <span class="sd">    be encountered.</span>
 
-<span class="sd">    E.g. back-propping through ``einsum(&#39;...,...-&gt;&#39;, x, x)`` will only incur a single</span>
+<span class="sd">    E.g. back-propping through ``einsum('...,...-&gt;', x, x)`` will only incur a single</span>
 <span class="sd">    computation/accumulation for ``x.grad`` rather than two. This permits users to</span>
 <span class="sd">    leverage the efficiency of sum-reduction, where ``(x ** 2).sum()`` is sub-optimal,</span>
 <span class="sd">    without being penalized during back-propagation.</span>
@@ -744,12 +744,12 @@ document.write(`
 <span class="sd">    operands : array_like</span>
 <span class="sd">        The tensors used in the summation.</span>
 
-<span class="sd">    optimize : {False, True, &#39;greedy&#39;, &#39;optimal&#39;}, optional (default=False)</span>
+<span class="sd">    optimize : {False, True, 'greedy', 'optimal'}, optional (default=False)</span>
 <span class="sd">        Controls if intermediate optimization should occur; also enables</span>
 <span class="sd">        the use of BLAS where possible. This can produce significant speedups</span>
 <span class="sd">        for computations like matrix multiplication.</span>
 
-<span class="sd">        No optimization will occur if False and True will default to the &#39;greedy&#39;</span>
+<span class="sd">        No optimization will occur if False and True will default to the 'greedy'</span>
 <span class="sd">        algorithm. Also accepts an explicit contraction list from the</span>
 <span class="sd">        ``np.einsum_path`` function. See ``np.einsum_path`` for more details.</span>
 
@@ -773,36 +773,36 @@ document.write(`
 <span class="sd">    The subscripts string is a comma-separated list of subscript labels,</span>
 <span class="sd">    where each label refers to a dimension of the corresponding operand.</span>
 <span class="sd">    Repeated subscripts labels in one operand take the diagonal.  For example,</span>
-<span class="sd">    ``einsum(&#39;ii&#39;, a)`` is equivalent to ``np.trace(a)`` (however, the former</span>
+<span class="sd">    ``einsum('ii', a)`` is equivalent to ``np.trace(a)`` (however, the former</span>
 <span class="sd">    supports back-propagation).</span>
 
-<span class="sd">    Whenever a label is repeated, it is summed, so ``einsum(&#39;i, i&#39;, a, b)``</span>
+<span class="sd">    Whenever a label is repeated, it is summed, so ``einsum('i, i', a, b)``</span>
 <span class="sd">    is equivalent to ``np.inner(a, b)``.  If a label appears only once,</span>
-<span class="sd">    it is not summed, so ``einsum(&#39;i&#39;, a)`` produces a view of ``a``</span>
+<span class="sd">    it is not summed, so ``einsum('i', a)`` produces a view of ``a``</span>
 <span class="sd">    with no changes.</span>
 
 <span class="sd">    The order of labels in the output is by default alphabetical.  This</span>
-<span class="sd">    means that ``np.einsum(&#39;ij&#39;, a)`` doesn&#39;t affect a 2D tensor, while</span>
-<span class="sd">    ``einsum(&#39;ji&#39;, a)`` takes its transpose.</span>
+<span class="sd">    means that ``np.einsum('ij', a)`` doesn't affect a 2D tensor, while</span>
+<span class="sd">    ``einsum('ji', a)`` takes its transpose.</span>
 
 <span class="sd">    The output can be controlled by specifying output subscript labels</span>
 <span class="sd">    as well.  This specifies the label order, and allows summing to</span>
-<span class="sd">    be disallowed or forced when desired.  The call ``einsum(&#39;i-&gt;&#39;, a)``</span>
-<span class="sd">    is like ``np.sum(a, axis=-1)``, and ``einsum(&#39;ii-&gt;i&#39;, a)``</span>
+<span class="sd">    be disallowed or forced when desired.  The call ``einsum('i-&gt;', a)``</span>
+<span class="sd">    is like ``np.sum(a, axis=-1)``, and ``einsum('ii-&gt;i', a)``</span>
 <span class="sd">    is like ``np.diag(a)``.  The difference is that `einsum` does not</span>
 <span class="sd">    allow broadcasting by default.</span>
 
 <span class="sd">    To enable and control broadcasting, use an ellipsis.  Default</span>
 <span class="sd">    NumPy-style broadcasting is done by adding an ellipsis</span>
-<span class="sd">    to the left of each term, like ``einsum(&#39;...ii-&gt;...i&#39;, a)``.</span>
+<span class="sd">    to the left of each term, like ``einsum('...ii-&gt;...i', a)``.</span>
 <span class="sd">    To take the trace along the first and last axes,</span>
-<span class="sd">    you can do ``einsum(&#39;i...i&#39;, a)``, or to do a matrix-matrix</span>
+<span class="sd">    you can do ``einsum('i...i', a)``, or to do a matrix-matrix</span>
 <span class="sd">    product with the left-most indices instead of rightmost, you can do</span>
-<span class="sd">    ``einsum(&#39;ij...,jk...-&gt;ik...&#39;, a, b)``.</span>
+<span class="sd">    ``einsum('ij...,jk...-&gt;ik...', a, b)``.</span>
 
 <span class="sd">    When there is only one operand, no axes are summed, and no output</span>
 <span class="sd">    parameter is provided, a view into the operand is returned instead</span>
-<span class="sd">    of a new tensor.  Thus, taking the diagonal as ``einsum(&#39;ii-&gt;i&#39;, a)``</span>
+<span class="sd">    of a new tensor.  Thus, taking the diagonal as ``einsum('ii-&gt;i', a)``</span>
 <span class="sd">    produces a view.</span>
 
 <span class="sd">    An alternative way to provide the subscripts and operands is as</span>
@@ -819,7 +819,7 @@ document.write(`
 
 <span class="sd">    Compute the trace of ``a``, :math:`\sum_{i}{A_{ii}} = f`:</span>
 
-<span class="sd">    &gt;&gt;&gt; einsum(&#39;ii&#39;, a)</span>
+<span class="sd">    &gt;&gt;&gt; einsum('ii', a)</span>
 <span class="sd">    Tensor(60)</span>
 <span class="sd">    &gt;&gt;&gt; einsum(a, [0, 0])</span>
 <span class="sd">    Tensor(60)</span>
@@ -828,7 +828,7 @@ document.write(`
 
 <span class="sd">    Return a view along the diagonal of ``a``, :math:`A_{ii} = F_{i}`:</span>
 
-<span class="sd">    &gt;&gt;&gt; einsum(&#39;ii-&gt;i&#39;, a)</span>
+<span class="sd">    &gt;&gt;&gt; einsum('ii-&gt;i', a)</span>
 <span class="sd">    Tensor([ 0,  6, 12, 18, 24])</span>
 <span class="sd">    &gt;&gt;&gt; einsum(a, [0,0], [0])</span>
 <span class="sd">    Tensor([ 0,  6, 12, 18, 24])</span>
@@ -837,18 +837,18 @@ document.write(`
 
 <span class="sd">    Compute the matrix-vector product of ``a`` with ``b``, :math:`\sum_{j}{A_{ij} B_{j}} = F_{i}`:</span>
 
-<span class="sd">    &gt;&gt;&gt; einsum(&#39;ij,j&#39;, a, b)</span>
+<span class="sd">    &gt;&gt;&gt; einsum('ij,j', a, b)</span>
 <span class="sd">    Tensor([ 30,  80, 130, 180, 230])</span>
 <span class="sd">    &gt;&gt;&gt; einsum(a, [0,1], b, [1])</span>
 <span class="sd">    Tensor([ 30,  80, 130, 180, 230])</span>
 <span class="sd">    &gt;&gt;&gt; mg.matmul(a, b)</span>
 <span class="sd">    Tensor([ 30,  80, 130, 180, 230])</span>
-<span class="sd">    &gt;&gt;&gt; einsum(&#39;...j,j&#39;, a, b)</span>
+<span class="sd">    &gt;&gt;&gt; einsum('...j,j', a, b)</span>
 <span class="sd">    Tensor([ 30,  80, 130, 180, 230])</span>
 
 <span class="sd">    Take the transpose of ``c``, :math:`C_{ji} = F_{ij}`:</span>
 
-<span class="sd">    &gt;&gt;&gt; einsum(&#39;ji&#39;, c)</span>
+<span class="sd">    &gt;&gt;&gt; einsum('ji', c)</span>
 <span class="sd">    Tensor([[0, 3],</span>
 <span class="sd">            [1, 4],</span>
 <span class="sd">            [2, 5]])</span>
@@ -863,10 +863,10 @@ document.write(`
 
 <span class="sd">    Compute ``3 * c``:</span>
 
-<span class="sd">    &gt;&gt;&gt; einsum(&#39;..., ...&#39;, 3, c)</span>
+<span class="sd">    &gt;&gt;&gt; einsum('..., ...', 3, c)</span>
 <span class="sd">    Tensor([[ 0,  3,  6],</span>
 <span class="sd">            [ 9, 12, 15]])</span>
-<span class="sd">    &gt;&gt;&gt; einsum(&#39;,ij&#39;, 3, c)</span>
+<span class="sd">    &gt;&gt;&gt; einsum(',ij', 3, c)</span>
 <span class="sd">    Tensor([[ 0,  3,  6],</span>
 <span class="sd">            [ 9, 12, 15]])</span>
 <span class="sd">    &gt;&gt;&gt; einsum(3, [Ellipsis], c, [Ellipsis])</span>
@@ -878,7 +878,7 @@ document.write(`
 
 <span class="sd">    Compute the inner product of ``b`` with itself, :math:`\sum_{i}{B_{i} B_{i}} = f`:</span>
 
-<span class="sd">    &gt;&gt;&gt; einsum(&#39;i,i&#39;, b, b)</span>
+<span class="sd">    &gt;&gt;&gt; einsum('i,i', b, b)</span>
 <span class="sd">    Tensor(30)</span>
 <span class="sd">    &gt;&gt;&gt; einsum(b, [0], b, [0])</span>
 <span class="sd">    Tensor(30)</span>
@@ -887,7 +887,7 @@ document.write(`
 
 <span class="sd">    Compute the outer product of ``array([1, 2])`` with ``b``, :math:`A_{i}B_{j} = F_{ij}`:</span>
 
-<span class="sd">    &gt;&gt;&gt; einsum(&#39;i,j&#39;, np.arange(2)+1, b)</span>
+<span class="sd">    &gt;&gt;&gt; einsum('i,j', np.arange(2)+1, b)</span>
 <span class="sd">    Tensor([[0, 1, 2, 3, 4],</span>
 <span class="sd">           [0, 2, 4, 6, 8]])</span>
 <span class="sd">    &gt;&gt;&gt; einsum(np.arange(2)+1, [0], b, [1])</span>
@@ -896,7 +896,7 @@ document.write(`
 <span class="sd">    &gt;&gt;&gt; np.outer(np.arange(2)+1, b)</span>
 <span class="sd">    array([[0, 1, 2, 3, 4],</span>
 <span class="sd">           [0, 2, 4, 6, 8]])</span>
-<span class="sd">    &gt;&gt;&gt; einsum(&#39;i...-&gt;...&#39;, a)</span>
+<span class="sd">    &gt;&gt;&gt; einsum('i...-&gt;...', a)</span>
 <span class="sd">    Tensor([50, 55, 60, 65, 70])</span>
 <span class="sd">    &gt;&gt;&gt; einsum(a, [0,Ellipsis], [Ellipsis])</span>
 <span class="sd">    Tensor([50, 55, 60, 65, 70])</span>
@@ -907,7 +907,7 @@ document.write(`
 
 <span class="sd">    &gt;&gt;&gt; a = mg.arange(60.).reshape(3,4,5)</span>
 <span class="sd">    &gt;&gt;&gt; b = mg.arange(24.).reshape(4,3,2)</span>
-<span class="sd">    &gt;&gt;&gt; einsum(&#39;ijk,jil-&gt;kl&#39;, a, b)</span>
+<span class="sd">    &gt;&gt;&gt; einsum('ijk,jil-&gt;kl', a, b)</span>
 <span class="sd">    Tensor([[ 4400.,  4730.],</span>
 <span class="sd">            [ 4532.,  4874.],</span>
 <span class="sd">            [ 4664.,  5018.],</span>
@@ -930,30 +930,30 @@ document.write(`
 
 <span class="sd">    &gt;&gt;&gt; a = mg.arange(6).reshape((3,2))</span>
 <span class="sd">    &gt;&gt;&gt; b = mg.arange(12).reshape((4,3))</span>
-<span class="sd">    &gt;&gt;&gt; einsum(&#39;ki,jk-&gt;ij&#39;, a, b)</span>
+<span class="sd">    &gt;&gt;&gt; einsum('ki,jk-&gt;ij', a, b)</span>
 <span class="sd">    Tensor([[10, 28, 46, 64],</span>
 <span class="sd">            [13, 40, 67, 94]])</span>
-<span class="sd">    &gt;&gt;&gt; einsum(&#39;ki,...k-&gt;i...&#39;, a, b)</span>
+<span class="sd">    &gt;&gt;&gt; einsum('ki,...k-&gt;i...', a, b)</span>
 <span class="sd">    Tensor([[10, 28, 46, 64],</span>
 <span class="sd">            [13, 40, 67, 94]])</span>
-<span class="sd">    &gt;&gt;&gt; einsum(&#39;k...,jk&#39;, a, b)</span>
+<span class="sd">    &gt;&gt;&gt; einsum('k...,jk', a, b)</span>
 <span class="sd">    Tensor([[10, 28, 46, 64],</span>
 <span class="sd">            [13, 40, 67, 94]])</span>
 
 <span class="sd">    Make an assignment to a view along the diagonal of ``a``:</span>
 
 <span class="sd">    &gt;&gt;&gt; a = mg.zeros((3, 3))</span>
-<span class="sd">    &gt;&gt;&gt; einsum(&#39;ii-&gt;i&#39;, a).data[:] = 1</span>
+<span class="sd">    &gt;&gt;&gt; einsum('ii-&gt;i', a).data[:] = 1</span>
 <span class="sd">    &gt;&gt;&gt; a</span>
 <span class="sd">    Tensor([[ 1.,  0.,  0.],</span>
 <span class="sd">            [ 0.,  1.,  0.],</span>
 <span class="sd">            [ 0.,  0.,  1.]])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1"># TODO: normalize error handling for invalid inputs</span>
     <span class="n">operands</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">operands</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">operands</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="c1"># operands form: &quot;ijk, ijk&quot;, x, y</span>
+        <span class="c1"># operands form: "ijk, ijk", x, y</span>
         <span class="n">variables</span> <span class="o">=</span> <span class="n">operands</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
         <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">operands</span><span class="p">):</span>
             <span class="n">operands</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="p">(</span>
@@ -970,7 +970,7 @@ document.write(`
 
     <span class="n">in_lbls</span><span class="p">,</span> <span class="n">out_lbls</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_parse_einsum_input</span><span class="p">(</span><span class="n">operands</span><span class="p">)</span>
 
-    <span class="c1"># einsum doesn&#39;t handle out=None properly in numpy 1.17</span>
+    <span class="c1"># einsum doesn't handle out=None properly in numpy 1.17</span>
 
     <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span>
         <span class="n">EinSum</span><span class="p">,</span>

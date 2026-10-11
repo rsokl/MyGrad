@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>mygrad.einsum &#8212; MyGrad 2.3.0.post1.dev31 documentation</title>
+    <title>mygrad.einsum &#8212; MyGrad 2.3.0.post1.dev35 documentation</title>
   
   
   
@@ -106,7 +106,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev31 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev35 documentation</p>
   
 </a></div>
     
@@ -645,7 +645,7 @@ below have corresponding <cite>einsum</cite> calls with the two parameter method
 </pre></div>
 </div>
 <p>Compute the trace of <code class="docutils literal notranslate"><span class="pre">a</span></code>, <span class="math notranslate nohighlight">\(\sum_{i}{A_{ii}} = f\)</span>:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;ii&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">'ii'</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
 <span class="go">Tensor(60)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
 <span class="go">Tensor(60)</span>
@@ -654,7 +654,7 @@ below have corresponding <cite>einsum</cite> calls with the two parameter method
 </pre></div>
 </div>
 <p>Return a view along the diagonal of <code class="docutils literal notranslate"><span class="pre">a</span></code>, <span class="math notranslate nohighlight">\(A_{ii} = F_{i}\)</span>:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;ii-&gt;i&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">'ii-&gt;i'</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
 <span class="go">Tensor([ 0,  6, 12, 18, 24])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 <span class="go">Tensor([ 0,  6, 12, 18, 24])</span>
@@ -663,18 +663,18 @@ below have corresponding <cite>einsum</cite> calls with the two parameter method
 </pre></div>
 </div>
 <p>Compute the matrix-vector product of <code class="docutils literal notranslate"><span class="pre">a</span></code> with <code class="docutils literal notranslate"><span class="pre">b</span></code>, <span class="math notranslate nohighlight">\(\sum_{j}{A_{ij} B_{j}} = F_{i}\)</span>:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;ij,j&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">'ij,j'</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
 <span class="go">Tensor([ 30,  80, 130, 180, 230])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="n">b</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 <span class="go">Tensor([ 30,  80, 130, 180, 230])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">mg</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
 <span class="go">Tensor([ 30,  80, 130, 180, 230])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...j,j&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">'...j,j'</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
 <span class="go">Tensor([ 30,  80, 130, 180, 230])</span>
 </pre></div>
 </div>
 <p>Take the transpose of <code class="docutils literal notranslate"><span class="pre">c</span></code>, <span class="math notranslate nohighlight">\(C_{ji} = F_{ij}\)</span>:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;ji&#39;</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">'ji'</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
 <span class="go">Tensor([[0, 3],</span>
 <span class="go">        [1, 4],</span>
 <span class="go">        [2, 5]])</span>
@@ -689,10 +689,10 @@ below have corresponding <cite>einsum</cite> calls with the two parameter method
 </pre></div>
 </div>
 <p>Compute <code class="docutils literal notranslate"><span class="pre">3</span> <span class="pre">*</span> <span class="pre">c</span></code>:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;..., ...&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">'..., ...'</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
 <span class="go">Tensor([[ 0,  3,  6],</span>
 <span class="go">        [ 9, 12, 15]])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;,ij&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">',ij'</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
 <span class="go">Tensor([[ 0,  3,  6],</span>
 <span class="go">        [ 9, 12, 15]])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="p">[</span><span class="bp">Ellipsis</span><span class="p">],</span> <span class="n">c</span><span class="p">,</span> <span class="p">[</span><span class="bp">Ellipsis</span><span class="p">])</span>
@@ -704,7 +704,7 @@ below have corresponding <cite>einsum</cite> calls with the two parameter method
 </pre></div>
 </div>
 <p>Compute the inner product of <code class="docutils literal notranslate"><span class="pre">b</span></code> with itself, <span class="math notranslate nohighlight">\(\sum_{i}{B_{i} B_{i}} = f\)</span>:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;i,i&#39;</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">'i,i'</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
 <span class="go">Tensor(30)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">b</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 <span class="go">Tensor(30)</span>
@@ -713,7 +713,7 @@ below have corresponding <cite>einsum</cite> calls with the two parameter method
 </pre></div>
 </div>
 <p>Compute the outer product of <code class="docutils literal notranslate"><span class="pre">array([1,</span> <span class="pre">2])</span></code> with <code class="docutils literal notranslate"><span class="pre">b</span></code>, <span class="math notranslate nohighlight">\(A_{i}B_{j} = F_{ij}\)</span>:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;i,j&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">'i,j'</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
 <span class="go">Tensor([[0, 1, 2, 3, 4],</span>
 <span class="go">       [0, 2, 4, 6, 8]])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">b</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">])</span>
@@ -722,7 +722,7 @@ below have corresponding <cite>einsum</cite> calls with the two parameter method
 <span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
 <span class="go">array([[0, 1, 2, 3, 4],</span>
 <span class="go">       [0, 2, 4, 6, 8]])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;i...-&gt;...&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">'i...-&gt;...'</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
 <span class="go">Tensor([50, 55, 60, 65, 70])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="bp">Ellipsis</span><span class="p">],</span> <span class="p">[</span><span class="bp">Ellipsis</span><span class="p">])</span>
 <span class="go">Tensor([50, 55, 60, 65, 70])</span>
@@ -733,7 +733,7 @@ below have corresponding <cite>einsum</cite> calls with the two parameter method
 <p>Compute the tensor product <span class="math notranslate nohighlight">\(\sum_{ij}{A_{ijk} B_{jil}} = F_{kl}\)</span></p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">60.</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">24.</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;ijk,jil-&gt;kl&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">'ijk,jil-&gt;kl'</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
 <span class="go">Tensor([[ 4400.,  4730.],</span>
 <span class="go">        [ 4532.,  4874.],</span>
 <span class="go">        [ 4664.,  5018.],</span>
@@ -756,20 +756,20 @@ below have corresponding <cite>einsum</cite> calls with the two parameter method
 <p>Matrix multiply <code class="docutils literal notranslate"><span class="pre">a.T</span></code> with <code class="docutils literal notranslate"><span class="pre">b.T</span></code>, <span class="math notranslate nohighlight">\(\sum_{k}{A_{ki} B_{jk}} = F_{ij}\)</span></p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;ki,jk-&gt;ij&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">'ki,jk-&gt;ij'</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
 <span class="go">Tensor([[10, 28, 46, 64],</span>
 <span class="go">        [13, 40, 67, 94]])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;ki,...k-&gt;i...&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">'ki,...k-&gt;i...'</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
 <span class="go">Tensor([[10, 28, 46, 64],</span>
 <span class="go">        [13, 40, 67, 94]])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;k...,jk&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">'k...,jk'</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
 <span class="go">Tensor([[10, 28, 46, 64],</span>
 <span class="go">        [13, 40, 67, 94]])</span>
 </pre></div>
 </div>
 <p>Make an assignment to a view along the diagonal of <code class="docutils literal notranslate"><span class="pre">a</span></code>:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;ii-&gt;i&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">[:]</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">einsum</span><span class="p">(</span><span class="s1">'ii-&gt;i'</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">[:]</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span>
 <span class="go">Tensor([[ 1.,  0.,  0.],</span>
 <span class="go">        [ 0.,  1.,  0.],</span>

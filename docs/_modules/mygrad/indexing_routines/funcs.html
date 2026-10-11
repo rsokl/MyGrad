@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad.indexing_routines.funcs &#8212; MyGrad 2.3.0.post1.dev31 documentation</title>
+    <title>mygrad.indexing_routines.funcs &#8212; MyGrad 2.3.0.post1.dev35 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev31 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev35 documentation</p>
   
 </a></div>
     
@@ -538,7 +538,7 @@ document.write(`
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.ops</span><span class="w"> </span><span class="kn">import</span> <span class="n">Where</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;where&quot;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"where"</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="where"><a class="viewcode-back" href="../../../generated/mygrad.where.html#mygrad.where">[docs]</a><span class="nd">@implements_numpy_override</span><span class="p">()</span>
@@ -549,7 +549,7 @@ document.write(`
     <span class="o">*</span><span class="p">,</span>
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    where(condition, [x, y])</span>
 
 <span class="sd">    Return elements chosen from `x` or `y` depending on `condition`.</span>
@@ -622,15 +622,15 @@ document.write(`
 <span class="sd">    Tensor([[ 0,  1,  2],</span>
 <span class="sd">            [ 0,  2, -1],</span>
 <span class="sd">            [ 0,  3, -1]])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="n">_NoValue</span> <span class="ow">and</span> <span class="n">y</span> <span class="ow">is</span> <span class="n">_NoValue</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">asarray</span><span class="p">(</span><span class="n">condition</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="n">_NoValue</span> <span class="ow">or</span> <span class="n">y</span> <span class="ow">is</span> <span class="n">_NoValue</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;either both or neither of x and y should be given&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"either both or neither of x and y should be given"</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span>
-        <span class="n">Where</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;condition&quot;</span><span class="p">:</span> <span class="n">condition</span><span class="p">},</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span>
+        <span class="n">Where</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">op_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"condition"</span><span class="p">:</span> <span class="n">condition</span><span class="p">},</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span>
     <span class="p">)</span></div>
 </pre></div>
 

@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad.math.trigonometric.funcs &#8212; MyGrad 2.3.0.post1.dev31 documentation</title>
+    <title>mygrad.math.trigonometric.funcs &#8212; MyGrad 2.3.0.post1.dev35 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev31 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev35 documentation</p>
   
 </a></div>
     
@@ -539,20 +539,20 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">.ops</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;sin&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sinc&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;cos&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;tan&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;cot&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;csc&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sec&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;arccos&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;arccsc&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;arcsin&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;arctan&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;arcsec&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;arccot&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;arctan2&quot;</span><span class="p">,</span>
+    <span class="s2">"sin"</span><span class="p">,</span>
+    <span class="s2">"sinc"</span><span class="p">,</span>
+    <span class="s2">"cos"</span><span class="p">,</span>
+    <span class="s2">"tan"</span><span class="p">,</span>
+    <span class="s2">"cot"</span><span class="p">,</span>
+    <span class="s2">"csc"</span><span class="p">,</span>
+    <span class="s2">"sec"</span><span class="p">,</span>
+    <span class="s2">"arccos"</span><span class="p">,</span>
+    <span class="s2">"arccsc"</span><span class="p">,</span>
+    <span class="s2">"arcsin"</span><span class="p">,</span>
+    <span class="s2">"arctan"</span><span class="p">,</span>
+    <span class="s2">"arcsec"</span><span class="p">,</span>
+    <span class="s2">"arccot"</span><span class="p">,</span>
+    <span class="s2">"arctan2"</span><span class="p">,</span>
 <span class="p">]</span>
 
 
@@ -565,7 +565,7 @@ document.write(`
     <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLikeReals</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Trigonometric sine, element-wise.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Trigonometric sine, element-wise.</span>
 
 <span class="sd">    This docstring was adapted from that of numpy.sin [1]_</span>
 
@@ -616,7 +616,7 @@ document.write(`
 <span class="sd">    centered on the origin.  A ray comes in from the :math:`+x` axis, makes</span>
 <span class="sd">    an angle at the origin (measured counter-clockwise from that axis), and</span>
 <span class="sd">    departs from the origin.  The :math:`y` coordinate of the outgoing</span>
-<span class="sd">    ray&#39;s intersection with the unit circle is the sine of that angle.  It</span>
+<span class="sd">    ray's intersection with the unit circle is the sine of that angle.  It</span>
 <span class="sd">    ranges from -1 for :math:`x=3\pi / 2` to +1 for :math:`\pi / 2.`  The</span>
 <span class="sd">    function has zeroes where the angle is a multiple of :math:`\pi`.</span>
 <span class="sd">    Sines of angles between :math:`\pi` and :math:`2\pi` are negative.</span>
@@ -637,7 +637,7 @@ document.write(`
 
 <span class="sd">    &gt;&gt;&gt; mg.sin(mg.tensor((0., 30., 45., 60., 90.)) * mg.pi / 180. )</span>
 <span class="sd">    Tensor([ 0.        ,  0.5       ,  0.70710678,  0.8660254 ,  1.        ])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="o">...</span>
 
 
@@ -650,7 +650,7 @@ document.write(`
     <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLikeReals</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Trigonometric cosine, element-wise.</span>
+<span class="w">    </span><span class="sd">"""Trigonometric cosine, element-wise.</span>
 
 <span class="sd">    This docstring was adapted from that of numpy.cos [1]_</span>
 
@@ -707,7 +707,7 @@ document.write(`
 <span class="sd">    &gt;&gt;&gt; import mygrad as mg</span>
 <span class="sd">    &gt;&gt;&gt; mg.cos([0, mg.pi/2, mg.pi])</span>
 <span class="sd">    Tensor([  1.00000000e+00,   6.12303177e-17,  -1.00000000e+00])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="o">...</span>
 
 
@@ -720,7 +720,7 @@ document.write(`
     <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLikeReals</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Trigonometric tangent, element-wise.</span>
+<span class="w">    </span><span class="sd">"""Trigonometric tangent, element-wise.</span>
 
 <span class="sd">    This docstring was adapted from that of numpy.tan [1]_</span>
 
@@ -778,7 +778,7 @@ document.write(`
 <span class="sd">    &gt;&gt;&gt; from math import pi</span>
 <span class="sd">    &gt;&gt;&gt; mg.tan([-pi, pi / 2, pi])</span>
 <span class="sd">    Tensor([  1.22460635e-16,   1.63317787e+16,  -1.22460635e-16])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="o">...</span>
 
 
@@ -791,7 +791,7 @@ document.write(`
     <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLikeReals</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Inverse sine, element-wise.</span>
+<span class="w">    </span><span class="sd">"""Inverse sine, element-wise.</span>
 
 <span class="sd">    This docstring was adapted from that of numpy.arcsin [1]_</span>
 
@@ -869,7 +869,7 @@ document.write(`
 <span class="sd">    Tensor(-1.5707963267948966)</span>
 <span class="sd">    &gt;&gt;&gt; mg.arcsin(0)</span>
 <span class="sd">    Tensor(0.0)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="o">...</span>
 
 
@@ -882,7 +882,7 @@ document.write(`
     <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLikeReals</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Inverse cosine, element-wise.</span>
+<span class="w">    </span><span class="sd">"""Inverse cosine, element-wise.</span>
 
 <span class="sd">    This docstring was adapted from that of numpy.arccos [1]_</span>
 
@@ -948,7 +948,7 @@ document.write(`
 <span class="sd">    ----------</span>
 <span class="sd">    .. [1] Retrieved from https://numpy.org/doc/stable/reference/generated/numpy.arccos.html</span>
 
-<span class="sd">    M. Abramowitz and I.A. Stegun, &quot;Handbook of Mathematical Functions&quot;,</span>
+<span class="sd">    M. Abramowitz and I.A. Stegun, "Handbook of Mathematical Functions",</span>
 <span class="sd">    10th printing, 1964, pp. 79. http://www.math.sfu.ca/~cbm/aands/</span>
 
 <span class="sd">    Examples</span>
@@ -958,7 +958,7 @@ document.write(`
 <span class="sd">    &gt;&gt;&gt; import mygrad as mg</span>
 <span class="sd">    &gt;&gt;&gt; mg.arccos([1, -1])</span>
 <span class="sd">    Tensor([ 0.        ,  3.14159265])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="o">...</span>
 
 
@@ -971,7 +971,7 @@ document.write(`
     <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLikeReals</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Inverse tangent, element-wise.</span>
+<span class="w">    </span><span class="sd">"""Inverse tangent, element-wise.</span>
 
 <span class="sd">    This docstring was adapted from that of numpy.arctan [1]_</span>
 
@@ -1011,7 +1011,7 @@ document.write(`
 
 <span class="sd">    See Also</span>
 <span class="sd">    --------</span>
-<span class="sd">    arctan2 : The &quot;four quadrant&quot; arctan of the angle formed by (`x`, `y`)</span>
+<span class="sd">    arctan2 : The "four quadrant" arctan of the angle formed by (`x`, `y`)</span>
 <span class="sd">        and the positive `x`-axis.</span>
 
 <span class="sd">    Notes</span>
@@ -1048,7 +1048,7 @@ document.write(`
 
 <span class="sd">    &gt;&gt;&gt; mg.pi / 4</span>
 <span class="sd">    0.78539816339744828</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="o">...</span>
 
 
@@ -1062,7 +1062,7 @@ document.write(`
     <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLikeReals</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Element-wise arc tangent of ``x1/x2`` choosing the quadrant correctly.</span>
+<span class="w">    </span><span class="sd">"""Element-wise arc tangent of ``x1/x2`` choosing the quadrant correctly.</span>
 
 <span class="sd">    This docstring was adapted from that of numpy.arctan [1]_</span>
 
@@ -1132,7 +1132,7 @@ document.write(`
 <span class="sd">    References</span>
 <span class="sd">    ----------</span>
 <span class="sd">    .. [1] Retrieved from https://numpy.org/doc/stable/reference/generated/numpy.arctan.html</span>
-<span class="sd">    .. [2] ISO/IEC standard 9899:1999, &quot;Programming language C.&quot;</span>
+<span class="sd">    .. [2] ISO/IEC standard 9899:1999, "Programming language C."</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -1151,12 +1151,12 @@ document.write(`
 <span class="sd">    &gt;&gt;&gt; mg.arctan2([1., -1.], [0., 0.])</span>
 <span class="sd">    Tenor([ 1.57079633, -1.57079633])</span>
 <span class="sd">    &gt;&gt;&gt; mg.arctan2([0., 0., mg.inf], [+0., -0., mg.inf])</span>
-<span class="sd">    Tenor([ 0.        ,  3.14159265,  0.78539816])&quot;&quot;&quot;</span>
+<span class="sd">    Tenor([ 0.        ,  3.14159265,  0.78539816])"""</span>
     <span class="o">...</span>
 
 
 <div class="viewcode-block" id="sinc"><a class="viewcode-back" href="../../../../generated/mygrad.sinc.html#mygrad.sinc">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">sinc</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;``f(a) -&gt; sin(a) / a``</span>
+<span class="w">    </span><span class="sd">"""``f(a) -&gt; sin(a) / a``</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1174,12 +1174,12 @@ document.write(`
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    mygrad.Tensor&quot;&quot;&quot;</span>
+<span class="sd">    mygrad.Tensor"""</span>
     <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Sinc</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">cot</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;``f(a) -&gt; cot(a)``</span>
+<span class="w">    </span><span class="sd">"""``f(a) -&gt; cot(a)``</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1197,12 +1197,12 @@ document.write(`
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    mygrad.Tensor&quot;&quot;&quot;</span>
+<span class="sd">    mygrad.Tensor"""</span>
     <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Cot</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">csc</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;``f(a) -&gt; csc(a)``</span>
+<span class="w">    </span><span class="sd">"""``f(a) -&gt; csc(a)``</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1220,12 +1220,12 @@ document.write(`
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    mygrad.Tensor&quot;&quot;&quot;</span>
+<span class="sd">    mygrad.Tensor"""</span>
     <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Csc</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">sec</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;``f(a) -&gt; sec(a)``</span>
+<span class="w">    </span><span class="sd">"""``f(a) -&gt; sec(a)``</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1243,12 +1243,12 @@ document.write(`
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    mygrad.Tensor&quot;&quot;&quot;</span>
+<span class="sd">    mygrad.Tensor"""</span>
     <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Sec</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">arccsc</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;``f(a) -&gt; arccsc(a)``</span>
+<span class="w">    </span><span class="sd">"""``f(a) -&gt; arccsc(a)``</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1266,12 +1266,12 @@ document.write(`
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    mygrad.Tensor&quot;&quot;&quot;</span>
+<span class="sd">    mygrad.Tensor"""</span>
     <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Arccsc</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">arccot</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;``f(a) -&gt; arccot(a)``</span>
+<span class="w">    </span><span class="sd">"""``f(a) -&gt; arccot(a)``</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1289,12 +1289,12 @@ document.write(`
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    mygrad.Tensor&quot;&quot;&quot;</span>
+<span class="sd">    mygrad.Tensor"""</span>
     <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Arccot</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">arcsec</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;``f(a) -&gt; arcsec(a)``</span>
+<span class="w">    </span><span class="sd">"""``f(a) -&gt; arcsec(a)``</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1312,7 +1312,7 @@ document.write(`
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    mygrad.Tensor&quot;&quot;&quot;</span>
+<span class="sd">    mygrad.Tensor"""</span>
     <span class="k">return</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">_op</span><span class="p">(</span><span class="n">Arcsec</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
 </pre></div>
 
