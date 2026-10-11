@@ -170,11 +170,11 @@ extras =
 [testenv:enforce-format]
 skip_install=true
 basepython=python3.11
-deps=black
-     isort
-     flake8
+deps=black==26.10.1
+     isort==9.0.2
+     flake8==7.4.1
      pytest
-     codespell
+     codespell==2.4.3
 commands=
     black src/ tests/ --diff --check
     isort src/ tests/ --diff --check

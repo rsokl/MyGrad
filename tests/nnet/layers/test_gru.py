@@ -13,6 +13,7 @@ from mygrad.nnet.activations import sigmoid, tanh
 from mygrad.tensor_base import Tensor
 from tests.utils.errors import does_not_raise
 
+pytest.importorskip("numba")
 gru_module = pytest.importorskip("mygrad.nnet.layers.gru")
 gru = gru_module.gru
 

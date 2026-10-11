@@ -78,7 +78,7 @@ def hard_tanh(
 
     if not isinstance(lower_bound, Real):
         raise TypeError(
-            f"`lower_bound` must be a real-valued scalar, got {lower_bound} (type { type(lower_bound)})"
+            f"`lower_bound` must be a real-valued scalar, got {lower_bound} (type {type(lower_bound)})"
         )
 
     if not isinstance(upper_bound, Real):
