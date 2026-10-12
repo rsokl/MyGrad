@@ -551,10 +551,9 @@ def test_clear_graph(x, y, z):
 # for more details. This checks to make sure that anyone who does so will get an
 # error. See also https://github.com/rsokl/MyGrad/pull/276
 def test_no_hash():
-    try:
+    # Python 3.15+ words this as "cannot use 'Tensor' as a dict key (unhashable type: 'Tensor')"
+    with pytest.raises(TypeError, match="unhashable type: 'Tensor'"):
         {Tensor(3): "this should not work"}
-    except TypeError as e:
-        assert str(e) == "unhashable type: 'Tensor'"
 
 
 @given(
