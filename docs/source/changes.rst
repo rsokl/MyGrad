@@ -6,18 +6,29 @@ This is a record of all past mygrad releases and what went into them,
 in reverse chronological order. All previous releases should still be available
 on pip.
 
-.. _v2.4.0:
+.. _v2.5.0:
 
 ------------------
-2.4.0 - 2026-10-12
+2.5.0 - Unreleased
 ------------------
 
 Python Support
 --------------
 
-- Adds support for Python 3.13, 3.14, and 3.15.
-- Drops support for Python 3.9 and 3.10, which have reached end-of-life. The minimum supported Python version is now 3.11.
-- ``typing-extensions`` is no longer a dependency.
+- Adds formal support for Python 3.13, 3.14, and 3.15. (:pull:`469`)
+- Drops support for Python 3.9 and 3.10, which have reached end-of-life. The minimum supported Python version is now 3.11; users of older Pythons will continue to receive mygrad 2.4.0 from pip. (:pull:`469`)
+- ``typing-extensions`` is no longer a dependency. (:pull:`469`)
+
+Development
+-----------
+
+- CI workflows run with least-privilege ``GITHUB_TOKEN`` permissions. (:pull:`469`)
+
+.. _v2.4.0:
+
+------------------
+2.4.0 - 2026-10-12
+------------------
 
 Performance
 -----------
