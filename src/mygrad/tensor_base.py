@@ -802,25 +802,37 @@ class Tensor:
         if constant is not None and not isinstance(constant, bool):
             raise TypeError(f"`constant` must be a boolean value, got: {constant}")
 
-        self._creator: Optional[Operation] = _creator
-
         if not NP_IS_V2:  # pragma: no cover
-            self.data = np.array(x, dtype=dtype, copy=copy, ndmin=ndmin)
+            data = np.array(x, dtype=dtype, copy=copy, ndmin=ndmin)
         else:
             if copy is False:
-                self.data = np.asarray(x, dtype=dtype)
+                data = np.asarray(x, dtype=dtype)
                 if not isinstance(ndmin, Integral):
                     raise TypeError(
                         f"'{type(ndmin)}' object cannot be interpreted as an integer"
                     )
-                if ndmin and self.data.ndim < ndmin:
-                    self.data = self.data[
-                        (*(None for _ in range(ndmin - self.data.ndim)),)
-                    ]
+                if ndmin and data.ndim < ndmin:
+                    data = data[(*(None for _ in range(ndmin - data.ndim)),)]
             else:
-                self.data = np.array(x, dtype=dtype, copy=copy, ndmin=ndmin)
+                data = np.array(x, dtype=dtype, copy=copy, ndmin=ndmin)
 
-        dtype = self.data.dtype.type
+        self._init_from_array(data, constant, _creator, _base)
+
+    def _init_from_array(
+        self,
+        data: np.ndarray,
+        constant: Optional[bool],
+        _creator: Optional[Operation],
+        _base: Optional["Tensor"],
+    ):
+        """*dev use only*
+
+        Validates ``data``'s dtype against ``constant`` and initializes all of the
+        tensor's state. Shared by ``__init__`` and ``_wrap_op_data``."""
+        self._creator: Optional[Operation] = _creator
+        self.data = data
+
+        dtype = data.dtype.type
         is_float = issubclass(dtype, np.floating)  # faster than `numpy.issubdtype`
         if not is_float and _track.TRACK_GRAPH:
             # No need to constrain dtypes if we aren't tracking the graph.
@@ -1030,8 +1042,9 @@ class Tensor:
         """*dev use only*
 
         Equivalent to ``cls(x, constant=constant, copy=False, _creator=_creator,
-        _base=_base)``, but skips the generic input handling of ``__init__``. This is
-        used for every op's inputs and output, and is several times faster."""
+        _base=_base)``, but skips the generic input handling of ``__init__`` (the
+        validation and state initialization are shared, via ``_init_from_array``).
+        This is used for every op's inputs and output, and is several times faster."""
         if cls.__init__ is not Tensor.__init__:  # pragma: no cover
             # respect subclasses that customize initialization
             return cls(x, constant=constant, copy=False, _creator=_creator, _base=_base)
@@ -1039,31 +1052,9 @@ class Tensor:
         if constant is not None and not isinstance(constant, bool):
             raise TypeError(f"`constant` must be a boolean value, got: {constant}")
 
-        data = np.asarray(x)
-        dtype = data.dtype.type
-        is_float = issubclass(dtype, np.floating)
-        if not is_float and _track.TRACK_GRAPH:
-            if not issubclass(dtype, CONSTANT_ONLY_DTYPES):
-                raise TypeError(
-                    f"Tensor data must be of an floating type, integer type, or boolean type, "
-                    f"received {dtype}"
-                )
-            elif constant is False:
-                raise ValueError("Integer-valued tensors must be treated as constants.")
-
-        if constant is None:
-            constant = not is_float
-
         out = object.__new__(cls)
-        # must set the same attributes as `__init__`
-        out._creator = _creator
-        out.data = data
-        out._constant = constant
-        out._grad = None
-        out._ops = set()
-        out._base = _base
-        out._view_children = WeakRefIterable()
-        out._view_grad = None
+        # (positional args: this is a hot path)
+        out._init_from_array(np.asarray(x), constant, _creator, _base)
         return out
 
     @classmethod

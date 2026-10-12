@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from math import prod
 from typing import Optional
 
 import numpy as np
@@ -118,8 +119,11 @@ class MatMul(BinaryUfunc):
                 # `b` was broadcast across the leading dims of `a`. Rather than
                 # forming one (j, k) product per leading index and then summing
                 # them, fold those dims into the rows: a single (j, N) @ (N, k)
+                # (the row count is explicit, as `-1` is ambiguous for zero-size arrays)
+                n_rows = prod(a.shape[:-1])
                 return np.matmul(
-                    a.reshape(-1, a.shape[-1]).T, grad.reshape(-1, grad.shape[-1])
+                    a.reshape(n_rows, a.shape[-1]).T,
+                    grad.reshape(n_rows, grad.shape[-1]),
                 )
             if a.ndim > 1:  # ([...], i, j) w/ ([...], j, [k])
                 if b.ndim == 1:

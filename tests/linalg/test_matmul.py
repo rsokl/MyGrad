@@ -1,5 +1,6 @@
 import hypothesis.extra.numpy as hnp
 import numpy as np
+import pytest
 from hypothesis import settings
 from numpy.testing import assert_allclose
 
@@ -44,3 +45,24 @@ def test_matmul_with_target_tensor():
     assert_allclose(y.grad, [0.0, 1.0, 0.0])
     assert_allclose(x1.grad, [2.0])
     assert_allclose(x2.grad, [1.0])
+
+
+@pytest.mark.parametrize(
+    "shape_a, shape_b",
+    [
+        ((2, 3, 0), (0, 4)),
+        ((2, 3, 5), (5, 0)),
+        ((0, 3, 5), (5, 4)),
+        ((2, 3, 5), (5, 4)),
+    ],
+)
+def test_matmul_backprop_to_matrix_broadcast_over_batch(shape_a, shape_b):
+    # exercises the fast path for the gradient of a 2D operand broadcast over
+    # the leading dims of the other, including zero-size dims
+    rng = np.random.default_rng(0)
+    a, b = mg.tensor(rng.normal(size=shape_a)), mg.tensor(rng.normal(size=shape_b))
+    grad = rng.normal(size=shape_a[:-1] + shape_b[-1:])
+    mg.matmul(a, b).backward(grad)
+    lead = list(range(len(shape_a) - 1))
+    assert_allclose(b.grad, np.tensordot(a.data, grad, axes=(lead, lead)))
+    assert_allclose(a.grad, grad @ b.data.T)

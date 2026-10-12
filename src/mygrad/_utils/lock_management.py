@@ -2,10 +2,11 @@
 Provides utilities responsible for locking/releasing array writeability.
 """
 
+import atexit
 import os
 from collections import defaultdict
-from typing import TYPE_CHECKING, DefaultDict, Dict, Generator, Iterable, Set
-from weakref import finalize, ref
+from typing import TYPE_CHECKING, DefaultDict, Dict, Iterable, Set
+from weakref import ref
 
 import numpy as np
 
@@ -80,43 +81,15 @@ def lock_arr_writeability(arr: np.ndarray, force_lock: bool = False) -> np.ndarr
     return arr
 
 
-def unique_arrs_and_bases(
-    tensors: Iterable["TensorType"],
-) -> Generator[np.ndarray, None, None]:
-    """
-    Yields unique (by-ID) arrays from an iterable. If an array
-    has a base, the base is yielded first (assuming that base
-    object has not already been yielded).
-    """
-    seen = set()
-    for t in tensors:
-        arr = t.data
-        arr_id = id(arr)
-        if arr_id not in seen:
-            # important note!
-            # We must yield array bases first so that base's
-            # writeability is restored first.
-            # Then view's writeability can be restored
-            if arr.base is not None:
-                base_id = id(arr.base)
-                if base_id not in seen:
-                    seen.add(base_id)
-                    yield arr.base
-            seen.add(arr_id)
-            yield arr
-
-
 def lock_arrs_of_tensors(
     tensors: Iterable["TensorType"],
 ) -> WeakRefIterable[np.ndarray]:
-    """Locks the unique arrays (and their bases) of ``tensors``, returning
-    weak references to them in the order in which they must be released.
+    """Locks the unique (by-ID) arrays of ``tensors``, along with the bases of
+    any that are views, returning weak references to them in the order in which
+    their locks must be released.
 
-    Equivalent to::
-
-        WeakRefIterable(lock_arr_writeability(x) for x in unique_arrs_and_bases(tensors))
-
-    but written as a single loop, as this is called for every op."""
+    A base array is locked - and thus released - before any of its views, so
+    that its writeability is restored first; only then can the views' be."""
     locked: WeakRefIterable[np.ndarray] = WeakRefIterable()
     refs = locked.data
     seen = set()
@@ -226,14 +199,19 @@ def release_writeability_lock_on_op(arr_refs: WeakRefIterable[np.ndarray]):
 # keeps the weakrefs made by `release_locks_when_collected` alive until they fire
 _pending_releases: Set[WeakRef] = set()
 
+# Discarding the weakrefs at exit means that their callbacks never fire during
+# interpreter shutdown, when the state that they touch may be partially torn
+# down. (Restoring array writeability at exit is moot.)
+atexit.register(_pending_releases.clear)
+
 
 def release_locks_when_collected(op: object, arr_refs: WeakRefIterable[np.ndarray]):
     """Calls ``release_writeability_lock_on_op(arr_refs)`` once ``op`` is garbage
     collected.
 
-    Equivalent to ``weakref.finalize(op, release_writeability_lock_on_op, arr_refs)``,
-    minus its extra machinery (e.g. at-exit handling); this is called for every op,
-    and is roughly twice as fast."""
+    Like ``weakref.finalize(op, release_writeability_lock_on_op, arr_refs)``, minus
+    its extra machinery; this is called for every op, and is roughly twice as fast.
+    Pending releases are discarded, rather than run, at interpreter exit."""
 
     def _release(op_ref: WeakRef):
         _pending_releases.discard(op_ref)
@@ -438,15 +416,7 @@ def mem_guard_active() -> bool:
 
 
 def force_lock_tensor_and_creators(tensor: "TensorType"):
-    unique_arrs = tuple(
-        lock_arr_writeability(arr)
-        for arr in unique_arrs_and_bases(tensor.creator.variables)
-    )
+    tensor_refs = lock_arrs_of_tensors(tensor.creator.variables)
     lock_arr_writeability(tensor.data, force_lock=True)
-    tensor_refs = WeakRefIterable(unique_arrs)
     tensor_refs.append(tensor.data)
-    finalize(
-        tensor.creator,
-        release_writeability_lock_on_op,
-        tensor_refs,
-    )
+    release_locks_when_collected(tensor.creator, tensor_refs)
