@@ -19,9 +19,15 @@ Python Support
 - Drops support for Python 3.9 and 3.10, which have reached end-of-life. The minimum supported Python version is now 3.11; users of older Pythons will continue to receive mygrad 2.4.0 from pip. (:pull:`469`)
 - ``typing-extensions`` is no longer a dependency. (:pull:`469`)
 
+Compatibility
+-------------
+
+- MyGrad no longer assigns to ``ndarray.shape``, which is deprecated as of NumPy 2.5. In-place reshaping of a tensor (``x.shape = ...``) is unaffected. (:pull:`469`)
+
 Development
 -----------
 
+- Type annotations use modern syntax (e.g. ``int | None`` and ``tuple[int, ...]``). (:pull:`469`)
 - CI workflows run with least-privilege ``GITHUB_TOKEN`` permissions. (:pull:`469`)
 
 .. _v2.4.0:
