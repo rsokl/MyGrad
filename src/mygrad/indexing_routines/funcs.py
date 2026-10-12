@@ -1,5 +1,3 @@
-from typing import Optional
-
 import numpy as np
 
 from mygrad.operation_base import _NoValue
@@ -17,7 +15,7 @@ def where(
     x: ArrayLike = _NoValue,
     y: ArrayLike = _NoValue,
     *,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:
     """
     where(condition, [x, y])

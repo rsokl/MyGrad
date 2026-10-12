@@ -1,5 +1,3 @@
-from typing import Optional, Union
-
 import numpy as np
 from numpy import ndarray
 
@@ -27,11 +25,11 @@ __all__ = [
 @ufunc_creator(Abs)
 def absolute(
     x: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
     nan_to_num: bool = True,
 ) -> Tensor:  # pragma: no cover
     """The absolute value, computed elementwise.
@@ -131,11 +129,11 @@ abs = absolute
 @ufunc_creator(Sqrt)
 def sqrt(
     x: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     """The square root, elementwise.
 
@@ -207,11 +205,11 @@ def sqrt(
 @ufunc_creator(Cbrt)
 def cbrt(
     x: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     """The cube root elementwise.
 
@@ -271,11 +269,11 @@ def cbrt(
 def maximum(
     x1: ArrayLike,
     x2: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     """Pair-wise maximum of tensor elements.
 
@@ -356,11 +354,11 @@ def maximum(
 def minimum(
     x1: ArrayLike,
     x2: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     """Pair-wise minimum of tensor elements.
 
@@ -440,11 +438,11 @@ def minimum(
 @implements_numpy_override()
 def clip(
     a: ArrayLike,
-    a_min: Union[ArrayLike, None],
-    a_max: Union[ArrayLike, None],
-    out: Optional[Union[np.ndarray, Tensor]] = None,
+    a_min: ArrayLike | None,
+    a_max: ArrayLike | None,
+    out: np.ndarray | Tensor | None = None,
     *,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:
     """Clip (limit) the values in an array.
 
@@ -516,10 +514,10 @@ def clip(
 def matmul(
     x1: ArrayLike,
     x2: ArrayLike,
-    out: Optional[Union[np.ndarray, Tensor]] = None,
+    out: np.ndarray | Tensor | None = None,
     *,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     r"""
     Matrix product of two tensors:
@@ -635,7 +633,7 @@ def matmul(
     ...
 
 
-def multi_matmul(tensors: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
+def multi_matmul(tensors: ArrayLike, *, constant: bool | None = None) -> Tensor:
     """
     Matrix product of two or more tensors calculated in the optimal ordering
 

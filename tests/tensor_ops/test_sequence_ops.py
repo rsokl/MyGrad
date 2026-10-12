@@ -1,5 +1,5 @@
+from collections.abc import Callable
 from functools import reduce
-from typing import Callable, Tuple
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
@@ -36,7 +36,7 @@ def prod(seq):
     data=st.data(),
 )
 def test_sequential_arithmetic(
-    sequential_function: Tuple[Callable, Callable],
+    sequential_function: tuple[Callable, Callable],
     shapes: hnp.BroadcastableShapes,
     data: st.DataObject,
 ):
@@ -71,7 +71,7 @@ def test_sequential_arithmetic(
             actual.grad,
             rtol=1e-4,
             atol=1e-4,
-            err_msg="tensor-{}".format(n),
+            err_msg=f"tensor-{n}",
         )
 
     assert all(not x._ops for x in tensors)

@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from math import prod
-from typing import Optional
 
 import numpy as np
 
@@ -55,7 +54,7 @@ class _MaxMin(BinaryUfunc, ABC):
 
     def __init__(self):
         super().__init__()
-        self._where_tensor_a_was_selected: Optional[np.ndarray] = None
+        self._where_tensor_a_was_selected: np.ndarray | None = None
 
     def backward_var(self, grad, index, **kwargs):
         a, b = self.variables

@@ -1,5 +1,3 @@
-from typing import Optional, Union
-
 from numpy import ndarray
 
 from mygrad.tensor_base import Tensor
@@ -29,11 +27,11 @@ __all__ = [
 @ufunc_creator(Sin)
 def sin(
     x: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     r"""Trigonometric sine, element-wise.
 
@@ -114,11 +112,11 @@ def sin(
 @ufunc_creator(Cos)
 def cos(
     x: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     """Trigonometric cosine, element-wise.
 
@@ -184,11 +182,11 @@ def cos(
 @ufunc_creator(Tan)
 def tan(
     x: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     """Trigonometric tangent, element-wise.
 
@@ -255,11 +253,11 @@ def tan(
 @ufunc_creator(Arcsin)
 def arcsin(
     x: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     """Inverse sine, element-wise.
 
@@ -346,11 +344,11 @@ def arcsin(
 @ufunc_creator(Arccos)
 def arccos(
     x: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     """Inverse cosine, element-wise.
 
@@ -435,11 +433,11 @@ def arccos(
 @ufunc_creator(Arctan)
 def arctan(
     x: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     """Inverse tangent, element-wise.
 
@@ -526,11 +524,11 @@ def arctan(
 def arctan2(
     x1: ArrayLike,
     x2: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     """Element-wise arc tangent of ``x1/x2`` choosing the quadrant correctly.
 
@@ -625,7 +623,7 @@ def arctan2(
     ...
 
 
-def sinc(a: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
+def sinc(a: ArrayLike, *, constant: bool | None = None) -> Tensor:
     """``f(a) -> sin(a) / a``
 
     Parameters
@@ -648,7 +646,7 @@ def sinc(a: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
     return Tensor._op(Sinc, a, constant=constant)
 
 
-def cot(a: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
+def cot(a: ArrayLike, *, constant: bool | None = None) -> Tensor:
     """``f(a) -> cot(a)``
 
     Parameters
@@ -671,7 +669,7 @@ def cot(a: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
     return Tensor._op(Cot, a, constant=constant)
 
 
-def csc(a: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
+def csc(a: ArrayLike, *, constant: bool | None = None) -> Tensor:
     """``f(a) -> csc(a)``
 
     Parameters
@@ -694,7 +692,7 @@ def csc(a: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
     return Tensor._op(Csc, a, constant=constant)
 
 
-def sec(a: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
+def sec(a: ArrayLike, *, constant: bool | None = None) -> Tensor:
     """``f(a) -> sec(a)``
 
     Parameters
@@ -717,7 +715,7 @@ def sec(a: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
     return Tensor._op(Sec, a, constant=constant)
 
 
-def arccsc(a: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
+def arccsc(a: ArrayLike, *, constant: bool | None = None) -> Tensor:
     """``f(a) -> arccsc(a)``
 
     Parameters
@@ -740,7 +738,7 @@ def arccsc(a: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
     return Tensor._op(Arccsc, a, constant=constant)
 
 
-def arccot(a: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
+def arccot(a: ArrayLike, *, constant: bool | None = None) -> Tensor:
     """``f(a) -> arccot(a)``
 
     Parameters
@@ -763,7 +761,7 @@ def arccot(a: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
     return Tensor._op(Arccot, a, constant=constant)
 
 
-def arcsec(a: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
+def arcsec(a: ArrayLike, *, constant: bool | None = None) -> Tensor:
     """``f(a) -> arcsec(a)``
 
     Parameters

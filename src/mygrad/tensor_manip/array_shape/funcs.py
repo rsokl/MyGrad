@@ -1,4 +1,5 @@
-from typing import Callable, List, Optional, Tuple, TypeVar, Union, cast, overload
+from collections.abc import Callable
+from typing import TypeVar, cast, overload
 
 from mygrad.tensor_base import Tensor, implements_numpy_override
 from mygrad.typing import ArrayLike, Shape
@@ -21,7 +22,7 @@ _T = TypeVar("_T")
 
 @implements_numpy_override()
 def reshape(
-    a: ArrayLike, newshape: Union[int, Shape], *, constant: Optional[bool] = None
+    a: ArrayLike, newshape: int | Shape, *, constant: bool | None = None
 ) -> Tensor:
     """Returns a tensor with a new shape, without changing its data.
 
@@ -70,9 +71,9 @@ def reshape(
 @implements_numpy_override()
 def squeeze(
     a: ArrayLike,
-    axis: Optional[Union[int, Tuple[int, ...]]] = None,
+    axis: int | tuple[int, ...] | None = None,
     *,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:
     """
     Remove single-dimensional entries from the shape of a tensor.
@@ -122,7 +123,7 @@ def squeeze(
 
 
 @implements_numpy_override()
-def ravel(a: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
+def ravel(a: ArrayLike, *, constant: bool | None = None) -> Tensor:
     """
     Flattens contents of a tensor into a contiguous 1-D array.  A copy is made only if needed.
 
@@ -159,7 +160,7 @@ def ravel(a: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
 
 
 @implements_numpy_override()
-def expand_dims(a: ArrayLike, axis: int, *, constant: Optional[bool] = None) -> Tensor:
+def expand_dims(a: ArrayLike, axis: int, *, constant: bool | None = None) -> Tensor:
     """
     Expand the dimensions of a tensor by adding a new axis.
 
@@ -198,9 +199,7 @@ def expand_dims(a: ArrayLike, axis: int, *, constant: Optional[bool] = None) -> 
 
 
 @implements_numpy_override()
-def broadcast_to(
-    a: ArrayLike, shape: Shape, *, constant: Optional[bool] = None
-) -> Tensor:
+def broadcast_to(a: ArrayLike, shape: Shape, *, constant: bool | None = None) -> Tensor:
     """
     Broadcast a tensor to a new shape.
 
@@ -265,22 +264,22 @@ def _dispatch_atleast_kd(func: Callable[..., _T], Op, *tensors, k: int, constant
 
 @overload
 def atleast_1d(
-    tensors: ArrayLike, *, constant: Optional[bool] = None
+    tensors: ArrayLike, *, constant: bool | None = None
 ) -> Tensor:  # pragma: no cover
     ...
 
 
 @overload
 def atleast_1d(
-    *tensors: ArrayLike, constant: Optional[bool] = None
-) -> List[Tensor]:  # pragma: no cover
+    *tensors: ArrayLike, constant: bool | None = None
+) -> list[Tensor]:  # pragma: no cover
     ...
 
 
 @implements_numpy_override()
 def atleast_1d(
-    *tensors: ArrayLike, constant: Optional[bool] = None
-) -> Union[Tensor, List[Tensor]]:
+    *tensors: ArrayLike, constant: bool | None = None
+) -> Tensor | list[Tensor]:
     """
     Convert inputs to tensors with at least one dimension.
 
@@ -342,22 +341,22 @@ def atleast_1d(
 
 @overload
 def atleast_2d(
-    tensors: ArrayLike, *, constant: Optional[bool] = None
+    tensors: ArrayLike, *, constant: bool | None = None
 ) -> Tensor:  # pragma: no cover
     ...
 
 
 @overload
 def atleast_2d(
-    *tensors: ArrayLike, constant: Optional[bool] = None
-) -> List[Tensor]:  # pragma: no cover
+    *tensors: ArrayLike, constant: bool | None = None
+) -> list[Tensor]:  # pragma: no cover
     ...
 
 
 @implements_numpy_override()
 def atleast_2d(
-    *tensors: ArrayLike, constant: Optional[bool] = None
-) -> Union[Tensor, List[Tensor]]:
+    *tensors: ArrayLike, constant: bool | None = None
+) -> Tensor | list[Tensor]:
     """
     Convert inputs to tensors with at least one dimension.
 
@@ -417,22 +416,22 @@ def atleast_2d(
 
 @overload
 def atleast_3d(
-    tensors: ArrayLike, *, constant: Optional[bool] = None
+    tensors: ArrayLike, *, constant: bool | None = None
 ) -> Tensor:  # pragma: no cover
     ...
 
 
 @overload
 def atleast_3d(
-    *tensors: ArrayLike, constant: Optional[bool] = None
-) -> List[Tensor]:  # pragma: no cover
+    *tensors: ArrayLike, constant: bool | None = None
+) -> list[Tensor]:  # pragma: no cover
     ...
 
 
 @implements_numpy_override()
 def atleast_3d(
-    *tensors: ArrayLike, constant: Optional[bool] = None
-) -> Union[Tensor, List[Tensor]]:
+    *tensors: ArrayLike, constant: bool | None = None
+) -> Tensor | list[Tensor]:
     """
     Convert inputs to tensors with at least one dimension.
 

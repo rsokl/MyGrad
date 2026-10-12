@@ -2,8 +2,9 @@
 Provides user interface for suspending computational graph tracking and back-propagation
 """
 
+from collections.abc import Callable
 from functools import wraps
-from typing import Any, Callable, TypeVar, cast
+from typing import Any, TypeVar, cast
 
 import numpy as np
 

@@ -1,5 +1,3 @@
-from typing import Optional, Union
-
 import numpy as np
 
 import mygrad
@@ -37,7 +35,7 @@ def check_dtype_consistency(out: ArrayLike, dest_dtype: DTypeLike):
 def expected_constant(
     *args: ArrayLike,
     dest_dtype: DTypeLikeReals,
-    constant: Optional[Union[_NoValueType, bool]] = None,
+    constant: _NoValueType | bool | None = None,
 ) -> bool:
     """Given the input arguments to a function that produces a tensor, infers
     whether the resulting tensor should be a constant or a variable tensor."""
@@ -74,5 +72,5 @@ def expected_constant(
         return False
 
 
-def is_float_arr(arr: Union[np.ndarray, mygrad.Tensor]) -> bool:
+def is_float_arr(arr: np.ndarray | mygrad.Tensor) -> bool:
     return issubclass(arr.dtype.type, np.floating)

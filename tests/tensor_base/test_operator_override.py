@@ -1,5 +1,5 @@
+from collections.abc import Callable
 from functools import partial
-from typing import Callable, Type, Union
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
@@ -68,8 +68,8 @@ def matmul(x, y):
 )
 def test_arithmetic_operators_between_array_and_tensor_cast_to_tensor(
     arr: np.ndarray,
-    func: Callable[[Union[np.ndarray, Tensor], Union[np.ndarray, Tensor]], Tensor],
-    op: Type[Operation],
+    func: Callable[[np.ndarray | Tensor, np.ndarray | Tensor], Tensor],
+    op: type[Operation],
 ):
     tensor = Tensor(arr)
     out = func(tensor, arr)

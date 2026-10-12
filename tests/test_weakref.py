@@ -1,4 +1,4 @@
-from typing import Callable
+from collections.abc import Callable
 from weakref import WeakValueDictionary
 
 import hypothesis.strategies as st

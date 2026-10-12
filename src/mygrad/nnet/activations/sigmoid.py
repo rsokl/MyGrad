@@ -1,5 +1,3 @@
-from typing import Optional
-
 import numpy as np
 
 from mygrad.operation_base import Operation
@@ -21,7 +19,7 @@ class Sigmoid(Operation):
         return grad * self.sigmoid * (1.0 - self.sigmoid)
 
 
-def sigmoid(x: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
+def sigmoid(x: ArrayLike, *, constant: bool | None = None) -> Tensor:
     """Applies the sigmoid activation function::
 
       f(x) = 1 / (1 + exp(-x))

@@ -2,7 +2,7 @@
 
 from functools import partial
 from numbers import Number
-from typing import Any, Dict
+from typing import Any
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
@@ -57,7 +57,7 @@ idiv = partial(inplace_op, op_name="itruediv")
         ("ipow", dict(index_to_bnds={0: (1, 4), 1: (1, 4)})),
     ],
 )
-def test_inplace_arithmetic_fwd(op_name: str, kwargs: Dict[str, Any]):
+def test_inplace_arithmetic_fwd(op_name: str, kwargs: dict[str, Any]):
     iop = partial(inplace_op, op_name=op_name)
 
     @fwdprop_test_factory(
@@ -83,7 +83,7 @@ def test_inplace_arithmetic_fwd(op_name: str, kwargs: Dict[str, Any]):
         ("ipow", dict(index_to_bnds={0: (1, 4), 1: (1, 4)})),
     ],
 )
-def test_inplace_arithmetic_bkwd(op_name: str, kwargs: Dict[str, Any]):
+def test_inplace_arithmetic_bkwd(op_name: str, kwargs: dict[str, Any]):
     iop = partial(inplace_op, op_name=op_name)
 
     @backprop_test_factory(

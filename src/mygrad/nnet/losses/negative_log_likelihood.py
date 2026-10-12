@@ -1,5 +1,3 @@
-from typing import Optional
-
 import numpy as np
 
 from mygrad.math.sequential.funcs import mean
@@ -13,8 +11,8 @@ def negative_log_likelihood(
     x: ArrayLike,
     y_true: ArrayLike,
     *,
-    weights: Optional[ArrayLike] = None,
-    constant: Optional[bool] = None,
+    weights: ArrayLike | None = None,
+    constant: bool | None = None,
 ) -> Tensor:
     """Returns the (weighted) negative log-likelihood loss between log-probabilities and y_true.
 

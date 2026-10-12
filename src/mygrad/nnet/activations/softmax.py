@@ -1,5 +1,3 @@
-from typing import Optional, Tuple, Union
-
 import numpy as np
 
 from mygrad.math._special import logsumexp as _logsumexp
@@ -39,9 +37,9 @@ class Softmax(Operation):
 
 def softmax(
     x: ArrayLike,
-    axis: Union[None, int, Tuple[int, ...]] = -1,
+    axis: None | int | tuple[int, ...] = -1,
     *,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:
     r"""
     Applies the softmax activation function::
@@ -113,9 +111,9 @@ class LogSoftmax(Operation):
 
 def logsoftmax(
     x: ArrayLike,
-    axis: Union[None, int, Tuple[int, ...]] = -1,
+    axis: None | int | tuple[int, ...] = -1,
     *,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:
     r"""
     Applies the log-softmax activation function::

@@ -1,4 +1,4 @@
-from typing import Callable
+from collections.abc import Callable
 
 import hypothesis.strategies as st
 import numpy as np

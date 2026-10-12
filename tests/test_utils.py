@@ -1,5 +1,3 @@
-from typing import Tuple
-
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
@@ -64,7 +62,7 @@ def test_reduce_broadcast_shape_consistency(shapes: hnp.BroadcastableShapes):
         )
     )
 )
-def test_bad_gradient_dimensionality(shapes: Tuple[Tuple[int, ...], Tuple[int, ...]]):
+def test_bad_gradient_dimensionality(shapes: tuple[tuple[int, ...], tuple[int, ...]]):
     """test that grad.dim < len(var_shape) raises ValueError"""
     var_shape = shapes[0]
     grad = np.empty(shapes[1])

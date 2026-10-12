@@ -1,6 +1,5 @@
 from copy import copy
 from itertools import chain
-from typing import List
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
@@ -77,7 +76,7 @@ def compare_backprop(*operands, atol=1e-5, rtol=1e-5, optimize=False):
             atol=atol,
             rtol=rtol,
             err_msg="The numerical and mygrad derivatives disagree for "
-            "variable index {}".format(n),
+            f"variable index {n}",
         )
 
 
@@ -247,7 +246,7 @@ def test_adaptive_pattern(
     j: int,
     k: int,
     p: int,
-    inputs: List[int],
+    inputs: list[int],
     data: st.DataObject,
 ):
     a = (np.random.rand(i, j, j, i) - 0.5) * 10

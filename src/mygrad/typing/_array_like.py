@@ -1,9 +1,6 @@
+from collections.abc import Sequence
 from typing import (
     TYPE_CHECKING,
-    List,
-    Optional,
-    Sequence,
-    Tuple,
     TypeVar,
     Union,
     runtime_checkable,
@@ -20,9 +17,7 @@ from typing import Protocol
 
 @runtime_checkable
 class ImplementsArray(Protocol):
-    def __array__(
-        self, dtype: None = ..., copy: Optional[bool] = ...
-    ) -> np.ndarray: ...
+    def __array__(self, dtype: None = ..., copy: bool | None = ...) -> np.ndarray: ...
 
 
 Real = Union[int, float]
@@ -71,6 +66,6 @@ Index = Union[
     np.ndarray,
     EllipsisType,
     Sequence[int],
-    Tuple["Index", ...],
-    List["Index"],
+    tuple["Index", ...],
+    list["Index"],
 ]

@@ -1,5 +1,4 @@
 from numbers import Integral
-from typing import Optional, Tuple, Union
 
 import numpy as np
 
@@ -151,10 +150,10 @@ class MaxPoolND(Operation):
 
 def max_pool(
     x: ArrayLike,
-    pool: Tuple[int, ...],
-    stride: Union[int, Tuple[int, ...]],
+    pool: tuple[int, ...],
+    stride: int | tuple[int, ...],
     *,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:
     """Perform max-pooling over the last N dimensions of a data batch.
 

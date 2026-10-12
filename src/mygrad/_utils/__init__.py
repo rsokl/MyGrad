@@ -1,19 +1,8 @@
 from abc import ABC, abstractmethod
+from collections import deque
+from collections.abc import Callable, Generator, Iterable
 from functools import wraps
-from typing import (
-    TYPE_CHECKING,
-    Callable,
-    Deque,
-    Dict,
-    Generator,
-    Generic,
-    Iterable,
-    List,
-    Optional,
-    Set,
-    TypeVar,
-    Union,
-)
+from typing import TYPE_CHECKING, Generic, TypeVar
 from weakref import ReferenceType
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -35,8 +24,8 @@ T = TypeVar("T")
 
 def collect_all_tensors_and_clear_grads(
     t: "Tensor",
-    seen: Set[int],
-    topo_sorted_tensors: Deque["Tensor"],
+    seen: set[int],
+    topo_sorted_tensors: deque["Tensor"],
 ):
     """Accumulates in `seen` the ids of all non-constant tensors involved in
     creating `t` (including `t`), clearing the gradients of every tensor visited.
@@ -79,7 +68,7 @@ else:  # pragma: no cover
         def __init__(self, ob: T, callback=None, **annotations):  # pragma: no cover
             ...
 
-        def __call__(self) -> Union[None, T]:  # pragma: no cover
+        def __call__(self) -> None | T:  # pragma: no cover
             ...
 
 
@@ -91,11 +80,11 @@ class WeakRefIterable(Generic[T]):
 
     __slots__ = ("data",)
 
-    def __init__(self, data: Optional[Iterable[T]] = None):
-        self.data: List[WeakRef[T]] = []
+    def __init__(self, data: Iterable[T] | None = None):
+        self.data: list[WeakRef[T]] = []
 
         if data is not None:
-            self.data: List[WeakRef[T]] = list(ReferenceType(x) for x in data)
+            self.data: list[WeakRef[T]] = list(ReferenceType(x) for x in data)
 
     def __len__(self) -> int:
         return sum(1 for _ in self)
@@ -172,7 +161,7 @@ class ContextTracker(ABC):
     _depth = 0  # type: int
 
     # the value that the state is set to upon entering the context
-    _enter_set_value: Optional[bool] = None
+    _enter_set_value: bool | None = None
 
     @property
     @abstractmethod
@@ -186,7 +175,7 @@ class ContextTracker(ABC):
 
     def __init__(self):
         # keeps track of what MemGuard was at a given depth
-        self._depth_tracker: Dict[int, bool] = dict()
+        self._depth_tracker: dict[int, bool] = dict()
 
     def __bool__(self) -> bool:  # pragma: no cover
         return self.state

@@ -1,5 +1,4 @@
 from numbers import Real
-from typing import Optional
 
 import numpy as np
 
@@ -111,7 +110,7 @@ def focal_loss(
     *,
     alpha: float = 1,
     gamma: float = 0,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:
     r"""Return the per-datum focal loss.
 
@@ -171,7 +170,7 @@ def softmax_focal_loss(
     *,
     alpha: float = 1,
     gamma: float = 0,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:
     r"""
     Applies the softmax normalization to the input scores before computing the

@@ -1,15 +1,9 @@
+from collections.abc import Callable, Iterator, Sequence
 from typing import (
     TYPE_CHECKING,
-    Callable,
-    Dict,
-    Iterator,
-    List,
     NamedTuple,
     Optional,
-    Sequence,
-    Set,
     TypeVar,
-    Union,
 )
 
 from numpy import logical_not, ndarray
@@ -131,14 +125,14 @@ class DuplicatingGraph:
         )
 
     def __init__(self, base: "Tensor"):
-        self.mappings: Dict[int, Node] = {}
+        self.mappings: dict[int, Node] = {}
 
         self._record_mapping(
             original=base, placeholder=make_placeholder_tensor(base, base=base.base)
         )
         self.base = self[base]
 
-        self.leafs: Set[int] = set()
+        self.leafs: set[int] = set()
         # creates placeholders for each node in the view graph
         self._duplicate_graph(base)
 
@@ -193,7 +187,7 @@ class DuplicatingGraph:
         since they will never be mutated."""
         yield from self._yield_children(self.base.placeholder)
 
-    def get_path_to_base(self, tensor: "Tensor") -> List[Node]:
+    def get_path_to_base(self, tensor: "Tensor") -> list[Node]:
         """Returns [leaf, (parent), ..., base]"""
         path = []
         node = self[tensor]
@@ -328,7 +322,7 @@ class ApplyMask(Operation):
         pass_through_tensor: "Tensor",
         upstream_tensor: "Tensor",
         *,
-        mask: Union[bool, ndarray],
+        mask: bool | ndarray,
     ) -> ndarray:
         self.variables = (pass_through_tensor, upstream_tensor)
         self._mask = mask

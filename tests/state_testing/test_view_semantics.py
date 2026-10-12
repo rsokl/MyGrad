@@ -36,7 +36,8 @@
 # forces x3's gradient to match its data; it follows from the correspondence stated above
 # that the same should be true for all other  views associated with the base (x1)
 
-from typing import Callable, List, NamedTuple, Optional, Tuple, TypeVar
+from collections.abc import Callable
+from typing import NamedTuple, Optional, TypeVar
 
 import hypothesis.strategies as st
 import numpy as np
@@ -175,10 +176,10 @@ class ViewGraphCompare(RuleBasedStateMachine):
         # created via the unit test (through `create_node` or `fuse_nodes`)
         # `Node` is the naive implementation of `Tensor` that we are checking
         # against
-        self.pair_list: List[Pair] = []
+        self.pair_list: list[Pair] = []
 
         # Stores the tensor from which we will trigger backprop
-        self.terminal_tensor: Optional[Tensor] = None
+        self.terminal_tensor: Tensor | None = None
 
     nodes = Bundle("nodes")
 
@@ -186,7 +187,7 @@ class ViewGraphCompare(RuleBasedStateMachine):
         self.pair_list.append(pair)
 
     @initialize(target=nodes, shape=st.sampled_from([(3, 3), (4, 4)]))
-    def create_base(self, shape: Tuple[int, int]) -> Pair:
+    def create_base(self, shape: tuple[int, int]) -> Pair:
         """
         Creates an equivalent tensor, array pair.
 

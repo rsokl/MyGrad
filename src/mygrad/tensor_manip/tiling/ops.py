@@ -1,4 +1,4 @@
-from typing import Optional, Sequence, Union
+from collections.abc import Sequence
 
 import numpy as np
 
@@ -14,7 +14,7 @@ class Repeat(Operation):
     #    repeat(1, 2) -> [1 1]
 
     def __call__(
-        self, a: Tensor, repeats: Union[int, Sequence[int]], axis: Optional[int] = None
+        self, a: Tensor, repeats: int | Sequence[int], axis: int | None = None
     ):
         self.variables = (a,)
         self._axis = axis
@@ -53,7 +53,7 @@ class Repeat(Operation):
             grad = grad.sum(axis=tuple(range(-len(window_shape), 0)))
 
             if self._axis is None:
-                grad.shape = a.shape
+                grad = grad.reshape(a.shape)
             return grad
         else:
             # We will create a grid of flat-indices commensurate with the

@@ -1,14 +1,9 @@
 from abc import ABC, ABCMeta, abstractmethod
+from collections.abc import Callable
 from inspect import signature
 from typing import (
     TYPE_CHECKING,
-    Callable,
-    List,
-    Optional,
-    Tuple,
-    Type,
     TypeVar,
-    Union,
     get_type_hints,
     overload,
 )
@@ -47,13 +42,13 @@ def _permitted_type_str(x: str) -> bool:
 
 
 class MyGradUfunc(type):
-    _wrapped_op: Union[Type[UnaryUfunc], Type[BinaryUfunc]]
+    _wrapped_op: type[UnaryUfunc] | type[BinaryUfunc]
     _decorated_func: Callable
     nin: int
     nout: int
     nargs: int
     ntypes: int
-    types: List[str]
+    types: list[str]
     identity: int
     signature: str
 
@@ -90,7 +85,7 @@ class ufunc(ABC, metaclass=FinalABC):
     nout: int
     nargs: int
     ntypes: int
-    types: List[str]
+    types: list[str]
     identity: int
     signature: str
 
@@ -98,7 +93,7 @@ class ufunc(ABC, metaclass=FinalABC):
         self,
         *args: ArrayLike,
         dtype: DTypeLikeReals,
-        constant: Optional[bool] = None,
+        constant: bool | None = None,
         **kwargs,
     ) -> Tensor:  # pragma: no cover
         pass
@@ -106,10 +101,10 @@ class ufunc(ABC, metaclass=FinalABC):
     def at(
         self,
         a: ArrayLike,
-        indices: Union[ArrayLike, Index, Tuple[ArrayLike, Index]],
-        b: Optional[ArrayLike] = None,
+        indices: ArrayLike | Index | tuple[ArrayLike, Index],
+        b: ArrayLike | None = None,
         *,
-        constant: Optional[bool] = None,
+        constant: bool | None = None,
     ) -> Tensor:  # pragma: no cover
         """Not implemented"""
         raise NotImplementedError()
@@ -119,9 +114,9 @@ class ufunc(ABC, metaclass=FinalABC):
         array: ArrayLike,
         axis: int = 0,
         dtype: DTypeLikeReals = None,
-        out: Optional[Union[Tensor, np.ndarray]] = None,
+        out: Tensor | np.ndarray | None = None,
         *,
-        constant: Optional[bool] = None,
+        constant: bool | None = None,
     ) -> Tensor:  # pragma: no cover
         """Not implemented"""
         raise NotImplementedError()
@@ -132,7 +127,7 @@ class ufunc(ABC, metaclass=FinalABC):
         b: ArrayLike,
         *,
         dtype: DTypeLikeReals,
-        out: Optional[Union[Tensor, np.ndarray]],
+        out: Tensor | np.ndarray | None,
     ) -> Tensor:  # pragma: no cover
         """Not Implemented"""
         raise NotImplementedError()
@@ -140,9 +135,9 @@ class ufunc(ABC, metaclass=FinalABC):
     def reduce(
         self,
         a: ArrayLike,
-        axis: Optional[Union[int, Tuple[int, ...]]] = 0,
+        axis: int | tuple[int, ...] | None = 0,
         dtype: DTypeLikeReals = None,
-        out: Optional[Union[Tensor, np.ndarray]] = None,
+        out: Tensor | np.ndarray | None = None,
         keepdims: bool = False,
         initial: Real = _NoValue,
         where: Mask = True,
@@ -155,26 +150,26 @@ class ufunc(ABC, metaclass=FinalABC):
         self,
         a: ArrayLike,
         indices: ArrayLike,
-        axis: Optional[Union[int, Tuple[int, ...]]] = 0,
+        axis: int | tuple[int, ...] | None = 0,
         dtype: DTypeLikeReals = None,
-        out: Optional[Union[Tensor, np.ndarray]] = None,
+        out: Tensor | np.ndarray | None = None,
     ) -> Tensor:  # pragma: no cover
         """Not Implemented"""
         raise NotImplementedError()
 
 
 class MyGradUnaryUfunc(MyGradUfunc):
-    _wrapped_op: Type[UnaryUfunc]
+    _wrapped_op: type[UnaryUfunc]
     nin: One
 
     def __call__(
         cls,
         x: ArrayLike,
-        out: Optional[Union[Tensor, np.ndarray]] = None,
+        out: Tensor | np.ndarray | None = None,
         *,
         where: Mask = True,
         dtype: DTypeLikeReals = None,
-        constant: Optional[bool] = None,
+        constant: bool | None = None,
         **kwargs,
     ) -> Tensor:
         # it is fastest to check if out is None, which is likely the
@@ -199,18 +194,18 @@ class MyGradUnaryUfunc(MyGradUfunc):
 
 
 class MyGradBinaryUfunc(MyGradUfunc):
-    _wrapped_op: Type[BinaryUfunc]
+    _wrapped_op: type[BinaryUfunc]
     nin: Two
 
     def __call__(
         cls,
         x: ArrayLike,
         y: ArrayLike,
-        out: Optional[Union[Tensor, np.ndarray]] = None,
+        out: Tensor | np.ndarray | None = None,
         *,
         where: Mask = True,
         dtype: DTypeLikeReals = None,
-        constant: Optional[bool] = None,
+        constant: bool | None = None,
     ) -> Tensor:
         # it is fastest to check if out is None, which is likely the
         # most common scenario, and this is a very "hot path" in the
@@ -236,17 +231,17 @@ class MyGradBinaryUfunc(MyGradUfunc):
 
 
 class MyGradBinaryUfuncNoMask(MyGradUfunc):
-    _wrapped_op: Type[BinaryUfunc]
+    _wrapped_op: type[BinaryUfunc]
     nin: Two
 
     def __call__(
         cls,
         x: ArrayLike,
         y: ArrayLike,
-        out: Optional[Union[Tensor, np.ndarray]] = None,
+        out: Tensor | np.ndarray | None = None,
         *,
         dtype: DTypeLikeReals = None,
-        constant: Optional[bool] = None,
+        constant: bool | None = None,
     ) -> Tensor:
         # it is fastest to check if out is None, which is likely the
         # most common scenario, and this is a very "hot path" in the
@@ -273,35 +268,35 @@ class MyGradBinaryUfuncNoMask(MyGradUfunc):
 
 @overload
 def _create_ufunc(
-    op: Type[UnaryUfunc],
+    op: type[UnaryUfunc],
     decorated_func: Callable,
     *,
-    at_op: Optional[Type[Operation]] = None,
-    accumulate_op: Optional[Type[Operation]] = None,
-    outer_op: Optional[Type[Operation]] = None,
-    reduce_op: Optional[Type[Operation]] = None,
-    reduceat_op: Optional[Type[Operation]] = None,
+    at_op: type[Operation] | None = None,
+    accumulate_op: type[Operation] | None = None,
+    outer_op: type[Operation] | None = None,
+    reduce_op: type[Operation] | None = None,
+    reduceat_op: type[Operation] | None = None,
 ) -> MyGradUnaryUfunc:  # pragma: no cover
     ...
 
 
 @overload
 def _create_ufunc(
-    op: Type[BinaryUfunc],
+    op: type[BinaryUfunc],
     decorated_func: Callable,
     *,
-    at_op: Optional[Type[Operation]] = None,
-    accumulate_op: Optional[Type[Operation]] = None,
-    outer_op: Optional[Type[Operation]] = None,
-    reduce_op: Optional[Type[Operation]] = None,
-    reduceat_op: Optional[Type[Operation]] = None,
+    at_op: type[Operation] | None = None,
+    accumulate_op: type[Operation] | None = None,
+    outer_op: type[Operation] | None = None,
+    reduce_op: type[Operation] | None = None,
+    reduceat_op: type[Operation] | None = None,
 ) -> MyGradBinaryUfunc:  # pragma: no cover
     ...
 
 
 # noinspection PyPep8Naming
 def _create_ufunc(
-    op: Type[Ufunc],
+    op: type[Ufunc],
     decorated_func,
     *,
     at_op=None,
@@ -309,13 +304,13 @@ def _create_ufunc(
     outer_op=None,
     reduce_op=None,
     reduceat_op=None,
-) -> Type[ufunc]:
+) -> type[ufunc]:
     def at(
         a: ArrayLike,
-        indices: Union[ArrayLike, Index, Tuple[ArrayLike, Index]],
-        b: Optional[ArrayLike] = None,
+        indices: ArrayLike | Index | tuple[ArrayLike, Index],
+        b: ArrayLike | None = None,
         *,
-        constant: Optional[bool] = None,
+        constant: bool | None = None,
     ) -> Tensor:  # pragma: no cover
         """Not implemented"""
         raise NotImplementedError()
@@ -323,10 +318,10 @@ def _create_ufunc(
     def accumulate(
         array: ArrayLike,
         axis: int = 0,
-        dtype: Optional[DTypeLikeReals] = None,
-        out: Optional[Union[Tensor, np.ndarray]] = None,
+        dtype: DTypeLikeReals | None = None,
+        out: Tensor | np.ndarray | None = None,
         *,
-        constant: Optional[bool] = None,
+        constant: bool | None = None,
     ) -> Tensor:  # pragma: no cover
         """Not implemented"""
         raise NotImplementedError()
@@ -335,17 +330,17 @@ def _create_ufunc(
         a: ArrayLike,
         b: ArrayLike,
         *,
-        dtype: Optional[DTypeLikeReals] = None,
-        out: Optional[Union[Tensor, np.ndarray]] = None,
+        dtype: DTypeLikeReals | None = None,
+        out: Tensor | np.ndarray | None = None,
     ) -> Tensor:  # pragma: no cover
         """Not Implemented"""
         raise NotImplementedError()
 
     def reduce(
         a: ArrayLike,
-        axis: Optional[Union[int, Tuple[int, ...]]] = 0,
-        dtype: Optional[DTypeLikeReals] = None,
-        out: Optional[Union[Tensor, np.ndarray]] = None,
+        axis: int | tuple[int, ...] | None = 0,
+        dtype: DTypeLikeReals | None = None,
+        out: Tensor | np.ndarray | None = None,
         keepdims: bool = False,
         initial: Real = _NoValue,
         where: Mask = True,
@@ -356,9 +351,9 @@ def _create_ufunc(
     def reduceat(
         a: ArrayLike,
         indices: ArrayLike,
-        axis: Optional[Union[int, Tuple[int, ...]]] = 0,
-        dtype: Optional[DTypeLikeReals] = None,
-        out: Optional[Union[Tensor, np.ndarray]] = None,
+        axis: int | tuple[int, ...] | None = 0,
+        dtype: DTypeLikeReals | None = None,
+        out: Tensor | np.ndarray | None = None,
     ) -> Tensor:  # pragma: no cover
         """Not Implemented"""
         raise NotImplementedError()
@@ -444,13 +439,13 @@ class ufunc_creator:
 
     def __init__(
         self,
-        mygrad_op: Type[Ufunc],
+        mygrad_op: type[Ufunc],
         *,
-        at_op: Optional[Type[Operation]] = None,
-        accumulate_op: Optional[Type[Operation]] = None,
-        outer_op: Optional[Type[Operation]] = None,
-        reduce_op: Optional[Type[Operation]] = None,
-        reduceat_op: Optional[Type[Operation]] = None,
+        at_op: type[Operation] | None = None,
+        accumulate_op: type[Operation] | None = None,
+        outer_op: type[Operation] | None = None,
+        reduce_op: type[Operation] | None = None,
+        reduceat_op: type[Operation] | None = None,
     ):
         """Provide the Operation-based implementation for the ufunc, and, optionally, implementations
         for the various methods of that ufunc (e.g. ufunc.at, ufunc.outer, etc.)

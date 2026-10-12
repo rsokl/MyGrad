@@ -1,5 +1,4 @@
 from numbers import Real
-from typing import List, Tuple
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
@@ -26,7 +25,7 @@ from tests.custom_strategies import (
 
 
 @given(seq=st.lists(elements=st.integers()), replace=st.booleans(), data=st.data())
-def test_choices(seq: List[int], replace: bool, data: st.SearchStrategy):
+def test_choices(seq: list[int], replace: bool, data: st.SearchStrategy):
     """Ensures that the `choices` strategy:
     - draws from the provided sequence
     - respects input parameters"""
@@ -74,7 +73,7 @@ def test_slice_index(size: int, data: st.SearchStrategy):
 
 
 @given(shape=hnp.array_shapes(min_dims=3), data=st.data())
-def test_basic_index(shape: Tuple[int, ...], data: st.SearchStrategy):
+def test_basic_index(shape: tuple[int, ...], data: st.SearchStrategy):
     min_dim = data.draw(st.integers(0, len(shape) + 2), label="min_dim")
     max_dim = data.draw(st.integers(min_dim, min_dim + len(shape)), label="max_dim")
     index = data.draw(
@@ -95,7 +94,7 @@ def test_basic_index(shape: Tuple[int, ...], data: st.SearchStrategy):
 
 @given(shape=hnp.array_shapes(min_dims=1), min_dims=st.integers(1, 3), data=st.data())
 def test_advanced_integer_index(
-    shape: Tuple[int, ...], min_dims: int, data: st.SearchStrategy
+    shape: tuple[int, ...], min_dims: int, data: st.SearchStrategy
 ):
     max_dims = data.draw(st.integers(min_dims, min_dims + 3), label="max_dims")
     index = data.draw(adv_integer_index(shape, min_dims=min_dims, max_dims=max_dims))
@@ -298,7 +297,7 @@ def test_tensor_read_only(data: st.DataObject, read_only: bool):
     ndmin=st.integers(0, 10),
     data=st.data(),
 )
-def test_tensor_ndmin(shape: Tuple[int, ...], ndmin: int, data: st.DataObject):
+def test_tensor_ndmin(shape: tuple[int, ...], ndmin: int, data: st.DataObject):
     tensor = data.draw(
         tensors(shape=shape, ndmin=ndmin, include_grad=True, read_only=st.booleans()),
         label="tensor",

@@ -1,5 +1,3 @@
-from typing import Tuple
-
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
@@ -289,12 +287,12 @@ def test_gru_backward(
     D: int,
     bp_lim: bool,
     dropout: bool,
-    U_constants: Tuple[bool, bool, bool],
-    W_constants: Tuple[bool, bool, bool],
-    b_constants: Tuple[bool, bool, bool],
+    U_constants: tuple[bool, bool, bool],
+    W_constants: tuple[bool, bool, bool],
+    b_constants: tuple[bool, bool, bool],
     X_constant: bool,
     V_constant: bool,
-    dtypes: Tuple[int, int, int, int],
+    dtypes: tuple[int, int, int, int],
 ):
     tolerances = dict(atol=1e-5, rtol=1e-5)
     T, N, C = X.shape

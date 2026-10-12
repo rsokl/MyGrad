@@ -1,4 +1,4 @@
-from typing import Optional, Sequence, Union
+from collections.abc import Sequence
 
 from mygrad.tensor_base import Tensor, implements_numpy_override
 from mygrad.typing import ArrayLike
@@ -11,10 +11,10 @@ __all__ = ["repeat"]
 @implements_numpy_override()
 def repeat(
     a: ArrayLike,
-    repeats: Union[int, Sequence[int]],
-    axis: Optional[int] = None,
+    repeats: int | Sequence[int],
+    axis: int | None = None,
     *,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:
     """
     Repeat elements of a tensor.

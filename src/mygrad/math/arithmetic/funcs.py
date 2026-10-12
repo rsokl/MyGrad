@@ -1,5 +1,3 @@
-from typing import Optional, Union
-
 from numpy import ndarray
 
 from mygrad.tensor_base import Tensor
@@ -40,11 +38,11 @@ __all__ = [
 def add(
     x1: ArrayLike,
     x2: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     """Add the arguments element-wise.
 
@@ -118,11 +116,11 @@ def add(
 def subtract(
     x1: ArrayLike,
     x2: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     """Subtract the arguments element-wise.
 
@@ -197,11 +195,11 @@ def subtract(
 def multiply(
     x1: ArrayLike,
     x2: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     """Multiply the arguments element-wise.
 
@@ -276,11 +274,11 @@ def multiply(
 def true_divide(
     x1: ArrayLike,
     x2: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     """Divide the arguments element-wise.
 
@@ -366,11 +364,11 @@ divide = true_divide
 def power(
     x1: ArrayLike,
     x2: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     """First tensor elements raised to powers from second tensor, element-wise.
 
@@ -463,11 +461,11 @@ def power(
 @ufunc_creator(Negative)
 def negative(
     x: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     """Negates the tensor element-wise.
 
@@ -525,11 +523,11 @@ def negative(
 @ufunc_creator(Positive)
 def positive(
     x: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     """Returns a copy of the tensor.
 
@@ -585,11 +583,11 @@ def positive(
 @ufunc_creator(Reciprocal)
 def reciprocal(
     x: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     """Return the reciprocal of the argument element-wise.
 
@@ -657,11 +655,11 @@ def reciprocal(
 @ufunc_creator(Square)
 def square(
     x: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     """Return the square of the argument element-wise.
 
@@ -720,7 +718,7 @@ def square(
     ...
 
 
-def multiply_sequence(*variables: ArrayLike, constant: Optional[bool] = None) -> Tensor:
+def multiply_sequence(*variables: ArrayLike, constant: bool | None = None) -> Tensor:
     """``f(a, b, ...) -> a * b * ...``
 
     Multiply a sequence of tensors.
@@ -775,7 +773,7 @@ def multiply_sequence(*variables: ArrayLike, constant: Optional[bool] = None) ->
     return Tensor._op(MultiplySequence, *variables, constant=constant)
 
 
-def add_sequence(*variables: ArrayLike, constant: Optional[bool] = None) -> Tensor:
+def add_sequence(*variables: ArrayLike, constant: bool | None = None) -> Tensor:
     """``f(a, b, ...) -> a + b + ...``
 
     Add a sequence of tensors.

@@ -1,9 +1,7 @@
-from typing import List, Type
-
 import mygrad
 
-_public_ufunc_names: List[str] = []
-_ufuncs: List[Type[mygrad.ufunc]] = []
+_public_ufunc_names: list[str] = []
+_ufuncs: list[type[mygrad.ufunc]] = []
 
 for _name in sorted(
     public_name for public_name in dir(mygrad) if not public_name.startswith("_")

@@ -1,5 +1,4 @@
 from numbers import Real
-from typing import Optional
 
 import numpy as np
 
@@ -55,7 +54,7 @@ def margin_ranking_loss(
     y: ArrayLike,
     margin: float,
     *,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:
     r"""Computes the margin average margin ranking loss.
     Equivalent to::

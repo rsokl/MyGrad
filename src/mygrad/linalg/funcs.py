@@ -1,5 +1,5 @@
+from collections.abc import Sequence
 from numbers import Real
-from typing import Optional, Sequence, Tuple, Union
 
 import numpy as np
 
@@ -22,12 +22,12 @@ __all__ = ["einsum", "norm"]
 @implements_numpy_override(np.linalg.norm)
 def norm(
     x: ArrayLike,
-    ord: Optional[Union[int, float]] = None,
-    axis: Optional[Union[int, Tuple[int]]] = None,
+    ord: int | float | None = None,
+    axis: int | tuple[int] | None = None,
     keepdims: bool = False,
     *,
     nan_to_num: bool = True,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:
     r"""Vector norm.
 
@@ -176,10 +176,10 @@ def norm(
 
 @implements_numpy_override()
 def einsum(
-    *operands: Union[ArrayLike, str, Sequence[int]],
+    *operands: ArrayLike | str | Sequence[int],
     optimize: bool = False,
-    out: Optional[Union[np.ndarray, Tensor]] = None,
-    constant: Optional[bool] = None,
+    out: np.ndarray | Tensor | None = None,
+    constant: bool | None = None,
 ) -> Tensor:
     r"""
     einsum(subscripts, *operands)

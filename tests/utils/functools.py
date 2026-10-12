@@ -1,7 +1,8 @@
 from collections import UserDict
+from collections.abc import Iterable, Sequence
 from copy import deepcopy
 from functools import wraps
-from typing import Any, Dict, Iterable, Sequence, Tuple, Union
+from typing import Any, Union
 
 import numpy as np
 
@@ -37,8 +38,8 @@ class SmartSignature(UserDict):
     - supports getitem/setitem for kwargs
     """
 
-    args: Tuple[Any, ...]
-    kwargs: Dict[str, Any]
+    args: tuple[Any, ...]
+    kwargs: dict[str, Any]
 
     def __len__(self):
         return len(self.args)
@@ -67,13 +68,13 @@ class SmartSignature(UserDict):
         if value is not _NoValue:
             self.kwargs[key] = value
 
-    def args_as_no_mygrad(self) -> Tuple[NotTensor, ...]:
+    def args_as_no_mygrad(self) -> tuple[NotTensor, ...]:
         return tuple(
             mg.asarray(item) if isinstance(item, mg.Tensor) else item
             for item in self.args
         )
 
-    def tensors_only(self) -> Tuple[mg.Tensor, ...]:
+    def tensors_only(self) -> tuple[mg.Tensor, ...]:
         return tuple(a for a in self.args if isinstance(a, mg.Tensor))
 
     def make_array_based_args_read_only(self):

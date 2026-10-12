@@ -1,11 +1,9 @@
-from typing import Optional
-
 import numpy as np
 
 from mygrad.tensor_base import Tensor
 
 
-def dirac(*shape: int, dtype=np.float32, constant: Optional[bool] = None) -> Tensor:
+def dirac(*shape: int, dtype=np.float32, constant: bool | None = None) -> Tensor:
     """Initialize a :class:`mygrad.Tensor` according to the Dirac initialization procedure described
     by Zagoruyko and Komodakis.
 

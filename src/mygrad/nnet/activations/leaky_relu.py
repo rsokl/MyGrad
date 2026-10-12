@@ -1,5 +1,4 @@
 from numbers import Real
-from typing import Optional
 
 from numpy import ndarray
 
@@ -10,9 +9,7 @@ from mygrad.typing import ArrayLike
 __all__ = ["leaky_relu"]
 
 
-def leaky_relu(
-    x: ArrayLike, slope: float, *, constant: Optional[bool] = None
-) -> Tensor:
+def leaky_relu(x: ArrayLike, slope: float, *, constant: bool | None = None) -> Tensor:
     """Returns the leaky rectified linear activation elementwise along x.
 
     The leaky ReLU is given by `max(x, 0) + slope*min(x, 0)`.

@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, Union
+from typing import Union
 
 import numpy as np
 
@@ -12,7 +12,7 @@ from mygrad.typing import ArrayLike
 
 from .ops import *
 
-Axis = Union[None, int, Tuple[int, ...]]
+Axis = Union[None, int, tuple[int, ...]]
 
 
 __all__ = [
@@ -36,7 +36,7 @@ def sum(
     axis: Axis = None,
     keepdims: bool = False,
     *,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:
     """
     Sum of tensor elements over a given axis.
@@ -124,7 +124,7 @@ def mean(
     axis: Axis = None,
     keepdims: bool = False,
     *,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:
     """
     Mean of tensor elements over a given axis.
@@ -202,7 +202,7 @@ def var(
     ddof: int = 0,
     keepdims: bool = False,
     *,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:
     """
     Compute the variance along the specified axis.
@@ -298,7 +298,7 @@ def std(
     ddof: int = 0,
     keepdims: bool = False,
     *,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:
     """
     Compute the standard deviation along the specified axis.
@@ -392,7 +392,7 @@ def max(
     axis: Axis = None,
     keepdims: bool = False,
     *,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:
     """
     Return the maximum of a tensor or maximum along its axes.
@@ -457,7 +457,7 @@ def min(
     axis: Axis = None,
     keepdims: bool = False,
     *,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:
     """
     Return the minimum of a tensor or minimum along its axes.
@@ -527,7 +527,7 @@ def prod(
     axis: Axis = None,
     keepdims: bool = False,
     *,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:
     """
     Return the product of array elements over given axes.
@@ -593,9 +593,7 @@ def prod(
 
 
 @implements_numpy_override()
-def cumprod(
-    a: ArrayLike, axis: Axis = None, *, constant: Optional[bool] = None
-) -> Tensor:
+def cumprod(a: ArrayLike, axis: Axis = None, *, constant: bool | None = None) -> Tensor:
     """
     Return the cumulative product of elements along a given axis.
 
@@ -658,9 +656,7 @@ def cumprod(
 
 
 @implements_numpy_override()
-def cumsum(
-    a: ArrayLike, axis: Axis = None, *, constant: Optional[bool] = None
-) -> Tensor:
+def cumsum(a: ArrayLike, axis: Axis = None, *, constant: bool | None = None) -> Tensor:
     """
     Return the cumulative sum of the elements along a given axis.
 

@@ -1,5 +1,3 @@
-from typing import Optional, Union
-
 from numpy import ndarray
 
 from mygrad.tensor_base import Tensor
@@ -24,11 +22,11 @@ __all__ = [
 @ufunc_creator(Exp)
 def exp(
     x1: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     r"""Calculate the exponential of all elements in the input tensor.
 
@@ -106,11 +104,11 @@ def exp(
 @ufunc_creator(Exp2)
 def exp2(
     x1: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     """Calculate `2**p` for all `p` in the input tensor.
 
@@ -173,11 +171,11 @@ def exp2(
 @ufunc_creator(Expm1)
 def expm1(
     x1: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     """Calculate ``exp(x) - 1`` for all elements in the tensor.
 
@@ -250,11 +248,11 @@ def expm1(
 @ufunc_creator(Log)
 def log(
     x1: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     """Natural logarithm, element-wise.
 
@@ -335,11 +333,11 @@ def log(
 @ufunc_creator(Log2)
 def log2(
     x1: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     """Base-2 logarithm applied elementwise to the tensor.
 
@@ -408,11 +406,11 @@ def log2(
 @ufunc_creator(Log10)
 def log10(
     x1: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     """Return the base 10 logarithm of the input tensor, element-wise.
 
@@ -476,11 +474,11 @@ def log10(
 @ufunc_creator(Log1p)
 def log1p(
     x1: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     """Return the natural logarithm of one plus the input tensor, element-wise.
 
@@ -556,11 +554,11 @@ def log1p(
 def logaddexp(
     x1: ArrayLike,
     x2: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     """Logarithm of the sum of exponentiations of the inputs.
 
@@ -636,11 +634,11 @@ def logaddexp(
 def logaddexp2(
     x1: ArrayLike,
     x2: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     """Logarithm of the sum of exponentiations of the inputs in base-2.
 

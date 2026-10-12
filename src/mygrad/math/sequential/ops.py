@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from functools import reduce
-from typing import Optional, Tuple, Union
 
 import numpy as np
 
@@ -28,7 +27,7 @@ class MaxMin(Sequential, ABC):
     @abstractmethod
     def _arg_finder(
         a: np.ndarray,
-        axis: Optional[Union[int, Tuple[int, ...]]] = None,
+        axis: int | tuple[int, ...] | None = None,
     ) -> np.ndarray:
         """`numpy.argmax` or `numpy.argmin` - in correspondence with the
         implementation of `max` or `min`."""
@@ -38,8 +37,8 @@ class MaxMin(Sequential, ABC):
     @abstractmethod
     def numpy_func(
         a: np.ndarray,
-        axis: Optional[Union[int, Tuple[int, ...]]] = None,
-        out: Optional[np.ndarray] = None,
+        axis: int | tuple[int, ...] | None = None,
+        out: np.ndarray | None = None,
         *args,
         **kwargs,
     ) -> np.ndarray:
@@ -197,7 +196,7 @@ class Prod(Sequential):
 
 
 def _reverse_cumsum(
-    x: np.ndarray, axis: Optional[int] = None
+    x: np.ndarray, axis: int | None = None
 ) -> np.ndarray:  # pragma: no cover
     """(x0, x1, x2) -> (x0, x0 + x1, x0 + x1 + x2)"""
     if axis is None:
@@ -322,7 +321,7 @@ class CumProd(Sequential):
             np.nan_to_num(dldx, copy=False)
 
         if axis is None:
-            dldx.shape = orig_shape
+            dldx = dldx.reshape(orig_shape)
         return dldx
 
 
@@ -334,7 +333,7 @@ class CumSum(Sequential):
         a = self.variables[index]
         g = _reverse_cumsum(grad, self.axis)
         if self.axis is None:
-            g.shape = a.shape
+            g = g.reshape(a.shape)
         return g
 
 
@@ -348,7 +347,7 @@ class Variance(Sequential):
 
     def backward_var(self, grad, index, **kwargs):
         (a,) = self.variables
-        axis: Optional[Tuple[int, ...]] = self.axis
+        axis: tuple[int, ...] | None = self.axis
         if isinstance(axis, Sequence) and len(axis) == 0:
             return np.zeros(a.shape, dtype=float)
 
@@ -360,7 +359,7 @@ class Variance(Sequential):
             # keepdims=False and axis=None (or all axes)
             grad = np.full(a.shape, grad, dtype=float)
         else:
-            axis: Tuple[int, ...]
+            axis: tuple[int, ...]
             if not self.keepdims:
                 index = [slice(None)] * a.ndim
                 for i in axis:

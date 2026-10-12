@@ -1,5 +1,4 @@
 from functools import partial
-from typing import Optional, Tuple
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
@@ -16,7 +15,7 @@ from tests.custom_strategies import array_likes, tensors
 @st.composite
 def concatable_tensors(
     draw, array_like_strat=array_likes
-) -> st.SearchStrategy[Tuple[Tuple[ArrayLike, ...], Optional[int]]]:
+) -> st.SearchStrategy[tuple[tuple[ArrayLike, ...], int | None]]:
     """draws valid inputs for numpy.concatenate"""
     axis_is_none = draw(st.booleans())
     if axis_is_none:
@@ -57,7 +56,7 @@ def concatable_tensors(
 @st.composite
 def stackable_tensors(
     draw, array_like_strat=array_likes
-) -> st.SearchStrategy[Tuple[Tuple[ArrayLike, ...], int]]:
+) -> st.SearchStrategy[tuple[tuple[ArrayLike, ...], int]]:
     seq_arrs = draw(
         array_like_strat(
             shape=hnp.array_shapes(min_dims=1, min_side=0),
@@ -77,14 +76,14 @@ def stackable_tensors(
 
 
 @given(concatable_tensors(hnp.arrays))
-def test_concatable_tensors_strat(x: Tuple[Tuple[ArrayLike, ...], Optional[int]]):
+def test_concatable_tensors_strat(x: tuple[tuple[ArrayLike, ...], int | None]):
     """Ensures strat does not produce bad results"""
     arrs, axis = x
     np.concatenate(arrs, axis=axis)
 
 
 @given(stackable_tensors(hnp.arrays))
-def test_stackable_tensors_strat(x: Tuple[Tuple[ArrayLike, ...], Optional[int]]):
+def test_stackable_tensors_strat(x: tuple[tuple[ArrayLike, ...], int | None]):
     arrs, axis = x
     np.stack(arrs, axis=axis)
 
@@ -103,7 +102,7 @@ def not_tensor(x):
 @given(data=st.data(), constant=st.booleans())
 def test_join_fwd(
     data: st.DataObject,
-    strat: st.SearchStrategy[Tuple[Tuple[ArrayLike, ...], Optional[int]]],
+    strat: st.SearchStrategy[tuple[tuple[ArrayLike, ...], int | None]],
     mygrad_func,
     constant: bool,
 ):
@@ -135,7 +134,7 @@ def test_join_fwd(
 @given(data=st.data())
 def test_join_bkwd(
     data: st.DataObject,
-    strat: st.SearchStrategy[Tuple[Tuple[ArrayLike, ...], Optional[int]]],
+    strat: st.SearchStrategy[tuple[tuple[ArrayLike, ...], int | None]],
     numpy_func,
 ):
     arrs, axis = data.draw(strat)

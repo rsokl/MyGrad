@@ -50,7 +50,11 @@ def in_place_reshape(arr, newshape, reshaper, **kwargs):
     if isinstance(arr, Number):
         arr = to_array(arr)
 
-    arr.shape = newshape
+    if isinstance(arr, Tensor):
+        arr.shape = newshape
+    else:
+        # (assigning to `ndarray.shape` is deprecated as of NumPy 2.5)
+        arr = arr.reshape(newshape)
     if isinstance(arr, Tensor) and kwargs.get("constant", False):
         arr._constant = True
     return arr
@@ -62,6 +66,27 @@ def test_in_place_reshape_no_autodiff():
         x.shape = (5, 2)
     assert x.shape == (5, 2)
     assert x.creator is None
+
+
+def test_in_place_reshape_no_autodiff_of_locked_tensor_regains_writeability():
+    x = mg.arange(10.0)
+    y = 2 * x  # locks the memory of `x`
+    with mg.no_autodiff:
+        x.shape = (5, 2)
+    assert x.shape == (5, 2)
+    assert not x.data.flags.writeable
+    del y
+    assert x.data.flags.writeable
+
+
+def test_in_place_reshape_requiring_copy_raises():
+    x = mg.arange(6.0).reshape(2, 3).T
+    with pytest.raises(AttributeError):
+        x.shape = (6,)
+
+    with mg.no_autodiff, pytest.raises(AttributeError):
+        x.shape = (6,)
+    assert x.shape == (3, 2)
 
 
 def test_raising_during_inplace_reshape_doesnt_corrupt_graph():
@@ -139,10 +164,7 @@ def test_in_place_reshape(tensor: Tensor, data: st.DataObject):
 
     tensor.shape = newshape
 
-    array.shape = newshape
-    assert_array_equal(array, tensor)
-
-    assert array.base is None
+    assert_array_equal(array.reshape(newshape), tensor)
     assert tensor.base is None
 
 
@@ -160,7 +182,7 @@ def test_in_place_reshape_post_view(tensor: Tensor, data: st.DataObject):
     t1.shape = newshape
 
     a1 = array[...]
-    a1.shape = newshape
+    a1 = a1.reshape(newshape)
     assert_array_equal(array, tensor)
     assert_array_equal(a1, t1)
 

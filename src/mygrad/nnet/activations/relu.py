@@ -1,5 +1,3 @@
-from typing import Optional
-
 import numpy as np
 
 from mygrad.operation_base import Operation
@@ -17,7 +15,7 @@ class ReLu(Operation):
         return grad * self.back
 
 
-def relu(x: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
+def relu(x: ArrayLike, *, constant: bool | None = None) -> Tensor:
     """
     Applies the recitfied linear unit activation function::
 

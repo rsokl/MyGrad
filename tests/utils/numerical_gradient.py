@@ -1,5 +1,4 @@
 from decimal import Decimal
-from typing import List, Optional, Tuple
 
 import numpy as np
 
@@ -108,7 +107,7 @@ def finite_difference(
 
 def numerical_gradient(
     f, *args, back_grad, vary_ind=None, h=1e-20, kwargs=None
-) -> Tuple[Optional[np.ndarray], ...]:
+) -> tuple[np.ndarray | None, ...]:
     """Computes numerical partial derivatives of f(x0, x1, ...) in each
     of its variables, using the central difference method.
     This is a "fast" method - it varies entire arrays at once. Thus
@@ -168,7 +167,7 @@ def numerical_gradient(
 
 def numerical_gradient_full(
     f, *args, back_grad, kwargs=None, vary_ind=None
-) -> Tuple[np.ndarray, ...]:
+) -> tuple[np.ndarray, ...]:
     """Computes numerical partial derivatives of f(x, y, ..., **kwargs), by
     varying each entry of x, y, ... independently producing a gradient
     in each variable.
@@ -239,7 +238,7 @@ def numerical_gradient_full(
         kwargs = {}
 
     args = tuple(i.astype(np.complex128) for i in args)
-    grads: List[Optional[np.ndarray]] = [None] * len(args)
+    grads: list[np.ndarray | None] = [None] * len(args)
 
     if isinstance(vary_ind, int):
         vary_ind = [vary_ind]

@@ -1,5 +1,3 @@
-from typing import Dict
-
 import hypothesis.strategies as st
 import numpy as np
 import pytest
@@ -162,7 +160,7 @@ def test_no_share_memory_view_is_still_view(constant: bool):
     assert tensor_view_of_view.base is tensor
 
 
-def create_view_graph(base_constant: bool = False) -> Dict[str, mg.Tensor]:
+def create_view_graph(base_constant: bool = False) -> dict[str, mg.Tensor]:
     """
     Creates the following graph:
 

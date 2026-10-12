@@ -5,7 +5,8 @@ Provides utilities responsible for locking/releasing array writeability.
 import atexit
 import os
 from collections import defaultdict
-from typing import TYPE_CHECKING, DefaultDict, Dict, Iterable, Set
+from collections.abc import Iterable
+from typing import TYPE_CHECKING
 from weakref import ref
 
 import numpy as np
@@ -18,14 +19,14 @@ if TYPE_CHECKING:  # pragma: no cover
 
 # arr-id -> num active ops involving arr
 # (a plain dict rather than a Counter: this is on the hot path of every op)
-_array_counter: Dict[int, int] = {}
+_array_counter: dict[int, int] = {}
 
 # arr-id -> weak-ref of arr, for arrays participating in live ops
-_array_tracker: Dict[int, WeakRef[np.ndarray]] = dict()
+_array_tracker: dict[int, WeakRef[np.ndarray]] = dict()
 
 # maps base-array ID to ID of view that can't be unlocked until
 # base is unlocked
-_views_waiting_for_unlock: DefaultDict[int, Set[int]] = defaultdict(set)
+_views_waiting_for_unlock: defaultdict[int, set[int]] = defaultdict(set)
 
 __all__ = [
     "lock_arr_writeability",
@@ -79,6 +80,20 @@ def lock_arr_writeability(arr: np.ndarray, force_lock: bool = False) -> np.ndarr
     if arr.flags.writeable is True:
         arr.flags.writeable = False
     return arr
+
+
+def unlock_view_with_base(view: np.ndarray):
+    """Has a read-only view, whose base is locked by mygrad, made writeable once
+    that base's lock is released.
+
+    E.g. a view taken of an array while it is involved in an op would otherwise
+    remain read-only after the op is done."""
+    base = view.base
+    if view.flags.writeable or base is None or not array_is_tracked(base):
+        return
+    view_id = id(view)
+    _array_tracker[view_id] = ref(view)
+    _views_waiting_for_unlock[id(base)].add(view_id)
 
 
 def lock_arrs_of_tensors(
@@ -197,7 +212,7 @@ def release_writeability_lock_on_op(arr_refs: WeakRefIterable[np.ndarray]):
 
 
 # keeps the weakrefs made by `release_locks_when_collected` alive until they fire
-_pending_releases: Set[WeakRef] = set()
+_pending_releases: set[WeakRef] = set()
 
 # Discarding the weakrefs at exit means that their callbacks never fire during
 # interpreter shutdown, when the state that they touch may be partially torn

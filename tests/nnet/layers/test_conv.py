@@ -1,7 +1,5 @@
 """Test conv fwd-prop and back-prop for ND convs"""
 
-from typing import Tuple
-
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
@@ -44,7 +42,7 @@ from ...wrappers.uber import backprop_test_factory, fwdprop_test_factory
 )
 @given(data=st.data())
 def test_input_validation(
-    shapes: st.SearchStrategy[Tuple[Tuple[int, ...], Tuple[int, ...]]],
+    shapes: st.SearchStrategy[tuple[tuple[int, ...], tuple[int, ...]]],
     data: st.DataObject,
 ):
     x_shape, k_shape = data.draw(shapes, label="x_shape, k_shape")
@@ -89,10 +87,10 @@ def get_outshape(x_shape, w_shape, stride, dilation):
 
     if not all(i.is_integer() and i > 0 for i in out_shape):
         msg = "Stride and kernel dimensions are incompatible: \n"
-        msg += "Input dimensions: {}\n".format(tuple(x_shape))
-        msg += "Stride dimensions: {}\n".format(tuple(stride))
-        msg += "Kernel dimensions: {}\n".format(tuple(w_shape))
-        msg += "Dilation dimensions: {}\n".format(tuple(dilation))
+        msg += f"Input dimensions: {tuple(x_shape)}\n"
+        msg += f"Stride dimensions: {tuple(stride)}\n"
+        msg += f"Kernel dimensions: {tuple(w_shape)}\n"
+        msg += f"Dilation dimensions: {tuple(dilation)}\n"
         return None
     return out_shape.astype(np.int32)
 
@@ -441,7 +439,5 @@ def test_conv_ND_bkwd(data, shape, num_filters, num_batch, num_channel):
             d_num,
             atol=1e-4,
             rtol=1e-4,
-            err_msg="arr-{}: numerical derivative and mygrad derivative do not match".format(
-                n
-            ),
+            err_msg=f"arr-{n}: numerical derivative and mygrad derivative do not match",
         )

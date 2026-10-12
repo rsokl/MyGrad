@@ -1,5 +1,4 @@
 from numbers import Real
-from typing import Optional
 
 from numpy import ndarray
 
@@ -15,7 +14,7 @@ def hard_tanh(
     *,
     lower_bound: Real = -1,
     upper_bound: Real = 1,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:
     """Returns the hard hyperbolic tangent function.
 

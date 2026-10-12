@@ -1,5 +1,3 @@
-from typing import Optional
-
 from mygrad import abs, divide
 from mygrad.tensor_base import Tensor
 from mygrad.typing import ArrayLike
@@ -7,7 +5,7 @@ from mygrad.typing import ArrayLike
 __all__ = ["soft_sign"]
 
 
-def soft_sign(x: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
+def soft_sign(x: ArrayLike, *, constant: bool | None = None) -> Tensor:
     """Returns the soft sign function x / (1 + |x|).
 
     Parameters

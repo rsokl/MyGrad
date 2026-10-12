@@ -432,7 +432,7 @@ def test_comparison_ops(
     )
     x = Tensor(x, constant=x_constant)
     y = Tensor(y, constant=y_constant)
-    assert hasattr(Tensor, op), "`Tensor` is missing the attribute {}".format(op)
+    assert hasattr(Tensor, op), f"`Tensor` is missing the attribute {op}"
     tensor_out = getattr(Tensor, op)(x, y)
     array_out = getattr(np.ndarray, op)(x.data, y.data)
     assert_equal(actual=tensor_out, desired=array_out)

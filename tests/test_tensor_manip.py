@@ -1,5 +1,4 @@
 from itertools import permutations
-from typing import List
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
@@ -110,8 +109,8 @@ def test_transpose_method():
         f = x.transpose(*axes)
         f.backward(dat.transpose(axes))
 
-        assert_allclose(f.data, dat.transpose(axes), err_msg="{}".format(axes))
-        assert_allclose(x.grad, dat, err_msg="{}".format(axes))
+        assert_allclose(f.data, dat.transpose(axes), err_msg=f"{axes}")
+        assert_allclose(x.grad, dat, err_msg=f"{axes}")
 
     # passing integers directly
     x = Tensor(dat)
@@ -494,7 +493,7 @@ def _wrap_list(x):
 
 @pytest.mark.parametrize("func", [atleast_1d, atleast_2d, atleast_3d])
 @given(x=infer, constant=st.none() | st.booleans())
-def test_atleast_kd_fixed_point(func, x: List[ArrayLike], constant):
+def test_atleast_kd_fixed_point(func, x: list[ArrayLike], constant):
     with no_autodiff:
         out1 = _wrap_list(func(*x, constant=constant))
         out2 = _wrap_list(func(*out1, constant=constant))
