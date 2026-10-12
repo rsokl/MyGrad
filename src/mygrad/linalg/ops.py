@@ -2,6 +2,7 @@ from collections import Counter
 from copy import copy
 from functools import reduce
 from itertools import chain
+from math import prod
 from numbers import Real
 from typing import Optional
 
@@ -76,6 +77,100 @@ def _get_indices(item, seq):
     return (n for n, x in enumerate(seq) if x == item)
 
 
+# Below this many multiply-adds, numpy's einsum loop beats the overhead of
+# routing a contraction through matmul
+_MIN_MATMUL_WORK = 2**14
+
+
+def _einsum_via_matmul(lhs: str, rhs: str, out: str, a: np.ndarray, b: np.ndarray):
+    """Computes ``einsum(f"{lhs},{rhs}->{out}", a, b)`` as a single (batched) matmul,
+    which uses BLAS; numpy's einsum does not unless ``optimize`` is specified, and
+    that incurs substantial overhead of its own.
+
+    Returns ``None`` if the contraction is not supported, or is too small to
+    benefit, in which case ``np.einsum`` should be used instead.
+
+    Supported: floating-point operands, with no label repeated within an operand
+    (e.g. traces) and no broadcasting between operands' shared labels."""
+    # Cheapest checks first: this is called for every two-operand einsum, and
+    # most small ones are declined here.
+    if a.size * b.size < _MIN_MATMUL_WORK:
+        # an upper bound on the number of multiply-adds
+        return None
+
+    lhs_set, rhs_set = set(lhs), set(rhs)
+    out_set = set(out)
+    if out_set <= lhs_set and out_set <= rhs_set:
+        # no label is unique to either operand: just a (batch of) dot product(s)
+        return None
+
+    if len(lhs_set) != len(lhs) or len(rhs_set) != len(rhs):
+        return None
+
+    if not (
+        issubclass(a.dtype.type, np.floating) and issubclass(b.dtype.type, np.floating)
+    ):
+        return None
+
+    a_sizes = dict(zip(lhs, a.shape))
+    b_sizes = dict(zip(rhs, b.shape))
+    if any(a_sizes[lbl] != b_sizes[lbl] for lbl in a_sizes.keys() & b_sizes.keys()):
+        return None
+
+    batch = [lbl for lbl in out if lbl in a_sizes and lbl in b_sizes]
+    contracted = [lbl for lbl in lhs if lbl in b_sizes and lbl not in out]
+    free_a = [lbl for lbl in out if lbl in a_sizes and lbl not in b_sizes]
+    free_b = [lbl for lbl in out if lbl in b_sizes and lbl not in a_sizes]
+
+    n_batch = prod([a_sizes[lbl] for lbl in batch])
+    m = prod([a_sizes[lbl] for lbl in free_a])
+    k = prod([a_sizes[lbl] for lbl in contracted])
+    n = prod([b_sizes[lbl] for lbl in free_b])
+    if k == 1 or (m == 1 and n == 1) or n_batch * m * k * n < _MIN_MATMUL_WORK:
+        # no contraction, a batch of dot products, or too little work for BLAS to
+        # pay off
+        return None
+
+    # labels that appear in only one operand, and not in the output, are summed
+    # out of that operand up front
+    sum_a = tuple(
+        i for i, lbl in enumerate(lhs) if lbl not in b_sizes and lbl not in out
+    )
+    if sum_a:
+        a = a.sum(axis=sum_a)
+        lhs = "".join(lbl for i, lbl in enumerate(lhs) if i not in sum_a)
+
+    sum_b = tuple(
+        i for i, lbl in enumerate(rhs) if lbl not in a_sizes and lbl not in out
+    )
+    if sum_b:
+        b = b.sum(axis=sum_b)
+        rhs = "".join(lbl for i, lbl in enumerate(rhs) if i not in sum_b)
+
+    # a -> (batch, m, k);  b -> (batch, k, n)
+    a = a.transpose([lhs.index(lbl) for lbl in batch + free_a + contracted])
+    b = b.transpose([rhs.index(lbl) for lbl in batch + contracted + free_b])
+    result = np.matmul(a.reshape(n_batch, m, k), b.reshape(n_batch, k, n))
+
+    result = result.reshape(
+        [a_sizes[lbl] for lbl in batch]
+        + [a_sizes[lbl] for lbl in free_a]
+        + [b_sizes[lbl] for lbl in free_b]
+    )
+    result_lbls = batch + free_a + free_b
+    return result.transpose([result_lbls.index(lbl) for lbl in out])
+
+
+def _einsum(in_lbls, out_lbls: str, *arrays: np.ndarray, optimize=False):
+    """``np.einsum(f"{','.join(in_lbls)}->{out_lbls}", *arrays, optimize=optimize)``,
+    computed via matmul when that is supported and beneficial."""
+    if optimize is False and len(arrays) == 2:
+        result = _einsum_via_matmul(in_lbls[0], in_lbls[1], out_lbls, *arrays)
+        if result is not None:
+            return result
+    return np.einsum(",".join(in_lbls) + "->" + out_lbls, *arrays, optimize=optimize)
+
+
 class EinSum(Operation):
     can_return_view = True
 
@@ -104,13 +199,12 @@ class EinSum(Operation):
         # unique tensor-label pair
         self._cache = None
 
-        # einsum doesn't handle out=None properly in numpy 1.17
-        kwargs = {} if out is None else {"out": out}
+        arrays = tuple(var.data for var in self.variables)
+        if out is None:
+            return _einsum(self.in_lbls, out_lbls, *arrays, optimize=optimize)
+
         return np.einsum(
-            "->".join((in_lbls, out_lbls)),
-            *(var.data for var in self.variables),
-            optimize=optimize,
-            **kwargs,
+            "->".join((in_lbls, out_lbls)), *arrays, optimize=optimize, out=out
         )
 
     @property
@@ -192,7 +286,8 @@ class EinSum(Operation):
             )
 
         # "ji, k -> ijk"
-        back_prop_lbls = ",".join([grad_lbl] + in_lbls) + "->" + var_lbl
+        back_prop_in_lbls = [grad_lbl] + in_lbls
+        back_prop_lbls = ",".join(back_prop_in_lbls) + "->" + var_lbl
 
         # (grad, y)
         operands = (grad,) + numpy_arrays[:index] + numpy_arrays[index + 1 :]
@@ -201,7 +296,8 @@ class EinSum(Operation):
             # dfdx: einsum("ji, k -> ijk", grad, y)
             outshape = self.variables[index].shape
             dfdx = reduce_broadcast(
-                np.einsum(back_prop_lbls, *operands, optimize=self.optimize), outshape
+                _einsum(back_prop_in_lbls, var_lbl, *operands, optimize=self.optimize),
+                outshape,
             )
             if var_shape != dfdx.shape:
                 # if y was broadcast over x, the gradient needs to
