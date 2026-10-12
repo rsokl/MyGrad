@@ -1,5 +1,5 @@
+from collections.abc import Callable
 from functools import wraps
-from typing import Callable
 
 from mygrad import Tensor
 from tests.utils.checkers import expected_constant

@@ -5,20 +5,12 @@ etc., are bound to the Tensor class in ``mygrad.__init__.py``.
 """
 
 from collections import deque
+from collections.abc import Callable, Iterator, Sequence
 from numbers import Integral, Number
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
-    Deque,
-    Dict,
-    Iterator,
-    List,
     Optional,
-    Sequence,
-    Set,
-    Tuple,
-    Type,
     TypeVar,
     Union,
 )
@@ -76,7 +68,7 @@ T = TypeVar("T")
 CONSTANT_ONLY_DTYPES = (np.integer, np.bool_)
 
 
-def _resolve_constant(*others: Any, constant: Optional[bool]) -> Optional[bool]:
+def _resolve_constant(*others: Any, constant: bool | None) -> bool | None:
     """Determines if `constant` should be resolved to True based on `others`.
     Otherwise defers to a tensor-creator to handle further resolutions based on dtype.
     """
@@ -168,7 +160,7 @@ def tensor(
     arr_like: ArrayLike,
     dtype: DTypeLikeReals = None,
     *,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
     copy: bool = True,
     ndmin: int = 0,
 ) -> "Tensor":
@@ -271,7 +263,7 @@ def tensor(
 
 
 def astensor(
-    t: ArrayLike, dtype: DTypeLikeReals = None, *, constant: Optional[bool] = None
+    t: ArrayLike, dtype: DTypeLikeReals = None, *, constant: bool | None = None
 ) -> "Tensor":
     """Convert the input to a tensor.
 
@@ -357,12 +349,12 @@ def astensor(
     return tensor(t, dtype=dtype, constant=constant, copy=False, ndmin=0)
 
 
-_REGISTERED_UFUNC: Dict[np.ufunc, Type["mygrad_ufunc"]] = {}
-_REGISTERED_DIFFERENTIABLE_NUMPY_FUNCS: Dict[
+_REGISTERED_UFUNC: dict[np.ufunc, type["mygrad_ufunc"]] = {}
+_REGISTERED_DIFFERENTIABLE_NUMPY_FUNCS: dict[
     Callable[..., np.ndarray], Callable[..., "Tensor"]
 ] = {}
 
-_REGISTERED_BOOL_ONLY_UFUNC: Set[np.ufunc] = {
+_REGISTERED_BOOL_ONLY_UFUNC: set[np.ufunc] = {
     np.isnan,
     np.isfinite,
     np.isinf,
@@ -397,7 +389,7 @@ _REGISTERED_CONST_ONLY_UFUNC = {
 }
 
 
-_REGISTERED_NO_DIFF_NUMPY_FUNCS: Set[Callable] = {
+_REGISTERED_NO_DIFF_NUMPY_FUNCS: set[Callable] = {
     np.allclose,
     np.bincount,
     np.can_cast,
@@ -441,7 +433,7 @@ class implements_numpy_override:
 
     __slots__ = ("numpy_func",)
 
-    def __init__(self, numpy_func: Optional[Callable] = None):
+    def __init__(self, numpy_func: Callable | None = None):
         # if None, `numpy_func` is inferred from the name of the decorated function
         self.numpy_func = numpy_func
 
@@ -461,6 +453,20 @@ class implements_numpy_override:
 
 class _ConstantOnly(ValueError):
     pass
+
+
+def _reshape_without_copy(arr: np.ndarray, newshape: int | Shape) -> np.ndarray:
+    """Returns a view of ``arr`` with the shape ``newshape``.
+
+    Raises in the same way as ``arr.shape = newshape``, which is deprecated
+    as of NumPy 2.5, when this cannot be done without copying ``arr``."""
+    out = arr.reshape(newshape)  # raises `ValueError` for an incompatible size
+    if out.size and not np.may_share_memory(out, arr):
+        raise AttributeError(
+            "Incompatible shape for in-place modification. Use `.reshape()` to "
+            "make a copy with the desired shape."
+        )
+    return out
 
 
 def _as_constant_array(t: Union["Tensor", np.ndarray]) -> np.ndarray:
@@ -630,7 +636,7 @@ class Tensor:
     __array_priority__ = 15.0
 
     def __array_ufunc__(
-        self, ufunc: Type[np.ufunc], method: str, *inputs: ArrayLike, **kwargs
+        self, ufunc: type[np.ufunc], method: str, *inputs: ArrayLike, **kwargs
     ) -> Union["Tensor", np.ndarray]:
         """An interface provided by NumPy to override the behavior of its ufuncs [1]_.
 
@@ -693,7 +699,7 @@ class Tensor:
             )
         (out,) = out
 
-        out: Optional[Union[np.ndarray, "Tensor"]]
+        out: np.ndarray | Tensor | None
 
         try:
             # differentiable ufunc implemented by mygrad
@@ -737,7 +743,7 @@ class Tensor:
             return NotImplemented
 
     def __array__(
-        self, dtype: DTypeLike = None, copy: Optional[bool] = None
+        self, dtype: DTypeLike = None, copy: bool | None = None
     ) -> np.ndarray:
         if NP_IS_V2:
             return np.asarray(self.data, dtype=dtype, copy=copy)
@@ -751,10 +757,10 @@ class Tensor:
         x: ArrayLike,
         *,
         dtype: DTypeLikeReals = None,
-        constant: Optional[bool] = None,
+        constant: bool | None = None,
         copy: bool = True,
         ndmin: int = 0,
-        _creator: Optional[Operation] = None,
+        _creator: Operation | None = None,
         _base: Optional["Tensor"] = None,
     ):
         """
@@ -821,15 +827,15 @@ class Tensor:
     def _init_from_array(
         self,
         data: np.ndarray,
-        constant: Optional[bool],
-        _creator: Optional[Operation],
+        constant: bool | None,
+        _creator: Operation | None,
         _base: Optional["Tensor"],
     ):
         """*dev use only*
 
         Validates ``data``'s dtype against ``constant`` and initializes all of the
         tensor's state. Shared by ``__init__`` and ``_wrap_op_data``."""
-        self._creator: Optional[Operation] = _creator
+        self._creator: Operation | None = _creator
         self.data = data
 
         dtype = data.dtype.type
@@ -857,7 +863,7 @@ class Tensor:
         self._grad = None  # type: Union[None, np.ndarray]
 
         # track all operations that this tensor participates in
-        self._ops: Set[WeakRef[Operation]] = set()
+        self._ops: set[WeakRef[Operation]] = set()
 
         # base points to the initial tensor that owns the memory of this
         # tensor
@@ -868,10 +874,10 @@ class Tensor:
         # Used to reflect the view of the gradient associated with that of `self.base`.
         # This is a means of distinguishing between the gradient set on `self` as
         # part of backpropagation and the view of the gradient of its base.
-        self._view_grad: Optional[np.ndarray] = None
+        self._view_grad: np.ndarray | None = None
 
     @property
-    def grad(self) -> Optional[np.ndarray]:
+    def grad(self) -> np.ndarray | None:
         """
         Returns the derivative of ``ℒ`` with respect to this tensor.
 
@@ -965,7 +971,7 @@ class Tensor:
         casting="unsafe",
         copy: bool = True,
         *,
-        constant: Optional[bool] = None,
+        constant: bool | None = None,
     ) -> "Tensor":
         """Copy of the tensor with the specified dtype.
 
@@ -1035,8 +1041,8 @@ class Tensor:
     def _wrap_op_data(
         cls,
         x: ArrayLike,
-        constant: Optional[bool],
-        _creator: Optional[Operation] = None,
+        constant: bool | None,
+        _creator: Operation | None = None,
         _base: Optional["Tensor"] = None,
     ) -> "Tensor":
         """*dev use only*
@@ -1060,12 +1066,12 @@ class Tensor:
     @classmethod
     def _op(
         cls,
-        Op: Type[Operation],
+        Op: type[Operation],
         *input_vars: ArrayLike,
-        op_args: Optional[Sequence] = None,
-        op_kwargs: Optional[Dict[str, Any]] = None,
-        constant: Optional[bool] = None,
-        out: Optional[Union[np.ndarray, "Tensor"]] = None,
+        op_args: Sequence | None = None,
+        op_kwargs: dict[str, Any] | None = None,
+        constant: bool | None = None,
+        out: Union[np.ndarray, "Tensor"] | None = None,
     ):
         """Wraps operations performed between tensors: f(a, b, ...).
 
@@ -1164,7 +1170,7 @@ class Tensor:
 
         # If output of op is a view - tracks the tensor var that is
         # the parent of the view
-        parent_var: Optional[Tensor] = None
+        parent_var: Tensor | None = None
 
         # Determine whether or not op was a view; if so, `base`
         # points to parent Tensor
@@ -1265,7 +1271,7 @@ class Tensor:
             constant=self.creator.replay_force_constant,
         )
 
-    def backward(self, grad: Optional[ArrayLike] = None):
+    def backward(self, grad: ArrayLike | None = None):
         """Trigger backpropagation and compute the derivatives of this tensor.
 
         Designating this tensor as the tensor ℒ, compute dℒ/dx for all (non-constant) tensors
@@ -1334,8 +1340,8 @@ class Tensor:
             self.clear_graph()
             return
 
-        topo_sorted_tensors: Deque["Tensor"] = deque([])
-        seen: Set[int] = set()
+        topo_sorted_tensors: deque[Tensor] = deque([])
+        seen: set[int] = set()
 
         collect_all_tensors_and_clear_grads(self, seen, topo_sorted_tensors)
 
@@ -1590,7 +1596,7 @@ class Tensor:
         return self._constant
 
     @property
-    def creator(self) -> Optional[Operation]:
+    def creator(self) -> Operation | None:
         """The ``Operation`` instance that produced ``self``.
 
         Returns
@@ -1629,11 +1635,11 @@ class Tensor:
 
     def _in_place_op(
         self,
-        inplace_op: Type[Operation],
+        inplace_op: type[Operation],
         *input_vars: ArrayLike,
-        op_args: Optional[Sequence] = None,
-        op_kwargs: Optional[Dict] = None,
-        constant: Optional[bool] = None,
+        op_args: Sequence | None = None,
+        op_kwargs: dict | None = None,
+        constant: bool | None = None,
     ):
         if _track.TRACK_GRAPH is False:
             return self._op(
@@ -1748,7 +1754,7 @@ class Tensor:
         inplace_target = mutant_base
 
         # stores view-fn sequence from base -> in-place target
-        view_fn_sequence: List[Callable[[np.ndarray], np.ndarray]] = []
+        view_fn_sequence: list[Callable[[np.ndarray], np.ndarray]] = []
 
         with _track.no_autodiff:
             # get view sequence from base -> in-place target
@@ -1925,7 +1931,7 @@ class Tensor:
         return self.data.shape
 
     @shape.setter
-    def shape(self, newshape: Union[int, Shape]):
+    def shape(self, newshape: int | Shape):
         # Even though this op cannot mutate views, we still must
         # do graph-replaying here so that views can still reference
         # this tensor, but with the proper reshaping mediating them.
@@ -1950,7 +1956,9 @@ class Tensor:
         #       y         shape-(4,)
 
         if not _track.TRACK_GRAPH:
-            self.data.shape = newshape
+            self.data = _reshape_without_copy(self.data, newshape)
+            # the new view must regain writeability along with the original array
+            _mem.unlock_view_with_base(self.data)
             return
 
         if newshape == self.shape:
@@ -1959,8 +1967,7 @@ class Tensor:
         old_shape = self.shape
 
         # raise here if the shape is not compatible
-        self.data.shape = newshape
-        self.data.shape = old_shape
+        _reshape_without_copy(self.data, newshape)
 
         # create placeholders for self and all of its view-children
         graph = _dup.DuplicatingGraph(self)
@@ -2114,7 +2121,7 @@ class Tensor:
         """
         return self.copy()
 
-    def copy(self, *, constant: Optional[bool] = None) -> "Tensor":
+    def copy(self, *, constant: bool | None = None) -> "Tensor":
         """Produces a copy of ``self`` with ``copy.creator=None``.
 
         Copies of the underlying numpy data array and gradient array are created.
@@ -2151,7 +2158,7 @@ class Tensor:
         copy._grad = np.copy(self._grad) if self._grad is not None else None
         return copy
 
-    def item(self) -> Union[int, float]:
+    def item(self) -> int | float:
         """Copy an element of a tensor to a standard Python scalar and return it.
 
         Note that the returned object does not support back-propagation.
@@ -2189,7 +2196,7 @@ class Tensor:
         into a list."""
         return self.data.__index__()
 
-    def flatten(self, *, constant: Optional[bool] = None) -> "Tensor":
+    def flatten(self, *, constant: bool | None = None) -> "Tensor":
         """Return a copy of the tensor collapsed into one dimension.
 
         This docstring was adapted from ``numpy.ndarray.flatten``.
@@ -2326,9 +2333,7 @@ class Tensor:
         <type 'numpy.dtype'>"""
         return self.data.dtype
 
-    def reshape(
-        self, *newshape: Union[int, Shape], constant: Optional[bool] = None
-    ) -> "Tensor":
+    def reshape(self, *newshape: int | Shape, constant: bool | None = None) -> "Tensor":
         """Returns a tensor with a new shape, without changing its data.
         This docstring was adapted from ``numpy.reshape``
 
@@ -2423,10 +2428,10 @@ class Tensor:
 
     def sum(
         self,
-        axis: Optional[Union[int, Tuple[int, ...]]] = None,
+        axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
         *,
-        constant: Optional[bool] = None,
+        constant: bool | None = None,
     ) -> "Tensor":
         """
         Sum of tensor elements over a given axis.
@@ -2505,10 +2510,10 @@ class Tensor:
 
     def prod(
         self,
-        axis: Optional[Union[int, Tuple[int, ...]]] = None,
+        axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
         *,
-        constant: Optional[bool] = None,
+        constant: bool | None = None,
     ) -> "Tensor":
         """
         Return the product of array elements over given axes.
@@ -2546,9 +2551,9 @@ class Tensor:
 
     def cumprod(
         self,
-        axis: Optional[Union[int, Tuple[int, ...]]] = None,
+        axis: int | tuple[int, ...] | None = None,
         *,
-        constant: Optional[bool] = None,
+        constant: bool | None = None,
     ) -> "Tensor":
         """
         Return the cumulative product of elements along a given axis.
@@ -2588,9 +2593,9 @@ class Tensor:
 
     def cumsum(
         self,
-        axis: Optional[Union[int, Tuple[int, ...]]] = None,
+        axis: int | tuple[int, ...] | None = None,
         *,
-        constant: Optional[bool] = None,
+        constant: bool | None = None,
     ) -> "Tensor":
         """
         Return the cumulative sum of the elements along a given axis.
@@ -2622,10 +2627,10 @@ class Tensor:
 
     def mean(
         self,
-        axis: Optional[Union[int, Tuple[int, ...]]] = None,
+        axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
         *,
-        constant: Optional[bool] = None,
+        constant: bool | None = None,
     ) -> "Tensor":
         """
         Mean of tensor elements over a given axis.
@@ -2674,11 +2679,11 @@ class Tensor:
 
     def std(
         self,
-        axis: Optional[Union[int, Tuple[int, ...]]] = None,
+        axis: int | tuple[int, ...] | None = None,
         ddof: int = 0,
         keepdims: bool = False,
         *,
-        constant: Optional[bool] = None,
+        constant: bool | None = None,
     ) -> "Tensor":
         """
         Compute the standard deviation along the specified axis.
@@ -2737,11 +2742,11 @@ class Tensor:
 
     def var(
         self,
-        axis: Optional[Union[int, Tuple[int, ...]]] = None,
+        axis: int | tuple[int, ...] | None = None,
         ddof: int = 0,
         keepdims: bool = False,
         *,
-        constant: Optional[bool] = None,
+        constant: bool | None = None,
     ) -> "Tensor":
         """
         Compute the variance along the specified axis.
@@ -2799,10 +2804,10 @@ class Tensor:
 
     def max(
         self,
-        axis: Optional[Union[int, Tuple[int, ...]]] = None,
+        axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
         *,
-        constant: Optional[bool] = None,
+        constant: bool | None = None,
     ) -> "Tensor":
         """
         Return the maximum of a tensor or maximum along its axes.
@@ -2862,10 +2867,10 @@ class Tensor:
 
     def min(
         self,
-        axis: Optional[Union[int, Tuple[int, ...]]] = None,
+        axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
         *,
-        constant: Optional[bool] = None,
+        constant: bool | None = None,
     ) -> "Tensor":
         """
         Return the minimum of a tensor or minimum along its axes.
@@ -2922,7 +2927,7 @@ class Tensor:
         )
 
     def swapaxes(
-        self, axis1: int, axis2: int, *, constant: Optional[bool] = None
+        self, axis1: int, axis2: int, *, constant: bool | None = None
     ) -> "Tensor":
         """Interchange two axes of a tensor.
 
@@ -2951,7 +2956,7 @@ class Tensor:
         return Tensor._op(SwapAxes, self, op_args=(axis1, axis2), constant=constant)
 
     def transpose(
-        self: ArrayLike, *axes: int, constant: Optional[bool] = None
+        self: ArrayLike, *axes: int, constant: bool | None = None
     ) -> "Tensor":
         """Permute the dimensions of a tensor.
 
@@ -3004,10 +3009,10 @@ class Tensor:
 
     def moveaxis(
         self,
-        source: Union[int, Tuple[int, ...]],
-        destination: Union[int, Tuple[int, ...]],
+        source: int | tuple[int, ...],
+        destination: int | tuple[int, ...],
         *,
-        constant: Optional[bool] = None,
+        constant: bool | None = None,
     ) -> "Tensor":
         """Move axes of a tensor to new positions. Other axes remain in their
         original order.
@@ -3042,9 +3047,9 @@ class Tensor:
 
     def squeeze(
         self,
-        axis: Optional[Union[int, Tuple[int, ...]]] = None,
+        axis: int | tuple[int, ...] | None = None,
         *,
-        constant: Optional[bool] = None,
+        constant: bool | None = None,
     ) -> "Tensor":
         """
         Remove single-dimensional entries from the shape of a tensor.
@@ -3080,7 +3085,7 @@ class Tensor:
         """
         return Tensor._op(Squeeze, self, op_args=(axis,), constant=constant)
 
-    def ravel(self, *, constant: Optional[bool] = None) -> "Tensor":
+    def ravel(self, *, constant: bool | None = None) -> "Tensor":
         """
         Flattens contents of a tensor into a contiguous 1-D array.  A copy is made only if needed.
 
@@ -3112,7 +3117,7 @@ class Tensor:
         return Tensor._op(Ravel, self, constant=constant)
 
     def argmax(
-        self, axis: Optional[int] = None, out: Optional[np.ndarray] = None
+        self, axis: int | None = None, out: np.ndarray | None = None
     ) -> np.ndarray:
         """Returns the indices of the maximum values along an axis.
 
@@ -3133,7 +3138,7 @@ class Tensor:
         return np.argmax(self.data, axis, out)
 
     def argmin(
-        self, axis: Optional[int] = None, out: Optional[np.ndarray] = None
+        self, axis: int | None = None, out: np.ndarray | None = None
     ) -> np.ndarray:
         """Returns the indices of the minimum values along an axis.
 
@@ -3153,8 +3158,8 @@ class Tensor:
 
     def any(
         self,
-        axis: Optional[Union[int, Tuple[int, ...]]] = None,
-        out: Optional[np.ndarray] = None,
+        axis: int | tuple[int, ...] | None = None,
+        out: np.ndarray | None = None,
         keepdims: bool = False,
     ) -> np.ndarray:
         """Test whether any array or Tensor element along a given axis evaluates to True.
@@ -3207,9 +3212,9 @@ class Tensor:
         self,
         a_min: ArrayLike,
         a_max: ArrayLike,
-        out: Optional[Union[np.ndarray, "Tensor"]] = None,
+        out: Union[np.ndarray, "Tensor"] | None = None,
         *,
-        constant: Optional[bool] = None,
+        constant: bool | None = None,
     ) -> "Tensor":  # pragma: no cover
         """Clip (limit) the values in an array.
 

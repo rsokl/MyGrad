@@ -1,8 +1,9 @@
+from collections.abc import Callable, Sequence
 from copy import copy
 from functools import partial
 from itertools import combinations
 from numbers import Real
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
+from typing import Any
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
@@ -103,18 +104,16 @@ class fwdprop_test_factory:
         *,
         mygrad_func: Callable[[Tensor], Tensor],
         true_func: Callable[[np.ndarray], np.ndarray],
-        num_arrays: Optional[int] = None,
-        shapes: Optional[MutuallyBroadcastableShapesStrategy] = None,
-        index_to_bnds: Dict[int, Tuple[float, float]] = None,
-        default_bnds: Tuple[float, float] = (-1e6, 1e6),
-        index_to_no_go: Dict[int, Sequence[int]] = None,
-        kwargs: Union[
-            Callable, Dict[str, Union[Any, Callable[[Any], SearchStrategy]]]
-        ] = None,
-        index_to_arr_shapes: Dict[int, Union[Sequence[int], SearchStrategy]] = None,
+        num_arrays: int | None = None,
+        shapes: MutuallyBroadcastableShapesStrategy | None = None,
+        index_to_bnds: dict[int, tuple[float, float]] = None,
+        default_bnds: tuple[float, float] = (-1e6, 1e6),
+        index_to_no_go: dict[int, Sequence[int]] = None,
+        kwargs: Callable | dict[str, Any | Callable[[Any], SearchStrategy]] = None,
+        index_to_arr_shapes: dict[int, Sequence[int] | SearchStrategy] = None,
         atol: float = 1e-7,
         rtol: float = 1e-7,
-        assumptions: Optional[Callable[..., bool]] = None,
+        assumptions: Callable[..., bool] | None = None,
         permit_0d_array_as_float: bool = True,
         internal_view_is_ok: bool = False,
     ):
@@ -430,28 +429,24 @@ class backprop_test_factory:
         *,
         mygrad_func: Callable[..., Tensor],
         true_func: Callable[..., np.ndarray],
-        num_arrays: Optional[int] = None,
-        shapes: Optional[MutuallyBroadcastableShapesStrategy] = None,
-        index_to_bnds: Optional[
-            Union[Dict[int, Tuple[float, float]], Sequence[Any]]
-        ] = None,
-        default_bnds: Tuple[float, float] = (-1e6, 1e6),
-        index_to_no_go: Optional[Dict[int, Sequence[int]]] = None,
-        index_to_arr_shapes: Optional[
-            Dict[int, Union[Sequence[int], SearchStrategy]]
-        ] = None,
-        index_to_unique: Optional[Union[Dict[int, bool], bool]] = None,
-        elements_strategy: Optional[SearchStrategy] = None,
-        kwargs: Optional[
-            Union[Callable, Dict[str, Union[Any, Callable[[Any], SearchStrategy]]]]
-        ] = None,
-        arrs_from_kwargs: Optional[Dict[int, str]] = None,
+        num_arrays: int | None = None,
+        shapes: MutuallyBroadcastableShapesStrategy | None = None,
+        index_to_bnds: dict[int, tuple[float, float]] | Sequence[Any] | None = None,
+        default_bnds: tuple[float, float] = (-1e6, 1e6),
+        index_to_no_go: dict[int, Sequence[int]] | None = None,
+        index_to_arr_shapes: dict[int, Sequence[int] | SearchStrategy] | None = None,
+        index_to_unique: dict[int, bool] | bool | None = None,
+        elements_strategy: SearchStrategy | None = None,
+        kwargs: (
+            Callable | dict[str, Any | Callable[[Any], SearchStrategy]] | None
+        ) = None,
+        arrs_from_kwargs: dict[int, str] | None = None,
         h: float = 1e-20,
         rtol: float = 1e-8,
         atol: float = 1e-8,
         vary_each_element: bool = False,
         use_finite_difference=False,
-        assumptions: Optional[Callable[..., bool]] = None,
+        assumptions: Callable[..., bool] | None = None,
     ):
         """
         Parameters
@@ -691,7 +686,7 @@ class backprop_test_factory:
             )
 
             # list of drawn arrays to feed to functions
-            arrs: List[Tensor] = data.draw(
+            arrs: list[Tensor] = data.draw(
                 st.tuples(
                     *(
                         self.arrays(i).map(Tensor)

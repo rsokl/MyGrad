@@ -4,7 +4,6 @@ from functools import reduce
 from itertools import chain
 from math import prod
 from numbers import Real
-from typing import Optional
 
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
@@ -403,7 +402,7 @@ class Norm(Operation):
             if hasattr(axis, "__len__"):
                 (axis,) = axis
 
-            self.axis: Optional[int] = axis
+            self.axis: int | None = axis
             self.keepdims = keepdims
             self.ord = ord if ord is not None else 2
 

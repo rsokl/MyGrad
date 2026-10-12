@@ -1,5 +1,4 @@
 import functools
-from typing import List, Tuple
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
@@ -21,14 +20,14 @@ def multi_matmul_slow(*arrays, **kwargs):
 
 
 @given(st.lists(st.just(mg.Tensor([0.0, 1.0])), min_size=0, max_size=1))
-def test_input_validation_too_few_tensors(tensors: List[mg.Tensor]):
+def test_input_validation_too_few_tensors(tensors: list[mg.Tensor]):
     """multi_matmul requires at least two input-tensors"""
     with pytest.raises(ValueError):
         mygrad.math.misc.funcs.multi_matmul(tensors)
 
 
 @given(st.lists(hnp.array_shapes(min_dims=1, min_side=2, max_side=2), min_size=2))
-def test_input_validation_large_dimensionality(shapes: List[Tuple[int, ...]]):
+def test_input_validation_large_dimensionality(shapes: list[tuple[int, ...]]):
     """multi_matmul only operates on 1D and 2D tensors"""
     if all((1 <= len(x) <= 2) for x in shapes):
         shapes[0] = (1, 1, *shapes[0])

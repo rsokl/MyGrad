@@ -1,5 +1,3 @@
-from typing import Optional
-
 import numpy as np
 
 import mygrad._utils.graph_tracking as _tracking
@@ -51,7 +49,7 @@ class SoftmaxCrossEntropy(Operation):
 
 
 def softmax_crossentropy(
-    x: ArrayLike, y_true: ArrayLike, *, constant: Optional[bool] = None
+    x: ArrayLike, y_true: ArrayLike, *, constant: bool | None = None
 ) -> Tensor:
     r"""Given the classification scores of C classes for N pieces of data,
 

@@ -1,5 +1,3 @@
-from typing import Optional
-
 import numpy as np
 
 from mygrad.operation_base import Operation
@@ -111,10 +109,10 @@ class BatchNorm(Operation):
 def batchnorm(
     x: ArrayLike,
     *,
-    gamma: Optional[ArrayLike] = None,
-    beta: Optional[ArrayLike] = None,
+    gamma: ArrayLike | None = None,
+    beta: ArrayLike | None = None,
     eps: float,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:
     """
     Performs batch normalization on ``x``::

@@ -1,5 +1,3 @@
-from typing import Optional
-
 import numpy as np
 
 from mygrad.operation_base import Operation
@@ -48,7 +46,7 @@ class SELU(Operation):
         return grad * _SCALE * np.where(x.data < 0, self.exp + _ALPHA, 1)
 
 
-def selu(x: ArrayLike, *, constant: Optional[bool] = None) -> Tensor:
+def selu(x: ArrayLike, *, constant: bool | None = None) -> Tensor:
     """Returns the scaled exponential linear activation (SELU) elementwise along x.
 
     The SELU is given by  λɑ(exp(x) - 1) for x < 0 and λx for x ≥ 0.

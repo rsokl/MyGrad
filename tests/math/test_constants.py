@@ -1,5 +1,3 @@
-from typing import Union
-
 import numpy as np
 import pytest
 
@@ -16,7 +14,5 @@ import mygrad as mg
         (mg.newaxis, np.newaxis),
     ],
 )
-def test_constants(
-    mygrad_constant: Union[None, float], numpy_constant: Union[None, float]
-):
+def test_constants(mygrad_constant: None | float, numpy_constant: None | float):
     assert mygrad_constant is numpy_constant

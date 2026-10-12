@@ -2,11 +2,12 @@
 
 import math
 from collections import defaultdict
+from collections.abc import Iterable, Mapping
 from functools import lru_cache, partial, reduce
 from itertools import groupby, zip_longest
 from numbers import Integral
 from operator import itemgetter
-from typing import Any, Iterable, List, Mapping, Optional, Tuple, Union
+from typing import Any
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
@@ -67,7 +68,7 @@ real_dtypes = (
 
 
 def everything_except(
-    excluded_types: Union[type, Tuple[type, ...]],
+    excluded_types: type | tuple[type, ...],
 ) -> st.SearchStrategy[Any]:
     """Returns hypothesis strategy that generates values of any type other than
     those specified in ``excluded_types``."""
@@ -125,12 +126,12 @@ class VerboseTensor(Tensor):
 def array_likes(
     draw,
     dtype: Any = st.sampled_from([float, int]),
-    shape: Union[int, Shape, st.SearchStrategy[Shape]] = hnp.array_shapes(
+    shape: int | Shape | st.SearchStrategy[Shape] = hnp.array_shapes(
         min_side=0, min_dims=0, max_dims=2
     ),
     *,
-    elements: Optional[Union[st.SearchStrategy, Mapping[str, Any]]] = None,
-    fill: Optional[st.SearchStrategy[Any]] = None,
+    elements: st.SearchStrategy | Mapping[str, Any] | None = None,
+    fill: st.SearchStrategy[Any] | None = None,
     unique: bool = False,
 ) -> st.SearchStrategy[ArrayLike]:
     """elements defaults to dict(min_value=-1e6, max_value=1e6)"""
@@ -160,19 +161,19 @@ st.register_type_strategy(ArrayLike, array_likes())
 def tensors(
     draw: Any,
     dtype: Any = np.float64,
-    shape: Union[int, Shape, st.SearchStrategy[Shape]] = hnp.array_shapes(
+    shape: int | Shape | st.SearchStrategy[Shape] = hnp.array_shapes(
         min_dims=0, min_side=0
     ),
     *,
     ndmin: int = 0,
-    elements: Optional[st.SearchStrategy[Any]] = None,
-    fill: Optional[st.SearchStrategy[Any]] = None,
+    elements: st.SearchStrategy[Any] | None = None,
+    fill: st.SearchStrategy[Any] | None = None,
     unique: bool = False,
-    constant: Union[bool, st.SearchStrategy[bool]] = st.booleans(),
-    include_grad: Union[bool, st.SearchStrategy[bool]] = False,
-    grad_dtype: Optional[Any] = None,
-    grad_elements_bounds: Optional[Tuple[int, int]] = None,
-    read_only: Union[bool, st.SearchStrategy[bool]] = False,
+    constant: bool | st.SearchStrategy[bool] = st.booleans(),
+    include_grad: bool | st.SearchStrategy[bool] = False,
+    grad_dtype: Any | None = None,
+    grad_elements_bounds: tuple[int, int] | None = None,
+    read_only: bool | st.SearchStrategy[bool] = False,
 ) -> Tensor:
     r"""Returns a strategy for generating :class:`mygrad:mygrad.Tensor`\ s.
 
@@ -375,7 +376,7 @@ def choices(seq, size, replace=True):
     ).map(lambda x: tuple(seq[i] for i in x))
 
 
-def _to_positive(x: Union[int, Iterable], ndim: int) -> Union[int, Tuple[int, ...]]:
+def _to_positive(x: int | Iterable, ndim: int) -> int | tuple[int, ...]:
     if hasattr(x, "__iter__"):
         return tuple(_to_positive(i, ndim) for i in x)
     return x if -1 < x else ndim + x
@@ -388,8 +389,8 @@ def valid_axes(
     permit_none: bool = True,
     permit_int: bool = True,
     min_dim: int = 0,
-    max_dim: Optional[int] = None,
-) -> st.SearchStrategy[Union[None, int, Tuple[int, ...]]]:
+    max_dim: int | None = None,
+) -> st.SearchStrategy[None | int | tuple[int, ...]]:
     """Hypothesis search strategy: Given array dimensionality, generate valid
     `axis` arguments (including `None`) for numpy's sequential functions.
 
@@ -546,7 +547,7 @@ def adv_integer_index(
     max_dims: int = 3,
     min_side: int = 1,
     max_side: int = 3,
-) -> st.SearchStrategy[Tuple[ndarray, ...]]:
+) -> st.SearchStrategy[tuple[ndarray, ...]]:
     """Hypothesis search strategy: given an array shape, generate a
     a valid index for specifying an element/subarray of that array,
     using advanced indexing with integer-valued arrays.
@@ -585,7 +586,7 @@ def adv_integer_index(
 
 
 @lru_cache(maxsize=1000)
-def _factors(n: int) -> List[int]:
+def _factors(n: int) -> list[int]:
     """Returns the divisors of n
 
     >>> _factors(4)
@@ -599,7 +600,7 @@ def _factors(n: int) -> List[int]:
 @st.composite
 def valid_shapes(
     draw, size: int, min_len: int = 1, max_len: int = 6
-) -> st.SearchStrategy[Union[int, Tuple[int, ...]]]:
+) -> st.SearchStrategy[int | tuple[int, ...]]:
     """Given an array's size, generate a compatible random shape
 
     Parameters
@@ -637,7 +638,7 @@ def valid_shapes(
 
 
 @st.composite
-def arbitrary_indices(draw, shape: Tuple[int]):
+def arbitrary_indices(draw, shape: tuple[int]):
     """
     Hypothesis search strategy: Generate a valid index
     for an array of a given shape. The index can contain
@@ -797,7 +798,7 @@ def arbitrary_indices(draw, shape: Tuple[int]):
 
 
 @st.composite
-def valid_constant_arg(draw, dtype: DTypeLike) -> st.SearchStrategy[Union[None, bool]]:
+def valid_constant_arg(draw, dtype: DTypeLike) -> st.SearchStrategy[None | bool]:
     if issubclass(np.dtype(dtype).type, np.floating):
         return draw(st.none() | st.booleans())
     else:
@@ -826,8 +827,8 @@ def _broadcast_shapes(*shapes):
 @st.composite
 def populates_ufunc(
     draw: st.DrawFn,
-    ufunc: Union[MyGradUnaryUfunc, MyGradBinaryUfunc],
-    arg_index_to_elements: Optional[Mapping[int, st.SearchStrategy]] = None,
+    ufunc: MyGradUnaryUfunc | MyGradBinaryUfunc,
+    arg_index_to_elements: Mapping[int, st.SearchStrategy] | None = None,
     include_where: bool = True,
     tensor_only: bool = False,
     use_ufunc_signature: bool = False,

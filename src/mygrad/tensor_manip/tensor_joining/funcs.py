@@ -1,4 +1,4 @@
-from typing import Optional, Sequence, Union
+from collections.abc import Sequence
 
 from numpy import ndarray
 
@@ -13,11 +13,11 @@ __all__ = ["concatenate", "stack"]
 @implements_numpy_override()
 def concatenate(
     tensors: Sequence[ArrayLike],
-    axis: Optional[int] = 0,
-    out: Optional[Union[ndarray, Tensor]] = None,
-    dtype: Optional[DTypeLikeReals] = None,
+    axis: int | None = 0,
+    out: ndarray | Tensor | None = None,
+    dtype: DTypeLikeReals | None = None,
     *,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:
     """
     concatenate((t1, t2, ...), axis=0, out=None, *, constant=None)
@@ -101,9 +101,9 @@ def concatenate(
 def stack(
     tensors: Sequence[ArrayLike],
     axis: int = 0,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:
     """
     stack((t1, t2, ...), axis=0, out=None, *, constant=None)

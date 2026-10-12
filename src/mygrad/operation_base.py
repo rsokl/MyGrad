@@ -4,7 +4,7 @@ gradients to their input tensors."""
 
 from abc import ABC, abstractmethod
 from numbers import Real
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Optional
 
 import numpy as np
 
@@ -25,7 +25,7 @@ __all__ = [
     "Sequential",
 ]
 
-Axis = Optional[Union[int, Tuple[int, ...]]]
+Axis = Optional[int | tuple[int, ...]]
 
 
 class _NoValueType:
@@ -41,7 +41,7 @@ class _NoValueType:
     def __new__(cls):
         # ensure that only one instance exists
         if not cls.__instance:
-            cls.__instance = super(_NoValueType, cls).__new__(cls)
+            cls.__instance = super().__new__(cls)
         return cls.__instance
 
     def __repr__(self):  # pragma: no cover
@@ -75,20 +75,20 @@ class Operation(ABC):
     can_return_view: bool = False
 
     # Stores the input tensors that the operation will backprop through.
-    variables: Tuple["Tensor", ...]
+    variables: tuple["Tensor", ...]
 
     def __init__(self):
         # Stores positional and keyword arguments used to call op.
         # Can be set optionally - only if op needs to be "replayed",
         # e.g. with a view
-        self.replay_args: Optional[Tuple[Any, ...]] = None
-        self.replay_kwargs: Optional[Dict[str, Any]] = None
-        self.replay_force_constant: Optional[bool] = None
+        self.replay_args: tuple[Any, ...] | None = None
+        self.replay_kwargs: dict[str, Any] | None = None
+        self.replay_force_constant: bool | None = None
         self.where: Mask = True
 
     @staticmethod
     def grad_post_process_fn(
-        grad: np.ndarray, var_shape: Tuple[int, ...]
+        grad: np.ndarray, var_shape: tuple[int, ...]
     ) -> np.ndarray:
         # this function gets called all of the time; we can avoid
         # the extra function call by doing the shape check upfront
@@ -259,7 +259,7 @@ class UnaryUfunc(Ufunc, ABC):
     def __call__(
         self,
         x1: "Tensor",
-        out: Optional[np.ndarray] = None,
+        out: np.ndarray | None = None,
         *,
         where: Mask = True,
         dtype: DTypeLike = None,
@@ -301,7 +301,7 @@ class UnaryUfunc(Ufunc, ABC):
         ----------
         .. [1] Retrieved from https://numpy.org/doc/stable/reference/generated/numpy.sqrt.html
         """
-        self.variables: Tuple["Tensor"] = (x1,)
+        self.variables: tuple[Tensor] = (x1,)
         if where is not True:
             self.where = where
         return self.numpy_ufunc(x1.data, out=out, where=where, dtype=dtype)
@@ -317,7 +317,7 @@ class BinaryUfunc(Ufunc, ABC):
         self,
         x1: "Tensor",
         x2: "Tensor",
-        out: Optional[np.ndarray] = None,
+        out: np.ndarray | None = None,
         *,
         where: Mask = True,
         dtype: DTypeLike = None,
@@ -369,7 +369,7 @@ class BinaryUfunc(Ufunc, ABC):
         .. [1] https://numpy.org/doc/stable/user/basics.broadcasting.html
         .. [2] Retrieved from https://numpy.org/doc/stable/reference/generated/numpy.add.html
         """
-        self.variables: Tuple["Tensor", "Tensor"] = (x1, x2)
+        self.variables: tuple[Tensor, Tensor] = (x1, x2)
         if where is not True and where is not _NoValue:
             self.where = where
             return self.numpy_ufunc(x1.data, x2.data, out=out, where=where, dtype=dtype)
@@ -388,9 +388,9 @@ class Sequential(Operation, ABC):
     @abstractmethod
     def numpy_func(
         a: np.ndarray,
-        axis: Optional[Union[int, Tuple[int, ...]]] = None,
+        axis: int | tuple[int, ...] | None = None,
         dtype: DTypeLike = None,
-        out: Optional[np.ndarray] = None,
+        out: np.ndarray | None = None,
         *args,
         **kwargs,
     ) -> np.ndarray:
@@ -398,9 +398,9 @@ class Sequential(Operation, ABC):
 
     def __init__(self):
         self.axis: Axis
-        self.keepdims: Optional[bool]
+        self.keepdims: bool | None
         self.initial: Real
-        self.out_shape: Tuple[int, ...]
+        self.out_shape: tuple[int, ...]
         super().__init__()
 
     def __call__(
@@ -408,14 +408,14 @@ class Sequential(Operation, ABC):
         a: "Tensor",
         axis: Axis = None,
         dtype=None,
-        out: Optional[np.ndarray] = None,
+        out: np.ndarray | None = None,
         keepdims: bool = _NoValue,
         initial: Real = _NoValue,
         *,
-        where: Union[bool, np.ndarray] = _NoValue,
+        where: bool | np.ndarray = _NoValue,
         ddof: int = _NoValue,
     ) -> np.ndarray:
-        self.variables: Tuple["Tensor"] = (a,)
+        self.variables: tuple[Tensor] = (a,)
 
         if where is not True and where is not _NoValue:
             self.where = where

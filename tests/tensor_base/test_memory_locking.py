@@ -1,4 +1,5 @@
-from typing import Callable, ContextManager, List, Union
+from collections.abc import Callable
+from typing import ContextManager
 
 import hypothesis.strategies as st
 import numpy as np
@@ -19,7 +20,7 @@ from tests.conftest import COVERAGE_MODE
 from tests.custom_strategies import tensors
 
 
-def writeable(x: Union[np.ndarray, Tensor]) -> bool:
+def writeable(x: np.ndarray | Tensor) -> bool:
     if isinstance(x, Tensor):
         x = x.data
     return x.flags.writeable
@@ -55,7 +56,7 @@ def test_memory_locks_with_multiple_inputs(
     """
     was_writeable = {id(i.data): writeable(i) for i in [x, y]}
 
-    def writeable_lookup(a: Union[Tensor, np.ndarray]) -> bool:
+    def writeable_lookup(a: Tensor | np.ndarray) -> bool:
         if isinstance(a, Tensor):
             a = a.data
         if a.base is not None:
@@ -421,7 +422,7 @@ def mem_on():
 
 @pytest.mark.usefixtures("seal_memguard")
 @given(st.lists(st.sampled_from([mem_on, mem_off])))
-def test_turn_memory_guarding_on_off(calls: List[Callable]):
+def test_turn_memory_guarding_on_off(calls: list[Callable]):
     """
     Call arbitrary sequency off mem-guard on/off;
     Ensure mem_guard_active always matches MEM_GUARD

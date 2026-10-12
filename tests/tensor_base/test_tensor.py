@@ -432,7 +432,7 @@ def test_comparison_ops(
     )
     x = Tensor(x, constant=x_constant)
     y = Tensor(y, constant=y_constant)
-    assert hasattr(Tensor, op), "`Tensor` is missing the attribute {}".format(op)
+    assert hasattr(Tensor, op), f"`Tensor` is missing the attribute {op}"
     tensor_out = getattr(Tensor, op)(x, y)
     array_out = getattr(np.ndarray, op)(x.data, y.data)
     assert_equal(actual=tensor_out, desired=array_out)
@@ -551,10 +551,9 @@ def test_clear_graph(x, y, z):
 # for more details. This checks to make sure that anyone who does so will get an
 # error. See also https://github.com/rsokl/MyGrad/pull/276
 def test_no_hash():
-    try:
+    # Python 3.15+ words this as "cannot use 'Tensor' as a dict key (unhashable type: 'Tensor')"
+    with pytest.raises(TypeError, match="unhashable type: 'Tensor'"):
         {Tensor(3): "this should not work"}
-    except TypeError as e:
-        assert str(e) == "unhashable type: 'Tensor'"
 
 
 @given(

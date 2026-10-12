@@ -1,5 +1,3 @@
-from typing import Optional, Union
-
 from numpy import ndarray
 
 from mygrad.tensor_base import Tensor
@@ -26,11 +24,11 @@ __all__ = [
 @ufunc_creator(Sinh)
 def sinh(
     x: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     """Hyperbolic sine, element-wise.
 
@@ -111,11 +109,11 @@ def sinh(
 @ufunc_creator(Cosh)
 def cosh(
     x: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     """Hyperbolic cosine, element-wise.
 
@@ -193,11 +191,11 @@ def cosh(
 @ufunc_creator(Tanh)
 def tanh(
     x: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     """Hyperbolic tangent, element-wise.
 
@@ -283,11 +281,11 @@ def tanh(
 @ufunc_creator(Arcsinh)
 def arcsinh(
     x: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     """Inverse hyperbolic sine, element-wise.
 
@@ -373,11 +371,11 @@ def arcsinh(
 @ufunc_creator(Arccosh)
 def arccosh(
     x: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     """Inverse hyperbolic cosine, element-wise.
 
@@ -469,11 +467,11 @@ def arccosh(
 @ufunc_creator(Arctanh)
 def arctanh(
     x: ArrayLike,
-    out: Optional[Union[ndarray, Tensor]] = None,
+    out: ndarray | Tensor | None = None,
     *,
     where: Mask = True,
     dtype: DTypeLikeReals = None,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:  # pragma: no cover
     """Inverse hyperbolic tangent, element-wise.
 

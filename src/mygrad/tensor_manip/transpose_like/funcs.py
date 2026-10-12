@@ -1,5 +1,3 @@
-from typing import Optional, Tuple, Union
-
 from mygrad.tensor_base import Tensor, implements_numpy_override
 from mygrad.typing import ArrayLike
 
@@ -9,7 +7,7 @@ __all__ = ["transpose", "moveaxis", "swapaxes", "roll"]
 
 
 @implements_numpy_override()
-def transpose(a: ArrayLike, *axes: int, constant: Optional[bool] = None) -> Tensor:
+def transpose(a: ArrayLike, *axes: int, constant: bool | None = None) -> Tensor:
     """Permute the dimensions of a tensor.
 
     Parameters
@@ -66,10 +64,10 @@ def transpose(a: ArrayLike, *axes: int, constant: Optional[bool] = None) -> Tens
 @implements_numpy_override()
 def moveaxis(
     a: ArrayLike,
-    source: Union[int, Tuple[int, ...]],
-    destination: Union[int, Tuple[int, ...]],
+    source: int | tuple[int, ...],
+    destination: int | tuple[int, ...],
     *,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:
     """Move axes of a tensor to new positions. Other axes remain in their
     original order.
@@ -116,7 +114,7 @@ def moveaxis(
 
 @implements_numpy_override()
 def swapaxes(
-    a: ArrayLike, axis1: int, axis2: int, *, constant: Optional[bool] = None
+    a: ArrayLike, axis1: int, axis2: int, *, constant: bool | None = None
 ) -> Tensor:
     """Interchange two axes of a tensor.
 
@@ -171,10 +169,10 @@ def swapaxes(
 @implements_numpy_override()
 def roll(
     a: ArrayLike,
-    shift: Union[int, Tuple[int, ...]],
+    shift: int | tuple[int, ...],
     axis=None,
     *,
-    constant: Optional[bool] = None,
+    constant: bool | None = None,
 ) -> Tensor:
     """
     Roll tensor elements along a given axis.

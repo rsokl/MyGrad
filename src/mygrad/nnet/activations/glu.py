@@ -1,5 +1,3 @@
-from typing import Optional
-
 from numpy import ndarray
 
 from mygrad.math.arithmetic.funcs import multiply
@@ -9,7 +7,7 @@ from mygrad.typing import ArrayLike
 from .sigmoid import sigmoid
 
 
-def glu(x: ArrayLike, axis: int = -1, *, constant: Optional[bool] = None) -> Tensor:
+def glu(x: ArrayLike, axis: int = -1, *, constant: bool | None = None) -> Tensor:
     """Returns the Gated Linear Unit A * σ(B), where A and B are split from `x`.
 
     Parameters

@@ -1,10 +1,26 @@
 version: 2
 updates:
-  - package-ecosystem: "github-actions" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  # Actions are pinned to commit SHAs; Dependabot updates the SHA and its version comment.
+  - package-ecosystem: "github-actions"
+    directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+    groups:
+      github-actions:
+        patterns:
+          - "*"
   - package-ecosystem: "pip"
     directory: "/docs/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
+  # the hash-pinned tools used to build releases
+  - package-ecosystem: "pip"
+    directory: "/deps/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7

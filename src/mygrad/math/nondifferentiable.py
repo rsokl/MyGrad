@@ -1,5 +1,3 @@
-from typing import Optional, Tuple, Union
-
 import numpy as np
 
 from mygrad.tensor_base import Tensor, implements_numpy_override
@@ -10,7 +8,7 @@ __all__ = ["any", "argmin", "argmax"]
 
 @implements_numpy_override()
 def argmax(
-    a: ArrayLike, axis: Optional[int] = None, out: Optional[np.ndarray] = None
+    a: ArrayLike, axis: int | None = None, out: np.ndarray | None = None
 ) -> np.ndarray:
     """Returns the indices of the maximum values along an axis.
 
@@ -34,7 +32,7 @@ def argmax(
 
 @implements_numpy_override()
 def argmin(
-    a: ArrayLike, axis: Optional[int] = None, out: Optional[np.ndarray] = None
+    a: ArrayLike, axis: int | None = None, out: np.ndarray | None = None
 ) -> np.ndarray:
     """Returns the indices of the minimum values along an axis.
 
@@ -59,8 +57,8 @@ def argmin(
 @implements_numpy_override()
 def any(
     a: ArrayLike,
-    axis: Optional[Union[int, Tuple[int, ...]]] = None,
-    out: Optional[np.ndarray] = None,
+    axis: int | tuple[int, ...] | None = None,
+    out: np.ndarray | None = None,
     keepdims: bool = False,
 ) -> np.ndarray:
     """Test whether any array or Tensor element along a given axis evaluates to True.

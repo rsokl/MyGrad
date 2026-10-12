@@ -1,4 +1,4 @@
-from typing import Callable, List, Tuple
+from collections.abc import Callable
 
 import hypothesis.strategies as st
 from hypothesis import given, settings
@@ -130,7 +130,7 @@ class GraphDuplicationCompare(RuleBasedStateMachine):
     def __init__(self):
         super().__init__()
         self.base = mg.arange(6.0)
-        self.node_list: List[int] = [id(self.base)]
+        self.node_list: list[int] = [id(self.base)]
         self.parent_child_pairs = set()
 
     nodes = Bundle("nodes")
@@ -159,7 +159,7 @@ class GraphDuplicationCompare(RuleBasedStateMachine):
 
     def teardown(self):
         graph = DuplicatingGraph(self.base)
-        iter_nodes: Tuple[Node, ...] = tuple(graph)
+        iter_nodes: tuple[Node, ...] = tuple(graph)
 
         assert sorted(id(t.tensor) for t in iter_nodes) == sorted(self.node_list)
 

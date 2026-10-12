@@ -1,6 +1,6 @@
 [build-system]
 requires = [
-       "setuptools >= 35.0.2",
+       "setuptools >= 77.0.3",
        "wheel >= 0.29.0",
        "setuptools_scm[toml]==7.0.5",
 ]
@@ -11,9 +11,10 @@ name = "mygrad"
 dynamic = ["version"]
 description = "Drop-in automatic differentiation to NumPy"
 readme = "README.md"
-requires-python = ">=3.9"
-dependencies = ["numpy >= 1.24, !=1.25.0", "typing-extensions >= 4.1.0, !=4.6.0"]
-license = { text = "MIT" }
+requires-python = ">=3.11"
+dependencies = ["numpy >= 1.24, !=1.25.0"]
+license = "MIT"
+license-files = ["LICENSE.txt"]
 
 authors = [
        { name = "Ryan Soklaski", email = "rsoklaski@gmail.com" },
@@ -22,16 +23,16 @@ maintainers = [{ name = "Ryan Soklaski", email = "rsoklaski@gmail.com" }]
 
 classifiers = [
     "Development Status :: 5 - Production/Stable",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Intended Audience :: Science/Research",
     "Intended Audience :: Education",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
     "Topic :: Scientific/Engineering",
 ]
 
@@ -83,14 +84,15 @@ ignore-words-list = ["ND","nd","nin","dout"]
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py39,py310,py311,py312,format,min_numpy
+envlist = py311,py312,py313,py314,py315,format,min_numpy
 
 [gh-actions]
 python =
-  3.9: py39
-  3.10: py310
   3.11: py311
   3.12: py312
+  3.13: py313
+  3.14: py314
+  3.15: py315
 
 [testenv]
 deps =
@@ -106,28 +108,7 @@ extras = rnn
 [testenv:min_numpy]
 deps = numpy==1.24
        {[testenv]deps}
-basepython = python3.9
-commands = pytest -n auto --hypothesis-profile ci \
-           {posargs}
-extras =
-
-[testenv:py310]
-deps = {[testenv]deps}
-commands = pytest -n auto --hypothesis-profile ci \
-           {posargs}
-extras =
-
-[testenv:py311]
-deps = {[testenv]deps}
-commands = pytest -n auto --hypothesis-profile ci \
-           {posargs}
-extras =
-
-[testenv:py312]  # exclude numba dependency for now
-deps = pytest
-       pytest-xdist
-       hypothesis
-       scipy
+basepython = python3.11
 commands = pytest -n auto --hypothesis-profile ci \
            {posargs}
 extras =
@@ -137,7 +118,7 @@ extras =
 setenv = NUMBA_DISABLE_JIT=1
          MYGRAD_COVERAGE_MODE=1
 usedevelop = true
-basepython = python3.10
+basepython = python3.13
 deps = {[testenv]deps}
        coverage
        pytest-cov
@@ -161,7 +142,7 @@ deps = pytest
        hypothesis
        scipy
        pytest-xdist
-basepython = python3.11
+basepython = python3.15
 commands = pytest -n auto --hypothesis-profile ci \
            {posargs}
 extras =

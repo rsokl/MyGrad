@@ -1,5 +1,3 @@
-from typing import Union
-
 import hypothesis.strategies as st
 import numpy as np
 import pytest
@@ -11,7 +9,7 @@ from mygrad.tensor_base import Tensor
 from tests.utils.checkers import expected_constant
 
 
-def _check_grad(t: mg.Tensor, expr: Union[None, np.ndarray, float]):
+def _check_grad(t: mg.Tensor, expr: None | np.ndarray | float):
     if t.constant:
         assert t.grad is None
     else:

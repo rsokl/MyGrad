@@ -1,7 +1,7 @@
 import warnings
 from collections import defaultdict
+from collections.abc import Hashable
 from functools import partial
-from typing import Dict, Hashable, Optional, Union
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
@@ -81,7 +81,7 @@ valid_exp2_inputs = st.floats(
 
 # Specifies the domain from which ufunc numerical inputs are drawn to test fwd-prop.
 # These are generally meant to match the true domain for the given function.
-FWD_DOMAINS: Dict[Hashable, Optional[Dict[int, st.SearchStrategy]]] = defaultdict(
+FWD_DOMAINS: dict[Hashable, dict[int, st.SearchStrategy] | None] = defaultdict(
     lambda: None
 )
 FWD_DOMAINS[mg.arccos] = {0: st.floats(-1, 1, exclude_min=True, exclude_max=True)}
@@ -124,7 +124,7 @@ FWD_DOMAINS[mg.cbrt] = {1: st.floats(min_value=1e-9, max_value=1e9)}
 @given(data=st.data())
 def test_ufunc_fwd(
     data: st.DataObject,
-    ufunc: Union[MyGradUnaryUfunc, MyGradBinaryUfunc],
+    ufunc: MyGradUnaryUfunc | MyGradBinaryUfunc,
 ):
     """
     Checks:
@@ -177,7 +177,7 @@ easy_log_domain = st.floats(min_value=1e-6, max_value=1e10)
 # Specifies the domain from which ufunc numerical inputs are drawn to test fwd-prop.
 # These are tailored to ensure that the resulting derivatives can be checked against
 # numerical approximations in a reliable way
-BKWD_DOMAINS: Dict[Hashable, Optional[Dict[int, st.SearchStrategy]]] = defaultdict(
+BKWD_DOMAINS: dict[Hashable, dict[int, st.SearchStrategy] | None] = defaultdict(
     lambda: None
 )
 BKWD_DOMAINS[mg.arccos] = {0: st.floats(-1, 1, exclude_min=True, exclude_max=True)}
@@ -221,7 +221,7 @@ BKWD_DOMAINS[mg.sqrt] = {0: st.floats(min_value=1e-5, max_value=1e6)}
 @given(data=st.data(), use_numpy_overload=st.booleans())
 def test_ufunc_bkwd(
     data: st.DataObject,
-    ufunc: Union[MyGradUnaryUfunc, MyGradBinaryUfunc],
+    ufunc: MyGradUnaryUfunc | MyGradBinaryUfunc,
     use_numpy_overload: bool,
 ):
     """

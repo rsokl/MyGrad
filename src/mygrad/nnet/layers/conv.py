@@ -1,5 +1,4 @@
 from numbers import Integral
-from typing import Optional, Tuple, Union
 
 import numpy as np
 
@@ -159,10 +158,10 @@ def conv_nd(
     x: ArrayLike,
     filter_bank: ArrayLike,
     *,
-    stride: Union[int, Tuple[int, ...]],
-    padding: Union[int, Tuple[int, ...]] = 0,
-    dilation: Union[int, Tuple[int, ...]] = 1,
-    constant: Optional[bool] = None,
+    stride: int | tuple[int, ...],
+    padding: int | tuple[int, ...] = 0,
+    dilation: int | tuple[int, ...] = 1,
+    constant: bool | None = None,
 ) -> Tensor:
     """Use ``filter_bank`` (``w``) to perform strided N-dimensional neural network-style
     convolutions (see Notes) over ``x``.::

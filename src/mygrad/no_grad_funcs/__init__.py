@@ -1,6 +1,6 @@
 import itertools
 import sys
-from typing import TYPE_CHECKING, Optional, Tuple, Union
+from typing import TYPE_CHECKING
 
 import numpy
 
@@ -84,7 +84,7 @@ if TYPE_CHECKING:  # pragma: no cover
         pass
 
     def bincount(
-        x: ArrayLike, weights: Optional[ArrayLike] = None, minlength: int = 0
+        x: ArrayLike, weights: ArrayLike | None = None, minlength: int = 0
     ) -> numpy.ndarray:
         pass
 
@@ -97,203 +97,201 @@ if TYPE_CHECKING:  # pragma: no cover
         pass
 
     def may_share_memory(
-        a: ArrayLike, b: ArrayLike, max_work: Optional[int] = None
+        a: ArrayLike, b: ArrayLike, max_work: int | None = None
     ) -> bool:
         pass
 
     def min_scalar_type(a: ArrayLike) -> numpy.dtype:
         pass
 
-    def result_type(*arrays_and_dtypes: Union[ArrayLike, numpy.dtype]) -> numpy.dtype:
+    def result_type(*arrays_and_dtypes: ArrayLike | numpy.dtype) -> numpy.dtype:
         pass
 
-    def shares_memory(
-        a: ArrayLike, b: ArrayLike, max_work: Optional[int] = None
-    ) -> bool:
+    def shares_memory(a: ArrayLike, b: ArrayLike, max_work: int | None = None) -> bool:
         pass
 
-    def shape(a: ArrayLike) -> Tuple[int, ...]:
+    def shape(a: ArrayLike) -> tuple[int, ...]:
         pass
 
     def isnan(
         x: ArrayLike,
-        out: Optional[ArrayLike] = None,
+        out: ArrayLike | None = None,
         *,
         casting: str = "same_kind",
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
         subok: bool = True,
-    ) -> Union[numpy.ndarray, bool]: ...
+    ) -> numpy.ndarray | bool: ...
 
     def isfinite(
         x: ArrayLike,
-        out: Optional[ArrayLike] = None,
+        out: ArrayLike | None = None,
         *,
         casting: str = "same_kind",
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
         subok: bool = True,
-    ) -> Union[numpy.ndarray, bool]: ...
+    ) -> numpy.ndarray | bool: ...
 
     def isinf(
         x: ArrayLike,
-        out: Optional[ArrayLike] = None,
+        out: ArrayLike | None = None,
         *,
         casting: str = "same_kind",
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
         subok: bool = True,
-    ) -> Union[numpy.ndarray, bool]: ...
+    ) -> numpy.ndarray | bool: ...
 
     def isnat(
         x: ArrayLike,
-        out: Optional[ArrayLike] = None,
+        out: ArrayLike | None = None,
         *,
         casting: str = "same_kind",
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
         subok: bool = True,
-    ) -> Union[numpy.ndarray, bool]: ...
+    ) -> numpy.ndarray | bool: ...
 
     def signbit(
         x: ArrayLike,
-        out: Optional[ArrayLike] = None,
+        out: ArrayLike | None = None,
         *,
         casting: str = "same_kind",
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
         subok: bool = True,
-    ) -> Union[numpy.ndarray, bool]: ...
+    ) -> numpy.ndarray | bool: ...
 
     def logical_not(
         x1: ArrayLike,
         x2: ArrayLike,
-        out: Optional[ArrayLike] = None,
+        out: ArrayLike | None = None,
         *,
         casting: str = "same_kind",
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
         subok: bool = True,
-    ) -> Union[numpy.ndarray, bool]: ...
+    ) -> numpy.ndarray | bool: ...
 
     def logical_and(
         x1: ArrayLike,
         x2: ArrayLike,
-        out: Optional[ArrayLike] = None,
+        out: ArrayLike | None = None,
         *,
         casting: str = "same_kind",
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
         subok: bool = True,
-    ) -> Union[numpy.ndarray, bool]: ...
+    ) -> numpy.ndarray | bool: ...
 
     def logical_or(
         x1: ArrayLike,
         x2: ArrayLike,
-        out: Optional[ArrayLike] = None,
+        out: ArrayLike | None = None,
         *,
         casting: str = "same_kind",
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
         subok: bool = True,
-    ) -> Union[numpy.ndarray, bool]: ...
+    ) -> numpy.ndarray | bool: ...
 
     def logical_xor(
         x1: ArrayLike,
         x2: ArrayLike,
-        out: Optional[ArrayLike] = None,
+        out: ArrayLike | None = None,
         *,
         casting: str = "same_kind",
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
         subok: bool = True,
-    ) -> Union[numpy.ndarray, bool]: ...
+    ) -> numpy.ndarray | bool: ...
 
     def greater(
         x1: ArrayLike,
         x2: ArrayLike,
-        out: Optional[ArrayLike] = None,
+        out: ArrayLike | None = None,
         *,
         casting: str = "same_kind",
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
         subok: bool = True,
-    ) -> Union[numpy.ndarray, bool]: ...
+    ) -> numpy.ndarray | bool: ...
 
     def greater_equal(
         x1: ArrayLike,
         x2: ArrayLike,
-        out: Optional[ArrayLike] = None,
+        out: ArrayLike | None = None,
         *,
         casting: str = "same_kind",
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
         subok: bool = True,
-    ) -> Union[numpy.ndarray, bool]: ...
+    ) -> numpy.ndarray | bool: ...
 
     def less(
         x1: ArrayLike,
         x2: ArrayLike,
-        out: Optional[ArrayLike] = None,
+        out: ArrayLike | None = None,
         *,
         casting: str = "same_kind",
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
         subok: bool = True,
-    ) -> Union[numpy.ndarray, bool]: ...
+    ) -> numpy.ndarray | bool: ...
 
     def less_equal(
         x1: ArrayLike,
         x2: ArrayLike,
-        out: Optional[ArrayLike] = None,
+        out: ArrayLike | None = None,
         *,
         casting: str = "same_kind",
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
         subok: bool = True,
-    ) -> Union[numpy.ndarray, bool]: ...
+    ) -> numpy.ndarray | bool: ...
 
     def equal(
         x1: ArrayLike,
         x2: ArrayLike,
-        out: Optional[ArrayLike] = None,
+        out: ArrayLike | None = None,
         *,
         casting: str = "same_kind",
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
         subok: bool = True,
-    ) -> Union[numpy.ndarray, bool]: ...
+    ) -> numpy.ndarray | bool: ...
 
     def not_equal(
         x1: ArrayLike,
         x2: ArrayLike,
-        out: Optional[ArrayLike] = None,
+        out: ArrayLike | None = None,
         *,
         casting: str = "same_kind",
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
         subok: bool = True,
-    ) -> Union[numpy.ndarray, bool]: ...
+    ) -> numpy.ndarray | bool: ...
 
     def floor_divide(
         x1: ArrayLike,
         x2: ArrayLike,
-        out: Optional[ArrayLike] = None,
+        out: ArrayLike | None = None,
         *,
         casting: str = "same_kind",
         where: Mask = True,
@@ -305,7 +303,7 @@ if TYPE_CHECKING:  # pragma: no cover
     def remainder(
         x1: ArrayLike,
         x2: ArrayLike,
-        out: Optional[ArrayLike] = None,
+        out: ArrayLike | None = None,
         *,
         casting: str = "same_kind",
         where: Mask = True,
@@ -317,42 +315,42 @@ if TYPE_CHECKING:  # pragma: no cover
     def divmod(
         x1: ArrayLike,
         x2: ArrayLike,
-        out: Optional[ArrayLike] = None,
+        out: ArrayLike | None = None,
         *,
         casting: str = "same_kind",
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
         subok: bool = True,
-    ) -> Tuple[numpy.ndarray, numpy.ndarray]: ...
+    ) -> tuple[numpy.ndarray, numpy.ndarray]: ...
 
     def mod(
         x1: ArrayLike,
         x2: ArrayLike,
-        out: Optional[ArrayLike] = None,
+        out: ArrayLike | None = None,
         *,
         casting: str = "same_kind",
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
         subok: bool = True,
-    ) -> Tuple[numpy.ndarray, numpy.ndarray]: ...
+    ) -> tuple[numpy.ndarray, numpy.ndarray]: ...
 
     def fmod(
         x1: ArrayLike,
         x2: ArrayLike,
-        out: Optional[ArrayLike] = None,
+        out: ArrayLike | None = None,
         *,
         casting: str = "same_kind",
         where: Mask = True,
         order: str = "K",
         dtype: DTypeLike = None,
         subok: bool = True,
-    ) -> Tuple[numpy.ndarray, numpy.ndarray]: ...
+    ) -> tuple[numpy.ndarray, numpy.ndarray]: ...
 
     def rint(
         x: ArrayLike,
-        out: Optional[ArrayLike] = None,
+        out: ArrayLike | None = None,
         *,
         casting: str = "same_kind",
         where: Mask = True,
@@ -363,7 +361,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
     def sign(
         x: ArrayLike,
-        out: Optional[ArrayLike] = None,
+        out: ArrayLike | None = None,
         *,
         casting: str = "same_kind",
         where: Mask = True,
@@ -374,7 +372,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
     def floor(
         x: ArrayLike,
-        out: Optional[ArrayLike] = None,
+        out: ArrayLike | None = None,
         *,
         casting: str = "same_kind",
         where: Mask = True,
@@ -385,7 +383,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
     def ceil(
         x: ArrayLike,
-        out: Optional[ArrayLike] = None,
+        out: ArrayLike | None = None,
         *,
         casting: str = "same_kind",
         where: Mask = True,
@@ -396,7 +394,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
     def trunc(
         x: ArrayLike,
-        out: Optional[ArrayLike] = None,
+        out: ArrayLike | None = None,
         *,
         casting: str = "same_kind",
         where: Mask = True,

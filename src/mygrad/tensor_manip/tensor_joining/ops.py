@@ -1,5 +1,5 @@
 from itertools import accumulate
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import numpy as np
 
@@ -16,8 +16,8 @@ class Concatenate(Operation):
     def __call__(
         self,
         *input_vars: "Tensor",
-        axis: Optional[int] = 0,
-        out: Optional[np.ndarray] = None,
+        axis: int | None = 0,
+        out: np.ndarray | None = None,
         dtype=None,
     ) -> np.ndarray:
         kwargs = {"out": out, "axis": axis}
@@ -67,7 +67,7 @@ class Stack(Operation):
         self,
         *input_vars: "Tensor",
         axis: int = 0,
-        out: Optional[np.ndarray] = None,
+        out: np.ndarray | None = None,
     ) -> np.ndarray:
         out = np.stack(tuple(var.data for var in input_vars), axis=axis, out=out)
 

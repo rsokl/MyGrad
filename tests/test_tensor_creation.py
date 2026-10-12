@@ -1,6 +1,6 @@
+from collections.abc import Callable
 from copy import deepcopy
 from functools import partial
-from typing import Callable, Union
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
@@ -311,9 +311,7 @@ def test_astensor_doesnt_mutate_input_tensor(
     dtype=st.none() | hnp.integer_dtypes() | hnp.floating_dtypes(),
     data=st.data(),
 )
-def test_as_tensor(
-    a: Union[np.ndarray, Tensor], as_list: bool, dtype, data: st.DataObject
-):
+def test_as_tensor(a: np.ndarray | Tensor, as_list: bool, dtype, data: st.DataObject):
     """Ensures `astensor` produces a tensor with the expected data, dtype, and constant,
     and that it doesn't mutate the input."""
     assume(~np.any(np.isnan(a)))

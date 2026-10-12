@@ -1,5 +1,3 @@
-from typing import Tuple
-
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
@@ -67,7 +65,7 @@ def simple_loss(x1, x2, y, margin):
     data=st.data(),
 )
 def test_ranked_margin(
-    shape: Tuple[int, ...], margin: float, labels_as_tensor: bool, data: st.DataObject
+    shape: tuple[int, ...], margin: float, labels_as_tensor: bool, data: st.DataObject
 ):
     x1 = data.draw(
         hnp.arrays(shape=shape, dtype=float, elements=st.floats(-1000, 1000)),
