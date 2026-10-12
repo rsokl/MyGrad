@@ -6,6 +6,32 @@ This is a record of all past mygrad releases and what went into them,
 in reverse chronological order. All previous releases should still be available
 on pip.
 
+.. _v2.4.0:
+
+------------------
+2.4.0 - 2026-10-12
+------------------
+
+Performance
+-----------
+
+- Graph construction and backpropagation have substantially less overhead: small-model training steps are 15-20% faster and individual tensor operations are up to ~34% faster. Memory-guard bookkeeping is also cheaper, with unchanged behavior. (:pull:`465`)
+- Two-operand :func:`~mygrad.einsum` contractions are computed via BLAS-backed matrix multiplication when beneficial, making contractions such as ``"bij,bjk->bik"`` 5-7.5x faster (forward and backward passes). (:pull:`466`)
+- The gradient for the matrix operand of a batched :func:`~mygrad.matmul` (e.g. ``(B, T, D) @ (D, K)``) is computed with a single matrix multiplication. (:pull:`465`)
+- Backpropagating through indexing (``x[i]``) no longer does work proportional to the size of all of ``x`` for each access; iterating over a tensor (e.g. over the time steps of a sequence) is no longer quadratic. (:pull:`467`)
+
+Bug Fixes
+---------
+
+- ``Tensor.backward()`` no longer raises ``RecursionError`` for computational graphs that are deeper than Python's recursion limit (~1000 operations). (:pull:`465`)
+- A tensor used in many operations without backpropagation (e.g. an inference loop) no longer becomes progressively slower to use. (:pull:`465`)
+- ``float(tensor)`` and ``int(tensor)`` work for size-1 tensors of any dimensionality under NumPy 2.4. (:pull:`458`)
+
+Development
+-----------
+
+- The format-check tools used in CI are now pinned. (:pull:`464`)
+
 .. _v2.3.0:
 
 ------------------
