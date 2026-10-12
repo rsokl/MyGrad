@@ -37,9 +37,13 @@ def mirror_tensor(*, target: "Tensor", source: "Tensor"):
 
 
 def reroute_ops_through(*, target: "Tensor", source: "Tensor"):
-    for op in source._ops:
+    # iterate over a snapshot: refs remove themselves from `_ops` when their op
+    # is garbage collected, which could otherwise happen mid-iteration
+    for op in tuple(source._ops):
         op = op()
-        if op is None:
+        if op is None:  # pragma: no cover
+            # refs remove themselves from `_ops` once their op is collected,
+            # so this only guards against the brief window before that runs
             continue
 
         op.variables = tuple(

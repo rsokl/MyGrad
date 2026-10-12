@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 
+import mygrad as mg
 from mygrad.operation_base import Operation
 from mygrad.tensor_base import Tensor
 
@@ -43,3 +44,18 @@ def test_op_wrapper_doesnt_make_copy_when_creating_output_tensor(
     y = Tensor([2.0], constant=y_const)
     out_tensor = dummy(x, y, constant=op_const)
     assert np.shares_memory(out_tensor, out_tensor.creator.array_out)
+
+
+def test_op_raises_for_non_bool_constant():
+    with pytest.raises(TypeError):
+        mg.add(1.0, 2.0, constant="yes")
+
+
+def test_op_raises_for_unsupported_input_dtype():
+    with pytest.raises(TypeError):
+        mg.add(np.array([1j]), 1.0)
+
+
+def test_op_raises_for_non_constant_integer_output():
+    with pytest.raises(ValueError):
+        mg.add(np.array([1]), np.array([2]), constant=False)

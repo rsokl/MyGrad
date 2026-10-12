@@ -175,8 +175,9 @@ class Operation(ABC):
             The back-propagated total derivative with respect to the present
             operation (`f`): d(out)/df
         """
+        where = self.where
         for index, var in enumerate(self.variables):
-            if var.constant:
+            if var._constant:
                 continue
 
             if not var._ops:
@@ -194,24 +195,29 @@ class Operation(ABC):
             except SkipGradient:
                 continue
 
-            if not isinstance(backed_grad, (np.ndarray, np.number, Real)):
-                raise InvalidGradient(
-                    f"An invalid gradient-value was passed to:"
-                    f"\n\t`{type(self).__name__}.backward_var(<gradient>, index={index})`"
-                    f"\nGradients are expected to be real-valued scalars or "
-                    f"numpy arrays, got a gradient of type: {type(backed_grad)}"
-                )
+            if type(backed_grad) is not np.ndarray:  # the common case is cheap
+                if not isinstance(backed_grad, (np.ndarray, np.number, Real)):
+                    raise InvalidGradient(
+                        f"An invalid gradient-value was passed to:"
+                        f"\n\t`{type(self).__name__}.backward_var(<gradient>, index={index})`"
+                        f"\nGradients are expected to be real-valued scalars or "
+                        f"numpy arrays, got a gradient of type: {type(backed_grad)}"
+                    )
 
-            if NP_IS_V2:
-                backed_grad = np.asarray(backed_grad)
-            else:  # pragma: no cover
-                backed_grad = np.array(backed_grad, copy=False)
+                if NP_IS_V2:
+                    backed_grad = np.asarray(backed_grad)
+                else:  # pragma: no cover
+                    backed_grad = np.array(backed_grad, copy=False)
 
-            if self.where is not True:
-                backed_grad = backed_grad * self.where
+            if where is not True:
+                backed_grad = backed_grad * where
 
-            backed_grad = self.grad_post_process_fn(backed_grad, var.shape)
-            assert backed_grad.shape == var.shape, (backed_grad.shape, var.shape)
+            var_data = var.data
+            backed_grad = self.grad_post_process_fn(backed_grad, var_data.shape)
+            assert backed_grad.shape == var_data.shape, (
+                backed_grad.shape,
+                var_data.shape,
+            )
             if var._grad is None:
                 backed_grad = (
                     np.copy(backed_grad)
@@ -220,8 +226,8 @@ class Operation(ABC):
                     if backed_grad.base is not None or (backed_grad is grad)
                     else backed_grad
                 )
-                if backed_grad.dtype != var.dtype:
-                    backed_grad = backed_grad.astype(var.dtype, copy=False)
+                if backed_grad.dtype != var_data.dtype:
+                    backed_grad = backed_grad.astype(var_data.dtype, copy=False)
 
                 var._grad = backed_grad
             else:

@@ -2,12 +2,11 @@
 Provides utilities responsible for locking/releasing array writeability.
 """
 
+import atexit
 import os
-from collections import Counter, defaultdict
-from typing import TYPE_CHECKING
-from typing import Counter as CounterType
-from typing import DefaultDict, Dict, Generator, Iterable, Set
-from weakref import finalize, ref
+from collections import defaultdict
+from typing import TYPE_CHECKING, DefaultDict, Dict, Iterable, Set
+from weakref import ref
 
 import numpy as np
 
@@ -18,7 +17,8 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 # arr-id -> num active ops involving arr
-_array_counter: CounterType[int] = Counter()
+# (a plain dict rather than a Counter: this is on the hot path of every op)
+_array_counter: Dict[int, int] = {}
 
 # arr-id -> weak-ref of arr, for arrays participating in live ops
 _array_tracker: Dict[int, WeakRef[np.ndarray]] = dict()
@@ -60,7 +60,8 @@ def lock_arr_writeability(arr: np.ndarray, force_lock: bool = False) -> np.ndarr
     numpy.ndarray
         The locked array"""
     arr_id = id(arr)
-    if not array_is_tracked(arr):
+    arr_ref = _array_tracker.get(arr_id)
+    if arr_ref is None or arr_ref() is None:  # `arr` is not tracked
         if (
             not force_lock
             and not arr.flags.writeable
@@ -73,36 +74,40 @@ def lock_arr_writeability(arr: np.ndarray, force_lock: bool = False) -> np.ndarr
         _array_tracker[arr_id] = ref(arr)
         _array_counter[arr_id] = 1
     else:
-        _array_counter[arr_id] += 1
+        # a view waiting on its base stays tracked without a counter entry
+        _array_counter[arr_id] = _array_counter.get(arr_id, 0) + 1
     if arr.flags.writeable is True:
         arr.flags.writeable = False
     return arr
 
 
-def unique_arrs_and_bases(
+def lock_arrs_of_tensors(
     tensors: Iterable["TensorType"],
-) -> Generator[np.ndarray, None, None]:
-    """
-    Yields unique (by-ID) arrays from an iterable. If an array
-    has a base, the base is yielded first (assuming that base
-    object has not already been yielded).
-    """
+) -> WeakRefIterable[np.ndarray]:
+    """Locks the unique (by-ID) arrays of ``tensors``, along with the bases of
+    any that are views, returning weak references to them in the order in which
+    their locks must be released.
+
+    A base array is locked - and thus released - before any of its views, so
+    that its writeability is restored first; only then can the views' be."""
+    locked: WeakRefIterable[np.ndarray] = WeakRefIterable()
+    refs = locked.data
     seen = set()
     for t in tensors:
         arr = t.data
         arr_id = id(arr)
-        if arr_id not in seen:
-            # important note!
-            # We must yield array bases first so that base's
-            # writeability is restored first.
-            # Then view's writeability can be restored
-            if arr.base is not None:
-                base_id = id(arr.base)
-                if base_id not in seen:
-                    seen.add(base_id)
-                    yield arr.base
-            seen.add(arr_id)
-            yield arr
+        if arr_id in seen:
+            continue
+        base = arr.base
+        if base is not None:
+            # a base must be locked (and thus released) before its views
+            base_id = id(base)
+            if base_id not in seen:
+                seen.add(base_id)
+                refs.append(ref(lock_arr_writeability(base)))
+        seen.add(arr_id)
+        refs.append(ref(lock_arr_writeability(arr)))
+    return locked
 
 
 def _release_lock_on_arr_writeability(arr: np.ndarray):
@@ -112,7 +117,7 @@ def _release_lock_on_arr_writeability(arr: np.ndarray):
     writeability restored.
     """
     arr_id = id(arr)
-    num_active_ops = _array_counter[arr_id]
+    num_active_ops = _array_counter.get(arr_id, 0)
 
     if num_active_ops == 1:
         # final active op involving array is being de-referenced:
@@ -137,9 +142,9 @@ def _release_lock_on_arr_writeability(arr: np.ndarray):
         _array_counter[arr_id] = num_active_ops - 1
 
     if (
-        arr.base is None
+        arr_id in _views_waiting_for_unlock  # cheapest, and usually False
+        and arr.base is None
         and arr.flags.writeable
-        and (arr_id in _views_waiting_for_unlock)
     ):
         # array was base of view waiting to be unlocked..
         #
@@ -149,7 +154,7 @@ def _release_lock_on_arr_writeability(arr: np.ndarray):
         #    or view can now get unlocked
         # under all conditions view will no longer be waiting to be unlocked
         for view_arr_id in tuple(_views_waiting_for_unlock[arr_id]):
-            if _array_counter[view_arr_id] > 0:
+            if _array_counter.get(view_arr_id, 0) > 0:
                 # view involved in new op
                 continue
 
@@ -189,6 +194,30 @@ def release_writeability_lock_on_op(arr_refs: WeakRefIterable[np.ndarray]):
         multiple times in the iterable."""
     for arr in arr_refs:
         _release_lock_on_arr_writeability(arr)
+
+
+# keeps the weakrefs made by `release_locks_when_collected` alive until they fire
+_pending_releases: Set[WeakRef] = set()
+
+# Discarding the weakrefs at exit means that their callbacks never fire during
+# interpreter shutdown, when the state that they touch may be partially torn
+# down. (Restoring array writeability at exit is moot.)
+atexit.register(_pending_releases.clear)
+
+
+def release_locks_when_collected(op: object, arr_refs: WeakRefIterable[np.ndarray]):
+    """Calls ``release_writeability_lock_on_op(arr_refs)`` once ``op`` is garbage
+    collected.
+
+    Like ``weakref.finalize(op, release_writeability_lock_on_op, arr_refs)``, minus
+    its extra machinery; this is called for every op, and is roughly twice as fast.
+    Pending releases are discarded, rather than run, at interpreter exit."""
+
+    def _release(op_ref: WeakRef):
+        _pending_releases.discard(op_ref)
+        release_writeability_lock_on_op(arr_refs)
+
+    _pending_releases.add(ref(op, _release))
 
 
 MEM_GUARD = os.environ.get("MYGRAD_MEM_GUARD", True)
@@ -387,15 +416,7 @@ def mem_guard_active() -> bool:
 
 
 def force_lock_tensor_and_creators(tensor: "TensorType"):
-    unique_arrs = tuple(
-        lock_arr_writeability(arr)
-        for arr in unique_arrs_and_bases(tensor.creator.variables)
-    )
+    tensor_refs = lock_arrs_of_tensors(tensor.creator.variables)
     lock_arr_writeability(tensor.data, force_lock=True)
-    tensor_refs = WeakRefIterable(unique_arrs)
     tensor_refs.append(tensor.data)
-    finalize(
-        tensor.creator,
-        release_writeability_lock_on_op,
-        tensor_refs,
-    )
+    release_locks_when_collected(tensor.creator, tensor_refs)
