@@ -1020,6 +1020,53 @@ class Tensor:
         return type(self)(cast_data, copy=False, constant=constant)
 
     @classmethod
+    def _wrap_op_data(
+        cls,
+        x: ArrayLike,
+        constant: Optional[bool],
+        _creator: Optional[Operation] = None,
+        _base: Optional["Tensor"] = None,
+    ) -> "Tensor":
+        """*dev use only*
+
+        Equivalent to ``cls(x, constant=constant, copy=False, _creator=_creator,
+        _base=_base)``, but skips the generic input handling of ``__init__``. This is
+        used for every op's inputs and output, and is several times faster."""
+        if cls.__init__ is not Tensor.__init__:  # pragma: no cover
+            # respect subclasses that customize initialization
+            return cls(x, constant=constant, copy=False, _creator=_creator, _base=_base)
+
+        if constant is not None and not isinstance(constant, bool):
+            raise TypeError(f"`constant` must be a boolean value, got: {constant}")
+
+        data = np.asarray(x)
+        dtype = data.dtype.type
+        is_float = issubclass(dtype, np.floating)
+        if not is_float and _track.TRACK_GRAPH:
+            if not issubclass(dtype, CONSTANT_ONLY_DTYPES):
+                raise TypeError(
+                    f"Tensor data must be of an floating type, integer type, or boolean type, "
+                    f"received {dtype}"
+                )
+            elif constant is False:
+                raise ValueError("Integer-valued tensors must be treated as constants.")
+
+        if constant is None:
+            constant = not is_float
+
+        out = object.__new__(cls)
+        # must set the same attributes as `__init__`
+        out._creator = _creator
+        out.data = data
+        out._constant = constant
+        out._grad = None
+        out._ops = set()
+        out._base = _base
+        out._view_children = WeakRefIterable()
+        out._view_grad = None
+        return out
+
+    @classmethod
     def _op(
         cls,
         Op: Type[Operation],
@@ -1085,21 +1132,18 @@ class Tensor:
 
         _uniques_bases_then_arrs = ()
 
+        # cast all input-vars to tensors
         tensor_vars = tuple(
-            cls(var, constant=True, copy=False) if not isinstance(var, Tensor) else var
+            var if isinstance(var, Tensor) else cls._wrap_op_data(var, constant=True)
             for var in input_vars
         )
 
-        # cast all input-vars to tensors
         if _track.TRACK_GRAPH and _mem.MEM_GUARD:
             # lock memory of array data
-            _uniques_bases_then_arrs = WeakRefIterable(
-                _mem.lock_arr_writeability(x)
-                for x in _mem.unique_arrs_and_bases(tensor_vars)
-            )
+            _uniques_bases_then_arrs = _mem.lock_arrs_of_tensors(tensor_vars)
 
         if op_args is None:
-            op_args = tuple()
+            op_args = ()
 
         if op_kwargs is None:
             op_kwargs = {}
@@ -1119,12 +1163,9 @@ class Tensor:
         if not _track.TRACK_GRAPH:
             # execute operation without tracking creator or any graph
             # information
-            return cls(
+            return cls._wrap_op_data(
                 op_out,
                 constant=constant,  # constant not determined by graph info
-                copy=False,
-                _creator=None,
-                _base=None,
             )
 
         # points to parent tensor that op-output is a view of
@@ -1136,40 +1177,30 @@ class Tensor:
 
         # Determine whether or not op was a view; if so, `base`
         # points to parent Tensor
-        op_out_base = op_out.base
-        if f.can_return_view and op_out_base is not None:
-            vars_can_share_mem = (
-                isinstance(var, (np.ndarray, Tensor)) for var in input_vars
-            )
-            for can_share_mem, parent_var in zip(vars_can_share_mem, tensor_vars):
-                if not can_share_mem:
-                    continue
-                parent_data = parent_var.data
-                parent_data_base = parent_data.base
+        if f.can_return_view:
+            op_out_base = op_out.base
+            if op_out_base is not None:
+                for var, parent_var in zip(input_vars, tensor_vars):
+                    if not isinstance(var, (np.ndarray, Tensor)):
+                        # cannot share memory
+                        continue
+                    parent_data = parent_var.data
+                    parent_data_base = parent_data.base
 
-                if (
-                    (op_out_base is parent_data)
-                    or (op_out_base is parent_data_base)
-                    or (op_out is parent_data)
-                ):
-                    if parent_var._base is not None and parent_var._creator is None:
-                        parent_var._base = None
+                    if (
+                        (op_out_base is parent_data)
+                        or (op_out_base is parent_data_base)
+                        or (op_out is parent_data)
+                    ):
+                        if parent_var._base is not None and parent_var._creator is None:
+                            parent_var._base = None
 
-                    base = parent_var if parent_var.base is None else parent_var.base
-                    break
-            else:
-                parent_var = None
-
-        for v in input_vars:
-            if isinstance(v, Tensor):
-                # tensor's graph has been cleared, but its base lingers
-                if v._base is not None and v._creator is None:
-                    v._base = None
-
-                if base is None:
-                    # non-view ops clear grads
-                    v._grad = None
-                    v._view_grad = None
+                        base = (
+                            parent_var if parent_var.base is None else parent_var.base
+                        )
+                        break
+                else:
+                    parent_var = None
 
         if base is not None:
             # we need to be able to replay view-ops for doing in-place operations
@@ -1178,24 +1209,36 @@ class Tensor:
             f.replay_kwargs = op_kwargs
             f.replay_force_constant = constant
 
-        # record graph information
-        if constant is None:
-            if any(not var.constant for var in tensor_vars):
-                constant = None
-            else:
-                constant = True
-
-        # record that a variable participated in that op
+        all_constant = True
         for var in tensor_vars:
+            # (inputs that were not already tensors were wrapped above, so
+            # the following resets are no-ops for them)
+
+            # tensor's graph has been cleared, but its base lingers
+            if var._base is not None and var._creator is None:
+                var._base = None
+
+            if base is None:
+                # non-view ops clear grads
+                var._grad = None
+                var._view_grad = None
+
+            if not var._constant:
+                all_constant = False
+
+            # record that a variable participated in that op.
             # The callback drops the ref once `f` is garbage collected. Otherwise
             # dead refs accumulate; and because a new op is often allocated at the
             # address of a freed one, they share a hash and make `add` O(len(_ops))
             var._ops.add(ReferenceType(f, var._ops.discard))
 
-        tensor_out = cls(
+        # record graph information
+        if constant is None and all_constant:
+            constant = True
+
+        tensor_out = cls._wrap_op_data(
             op_out,
             constant=constant,
-            copy=False,
             _creator=f,
             _base=base,
         )
@@ -1204,13 +1247,13 @@ class Tensor:
             parent_var._view_children.append(tensor_out)
 
         if _mem.MEM_GUARD:
-            if out is not None and tensor_out.data.base is not None:
-                _mem.lock_arr_writeability(tensor_out.data.base)
-                _uniques_bases_then_arrs.append(tensor_out.data.base)
-            _mem.lock_arr_writeability(tensor_out.data)
-            tensor_refs = _uniques_bases_then_arrs
-            tensor_refs.append(tensor_out.data)
-            _mem.release_locks_when_collected(f, tensor_refs)
+            out_data = tensor_out.data
+            if out is not None and out_data.base is not None:
+                _mem.lock_arr_writeability(out_data.base)
+                _uniques_bases_then_arrs.append(out_data.base)
+            _mem.lock_arr_writeability(out_data)
+            _uniques_bases_then_arrs.append(out_data)
+            _mem.release_locks_when_collected(f, _uniques_bases_then_arrs)
         return tensor_out
 
     def _replay_op(self, *input_vars: ArrayLike) -> "Tensor":

@@ -106,6 +106,37 @@ def unique_arrs_and_bases(
             yield arr
 
 
+def lock_arrs_of_tensors(
+    tensors: Iterable["TensorType"],
+) -> WeakRefIterable[np.ndarray]:
+    """Locks the unique arrays (and their bases) of ``tensors``, returning
+    weak references to them in the order in which they must be released.
+
+    Equivalent to::
+
+        WeakRefIterable(lock_arr_writeability(x) for x in unique_arrs_and_bases(tensors))
+
+    but written as a single loop, as this is called for every op."""
+    locked: WeakRefIterable[np.ndarray] = WeakRefIterable()
+    refs = locked.data
+    seen = set()
+    for t in tensors:
+        arr = t.data
+        arr_id = id(arr)
+        if arr_id in seen:
+            continue
+        base = arr.base
+        if base is not None:
+            # a base must be locked (and thus released) before its views
+            base_id = id(base)
+            if base_id not in seen:
+                seen.add(base_id)
+                refs.append(ref(lock_arr_writeability(base)))
+        seen.add(arr_id)
+        refs.append(ref(lock_arr_writeability(arr)))
+    return locked
+
+
 def _release_lock_on_arr_writeability(arr: np.ndarray):
     """
     Decrements the number of active ops the array participates in.
