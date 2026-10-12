@@ -1,8 +1,10 @@
 import hypothesis.extra.numpy as hnp
 import numpy as np
+import pytest
 from hypothesis import given, settings
 from numpy.testing import assert_allclose
 
+from mygrad.errors import InvalidBackprop
 from mygrad.tensor_base import Tensor
 from tests.utils.wrappers import adds_constant_arg
 
@@ -295,3 +297,34 @@ def test_getitem_arbitraryindex_fwdprop():
 )
 def test_getitem_arbitraryindex_bkwdprop():
     pass
+
+
+@pytest.mark.parametrize(
+    "index",
+    [(1,), (slice(None, None, 2),), (np.array([0, 2, 0, 3]),)],  # last: repeated
+)
+def test_getitem_backward_var_matches_backprop(index):
+    # `GetItem.backward` accumulates directly into the input's gradient rather
+    # than via `backward_var`; the two must agree
+    x = Tensor(np.arange(20.0).reshape(4, 5))
+    y = x[index]
+    grad = np.arange(y.size, dtype=float).reshape(y.shape) + 1
+    via_backward_var = y.creator.backward_var(grad, index=0)
+    y.backward(grad)
+    assert_allclose(x.grad, via_backward_var)
+
+
+def test_repeated_getitem_accumulates_grad():
+    x = Tensor(np.zeros((3, 4)))
+    out = sum(x[i] * (i + 1) for i in range(3)) + x[0]
+    out.backward()
+    expected = np.array([2.0, 2.0, 3.0])[:, None] * np.ones((3, 4))
+    assert_allclose(x.grad, expected)
+
+
+def test_getitem_backprop_through_cleared_graph_raises():
+    x = Tensor([1.0, 2.0, 3.0])
+    y = x[np.array([0, 0])]
+    x.clear_graph()
+    with pytest.raises(InvalidBackprop):
+        y.backward()
