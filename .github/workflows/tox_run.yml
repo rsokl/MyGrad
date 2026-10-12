@@ -12,6 +12,9 @@ on:
       - master
       - develop
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
