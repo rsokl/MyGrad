@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad.operation_base &#8212; MyGrad 2.3.0.post1.dev50 documentation</title>
+    <title>mygrad.operation_base &#8212; MyGrad 2.3.0.post1.dev58 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev50 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev58 documentation</p>
   
 </a></div>
     
@@ -705,8 +705,9 @@ document.write(`
 <span class="sd">            The back-propagated total derivative with respect to the present</span>
 <span class="sd">            operation (`f`): d(out)/df</span>
 <span class="sd">        """</span>
+        <span class="n">where</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">where</span>
         <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">constant</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">_constant</span><span class="p">:</span>
                 <span class="k">continue</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">var</span><span class="o">.</span><span class="n">_ops</span><span class="p">:</span>
@@ -724,24 +725,29 @@ document.write(`
             <span class="k">except</span> <span class="n">SkipGradient</span><span class="p">:</span>
                 <span class="k">continue</span>
 
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">backed_grad</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">,</span> <span class="n">Real</span><span class="p">)):</span>
-                <span class="k">raise</span> <span class="n">InvalidGradient</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">"An invalid gradient-value was passed to:"</span>
-                    <span class="sa">f</span><span class="s2">"</span><span class="se">\n\t</span><span class="s2">`</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.backward_var(&lt;gradient&gt;, index=</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">)`"</span>
-                    <span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Gradients are expected to be real-valued scalars or "</span>
-                    <span class="sa">f</span><span class="s2">"numpy arrays, got a gradient of type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">backed_grad</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
-                <span class="p">)</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">backed_grad</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>  <span class="c1"># the common case is cheap</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">backed_grad</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">,</span> <span class="n">Real</span><span class="p">)):</span>
+                    <span class="k">raise</span> <span class="n">InvalidGradient</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">"An invalid gradient-value was passed to:"</span>
+                        <span class="sa">f</span><span class="s2">"</span><span class="se">\n\t</span><span class="s2">`</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.backward_var(&lt;gradient&gt;, index=</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">)`"</span>
+                        <span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Gradients are expected to be real-valued scalars or "</span>
+                        <span class="sa">f</span><span class="s2">"numpy arrays, got a gradient of type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">backed_grad</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+                    <span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">NP_IS_V2</span><span class="p">:</span>
-                <span class="n">backed_grad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">backed_grad</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-                <span class="n">backed_grad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">backed_grad</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">NP_IS_V2</span><span class="p">:</span>
+                    <span class="n">backed_grad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">backed_grad</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                    <span class="n">backed_grad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">backed_grad</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">where</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">True</span><span class="p">:</span>
-                <span class="n">backed_grad</span> <span class="o">=</span> <span class="n">backed_grad</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">where</span>
+            <span class="k">if</span> <span class="n">where</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">backed_grad</span> <span class="o">=</span> <span class="n">backed_grad</span> <span class="o">*</span> <span class="n">where</span>
 
-            <span class="n">backed_grad</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad_post_process_fn</span><span class="p">(</span><span class="n">backed_grad</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-            <span class="k">assert</span> <span class="n">backed_grad</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">var</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="n">backed_grad</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">var_data</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">data</span>
+            <span class="n">backed_grad</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad_post_process_fn</span><span class="p">(</span><span class="n">backed_grad</span><span class="p">,</span> <span class="n">var_data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">backed_grad</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">var_data</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span>
+                <span class="n">backed_grad</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                <span class="n">var_data</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">_grad</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">backed_grad</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">backed_grad</span><span class="p">)</span>
@@ -750,8 +756,8 @@ document.write(`
                     <span class="k">if</span> <span class="n">backed_grad</span><span class="o">.</span><span class="n">base</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="p">(</span><span class="n">backed_grad</span> <span class="ow">is</span> <span class="n">grad</span><span class="p">)</span>
                     <span class="k">else</span> <span class="n">backed_grad</span>
                 <span class="p">)</span>
-                <span class="k">if</span> <span class="n">backed_grad</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="n">var</span><span class="o">.</span><span class="n">dtype</span><span class="p">:</span>
-                    <span class="n">backed_grad</span> <span class="o">=</span> <span class="n">backed_grad</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">backed_grad</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="n">var_data</span><span class="o">.</span><span class="n">dtype</span><span class="p">:</span>
+                    <span class="n">backed_grad</span> <span class="o">=</span> <span class="n">backed_grad</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">var_data</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
                 <span class="n">var</span><span class="o">.</span><span class="n">_grad</span> <span class="o">=</span> <span class="n">backed_grad</span>
             <span class="k">else</span><span class="p">:</span>

@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad._utils.lock_management &#8212; MyGrad 2.3.0.post1.dev50 documentation</title>
+    <title>mygrad._utils.lock_management &#8212; MyGrad 2.3.0.post1.dev58 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev50 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev58 documentation</p>
   
 </a></div>
     
@@ -532,12 +532,11 @@ document.write(`
 <span class="sd">Provides utilities responsible for locking/releasing array writeability.</span>
 <span class="sd">"""</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">atexit</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span><span class="p">,</span> <span class="n">defaultdict</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span> <span class="k">as</span> <span class="n">CounterType</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Set</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">weakref</span><span class="w"> </span><span class="kn">import</span> <span class="n">finalize</span><span class="p">,</span> <span class="n">ref</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Set</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">weakref</span><span class="w"> </span><span class="kn">import</span> <span class="n">ref</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
@@ -548,7 +547,8 @@ document.write(`
 
 
 <span class="c1"># arr-id -&gt; num active ops involving arr</span>
-<span class="n">_array_counter</span><span class="p">:</span> <span class="n">CounterType</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">()</span>
+<span class="c1"># (a plain dict rather than a Counter: this is on the hot path of every op)</span>
+<span class="n">_array_counter</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
 <span class="c1"># arr-id -&gt; weak-ref of arr, for arrays participating in live ops</span>
 <span class="n">_array_tracker</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">WeakRef</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
@@ -590,7 +590,8 @@ document.write(`
 <span class="sd">    numpy.ndarray</span>
 <span class="sd">        The locked array"""</span>
     <span class="n">arr_id</span> <span class="o">=</span> <span class="nb">id</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">array_is_tracked</span><span class="p">(</span><span class="n">arr</span><span class="p">):</span>
+    <span class="n">arr_ref</span> <span class="o">=</span> <span class="n">_array_tracker</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">arr_id</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">arr_ref</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">arr_ref</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># `arr` is not tracked</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="ow">not</span> <span class="n">force_lock</span>
             <span class="ow">and</span> <span class="ow">not</span> <span class="n">arr</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">writeable</span>
@@ -603,36 +604,40 @@ document.write(`
         <span class="n">_array_tracker</span><span class="p">[</span><span class="n">arr_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">ref</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
         <span class="n">_array_counter</span><span class="p">[</span><span class="n">arr_id</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">_array_counter</span><span class="p">[</span><span class="n">arr_id</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="c1"># a view waiting on its base stays tracked without a counter entry</span>
+        <span class="n">_array_counter</span><span class="p">[</span><span class="n">arr_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">_array_counter</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">arr_id</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
     <span class="k">if</span> <span class="n">arr</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">writeable</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">arr</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">writeable</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">return</span> <span class="n">arr</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">unique_arrs_and_bases</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">lock_arrs_of_tensors</span><span class="p">(</span>
     <span class="n">tensors</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="s2">"TensorType"</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">"""</span>
-<span class="sd">    Yields unique (by-ID) arrays from an iterable. If an array</span>
-<span class="sd">    has a base, the base is yielded first (assuming that base</span>
-<span class="sd">    object has not already been yielded).</span>
-<span class="sd">    """</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WeakRefIterable</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Locks the unique (by-ID) arrays of ``tensors``, along with the bases of</span>
+<span class="sd">    any that are views, returning weak references to them in the order in which</span>
+<span class="sd">    their locks must be released.</span>
+
+<span class="sd">    A base array is locked - and thus released - before any of its views, so</span>
+<span class="sd">    that its writeability is restored first; only then can the views' be."""</span>
+    <span class="n">locked</span><span class="p">:</span> <span class="n">WeakRefIterable</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="n">WeakRefIterable</span><span class="p">()</span>
+    <span class="n">refs</span> <span class="o">=</span> <span class="n">locked</span><span class="o">.</span><span class="n">data</span>
     <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tensors</span><span class="p">:</span>
         <span class="n">arr</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">data</span>
         <span class="n">arr_id</span> <span class="o">=</span> <span class="nb">id</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">arr_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
-            <span class="c1"># important note!</span>
-            <span class="c1"># We must yield array bases first so that base's</span>
-            <span class="c1"># writeability is restored first.</span>
-            <span class="c1"># Then view's writeability can be restored</span>
-            <span class="k">if</span> <span class="n">arr</span><span class="o">.</span><span class="n">base</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">base_id</span> <span class="o">=</span> <span class="nb">id</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">base</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">base_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
-                    <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">base_id</span><span class="p">)</span>
-                    <span class="k">yield</span> <span class="n">arr</span><span class="o">.</span><span class="n">base</span>
-            <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">arr_id</span><span class="p">)</span>
-            <span class="k">yield</span> <span class="n">arr</span>
+        <span class="k">if</span> <span class="n">arr_id</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">arr</span><span class="o">.</span><span class="n">base</span>
+        <span class="k">if</span> <span class="n">base</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># a base must be locked (and thus released) before its views</span>
+            <span class="n">base_id</span> <span class="o">=</span> <span class="nb">id</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">base_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+                <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">base_id</span><span class="p">)</span>
+                <span class="n">refs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ref</span><span class="p">(</span><span class="n">lock_arr_writeability</span><span class="p">(</span><span class="n">base</span><span class="p">)))</span>
+        <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">arr_id</span><span class="p">)</span>
+        <span class="n">refs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ref</span><span class="p">(</span><span class="n">lock_arr_writeability</span><span class="p">(</span><span class="n">arr</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">locked</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_release_lock_on_arr_writeability</span><span class="p">(</span><span class="n">arr</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
@@ -642,7 +647,7 @@ document.write(`
 <span class="sd">    writeability restored.</span>
 <span class="sd">    """</span>
     <span class="n">arr_id</span> <span class="o">=</span> <span class="nb">id</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
-    <span class="n">num_active_ops</span> <span class="o">=</span> <span class="n">_array_counter</span><span class="p">[</span><span class="n">arr_id</span><span class="p">]</span>
+    <span class="n">num_active_ops</span> <span class="o">=</span> <span class="n">_array_counter</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">arr_id</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">num_active_ops</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="c1"># final active op involving array is being de-referenced:</span>
@@ -667,9 +672,9 @@ document.write(`
         <span class="n">_array_counter</span><span class="p">[</span><span class="n">arr_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_active_ops</span> <span class="o">-</span> <span class="mi">1</span>
 
     <span class="k">if</span> <span class="p">(</span>
-        <span class="n">arr</span><span class="o">.</span><span class="n">base</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="n">arr_id</span> <span class="ow">in</span> <span class="n">_views_waiting_for_unlock</span>  <span class="c1"># cheapest, and usually False</span>
+        <span class="ow">and</span> <span class="n">arr</span><span class="o">.</span><span class="n">base</span> <span class="ow">is</span> <span class="kc">None</span>
         <span class="ow">and</span> <span class="n">arr</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">writeable</span>
-        <span class="ow">and</span> <span class="p">(</span><span class="n">arr_id</span> <span class="ow">in</span> <span class="n">_views_waiting_for_unlock</span><span class="p">)</span>
     <span class="p">):</span>
         <span class="c1"># array was base of view waiting to be unlocked..</span>
         <span class="c1">#</span>
@@ -679,7 +684,7 @@ document.write(`
         <span class="c1">#    or view can now get unlocked</span>
         <span class="c1"># under all conditions view will no longer be waiting to be unlocked</span>
         <span class="k">for</span> <span class="n">view_arr_id</span> <span class="ow">in</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">_views_waiting_for_unlock</span><span class="p">[</span><span class="n">arr_id</span><span class="p">]):</span>
-            <span class="k">if</span> <span class="n">_array_counter</span><span class="p">[</span><span class="n">view_arr_id</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">_array_counter</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">view_arr_id</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="c1"># view involved in new op</span>
                 <span class="k">continue</span>
 
@@ -719,6 +724,30 @@ document.write(`
 <span class="sd">        multiple times in the iterable."""</span>
     <span class="k">for</span> <span class="n">arr</span> <span class="ow">in</span> <span class="n">arr_refs</span><span class="p">:</span>
         <span class="n">_release_lock_on_arr_writeability</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+
+
+<span class="c1"># keeps the weakrefs made by `release_locks_when_collected` alive until they fire</span>
+<span class="n">_pending_releases</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">WeakRef</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+<span class="c1"># Discarding the weakrefs at exit means that their callbacks never fire during</span>
+<span class="c1"># interpreter shutdown, when the state that they touch may be partially torn</span>
+<span class="c1"># down. (Restoring array writeability at exit is moot.)</span>
+<span class="n">atexit</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">_pending_releases</span><span class="o">.</span><span class="n">clear</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">release_locks_when_collected</span><span class="p">(</span><span class="n">op</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="n">arr_refs</span><span class="p">:</span> <span class="n">WeakRefIterable</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">"""Calls ``release_writeability_lock_on_op(arr_refs)`` once ``op`` is garbage</span>
+<span class="sd">    collected.</span>
+
+<span class="sd">    Like ``weakref.finalize(op, release_writeability_lock_on_op, arr_refs)``, minus</span>
+<span class="sd">    its extra machinery; this is called for every op, and is roughly twice as fast.</span>
+<span class="sd">    Pending releases are discarded, rather than run, at interpreter exit."""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_release</span><span class="p">(</span><span class="n">op_ref</span><span class="p">:</span> <span class="n">WeakRef</span><span class="p">):</span>
+        <span class="n">_pending_releases</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">op_ref</span><span class="p">)</span>
+        <span class="n">release_writeability_lock_on_op</span><span class="p">(</span><span class="n">arr_refs</span><span class="p">)</span>
+
+    <span class="n">_pending_releases</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ref</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">_release</span><span class="p">))</span>
 
 
 <span class="n">MEM_GUARD</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"MYGRAD_MEM_GUARD"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
@@ -917,18 +946,10 @@ document.write(`
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">force_lock_tensor_and_creators</span><span class="p">(</span><span class="n">tensor</span><span class="p">:</span> <span class="s2">"TensorType"</span><span class="p">):</span>
-    <span class="n">unique_arrs</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
-        <span class="n">lock_arr_writeability</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">arr</span> <span class="ow">in</span> <span class="n">unique_arrs_and_bases</span><span class="p">(</span><span class="n">tensor</span><span class="o">.</span><span class="n">creator</span><span class="o">.</span><span class="n">variables</span><span class="p">)</span>
-    <span class="p">)</span>
+    <span class="n">tensor_refs</span> <span class="o">=</span> <span class="n">lock_arrs_of_tensors</span><span class="p">(</span><span class="n">tensor</span><span class="o">.</span><span class="n">creator</span><span class="o">.</span><span class="n">variables</span><span class="p">)</span>
     <span class="n">lock_arr_writeability</span><span class="p">(</span><span class="n">tensor</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">force_lock</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">tensor_refs</span> <span class="o">=</span> <span class="n">WeakRefIterable</span><span class="p">(</span><span class="n">unique_arrs</span><span class="p">)</span>
     <span class="n">tensor_refs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tensor</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
-    <span class="n">finalize</span><span class="p">(</span>
-        <span class="n">tensor</span><span class="o">.</span><span class="n">creator</span><span class="p">,</span>
-        <span class="n">release_writeability_lock_on_op</span><span class="p">,</span>
-        <span class="n">tensor_refs</span><span class="p">,</span>
-    <span class="p">)</span>
+    <span class="n">release_locks_when_collected</span><span class="p">(</span><span class="n">tensor</span><span class="o">.</span><span class="n">creator</span><span class="p">,</span> <span class="n">tensor_refs</span><span class="p">)</span>
 </pre></div>
 
                 </article>

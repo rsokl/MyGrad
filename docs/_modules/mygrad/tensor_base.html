@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad.tensor_base &#8212; MyGrad 2.3.0.post1.dev50 documentation</title>
+    <title>mygrad.tensor_base &#8212; MyGrad 2.3.0.post1.dev58 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev50 documentation</p>
+    <p class="title logo__title">MyGrad 2.3.0.post1.dev58 documentation</p>
   
 </a></div>
     
@@ -552,7 +552,7 @@ document.write(`
     <span class="n">TypeVar</span><span class="p">,</span>
     <span class="n">Union</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">weakref</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReferenceType</span><span class="p">,</span> <span class="n">finalize</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">weakref</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReferenceType</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
@@ -1332,25 +1332,37 @@ document.write(`
         <span class="k">if</span> <span class="n">constant</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">constant</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"`constant` must be a boolean value, got: </span><span class="si">{</span><span class="n">constant</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_creator</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Operation</span><span class="p">]</span> <span class="o">=</span> <span class="n">_creator</span>
-
         <span class="k">if</span> <span class="ow">not</span> <span class="n">NP_IS_V2</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="n">copy</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="n">ndmin</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="n">copy</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="n">ndmin</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">copy</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ndmin</span><span class="p">,</span> <span class="n">Integral</span><span class="p">):</span>
                     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">ndmin</span><span class="p">)</span><span class="si">}</span><span class="s2">' object cannot be interpreted as an integer"</span>
                     <span class="p">)</span>
-                <span class="k">if</span> <span class="n">ndmin</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&lt;</span> <span class="n">ndmin</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span>
-                        <span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="kc">None</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ndmin</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">ndim</span><span class="p">)),)</span>
-                    <span class="p">]</span>
+                <span class="k">if</span> <span class="n">ndmin</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&lt;</span> <span class="n">ndmin</span><span class="p">:</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[(</span><span class="o">*</span><span class="p">(</span><span class="kc">None</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ndmin</span> <span class="o">-</span> <span class="n">data</span><span class="o">.</span><span class="n">ndim</span><span class="p">)),)]</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="n">copy</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="n">ndmin</span><span class="p">)</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="n">copy</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="n">ndmin</span><span class="p">)</span>
 
-        <span class="n">dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_from_array</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">constant</span><span class="p">,</span> <span class="n">_creator</span><span class="p">,</span> <span class="n">_base</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_from_array</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span>
+        <span class="n">_creator</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Operation</span><span class="p">],</span>
+        <span class="n">_base</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="s2">"Tensor"</span><span class="p">],</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">"""*dev use only*</span>
+
+<span class="sd">        Validates ``data``'s dtype against ``constant`` and initializes all of the</span>
+<span class="sd">        tensor's state. Shared by ``__init__`` and ``_wrap_op_data``."""</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_creator</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Operation</span><span class="p">]</span> <span class="o">=</span> <span class="n">_creator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span>
         <span class="n">is_float</span> <span class="o">=</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">)</span>  <span class="c1"># faster than `numpy.issubdtype`</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">is_float</span> <span class="ow">and</span> <span class="n">_track</span><span class="o">.</span><span class="n">TRACK_GRAPH</span><span class="p">:</span>
             <span class="c1"># No need to constrain dtypes if we aren't tracking the graph.</span>
@@ -1550,6 +1562,32 @@ document.write(`
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="n">cast_data</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span></div>
 
     <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_wrap_op_data</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">x</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+        <span class="n">constant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span>
+        <span class="n">_creator</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Operation</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">_base</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="s2">"Tensor"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""*dev use only*</span>
+
+<span class="sd">        Equivalent to ``cls(x, constant=constant, copy=False, _creator=_creator,</span>
+<span class="sd">        _base=_base)``, but skips the generic input handling of ``__init__`` (the</span>
+<span class="sd">        validation and state initialization are shared, via ``_init_from_array``).</span>
+<span class="sd">        This is used for every op's inputs and output, and is several times faster."""</span>
+        <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Tensor</span><span class="o">.</span><span class="fm">__init__</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="c1"># respect subclasses that customize initialization</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">_creator</span><span class="o">=</span><span class="n">_creator</span><span class="p">,</span> <span class="n">_base</span><span class="o">=</span><span class="n">_base</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">constant</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">constant</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"`constant` must be a boolean value, got: </span><span class="si">{</span><span class="n">constant</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="c1"># (positional args: this is a hot path)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">_init_from_array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">constant</span><span class="p">,</span> <span class="n">_creator</span><span class="p">,</span> <span class="n">_base</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_op</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">Op</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Operation</span><span class="p">],</span>
@@ -1615,21 +1653,18 @@ document.write(`
 
         <span class="n">_uniques_bases_then_arrs</span> <span class="o">=</span> <span class="p">()</span>
 
+        <span class="c1"># cast all input-vars to tensors</span>
         <span class="n">tensor_vars</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
-            <span class="bp">cls</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">)</span> <span class="k">else</span> <span class="n">var</span>
+            <span class="n">var</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">)</span> <span class="k">else</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_wrap_op_data</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">input_vars</span>
         <span class="p">)</span>
 
-        <span class="c1"># cast all input-vars to tensors</span>
         <span class="k">if</span> <span class="n">_track</span><span class="o">.</span><span class="n">TRACK_GRAPH</span> <span class="ow">and</span> <span class="n">_mem</span><span class="o">.</span><span class="n">MEM_GUARD</span><span class="p">:</span>
             <span class="c1"># lock memory of array data</span>
-            <span class="n">_uniques_bases_then_arrs</span> <span class="o">=</span> <span class="n">WeakRefIterable</span><span class="p">(</span>
-                <span class="n">_mem</span><span class="o">.</span><span class="n">lock_arr_writeability</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">_mem</span><span class="o">.</span><span class="n">unique_arrs_and_bases</span><span class="p">(</span><span class="n">tensor_vars</span><span class="p">)</span>
-            <span class="p">)</span>
+            <span class="n">_uniques_bases_then_arrs</span> <span class="o">=</span> <span class="n">_mem</span><span class="o">.</span><span class="n">lock_arrs_of_tensors</span><span class="p">(</span><span class="n">tensor_vars</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">op_args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">op_args</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span>
+            <span class="n">op_args</span> <span class="o">=</span> <span class="p">()</span>
 
         <span class="k">if</span> <span class="n">op_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">op_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
@@ -1649,12 +1684,9 @@ document.write(`
         <span class="k">if</span> <span class="ow">not</span> <span class="n">_track</span><span class="o">.</span><span class="n">TRACK_GRAPH</span><span class="p">:</span>
             <span class="c1"># execute operation without tracking creator or any graph</span>
             <span class="c1"># information</span>
-            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_wrap_op_data</span><span class="p">(</span>
                 <span class="n">op_out</span><span class="p">,</span>
                 <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">,</span>  <span class="c1"># constant not determined by graph info</span>
-                <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                <span class="n">_creator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                <span class="n">_base</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="c1"># points to parent tensor that op-output is a view of</span>
@@ -1666,40 +1698,30 @@ document.write(`
 
         <span class="c1"># Determine whether or not op was a view; if so, `base`</span>
         <span class="c1"># points to parent Tensor</span>
-        <span class="n">op_out_base</span> <span class="o">=</span> <span class="n">op_out</span><span class="o">.</span><span class="n">base</span>
-        <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">can_return_view</span> <span class="ow">and</span> <span class="n">op_out_base</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">vars_can_share_mem</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="nb">isinstance</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">))</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">input_vars</span>
-            <span class="p">)</span>
-            <span class="k">for</span> <span class="n">can_share_mem</span><span class="p">,</span> <span class="n">parent_var</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">vars_can_share_mem</span><span class="p">,</span> <span class="n">tensor_vars</span><span class="p">):</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">can_share_mem</span><span class="p">:</span>
-                    <span class="k">continue</span>
-                <span class="n">parent_data</span> <span class="o">=</span> <span class="n">parent_var</span><span class="o">.</span><span class="n">data</span>
-                <span class="n">parent_data_base</span> <span class="o">=</span> <span class="n">parent_data</span><span class="o">.</span><span class="n">base</span>
+        <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">can_return_view</span><span class="p">:</span>
+            <span class="n">op_out_base</span> <span class="o">=</span> <span class="n">op_out</span><span class="o">.</span><span class="n">base</span>
+            <span class="k">if</span> <span class="n">op_out_base</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">parent_var</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">input_vars</span><span class="p">,</span> <span class="n">tensor_vars</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">)):</span>
+                        <span class="c1"># cannot share memory</span>
+                        <span class="k">continue</span>
+                    <span class="n">parent_data</span> <span class="o">=</span> <span class="n">parent_var</span><span class="o">.</span><span class="n">data</span>
+                    <span class="n">parent_data_base</span> <span class="o">=</span> <span class="n">parent_data</span><span class="o">.</span><span class="n">base</span>
 
-                <span class="k">if</span> <span class="p">(</span>
-                    <span class="p">(</span><span class="n">op_out_base</span> <span class="ow">is</span> <span class="n">parent_data</span><span class="p">)</span>
-                    <span class="ow">or</span> <span class="p">(</span><span class="n">op_out_base</span> <span class="ow">is</span> <span class="n">parent_data_base</span><span class="p">)</span>
-                    <span class="ow">or</span> <span class="p">(</span><span class="n">op_out</span> <span class="ow">is</span> <span class="n">parent_data</span><span class="p">)</span>
-                <span class="p">):</span>
-                    <span class="k">if</span> <span class="n">parent_var</span><span class="o">.</span><span class="n">_base</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">parent_var</span><span class="o">.</span><span class="n">_creator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="n">parent_var</span><span class="o">.</span><span class="n">_base</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="p">(</span><span class="n">op_out_base</span> <span class="ow">is</span> <span class="n">parent_data</span><span class="p">)</span>
+                        <span class="ow">or</span> <span class="p">(</span><span class="n">op_out_base</span> <span class="ow">is</span> <span class="n">parent_data_base</span><span class="p">)</span>
+                        <span class="ow">or</span> <span class="p">(</span><span class="n">op_out</span> <span class="ow">is</span> <span class="n">parent_data</span><span class="p">)</span>
+                    <span class="p">):</span>
+                        <span class="k">if</span> <span class="n">parent_var</span><span class="o">.</span><span class="n">_base</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">parent_var</span><span class="o">.</span><span class="n">_creator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">parent_var</span><span class="o">.</span><span class="n">_base</span> <span class="o">=</span> <span class="kc">None</span>
 
-                    <span class="n">base</span> <span class="o">=</span> <span class="n">parent_var</span> <span class="k">if</span> <span class="n">parent_var</span><span class="o">.</span><span class="n">base</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">parent_var</span><span class="o">.</span><span class="n">base</span>
-                    <span class="k">break</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">parent_var</span> <span class="o">=</span> <span class="kc">None</span>
-
-        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">input_vars</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">):</span>
-                <span class="c1"># tensor's graph has been cleared, but its base lingers</span>
-                <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">_base</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">v</span><span class="o">.</span><span class="n">_creator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">v</span><span class="o">.</span><span class="n">_base</span> <span class="o">=</span> <span class="kc">None</span>
-
-                <span class="k">if</span> <span class="n">base</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="c1"># non-view ops clear grads</span>
-                    <span class="n">v</span><span class="o">.</span><span class="n">_grad</span> <span class="o">=</span> <span class="kc">None</span>
-                    <span class="n">v</span><span class="o">.</span><span class="n">_view_grad</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="n">base</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="n">parent_var</span> <span class="k">if</span> <span class="n">parent_var</span><span class="o">.</span><span class="n">base</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">parent_var</span><span class="o">.</span><span class="n">base</span>
+                        <span class="p">)</span>
+                        <span class="k">break</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">parent_var</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="n">base</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># we need to be able to replay view-ops for doing in-place operations</span>
@@ -1708,22 +1730,36 @@ document.write(`
             <span class="n">f</span><span class="o">.</span><span class="n">replay_kwargs</span> <span class="o">=</span> <span class="n">op_kwargs</span>
             <span class="n">f</span><span class="o">.</span><span class="n">replay_force_constant</span> <span class="o">=</span> <span class="n">constant</span>
 
-        <span class="c1"># record graph information</span>
-        <span class="k">if</span> <span class="n">constant</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="ow">not</span> <span class="n">var</span><span class="o">.</span><span class="n">constant</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">tensor_vars</span><span class="p">):</span>
-                <span class="n">constant</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">constant</span> <span class="o">=</span> <span class="kc">True</span>
-
-        <span class="c1"># record that a variable participated in that op</span>
-        <span class="n">ref_f</span> <span class="o">=</span> <span class="n">ReferenceType</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>  <span class="c1"># type: WeakRef[Operation]</span>
+        <span class="n">all_constant</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">tensor_vars</span><span class="p">:</span>
-            <span class="n">var</span><span class="o">.</span><span class="n">_ops</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ref_f</span><span class="p">)</span>
+            <span class="c1"># (inputs that were not already tensors were wrapped above, so</span>
+            <span class="c1"># the following resets are no-ops for them)</span>
 
-        <span class="n">tensor_out</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="c1"># tensor's graph has been cleared, but its base lingers</span>
+            <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">_base</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">var</span><span class="o">.</span><span class="n">_creator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">var</span><span class="o">.</span><span class="n">_base</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">if</span> <span class="n">base</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># non-view ops clear grads</span>
+                <span class="n">var</span><span class="o">.</span><span class="n">_grad</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">var</span><span class="o">.</span><span class="n">_view_grad</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">var</span><span class="o">.</span><span class="n">_constant</span><span class="p">:</span>
+                <span class="n">all_constant</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="c1"># record that a variable participated in that op.</span>
+            <span class="c1"># The callback drops the ref once `f` is garbage collected. Otherwise</span>
+            <span class="c1"># dead refs accumulate; and because a new op is often allocated at the</span>
+            <span class="c1"># address of a freed one, they share a hash and make `add` O(len(_ops))</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">_ops</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ReferenceType</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">_ops</span><span class="o">.</span><span class="n">discard</span><span class="p">))</span>
+
+        <span class="c1"># record graph information</span>
+        <span class="k">if</span> <span class="n">constant</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">all_constant</span><span class="p">:</span>
+            <span class="n">constant</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">tensor_out</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_wrap_op_data</span><span class="p">(</span>
             <span class="n">op_out</span><span class="p">,</span>
             <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">,</span>
-            <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">_creator</span><span class="o">=</span><span class="n">f</span><span class="p">,</span>
             <span class="n">_base</span><span class="o">=</span><span class="n">base</span><span class="p">,</span>
         <span class="p">)</span>
@@ -1732,13 +1768,13 @@ document.write(`
             <span class="n">parent_var</span><span class="o">.</span><span class="n">_view_children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tensor_out</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">_mem</span><span class="o">.</span><span class="n">MEM_GUARD</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">tensor_out</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">base</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">_mem</span><span class="o">.</span><span class="n">lock_arr_writeability</span><span class="p">(</span><span class="n">tensor_out</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">base</span><span class="p">)</span>
-                <span class="n">_uniques_bases_then_arrs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tensor_out</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">base</span><span class="p">)</span>
-            <span class="n">_mem</span><span class="o">.</span><span class="n">lock_arr_writeability</span><span class="p">(</span><span class="n">tensor_out</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
-            <span class="n">tensor_refs</span> <span class="o">=</span> <span class="n">_uniques_bases_then_arrs</span>
-            <span class="n">tensor_refs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tensor_out</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
-            <span class="n">finalize</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">_mem</span><span class="o">.</span><span class="n">release_writeability_lock_on_op</span><span class="p">,</span> <span class="n">tensor_refs</span><span class="p">)</span>
+            <span class="n">out_data</span> <span class="o">=</span> <span class="n">tensor_out</span><span class="o">.</span><span class="n">data</span>
+            <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">out_data</span><span class="o">.</span><span class="n">base</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">_mem</span><span class="o">.</span><span class="n">lock_arr_writeability</span><span class="p">(</span><span class="n">out_data</span><span class="o">.</span><span class="n">base</span><span class="p">)</span>
+                <span class="n">_uniques_bases_then_arrs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out_data</span><span class="o">.</span><span class="n">base</span><span class="p">)</span>
+            <span class="n">_mem</span><span class="o">.</span><span class="n">lock_arr_writeability</span><span class="p">(</span><span class="n">out_data</span><span class="p">)</span>
+            <span class="n">_uniques_bases_then_arrs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out_data</span><span class="p">)</span>
+            <span class="n">_mem</span><span class="o">.</span><span class="n">release_locks_when_collected</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">_uniques_bases_then_arrs</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">tensor_out</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_replay_op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">input_vars</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Tensor"</span><span class="p">:</span>
@@ -2009,23 +2045,33 @@ document.write(`
 <span class="sd">        &gt;&gt;&gt; x.flags.writeable, y.creator</span>
 <span class="sd">        (True, None)</span>
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># "pull" on grad to force views to update their</span>
-            <span class="c1"># gradients from upstream before the graph info</span>
-            <span class="c1"># gets cleared</span>
-            <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad</span>
+        <span class="c1"># Depth-first, pre-order traversal of the graph; uses an explicit stack</span>
+        <span class="c1"># (rather than recursion) to handle graphs deeper than the recursion limit</span>
+        <span class="n">stack</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="p">]</span>
+        <span class="k">while</span> <span class="n">stack</span><span class="p">:</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">_base</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># "pull" on grad to force views to update their</span>
+                <span class="c1"># gradients from upstream before the graph info</span>
+                <span class="c1"># gets cleared</span>
+                <span class="n">_</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">grad</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_view_children</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ops</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">_view_children</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">_ops</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_creator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span>
+            <span class="n">creator</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">_creator</span>
+            <span class="k">if</span> <span class="n">creator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
 
-        <span class="n">creator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_creator</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_creator</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># marks tensor as "visited" during graph-traversal</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">_creator</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># marks tensor as "visited" during graph-traversal</span>
 
-        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">creator</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span>  <span class="c1"># type: "Tensor"</span>
-            <span class="n">var</span><span class="o">.</span><span class="n">clear_graph</span><span class="p">()</span></div>
+            <span class="c1"># reversed, so that inputs are cleared in order</span>
+            <span class="n">stack</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">creator</span><span class="o">.</span><span class="n">variables</span><span class="p">))</span>
+
+            <span class="c1"># Free `creator` now, while `t` is still alive: an op only holds weak</span>
+            <span class="c1"># refs to the arrays it locked, so if `t` (and thus its array) were</span>
+            <span class="c1"># collected first, the op could no longer release that array's lock</span>
+            <span class="k">del</span> <span class="n">creator</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">constant</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
