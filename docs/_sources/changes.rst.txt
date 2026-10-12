@@ -6,6 +6,33 @@ This is a record of all past mygrad releases and what went into them,
 in reverse chronological order. All previous releases should still be available
 on pip.
 
+.. _v2.5.0:
+
+------------------
+2.5.0 - Unreleased
+------------------
+
+Python Support
+--------------
+
+- Adds formal support for Python 3.13, 3.14, and 3.15. (:pull:`469`)
+- Drops support for Python 3.9 and 3.10, which have reached end-of-life. The minimum supported Python version is now 3.11; users of older Pythons will continue to receive mygrad 2.4.0 from pip. (:pull:`469`)
+- ``typing-extensions`` is no longer a dependency. (:pull:`469`)
+
+Compatibility
+-------------
+
+- MyGrad no longer assigns to ``ndarray.shape``, which is deprecated as of NumPy 2.5. In-place reshaping of a tensor (``x.shape = ...``) is unaffected. (:pull:`469`)
+
+Development
+-----------
+
+- Type annotations use modern syntax (e.g. ``int | None`` and ``tuple[int, ...]``). (:pull:`469`)
+- CI workflows run with least-privilege ``GITHUB_TOKEN`` permissions. (:pull:`469`)
+- GitHub Actions are pinned to commit SHAs and checkouts don't persist git credentials. Releases are built with hash-pinned build tools, outside of the PyPI publishing environment. (:pull:`469`)
+- The package metadata uses an SPDX license expression, as required by future versions of setuptools. (:pull:`469`)
+- Adds a security policy (``SECURITY.md``) for reporting vulnerabilities privately. (:pull:`469`)
+
 .. _v2.4.0:
 
 ------------------

@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mygrad._utils.lock_management &#8212; MyGrad 2.3.0.post1.dev65 documentation</title>
+    <title>mygrad._utils.lock_management &#8212; MyGrad 2.4.0.post1.dev8 documentation</title>
   
   
   
@@ -102,7 +102,7 @@
   
   
   
-    <p class="title logo__title">MyGrad 2.3.0.post1.dev65 documentation</p>
+    <p class="title logo__title">MyGrad 2.4.0.post1.dev8 documentation</p>
   
 </a></div>
     
@@ -535,7 +535,8 @@ document.write(`
 <span class="kn">import</span><span class="w"> </span><span class="nn">atexit</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">defaultdict</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Set</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">weakref</span><span class="w"> </span><span class="kn">import</span> <span class="n">ref</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -548,14 +549,14 @@ document.write(`
 
 <span class="c1"># arr-id -&gt; num active ops involving arr</span>
 <span class="c1"># (a plain dict rather than a Counter: this is on the hot path of every op)</span>
-<span class="n">_array_counter</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">_array_counter</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
 <span class="c1"># arr-id -&gt; weak-ref of arr, for arrays participating in live ops</span>
-<span class="n">_array_tracker</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">WeakRef</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+<span class="n">_array_tracker</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">WeakRef</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
 <span class="c1"># maps base-array ID to ID of view that can't be unlocked until</span>
 <span class="c1"># base is unlocked</span>
-<span class="n">_views_waiting_for_unlock</span><span class="p">:</span> <span class="n">DefaultDict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Set</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">set</span><span class="p">)</span>
+<span class="n">_views_waiting_for_unlock</span><span class="p">:</span> <span class="n">defaultdict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">set</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">set</span><span class="p">)</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s2">"lock_arr_writeability"</span><span class="p">,</span>
@@ -609,6 +610,20 @@ document.write(`
     <span class="k">if</span> <span class="n">arr</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">writeable</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">arr</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">writeable</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">return</span> <span class="n">arr</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">unlock_view_with_base</span><span class="p">(</span><span class="n">view</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Has a read-only view, whose base is locked by mygrad, made writeable once</span>
+<span class="sd">    that base's lock is released.</span>
+
+<span class="sd">    E.g. a view taken of an array while it is involved in an op would otherwise</span>
+<span class="sd">    remain read-only after the op is done."""</span>
+    <span class="n">base</span> <span class="o">=</span> <span class="n">view</span><span class="o">.</span><span class="n">base</span>
+    <span class="k">if</span> <span class="n">view</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">writeable</span> <span class="ow">or</span> <span class="n">base</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">array_is_tracked</span><span class="p">(</span><span class="n">base</span><span class="p">):</span>
+        <span class="k">return</span>
+    <span class="n">view_id</span> <span class="o">=</span> <span class="nb">id</span><span class="p">(</span><span class="n">view</span><span class="p">)</span>
+    <span class="n">_array_tracker</span><span class="p">[</span><span class="n">view_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">ref</span><span class="p">(</span><span class="n">view</span><span class="p">)</span>
+    <span class="n">_views_waiting_for_unlock</span><span class="p">[</span><span class="nb">id</span><span class="p">(</span><span class="n">base</span><span class="p">)]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">view_id</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">lock_arrs_of_tensors</span><span class="p">(</span>
@@ -727,7 +742,7 @@ document.write(`
 
 
 <span class="c1"># keeps the weakrefs made by `release_locks_when_collected` alive until they fire</span>
-<span class="n">_pending_releases</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">WeakRef</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+<span class="n">_pending_releases</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">WeakRef</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
 <span class="c1"># Discarding the weakrefs at exit means that their callbacks never fire during</span>
 <span class="c1"># interpreter shutdown, when the state that they touch may be partially torn</span>
