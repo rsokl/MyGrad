@@ -12,6 +12,13 @@ on pip.
 2.4.0 - 2026-10-12
 ------------------
 
+Python Support
+--------------
+
+- Adds support for Python 3.13, 3.14, and 3.15.
+- Drops support for Python 3.9 and 3.10, which have reached end-of-life. The minimum supported Python version is now 3.11.
+- ``typing-extensions`` is no longer a dependency.
+
 Performance
 -----------
 

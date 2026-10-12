@@ -1,4 +1,3 @@
-import sys
 from typing import (
     TYPE_CHECKING,
     List,
@@ -15,14 +14,8 @@ import numpy as np
 if TYPE_CHECKING:  # pragma: no cover
     from mygrad import Tensor
 
+from types import EllipsisType
 from typing import Protocol
-
-if sys.version_info >= (3, 10):  # pragma: no cover
-    from types import EllipsisType
-elif TYPE_CHECKING:  # pragma: no cover
-    from builtins import ellipsis as EllipsisType
-else:  # pragma: no cover
-    EllipsisType = type(Ellipsis)
 
 
 @runtime_checkable
