@@ -22,7 +22,7 @@ from typing import (
     TypeVar,
     Union,
 )
-from weakref import ReferenceType, finalize
+from weakref import ReferenceType
 
 import numpy as np
 
@@ -1210,7 +1210,7 @@ class Tensor:
             _mem.lock_arr_writeability(tensor_out.data)
             tensor_refs = _uniques_bases_then_arrs
             tensor_refs.append(tensor_out.data)
-            finalize(f, _mem.release_writeability_lock_on_op, tensor_refs)
+            _mem.release_locks_when_collected(f, tensor_refs)
         return tensor_out
 
     def _replay_op(self, *input_vars: ArrayLike) -> "Tensor":

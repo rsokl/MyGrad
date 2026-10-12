@@ -3,10 +3,8 @@ Provides utilities responsible for locking/releasing array writeability.
 """
 
 import os
-from collections import Counter, defaultdict
-from typing import TYPE_CHECKING
-from typing import Counter as CounterType
-from typing import DefaultDict, Dict, Generator, Iterable, Set
+from collections import defaultdict
+from typing import TYPE_CHECKING, DefaultDict, Dict, Generator, Iterable, Set
 from weakref import finalize, ref
 
 import numpy as np
@@ -18,7 +16,8 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 # arr-id -> num active ops involving arr
-_array_counter: CounterType[int] = Counter()
+# (a plain dict rather than a Counter: this is on the hot path of every op)
+_array_counter: Dict[int, int] = {}
 
 # arr-id -> weak-ref of arr, for arrays participating in live ops
 _array_tracker: Dict[int, WeakRef[np.ndarray]] = dict()
@@ -60,7 +59,8 @@ def lock_arr_writeability(arr: np.ndarray, force_lock: bool = False) -> np.ndarr
     numpy.ndarray
         The locked array"""
     arr_id = id(arr)
-    if not array_is_tracked(arr):
+    arr_ref = _array_tracker.get(arr_id)
+    if arr_ref is None or arr_ref() is None:  # `arr` is not tracked
         if (
             not force_lock
             and not arr.flags.writeable
@@ -73,7 +73,8 @@ def lock_arr_writeability(arr: np.ndarray, force_lock: bool = False) -> np.ndarr
         _array_tracker[arr_id] = ref(arr)
         _array_counter[arr_id] = 1
     else:
-        _array_counter[arr_id] += 1
+        # a view waiting on its base stays tracked without a counter entry
+        _array_counter[arr_id] = _array_counter.get(arr_id, 0) + 1
     if arr.flags.writeable is True:
         arr.flags.writeable = False
     return arr
@@ -112,7 +113,7 @@ def _release_lock_on_arr_writeability(arr: np.ndarray):
     writeability restored.
     """
     arr_id = id(arr)
-    num_active_ops = _array_counter[arr_id]
+    num_active_ops = _array_counter.get(arr_id, 0)
 
     if num_active_ops == 1:
         # final active op involving array is being de-referenced:
@@ -137,9 +138,9 @@ def _release_lock_on_arr_writeability(arr: np.ndarray):
         _array_counter[arr_id] = num_active_ops - 1
 
     if (
-        arr.base is None
+        arr_id in _views_waiting_for_unlock  # cheapest, and usually False
+        and arr.base is None
         and arr.flags.writeable
-        and (arr_id in _views_waiting_for_unlock)
     ):
         # array was base of view waiting to be unlocked..
         #
@@ -149,7 +150,7 @@ def _release_lock_on_arr_writeability(arr: np.ndarray):
         #    or view can now get unlocked
         # under all conditions view will no longer be waiting to be unlocked
         for view_arr_id in tuple(_views_waiting_for_unlock[arr_id]):
-            if _array_counter[view_arr_id] > 0:
+            if _array_counter.get(view_arr_id, 0) > 0:
                 # view involved in new op
                 continue
 
@@ -189,6 +190,25 @@ def release_writeability_lock_on_op(arr_refs: WeakRefIterable[np.ndarray]):
         multiple times in the iterable."""
     for arr in arr_refs:
         _release_lock_on_arr_writeability(arr)
+
+
+# keeps the weakrefs made by `release_locks_when_collected` alive until they fire
+_pending_releases: Set[WeakRef] = set()
+
+
+def release_locks_when_collected(op: object, arr_refs: WeakRefIterable[np.ndarray]):
+    """Calls ``release_writeability_lock_on_op(arr_refs)`` once ``op`` is garbage
+    collected.
+
+    Equivalent to ``weakref.finalize(op, release_writeability_lock_on_op, arr_refs)``,
+    minus its extra machinery (e.g. at-exit handling); this is called for every op,
+    and is roughly twice as fast."""
+
+    def _release(op_ref: WeakRef):
+        _pending_releases.discard(op_ref)
+        release_writeability_lock_on_op(arr_refs)
+
+    _pending_releases.add(ref(op, _release))
 
 
 MEM_GUARD = os.environ.get("MYGRAD_MEM_GUARD", True)
