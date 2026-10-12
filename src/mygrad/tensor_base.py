@@ -1524,23 +1524,33 @@ class Tensor:
         >>> x.flags.writeable, y.creator
         (True, None)
         """
-        if self._base is not None:
-            # "pull" on grad to force views to update their
-            # gradients from upstream before the graph info
-            # gets cleared
-            _ = self.grad
+        # Depth-first, pre-order traversal of the graph; uses an explicit stack
+        # (rather than recursion) to handle graphs deeper than the recursion limit
+        stack = [self]
+        while stack:
+            t = stack.pop()
+            if t._base is not None:
+                # "pull" on grad to force views to update their
+                # gradients from upstream before the graph info
+                # gets cleared
+                _ = t.grad
 
-        self._view_children.clear()
-        self._ops.clear()
+            t._view_children.clear()
+            t._ops.clear()
 
-        if self._creator is None:
-            return
+            creator = t._creator
+            if creator is None:
+                continue
 
-        creator = self._creator
-        self._creator = None  # marks tensor as "visited" during graph-traversal
+            t._creator = None  # marks tensor as "visited" during graph-traversal
 
-        for var in creator.variables:  # type: "Tensor"
-            var.clear_graph()
+            # reversed, so that inputs are cleared in order
+            stack.extend(reversed(creator.variables))
+
+            # Free `creator` now, while `t` is still alive: an op only holds weak
+            # refs to the arrays it locked, so if `t` (and thus its array) were
+            # collected first, the op could no longer release that array's lock
+            del creator
 
     @property
     def constant(self) -> bool:

@@ -37,40 +37,36 @@ def collect_all_tensors_and_clear_grads(
     t: "Tensor",
     seen: Set[int],
     topo_sorted_tensors: Deque["Tensor"],
-    _marked: Optional[Set[int]] = None,
 ):
-    """Recursively accumulates in `seen` all operations involved
-    in creating `t`.
+    """Accumulates in `seen` the ids of all non-constant tensors involved in
+    creating `t` (including `t`), clearing the gradients of every tensor visited.
 
-    `seen` is updated in-place
-    """
-    t._view_grad = None
-    t._grad = None
+    `topo_sorted_tensors` is populated in topological order, with `t` first.
 
-    if _marked is None:
-        _marked = set()
+    `seen` and `topo_sorted_tensors` are updated in-place.
 
-    if t.constant:
-        return
+    This is a depth-first traversal that uses an explicit stack (rather than
+    recursion) so that it can handle graphs that are deeper than Python's
+    recursion limit."""
+    # entries: (tensor, whether its inputs have already been traversed)
+    stack = [(t, False)]
+    while stack:
+        t, inputs_done = stack.pop()
+        if inputs_done:
+            seen.add(id(t))
+            topo_sorted_tensors.appendleft(t)
+            continue
 
-    id_ = id(t)
+        t._view_grad = None
+        t._grad = None
 
-    if id_ in seen:
-        return
+        if t._constant or id(t) in seen:
+            continue
 
-    if id_ in _marked:  # pragma: no cover
-        assert False, "Computational graph is contains a cycle"
-
-    _marked.add(id_)
-
-    if t.creator is not None:
-        for t_loop in t.creator.variables:
-            collect_all_tensors_and_clear_grads(t_loop, seen, topo_sorted_tensors)
-        del t_loop
-
-    _marked.remove(id_)
-    seen.add(id_)
-    topo_sorted_tensors.appendleft(t)
+        stack.append((t, True))
+        if t._creator is not None:
+            # reversed, so that inputs are traversed in order
+            stack.extend((var, False) for var in reversed(t._creator.variables))
 
 
 if TYPE_CHECKING:  # pragma: no cover

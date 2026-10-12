@@ -1,3 +1,5 @@
+import sys
+
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
@@ -94,3 +96,18 @@ def test_incompatible_grad_shape_raises(grad: np.ndarray, tensor: mg.Tensor):
     else:
         with pytest.raises(ValueError):
             tensor.backward(grad)
+
+
+def test_backward_through_graph_deeper_than_recursion_limit():
+    # graph traversal during backprop (and the subsequent clearing of the
+    # graph) must not be recursive
+    depth = sys.getrecursionlimit() + 500
+    x = mg.tensor(1.0)
+    y = x
+    for _ in range(depth):
+        y = y * 1.0001
+
+    y.backward()
+    assert_allclose(x.grad, 1.0001**depth)
+    assert y.creator is None  # graph was cleared
+    assert x.data.flags.writeable  # all memory locks were released
