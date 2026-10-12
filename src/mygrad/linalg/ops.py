@@ -81,6 +81,9 @@ def _get_indices(item, seq):
 # routing a contraction through matmul
 _MIN_MATMUL_WORK = 2**14
 
+# dtypes for which matmul uses BLAS
+_BLAS_DTYPES = (np.float32, np.float64)
+
 
 def _einsum_via_matmul(lhs: str, rhs: str, out: str, a: np.ndarray, b: np.ndarray):
     """Computes ``einsum(f"{lhs},{rhs}->{out}", a, b)`` as a single (batched) matmul,
@@ -90,8 +93,12 @@ def _einsum_via_matmul(lhs: str, rhs: str, out: str, a: np.ndarray, b: np.ndarra
     Returns ``None`` if the contraction is not supported, or is too small to
     benefit, in which case ``np.einsum`` should be used instead.
 
-    Supported: floating-point operands, with no label repeated within an operand
-    (e.g. traces) and no broadcasting between operands' shared labels."""
+    Supported: operands of the same dtype, either float32 or float64 (mixing them
+    would sum some labels at the lower precision; other dtypes have no BLAS
+    routine), with no label repeated within an operand (e.g. traces) and no
+    broadcasting between operands' shared labels.
+
+    The result owns its memory, and is C-contiguous."""
     # Cheapest checks first: this is called for every two-operand einsum, and
     # most small ones are declined here.
     if a.size * b.size < _MIN_MATMUL_WORK:
@@ -107,9 +114,7 @@ def _einsum_via_matmul(lhs: str, rhs: str, out: str, a: np.ndarray, b: np.ndarra
     if len(lhs_set) != len(lhs) or len(rhs_set) != len(rhs):
         return None
 
-    if not (
-        issubclass(a.dtype.type, np.floating) and issubclass(b.dtype.type, np.floating)
-    ):
+    if a.dtype != b.dtype or a.dtype.type not in _BLAS_DTYPES:
         return None
 
     a_sizes = dict(zip(lhs, a.shape))
@@ -150,15 +155,26 @@ def _einsum_via_matmul(lhs: str, rhs: str, out: str, a: np.ndarray, b: np.ndarra
     # a -> (batch, m, k);  b -> (batch, k, n)
     a = a.transpose([lhs.index(lbl) for lbl in batch + free_a + contracted])
     b = b.transpose([rhs.index(lbl) for lbl in batch + contracted + free_b])
-    result = np.matmul(a.reshape(n_batch, m, k), b.reshape(n_batch, k, n))
-
-    result = result.reshape(
+    # matmul directly into an array of the result's shape, so that the result
+    # owns its memory (rather than being a view of matmul's output)
+    result = np.empty(
         [a_sizes[lbl] for lbl in batch]
         + [a_sizes[lbl] for lbl in free_a]
-        + [b_sizes[lbl] for lbl in free_b]
+        + [b_sizes[lbl] for lbl in free_b],
+        dtype=a.dtype,
     )
+    np.matmul(
+        a.reshape(n_batch, m, k),
+        b.reshape(n_batch, k, n),
+        out=result.reshape(n_batch, m, n),
+    )
+
     result_lbls = batch + free_a + free_b
-    return result.transpose([result_lbls.index(lbl) for lbl in out])
+    if result_lbls != list(out):
+        result = np.ascontiguousarray(
+            result.transpose([result_lbls.index(lbl) for lbl in out])
+        )
+    return result
 
 
 def _einsum(in_lbls, out_lbls: str, *arrays: np.ndarray, optimize=False):
@@ -287,7 +303,6 @@ class EinSum(Operation):
 
         # "ji, k -> ijk"
         back_prop_in_lbls = [grad_lbl] + in_lbls
-        back_prop_lbls = ",".join(back_prop_in_lbls) + "->" + var_lbl
 
         # (grad, y)
         operands = (grad,) + numpy_arrays[:index] + numpy_arrays[index + 1 :]
@@ -333,6 +348,7 @@ class EinSum(Operation):
             for lbl in var_lbl
         )
         out_view = as_strided(dfdx, shape=out_view_shape, strides=strides)
+        back_prop_lbls = ",".join(back_prop_in_lbls) + "->" + var_lbl
         np.einsum(back_prop_lbls, *operands, out=out_view, optimize=self.optimize)
         if factor > 1:
             # This tensor-label pair appears several times as

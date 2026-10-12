@@ -76,6 +76,10 @@ def test_matmul_path_matches_einsum_path(
         ("i,i->", np.ones(4), np.ones(4)),  # dot product
         ("ij,ij->i", np.ones((3, 4)), np.ones((3, 4))),  # batch of dot products
         ("ij,kl->ijkl", np.ones((3, 4)), np.ones((2, 5))),  # outer product
+        # mixed precision: would sum `h` out of `a` at float32 precision
+        ("hij,jk->ik", np.ones((2, 3, 4), np.float32), np.ones((4, 5))),
+        ("ij,jk->ik", np.ones((3, 4), np.float16), np.ones((4, 5), np.float16)),
+        ("ij,jk->ik", np.ones((3, 4), np.longdouble), np.ones((4, 5), np.longdouble)),
     ],
 )
 def test_unsupported_contractions_fall_back(expr, a, b, always_use_matmul):
@@ -111,3 +115,44 @@ def test_einsum_writes_to_provided_out_array():
     result = mg.einsum("ij,jk->ik", a, b, out=out)
     assert np.shares_memory(result, out)
     assert_allclose(out, np.full((64, 64), 64.0))
+
+
+@pytest.mark.parametrize("expr, shape_a, shape_b", SUPPORTED)
+def test_float32_contractions_use_matmul(expr, shape_a, shape_b, always_use_matmul):
+    rng = np.random.default_rng(2)
+    x = rng.normal(size=shape_a).astype(np.float32)
+    y = rng.normal(size=shape_b).astype(np.float32)
+    ins, out = expr.split("->")
+    lhs, rhs = ins.split(",")
+    result = _einsum_via_matmul(lhs, rhs, out, x, y)
+    assert result is not None
+    assert result.dtype == np.float32
+    assert_allclose(result, np.einsum(expr, x, y), rtol=1e-5, atol=1e-5)
+
+
+@pytest.mark.parametrize("expr", ["ij,jk->ik", "ij,jk->ki"])
+def test_matmul_result_owns_contiguous_memory(expr, always_use_matmul):
+    a, b = np.ones((3, 4)), np.ones((4, 5))
+    ins, out = expr.split("->")
+    lhs, rhs = ins.split(",")
+    result = _einsum_via_matmul(lhs, rhs, out, a, b)
+    assert result.base is None
+    assert result.flags.c_contiguous
+
+
+def test_same_tensor_as_both_operands(monkeypatch: pytest.MonkeyPatch):
+    # x @ x.T: the gradients via both operands must accumulate
+    x = np.random.default_rng(3).normal(size=(4, 6))
+
+    def grad_of_x(**patches):
+        with monkeypatch.context() as m:
+            for name, value in patches.items():
+                m.setattr(linalg_ops, name, value)
+            t = mg.tensor(x)
+            mg.einsum("ij,kj->ik", t, t).backward()
+            return t.grad
+
+    expected = grad_of_x(_einsum_via_matmul=lambda *args: None)
+    actual = grad_of_x(_MIN_MATMUL_WORK=0)
+    assert_allclose(actual, expected)
+    assert_allclose(actual, 2 * np.ones((4, 4)) @ x)
