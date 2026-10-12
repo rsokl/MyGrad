@@ -3,6 +3,7 @@ from numbers import Number
 import numpy as np
 
 import mygrad._utils.graph_tracking as _tracking
+from mygrad.errors import InvalidBackprop
 from mygrad.operation_base import Operation
 
 __all__ = ["GetItem", "SetItem"]
@@ -79,16 +80,46 @@ class GetItem(Operation):
         )
         return out
 
+    def backward(self, grad, **kwargs):
+        """Accumulates ``grad`` directly into the indexed region of ``a.grad``.
+
+        This is equivalent to ``Operation.backward``, which would add the
+        full-size array returned by ``backward_var`` into ``a.grad``. Avoiding
+        that full-size array matters when many items of a tensor are accessed
+        separately (e.g. iterating over a sequence): otherwise each access costs
+        time and memory proportional to the size of the entire tensor."""
+        (a,) = self.variables
+        if a._constant:  # pragma: no cover
+            # (unreachable in practice: the output would be constant too, and
+            # backprop never reaches a constant tensor)
+            return
+
+        if not a._ops:
+            raise InvalidBackprop(
+                f"Part of the computational graph containing "
+                f"this tensor, {a}, was 'cleared' prior to backprop.\n"
+                f"It is recommended that you clear all computational graphs "
+                f"and restart your computation."
+            )
+
+        if a._grad is None:
+            a._grad = np.zeros_like(a.data)
+        self._accumulate(a._grad, grad)
+
     def backward_var(self, grad, index, **kwargs):
         a = self.variables[index]
         out = np.zeros_like(a.data)  # TODO: ensure ints are promoted to floats
+        self._accumulate(out, grad)
+        return out
+
+    def _accumulate(self, out: np.ndarray, grad: np.ndarray):
+        """``out[self.index] += grad``, accounting for repeated indices"""
         if self._used_distinct_indices:
             out[self.index] += grad
         else:
             # although `add.at` will work for all cases, it is
             # a very slow function: https://github.com/numpy/numpy/issues/5922
             np.add.at(out, self.index, grad)
-        return out
 
 
 def _arr(*shape: int) -> np.ndarray:
