@@ -114,6 +114,13 @@ class MatMul(BinaryUfunc):
             return dfdx
 
         if index == 1:  # compute grad through b
+            if a.ndim > 2 and b.ndim == 2:  # (..., i, j) w/ (j, k)
+                # `b` was broadcast across the leading dims of `a`. Rather than
+                # forming one (j, k) product per leading index and then summing
+                # them, fold those dims into the rows: a single (j, N) @ (N, k)
+                return np.matmul(
+                    a.reshape(-1, a.shape[-1]).T, grad.reshape(-1, grad.shape[-1])
+                )
             if a.ndim > 1:  # ([...], i, j) w/ ([...], j, [k])
                 if b.ndim == 1:
                     grad = np.expand_dims(grad, -1)

@@ -52,3 +52,21 @@ def test_no_ref_op_does_not_prevent_gc(constant: bool):
     assert len(refs) == 1
     del y
     assert len(refs) == 0
+
+
+def test_dead_ops_are_pruned_from_input_tensors():
+    # Refs to garbage-collected ops must not accumulate in `Tensor._ops`:
+    # besides leaking, they made each new `_ops.add` linear in the number of
+    # ops the tensor had ever participated in
+    x = mg.tensor([1.0, 2.0])
+    y = mg.tensor([3.0, 4.0])
+    for _ in range(100):
+        x + y
+
+    assert len(x._ops) == 0
+    assert len(y._ops) == 0
+
+    z = x + y  # live op is still recorded
+    assert len(x._ops) == 1
+    z.backward()
+    assert_allclose(x.grad, [1.0, 1.0])

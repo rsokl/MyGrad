@@ -1186,9 +1186,11 @@ class Tensor:
                 constant = True
 
         # record that a variable participated in that op
-        ref_f = ReferenceType(f)  # type: WeakRef[Operation]
         for var in tensor_vars:
-            var._ops.add(ref_f)
+            # The callback drops the ref once `f` is garbage collected. Otherwise
+            # dead refs accumulate; and because a new op is often allocated at the
+            # address of a freed one, they share a hash and make `add` O(len(_ops))
+            var._ops.add(ReferenceType(f, var._ops.discard))
 
         tensor_out = cls(
             op_out,
